@@ -4,10 +4,11 @@ try:
 except:
     from xml.etree import ElementTree as etree
 
-from numpy import sqrt,pi,exp,sin,cos,abs,tan
-import numpy as np
-
 import os,sys
+
+#from pprint import pprint as pp
+
+
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../'+'/NetworkLib')
@@ -15,28 +16,12 @@ sys.path.append(cur+'/../'+'/NetworkLib')
 from classVascularNetwork import VascularNetwork
 from classBoundaryConditions import *
 
-
-### import units of all variables in the SI system outdated used of only few functions -> to be changed
-from constants import variableUnitsSI as variableUnits
-from constants import unitConversion
-
-from constants import vPCconfigurationTemplate
-
-######
-### new imports
+from constants import variablesDict 
 from constants import unitsDictSI as unitsDict
-# from constants import variablesDict 
-# from constants import communicatorReference
-# from constants import xmlElements
-# from constants import xmlElementsReference
-# from constants import boundaryConditionElements
-from constants import *
-
+from constants import newestNetworkXmlVersion
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
 #from constants import unitsDictMed as unitsDict
-
-from pprint import pprint as pp
 
 
 def writeXMLsetUnit(xmlElement, variable, unit = 'unitSI'):
@@ -45,7 +30,9 @@ def writeXMLsetUnit(xmlElement, variable, unit = 'unitSI'):
     '''
     try: 
         if variablesDict[variable][unit]: xmlElement.set('unit', variablesDict[variable][unit])
-    except: print "ERROR: moduleXML.writeXML() variable {} of element {} is not proper defined in variablesDict".format(variable,xmlElement)
+    except: print """ERROR: moduleXML.writeXML():
+            variable {} of element {} is not proper defined
+            in variablesDict, system exit()""".format(variable,xmlElement),exit()
 
 def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
     '''
@@ -58,32 +45,46 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
         xmlElement.text = str(variableValues)
 
 
-def writeNetworkToXML(vascularNetwork, filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", filename = None, networkPath = str(cur+"/../NetworkFiles/")):
     '''
     This function creates an XML file and writes all variable data of a vascularNetwork into it (except solution)
     The forma of the XML and all variable data are defined in constants.py
     '''
-    currentVersion = '4.0'
-    
+        
     #print filename
     if filename == None:
-        filename = "NewNetwork.xml"
+        filename = "newNetwork.xml"
+        
+    if dataNumber is not 'xxx':
+        filename = filename.split('.')[0]
+        networkDirectory = filename
+        filename = ''.join([filename,'_SolutionData_',dataNumber,'.xml'])
+    else: 
+        networkDirectory = filename.split('.')[0]
     
-    networkDirectory = filename.split('.')[0]
-    if not os.path.exists(str(networkPath+networkDirectory)):
-        os.makedirs(str(networkPath+networkDirectory))  
+    if networkDirectory not in networkPath.split('/'):
+        folderPath = ''.join([networkPath,networkDirectory])
+        if not os.path.exists(folderPath):
+            os.makedirs(folderPath)  
+    else:
+        folderPath = networkPath
     
+    networkXmlFile = ''.join([folderPath,'/',filename])
+        
     try:
-        root = etree.Element(filename, id = "1.0", version = currentVersion)
+        root = etree.Element(filename, id = dataNumber, version = newestNetworkXmlVersion)
     except:
         print " Error: path / file does not exist"
         return
         
+    ## import current network xml description as nxmlW(rite) to avoid version clash
+    from constants import newestNetworkXml as nxmlW
+        
     xmlFile = etree.ElementTree(root)
     
-    for xmlElementName in xmlElements:
+    for xmlElementName in nxmlW.xmlElements:
         xmlFileElement = etree.SubElement(root, xmlElementName)
-        xmlElement = xmlElementsReference[xmlElementName]
+        xmlElement = nxmlW.xmlElementsReference[xmlElementName]
         
         if xmlElementName == 'boundaryConditions':
             for vesselId,boundaryConditions in vascularNetwork.boundaryConditions.iteritems():
@@ -97,7 +98,7 @@ def writeNetworkToXML(vascularNetwork, filename = None, networkPath = str(cur+"/
                     try: polyChaosDict = [polyDict for polyDict in polyChaosList if polyDict['name'] == boundaryType][0]
                     except: polyChaosDict = {}
                     # loop variables of the instance to be saved in xml
-                    for variable in boundaryConditionElements[boundaryType]:
+                    for variable in nxmlW.boundaryConditionElements[boundaryType]:
                         variableElement = etree.SubElement(typeElement, variable)
                         writeXMLsetUnit(variableElement,variable)
                         writeXMLsaveValues(variableElement,variable,boundaryCondition.getVariableValue(variable))  
@@ -110,7 +111,7 @@ def writeNetworkToXML(vascularNetwork, filename = None, networkPath = str(cur+"/
         elif xmlElementName == 'vessels':
             for vessel in vascularNetwork.vessels.itervalues():
                 attributes = {}
-                for attribute in vesselAttributes:
+                for attribute in nxmlW.vesselAttributes:
                     attributes[attribute] = str(vessel.getVariableValue(attribute))
                 vesselSubElement = etree.SubElement(xmlFileElement,'vessel',attributes)
                 for vesselElement in xmlElement:
@@ -119,9 +120,9 @@ def writeNetworkToXML(vascularNetwork, filename = None, networkPath = str(cur+"/
                     # check if compliance and adjust variables
                     if vesselElement == 'compliance':
                         complianceType = vessel.getVariableValue('complianceType')
-                        variables = vesselElementReference[vesselElement][complianceType]
+                        variables = nxmlW.vesselElementReference[vesselElement][complianceType]
                     else:
-                        variables = vesselElementReference[vesselElement]
+                        variables = nxmlW.vesselElementReference[vesselElement]
                     # save variables
                     for variable in variables:
                         subsubElement = etree.SubElement(subElement, variable)
@@ -140,7 +141,7 @@ def writeNetworkToXML(vascularNetwork, filename = None, networkPath = str(cur+"/
             for comId,comData in vascularNetwork.communicators.iteritems():
                 comType = comData['comType']
                 subElement = etree.SubElement(xmlFileElement, comType)
-                for variable in communicatorReference[comData['comType']]:
+                for variable in nxmlW.communicatorReference[comData['comType']]:
                     subsubElement = etree.SubElement(subElement, variable)
                     writeXMLsetUnit(subsubElement,variable)
                     writeXMLsaveValues(subsubElement,variable,comData[variable])  
@@ -162,14 +163,15 @@ def writeNetworkToXML(vascularNetwork, filename = None, networkPath = str(cur+"/
                     intervalElement.text = ' '.join(str(i) for i in subElementIntervalValues)
                 except : pass   
                                 
-    xmlFile.write(networkPath+networkDirectory+'/'+filename,encoding='iso-8859-1',pretty_print = True)
+    
+    xmlFile.write(networkXmlFile,encoding='iso-8859-1',pretty_print = True)
     
 
 def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'unitSI', polychaos = False):
     '''
     checks the element.text string and
     evaluates it corresponding to the definition
-    of the variable in the constants.variablesDict 
+    of the variable in the constants variablesDict 
     
     return converted evaluated value of variable
     '''
@@ -242,49 +244,63 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
     
     return variableValues
    
-def loadingErrorMessageValueError(variableName, element, elementName, variableDict):
+def loadingErrorMessageValueError(variableName, element, elementName):
+    variableDict =   variablesDict[variableName]
     print """ERROR loadNetworkFromXML():
           value for variable <<{}>> of {} {} is not defined.
           (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
     exit()
    
-def loadingErrorMessageVariableError(variableName, element, elementName, variableDict):
-    
+def loadingErrorMessageVariableError(variableName, element, elementName):
+    variableDict =   variablesDict[variableName]
     print """ERROR loadNetworkFromXML():
           variable "{}" of {} {} is not defined.
           (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
     exit()
       
    
-def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/../NetworkFiles/")):
+def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cur+"/../NetworkFiles/")):
     '''
     Function laods network from XML-file
     
-    version of XML files supported: 4.0
+    version of XML files supported: 4.0, 4.1
     '''
-    currentVersions = ['4.0']
+    currentVersions = ['4.0','4.1']
     
     # read from file
     if filename == None:
         print 'ERROR: moduleXML.loadNetworkFromXML() : load XML - no filename passed'
         return None
     
+    networkDirectory = filename.split('.')[0]
+    
+    if dataNumber is not 'xxx':        
+        filename = ''.join([filename.split('.')[0],'_SolutionData_',dataNumber,'.xml'])
+    
     if '.xml' not in filename:
         filename = ''.join([filename,'.xml'])  
+        
+    if networkDirectory not in networkPath.split('/'):
+        folderPath = ''.join([networkPath,networkDirectory])
+    else:
+        folderPath = networkPath
+    
+    
       
-    networkDirectory = filename.split('.')[0]
-    if not os.path.exists(str(networkPath+networkDirectory)):
+    if not os.path.exists(folderPath):
         print 'ERROR: moduleXML.loadNetworkFromXML(): directory and file does not exists'
         return None
+    
+    networkXmlFile = ''.join([folderPath,'/',filename])
     
     # create vascularNetwork instance
     vascularNetwork = VascularNetwork()
     # set name
-    vascularNetwork.name = (filename.split('.'))[0]
+    vascularNetwork.name = networkDirectory
     
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
-        tree = etree.parse(''.join([networkPath,networkDirectory,'/',filename]), parser)
+        tree = etree.parse(''.join([networkXmlFile]), parser)
     except (etree.ParseError, ImportError) as e:
         if isinstance(e, etree.ParseError):
             print " ERROR moduleXML.loadNetworkFromXML() on line {} {}: ".format(e.position[0], e)
@@ -297,33 +313,43 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
         print "ERROR moduleXML.loadNetworkFromXML(): XML file is outdated file-version {} " \
         "current supported version {}, could not parse file! system exit".format(root.attrib['version'],currentVersions); exit()
     
-    for xmlElementName in xmlElements:
+    
+    if xmlFileVersion == newestNetworkXmlVersion:
+        from constants import newestNetworkXml as nxml
+    
+    elif xmlFileVersion == '4.0':
+        import networkXml040 as nxml  
+    
+    if xmlFileVersion != newestNetworkXmlVersion:
+        print " WARNING the version of the network xml file you try to load is outdated it may occure some problems!"
+    
+    for xmlElementName in nxml.xmlElements:
         for xmlElement in root.findall(''.join([".//",xmlElementName])):
                       
             if xmlElementName == 'boundaryConditions':
                 # loop through all boundaryCondition
                 for boundaryConditionElement in xmlElement.findall(''.join(['.//','boundaryCondition'])):
                     try: vesselId = int(boundaryConditionElement.attrib['vesselId'])
-                    except: loadingErrorMessageVariableError('vesselId', 'one boundaryCondition', '', variablesDict['vesselId'])
+                    except: loadingErrorMessageVariableError('vesselId', 'one boundaryCondition', '')
                        
                     boundaryInstances = []
                     boundaryIntervals = []
                     # loop through possible communicator class types
-                    for boundaryType in xmlElementsReference[xmlElementName]:
+                    for boundaryType in nxml.xmlElementsReference[xmlElementName]:
                         # find all bcs of this type
                         for bcElements in boundaryConditionElement.findall(''.join(['.//',boundaryType])):
-                            boundaryInstance = eval(bcTagsClassReferences[boundaryType])()
+                            boundaryInstance = eval(nxml.bcTagsClassReferences[boundaryType])()
                             boundaryDataDict = {}
                             boundaryDataDict['name'] = boundaryType
                             boundaryIntervalDataDict = {}
                             # loop through all variables of this type, convert and save values of these
-                            for variable in xmlElementsReference[xmlElementName][boundaryType]: 
+                            for variable in nxml.xmlElementsReference[xmlElementName][boundaryType]: 
                                 # find normal variables
                                 try: element = bcElements.findall(''.join(['.//',variable]))[0]
-                                except: loadingErrorMessageVariableError(variable, 'boundaryCondition', boundaryType, variablesDict[variable])
+                                except: loadingErrorMessageVariableError(variable, 'boundaryCondition', boundaryType)
                                 # get variable value                        
                                 try: variableValueStr = element.text
-                                except: loadingErrorMessageValueError(variable, 'boundaryCondition', boundaryType, variablesDict[variable])
+                                except: loadingErrorMessageValueError(variable, 'boundaryCondition', boundaryType)
                                 # get unit
                                 try: variableUnit = element.attrib['unit']
                                 except: variableUnit = None 
@@ -335,7 +361,7 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
                                     element = bcElements.findall(''.join(['.//',variable,'-polyChaos']))[0]
                                     # get variable value                        
                                     try: variableValueStr = element.text
-                                    except: loadingErrorMessageValueError(variable, 'boundaryCondition', boundaryType, variablesDict[variable])
+                                    except: loadingErrorMessageValueError(variable, 'boundaryCondition', boundaryType)
                                     # get unit
                                     try: variableUnit = element.attrib['unit']
                                     except: variableUnit = None 
@@ -367,29 +393,29 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
                     vesselData = {}
                     vesselPolychaosData = {}
                     # load vessel attributes
-                    for attribute in vesselAttributes:
+                    for attribute in nxml.vesselAttributes:
                         try: vesselData[attribute] = loadVariablesConversion(attribute, vesselXMLnode.attrib[attribute], '')
                         except: 
-                            try:    loadingErrorMessageVariableError(attribute, 'vessel', vesselData['Id'], variablesDict[attribute])
-                            except: loadingErrorMessageVariableError(attribute, 'one vessel', '', variablesDict[attribute])
+                            try:    loadingErrorMessageVariableError(attribute, 'vessel', vesselData['Id'])
+                            except: loadingErrorMessageVariableError(attribute, 'one vessel', '')
                         
                         
-                    for vesselElement in xmlElementsReference[xmlElementName]: 
+                    for vesselElement in nxml.xmlElementsReference[xmlElementName]: 
                         # check if compliance and adjust variables
                         if vesselElement == 'compliance':
                             try: complianceTypeElement = vesselXMLnode.findall(''.join(['.//','complianceType']))[0]
-                            except: loadingErrorMessageVariableError('complianceType', 'vessel', vesselData['Id'], variablesDict['complianceType'])
+                            except: loadingErrorMessageVariableError('complianceType', 'vessel', vesselData['Id'])
                             complianceType = loadVariablesConversion('complianceType', complianceTypeElement.text, '')
-                            variables = vesselElementReference[vesselElement][complianceType]
+                            variables = nxml.vesselElementReference[vesselElement][complianceType]
                         else:
-                            variables = vesselElementReference[vesselElement]
+                            variables = nxml.vesselElementReference[vesselElement]
                         # load variables
                         for variable in variables:
                             try: element = vesselXMLnode.findall(''.join(['.//',variable]))[0]
-                            except: loadingErrorMessageVariableError(variable, 'vessel', vesselData['Id'], variablesDict[variable])
+                            except: loadingErrorMessageVariableError(variable, 'vessel', vesselData['Id'])
                             # get variable value                        
                             try: variableValueStr = element.text
-                            except: loadingErrorMessageValueError(variable, 'vessel', vesselData['Id'], variablesDict[variable])
+                            except: loadingErrorMessageValueError(variable, 'vessel', vesselData['Id'])
                             # get unit 
                             try: variableUnit = element.attrib['unit']
                             except: variableUnit = None 
@@ -401,7 +427,7 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
                                 element = vesselXMLnode.findall(''.join(['.//',variable,'-polyChaos']))[0]
                                 # get variable value                        
                                 try: variableValueStr = element.text
-                                except: loadingErrorMessageValueError(variable, 'vessel', vesselData['Id'], variablesDict[variable])
+                                except: loadingErrorMessageValueError(variable, 'vessel', vesselData['Id'])
                                 # get unit
                                 try: variableUnit = element.attrib['unit']
                                 except: variableUnit = None 
@@ -413,17 +439,17 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
             
             elif xmlElementName == 'communicators':
                 # loop through possible communicator class types
-                for comunicatorType in xmlElementsReference[xmlElementName]:
+                for comunicatorType in nxml.xmlElementsReference[xmlElementName]:
                     # find all communicator of this type
                     for comElements in xmlElement.findall(''.join(['.//',comunicatorType])):
                         # loop through all variables of this type, convert and save values of these
                         communicatorData = {}
-                        for variable in xmlElementsReference[xmlElementName][comunicatorType]: 
+                        for variable in nxml.xmlElementsReference[xmlElementName][comunicatorType]: 
                             try: element = comElements.findall(''.join(['.//',variable]))[0]
-                            except: loadingErrorMessageVariableError(variable, 'communicator', comunicatorType, variablesDict[variable])
+                            except: loadingErrorMessageVariableError(variable, 'communicator', comunicatorType)
                             # get variable value                        
                             try: variableValueStr = element.text
-                            except: loadingErrorMessageValueError(variable, 'communicator', comunicatorType, variablesDict[variable])
+                            except: loadingErrorMessageValueError(variable, 'communicator', comunicatorType)
                             # get unit
                             try: variableUnit = element.attrib['unit']
                             except: variableUnit = None 
@@ -436,13 +462,13 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
                 globalFluidData = {}
                 globalFluidPolychaosData = {}
                 
-                for variable in xmlElementsReference[xmlElementName]: 
+                for variable in nxml.xmlElementsReference[xmlElementName]: 
                     # find normal variables
                     try: element = xmlElement.findall(''.join(['.//',variable]))[0]
-                    except: loadingErrorMessageVariableError(variable, 'global fluid', '',  variablesDict[variable])
+                    except: loadingErrorMessageVariableError(variable, 'global fluid', '')
                     # get variable value                        
                     try: variableValueStr = element.text
-                    except: loadingErrorMessageValueError(variable, 'global fluid', '',  variablesDict[variable])
+                    except: loadingErrorMessageValueError(variable, 'global fluid', '')
                     # get unit
                     try: variableUnit = element.attrib['unit']
                     except: variableUnit = None 
@@ -455,7 +481,7 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
                         element = xmlElement.findall(''.join(['.//',variable,'-polyChaos']))[0]
                         # get variable value                        
                         try: variableValueStr = element.text
-                        except: loadingErrorMessageValueError(variable, 'global fluid', '', variablesDict[variable])
+                        except: loadingErrorMessageValueError(variable, 'global fluid', '')
                         # get unit
                         try: variableUnit = element.attrib['unit']
                         except: variableUnit = None 
@@ -464,14 +490,14 @@ def loadNetworkFromXML(filename = None, update = None, networkPath = str(cur+"/.
                     except: pass
                 vascularNetwork.updateNetwork({'globalFluid':globalFluidData,'globalFluidPolyChaos':globalFluidPolychaosData})
                     
-            elif xmlElementName in vascularNetworkElements: # vascularNetwork
+            elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork
                 vascularNetworkData = {}
-                for variable in xmlElementsReference[xmlElementName]: 
+                for variable in nxml.xmlElementsReference[xmlElementName]: 
                     try: element = xmlElement.findall(''.join(['.//',variable]))[0]
-                    except: loadingErrorMessageVariableError(variable, xmlElementName, '', variablesDict[variable])
+                    except: loadingErrorMessageVariableError(variable, xmlElementName, '')
                     # get variable value                        
                     try: variableValueStr = element.text
-                    except: loadingErrorMessageValueError(variable, xmlElementName, '', variablesDict[variable])
+                    except: loadingErrorMessageValueError(variable, xmlElementName, '')
                     # get 
                     try: variableUnit = element.attrib['unit']
                     except: variableUnit = None 
@@ -639,8 +665,32 @@ def savePolyChaosXML(vPCconfiguration, filename = None, networkPath = str(cur+"/
 
     xmlFile.write(pathAndFileName,encoding='iso-8859-1',pretty_print = True)
     print " ... file saved"
+  
+  
+###----------------------------------------------------------------------------------------
+### Polynomial chaos
+# Conversion
+def unitConversion(unitsDict,value,unit):
+    try: 
+        value = float(value)
+    except:
+        if value is None: return value
+        else: print 'ERROR: unitConversion not feasible: value {} not convertable to float'.format(value)
+    if ' ' in unit:
+        unit = unit.split(' ')
+        for un in range (0,len(unit),1): value = value*unitsDict[unit[un]]
+    else: 
+        value = value*unitsDict[unit]
+    return value
+  
     
 def loadPolyChaosXML(filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+    
+    
+    ### import units of all variables in the SI system outdated used of only few functions -> to be changed
+    ## just used for polynomial chaos config.
+    from constants import variableUnitsSI as variableUnits
+    from constants import vPCconfigurationTemplate
     
     if '.xml' not in filename:
         filename = ''.join([filename,'.xml'])

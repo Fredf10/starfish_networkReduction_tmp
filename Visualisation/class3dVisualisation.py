@@ -585,13 +585,13 @@ class Visualisation3D(Visualisation3DGUI):
     This class defines the 3D visualisation
     it is an inheritance of Visualisation3DGui which defines the GUI
     '''
-    def __init__(self, networkName = None, dataSetNumber = None, connect = False):
+    def __init__(self, networkName = None, dataNumber = None, connect = False):
         
         Visualisation3DGUI.__init__(self)
         
         # load functions
         self.networkName = networkName
-        self.dataSetNumber = dataSetNumber
+        self.dataNumber = dataNumber
         self.connect = connect
                
         # vascularNewtor Instance
@@ -692,11 +692,11 @@ class Visualisation3D(Visualisation3DGUI):
         load vascularNetwork inclusiv all solution data
         from solution data set
         
-        uses local variables networkName and dataSetNumber
+        uses local variables networkName and dataNumber
         saves vascularNetwork instance in self.vascularNetwork
         '''
-        if self.networkName and self.dataSetNumber:
-            vascularNetwork, solutionDataSets, simulationCaseDescriptions = loadSolutionDataFile(self.networkName, self.dataSetNumber) 
+        if self.networkName and self.dataNumber:
+            vascularNetwork = loadSolutionDataFile(self.networkName, self.dataNumber) 
             self.vascularNetwork = vascularNetwork    
         
     def createVessel3D(self):
@@ -728,7 +728,7 @@ class Visualisation3D(Visualisation3DGUI):
         ## update all visualisations of all vessel3D instances   
         # update vessel Positions, 3dgeometry and colour of vertices
         for vesselId in self.vascularNetwork.treeTraverseList:
-            self.vessels3D[vesselId].update3Dposition(timeStepCurrent,None, None)
+            self.vessels3D[vesselId].update3Dposition(timeStepCurrent)
         
         # update the time step for next call
         self.timeStepCurrent = self.timeStepCurrent+self.timeStepIncrement
@@ -1131,7 +1131,7 @@ class Vessel3D(Vessel):
                                               ('v3f/stream',normalLines))
         
       
-    def update3Dposition(self,timeStepCurrent, positionEndMother, rotToGlobalSysMother):
+    def update3Dposition(self,timeStepCurrent):
         '''
         
         '''
@@ -1205,9 +1205,9 @@ if __name__ == '__main__':
            
     optionsDict = parseOptions(['f','n','c'], visualisationOnly = True)
     
-    networkName           = optionsDict['networkName']
-    dataSetNumber         = optionsDict['dataSetNumber']
-    connect               = optionsDict['connect']
+    networkName  = optionsDict['networkName']
+    dataNumber   = optionsDict['dataNumber']
+    connect      = optionsDict['connect']
              
     if networkName == None:
         #Visualisation3DGUI
@@ -1215,7 +1215,7 @@ if __name__ == '__main__':
         
     else:
 
-        visualisation3D = Visualisation3D(networkName, dataSetNumber, connect)
+        visualisation3D = Visualisation3D(networkName, dataNumber, connect)
             
     
         pyglet.app.run()  

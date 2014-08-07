@@ -1,19 +1,16 @@
 import pprint
 from copy import deepcopy
+import sys, os
+from math import pi, cos, sin
+import numpy as np
 
 from moduleGrids import *
 from classCompliance import *
 
-import sys, os
+
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../'+'/UtilityLib')
-from constants import vesselComplianceElements
-
-from math import pi, cos, sin
-
-import numpy as np
-
-from copy import deepcopy
+from constants import newestNetworkXml as nxml
 
 class Vessel(object):
     '''
@@ -68,7 +65,7 @@ class Vessel(object):
         self.applyGlobalFluid   = True              # bool: apply global fluid properties or the ones stored in vessel XML
         self.my                 = 1.e-6             # blood viscosity
         self.rho                = 1050.             # blood density
-        self.gamma              = None              # velocity profile gamma correction                              
+        self.gamma              = 2.0              # velocity profile gamma correction                              
         
         # vascular Polynomial chaos data dictionary with uncertainty variables
         self.polyChaos          = {}                # dict with uncertain variables { 'variableName': [dist coeff coeff]}
@@ -191,7 +188,7 @@ class Vessel(object):
             self.compliance = eval(self.complianceType)(self.rho,self.AsVector)
             # initialize compliance element
             complianceDict = {}
-            for variable in vesselComplianceElements[self.complianceType]:
+            for variable in nxml.vesselComplianceElements[self.complianceType]:
                 if variable not in ['As','constantCompliance']:
                     complianceDict[variable] = self.getVariableValue(variable)
             self.compliance.initialize(complianceDict)

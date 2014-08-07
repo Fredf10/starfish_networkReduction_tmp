@@ -22,13 +22,15 @@ class VascularNetwork(object):
 
         ## vascularNetwork variables to set via XML
         self.name = 'vascularNetwork'   # name of the network
+        self.description = ''           # description of the current case
         self.quiet = quiet              # bool to suppress output
         
         # simulation Context
         self.totalTime      = 1.0       # simulation time in seconds
         self.CFL            = 0.85      # maximal initial CFL number
         self.dt             = None      # time step of the simulation determined by the solver
-        self.nTsteps         = None      # number of timesteps of the simulation case determined by the solver
+        self.nTsteps        = None      # number of timesteps of the simulation case determined by the solver
+        self.simulationTime = None      # array with simulation Time
                 
         #self.motion         = {'keyframe': [0, 0.1, 1.0],
         #                        'X1'     : [0, 45, 90]}
@@ -348,7 +350,52 @@ class VascularNetwork(object):
         upDict = {'C':None,'A':None,'c':None,'C_nID':None,'A_nID':None}
         for vessel in self.vessels.itervalues():
             vessel.update(upDict)
-                    
+        
+        # return solution data
+        return self.prepareSolutionDataToSave()
+    
+    def prepareSolutionDataToSave(self):
+        '''
+        
+        # solution of the system over time 
+        # {vesselID: { 'Psol' : [ [solution at N nodes]<-one array for each timePoint , ...  ], ..  }
+        '''
+        solutionData = {'vessels':{}, 'vascularNetwork' : {}}
+        # hash solition data
+        for vesselId,vessel in self.vessels.iteritems():
+            solutionData['vessels'][vesselId]   = {'Psol': vessel.Psol,
+                                                   'Qsol': vessel.Qsol,
+                                                   'Asol': vessel.Asol,
+                                                   'rotToGlobalSys':vessel.rotToGlobalSys,
+                                                   'positionStart' :vessel.positionStart,
+                                                   'netGravity'    :vessel.netGravity}
+            
+        
+        simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
+        
+        solutionData['vascularNetwork'] = { 'simulationTime': simulationTime,
+                                            'dt'            : self.dt,
+                                            'nTsteps'       : self.nTsteps }
+        
+        return solutionData
+        
+    def prepareSolutionDataAfterLoad(self, solutionData):
+        '''
+        This function prepares the solution data when the network is loaded
+        and saves it in the corresponding vessel instance
+        
+        this includes as well postprocessing methods for
+        - wave speed
+        - mean velocity
+        '''
+        
+        for vesselId,data in solutionData['vessels'].iteritems():
+            self.vessels[vesselId].update(data)
+            self.vessels[vesselId].postProcessing() 
+            
+        self.update(solutionData['vascularNetwork'])
+        
+        
         
     def findRootVessel(self):
         '''

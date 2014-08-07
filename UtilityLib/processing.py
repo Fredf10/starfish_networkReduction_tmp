@@ -1,9 +1,18 @@
 import numpy as np
+import psutil, os
+
+def memoryUsagePsutil():
+    '''
+    return the memory usage in MB
+    '''
+    process = psutil.Process(os.getpid())
+    return process.get_memory_info()[0] / float(2 ** 20)
+    
 
 def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,maxLength=500):
     '''
     calculates the linear wave splitting for a given P,Q,A,c (np.arrays) and rho (float) 
-      return values are: P_forward, P_backward, Q_forward, Q_backward 
+    return values are: P_forward, P_backward, Q_forward, Q_backward 
     '''
 
     ## calculate Zo and recast// delete last element

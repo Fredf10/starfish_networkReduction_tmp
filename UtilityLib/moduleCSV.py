@@ -8,8 +8,11 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../NetworkLib/']))
 from classBoundaryConditions import *
 
-from constants import *
+from constants import newestNetworkXml as nxml
+from constants import variablesDict
+
 from moduleXML import loadVariablesConversion
+
 
 def writeVesselDataToCSV(vessels,delimiter=';',filename = None, networkPath = str(cur+"/../NetworkFiles/")):
     '''
@@ -30,17 +33,17 @@ def writeVesselDataToCSV(vessels,delimiter=';',filename = None, networkPath = st
         for pcTag in pcTags: 
             if pcTag not in polyChaosTags.keys(): polyChaosTags[pcTag] = len(vessel.getVariableValue('polyChaos')[pcTag])     
     tags = []
-    for tag in vesselAttributes: tags.append(tag)
-    for vesselElement in vesselElements:
+    for tag in nxml.vesselAttributes: tags.append(tag)
+    for vesselElement in nxml.vesselElements:
         if vesselElement == 'compliance':
-            for specificCompElements in vesselElementReference[vesselElement].values():
+            for specificCompElements in nxml.vesselElementReference[vesselElement].values():
                 for tag in specificCompElements:
                     if tag not in tags:
                         tags.append(tag)
                         if tag in polyChaosTags.keys():
                             for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
         else: 
-            for tag in vesselElementReference[vesselElement]:
+            for tag in nxml.vesselElementReference[vesselElement]:
                 tags.append(tag)
                 if tag in polyChaosTags.keys():
                     for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
@@ -165,11 +168,11 @@ def writeBCToCSV(boundaryConditionDict,boundaryConditionPolyChaos,delimiter=';',
     # find all tags which are known for all boundary conditions
     tagsBCType1 = ['Id','boundaryType']
     tagsBCType2 = [] 
-    for boundaryCondition,elementTags in boundaryConditionElements.iteritems():
+    for boundaryCondition,elementTags in nxml.boundaryConditionElements.iteritems():
         # None - bc for tag evaluation
         if 'None' not in boundaryCondition and '_' not in boundaryCondition:
             #check out type of BoundaryCondition:
-            bcType = eval(bcTagsClassReferences[boundaryCondition])().getVariableValue('type')
+            bcType = eval(nxml.bcTagsClassReferences[boundaryCondition])().getVariableValue('type')
             for elementTag in elementTags:
                 if bcType == 1:
                     if elementTag not in tagsBCType1:
@@ -214,7 +217,7 @@ def writeBCToCSV(boundaryConditionDict,boundaryConditionPolyChaos,delimiter=';',
             dataRow       = {}
             dataRow['Id'] = Id
             dataRow['boundaryType'] = boundaryType
-            for variable in boundaryConditionElements[boundaryType]:
+            for variable in nxml.boundaryConditionElements[boundaryType]:
                 dataRow[variable] = boundaryCondition.getVariableValue(variable)
             try:
                 for bcPolyChaosDict in boundaryConditionPolyChaos[Id]:
@@ -258,12 +261,12 @@ def readBCFromCSV(delimiter=';',filename = None, networkPath = str(cur+"/../Netw
         
         # create class instance
         boundaryType = bcData['boundaryType']
-        try: boundaryInstance = eval(bcTagsClassReferences[boundaryType])()
+        try: boundaryInstance = eval(nxml.bcTagsClassReferences[boundaryType])()
         except: 'ERROR moduleCSV.readBCFromCSV: boundaryType <<{}>> does not exist'.format(boundaryType)
         boundaryDataDict = {'name':boundaryType}
         polyChaos = {}
         for variable,variableValueStr in bcData.iteritems():
-            if variable in boundaryConditionElements[boundaryType]: 
+            if variable in nxml.boundaryConditionElements[boundaryType]: 
                 try: variableUnit = columUnits[variable]
                 except: variableUnit = None 
                 # save converted XML-value

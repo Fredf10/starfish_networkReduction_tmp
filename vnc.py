@@ -20,10 +20,7 @@ from moduleCSV import writeVesselDataToCSV
 from moduleCSV import writeBCToCSV 
 from moduleCSV import readBCFromCSV
 
-from constants import bcTagsClassReferences
-from constants import boundaryConditionElements as bcTags
-
-from constants import vesselComplianceElements
+import networkXml041 as nxml
 
 ### import units of all variables in the SI system
 from constants import variableUnitsSI as variableUnits
@@ -142,7 +139,7 @@ def main():
             print "     available compliance types:"
             print ""
             # get all defined boundaryConditions from constants-dict save as bcTypes
-            complianceTypes = vesselComplianceElements.keys()
+            complianceTypes = nxml.vesselComplianceElements.keys()
             compTypes = ['default (Hayashi)']
             for compType in complianceTypes: 
                 compTypes.append(compType)
@@ -176,12 +173,12 @@ def main():
             
             if compType != 'default (Hayashi)':
                 vesselData = {'complianceType':compType}
-                vesselComplianceElements[compType]
+                nxml.vesselComplianceElements[compType]
                                     
                 print ""
                 print "      set values for the Compliance: ", compType
                 question = True
-                for arg in vesselComplianceElements[compType]:
+                for arg in nxml.vesselComplianceElements[compType]:
                     if arg != 'complianceType':
                         currValue = raw_input (str("            set value for "+str(arg)+' '))
                         test = True
@@ -336,7 +333,7 @@ def main():
                         print "     add boundary condition type:"
                         print ""
                         # get all defined boundaryConditions from constants-dict save as bcTypes
-                        bcTypesAll = bcTagsClassReferences.keys()
+                        bcTypesAll = nxml.bcTagsClassReferences.keys()
                         bcTypes = []
                         for bcType in bcTypesAll: 
                             if "_" is not bcType[0]:
@@ -370,7 +367,7 @@ def main():
                         
                         bcType = bcTypes[int(inputType)] 
                         
-                        boundaryInstance = eval(bcTagsClassReferences[bcType])()
+                        boundaryInstance = eval(nxml.bcTagsClassReferences[bcType])()
                         boundaryDataDict = {}
                         boundaryDataDict['name']= bcType
                         
@@ -378,7 +375,7 @@ def main():
                         print "      set values for the BC condition: ", bcType
                         print "          enter 'b' for the first value to skip this procedure"
                         question = True
-                        for arg in bcTags[bcType]:
+                        for arg in nxml.bcTags[bcType]:
                             if question == True: 
                                 currValue = raw_input (str("            set value for "+str(arg)+' '))
                                 if currValue == 'b': question=False
@@ -603,9 +600,8 @@ def main():
                     print "     load network from SolutionData"
                     try:
                         networkName,dataSetNumber = chooseSolutionDataCase()
-                        vascularNetwork,solData,Description = loadSolutionDataFile(networkName,[dataSetNumber])
+                        vascularNetwork = loadSolutionDataFile(networkName, dataSetNumber)
                         mainGraph.update_graph(vascularNetwork, window)
-                        
                         filename, value = filename.split(".",1)
                     except: " ERROR occured could not open requested network, maybe the class description is out dated"
                     break

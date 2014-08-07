@@ -1,12 +1,13 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleAorta.xml id="1.0" version="4.0">
+<singleAorta.xml id="999" version="4.1">
   <simulationContext>
-    <totalTime unit="s">5.0</totalTime>
+    <description>my STARFiSh simulation</description>
+    <totalTime unit="s">1.0</totalTime>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
-    <centralVenousPressure unit="mmHg">0.0</centralVenousPressure>
-    <minimumVenousPressure unit="mmHg">0.0</minimumVenousPressure>
+    <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
+    <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
   </simulationContext>
   <solverCalibration>
     <rigidAreas>False</rigidAreas>
@@ -17,7 +18,7 @@
   <initialisationControls>
     <initialsationMethod>Auto</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0.000125</initMeanFlow>
-    <initMeanPressure unit="mmHg">166.7</initMeanPressure>
+    <initMeanPressure unit="Pa">22224.444</initMeanPressure>
     <estimateWindkesselCompliance>Tree</estimateWindkesselCompliance>
     <compPercentageWK3>0.8</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
@@ -32,7 +33,7 @@
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <Flow-Sinus2>
-        <amp unit="ml s-1">500</amp>
+        <amp unit="m3 s-1">0.0005</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
         <Npulse>50.0</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
@@ -41,23 +42,20 @@
         <runtimeEvaluation>False</runtimeEvaluation>
         <prescribe>influx</prescribe>
       </Flow-Sinus2>
-       <_Windkessel-3Elements>
+      <_Windkessel-3Elements>
         <Rc unit="Pa s m-3">None</Rc>
-        <Rtotal>133000000.0</Rtotal>
-        <C unit="m3 Pa-1">3.52355288029e-8</C>
+        <Rtotal unit="Pa s m-3">133000000.0</Rtotal>
+        <C unit="m3 Pa-1">3.52355288029e-08</C>
         <Z unit="Pa s m-3">VesselImpedance</Z>
       </_Windkessel-3Elements>
-     </boundaryCondition>
-       <_ReflectionCoefficient>
-       		<Rt>0.5</Rt>
-       </_ReflectionCoefficient>
+    </boundaryCondition>
   </boundaryConditions>
   <vessels>
-    <vessel  Id = "1"  name="Ascending aorta 1">
+    <vessel Id="1" name="Ascending aorta 1">
       <topology>
-      	<leftDaughter>None</leftDaughter>
+        <leftDaughter>None</leftDaughter>
         <rightDaughter>None</rightDaughter>
-        <angleYMother unit=''>0</angleYMother>
+        <angleYMother unit="rad">0.0</angleYMother>
       </topology>
       <geometry>
         <geometryType>uniform</geometryType>
@@ -72,8 +70,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">0.00271546702606</As>
-        <betaHayashi>1.8315018315</betaHayashi>
-        <betaHayashi-polyChaos>1.0 2.0</betaHayashi-polyChaos>
+        <betaHayashi unit="Pa">1.8315018315</betaHayashi>
       </compliance>
       <fluid>
         <applyGlobalFluid>True</applyGlobalFluid>

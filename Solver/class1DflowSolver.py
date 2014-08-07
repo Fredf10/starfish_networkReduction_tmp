@@ -17,6 +17,9 @@ from classConnections import *
 from classFields import *
 from classCommunicators import *
 
+sys.path.append(cur+'/UtilityLib/')
+from processing import memoryUsagePsutil
+
 import pprint 
 from copy import copy as copy 
 
@@ -30,6 +33,7 @@ class FlowSolver(object):
         '''
         Constructor       
         '''
+                
         if vascularNetwork == None: print "ERROR: No vascularNetwork given!" / exit()
         assert isinstance(vascularNetwork, VascularNetwork)
         # the vascular network to solve
@@ -95,7 +99,7 @@ class FlowSolver(object):
         
         ## for future use !!
         self.multiProcessing = False
-                
+        
         # initialize system
         self.vascularNetwork.initialize(initializeForSimulation = True)
         
@@ -205,7 +209,8 @@ class FlowSolver(object):
             logfile2.write(''.join([str(int(Nnew)),'\n']))
         logfile.close()
         logfile2.close()    
-        self.vascularNetwork.dt = self.dt
+        
+        self.vascularNetwork.update({'dt':self.dt, 'nTsteps': self.Tsteps})
         
         if self.output['CFLcorrect'] != []:
             if quiet == False:
@@ -243,6 +248,7 @@ class FlowSolver(object):
         '''
         initialize solution matrices
         '''
+        
         
         initialValues = self.vascularNetwork.initialValues
         
@@ -305,7 +311,7 @@ class FlowSolver(object):
             
         ## calculate venous pressure for windkessel
         self.vascularNetwork.initializeVenousGravityPressureTime(self.Tsteps)
-         
+                  
     def initializeSystemEquations(self):
         '''
         initialize system Equations
@@ -527,7 +533,8 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumConnections',len(self.connections))
         print '%-20s %4d' % ('NumBoundarys',len(self.boundarys))
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
-        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)                 
+        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)               
+        print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
         print '===================================== \n'
         
             
@@ -708,10 +715,6 @@ class FlowSolver(object):
             print '                    ------------'
             print '  volume diff      (ml)  {:.2f}'.format(vesselsInit - vesselsSol + totalIn - totalOut)
         
-        # postprocessing: calculate wave speed
-        for vessel in self.vessels.itervalues():
-            vessel.postProcessing()  
-            
         ## stop realtime visualisation
         for communicator in self.communicators.itervalues():           
             try: communicator.stopRealtimeViz()
@@ -725,21 +728,4 @@ class FlowSolver(object):
         del self.connections
         del self.boundarys
         del self.communicators
-        
-        
-        ## create Mimic of the old solutionDataSets from solution data saved in each vessel instance
-        # this will be removed soon!!!
-        
-         # solution of the system over time {vesselID: [ [solution at N nodes]<-one array for each timePoint , ...  ]  }
-        # old and will be removed soon
-        P  = {}
-        Q  = {}
-        A  = {}
-        c  = {}
-        for vesselId,vessel in self.vessels.iteritems():
-            P[vesselId]    = self.vessels[vesselId].Psol
-            Q[vesselId]    = self.vessels[vesselId].Qsol
-            A[vesselId]    = self.vessels[vesselId].Asol
-            c[vesselId]    = self.vessels[vesselId].csol
-        
-        return P,Q,A,c
+                

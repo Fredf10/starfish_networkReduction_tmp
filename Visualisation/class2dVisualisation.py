@@ -1183,14 +1183,14 @@ if __name__ == '__main__':
                
     optionsDict = parseOptions(['f','n','c'], visualisationOnly = True)
     
-    networkName           = optionsDict['networkName']
-    dataSetNumber         = optionsDict['dataSetNumber']
-    connect               = optionsDict['connect']
+    networkName  = optionsDict['networkName']
+    dataNumber   = optionsDict['dataNumber']
+    connect      = optionsDict['connect']
              
     if networkName == None:
         Visualisation2D()
         gtk.main()
         
     else:
-        Visualisation2D(networkName = networkName, dataSetNumber = dataSetNumber, connect = connect)
+        Visualisation2D(networkName = networkName, dataSetNumber = dataNumber, connect = connect)
         gtk.main()

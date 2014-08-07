@@ -13,14 +13,13 @@ from moduleStartUp import parseOptions
 def main():    
     print ""
     print '====================================='
-    print '# Vascular1dFlow_v0.2 Visualisation #'
+    print '#    STARFiSh_v0.3 Visualisation    #'
     print '====================================='
     print ""
     
     optionsDict = parseOptions(['f','n','v'], visualisationOnly = True)
     
     networkName    = optionsDict['networkName']
-    dataSetNumber  = optionsDict['dataSetNumber']
     dataNumber     = optionsDict['dataNumber']
     vizOutput      = optionsDict['vizOutput']
     if vizOutput == 'non':

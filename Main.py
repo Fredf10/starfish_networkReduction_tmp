@@ -42,7 +42,7 @@ import subprocess
 def main():
     print ""
     print '====================================='
-    print '#       Vascular1dFlow_v0.2         #'
+    print '#     STARFiSh_v0.3_development     #'
     print '====================================='
     
     optionsDict = parseOptions(['f','n','d','s','v','r'])
@@ -64,18 +64,17 @@ def main():
     print '%-20s %s' % ('Resimulate', resimulate)
     print '%-20s %s' % ('Visualisationmode', vizOutput)
     
-    
     # load network from the path!
     if resimulate == False:
         vascularNetwork = loadNetworkFromXML(filename=filename)
     else:
-        vascularNetwork,solutionDataSets,simulationCaseDescriptions = loadSolutionDataFile(networkName, [dataNumber])
-        simulationDescription = simulationCaseDescriptions[0][0]
-        print simulationCaseDescriptions
-        print simulationDescription,type(simulationDescription)
+        vascularNetwork = loadSolutionDataFile(networkName, dataNumber)
+        if simulationDescription == '':
+            simulationDescription = vascularNetwork.description
     
     if vascularNetwork == None: exit()
-    vascularNetwork.evaluateConnections()
+    
+    vascularNetwork.description = simulationDescription
     
     timeSolverInitStart = time.clock()
     #initialize Solver
@@ -83,7 +82,7 @@ def main():
     timeSolverInit = time.clock()-timeSolverInitStart
     timeSolverSolveStart = time.clock()
     #solve the system
-    P,Q,A,c = flowSolver.solve()
+    flowSolver.solve()
     timeSolverSolve = time.clock()-timeSolverSolveStart
     
     minutesInit = int(timeSolverInit/60.)
@@ -98,16 +97,13 @@ def main():
     print 'Solving:        {} min {} sec'.format(minutesSolve,secsSolve)
     print '====================================='
     
-          
-    solutionDataSave = [{'Pressure': P, 'Flow': Q, 'Area': A, 'WaveSpeed':c, 'Name': str('simulation_'+dataNumber) }]
-    networkName = filename.split('.')[0]
-
-    saveSolutionDataFile(networkName,dataNumber,vascularNetwork,solutionDataSave,simulationDescription)
+    saveSolutionDataFile(vascularNetwork,dataNumber)
+    
     
     del flowSolver
     gc.collect()
     
-    updateSimulationDescriptions(networkName,dataNumber)
+    updateSimulationDescriptions(networkName, dataNumber, simulationDescription)
     
     gc.collect()
     
