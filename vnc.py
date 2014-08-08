@@ -603,7 +603,7 @@ def main():
                         vascularNetwork = loadSolutionDataFile(networkName, dataSetNumber)
                         mainGraph.update_graph(vascularNetwork, window)
                         filename, value = filename.split(".",1)
-                    except: " ERROR occured could not open requested network, maybe the class description is out dated"
+                    except: print "\n ERROR occured could not open requested network, file does not exist or is out dated"
                     break
                 
                 elif subMenuInput == 'b':

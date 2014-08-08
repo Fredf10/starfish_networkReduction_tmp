@@ -786,24 +786,7 @@ class Visualisation3D(Visualisation3DGUI):
         
         try:   FFMpegWriter = animation.writers['mencoder']
         except: print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
-                
-#         metadata = dict(title=self.networkName, artist='STARFISH 0.3 - 3d Visualisation',comment='Animation of a arterial network')
-#         writer = FFMpegWriter(fps=30, metadata=metadata)
-#         
-#         fig = plt.figure(figsize = frameSize)
-#                 
-#         fileName = ''.join([self.movieSaveDirectory,'/',self.networkName,'_',str(self.movieNumber),self.movieFileType])
-#         
-#         with writer.saving(fig, fileName, fig.dpi):
-#             for n in xrange(self.movieCount-1):
-#                 imageName = ''.join([self.templateMovDataDirectory,'/.screenShot',str(n),'.png'])
-#                 im = read_png(imageName)              
-#                 fig.figimage(im, 0,0)
-#                 writer.grab_frame()
-#             
-#         self.movieNumber = self.movieNumber+1
-#         print "createMovie(): created movie sucessfull"
-        
+                        
         try:
             fileName = ''.join([self.movieSaveDirectory,'/',self.networkName,'_',str(self.movieNumber),self.movieFileType])
             imageName = ''.join(['mf://',self.templateMovDataDirectory,'/.screenShot%d.png'])

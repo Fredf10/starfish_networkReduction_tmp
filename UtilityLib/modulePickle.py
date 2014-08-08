@@ -61,8 +61,7 @@ def saveSolutionDataFile(vascularNetwork, dataNumber):
     cPickle.dump(solutionData, FILE, protocol=2)
     
     FILE.close()
-    
-    
+        
     # save to network xml 
     writeNetworkToXML(vascularNetwork, dataNumber = dataNumber, filename = networkName, networkPath = solutionDirectory)
 
