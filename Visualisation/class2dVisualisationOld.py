@@ -587,8 +587,7 @@ class Window2dPlots(gtk.Window):
         cbXaxis.append_text('Plot over Time')
         cbXaxis.append_text('Plot over Space')
         cbXaxis.set_active(0) 
-        
-        
+              
 
         vbox = gtk.VBox(False,1)
         hboxLegend = gtk.HBox(False,10) 
