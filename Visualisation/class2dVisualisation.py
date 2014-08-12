@@ -3,7 +3,6 @@ import gtk
 import gobject
 
 import matplotlib.pyplot as plt   
-
 from matplotlib.figure import Figure
 # uncomment to select /GTK/GTKAgg/GTKCairo
 # from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
@@ -11,37 +10,22 @@ from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanva
 # from matplotlib.backends.backend_gtkcairo import FigureCanvasGTKCairo as FigureCanvas
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 
+from matplotlib.font_manager import FontProperties
+
 import sys, os
 cur = os.path.dirname(os.path.realpath(__file__))
 
 sys.path.append(cur + '/../UtilityLib')
-from moduleXML import loadNetworkFromXML 
-from processing import linearWaveSplitting
-from processing import nonLinearWaveSplitting
-from processing import minMaxFunction
+import processing as proc
+#from processing import nonLinearWaveSplitting
 
 from moduleStartUp import parseOptions
 
 from modulePickle import loadSolutionDataFile
 from modulePickle import loadExternalDataSet
 
-
-sys.path.append(cur + '/../NetworkLib')
-from classVascularNetwork import VascularNetwork 
-
-from matplotlib.font_manager import FontProperties
-
-import itertools
-import subprocess
-
-from optparse import OptionParser
-import cPickle
 import numpy as np
-
 from pprint import pprint as pp
-
-from numpy import arange, sin, pi
-
 from copy import deepcopy as copy
 
 class Visualisation2DPlotWindowAdjustValues(gtk.Window):
@@ -74,37 +58,38 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                 
         self.entries = {}
         
-        countX = 1
-        countY = 1
+        countHeight = 1
+        countWidth = 1
         
-        for key,values in actualValuesDict.iteritems():
+        keys = actualValuesDict.keys()
+        keys.sort()
+        for key in keys:
             hbox = gtk.HBox(False, 10) 
             label = gtk.Label(key)
             hbox.pack_start(label, fill=False, expand=True)     
             self.entries[key] = []
             
-            countX = countX +1
+            countHeight = countHeight +1
             
+            values = actualValuesDict[key]
+            countWidth  = max(countWidth,len(values))
             for value in values:
                 entry = gtk.Entry()
+                entry.set_size_request(120,20)
                 entry.add_events(gtk.gdk.KEY_RELEASE_MASK)
                 entry.set_text(str(value))
                 hbox.pack_start(entry, fill=False, expand=False)  
                 self.entries[key].append(entry)   
                 
-                countY = countY+1
             vbox.pack_start(hbox, expand=True, fill=False)
             
-        self.set_size_request(30*countX, 15*countY)
+        width = 130 + 120 * (countWidth)
+        height  = 30 + 30*countHeight
+        self.set_size_request(width,height)
             
-        self.connect("destroy", self.on_destroy)   
-        
         self.add(vbox)
         self.show_all()
-    
-    def on_destroy(self, widget):
-        self.parentWindow.update({'limitsWindow':None})
-    
+        
     def on_clickedUpdate(self, widget):
         for key, entries in self.entries.iteritems():
             for entry in entries:
@@ -114,15 +99,15 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                     try: self.actualValuesDict[key][index] = float(text)
                     except: print "WARNING: insert float please and not :",text
         self.parentWindow.update({self.variableName:self.actualValuesDict})
-        self.parentWindow.plot()
-
+        self.parentWindow.updatePlotWindow()
+        
     def on_clickedReset(self, widget):
         for key, entries in self.entries.iteritems():
             for entry,i in zip(entries,xrange(len(entries))):
                 value = self.inititalValuesDict[key][i]
                 entry.set_text(str(value))
         self.parentWindow.update({self.variableName: copy(self.inititalValuesDict)})
-        self.parentWindow.plot()
+        self.parentWindow.updatePlotWindow()
 
 class Visualisation2DPlotWindowGui(gtk.Window):
     def __init__(self):
@@ -141,17 +126,10 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         self.nodeLabel = gtk.Label('Node 0')
         
         # # image legend
-        self.legend = False
-        cBlegend = gtk.CheckButton("show legend")
+        self.cBlegend = gtk.CheckButton("show legend")
         # cBlegend.connect("toggled", self.on_changedLegendBool)
-        cBlegend.set_size_request(120, 30)
-        
-        # plot title
-        self.plotTitle = False
-        cBtitle = gtk.CheckButton("show title")
-        # cBtitle.connect("toggled", self.on_changedTitleBool)
-        cBtitle.set_size_request(120, 30)
-        
+        self.cBlegend.set_size_request(120, 30)
+                
         # medical units
 #         self.medicalUnit = True
 #         cBmedical = gtk.CheckButton("use medical units")
@@ -160,7 +138,6 @@ class Visualisation2DPlotWindowGui(gtk.Window):
 #         cBmedical.set_active(1) 
 
         # show decriptions
-        self.showDescription = False
         cBdescription = gtk.CheckButton('show descriptions')
         # cBdescription.connect("toggled", self.on_changedDescription)
         cBdescription.set_size_request(120, 30)
@@ -172,20 +149,30 @@ class Visualisation2DPlotWindowGui(gtk.Window):
 
         #### second row of buttons
         # min max plots
-        self.plotMinMaxPoints = False
-        cBplotMinMaxPoints = gtk.CheckButton('plot MinMax-points')
-        # cBplotMinMaxPoints.connect("toggled", self.on_changedPlotMinMax)
-        cBplotMinMaxPoints.set_size_request(120, 30)
+        self.buttonMinMaxPoints = gtk.ToggleButton('MinMax points')
+        self.buttonMinMaxPoints.connect("toggled", self.on_changedPlotMinMax)
+        self.buttonMinMaxPoints.set_size_request(120, 30)
+        
+        buttonDeltas = gtk.ToggleButton("update Deltas")
+        buttonDeltas.connect("toggled", self.on_changeDeltas)
+        buttonDeltas.set_size_request(120, 30)        
+        
+        #checkInflation = gtk.CheckButton('Point of Inflection')
+        # checkInflation.connect("toggled", self.on_changedDescription)
+        #checkInflation.set_size_request(120, 30)
         
 #         cBchangeMinMaxDelta = gtk.Button('change MinMax-deltas')
 #         cBchangeMinMaxDelta.connect("clicked", self.on_clickedMinMaxDelta)
 #         cBchangeMinMaxDelta.set_size_request(120,30)
 #         cBchangeMinMaxDelta.set_sensitive(False)
 
-        buttonLimits = gtk.Button("update limits")
-        buttonLimits.connect("clicked", self.on_changeLimits)
+        buttonLimits = gtk.ToggleButton("update limits")
+        buttonLimits.connect("toggled", self.on_changeLimits)
         buttonLimits.set_size_request(120, 30)
 
+        buttonLables = gtk.ToggleButton("update lables")
+        buttonLables.connect("toggled", self.on_changeLables)
+        buttonLables.set_size_request(120, 30)
         
         self.fig = Figure(figsize=(5, 4), dpi=100)
         # self.plot(0)
@@ -193,9 +180,6 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         self.canvas.set_size_request(640, 690)
         
         toolbar = NavigationToolbar(self.canvas, self)
-        
-        cBtitle.set_active(0) 
-        cBdescription.set_active(0) 
         
         cbType = gtk.combo_box_new_text()
         cbType.append_text('Plot P,Q')
@@ -220,13 +204,14 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         hbox2 = gtk.HBox(False, 1)
                 
         # Checkbutton series
-        hboxLegend.pack_start(cBlegend)
+        hboxLegend.pack_start(self.cBlegend)
         hboxLegend.pack_start(cBdescription)
         hboxLegend.pack_start(buttonLimits)
         # hboxLegend.pack_start(cBmedical)
         hboxLegend.pack_start(self.buttonRenderMovie)
-        hboxCheckboxes2.pack_start(cBplotMinMaxPoints)
-        # hboxCheckboxes2.pack_start(cBchangeMinMaxDelta)
+        hboxCheckboxes2.pack_start(self.buttonMinMaxPoints)
+        hboxCheckboxes2.pack_start(buttonDeltas)
+        hboxCheckboxes2.pack_start(buttonLables)        
 
         # align pictures canvas
         alignIm = gtk.Alignment(0, 1 , 1, 0)
@@ -264,20 +249,40 @@ class Visualisation2DPlotWindowGui(gtk.Window):
             
     def on_changeLimits(self, widget):
         pass
-            
+    
+    def on_changedPlotMinMax(self,widget):
+        pass
+    
+    def on_changeDeltas(self,widget):
+        pass
+    
+    def on_changeLables(self,widget):
+        pass
+                
 class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
-    def __init__(self, selectedNetworks, selectedVesselIds, selectedExternalData):
-        
+    def __init__(self, selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames):
+                
         self.plot = lambda :''
-        
-        self.limitsWindow = None
-        
+                
         # # variables for the slider
-        self.sliderValue = 0  # grid node / time point
-        self.limits = {'Time':      [0, 10],
-                       'Space':     [0, 10],
-                       'gridNodes': [0, 5]}
+        self.sliderValue    = 0  # grid node / time point
+        self.limitsWindow   = None
+        self.limits         = {'Time':      [0, 10],
+                               'Space':     [0, 10],
+                               'gridNodes': [0, 5]}
+        self.limitsInit     = {}
         
+        self.deltasWindow   = None
+        self.deltas         = {}
+        self.deltasInit     = {}
+        
+        self.axis = {}
+        self.lines = {}
+        self.points = {}
+        
+        self.lablesWindow = None
+        self.lables     = {}
+        self.lablesInit = {}
         
         # # initialize super class
         super(Visualisation2DPlotWindow, self).__init__()
@@ -285,6 +290,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.selectedNetworks = selectedNetworks
         self.selectedVesselIds = selectedVesselIds
         self.selectedExternalData = selectedExternalData
+        self.selectedCaseNames = selectedCaseNames
         
         # # activate space/time changer if only one network is loaded
         if len(self.selectedNetworks) == 1:
@@ -299,10 +305,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.createGraph()
         self.estimatePlotLimits()
         self.plot = self.updateLinesPQ
-        
+                
         # # update slider and so --> update the plot
         self.scale.set_range(*self.limits['gridNodes'])
-        self.plot()
+        self.updatePlotWindow()
     
     def update(self, visualisationData):
         '''
@@ -369,43 +375,128 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         
         #plt.yticks(np.linspace(ax22.get_xlim()[0], ax22.get_xlim()[1], 2), ['', '']) 
                            
-        self.axis = [ax1, ax12 ,ax2, ax22]
-        self.lines = [[], []]
+        self.axis = {'axis1':ax1,'axis1Twin':ax12, 'axis2':ax2,'axis2Twin':ax22}
+        self.lines = {}
+        self.points = {}
+        self.lables = {}
         # # add 3 lines for each network case to each subplot
         colors = ['b', 'r', 'm', 'g', 'c']
-        for i in xrange(len(self.selectedVesselIds)):
-            
-            self.lines[0].append([self.axis[0].plot(-1, 0, color=colors[i], linestyle='-', linewidth=self.linewidth)[0]])
-            self.lines[0][i].append(self.axis[1].plot(-1, 0, color=colors[i], linestyle='--', linewidth=self.linewidth)[0])
-            self.lines[0][i].append(self.axis[1].plot(-1, 0, color=colors[i], linestyle=':', linewidth=self.linewidth)[0])
-            
-            self.lines[1].append([self.axis[2].plot(-1, 0, color=colors[i], linestyle='-', linewidth=self.linewidth)[0]])
-            self.lines[1][i].append(self.axis[3].plot(-1, 0, color=colors[i], linestyle='--', linewidth=self.linewidth)[0])
-            self.lines[1][i].append(self.axis[3].plot(-1, 0, color=colors[i], linestyle=':', linewidth=self.linewidth)[0])   
+        linestyles = {'axis1': ['-'],'axis1Twin': ['--',':'], 'axis2': ['-'], 'axis2Twin':['--',':']}
         
-    def clearLines(self):
-        for lineAxisPack in self.lines:
-            for linePack in lineAxisPack:
-                for line in linePack:
-                    line.set_data(-1, 0)
+        # lines and points are refered with the id(int) in the selectedNetworks list == 'caseId'
+        # lines  = dict[caseId][axis][linestyle]
+        # points = dict[caseId][axis][linestyle] ## here the linestyle define the according line only
+        for caseId in xrange(len(self.selectedVesselIds)):
+            # create dictionaies accroding to current defined axis
+            self.lines[caseId]  = {key: {} for key in self.axis.keys()}
+            self.points[caseId] = {key: {} for key in self.axis.keys()}
+            # fill in lines according to defined axis, linesytles and color 
+            for axis in self.axis.keys():
+                for linestyle in linestyles[axis]:
                     
-        self.axis[1].set_visible(False)
-        self.axis[3].set_visible(False)   
-        self.updatePlotWindow()
+                    currentName = ' '.join([str(caseId),axis,linestyle])
+                    if axis == 'axis1':
+                        self.lables[currentName]     = [self.selectedCaseNames[caseId]]
+                        self.lablesInit[currentName] = [self.selectedCaseNames[caseId]]
+                    else:
+                        self.lables[currentName]     = ['']
+                        self.lablesInit[currentName] = ['']
+                    self.deltas[currentName]     = [0.025]
+                    self.deltasInit[currentName] = [0.025]
+                    
+                    self.lines[caseId][axis][linestyle] = self.axis[axis].plot( -1, 0,
+                                                                           color=colors[caseId],
+                                                                           linestyle = linestyle,
+                                                                           linewidth = self.linewidth,
+                                                                           label = self.lables[currentName][0])[0]
+                    self.points[caseId][axis][linestyle] = self.axis[axis].plot( -1, 0,
+                                                                           color=colors[caseId],
+                                                                           linestyle = '',
+                                                                           marker='o',
+                                                                           linewidth=self.linewidth)[0]
         
+        if self.selectedExternalData != None:
+            self.lines['external'] = {}
+            self.lines['external']['axis1'] = {'-':self.axis['axis1'].plot( -1, 0,
+                                                                      color= 'k',
+                                                                      linestyle = '-',
+                                                                      linewidth = self.linewidth)[0]}
+                                      
+            self.lines['external']['axis2'] = {'-':self.axis['axis2'].plot( -1, 0,
+                                                                      color= 'k',
+                                                                      linestyle = '-',
+                                                                      linewidth = self.linewidth)[0]}
+            
+            self.points['external']= {'axis1':{'-':self.axis['axis1'].plot( -1, 0,
+                                                                      color= 'k',
+                                                                      linestyle = '',
+                                                                      marker='o',
+                                                                      linewidth=self.linewidth)[0]},
+                                      'axis2':{'-':self.axis['axis2'].plot( -1, 0,
+                                                                      color= 'k',
+                                                                      linestyle = '',
+                                                                      marker='o',
+                                                                      linewidth=self.linewidth)[0]}}
+            self.deltas['external axis1 -'] = [0.025]
+            self.deltas['external axis2 -'] = [0.025]
         
+                    
+    def clearPlotWindow(self, lines = True, points = True):
+        '''
+        set all line data to single point at (-1, 0) out of the view field
+        '''
+        for caseId,axisDict in self.lines.iteritems():
+            for axis,lineDict in axisDict.iteritems():
+                if lines:
+                    for line in lineDict.itervalues():
+                        line.set_data([-1], [0])
+                    self.axis['axis1Twin'].set_visible(False)
+                    self.axis['axis2Twin'].set_visible(False)
+                if points:
+                    try:
+                        for point in self.points[caseId][axis].itervalues():
+                            point.set_data([-1], [0])
+                    except: pass
+                                   
+        self.canvas.figure = self.fig
+        self.fig.set_canvas(self.canvas)
+        self.canvas.queue_resize()             
         
     def updatePlotWindow(self):
+        '''
+        update the plot canvas in the GUI
+        '''    
+        self.plot()
+        
+        if self.buttonMinMaxPoints.get_active():
+            self.updatePoints()
+            
+        if self.cBlegend.get_active():
+            self.updateLables()
+            for axis in self.axis.itervalues():
+                try:    axis.legend(frameon=False, ncol=1)
+                except: pass
+            
         self.canvas.figure = self.fig
         self.fig.set_canvas(self.canvas)
         self.canvas.queue_resize()        
                 
-    def updateLinesPQ(self):
+    def updateLables(self):
         
+        for caseId,axisDict in self.lines.iteritems():
+            for axis,lineDict in axisDict.iteritems():
+                for linestyle, line in lineDict.iteritems():
+                    currentName = ' '.join([str(caseId),axis,linestyle])
+                    line.lable = self.lables[currentName][0]
+                
+    def updateLinesPQ(self):
+        '''
+        create line plot with P in the first axis and Q the second axis
+        '''
         gridNode = self.sliderValue
         # 1. set axis lable
-        self.axis[0].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
-        self.axis[2].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
+        self.axis['axis1'].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
+        self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
                 
         for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
@@ -414,52 +505,66 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 try:
                     yData00 = vascularNetwork.vessels[vesselId].Psol[:, [gridNode]] / 133.32
                     ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
-                    
                     xData = vascularNetwork.simulationTime
+                                
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    self.lines[i]['axis2']['-'].set_data(xData, ydata10)
+        
+                    self.axis['axis1'].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlim(self.limits['Time'])
                     
-                    self.lines[0][i][0].set_data(xData, yData00)
-                    self.lines[1][i][0].set_data(xData, ydata10)
-                    
-                    self.axis[2].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Time'])
-                    self.axis[2].set_xlim(self.limits['Time'])
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+                    
+                if self.selectedExternalData != None:
+                    try:
+                        xData   = self.selectedExternalData['SolutionData'][vesselId]['Time']+self.limits['external time shift']
+                        try:
+                            yData00 = self.selectedExternalData['SolutionData'][vesselId]['Pressure']
+                            self.lines['external']['axis1']['-'].set_data(xData, yData00)
+                        except: pass
+                        try:
+                            ydata10 = self.selectedExternalData['SolutionData'][vesselId]['Flow']
+                            self.lines['external']['axis2']['-'].set_data(xData, ydata10)
+                        except: pass
+                    except: pass
             
             elif self.axisX == "Space":
                 try: 
                     yData00 = vascularNetwork.vessels[vesselId].Psol[gridNode] / 133.32
                     ydata10 = vascularNetwork.vessels[vesselId].Qsol[gridNode] * 1e6    
-                    
                     xData = np.linspace(0, vascularNetwork.vessels[vesselId].length, len(yData00)) * 100.
                     
-                    self.lines[0][i][0].set_data(xData, yData00)
-                    self.lines[1][i][0].set_data(xData, ydata10)      
-                    
-                    self.axis[1].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Space'])
-                    self.axis[1].set_xlim(self.limits['Space'])              
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
+                                        
+                    self.axis['axis1'].set_xlim(self.limits['Space'])
+                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlim(self.limits['Space'])                                  
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+                    
+                if self.selectedExternalData != None:
+                    self.lines['external']['axis1']['-'].set_data([-1], [0])
+                    self.lines['external']['axis2']['-'].set_data([-1], [0])
         
-        self.axis[0].set_ylim(self.limits['P'])
-        self.axis[2].set_ylim(self.limits['Q'])
-        
-        self.updatePlotWindow()
-          
+        self.axis['axis1'].set_ylim(self.limits['P'])
+        self.axis['axis2'].set_ylim(self.limits['Q'])
+                  
     def updateLinesPQsplitLin(self):
         gridNode = self.sliderValue
         # 1. set axis lable
-        self.axis[0].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
-        self.axis[1].set_ylabel('Contribution ' + self.unitPtext, fontsize=self.fontSizeLabel)
-        self.axis[2].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
-        self.axis[3].set_ylabel('Contribution ' + self.unitFtext, fontsize=self.fontSizeLabel)
+        self.axis['axis1'].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
+        self.axis['axis1Twin'].set_ylabel('Contribution ' + self.unitPtext, fontsize=self.fontSizeLabel)
+        self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
+        self.axis['axis2Twin'].set_ylabel('Contribution ' + self.unitFtext, fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
         
-        self.axis[1].set_visible(True)
-        self.axis[3].set_visible(True) 
+        self.axis['axis1Twin'].set_visible(True)
+        self.axis['axis2Twin'].set_visible(True) 
         
         for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
@@ -470,7 +575,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Asol = vascularNetwork.vessels[vesselId].Asol[:, [gridNode]]   
                     csol = vascularNetwork.vessels[vesselId].csol[:, [gridNode]]  
                     
-                    Psol_f, Psol_b, Qsol_f, Qsol_b = linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
                     yData00 = Psol / 133.32
                     yData01 = Psol_f / 133.32
@@ -481,20 +586,20 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     xData = vascularNetwork.simulationTime
                     
-                    self.lines[0][i][0].set_data(xData,     yData00)
-                    self.lines[0][i][1].set_data(xData[1:], yData01)
-                    self.lines[0][i][2].set_data(xData[1:], yData02)
+                    self.lines[i]['axis1']['-'].set_data(xData,     yData00)
+                    self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
+                    self.lines[i]['axis1Twin'][':'].set_data(xData[1:], yData02)
                     
-                    self.lines[1][i][0].set_data(xData,     yData10)
-                    self.lines[1][i][1].set_data(xData[1:], yData11)
-                    self.lines[1][i][2].set_data(xData[1:], yData12)
+                    self.lines[i]['axis2']['-'].set_data(xData,     yData10)
+                    self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
+                    self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
                                         
-                    self.axis[2].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Time'])
-                    self.axis[2].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlim(self.limits['Time'])
                  except:
-                    self.lines[0][i][0].set_data(-1,0)
-                    self.lines[1][i][0].set_data(-1,0)
+                    self.lines[i]['axis1']['-'].set_data(-1,0)
+                    self.lines[i]['axis2']['-'].set_data(-1,0)
             
             elif self.axisX == "Space":
                 try:                     
@@ -503,7 +608,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Asol = vascularNetwork.vessels[vesselId].Asol[gridNode]   
                     csol = vascularNetwork.vessels[vesselId].csol[gridNode]  
                     
-                    Psol_f, Psol_b, Qsol_f, Qsol_b = linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
                     yData00 = Psol / 133.32
                     yData01 = Psol_f / 133.32
@@ -513,33 +618,30 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData12 = Qsol_b * 1.e6  
                     
                     xData = np.linspace(0, vascularNetwork.vessels[vesselId].length, len(yData00)) * 100.
-                    print len(xData)
                     
-                    self.lines[0][i][0].set_data(xData,     yData00)
-                    self.lines[0][i][1].set_data(xData[1:], yData01)
-                    self.lines[0][i][2].set_data(xData[1:], yData02)
+                    self.lines[i]['axis1']['-'].set_data(xData,     yData00)
+                    self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
+                    self.lines[i]['axis1Twin'][':'].set_data(xData[1:], yData02)
                     
-                    self.lines[1][i][0].set_data(xData,     yData10)
-                    self.lines[1][i][1].set_data(xData[1:], yData11)
-                    self.lines[1][i][2].set_data(xData[1:], yData12)
+                    self.lines[i]['axis2']['-'].set_data(xData,     yData10)
+                    self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
+                    self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
                                         
-                    self.axis[2].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Space'])
-                    self.axis[2].set_xlim(self.limits['Space']) 
+                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Space'])
+                    self.axis['axis2'].set_xlim(self.limits['Space']) 
                                  
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
                     
         
-        self.axis[0].set_ylim(self.limits['P'])
-        self.axis[2].set_ylim(self.limits['Q'])
+        self.axis['axis1'].set_ylim(self.limits['P'])
+        self.axis['axis2'].set_ylim(self.limits['Q'])
         
-        self.axis[1].set_ylim(self.limits['Pfb'])
-        self.axis[3].set_ylim(self.limits['Qfb'])
+        self.axis['axis1Twin'].set_ylim(self.limits['Pfb'])
+        self.axis['axis2Twin'].set_ylim(self.limits['Qfb'])
         
-        
-        self.updatePlotWindow()
     
     def updateLinesPQspliNonLin(self):
         pass
@@ -547,8 +649,8 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
     def updateLinesWaveCFL(self):
         gridNode = self.sliderValue
         # 1. set axis lable
-        self.axis[0].set_ylabel('Wave Speed $m/s$', fontsize=self.fontSizeLabel)
-        self.axis[2].set_ylabel('CFL $-$' + self.unitFtext, fontsize=self.fontSizeLabel)
+        self.axis['axis1'].set_ylabel('Wave Speed $m/s$', fontsize=self.fontSizeLabel)
+        self.axis['axis2'].set_ylabel('CFL $-$' + self.unitFtext, fontsize=self.fontSizeLabel)
         
         for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
@@ -562,15 +664,15 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     xData = vascularNetwork.simulationTime
                     
-                    self.lines[0][i][0].set_data(xData, yData00)
-                    self.lines[1][i][0].set_data(xData, ydata10)
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    self.lines[i]['axis2']['-'].set_data(xData, ydata10)
                     
-                    self.axis[2].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Time'])
-                    self.axis[2].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlim(self.limits['Time'])
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
             
             elif self.axisX == "Space":
                 try: 
@@ -585,26 +687,25 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     print yData00, xData
                     
-                    self.lines[0][i][0].set_data(xData, yData00)
-                    self.lines[1][i][0].set_data(xData, ydata10)      
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
                     
-                    self.axis[2].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Space'])
-                    self.axis[2].set_xlim(self.limits['Space'])     
+                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Space'])
+                    self.axis['axis2'].set_xlim(self.limits['Space'])     
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
         
-        self.axis[0].set_ylim(self.limits['c'])
-        self.axis[2].set_ylim(self.limits['CFL'])
+        self.axis['axis1'].set_ylim(self.limits['c'])
+        self.axis['axis2'].set_ylim(self.limits['CFL'])
         
-        self.updatePlotWindow()
     
     def updateLinesAreaComp(self):
         gridNode = self.sliderValue
         # 1. set axis lable
-        self.axis[0].set_ylabel('Area $mm^2$', fontsize=self.fontSizeLabel)
-        self.axis[2].set_ylabel('Compliance $mm^2/mmHg$', fontsize=self.fontSizeLabel)
+        self.axis['axis1'].set_ylabel('Area $mm^2$', fontsize=self.fontSizeLabel)
+        self.axis['axis2'].set_ylabel('Compliance $mm^2/mmHg$', fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
         
         for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
@@ -617,15 +718,15 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     xData = vascularNetwork.simulationTime
                     
-                    self.lines[0][i][0].set_data(xData, yData00)
-                    self.lines[1][i][0].set_data(xData, ydata10)
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    self.lines[i]['axis2']['-'].set_data(xData, ydata10)
                     
-                    self.axis[2].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Time'])
-                    self.axis[2].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlim(self.limits['Time'])
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
             
             elif self.axisX == "Space":
                 try: 
@@ -635,36 +736,43 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     xData = np.linspace(0, vascularNetwork.vessels[vesselId].length, len(yData00)) * 100.
                     
-                    self.lines[0][i][0].set_data(xData, yData00)
-                    self.lines[1][i][0].set_data(xData, ydata10)      
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
                     
-                    self.axis[2].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
-                    self.axis[0].set_xlim(self.limits['Space'])
-                    self.axis[2].set_xlim(self.limits['Space'])              
+                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Space'])
+                    self.axis['axis2'].set_xlim(self.limits['Space'])              
                 except:
-                    self.lines[0][i][0].set_data(-1, 0)
-                    self.lines[1][i][0].set_data(-1, 0)
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
         
-        self.axis[0].set_ylim(self.limits['A'])
-        self.axis[2].set_ylim(self.limits['C'])
+        self.axis['axis1'].set_ylim(self.limits['A'])
+        self.axis['axis2'].set_ylim(self.limits['C'])
         
-        self.updatePlotWindow()
         
     def updateGravity(self):
         '''
         creates a plot of gravity in the first sub plot
         '''
         
-    def on_changeLimits(self, widget):
+    def updatePoints(self):
         '''
-        create window to change plot limits
+        plot min and max points of all current lines
         '''
-        if self.limitsWindow == None:
-            self.limitsWindow = Visualisation2DPlotWindowAdjustValues(self,'limits',self.limits,self.limitsInit)    
-        else:
-            self.limitsWindow.destroy()
-        self.plot()
-                  
+        # 1 find out current visible lines
+        for caseId,axisDict in self.lines.iteritems():
+            for axis,lineDict in axisDict.iteritems():
+                for linestyle,line in lineDict.iteritems():
+                    
+                    xData = line.get_xdata()
+                    if len(xData) != 1:
+                        # if toggled add points if "untoggled" remove points
+                        # 2 find min and max points for all current lines
+                        currentName = ' '.join([str(caseId),axis,linestyle])
+                        minMaxPoints = proc.minMaxFunction(line.get_ydata(), xData, delta = self.deltas[currentName][0])
+                        # 3 plot all min and max points for current lines
+                        self.points[caseId][axis][linestyle].set_data(minMaxPoints[1], minMaxPoints[0])
+        
     def estimatePlotLimits(self):
         '''
         This function evaluates all limits for the plots
@@ -729,7 +837,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.limits[limit] = [0, max([self.limits[limit][1], np.max(sol)])]
             # pressure / flow,  forward backward
             for n in xrange(int(vascularNetwork.vessels[vesselId].N)):
-                pf,pb,qf,qb =  linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
+                pf,pb,qf,qb =  proc.linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
                 
                 limit = 'Pf'
                 sol = pf/133.32
@@ -752,11 +860,23 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 
                 limit = 'Qfb'
                 self.limits[limit] = [min([self.limits[limit][0], np.min(qf*1.e6), np.min(qb*1.e6)]), max([self.limits[limit][1], np.max(qf*1.e6), np.max(qb*1.e6)])]
+            
+            if self.selectedExternalData != None:
+                try:
+                    # pressure
+                    limit = 'P'
+                    sol = self.selectedExternalData['SolutionData'][vesselId]['Pressure']
+                    self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]), max([self.limits[limit][1], np.max(sol)])]
+                except: pass
+                try:
+                    # flow
+                    limit = 'Q'
+                    sol = self.selectedExternalData['SolutionData'][vesselId]['Flow']
+                    self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]), max([self.limits[limit][1], np.max(sol)])]
+                except: pass
+                self.limits['external time shift'] = [0]
                 
         self.limitsInit = copy(self.limits)
-            
-            
-            
         
     # callback function
     def on_changePlotXaxis(self, widget):   
@@ -780,7 +900,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.buttonRenderMovie.set_sensitive(True)
             self.scale.set_range(0, len(self.selectedNetworks[0].simulationTime) - 1)   
             
-        self.plot()
+        self.updatePlotWindow()
         
 
     def on_changedSlider(self, widget):
@@ -793,13 +913,14 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         elif self.axisX == 'Space':
             NodeValue = str(self.selectedNetworks[0].simulationTime[self.sliderValue][0])
             self.nodeLabel.set_text(' '.join(['Time ', str(NodeValue)[:6]]))
-        self.plot()
+        
+        self.updatePlotWindow()
         
     def on_changePlotType(self, widget):
         '''
         call function of the combobox to choose type of plot
         '''
-        self.clearLines()
+        self.clearPlotWindow()
         cbIndex = widget.get_active()
         if   cbIndex == 0:
             self.plot = self.updateLinesPQ
@@ -811,8 +932,55 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.plot = self.updateLinesWaveCFL
         elif cbIndex == 4:
             self.plot = self.updateLinesAreaComp
-        
         self.plot()
+        
+    def on_changedPlotMinMax(self, widget):
+        if widget.get_active():
+            self.updatePlotWindow()
+        else:
+            self.clearPlotWindow(lines = False)
+            try: self.deltasWindow.destroy()
+            except: pass
+            self.deltasWindow = None
+                    
+    def on_changeDeltas(self, widget):
+        pass
+        '''
+        create widnow to change the deltas for the min max function
+        '''        
+        if widget.get_active() and self.buttonMinMaxPoints.get_active():
+            self.deltasWindow = Visualisation2DPlotWindowAdjustValues(self,'deltas',self.deltas,self.deltasInit)    
+        else:
+            try: self.deltasWindow.destroy()
+            except: pass
+            self.deltasWindow = None
+            widget.set_active(False)
+         
+        self.updatePlotWindow()
+        
+    def on_changeLimits(self, widget):
+        '''
+        create window to change plot limits
+        '''
+        if widget.get_active():
+            self.limitsWindow = Visualisation2DPlotWindowAdjustValues(self,'limits',self.limits,self.limitsInit)    
+        else:
+            self.limitsWindow.destroy()
+            self.limitsWindow = None
+        
+        self.updatePlotWindow()
+        
+    def on_changeLables(self, widget):
+        '''
+        create window to change plot limits
+        '''
+        if widget.get_active():
+            self.lablesWindow = Visualisation2DPlotWindowAdjustValues(self,'lables',self.lables,self.lablesInit)    
+        else:
+            self.lablesWindow.destroy()
+            self.lablesWindow = None
+        
+        self.updatePlotWindow()
         
 class Visualisation2DMainCase(object):
     def __init__(self, number):
@@ -1069,23 +1237,36 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         # # check out selected networks and ids
         selectedNetworks = []
         selectedVesselIds = []
+        selectedCases = []
+        selectedCaseNames = []
         for case in self.cases:
             currentNetwork = case.currentNetwork
             currentVesselId = case.currentVesselId
             if currentNetwork != "choose simulation case":
                 if currentVesselId:
-                    currentVesselId = int(currentVesselId.split('-')[0])
-                    if currentVesselId not in selectedVesselIds:
+                    currentVesselId = int(currentVesselId.split('-')[0])                    
+                    # check if it is not already in cases
+                    if len(selectedCases) == 0:
                         selectedNetworks.append(self.networks[currentNetwork])
                         selectedVesselIds.append(currentVesselId)
+                        selectedCases.append([currentNetwork,currentVesselId])
+                        selectedCaseNames.append(' '.join([' '.join(currentNetwork.split('_')),'vessel',str(currentVesselId)]))
+                    else:
+                        for case in selectedCases:
+                            if currentNetwork != case[0] or currentVesselId != case[1]:
+                                selectedNetworks.append(self.networks[currentNetwork])
+                                selectedVesselIds.append(currentVesselId)
+                                selectedCases.append([currentNetwork,currentVesselId])
+                                selectedCaseNames.append(' '.join([' '.join(currentNetwork.split('_')),'vessel',str(currentVesselId)]))
+                                                
         # # check selected external data
         selectedExternalData = None
         if self.buttonEnableExternalData.get_active() == True:
-            print " oh yes and i will plot external data if given"
             selectedExternalData = self.externalData
+                                    
         # # open plot window        
         if selectedNetworks != []:
-            Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData)
+            Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
     def loadVascularNetwork(self, networkName, dataNumber):
         '''

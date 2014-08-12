@@ -39,7 +39,6 @@ class VascularNetwork(object):
         #  'X1: [0, 45, 90]} ## <- correspond to 90 degree change of angleXtoMother of vessel 1        
         self.motionAngles   = {}
         
-        
         # gravity controls
         self.gravitationalField = True  # bool, turn gravity on or off
         self.gravityConstant    = -9.81 # earth gravity
