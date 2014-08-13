@@ -30,16 +30,34 @@ from copy import deepcopy as copy
 
 class Visualisation2DPlotWindowAdjustValues(gtk.Window):
     
-    def __init__(self, parent, variableName, actualValuesDict, inititalValuesDict):
+    def __init__(self, parent, dictVariableName, actualValuesDict, inititalValuesDict, variableTypes = None, variableFixedChoice = None):
+        '''
+        creates a window to update data written in a dictionary:
+        
+        dictVariableName    := <str> name of the dictionary in the parent class (used to update dict)
+        actualValuesDict    := <dict> containing the data to be updated form {'variableName': [ item, item ...]}
+        inititalValuesDict  := <dict> as actualValuesDict with initial values to reset initial values
+        variableTypes       := <dict> as actualValuesDict but indicating the type of the variable which is used with e.g. 'str'
+        variableFixedChoice := <dict> as actualValuesDict prescribe a fixed option for some variables, e.g. {'variableName': [ ['-',':'], ..]}
+        
+        for each item of each variable in the dictionary an entry element is created,
+        if no type is defined (i.e. variableTypes == None) the variable is converted to float
+        if a variableFixedChoice is defined for the variable a comboBox is created instead of a entry
+        
+        '''
+        
+        
         super(Visualisation2DPlotWindowAdjustValues, self).__init__()
         
         self.set_resizable(False)
         #self.set_position(gtk.WIN_POS_CENTER)
                                 
-        self.parentWindow       = parent
-        self.variableName       = variableName
-        self.inititalValuesDict = copy(inititalValuesDict)
-        self.actualValuesDict   = actualValuesDict
+        self.parentWindow        = parent
+        self.dictVariableName    = dictVariableName
+        self.inititalValuesDict  = copy(inititalValuesDict)
+        self.actualValuesDict    = actualValuesDict
+        self.variableTypes       = variableTypes
+        self.variableFixedChoice = variableFixedChoice
         
         vbox = gtk.VBox(False, 1)
                
@@ -56,7 +74,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
         hbox.pack_start(buttonReset, fill=False, expand=True)   
         vbox.pack_start(hbox, expand=True, fill=False)
                 
-        self.entries = {}
+        self.entriesCombo = {}
         
         countHeight = 1
         countWidth = 1
@@ -67,19 +85,27 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
             hbox = gtk.HBox(False, 10) 
             label = gtk.Label(key)
             hbox.pack_start(label, fill=False, expand=True)     
-            self.entries[key] = []
+            self.entriesCombo[key] = []
             
             countHeight = countHeight +1
             
             values = actualValuesDict[key]
             countWidth  = max(countWidth,len(values))
-            for value in values:
-                entry = gtk.Entry()
-                entry.set_size_request(120,20)
-                entry.add_events(gtk.gdk.KEY_RELEASE_MASK)
-                entry.set_text(str(value))
+            for index,value in enumerate(values):
+                #try to set up a combo box if defined 
+                # if not create a text entry field
+                try: 
+                    comboChoices = self.variableFixedChoice[key][index]
+                    entry = gtk.combo_box_entry_new_text()
+                
+                except:
+                    entry = gtk.Entry()
+                    entry.set_size_request(120,20)
+                    entry.add_events(gtk.gdk.KEY_RELEASE_MASK)
+                    entry.set_text(str(value))
+                
                 hbox.pack_start(entry, fill=False, expand=False)  
-                self.entries[key].append(entry)   
+                self.entriesCombo[key].append(entry)   
                 
             vbox.pack_start(hbox, expand=True, fill=False)
             
@@ -91,22 +117,32 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
         self.show_all()
         
     def on_clickedUpdate(self, widget):
-        for key, entries in self.entries.iteritems():
+        '''
+        update dictionary from data 
+        written in entriesCombo and choosen from comboboxes
+        '''
+        for key, entries in self.entriesCombo.iteritems():
             for entry in entries:
                 text = entry.get_text()
                 index = entries.index(entry)
                 if text is not '':
-                    try: self.actualValuesDict[key][index] = float(text)
-                    except: print "WARNING: insert float please and not :",text
-        self.parentWindow.update({self.variableName:self.actualValuesDict})
+                    try: type = self.variableTypes[key][index]
+                    except: type = 'float'
+                    try: self.actualValuesDict[key][index] = eval(type)(text)
+                    except: print """WARNING: could not convert "{}" to "{}" """.format(text,type)
+                    
+        self.parentWindow.update({self.dictVariableName:self.actualValuesDict})
         self.parentWindow.updatePlotWindow()
         
     def on_clickedReset(self, widget):
-        for key, entries in self.entries.iteritems():
+        '''
+        Reset entriesCombo and and comboBoxes to entriesCombo of the beginning
+        '''
+        for key, entries in self.entriesCombo.iteritems():
             for entry,i in zip(entries,xrange(len(entries))):
                 value = self.inititalValuesDict[key][i]
                 entry.set_text(str(value))
-        self.parentWindow.update({self.variableName: copy(self.inititalValuesDict)})
+        self.parentWindow.update({self.dictVariableName: copy(self.inititalValuesDict)})
         self.parentWindow.updatePlotWindow()
 
 class Visualisation2DPlotWindowGui(gtk.Window):
@@ -127,7 +163,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         
         # # image legend
         self.cBlegend = gtk.CheckButton("show legend")
-        # cBlegend.connect("toggled", self.on_changedLegendBool)
+        self.cBlegend.connect("toggled", self.on_changedLegend)
         self.cBlegend.set_size_request(120, 30)
                 
         # medical units
@@ -205,13 +241,14 @@ class Visualisation2DPlotWindowGui(gtk.Window):
                 
         # Checkbutton series
         hboxLegend.pack_start(self.cBlegend)
+        hboxLegend.pack_start(buttonLables)
         hboxLegend.pack_start(cBdescription)
-        hboxLegend.pack_start(buttonLimits)
+        
         # hboxLegend.pack_start(cBmedical)
         hboxLegend.pack_start(self.buttonRenderMovie)
         hboxCheckboxes2.pack_start(self.buttonMinMaxPoints)
         hboxCheckboxes2.pack_start(buttonDeltas)
-        hboxCheckboxes2.pack_start(buttonLables)        
+        hboxCheckboxes2.pack_start(buttonLimits)        
 
         # align pictures canvas
         alignIm = gtk.Alignment(0, 1 , 1, 0)
@@ -256,6 +293,9 @@ class Visualisation2DPlotWindowGui(gtk.Window):
     def on_changeDeltas(self,widget):
         pass
     
+    def on_changedLegend(self,widget):
+        pass
+    
     def on_changeLables(self,widget):
         pass
                 
@@ -280,9 +320,11 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.lines = {}
         self.points = {}
         
+        self.legend       = None
         self.lablesWindow = None
-        self.lables     = {}
-        self.lablesInit = {}
+        self.lables       = {}
+        self.lablesInit   = {}
+        self.lablesTypes  = {}
         
         # # initialize super class
         super(Visualisation2DPlotWindow, self).__init__()
@@ -313,7 +355,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
     def update(self, visualisationData):
         '''
         updates the vascularNetwork data using a dictionary in form of 
-        visualisationData = {'variableName': value}
+        visualisationData = {'dictVariableName': value}
         '''
         for key,value in visualisationData.iteritems():
             try:
@@ -331,7 +373,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.fig.subplots_adjust(right=0.86)
         self.fig.subplots_adjust(left=0.17)
         self.fig.subplots_adjust(top=0.95)
-        self.fig.subplots_adjust(bottom=0.15)
+        self.fig.subplots_adjust(bottom=0.35)
         self.fig.subplots_adjust(hspace=0.18)
         
         fontLegend = FontProperties()
@@ -359,7 +401,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         ax1.spines['top'].set_visible(False)
         ax1.spines['right'].set_visible(False)
         ax1.tick_params(axis='y', right='off')
-        
+                
         #plt.yticks(np.linspace(ax12.get_xlim()[0], ax12.get_xlim()[1], 2), ['', '']) 
                 
         ax2 = plt.subplot(2, 1, 2, frameon=True)
@@ -376,9 +418,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         #plt.yticks(np.linspace(ax22.get_xlim()[0], ax22.get_xlim()[1], 2), ['', '']) 
                            
         self.axis = {'axis1':ax1,'axis1Twin':ax12, 'axis2':ax2,'axis2Twin':ax22}
-        self.lines = {}
-        self.points = {}
-        self.lables = {}
+        
         # # add 3 lines for each network case to each subplot
         colors = ['b', 'r', 'm', 'g', 'c']
         linestyles = {'axis1': ['-'],'axis1Twin': ['--',':'], 'axis2': ['-'], 'axis2Twin':['--',':']}
@@ -387,6 +427,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         # lines  = dict[caseId][axis][linestyle]
         # points = dict[caseId][axis][linestyle] ## here the linestyle define the according line only
         for caseId in xrange(len(self.selectedVesselIds)):
+            print 'self.selectedVesselIds', self.selectedVesselIds
             # create dictionaies accroding to current defined axis
             self.lines[caseId]  = {key: {} for key in self.axis.keys()}
             self.points[caseId] = {key: {} for key in self.axis.keys()}
@@ -401,6 +442,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     else:
                         self.lables[currentName]     = ['']
                         self.lablesInit[currentName] = ['']
+                    self.lablesTypes[currentName] = ['str'] 
                     self.deltas[currentName]     = [0.025]
                     self.deltasInit[currentName] = [0.025]
                     
@@ -408,7 +450,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                                                            color=colors[caseId],
                                                                            linestyle = linestyle,
                                                                            linewidth = self.linewidth,
-                                                                           label = self.lables[currentName][0])[0]
+                                                                           label = currentName)[0]
                     self.points[caseId][axis][linestyle] = self.axis[axis].plot( -1, 0,
                                                                            color=colors[caseId],
                                                                            linestyle = '',
@@ -440,8 +482,11 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.deltas['external axis1 -'] = [0.025]
             self.deltas['external axis2 -'] = [0.025]
         
+        # create legend
+        self.updateLegend()
+        self.legend.set_visible(False)
                     
-    def clearPlotWindow(self, lines = True, points = True):
+    def clearPlotWindow(self, lines = True, points = True, lables = False):
         '''
         set all line data to single point at (-1, 0) out of the view field
         '''
@@ -457,6 +502,9 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                         for point in self.points[caseId][axis].itervalues():
                             point.set_data([-1], [0])
                     except: pass
+                if lables:
+                    currentName = ' '.join([str(caseId),axis,linestyle])
+                    self.lables[currentName] = '' 
                                    
         self.canvas.figure = self.fig
         self.fig.set_canvas(self.canvas)
@@ -472,23 +520,36 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.updatePoints()
             
         if self.cBlegend.get_active():
-            self.updateLables()
-            for axis in self.axis.itervalues():
-                try:    axis.legend(frameon=False, ncol=1)
-                except: pass
+            self.updateLegend()
+            try:  self.legend.set_visible(True)
+            except: pass
+        else:
+            try:  self.legend.set_visible(False)
+            except: pass
             
         self.canvas.figure = self.fig
         self.fig.set_canvas(self.canvas)
         self.canvas.queue_resize()        
                 
-    def updateLables(self):
+    def updateLegend(self):
+        '''
+        Stores the lables of the lines in the legend
+        '''
+        handles = []
+        lables  = []
+        for axis in self.axis.itervalues():
+            ha,la = axis.get_legend_handles_labels()
+            for currentAxis,currentLine in zip(ha,la):
+                lable = self.lables[currentLine][0]
+                if lable != '':
+                    lables.append(lable)
+                    handles.append(currentAxis)
+        try:  
+            self.legend.set_visible(False)
+            self.legend.remove()   
+        except: pass
+        self.legend = self.fig.legend(handles,lables, loc=3, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
         
-        for caseId,axisDict in self.lines.iteritems():
-            for axis,lineDict in axisDict.iteritems():
-                for linestyle, line in lineDict.iteritems():
-                    currentName = ' '.join([str(caseId),axis,linestyle])
-                    line.lable = self.lables[currentName][0]
-                
     def updateLinesPQ(self):
         '''
         create line plot with P in the first axis and Q the second axis
@@ -970,12 +1031,19 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         
         self.updatePlotWindow()
         
+    def on_changedLegend(self,widget):
+        '''
+        activate legend and deactivate it
+        '''
+        self.updatePlotWindow()
+            
+        
     def on_changeLables(self, widget):
         '''
         create window to change plot limits
         '''
         if widget.get_active():
-            self.lablesWindow = Visualisation2DPlotWindowAdjustValues(self,'lables',self.lables,self.lablesInit)    
+            self.lablesWindow = Visualisation2DPlotWindowAdjustValues(self,'lables',self.lables,self.lablesInit,self.lablesTypes)    
         else:
             self.lablesWindow.destroy()
             self.lablesWindow = None
@@ -1034,7 +1102,7 @@ class Visualisation2DMainCase(object):
         
     def updateVesselComboBox(self):
         '''
-        Update the comboBox entries with vessel ids
+        Update the comboBox entriesCombo with vessel ids
         '''
         self.comboBoxVessels.get_model().clear()
         self.comboBoxVessels.append_text("choose vessel")
@@ -1044,7 +1112,7 @@ class Visualisation2DMainCase(object):
                         
     def updateNetworkComboBox(self, networkCases, networkInfo):
         '''
-        update the comboBox entries if available network names 
+        update the comboBox entriesCombo if available network names 
         have changed
         '''
         self.networkCases = networkCases
@@ -1246,19 +1314,17 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                 if currentVesselId:
                     currentVesselId = int(currentVesselId.split('-')[0])                    
                     # check if it is not already in cases
-                    if len(selectedCases) == 0:
+                    add = True
+                    if len(selectedCases) > 0:
+                        for case in selectedCases:
+                            if currentNetwork == case[0] and currentVesselId == case[1]:
+                                add = False
+                    if add == True:
                         selectedNetworks.append(self.networks[currentNetwork])
                         selectedVesselIds.append(currentVesselId)
                         selectedCases.append([currentNetwork,currentVesselId])
                         selectedCaseNames.append(' '.join([' '.join(currentNetwork.split('_')),'vessel',str(currentVesselId)]))
-                    else:
-                        for case in selectedCases:
-                            if currentNetwork != case[0] or currentVesselId != case[1]:
-                                selectedNetworks.append(self.networks[currentNetwork])
-                                selectedVesselIds.append(currentVesselId)
-                                selectedCases.append([currentNetwork,currentVesselId])
-                                selectedCaseNames.append(' '.join([' '.join(currentNetwork.split('_')),'vessel',str(currentVesselId)]))
-                                                
+                                        
         # # check selected external data
         selectedExternalData = None
         if self.buttonEnableExternalData.get_active() == True:

@@ -1246,7 +1246,7 @@ class VascularNetwork(object):
         '''
         
         if n == 0:
-            self.vessels[self.root].angleXMother = 0#45*np.pi/180.
+            self.vessels[self.root].angleXMother = 90.*np.pi/180.
             self.vessels[self.root].angleYMother = 0#45*np.pi/180.
             self.vessels[self.root].angleZMother = 0#45*np.pi/180.
                                 
