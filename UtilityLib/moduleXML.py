@@ -175,6 +175,9 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
     
     return converted evaluated value of variable
     '''
+    
+    polynomialChaosDistributions = ['Uniform','Normal'] # need to be moved and changed to networkXML files
+    
     multiVariable = False
     variableValue = 'notConvertable'
     convertError = []

@@ -73,7 +73,7 @@ class Visualisation3DGUI(pyglet.window.Window):
                         
         self.set_maximum_size(screen.width, screen.height)
         self.set_minimum_size(self.width, self.height)
-                     
+                                          
         self.keys = key.KeyStateHandler()
         self.push_handlers(self.keys)
         
@@ -194,8 +194,13 @@ class Visualisation3DGUI(pyglet.window.Window):
         return pyglet.event.EVENT_HANDLED
     
     def resizeWindow(self,dx,dy):
-        print "new size", self.width+dx, self.height-dy
-        self.set_size(self.width+dx, self.height-dy) 
+        addx = 2
+        if dx < 0: addx = -2
+        addy = 2
+        if dy < 0: addy = -2
+        print "new size", self.width+addx, self.height-addy
+        
+        self.set_size(self.width+addx, self.height-addy) 
         
     def drawPlane(self):
         self.planeZ = -0.25
@@ -404,16 +409,13 @@ class Visualisation3DGUI(pyglet.window.Window):
         self.zoomInAndOut(0,-scroll_y)
         
     def on_key_press(self,symbol, modifiers):
-        
-        
+                
         #### start stop simulation visualisation
         if symbol == key.P:
             self.startVisualisation()
         elif symbol == key.O:
             self.resetVisualisationAndPause()
-        
-        
-                            
+                                    
         #### visualisation speed
         elif symbol == key.H:
             self.visualisationSpeedHalfTime()
@@ -423,6 +425,10 @@ class Visualisation3DGUI(pyglet.window.Window):
             self.visualisationSpeedUp()
         elif symbol == key.MINUS:
             self.visualisationSpeedDown()
+            
+        ### visualisation time
+        elif symbol == key.T:
+            self.setVisualisationStartEndTime()
             
         #### look up table stuff
         elif symbol == key.L:
@@ -444,6 +450,9 @@ class Visualisation3DGUI(pyglet.window.Window):
         elif symbol == key.M:
             self.recordMovie()
             
+        elif symbol == key.N:
+            self.recordMovie(oneCycle = True)
+            
         elif symbol == key.S:
             self.saveScreenShot()
         
@@ -452,6 +461,7 @@ class Visualisation3DGUI(pyglet.window.Window):
                     
         elif symbol == key.B:
             self.changeBackgroundColor()
+            
                    
         ## view 
         elif symbol == key._1 :
@@ -477,6 +487,7 @@ class Visualisation3DGUI(pyglet.window.Window):
             self.rotate(-4,0)
             
             
+            
     def on_close(self):
         self.cLUT.windowLUT.switch_to()
         pyglet.app.exit()
@@ -496,12 +507,7 @@ class Visualisation3DGUI(pyglet.window.Window):
             self.simulationRunning = True
     
     def resetVisualisationAndPause(self):
-        if self.simulationRunning : self.startVisualisation()
-        self.timeStepCurrent = 0
-        self.updateVisualisation(self.updateTime)
-        self.timeStepCurrent = 0
-        self.switch_to()
-        self.on_draw()
+        pass
         
         
     def updateVisualisation(self,dt):
@@ -526,6 +532,9 @@ class Visualisation3DGUI(pyglet.window.Window):
     def changeColorTable(self):       
         pass
     
+    def setVisualisationStartEndTime(self):
+        pass
+    
     ### area / vessel wall
     def enableWallMovement(self):
         pass
@@ -544,7 +553,7 @@ class Visualisation3DGUI(pyglet.window.Window):
         pass
     
     ### record save movie screenshot
-    def recordMovie(self):
+    def recordMovie(self, oneCycle = False):
         pass
 
     def saveScreenShot(self):
@@ -616,31 +625,32 @@ class Visualisation3D(Visualisation3DGUI):
         self.waveSplit = [False] # us an array as it is behaving like a pointer
         
         # simulation timing and update 
-        self.updateTime = 1./60.
-        self.totalTime = 0
+        self.updateTime         = 1./60.
+        self.totalTime          = 0
         self.timeStepsTotal     = 50 # get this from solution length e.g. len(area)
         self.timeStepCurrent    = 0
         self.timeStepIncrement  = 1 # time step increment from [1, ... self.totalTimeSteps-1 ]
+        self.timeStepStart      = 0
+        self.timeStepStop       = 50
                 
         ## create movie
         self.recordMovieData = False
         self.movieCount = 0
-        self.movieCount = 0
+        self.oneCycle = False
         
         self.templateMovDataDirectory = ''.join([cur,'/.movieTemplateData'])
         self.movieSaveDirectory = ''.join([cur+'/Movies'])
         try: os.mkdir(self.movieSaveDirectory)
         except: pass
-        self.movieNumber = 0
-        self.movieFileType = '.mp4'
+        self.movieNumber    = 0
+        self.movieFileType  = '.mp4'
         
         ## create screen shot
-        self.screenShotNumber = 0 
+        self.screenShotNumber        = 0 
         self.screenShotDataDirectory = ''.join([cur,'/screenShots'])
                 
         self.initialzeVisualisation()
-        
-    
+      
     #--- functions for initialisation
     def initialzeVisualisation(self):
         '''
@@ -732,19 +742,36 @@ class Visualisation3D(Visualisation3DGUI):
         
         # update the time step for next call
         self.timeStepCurrent = self.timeStepCurrent+self.timeStepIncrement
-        # restart simulation if end reached
-        if self.timeStepCurrent >= self.timeStepsTotal:
-            self.timeStepCurrent = 0
-            self.timeElapsed = 0
         
+        # restart simulation if end reached
+        if self.timeStepCurrent >= self.timeStepStop:
+            print self.timeStepCurrent+self.timeStepIncrement
+            self.timeStepCurrent = self.timeStepStart
+            if self.oneCycle: self.recordMovie()
+            
         # record movie data
         if self.recordMovieData == True:
             ## save screenshots
             self.switch_to()
-            pyglet.image.get_buffer_manager().get_color_buffer().save(''.join([self.templateMovDataDirectory,'/.screenShot',str(self.movieCount),'.png']))
+            pyglet.image.get_buffer_manager().get_color_buffer().save(''.join([self.templateMovDataDirectory,'/.screenShot',str(self.movieCount).zfill(4),'.png']))
+            
+            print ''.join([self.templateMovDataDirectory,'/.screenShot',str(self.movieCount).zfill(4),'.png'])
             self.movieCount = self.movieCount + 1 
+    
+    def resetVisualisationAndPause(self):
+        '''
+        reset the visualisation to the start 
+        and stop it if it is running
+        '''
+        if self.simulationRunning : self.startVisualisation()
+        self.timeStepCurrent = self.timeStepStart
+        self.updateVisualisation(self.updateTime)
+        self.timeStepCurrent = self.timeStepStart
+        self.switch_to()
+        self.on_draw()
+    
         
-    def recordMovie(self):
+    def recordMovie(self, oneCycle = False):
         '''
         start end end recording movies
         '''
@@ -754,15 +781,23 @@ class Visualisation3D(Visualisation3DGUI):
             try: os.mkdir(self.templateMovDataDirectory)
             except: pass
             
-            self.movieCount = 0
+            self.movieCount      = 0
             self.recordMovieData = True
             
+            self.oneCycle = oneCycle
+            if oneCycle:
+                print " create movie for one cylce"
+                self.resetVisualisationAndPause()
+                self.startVisualisation()
+                
         else: # create movie out of recorded data 
             self.recordMovieData = False
             self.createMovie()
             filelist = [ f for f in os.listdir(self.templateMovDataDirectory) if  f.endswith(".png")]
             for f in filelist:
                 os.remove(''.join([self.templateMovDataDirectory,'/',f]))
+        
+            self.oneCycle = False
         
     def saveScreenShot(self):
         '''
@@ -781,33 +816,57 @@ class Visualisation3D(Visualisation3DGUI):
         '''
         print "createMovie(): writing image data"
         
-        frameSizeImage = read_png(''.join([self.templateMovDataDirectory,'/.screenShot',str(0),'.png']))
+        frameSizeImage = read_png(''.join([self.templateMovDataDirectory,'/.screenShot0000.png']))
         frameSize = (np.shape(frameSizeImage)[1],np.shape(frameSizeImage)[0])
         
         try:   FFMpegWriter = animation.writers['mencoder']
         except: print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
-                        
-        try:
-            fileName = ''.join([self.movieSaveDirectory,'/',self.networkName,'_',str(self.movieNumber),self.movieFileType])
-            imageName = ''.join(['mf://',self.templateMovDataDirectory,'/.screenShot%d.png'])
-            imageType = ''.join(['type=png:w=',str(frameSize[0]),':h=',str(frameSize[1]),':fps=24'])
-            command = ('mencoder',
-                       imageName,
-                       '-mf',
-                       imageType,
-                       '-ovc',
-                       'lavc',
-                       '-lavcopts',
-                       'vcodec=mpeg4',
-                       '-oac',
-                       'copy',
-                       '-o',
-                       fileName)
-            os.spawnvp(os.P_WAIT, 'mencoder', command)
+                      
+        if True:              
+        #try:
+#         ## mencoder is not used that maintainanced a lot -> no apple compatibility ...
+#             fileName = ''.join([self.movieSaveDirectory,'/',self.networkName,'_',str(self.movieNumber),self.movieFileType])
+#             imageName = ''.join(['mf://',self.templateMovDataDirectory,'/.screenShot%04d.png']) 
+#             imageType = ''.join(['type=png:fps=24']) #:w=',str(frameSize[0]),':h=',str(frameSize[1]),'
+#                         
+#             command = ('mencoder', imageName,
+#                        '-mf', imageType,
+#                        '-ovc', 'lavc',
+#                        '-lavcopts', 'vcodec=mpeg4',
+#                        #'-vf', videoSize,
+#                        '-oac', 'copy',
+#                        '-ofps', '24',
+#                        '-o', fileName)
+#             
+#             os.spawnvp(os.P_WAIT, 'mencoder', command)
+#             
+#             #ffmpeg -f lavfi -i nullsrc -c:v libx264 -preset help -f mp4 
+#             #-c:v libx264 -preset veryslow -qp 0 output.mp4
+            
+            imageNameFFmpg = ''.join([self.templateMovDataDirectory,'/.screenShot%04d.png']) 
+            fileNameFFMpg = ''.join([self.movieSaveDirectory,'/',self.networkName,'_macComp_',str(self.movieNumber),self.movieFileType])
+            commandFFmpg = ('ffmpeg',
+                            '-r', str(1./self.updateTime) ,
+                            '-i', imageNameFFmpg,
+                            '-c:v', 'libx264',
+                            '-crf','1', 
+                            '-preset', 'slow', #'veryslow', higher quality not for mac
+                            '-r','24', # outputFramerate
+                            '-pix_fmt','yuv420p',
+                            #'-qp', '0', #higher quality not for mac
+                            '-profile:v', 'baseline', # mac compatibility
+                             '-level', '3.0', # mac compatibility
+                            fileNameFFMpg)
+            
+            
+            
+            os.spawnvp(os.P_WAIT, 'ffmpeg', commandFFmpg)
+            
+            print str(1./self.updateTime)
             self.movieNumber = self.movieNumber+1
             print "createMovie(): created movie sucessfull"
-        except:
-            print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
+        #except:
+        #    print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
                
         
         
@@ -817,8 +876,8 @@ class Visualisation3D(Visualisation3DGUI):
         evaluate the visualisation update rate and the timeStepIncrement
         to get realtime visualisation i.e. synchronise update times
         '''
-        maxFrameRate = 60.
-        minFrameRate = 24.
+        maxFrameRate    = 60.
+        minFrameRate    = 24.
         numberOfUpdates = 50.
         
         dtSim     = self.vascularNetwork.dt
@@ -852,6 +911,9 @@ class Visualisation3D(Visualisation3DGUI):
         self.timeStepCurrent = 0
         self.updateVisualisation(0.0)
         self.timeStepCurrent = self.timeStepIncrement    
+        
+        self.timeStepStop = self.timeStepsTotal
+        
     
     def visualisationSpeedHalfTime(self):
         self.timeStepIncrement = int(self.timeStepIncrementRealTime/2.)
@@ -908,19 +970,67 @@ class Visualisation3D(Visualisation3DGUI):
     def enableLeftRightColoring(self):
         self.cLUT.enableLeftRightColoring()
     
-    def findMinMaxPressure(self):
+    def findMinMaxPressure(self,range=None):
+        
         maximaP = [1.e20, 0]
         maximaQ = [1.e20, 0]
-        for vessel in self.vascularNetwork.vessels.itervalues():
-            # maximum
-            maximaP[1] = np.max([maximaP[1], np.max(vessel.Psol)])
-            maximaQ[1] = np.max([maximaQ[1], np.max(vessel.Qsol)])
-            # minimum
-            maximaP[0] = np.min([maximaP[0], np.min(vessel.Psol)])
-            maximaQ[0] = np.min([maximaQ[0], np.min(vessel.Qsol)])
+        
+        if range == None:
+            for vessel in self.vascularNetwork.vessels.itervalues():
+                # maximum
+                maximaP[1] = np.max([maximaP[1], np.max(vessel.Psol)])
+                maximaQ[1] = np.max([maximaQ[1], np.max(vessel.Qsol)])
+                # minimum
+                maximaP[0] = np.min([maximaP[0], np.min(vessel.Psol)])
+                maximaQ[0] = np.min([maximaQ[0], np.min(vessel.Qsol)])
+         
+        else:
+            s = range[0]
+            e = range[1]+1
+            
+            for vessel in self.vascularNetwork.vessels.itervalues():
+                # maximum
+                maximaP[1] = np.max([maximaP[1], np.max(vessel.Psol[s:e,:])])
+                maximaQ[1] = np.max([maximaQ[1], np.max(vessel.Qsol[s:e,:])])
+                # minimum
+                maximaP[0] = np.min([maximaP[0], np.min(vessel.Psol[s:e,:])])
+                maximaQ[0] = np.min([maximaQ[0], np.min(vessel.Qsol[s:e,:])])
             
         self.quantitiyMaxima = {'Pressure':maximaP, 'Flow':maximaQ}
             
+         
+    def setVisualisationStartEndTime(self):
+        '''
+        restrict the timespan which is visualized
+        '''
+        startTime   = 3.2
+        endTime     = 4.0
+        
+        # get values
+        valueStart,indexStart = self.findNearestValueIdOfArray(self.vascularNetwork.simulationTime, startTime)
+        valueEnd,indexEnd     = self.findNearestValueIdOfArray(self.vascularNetwork.simulationTime, endTime)
+        print " restrict visualisation time: from {}({}) to {}({}) ".format(valueStart,startTime,valueEnd,endTime)
+        
+        if indexStart < indexEnd:
+            # set timesteps
+            self.timeStepStart = int(indexStart)
+            self.timeStepStop  = int(indexEnd)
+            
+            self.timeStepCurrent = int(indexStart)
+            
+            # update Lookuptable minMax points
+            self.findMinMaxPressure(range = [indexStart,indexEnd] )
+            self.cLUT.update({'range':self.quantitiyMaxima})
+            
+            for vessel in self.vessels3D.itervalues():        
+                vessel.calculateWaveSpeedRange(range = [indexStart,indexEnd] )
+            # recalculate rf factor
+            
+      
+    def findNearestValueIdOfArray(self,array,value):
+        idx = (np.abs(array-value)).argmin()
+        return array[idx], idx
+    
          
 class Vessel3D(Vessel):
     '''
@@ -959,14 +1069,12 @@ class Vessel3D(Vessel):
         # LUT 
         self.cLUT = cLUT
         self.quantityLUT = quantityLUT
-        self.waveSplit = waveSplit
+        self.waveSplit   = waveSplit
         self.createWaveSplitSolutions()
+        self.calculateWaveSpeedRange()
         # functions
         self.createInitial3dVertice()
-        self.waveSplitRange = {'Pressure': [[np.min(self.PsolF),np.max(self.PsolF)],
-                                            [np.min(self.PsolB),np.max(self.PsolB)]],
-                                'Flow':    [[np.min(self.QsolF),np.max(self.QsolF)],
-                                            [np.min(self.QsolB),np.max(self.QsolB)]]}
+        
             
     def createWaveSplitSolutions(self):
         '''
@@ -985,6 +1093,25 @@ class Vessel3D(Vessel):
             self.PsolB[1::,[n]] = pb.reshape(numberOfTimeSteps-1,1)
             self.QsolF[1::,[n]] = qf.reshape(numberOfTimeSteps-1,1)
             self.QsolB[1::,[n]] = qb.reshape(numberOfTimeSteps-1,1)
+        
+    def calculateWaveSpeedRange(self,range=None):
+        
+        if range == None:
+            self.waveSplitRange = {'Pressure': [[np.min(self.PsolF),np.max(self.PsolF)],
+                                                [np.min(self.PsolB),np.max(self.PsolB)]],
+                                    'Flow':    [[np.min(self.QsolF),np.max(self.QsolF)],
+                                                [np.min(self.QsolB),np.max(self.QsolB)]]}
+        else:
+            #try:
+            s = range[0]
+            e = range[1]
+            
+            self.waveSplitRange = {'Pressure': [[np.min(self.PsolF[s:e,:]),np.max(self.PsolF[s:e,:])],
+                                                [np.min(self.PsolB[s:e,:]),np.max(self.PsolB[s:e,:])]],
+                                   'Flow':    [[np.min(self.QsolF[s:e,:]),np.max(self.QsolF[s:e,:])],
+                                               [np.min(self.QsolB[s:e,:]),np.max(self.QsolB[s:e,:])]]}
+            #except: pass
+        
         
     def createInitial3dVertice(self):            
         '''

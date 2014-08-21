@@ -11,6 +11,7 @@ from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanva
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 
 from matplotlib.font_manager import FontProperties
+from matplotlib.patches import Rectangle
 
 import sys, os
 cur = os.path.dirname(os.path.realpath(__file__))
@@ -44,9 +45,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
         if no type is defined (i.e. variableTypes == None) the variable is converted to float
         if a variableFixedChoice is defined for the variable a comboBox is created instead of a entry
         
-        '''
-        
-        
+        '''       
         super(Visualisation2DPlotWindowAdjustValues, self).__init__()
         
         self.set_resizable(False)
@@ -204,9 +203,9 @@ class Visualisation2DPlotWindowGui(gtk.Window):
 #         cBmedical.set_active(1) 
 
         # show decriptions
-        cBdescription = gtk.CheckButton('show descriptions')
-        # cBdescription.connect("toggled", self.on_changedDescription)
-        cBdescription.set_size_request(120, 30)
+        self.buttonDescription = gtk.CheckButton('show descriptions')
+        self.buttonDescription.connect("toggled", self.on_changedDescriptions)
+        self.buttonDescription.set_size_request(120, 30)
         # render movie button
         self.buttonRenderMovie = gtk.Button("render movie")
         # self.buttonRenderMovie.connect("clicked", self.on_clickedRenderMovie)
@@ -276,7 +275,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         # Checkbutton series
         hboxLegend.pack_start(self.cBlegend)
         hboxLegend.pack_start(buttonLables)
-        hboxLegend.pack_start(cBdescription)
+        hboxLegend.pack_start(self.buttonDescription)
         
         # hboxLegend.pack_start(cBmedical)
         hboxLegend.pack_start(self.buttonRenderMovie)
@@ -336,7 +335,10 @@ class Visualisation2DPlotWindowGui(gtk.Window):
     
     def on_changeLines(self,widget):
         pass
-                
+    
+    def on_changedDescriptions(self,widget):
+        pass
+    
 class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
     def __init__(self, selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames):
                 
@@ -529,10 +531,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                                                             linewidth=self.linewidth)[0]}}
             self.deltas['external axis1 -'] = [0.025]
             self.deltas['external axis2 -'] = [0.025]
-        
-        # create legend
-        #self.legend.set_visible(False)        
-                    
+                                    
     def clearPlotWindow(self, lines = True, points = True, lables = False):
         '''
         set all line data to single point at (-1, 0) out of the view field
@@ -579,7 +578,15 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         
         if self.buttonLines.get_active():
             self.updateLineProperties()    
-        
+                        
+        if self.buttonDescription.get_active():
+            
+            self.updateDescriptions()
+            self.descriptions.set_visible(True)
+        else:
+            try: self.descriptions.set_visible(False)
+            except: pass
+                   
         self.canvas.figure = self.fig
         self.fig.set_canvas(self.canvas)
         self.canvas.queue_resize()        
@@ -602,6 +609,24 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.legend.remove()   
         except: pass
         self.legend = self.fig.legend(handles,lables, loc=3, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
+        
+    def updateDescriptions(self):
+        '''
+        Stores the descriptions of the cases in the legend
+        '''
+        handles = []
+        lables  = []
+        for caseId,vascularNetwork in enumerate(self.selectedNetworks):
+            currentColor = self.lines[caseId]['axis1']['-'].get_color()
+            feakLine = Rectangle((-1, -1.005), -1.005, -1.005, fc=currentColor, fill=True, edgecolor='none', linewidth=0)
+            handles.append(feakLine)
+            lables.append(vascularNetwork.description)
+        try:  
+            self.descriptions.set_visible(False)
+            self.descriptions.remove()   
+        except: pass
+                
+        self.descriptions = self.fig.legend(handles,lables, loc=4, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
         
     def updateLineProperties(self):
         '''
@@ -1144,6 +1169,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 
         self.limitsInit = copy(self.limits)
         
+        
     # callback function
     def on_changePlotXaxis(self, widget):   
         '''
@@ -1168,7 +1194,6 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             
         self.updatePlotWindow()
         
-
     def on_changedSlider(self, widget):
         '''
         callback function for changed node/time slider
@@ -1242,7 +1267,6 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         '''
         self.updatePlotWindow()
             
-        
     def on_changeLables(self, widget):
         '''
         create window to change plot limits
@@ -1270,6 +1294,12 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.lineWindow.destroy()
             self.lineWindow = None
         
+        self.updatePlotWindow()
+        
+    def on_changedDescriptions(self,widget):
+        '''
+        activate descriptions
+        '''
         self.updatePlotWindow()
         
 class Visualisation2DMainCase(object):

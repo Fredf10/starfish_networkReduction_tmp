@@ -370,7 +370,8 @@ class VascularNetwork(object):
                                                    'netGravity'    :vessel.netGravity}
             
         
-        simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
+        try: simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
+        except: simulationTime = self.simulationTime
         
         solutionData['vascularNetwork'] = { 'simulationTime': simulationTime,
                                             'dt'            : self.dt,
