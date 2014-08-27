@@ -851,7 +851,7 @@ class Visualisation3D(Visualisation3DGUI):
                             '-c:v', 'libx264',
                             '-crf','1', 
                             '-preset', 'slow', #'veryslow', higher quality not for mac
-                            '-r','24', # outputFramerate
+                            '-r','25', # outputFramerate
                             '-pix_fmt','yuv420p',
                             #'-qp', '0', #higher quality not for mac
                             '-profile:v', 'baseline', # mac compatibility
@@ -877,7 +877,7 @@ class Visualisation3D(Visualisation3DGUI):
         to get realtime visualisation i.e. synchronise update times
         '''
         maxFrameRate    = 60.
-        minFrameRate    = 24.
+        minFrameRate    = 25.
         numberOfUpdates = 50.
         
         dtSim     = self.vascularNetwork.dt
@@ -1024,6 +1024,7 @@ class Visualisation3D(Visualisation3DGUI):
             
             for vessel in self.vessels3D.itervalues():        
                 vessel.calculateWaveSpeedRange(range = [indexStart,indexEnd] )
+                
             # recalculate rf factor
             
       

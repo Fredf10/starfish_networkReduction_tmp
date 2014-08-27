@@ -466,7 +466,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis = {'axis1':ax1,'axis1Twin':ax12, 'axis2':ax2,'axis2Twin':ax22}
         
         # # add 3 lines for each network case to each subplot
-        colors = ['b', 'r', 'm', 'g', 'c']
+        colors = ['b', 'r', 'm', 'g', 'c', 'k']
         linestyles = {'axis1': ['-'],'axis1Twin': ['--',':'], 'axis2': ['-'], 'axis2Twin':['--',':']}
                 
         # lines and points are refered with the id(int) in the selectedNetworks list == 'caseId'
@@ -1508,7 +1508,7 @@ class Visualisation2DMainGUI(gtk.Window):
         add new simulation case to compare plots
         bounded to 5 cases now ..
         '''
-        if len(self.cases) < 5:
+        if len(self.cases) < 6:
             newCase = Visualisation2DMainCase(len(self.cases) + 1)
             newCase.updateNetworkComboBox(self.networkCases, self.networkInfo)
             self.cases.append(newCase)

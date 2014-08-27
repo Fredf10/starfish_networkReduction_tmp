@@ -289,7 +289,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">5.4945054945</betaHayashi>
+        <betaHayashi unit="Pa">7.326007326</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">3.663003663 3.663003663</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -318,7 +318,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">6.1224489797</betaHayashi>
+        <betaHayashi unit="Pa">8.1632653062</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">4.0816326531 4.0816326531</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -347,7 +347,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">7.1090047394</betaHayashi>
+        <betaHayashi unit="Pa">9.4786729858</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">4.7393364929 4.7393364929</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -376,7 +376,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">10.3448275862</betaHayashi>
+        <betaHayashi unit="Pa">13.7931034482</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.8965517241 6.8965517241</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -405,7 +405,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">10.2389078499</betaHayashi>
+        <betaHayashi unit="Pa">13.6518771332</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.8259385666 6.8259385666</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -434,7 +434,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">20.5479452055</betaHayashi>
+        <betaHayashi unit="Pa">27.397260274</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">13.698630137 13.698630137</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -463,7 +463,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">13.698630137</betaHayashi>
+        <betaHayashi unit="Pa">18.2648401826</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">9.1324200913 9.1324200913</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -492,7 +492,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">20.1342281879</betaHayashi>
+        <betaHayashi unit="Pa">26.8456375838</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">13.4228187919 13.4228187919</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -521,7 +521,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">19.6078431372</betaHayashi>
+        <betaHayashi unit="Pa">26.1437908496</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">13.0718954248 13.0718954248</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -550,7 +550,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">27.7777777778</betaHayashi>
+        <betaHayashi unit="Pa">37.037037037</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">18.5185185185 18.5185185185</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -579,7 +579,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">21.5827338129</betaHayashi>
+        <betaHayashi unit="Pa">28.7769784172</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">14.3884892086 14.3884892086</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -608,7 +608,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">15.873015873</betaHayashi>
+        <betaHayashi unit="Pa">21.164021164</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.582010582 10.582010582</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -637,7 +637,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">16.3934426229</betaHayashi>
+        <betaHayashi unit="Pa">21.8579234972</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.9289617486 10.9289617486</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -666,7 +666,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">6.6964285715</betaHayashi>
+        <betaHayashi unit="Pa">8.9285714286</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">4.4642857143 4.4642857143</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -695,7 +695,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">11.1940298508</betaHayashi>
+        <betaHayashi unit="Pa">14.9253731344</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">7.4626865672 7.4626865672</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -724,7 +724,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">16.4835164835</betaHayashi>
+        <betaHayashi unit="Pa">21.978021978</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.989010989 10.989010989</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -753,7 +753,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">16.9491525423</betaHayashi>
+        <betaHayashi unit="Pa">22.5988700564</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">11.2994350282 11.2994350282</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -782,7 +782,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">7.0422535212</betaHayashi>
+        <betaHayashi unit="Pa">9.3896713616</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">4.6948356808 4.6948356808</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -811,7 +811,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">10.6761565836</betaHayashi>
+        <betaHayashi unit="Pa">14.2348754448</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">7.1174377224 7.1174377224</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -840,7 +840,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">20.5479452055</betaHayashi>
+        <betaHayashi unit="Pa">27.397260274</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">13.698630137 13.698630137</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -869,7 +869,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">13.698630137</betaHayashi>
+        <betaHayashi unit="Pa">18.2648401826</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">9.1324200913 9.1324200913</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -898,7 +898,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">20.979020979</betaHayashi>
+        <betaHayashi unit="Pa">27.972027972</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">13.986013986 13.986013986</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -927,7 +927,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">17.4418604651</betaHayashi>
+        <betaHayashi unit="Pa">23.2558139534</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">11.6279069767 11.6279069767</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -956,7 +956,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">29.1262135923</betaHayashi>
+        <betaHayashi unit="Pa">38.8349514564</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">19.4174757282 19.4174757282</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -985,7 +985,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.5185185185</betaHayashi>
+        <betaHayashi unit="Pa">24.6913580246</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.3456790123 12.3456790123</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1014,7 +1014,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">9.8684210526</betaHayashi>
+        <betaHayashi unit="Pa">13.1578947368</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.5789473684 6.5789473684</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1043,7 +1043,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">8.3333333334</betaHayashi>
+        <betaHayashi unit="Pa">11.1111111112</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">5.5555555556 5.5555555556</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1072,7 +1072,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">9.3167701863</betaHayashi>
+        <betaHayashi unit="Pa">12.4223602484</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.2111801242 6.2111801242</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1101,7 +1101,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">12.6050420168</betaHayashi>
+        <betaHayashi unit="Pa">16.806722689</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">8.4033613445 8.4033613445</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1130,7 +1130,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">15.7894736843</betaHayashi>
+        <betaHayashi unit="Pa">21.052631579</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.5263157895 10.5263157895</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1159,7 +1159,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">16.0427807487</betaHayashi>
+        <betaHayashi unit="Pa">21.3903743316</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.6951871658 10.6951871658</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1188,7 +1188,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">21.1267605635</betaHayashi>
+        <betaHayashi unit="Pa">28.1690140846</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">14.0845070423 14.0845070423</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1217,7 +1217,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.0722891567</betaHayashi>
+        <betaHayashi unit="Pa">24.0963855422</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.0481927711 12.0481927711</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1246,7 +1246,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">12.4481327801</betaHayashi>
+        <betaHayashi unit="Pa">16.5975103734</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">8.2987551867 8.2987551867</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1275,7 +1275,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">9.7087378641</betaHayashi>
+        <betaHayashi unit="Pa">12.9449838188</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.4724919094 6.4724919094</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1304,7 +1304,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">15.5440414508</betaHayashi>
+        <betaHayashi unit="Pa">20.725388601</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.3626943005 10.3626943005</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1333,7 +1333,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">9.4936708862</betaHayashi>
+        <betaHayashi unit="Pa">12.6582278482</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.3291139241 6.3291139241</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1362,7 +1362,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">15.5440414508</betaHayashi>
+        <betaHayashi unit="Pa">20.725388601</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">10.3626943005 10.3626943005</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1391,7 +1391,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">9.7719869708</betaHayashi>
+        <betaHayashi unit="Pa">13.029315961</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.5146579805 6.5146579805</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1420,7 +1420,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.2926829268</betaHayashi>
+        <betaHayashi unit="Pa">24.3902439024</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.1951219512 12.1951219512</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1449,7 +1449,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">10.1351351352</betaHayashi>
+        <betaHayashi unit="Pa">13.5135135136</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">6.7567567568 6.7567567568</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1478,7 +1478,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">12.5523012552</betaHayashi>
+        <betaHayashi unit="Pa">16.7364016736</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">8.3682008368 8.3682008368</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1507,7 +1507,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">12.5523012552</betaHayashi>
+        <betaHayashi unit="Pa">16.7364016736</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">8.3682008368 8.3682008368</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1536,7 +1536,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">13.9534883721</betaHayashi>
+        <betaHayashi unit="Pa">18.6046511628</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">9.3023255814 9.3023255814</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1565,7 +1565,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.1818181818</betaHayashi>
+        <betaHayashi unit="Pa">24.2424242424</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.1212121212 12.1212121212</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1594,7 +1594,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">16.9491525423</betaHayashi>
+        <betaHayashi unit="Pa">22.5988700564</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">11.2994350282 11.2994350282</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1623,7 +1623,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.6335403726</betaHayashi>
+        <betaHayashi unit="Pa">24.8447204968</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.4223602484 12.4223602484</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1652,7 +1652,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">21.7391304348</betaHayashi>
+        <betaHayashi unit="Pa">28.9855072464</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">14.4927536232 14.4927536232</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1681,7 +1681,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">24.1935483872</betaHayashi>
+        <betaHayashi unit="Pa">32.2580645162</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">16.1290322581 16.1290322581</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1710,7 +1710,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">13.9534883721</betaHayashi>
+        <betaHayashi unit="Pa">18.6046511628</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">9.3023255814 9.3023255814</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1739,7 +1739,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.1818181818</betaHayashi>
+        <betaHayashi unit="Pa">24.2424242424</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.1212121212 12.1212121212</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1768,7 +1768,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">16.9491525423</betaHayashi>
+        <betaHayashi unit="Pa">22.5988700564</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">11.2994350282 11.2994350282</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1797,7 +1797,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">18.6335403726</betaHayashi>
+        <betaHayashi unit="Pa">24.8447204968</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">12.4223602484 12.4223602484</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1826,7 +1826,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">21.7391304348</betaHayashi>
+        <betaHayashi unit="Pa">28.9855072464</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">14.4927536232 14.4927536232</betaHayashi-polyChaos>
       </compliance>
       <fluid>
@@ -1855,7 +1855,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">None</As>
-        <betaHayashi unit="Pa">24.1935483872</betaHayashi>
+        <betaHayashi unit="Pa">32.2580645162</betaHayashi>
         <betaHayashi-polyChaos unit="Pa">16.1290322581 16.1290322581</betaHayashi-polyChaos>
       </compliance>
       <fluid>

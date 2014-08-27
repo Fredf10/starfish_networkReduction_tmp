@@ -47,12 +47,10 @@ class WindowLUT(pyglet.window.Window):
                 
         height = 300 
         width  = 150
-        
-        
+                
         super(WindowLUT, self).__init__(resizable = False, 
                                         height= height, 
                                         width= width)
-        
         self.set_size(width, height)
         
         
