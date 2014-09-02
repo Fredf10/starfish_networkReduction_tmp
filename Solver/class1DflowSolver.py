@@ -288,15 +288,15 @@ class FlowSolver(object):
         
         # define motion
         motionDict = {}
-        headUpTilt = False
+        headUpTilt = True
         ## head up tilt
         if headUpTilt == True:
-            tSteps4 = int(self.Tsteps/4.0)
+            tSteps4 = int(self.Tsteps/6.0)
             start = self.vessels[1].angleXMother
             end   = start-80*np.pi/180
-            startAngle = np.ones(tSteps4)*start
+            startAngle = np.ones(tSteps4*2.0)*start
             endAngle   = np.ones(tSteps4)*end
-            tiltAngle  = np.linspace(start, end, self.Tsteps-2*tSteps4)
+            tiltAngle  = np.linspace(start, end, self.Tsteps-3*tSteps4)
              
             angleXSystem = np.append(startAngle,np.append(tiltAngle,endAngle))
                      

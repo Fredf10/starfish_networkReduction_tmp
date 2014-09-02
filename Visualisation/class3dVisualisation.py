@@ -1004,7 +1004,7 @@ class Visualisation3D(Visualisation3DGUI):
         restrict the timespan which is visualized
         '''
         startTime   = 3.2
-        endTime     = 4.0
+        endTime     = 24.0
         
         # get values
         valueStart,indexStart = self.findNearestValueIdOfArray(self.vascularNetwork.simulationTime, startTime)

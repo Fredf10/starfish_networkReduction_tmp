@@ -828,9 +828,13 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
+                    liftFactor = 0
+                    if i == 1:
+                        liftFactor = 11.75
+                    
                     yData00 = Psol / 133.32 - Psol[0]/ 133.32
                     yData01 = Psol_f / 133.32
-                    yData02 = Psol_b / 133.32
+                    yData02 = Psol_b / 133.32 + liftFactor
                     yData10 = Qsol * 1.e6   - Qsol[0]* 1.e6
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
