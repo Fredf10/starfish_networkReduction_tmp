@@ -4,6 +4,8 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 
 sys.path.append(cur+'/../UtilityLib')
 
+import subprocess
+
 from moduleXML import loadNetworkFromXML 
 from moduleStartUp import parseOptions
 from modulePickle import loadSolutionDataFile
@@ -794,8 +796,8 @@ class Visualisation3D(Visualisation3DGUI):
             self.recordMovieData = False
             self.createMovie()
             filelist = [ f for f in os.listdir(self.templateMovDataDirectory) if  f.endswith(".png")]
-            for f in filelist:
-                os.remove(''.join([self.templateMovDataDirectory,'/',f]))
+            #for f in filelist:
+                #os.remove(''.join([self.templateMovDataDirectory,'/',f]))
         
             self.oneCycle = False
         
@@ -816,11 +818,11 @@ class Visualisation3D(Visualisation3DGUI):
         '''
         print "createMovie(): writing image data"
         
-        frameSizeImage = read_png(''.join([self.templateMovDataDirectory,'/.screenShot0000.png']))
-        frameSize = (np.shape(frameSizeImage)[1],np.shape(frameSizeImage)[0])
+        #frameSizeImage = read_png(''.join([self.templateMovDataDirectory,'/.screenShot0000.png']))
+        #frameSize = (np.shape(frameSizeImage)[1],np.shape(frameSizeImage)[0])
         
-        try:   FFMpegWriter = animation.writers['mencoder']
-        except: print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
+        #try:   FFMpegWriter = animation.writers['mencoder']
+       # except: print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
                       
         if True:              
         #try:
@@ -845,22 +847,24 @@ class Visualisation3D(Visualisation3DGUI):
             
             imageNameFFmpg = ''.join([self.templateMovDataDirectory,'/.screenShot%04d.png']) 
             fileNameFFMpg = ''.join([self.movieSaveDirectory,'/',self.networkName,'_macComp_',str(self.movieNumber),self.movieFileType])
-            commandFFmpg = ('ffmpeg',
-                            '-r', str(1./self.updateTime) ,
-                            '-i', imageNameFFmpg,
-                            '-c:v', 'libx264',
-                            '-crf','1', 
-                            '-preset', 'slow', #'veryslow', higher quality not for mac
-                            '-r','25', # outputFramerate
-                            '-pix_fmt','yuv420p',
-                            #'-qp', '0', #higher quality not for mac
-                            '-profile:v', 'baseline', # mac compatibility
-                             '-level', '3.0', # mac compatibility
-                            fileNameFFMpg)
+            commandFFmpg = ' '.join(['ffmpeg',
+                                     '-r', str(1./self.updateTime),
+                                     '-i', imageNameFFmpg,
+                                     '-c:v', 'libx264',
+                                     '-crf','1', 
+                                     '-preset', 'slow', #'veryslow', higher quality not for mac
+                                     '-r','25', # outputFramerate
+                                     '-pix_fmt','yuv420p',
+                                     #'-qp', '0', #higher quality not for mac
+                                     '-profile:v', 'baseline', # mac compatibility
+                                     '-level', '3.0', # mac compatibility
+                                     fileNameFFMpg])
             
             
             
-            os.spawnvp(os.P_WAIT, 'ffmpeg', commandFFmpg)
+            #os.spawnvp(os.P_WAIT, 'ffmpeg', commandFFmpg)
+            print commandFFmpg
+            subprocess.Popen(commandFFmpg, shell = True )
             
             print str(1./self.updateTime)
             self.movieNumber = self.movieNumber+1
