@@ -27,7 +27,7 @@ def systemCheck():
     except:
         print " IMPORT ERROR; no version of matplotlib.pyplot found"
     
-    print "check for mencoder   ",
+    print "should check for ffmpeg instead, but checks mencoder ...   ",
     if matplotlibInstalled:
         import matplotlib.animation as animation
         
