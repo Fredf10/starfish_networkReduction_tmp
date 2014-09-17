@@ -74,6 +74,12 @@ def systemCheck():
 #             print installed," [Old Version !!]"
 #         except:
 #             print "IMPORT ERROR; no version of tvtk found"
+    print "check for psutil"
+    try:
+        import psutil
+        print installed
+    except:
+        print " IMPORT ERROR; no version of psutil found"
     
     print "check for lxml2      ",
     try:

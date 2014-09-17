@@ -1,5 +1,4 @@
 import sys,os,io
-from wx._core import CURSOR_DEFAULT, CURSOR_SIZING
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 
 sys.path.append(cur+'/../UtilityLib')
@@ -55,7 +54,7 @@ class Visualisation3DGUI(pyglet.window.Window):
 
         ## openGL context configuration
         stencil_size    = 8
-        depth_size      = 24
+        depth_size      = 16
         samples         = 4
         sample_buffers  = 1
         
@@ -63,12 +62,28 @@ class Visualisation3DGUI(pyglet.window.Window):
         display = platform.get_default_display()
         screen = display.get_default_screen()
         
-        template = pyglet.gl.Config(sample_buffers=sample_buffers,
+        templateHigh = pyglet.gl.Config(sample_buffers=sample_buffers,
                                     samples = samples,
                                     double_buffer=True,
                                     depth_size = depth_size,
                                     stencil_size = stencil_size)
-        config = screen.get_best_config(template)
+        
+        templateLow = pyglet.gl.Config(sample_buffers=0,
+                                    double_buffer=False,
+                                    depth_size = 16)
+        
+        try:
+            config = screen.get_best_config(templateHigh)
+        except pyglet.window.NoSuchConfigException:
+            try: 
+                config = screen.get_best_config(templateLow)
+                print "OpenGlconfig", config
+            except pyglet.window.NoSuchConfigException:
+                print " OpenGL: simple context configuration is applied due to installed hardware"
+                template = gl.Config()
+                config = screen.get_best_config(template)
+                print "OpenGlconfig", config
+        
         context = config.create_context(None)
         
         super(Visualisation3DGUI, self).__init__(resizable = True, context = context)

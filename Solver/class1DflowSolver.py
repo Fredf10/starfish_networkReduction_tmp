@@ -1,6 +1,4 @@
 import numpy as np
-import scipy as sc
-from itertools import islice
 
 import sys,os
 from classBoundaryConditions import VaryingElastance, Valve
