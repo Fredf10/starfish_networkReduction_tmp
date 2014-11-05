@@ -43,7 +43,6 @@ class Field(object):
         '''
         Mack Kormac Predictor-Corrector
         '''
-        startTime = time.clock()
         # solve vessel objects
         dt = self.dt
         n = self.n[0]
@@ -120,7 +119,6 @@ class Field(object):
         else:
             self.A[n+1][1:-1] = self.AFunction(self.P[n+1])[1:-1]
 
-        print "PDE-sweep-time ", time.clock()-startTime
 #     def DeltaForwardInnerPart(self,f): 
 #         """ 1st-order forward diff array """
 #         return (f[2::] - f[1:-1])/self.dz[1::]
