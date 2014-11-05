@@ -286,7 +286,7 @@ class FlowSolver(object):
         
         # define motion
         motionDict = {}
-        headUpTilt = True
+        headUpTilt = False
         ## head up tilt
         if headUpTilt == True:
             tSteps4 = int(self.Tsteps/6.0)

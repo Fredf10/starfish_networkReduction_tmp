@@ -1556,7 +1556,7 @@ class VaryingElastance(BoundaryConditionType2):
 		self.aortic = Valve(aortic_M_st, aortic_M_rg, aortic_delta_p_open, \
 						aortic_delta_p_close, aortic_K_v_open, aortic_K_v_close)
 	
-	def __call__(self, _domegaField_, R, L, n, dt, P, Q, A, Z1, Z2):
+	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 	
 		self.updateValves(P, n, dt)                     # Update the state of the mitral and aortic valve at timestep n + 1
 		self.startNewCycleIfCriteriaIsMet(n, dt)
@@ -1613,7 +1613,8 @@ class VaryingElastance(BoundaryConditionType2):
 		n_o = 1.0#n_q/r21
 		
 
-		args = dt, mitrLdivB, mitrB,LdivB,B, mitrQn1, mitrQn,ventrPn, venoP, E, Vn, Qn, r21, r22, Pn, _domega, n_q, n_p, B_ref
+		args = dt, mitrLdivB, mitrB,LdivB,B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega, n_q, n_p, B_ref
+		
 		
 		"""The following section computes the increment domega_ which goes into the vessel from the ventricle, """
 		
@@ -1638,6 +1639,7 @@ class VaryingElastance(BoundaryConditionType2):
 				self.pressure[n+1] = self.pressure[n] + x[0]*n_p
 				domega_  = x[1]*n_o
 				self.x0 = np.concatenate((np.array([0]), x))
+				
 			elif not B:
 				"""only  the mitral valve is open"""
 				x = self.newtonSolver(self.x0,args, partialSystem='mitral open')
@@ -1690,12 +1692,14 @@ class VaryingElastance(BoundaryConditionType2):
 		xn = x0[self.system[partialSystem]]
 		res = self.solverResiduals(xn,*args, partialSystem = partialSystem)
 		#error = np.linalg.norm(res, 2)
+						
 		
 		while True:
 			#print x0
 			iterations +=1
 			J_inv = self.solverInverseJacobian(xn, *args, partialSystem = partialSystem)
-			x = xn - np.dot(J_inv, res)
+			x = xn - np.dot(J_inv, res).ravel()
+			print " this function is quickfixed"
 			
 			error = np.linalg.norm(x - xn, 2)/np.linalg.norm(xn, 2)
 			if error < 0.0001:
@@ -1713,11 +1717,10 @@ class VaryingElastance(BoundaryConditionType2):
 		"""Computes  are the resisduals of the functions f1,f2 and f3, they are defined as functions that are only called when they are needed. The
 		argument partialSystem determines which of the residuals are computed and returned."""
 		
-		x = np.array([0.0, 0.0, 0.0])
+		x = np.array([2.0, 3.0, 4.0])
 		x[self.system[partialSystem]] += x_partial
 		dQm, dPv, domega_ = x 
-		
-		
+				
 		def f1(): 
 			a = mitrQn/n_q + dQm
 			return a*abs(a) + mitrLdivB/(2*n_q*dt)*(3*dQm + (mitrQn1 - mitrQn)/n_q) + (n_p*dPv + ventrPn - atrP)/(mitrB*n_q**2)
