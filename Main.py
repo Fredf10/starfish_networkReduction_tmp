@@ -148,6 +148,6 @@ if __name__ == '__main__':
         import pycallgraph
         pycallgraph.start_trace()
         main()
-        pycallgraph.make_dot_graph('vascular1DFlowCallGraph.png')
+        pycallgraph.make_dot_graph('STARFiSh-CallGraph.png')
     else:
         main()

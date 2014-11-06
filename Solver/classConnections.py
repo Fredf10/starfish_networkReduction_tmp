@@ -110,16 +110,8 @@ class Link():
         Q2o = Q2[pos2]
         
         # update system equation and store L1
-        self.systemEquations[0].updateLARL(P1,Q1,A1,idArray=[pos1]) 
-        #L1 = self.systemEquations[0].L[pos1][pos1+1]
-        R1 = self.systemEquations[0].R[pos1]
-        domega1_1 = self.systemEquations[0].domega[pos1]
-        
-        self.systemEquations[1].updateLARL(P2,Q2,A2,idArray=[pos2]) 
-        #L2 = self.systemEquations[1].L[pos2][pos2+1]
-        R2 = self.systemEquations[1].R[pos2]
-        domega2_2 = self.systemEquations[1].domega[pos2]
-    
+        L,R1,LMBD,Z1,Z2,domega1_1 = self.systemEquations[0].updateLARL(P1,Q1,A1,pos1)
+        L,R2,LMBD,Z1,Z2,domega2_2 = self.systemEquations[1].updateLARL(P2,Q2,A2,pos2)
             
         # local R matrices
         R1_11 = R1[0][0]
@@ -571,20 +563,9 @@ class Bifurcation():
         Q3o = Q3[pos3]
         
         ## update LARL
-        self.systemEquations[0].updateLARL(P1,Q1,A1,idArray=[pos1])
-        L1 = self.systemEquations[0].L[pos1][pos1+1]
-        R1 = self.systemEquations[0].R[pos1]
-        domega1_1 = self.systemEquations[0].domega[pos1]
-        
-        self.systemEquations[1].updateLARL(P2,Q2,A2,idArray=[pos2])
-        L2 = self.systemEquations[1].L[pos2][pos2+1]
-        R2 = self.systemEquations[1].R[pos2]
-        domega2_2 = self.systemEquations[1].domega[pos2]
-        
-        self.systemEquations[2].updateLARL(P3,Q3,A3,idArray=[pos3])                                    
-        L3 = self.systemEquations[2].L[pos3][pos3+1]
-        R3 = self.systemEquations[2].R[pos2]
-        domega3_2 = self.systemEquations[2].domega[pos3]
+        L,R1,LMBD,Z1,Z2,domega1_1 = self.systemEquations[0].updateLARL(P1,Q1,A1,pos1)
+        L,R2,LMBD,Z1,Z2,domega2_2 = self.systemEquations[1].updateLARL(P2,Q2,A2,pos2)
+        L,R3,LMBD,Z1,Z2,domega3_2 = self.systemEquations[2].updateLARL(P3,Q3,A3,pos3)
         
         # local R matrices
         R1_11 = R1[0][0]
@@ -848,7 +829,7 @@ class Bifurcation():
 #             print 'Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
 #             
 #             ## non linear error
-#             sumPErrorNonLin = abs((sol[2]+0.5*(sol[3]/A1n)**2)-(sol[0]+0.5*(sol[1]/A2n)**2))/abs(sol[2]+0.5*(sol[3]/A1n)**2)
+#             sumPErrorNonLin = abs((sol[2]+0.5*(sol[3]/A1n)**2)-(sol[0]+0.5*(sol[1]/AL12n)**2))/abs(sol[2]+0.5*(sol[3]/A1n)**2)
 #             if sumPErrorNonLin > 0.0: 
 #                 self.sumPErrorNonLinCount = self.sumPErrorNonLinCount+1
 #             if sumPErrorNonLin > self.maxPErrorNonLin:
@@ -1095,20 +1076,9 @@ class Anastomosis():
                            
                 
         # update LARL
-        self.systemEquations[0].updateLARL(P1,Q1,A1,idArray=[pos1]) #
-        L1 = self.systemEquations[0].L[pos1][pos1+1]
-        R1 = self.systemEquations[0].R[pos1]
-        domega1_1 = self.systemEquations[0].domega[pos1]
-        
-        self.systemEquations[1].updateLARL(P2,Q2,A2,idArray=[pos2])
-        L2 = self.systemEquations[1].L[pos2][pos2+1]
-        R2 = self.systemEquations[1].R[pos2]
-        domega2_1 = self.systemEquations[1].domega[pos2]
-        
-        self.systemEquations[2].updateLARL(P3,Q3,A3,idArray=[pos3])
-        L3 = self.systemEquations[2].L[pos3][pos3+1]
-        R3 = self.systemEquations[2].R[pos2]
-        domega3_2 = self.systemEquations[2].domega[pos3]
+        L,R1,LMBD,Z1,Z2,domega1_1 = self.systemEquations[0].updateLARL(P1,Q1,A1,pos1)
+        L,R2,LMBD,Z1,Z2,domega2_1 = self.systemEquations[1].updateLARL(P2,Q2,A2,pos2)
+        L,R3,LMBD,Z1,Z2,domega3_2 = self.systemEquations[2].updateLARL(P3,Q3,A3,pos3)
             
         # local R matrices
         R1_11 = R1[0][0]

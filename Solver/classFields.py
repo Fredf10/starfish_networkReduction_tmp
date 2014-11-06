@@ -82,7 +82,7 @@ class Field(object):
         Q_pre[1:-1] = (Q[1:-1] - (m21*dPdz + m22*dQ2dz - b2 )*dt)
          
         # check pressure solution
-        if np.any(P_pre<0):
+        if P_pre.any()<0:
             print "ERROR: {} calculated negativ pressure in predictor step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print P_pre
             exit()
@@ -108,7 +108,7 @@ class Field(object):
         self.Q[n+1][1:-1] = (Q[1:-1] + Q_pre[1:-1] - (m21*dPdz + m22*dQ2dz - b2 )*dt )/2.0
          
         # check pressure solution
-        if np.any(self.P[n+1]<0):
+        if self.P[n+1].any() < 0:
             print "ERROR: {} calculated negativ pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print self.P[n+1]
             exit()
@@ -118,34 +118,3 @@ class Field(object):
             self.A[n+1] = A_pre
         else:
             self.A[n+1][1:-1] = self.AFunction(self.P[n+1])[1:-1]
-
-#     def DeltaForwardInnerPart(self,f): 
-#         """ 1st-order forward diff array """
-#         return (f[2::] - f[1:-1])/self.dz[1::]
-#     
-#     def DeltaBackwardInnerPart(self,f): 
-#         """ 1st-order backward diff array"""
-#         return (f[1:-1] - f[0:-2])/self.dz[0:-1]
-# 
-#  
-#     def DeltaForward(self,f): 
-#         """ 1st-order forward diff array """
-#         dfdz_t = (f[2::] - f[1:-1])/self.dz[1::]
-#         
-#         dfdz = np.empty_like(f)
-#     
-#         dfdz[1:-1] = dfdz_t
-#         dfdz[0] = 0
-#         dfdz[-1] = 0
-#         
-#         return dfdz
-# 
-#     def DeltaBackward(self,f): 
-#         """ 1st-order backward diff array"""
-#         dbdz_t = (f[1:-1] - f[0:-2])/self.dz[0:-1]
-#         
-#         dbdz = np.empty_like(f)
-#         dbdz[1:-1] = dbdz_t
-#         dbdz[0] = 0
-#         dbdz[-1] = 0
-#         return dbdz

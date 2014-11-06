@@ -127,12 +127,9 @@ class Boundary():
             print "ERROR classBoundary: Too many type2-boundary Conditions defined!"
         
         # 4. Define the output of A, dependend if rigidArea
-        if rigidArea == True:
-            self.AFunction = self.AFunctionSys0
-        else:
-            self.A_nID = vessel.A_nID
-            self.AFunction = self.AFunctionSys1
-        
+        self.rigidArea = rigidArea
+        self.A_nID = vessel.A_nID
+                
         ## 5. Define the call function depending on the solving Scheme
         #if solvingScheme == "MacCormack_Field": 
         #    self.__call__ = self.callMacCormackField
@@ -195,14 +192,6 @@ class Boundary():
 
         return duPrescribed
     
-    ## Function to define the output of A, dependend on the characteristic system 0.1
-    
-    def AFunctionSys0(self,A,p):
-        return A
-    
-    def AFunctionSys1(self,A,p):
-        return self.A_nID(p,self.position)
-    
     def __call__(self): #callMacCormackField(self):    
         '''
         new Boundary method calculates the values at the boundary
@@ -221,13 +210,7 @@ class Boundary():
         position = self.position
         
         # calculate need values
-        self.systemEquation.updateLARL(P,Q,A,idArray=[position])
-        L    = self.systemEquation.L[position]
-        R    = self.systemEquation.R[position]
-        LMBD = self.systemEquation.LAMBDA[position]
-        Z1   = self.systemEquation.Z[position][0]
-        Z2   = self.systemEquation.Z[position][1]
-        _omega_field = self.systemEquation.domega[position]
+        L,R,LMBD,Z1,Z2,_omega_field = self.systemEquation.updateLARL(P,Q,A,position)
         
         #calculate the du_vector using given boundaryConditions of type 1
         duPrescribed = self.duFunctionRuntime(n, dt, Z1, Z2, position)
@@ -238,15 +221,17 @@ class Boundary():
         # calculate new values for p and q
         P_calc = dPQ_calc[0]+ P[position]
         Q_calc = dPQ_calc[1]+ Q[position]
-                
+                        
         # check new p value
         if P_calc < 0:
             print "ERROR: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print P_calc
             exit()
         
-        # calculate new a value
-        A_calc =  self.AFunction(A[position],[P_calc])
+        # calculate new value for the area
+        A_calc = A[position] # assign old value
+        if self.rigidArea == False:
+              A_calc =  self.A_nID([P_calc],position)         
                 
         # apply values to solution array
         self.P[n+1][position] = P_calc

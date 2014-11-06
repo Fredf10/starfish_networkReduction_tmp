@@ -55,11 +55,9 @@ class System(object):
         self.M      = None
         self.b2     = None
         self.B      = None
-        self.LAMBDA = [np.ones(2),np.ones(2)]  # list with 2 objects one for each boundary
-        self.R      = [np.ones((2,2)),np.ones((2,2))]  # list with 2 objects one for each boundary
-        self.L      = [np.ones((2,2)),np.ones((2,2))]  # list with 2 objects one for each boundary
-        self.Z      = [np.ones(2),np.ones(2)] # [forward Z, backward Z ] list with 2 objects one for each boundary
-        self.domega = [0.0,0.0] # [omega2(position0),omega1(position-1)] list with 1 domega at each boundary
+        self.LAMBDA = np.ones(2)     
+        self.R      = np.ones((2,2)) 
+        self.L      = np.ones((2,2))
         self.du     = np.empty(2)
         
         #calculate dlt
@@ -114,7 +112,7 @@ class System(object):
         
         return m12,m21,m22,b2
             
-    def updateLARLSys0InvariantFlow(self,P,Q,A,idArray=[0,-1],Ct=None,ct=None):
+    def updateLARLSys0InvariantFlow(self,P,Q,A,position):
         '''
         Update LAMBDA,R,L,Z of the system equations
         
@@ -135,60 +133,52 @@ class System(object):
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
         n = self.n[0]
-        for Id in idArray:
-            
-            
-            
-            Aid = A[Id]       
-            
-            if Ct == None: C = self.C_nID(P,Id)
-            else:  C = Ct[Id]
-            if ct == None: c = self.c(A[Id],C)
-            else:  c = ct[Id]
+               
+        C = self.C_nID(P,position)
+        c = self.c(A[position],C)
                         
-            # Z1 = Z2 = Zc
-            Zc =  1.0/(C*c)
-            
-            self.Z[Id][0] = Zc
-            self.Z[Id][1] = Zc
-            
-            self.LAMBDA[Id][0] = c
-            self.LAMBDA[Id][1] = -c
-                  
-            ## left eigenvalue matrix
-            # riemannInvariants with unit flow    
-            self.L[Id][0][0] =  0.5/(Zc)
-            self.L[Id][0][1] =  0.5
-            self.L[Id][1][0] =  0.5/(Zc)
-            self.L[Id][1][1] = -0.5
+        # Z1 = Z2 = Zc
+        Zc =  1.0/(C*c)
+                        
+        LAMBDA = self.LAMBDA
+        
+        LAMBDA[0] = c
+        LAMBDA[1] = -c
+        
+        L = self.L
+        R = self.R     
+        
+        ## left eigenvalue matrix
+        # riemannInvariants with unit flow    
+        L[0][0] =  0.5/(Zc)
+        L[0][1] =  0.5
+        L[1][0] =  0.5/(Zc)
+        L[1][1] = -0.5
 
-            ## right eigenvalue matrix
-            # riemannInvariants with unit flow 
-            self.R[Id][0][0] =  Zc
-            self.R[Id][0][1] =  Zc
-            self.R[Id][1][1] = -1.0
-            
-            L = self.L[Id]
-            R = self.R[Id]
-            ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
-                            
-            ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
-            errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
-            if errorIdentity > 5.e-16:
-                print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
-            
-            # calculate omegas
-            du = self.du
-            
-            zi = self.z[Id] - [l2,l1][Id] * self.dt
-                        
-            du[0]  = np.interp(zi,self.z,P) - P[Id]
-            du[-1] = np.interp(zi,self.z,Q) - Q[Id]
-            
-            self.domega[Id] = np.dot( self.L[Id][1+Id], du) + self.dt * self.L[Id][1+Id][1] * Aid * self.netGravity[n] 
+        ## right eigenvalue matrix
+        # riemannInvariants with unit flow 
+        R[0][0] =  Zc
+        R[0][1] =  Zc
+        R[1][1] = -1.0
+                                
+        ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
+        errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
+        if errorIdentity > 5.e-16:
+            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+        
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
+        # calculate omegas
+        du = self.du
+        zi = self.z[position] - [-c,c][position] * self.dt
+                                        
+        du[0]  = np.interp(zi,self.z,P) - P[position]
+        du[-1] = np.interp(zi,self.z,Q) - Q[position]
+        
+        domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * A[position] * self.netGravity[n]
                 
+        return L,R,LAMBDA,Zc,Zc,domega
              
-    def updateLARLSys0InvariantPressure(self,P,Q,A,idArray=[0,-1],Ct=None,ct=None):
+    def updateLARLSys0InvariantPressure(self,P,Q,A,position):
         '''
         Update LAMBDA,R,L,Z of the system equations
         
@@ -208,56 +198,53 @@ class System(object):
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
         n = self.n[0]
-        for Id in idArray: 
-            
-            Aid = A[Id]      
-            
-            if Ct == None: C = self.C_nID(P,Id)
-            else:  C = Ct[Id]
-            if ct == None: c = self.c(A[Id],C)
-            else:  c = ct[Id]
-            
-            self.LAMBDA[Id][0] = c
-            self.LAMBDA[Id][1] = -c
-            
-            # Z1 = Z2 = Zc
-            Zc =  1.0/(C*c)
+        
+        C = self.C_nID(P,position)
+        c = self.c(A[position],C)
                         
-            self.Z[Id][0] = Zc
-            self.Z[Id][1] = Zc
-            
-            ## left eigenvalue matrix
-            # riemannInvariants with unit pressure
-            self.L[Id][0][1] =  Zc
-            self.L[Id][1][1] = -Zc
-
-            ## right eigenvalue matrix
-            # riemannInvariants with unit pressure
-            self.R[Id][0][0] =  0.5
-            self.R[Id][0][1] =  0.5
-            self.R[Id][1][0] =  0.5/(Zc)
-            self.R[Id][1][1] = -0.5/(Zc)
-
-            L = self.L[Id]
-            R = self.R[Id]
-            ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
-                            
-            ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
-            errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
-            if errorIdentity > 5.e-16:
-                print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
-            
-            # calculate omegas
-            du = self.du
-            
-            zi = self.z[Id] - [l2,l1][Id] * self.dt
+        # Z1 = Z2 = Zc
+        Zc =  1.0/(C*c)
                         
-            du[0]  = np.interp(zi,self.z,P) - P[Id]
-            du[-1] = np.interp(zi,self.z,Q) - Q[Id]
+        LAMBDA = self.LAMBDA
+        
+        LAMBDA[0] = c
+        LAMBDA[1] = -c
+        
+        L = self.L
+        R = self.R
+        
+        ## left eigenvalue matrix
+        # riemannInvariants with unit pressure
+        L[0][1] =  Zc
+        L[1][1] = -Zc
+
+        ## right eigenvalue matrix
+        # riemannInvariants with unit pressure
+        R[0][0] =  0.5
+        R[0][1] =  0.5
+        R[1][0] =  0.5/(Zc)
+        R[1][1] = -0.5/(Zc)
+                                
+        ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
+        errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
+        if errorIdentity > 5.e-16:
+            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+        
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
+        # calculate omegas
+        du = self.du
+        
+        zi = self.z[position] - [-c,c][position] * self.dt
+                    
+        du[0]  = np.interp(zi,self.z,P) - P[position]
+        du[-1] = np.interp(zi,self.z,Q) - Q[position]
             
-            self.domega[Id] = np.dot( self.L[Id][1+Id], du) + self.dt * self.L[Id][1+Id][1] * Aid * self.netGravity[n]    
+        domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * A[position] * self.netGravity[n]    
             
-    def updateLARLSys1InvariantFlow(self,P,Q,A,idArray=[0,-1],Ct=None,ct=None,sqrt=np.sqrt):
+        return L,R,LAMBDA,Zc,Zc,domega
+            
+            
+    def updateLARLSys1InvariantFlow(self,P,Q,A,position,sqrt=np.sqrt):
         '''
         Update LAMBDA,R,L,Z of the system equations
         
@@ -279,63 +266,57 @@ class System(object):
         dlt = self.dlt  
         n = self.n[0]
         
-        for Id in idArray:       
-               
-            Aid = A[Id]
-               
-            if Ct == None: C = self.C_nID(P,Id)
-            else:  C = Ct[Id]
-            if ct == None: c = self.c(Aid,C)
-            else:  c = ct[Id]
-            
-            v = Q[Id]/Aid
-            
-            l1 = dlt*v+sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
-            l2 = dlt*v-sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
-            
-            self.LAMBDA[Id][0] = l1
-            self.LAMBDA[Id][1] = l2
-            
-            Z1 =  1.0/(C*l1)
-            Z2 = -1.0/(C*l2)
-                        
-            self.Z[Id][0] = Z1
-            self.Z[Id][1] = Z2
-            
-            ## left eigenvalue matrix
-            # riemannInvariants with unit flow    
-            self.L[Id][0][0] =  1.0/(Z1+Z2)
-            self.L[Id][0][1] =  Z2/(Z1+Z2)
-            self.L[Id][1][0] =  1.0/(Z1+Z2)
-            self.L[Id][1][1] = -Z1/(Z1+Z2)
+        Aid = A[position]
+        
+        C = self.C_nID(P,position)
+        c = self.c(Aid,C)
+        
+        v = Q[position]/Aid
+        
+        l1 = dlt*v+sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+        l2 = dlt*v-sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+        
+        LAMBDA = self.LAMBDA
+        LAMBDA[0] = l1
+        LAMBDA[1] = l2
+        
+        Z1 =  1.0/(C*l1)
+        Z2 = -1.0/(C*l2)
+                                            
+        L = self.L
+        R = self.R
+        
+        ## left eigenvalue matrix
+        # riemannInvariants with unit flow    
+        L[0][0] =  1.0/(Z1+Z2)
+        L[0][1] =  Z2/(Z1+Z2)
+        L[1][0] =  1.0/(Z1+Z2)
+        L[1][1] = -Z1/(Z1+Z2)
 
-            ## right eigenvalue matrix
-            # riemannInvariants with unit flow 
-            self.R[Id][0][0] =  Z1
-            self.R[Id][0][1] =  Z2
-            self.R[Id][1][1] = -1.0
-
-            L = self.L[Id]
-            R = self.R[Id]
-            ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
-                            
-            ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
-            errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
-            if errorIdentity > 5.e-16:
-                print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
-            
-            # calculate omegas
-            du = self.du
-            
-            zi = self.z[Id] - [l2,l1][Id] * self.dt
-                        
-            du[0]  = np.interp(zi,self.z,P) - P[Id]
-            du[-1] = np.interp(zi,self.z,Q) - Q[Id]
-            
-            self.domega[Id] = np.dot( self.L[Id][1+Id], du) + self.dt * self.L[Id][1+Id][1] * Aid * self.netGravity[n]   
+        ## right eigenvalue matrix
+        # riemannInvariants with unit flow 
+        R[0][0] =  Z1
+        R[0][1] =  Z2
+        R[1][1] = -1.0
+  
+        ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
+        errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
+        if errorIdentity > 5.e-16:
+            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+        
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
+        # calculate omegas
+        du = self.du
+        zi = self.z[position] - [l2,l1][position] * self.dt
+                    
+        du[0]  = np.interp(zi,self.z,P) - P[position]
+        du[-1] = np.interp(zi,self.z,Q) - Q[position]
+        
+        domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * Aid * self.netGravity[n]   
+          
+        return L,R,LAMBDA,Z1,Z2,domega
               
-              
-    def updateLARLSys1InvariantPressure(self,P,Q,A,idArray=[0,-1],Ct=None,ct=None,sqrt=np.sqrt):
+    def updateLARLSys1InvariantPressure(self,P,Q,A,position,sqrt=np.sqrt):
         '''
         Update LAMBDA,R,L,Z of the system equations
         
@@ -355,57 +336,54 @@ class System(object):
         '''
         dlt = self.dlt  
         n = self.n[0]
-        for Id in idArray:
             
-            Aid = A[Id]       
-               
-            if Ct == None: C = self.C_nID(P,Id)
-            else:  C = Ct[Id]
-            if ct == None: c = self.c(A[Id],C)
-            else:  c = ct[Id]
-            
-            v = Q[Id]/A[Id] 
-            
-            l1 = dlt*v+sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
-            l2 = dlt*v-sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
-            
-            self.LAMBDA[Id][0] = l1
-            self.LAMBDA[Id][1] = l2
-            
-            Z1 =  1.0/(C*l1)
-            Z2 = -1.0/(C*l2)
-                                    
-            self.Z[Id][0] = Z1
-            self.Z[Id][1] = Z2
-            
-            ## left eigenvalue matrix
-            # riemannInvariants with unit poressure
-            self.L[Id][0][1] =  Z2
-            self.L[Id][1][1] = -Z1
+        Aid = A[position]       
+           
+        C = self.C_nID(P,position)
+        c = self.c(Aid,C)
+        
+        v = Q[position]/Aid
+        
+        l1 = dlt*v+sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+        l2 = dlt*v-sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+                
+        LAMBDA = self.LAMBDA
+        LAMBDA[0] = l1
+        LAMBDA[1] = l2
+        
+        Z1 =  1.0/(C*l1)
+        Z2 = -1.0/(C*l2)
+                                
+        L = self.L
+        R = self.R
+        
+        ## left eigenvalue matrix
+        # riemannInvariants with unit poressure
+        L[0][1] =  Z2
+        L[1][1] = -Z1
 
-            ## right eigenvalue matrix
-            # riemannInvariants with unit pressure
-            self.R[Id][0][0] =  Z1/(Z1+Z2)
-            self.R[Id][0][1] =  Z2/(Z1+Z2)
-            self.R[Id][1][0] =  1.0/(Z1+Z2)
-            self.R[Id][1][1] = -1.0/(Z1+Z2)
-            
-            L = self.L[Id]
-            R = self.R[Id]
-            ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
-                            
-            ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
-            errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
-            if errorIdentity > 5.e-16:
-                print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
-            
-            # calculate omegas
-            du = self.du
-            
-            zi = self.z[Id] - [l2,l1][Id] * self.dt
+        ## right eigenvalue matrix
+        # riemannInvariants with unit pressure
+        R[0][0] =  Z1/(Z1+Z2)
+        R[0][1] =  Z2/(Z1+Z2)
+        R[1][0] =  1.0/(Z1+Z2)
+        R[1][1] = -1.0/(Z1+Z2)
+                
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
                         
-            du[0]  = np.interp(zi,self.z,P) - P[Id]
-            du[-1] = np.interp(zi,self.z,Q) - Q[Id]
+        ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
+        errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
+        if errorIdentity > 5.e-16:
+            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
             
-            self.domega[Id] = np.dot( self.L[Id][1+Id], du) + self.dt * self.L[Id][1+Id][1] * Aid * self.netGravity[n]  
-    
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
+        # calculate omegas
+        du = self.du
+        zi = self.z[position] - [l2,l1][position] * self.dt
+                    
+        du[0]  = np.interp(zi,self.z,P) - P[position]
+        du[-1] = np.interp(zi,self.z,Q) - Q[position]
+        
+        domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * Aid * self.netGravity[n]   
+          
+        return L,R,LAMBDA,Z1,Z2,domega

@@ -1717,7 +1717,7 @@ class VaryingElastance(BoundaryConditionType2):
 		"""Computes  are the resisduals of the functions f1,f2 and f3, they are defined as functions that are only called when they are needed. The
 		argument partialSystem determines which of the residuals are computed and returned."""
 		
-		x = np.array([2.0, 3.0, 4.0])
+		x = np.array([0.0, 0.0, 0.0])
 		x[self.system[partialSystem]] += x_partial
 		dQm, dPv, domega_ = x 
 				
