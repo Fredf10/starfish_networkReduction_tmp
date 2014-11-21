@@ -284,7 +284,7 @@ class VascularNetwork(object):
                 if bc.name in ['_Windkessel-2Elements','_Windkessel-2Elements','_Windkessel-3Elements','Windkessel-3Elements']:
                     windkesselExist = True
                 # initialise 
-                if bc.name in ['VaryingElastance']:
+                if bc.name in ['VaryingElastanceHeart']:
                     try:
                         bc.mitral.rho = self.globalFluid['rho']
                     except: print "WARNING: VascularNetwork.initialize(): could not set blood density for mitral valve!"

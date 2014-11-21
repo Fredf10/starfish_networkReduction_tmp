@@ -1498,7 +1498,7 @@ class VaryingElastance(BoundaryConditionType2):
 		
 				
 		self.cycleNumber = 0
-		self.atriumPressure = 7.5 * 133.32 #Pressure in the atrium
+		self.atriumPressure = 7.5 * 133.32 #Pressure in the atrium ## venouse pressure?!
 		
 		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
 		
@@ -1508,6 +1508,7 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		self.dQInOut = np.empty((2))
 		
+		
 	def initializeSolutionVectors(self, Tsteps):
 		"""Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state 
 		
@@ -1516,6 +1517,9 @@ class VaryingElastance(BoundaryConditionType2):
 		"""
 		
 		""" Initialize Solution Vectors """
+		
+		print """ Initialize Solution Vectors """
+		
 		self.mitral.initializeSolutions(Tsteps)
 		self.aortic.initializeSolutions(Tsteps)
 	
@@ -1699,8 +1703,7 @@ class VaryingElastance(BoundaryConditionType2):
 			iterations +=1
 			J_inv = self.solverInverseJacobian(xn, *args, partialSystem = partialSystem)
 			x = xn - np.dot(J_inv, res).ravel()
-			print " this function is quickfixed"
-			
+						
 			error = np.linalg.norm(x - xn, 2)/np.linalg.norm(xn, 2)
 			if error < 0.0001:
 				break

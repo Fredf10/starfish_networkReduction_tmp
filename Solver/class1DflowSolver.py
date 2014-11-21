@@ -275,7 +275,9 @@ class FlowSolver(object):
         ## initialse varying elastance model
         for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if isinstance(bC, VaryingElastance):
+                print bC.name
+                if bC.name == 'VaryingElastanceHeart':
+                    print "initialize VEH"
                     Qm    = initialValues[vesselId]['Flow']
                     bC.update({'aorticFlowPreviousTimestep':Qm})
                     bC.initializeSolutionVectors(self.Tsteps)
@@ -720,6 +722,12 @@ class FlowSolver(object):
             
         ### garbage collection
         gc.collect()
+        
+        try:
+            print "FS726: self.vascularNetwork.boundaryConditions[1][0].volume"
+            print self.vascularNetwork.boundaryConditions[1][0].volume
+            print self.vascularNetwork.boundaryConditions[1][0].pressure
+        except: pass
         
         del self.numericalObjects
         del self.fields

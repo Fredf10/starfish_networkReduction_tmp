@@ -42,10 +42,11 @@ except:
     exit()
     
 
-### 2. available data
+### 2. saveData To csv
 
-vesselId = 50
+vesselId = 1
 n = 5 #gridnode
+filename = "reymondVessel1.csv"
 
 Psol = vascularNetwork.vessels[vesselId].Psol[:,[n]]
 Qsol = vascularNetwork.vessels[vesselId].Qsol[:,[n]]
@@ -54,7 +55,7 @@ Asol = vascularNetwork.vessels[vesselId].Asol[:,[n]]
 timeValues = vascularNetwork.simulationTime.ravel()
 
 #'P_f [Pa]','P_b [Pa]', 'Q_f [m^3/s]', 'Q_b [m^3/s]'
-filename = "basd.csv"
+
 import csv
 with open(filename, 'wb') as f:
     writer = csv.writer(f,delimiter=';')
