@@ -83,6 +83,7 @@ def loadSolutionDataFile(networkName, dataNumber):
     vascularNetwork = None
     
     # 
+    
     simulationCasesAvailable = parseDirectoryForSimulationCases(networkName)    
     try: simCasePathPickle = simulationCasesAvailable[dataNumber]    
     except: 
