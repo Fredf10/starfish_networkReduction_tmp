@@ -2,9 +2,9 @@
 <bigDaddy_Reymond2009.xml id="xxx" version="4.1">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">24.0</totalTime>
+    <totalTime unit="s">4.0</totalTime>
     <CFL>0.45</CFL>
-    <gravitationalField>True</gravitationalField>
+    <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
     <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
     <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>

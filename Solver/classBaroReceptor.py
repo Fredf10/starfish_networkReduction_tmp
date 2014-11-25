@@ -13,7 +13,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/NetworkLib')
 
 class BaroReceptor(object):
-    def __init__(self, dt, n, Tsteps, vesselNi, A):
+    def __init__(self, dt, n, Tsteps, vesselNi, A, bc):
         '''
         Baroreceptor model
         
@@ -39,31 +39,66 @@ class BaroReceptor(object):
         self.F1 = F0
         self.F2 = F0
         
+        self.bc = bc
+        self.cellMlBaroreceporModel = None
+        
+        
+        ## initialize
+        self.loadCellMLBaroModel()
+    
+    def loadCellMLBaroModel(self):
+         '''
+         create the python class for baroreceptor model from cellML file
+         '''
+         
+         self.filename     
+         
+         self.cellMlBaroreceporModel = baroReceptorBuganhage
+        
     def __call__(self):
         
         # create local variables for this timestep
         dt = self.dt
         n = self.n[0]
         
-        # 1. calculate strain
-        An = self.A[n][self.vesselNi]
-        A0 = self.A0
-        epsilon = (An-A0)/A0
+        if n%50 == 0:
         
+            # 1. calculate strain
+            An = self.A[n][self.vesselNi]
+            A0 = self.A0
+            epsilon = (An-A0)/A0
+            
+            ## call cellML baor model
+            self.cellMlBaroreceporModel.solve(epsilon, dt)
+            
+            heartRate = self.cellMlBaroreceporModel.heartRate
+            
+            ## update hartRate in VaryingElastance model
+                   
+            self.bc.update({'T':1.0/heartRate})
+        
+        
+        
+    def baroReceptorBuganhage(self,epsilon,dt):        
+         
         ## 2. solve F1,F2  (== L1 L2) functions
         # explicit euler
         self.F1 = self.F1 + dt/self.tau1 (epsilon-self.F1)
         self.F2 = self.F2 + dt/self.tau2 (epsilon-self.F2)
-        
+         
         # 3. calculate L(L1,L2)
         F = (self.alpha * self.F1 - self.F2)*(alpha-1)
-        
+         
         # 4. calculate firing rate phi
         phi = self.phi0 + self.g*(F-self.F0)* 0.5 * (np.sign((F-self.F0)) + 1)
-        
+         
         # 5. calcualte phi_sn phi_pn
-        
+         
         ## should go into the classBoundaryConditions.py
         # 6. (adrelanin ODE) phi_sn -> calculate heart rate // apply to boundaryConditions
-        
-        
+         
+        return phi
+ 
+            
+    
+    

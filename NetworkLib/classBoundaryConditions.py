@@ -1612,12 +1612,11 @@ class VaryingElastance(BoundaryConditionType2):
 		""" Because of the large differences in magnitude between pressure and flow in the currently used dimensions some attemts were made to scale the
 		variables using for example these scaling factors for B,p, q,and omega"""
 		B_ref = 1060/(2*A**2)
-		n_p = 1.0#self.Emax*self.V0
-		n_q = 1.0#(n_p/B_ref)**0.5
-		n_o = 1.0#n_q/r21
+		n_p = 1.#self.Emax*self.V0
+		n_q = 1.#(n_p/B_ref)**0.5
+		n_o = 1.#n_q/r21
 		
-
-		args = dt, mitrLdivB, mitrB,LdivB,B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega, n_q, n_p, B_ref
+		args = dt, mitrLdivB, mitrB,LdivB, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega, n_q, n_p, B_ref
 		
 		
 		"""The following section computes the increment domega_ which goes into the vessel from the ventricle, """
@@ -1679,7 +1678,6 @@ class VaryingElastance(BoundaryConditionType2):
 	def E(self, t):
 		"""Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
 		   according to Tpeak, T, Emax and Emin. """
-		
 		a1 = 0.708*self.Tpeak
 		a2 = 1.677*a1
 		
@@ -1696,8 +1694,7 @@ class VaryingElastance(BoundaryConditionType2):
 		xn = x0[self.system[partialSystem]]
 		res = self.solverResiduals(xn,*args, partialSystem = partialSystem)
 		#error = np.linalg.norm(res, 2)
-						
-		
+								
 		while True:
 			#print x0
 			iterations +=1
@@ -1774,6 +1771,8 @@ class VaryingElastance(BoundaryConditionType2):
 			
 
 			return J_inv 
+		
+		
 		
 
 class Valve:

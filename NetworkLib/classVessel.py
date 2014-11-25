@@ -184,13 +184,15 @@ class Vessel(object):
             print "ERROR: classVessel.initialize(): As calculation of vessel {}!".format(self.Id)
             
         ## initialize compliance
-        try:
+        try:            
+            
             self.compliance = eval(self.complianceType)(self.rho,self.AsVector)
             # initialize compliance element
             complianceDict = {}
             for variable in nxml.vesselComplianceElements[self.complianceType]:
                 if variable not in ['As','constantCompliance']:
                     complianceDict[variable] = self.getVariableValue(variable)
+                                
             self.compliance.initialize(complianceDict)
             
             # apply functionals
