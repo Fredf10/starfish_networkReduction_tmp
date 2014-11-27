@@ -1594,11 +1594,11 @@ class VaryingElastance(BoundaryConditionType2):
 		Qn1 = self.aorticFlowPreviousTimestep
 		
 		
-		r21,r22 =  R[1][0],R[1][1]
-		#L = self.aortic.computeL(A, n+1)
+		r11,r12,r21,r22 =  R[0][0],R[0][1],R[1][0],R[1][1]
+		L = self.aortic.computeL(A, n+1)
 		LdivB = self.aortic.LdivideB(A, n+1)
 		B = self.aortic.computeB(A, n+1)
-		#mitrL = self.mitral.computeL(self.mitral_annulus_area, n+1)
+		mitrL = self.mitral.computeL(self.mitral_annulus_area, n+1)
 		mitrLdivB = self.mitral.LdivideB(A, n+1)
 		mitrB = self.mitral.computeB(self.mitral_annulus_area, n+1) #
 		mitrQn = self.mitralQ[n]
@@ -1608,7 +1608,21 @@ class VaryingElastance(BoundaryConditionType2):
 		E = self.E(t)
 		Vn = self.volume[n]
 		ventrPn = self.pressure[n]
-		
+# 		print "B is: ", B
+# 		print "pn is: ", Pn
+# 		print "ventrPn is: ", ventrPn
+# 		print "volume is", Vn
+# 		print "E is,", E
+# 		print "ventricle pressure should be:", E*(Vn-self.V0)
+# 		print "t is:",t
+# 		if B:
+# 			print "Qn is: ", Qn
+# 			print "dp1 is:", abs(Qn)*Qn*B
+# 			print "dp2 is:", L*(Qn-Qn1)/dt
+# 			print "dP total is:", abs(Qn)*Qn*B+L*(Qn-Qn1)/dt
+# 		print "ventrPn-Pn is:", ventrPn-Pn
+# # 		print "A aortic is",A
+# 		print "venop is:", venoP
 		""" Because of the large differences in magnitude between pressure and flow in the currently used dimensions some attemts were made to scale the
 		variables using for example these scaling factors for B,p, q,and omega"""
 		B_ref = 1060/(2*A**2)
@@ -1616,13 +1630,15 @@ class VaryingElastance(BoundaryConditionType2):
 		n_q = 1.#(n_p/B_ref)**0.5
 		n_o = 1.#n_q/r21
 		
-		args = dt, mitrLdivB, mitrB,LdivB, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega, n_q, n_p, B_ref
+		args = dt, mitrLdivB, mitrB,LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref
 		
 		
 		"""The following section computes the increment domega_ which goes into the vessel from the ventricle, """
 		
 		if not B and not mitrB:
 			"""both valves are closed: """
+			
+			
 			self.mitralQ[n+1] = 0 
 			domega_ = _domega
 			self.volume[n+1] = self.volume[n] - 0.5*(Qn - mitrQn)*dt
@@ -1639,6 +1655,7 @@ class VaryingElastance(BoundaryConditionType2):
 				"""only the aortic valve is open"""
 				x = self.newtonSolver(self.x0,args, partialSystem='aortic open')
 				self.mitralQ[n+1] = 0
+			
 				self.pressure[n+1] = self.pressure[n] + x[0]*n_p
 				domega_  = x[1]*n_o
 				self.x0 = np.concatenate((np.array([0]), x))
@@ -1649,6 +1666,7 @@ class VaryingElastance(BoundaryConditionType2):
 				self.mitralQ[n+1] = self.mitralQ[n] + x[0]*n_q
 				self.pressure[n+1] = self.pressure[n] + x[1]*n_p
 				
+			
 				if Qn == 0:
 					domega_ = _domega
 				else:
@@ -1658,6 +1676,8 @@ class VaryingElastance(BoundaryConditionType2):
 			else:
 				"""both valves are open"""
 				x = self.newtonSolver(self.x0,args)
+				print "both open"
+			
 				self.mitralQ[n+1] = self.mitralQ[n] + x[0]*n_q
 				self.pressure[n+1] = self.pressure[n] + x[1]*n_p
 				domega_ = x[2]*n_o
@@ -1699,28 +1719,34 @@ class VaryingElastance(BoundaryConditionType2):
 			#print x0
 			iterations +=1
 			J_inv = self.solverInverseJacobian(xn, *args, partialSystem = partialSystem)
-			x = xn - np.dot(J_inv, res).ravel()
+			
+ 			
+			
+			x = xn - np.dot(J_inv, res).T
+			
 						
 			error = np.linalg.norm(x - xn, 2)/np.linalg.norm(xn, 2)
 			if error < 0.0001:
 				break
 			xn = x
 			res = self.solverResiduals(x, *args, partialSystem = partialSystem)
-			
+
 			if iterations > maxIterations: 
 				x *= 0
 				break
 
 		return x
 		
-	def solverResiduals(self, x_partial, dt, mitrLdivB, mitrB,LdivB,B, mitrQn1, mitrQn,ventrPn, atrP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega, n_q, n_p, B_ref, partialSystem = np.array([0,1,2])):#dt, mitrL, mitrB,L,B, mitrQn1, mitrQn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega):
+	def solverResiduals(self, x_partial, dt, mitrLdivB, mitrB, LdivB, L, mitrL, B, mitrQn1, mitrQn,ventrPn, atrP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref, partialSystem = np.array([0,1,2])):#dt, mitrL, mitrB,L,B, mitrQn1, mitrQn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega):
 		"""Computes  are the resisduals of the functions f1,f2 and f3, they are defined as functions that are only called when they are needed. The
 		argument partialSystem determines which of the residuals are computed and returned."""
 		
 		x = np.array([0.0, 0.0, 0.0])
 		x[self.system[partialSystem]] += x_partial
 		dQm, dPv, domega_ = x 
-				
+		
+# 		Knut Petters version:
+		"""		
 		def f1(): 
 			a = mitrQn/n_q + dQm
 			return a*abs(a) + mitrLdivB/(2*n_q*dt)*(3*dQm + (mitrQn1 - mitrQn)/n_q) + (n_p*dPv + ventrPn - atrP)/(mitrB*n_q**2)
@@ -1729,11 +1755,33 @@ class VaryingElastance(BoundaryConditionType2):
 		def f3():
 			a = (Qn + r22*_domega)/n_q + domega_
 			return a*abs(a) + LdivB/(2*n_q*dt)*(3*domega_ + (3*r22 - Qn + Qn1)/n_q) + (n_q/r21*domega_ + _domega + Pn - ventrPn - n_p*dPv)/(B*n_q**2)
+		"""
 		
-		functions = np.array([f1, f2, f3])
+		def f1():
+			a = mitrQn/n_q + dQm
+			return mitrB*a*abs(a)+(0.5/dt)*mitrL*(3*dQm + (mitrQn1 - mitrQn)/n_q)+(n_p*dPv + ventrPn - atrP)
+		def f2():
+			return E/n_p*(Vn - (Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dQm))*dt - self.V0)*(1-self.K*(Qn + n_q*domega_*r21 + r22*_domega)) - ventrPn/n_p - dPv
+		
+		def f3():
+			 a = (Qn + r22*_domega)/n_q + domega_*r21
+			 return B*a*abs(a)+(0.5/dt)*L*(3*domega_*r21 + (3*r22*_domega - Qn + Qn1)/n_q)+ (r11*domega_ + _domega*r12 + Pn - ventrPn - n_p*dPv)
+		
+		def f1simple():
+			a= mitrQn +dQm
+			return mitrB*a*abs(a)+0.5*mitrL*(3*dQm+mitrQn1-mitrQn)/dt-atrP+ventrPn+dPv
+		
+		def f2simple():
+			return E*(Vn-0.5*dt*(r21*domega_+r22*_domega+2*Qn-2*mitrQn-dQm)-self.V0)-ventrPn-dPv
+		
+		def f3simple():
+			a=r21*domega_+r22*_domega+Qn
+			return B*a*abs(a)+(L/(2*dt))*(3*r21*domega_+3*r22*_domega-Qn+Qn1)-ventrPn -dPv + Pn + r11*domega_ + _domega*r12
+			
+		functions = np.array([f1simple, f2simple, f3simple])
 		return np.array([f() for f in functions[self.system[partialSystem]]])
 	
-	def solverInverseJacobian(self, x_partial, dt, mitrLdivB, mitrB,LdivB,B, mitrQn1, mitrQn,ventrPn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega, n_q, n_p,B_ref, partialSystem = np.array([0,1,2])):
+	def solverInverseJacobian(self, x_partial, dt, mitrLdivB, mitrB,LdivB, L, mitrL, B, mitrQn1, mitrQn,ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p,B_ref, partialSystem = np.array([0,1,2])):
 		"""Computes the inverse Jacobian of the system. The components a1, a2, a3, a4, a5 and a6 are declared using strings, and evaluated using eval()
 		 only when needed. (Not sure how smart this is). Reduces lines of code, but is probably slower."""
 		
@@ -1742,7 +1790,43 @@ class VaryingElastance(BoundaryConditionType2):
 		x[self.system[partialSystem]] += x_partial 
 		dmQ, dvP, domega_ = x
 		
+		if partialSystem == 'mitral open':
+			
+			a1 = mitrB*2*(mitrQn/n_q + dmQ)*np.sign(mitrQn/n_q + dmQ)+1.5*mitrL/dt
+			a2 = 0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))
+			
+			a1simple = mitrB*2*abs(mitrQn+dmQ)+1.5*mitrL/dt
+			a2simple = 0.5*E*dt
+			
+			J_inv = np.array([[1,  1], 
+							  [a2simple, -a1simple]])/(a1simple+a2simple)
+			return J_inv
+		elif partialSystem == 'aortic open':
+			a3 = -0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))-r21*E*self.K*(Vn -(Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dmQ))*dt - self.V0)
+			a4 = B*r21*2*(Qn + r21*domega_+ r22*_domega)*np.sign(Qn + r21*domega_+ r22*_domega)+1.5*L*r21/dt+r11
+			
+			a3simple = -0.5*E*dt*r21
+			a4simple = 2*r21*B*abs(r21*domega_+r22*_domega+Qn)+1.5*L*r21/(dt)+r11
+			
+			J_inv =np.array([[a4simple, -a3simple], 
+							 [1, -1]])/(-a4simple +a3simple)
+			return J_inv
+		else:
+			a1 = mitrB*2*(mitrQn/n_q + dmQ)*np.sign(mitrQn/n_q + dmQ)+1.5*mitrL/dt
+			a2 = 0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))
+			a3 = -0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))-r21*E*self.K*(Vn -(Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dmQ))*dt - self.V0)
+			a4 = B*r21*2*(Qn + r21*domega_+ r22*_domega)*np.sign(Qn + r21*domega_+ r22*_domega)+1.5*L*r21/dt+r11
+
+			J_inv = np.array([[ -a4+a3,  -a4,  a3  ],
+						      [ -a2*a4, a1*a4, -a1*a3 ],
+						      [  -a2, a1, a1+a2 ]])/(a1*a3 - a1*a4 - a2*a4)
+			
+
+			return J_inv 
 		
+		
+		
+		"""
 		expressions = np.array([
 		'2*(mitrQn/n_q + dmQ)*np.sign(mitrQn/n_q + dmQ) + 1.5*mitrLdivB/(n_q*dt)',
 		'B_ref/mitrB',
@@ -1750,6 +1834,11 @@ class VaryingElastance(BoundaryConditionType2):
 		'-0.5*n_q/n_p*E*dt*(1-self.K*(Qn + n_q*domega_ + r22*_domega)) - E*self.K*n_q/n_p*(Vn -(Qn - mitrQn + 0.5*(n_q*domega_ + r22*_domega - n_q*dmQ))*dt - self.V0)',
 		'-B_ref/B',
 		'2*((Qn + r22*_domega)/n_q + domega_)*np.sign((Qn + r22*_domega)/n_q + domega_) + 1.5*LdivB/(n_q*dt) + 1/(r21*B*n_q)'])
+
+
+
+
+		
 
 		if partialSystem == 'mitral open':
 			a1, a2, a3 = [eval(e) for e in expressions[[0,1,2]]]
@@ -1772,7 +1861,7 @@ class VaryingElastance(BoundaryConditionType2):
 
 			return J_inv 
 		
-		
+		"""
 		
 
 class Valve:
@@ -1810,6 +1899,9 @@ class Valve:
 	def computeB(self, A, n):
 		""" Returns the turbulent resistance coefficient B, used in computing the pressure difference across the valve"""
 		A_eff = self.effectiveOrificeArea(A,n)
+		
+
+		
 		if A_eff == 0:
 			B = None
 		elif A/A_eff > 1e4:
