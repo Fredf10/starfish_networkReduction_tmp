@@ -2,7 +2,7 @@
 <singleAorta.xml id="999" version="4.1">
   <simulationContext>
     <description>my STARFiSh simulation</description>
-    <totalTime unit="s">6.0</totalTime>
+    <totalTime unit="s">2.0</totalTime>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
@@ -16,9 +16,9 @@
     <automaticGridAdaptation>True</automaticGridAdaptation>
   </solverCalibration>
   <initialisationControls>
-    <initialsationMethod>ConstantPressure</initialsationMethod>
+    <initialsationMethod>MeanPressure</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0.000125</initMeanFlow>
-    <initMeanPressure unit="mmHg">25</initMeanPressure>
+    <initMeanPressure unit="mmHg">100</initMeanPressure>
     <estimateWindkesselCompliance>Tree</estimateWindkesselCompliance>
     <compPercentageWK3>0.8</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
@@ -49,7 +49,7 @@
       	<Tpeak unit = 's'>0.43</Tpeak>
       	<V0 unit = 'ml'>20</V0>
       	<K>0</K>
-      </VaryingElastanceHeart>      
+      </VaryingElastanceHeart>            
       <_Windkessel-3Elements>
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">133000000.0</Rtotal>
@@ -70,7 +70,7 @@
         <length unit="m">0.5</length>
         <radiusProximal unit="m">0.0294</radiusProximal>
         <radiusDistal unit="m">0.0288</radiusDistal>
-        <N>30.0</N>
+        <N>100.0</N>
       </geometry>
       <compliance>
         <complianceType>Hayashi</complianceType>

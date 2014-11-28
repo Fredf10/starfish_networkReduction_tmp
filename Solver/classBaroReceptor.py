@@ -69,7 +69,7 @@ class BaroReceptor(object):
             epsilon = (An-A0)/A0
             
             ## call cellML baor model
-            self.cellMlBaroreceporModel.solve(epsilon, dt)
+            self.cellMlBaroreceporModel.solve(P, dt)
             
             heartRate = self.cellMlBaroreceporModel.heartRate
             

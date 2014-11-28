@@ -176,7 +176,7 @@ class System(object):
         
         domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * A[position] * self.netGravity[n]
                 
-        return L,R,LAMBDA,Zc,Zc,domega
+        return L,R,LAMBDA,Zc,Zc,domega[0]
              
     def updateLARLSys0InvariantPressure(self,P,Q,A,position):
         '''
@@ -241,7 +241,7 @@ class System(object):
             
         domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * A[position] * self.netGravity[n]    
             
-        return L,R,LAMBDA,Zc,Zc,domega
+        return L,R,LAMBDA,Zc,Zc,domega[0]
             
             
     def updateLARLSys1InvariantFlow(self,P,Q,A,position,sqrt=np.sqrt):
@@ -314,7 +314,7 @@ class System(object):
         
         domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * Aid * self.netGravity[n]   
           
-        return L,R,LAMBDA,Z1,Z2,domega
+        return L,R,LAMBDA,Z1,Z2,domega[0]
               
     def updateLARLSys1InvariantPressure(self,P,Q,A,position,sqrt=np.sqrt):
         '''
@@ -386,4 +386,4 @@ class System(object):
         
         domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * Aid * self.netGravity[n]   
           
-        return L,R,LAMBDA,Z1,Z2,domega
+        return L,R,LAMBDA,Z1,Z2,domega[0]
