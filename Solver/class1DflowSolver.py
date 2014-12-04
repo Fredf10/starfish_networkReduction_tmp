@@ -48,7 +48,8 @@ class FlowSolver(object):
         # the connections of the Network { motherVesselID : <instance>::classConnections, ...}
         self.connections  = {}                
         # the communicator objects of the vascularNetwork {communicatorID : <instance>::classCommunicator}
-        self.communicators = {}
+        #self.communicators = {}
+        self.communicators = {'0':{'comType': 'CommunicatorBaroreceptor','vesselId':0}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -424,16 +425,18 @@ class FlowSolver(object):
         
         
         #print 'cFS435 Communicators',self.vascularNetwork.communicators
-        for comId, comData in self.vascularNetwork.communicators.iteritems():
-                      
+        #for comId, comData in self.vascularNetwork.communicators.iteritems():
+        for comId, comData in self.communicators.iteritems():      
             ## for baro receptor and visualisation
-            try:
-                data = {'Pressure': self.vessels[comData['vesselId']].Psol,
-                        'Flow'    : self.vessels[comData['vesselId']].Qsol,
-                        'Area'    : self.vessels[comData['vesselId']].Asol
+            #try:
+            data = {'Pressure': self.vessels[comData['vesselId']].Psol,
+                    'Flow'    : self.vessels[comData['vesselId']].Qsol,
+                    'Area'    : self.vessels[comData['vesselId']].Asol
                         }
-                comData['data']           = data
-            except: pass
+            comData['data']           = data
+                
+                
+            #except: pass
             
             ## not used now
 #             ## for visualisation                                        
@@ -455,9 +458,11 @@ class FlowSolver(object):
             comData['n']              = self.n
             comData['dt']             = self.dt
             
-            self.communicators[comId] = eval(comData['comType'])(comData)
-       
-       
+            self.communicators[comId] = eval(comData['comType'])(comData) # call the constructor
+            
+            
+
+   
     def initializeNumericalObjectList(self):
         '''
         ## fill numObjectList (self.numericalObjects) traversing the treeList 
@@ -535,6 +540,8 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
         print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)               
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
+        print self.communicators['0']
+        print np.shape(self.communicators['0'].data['Area'])
         print '===================================== \n'
         
             
