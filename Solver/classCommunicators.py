@@ -3,6 +3,7 @@ import numpy as np
 import pprint
 import subprocess
 
+
 import sys,os,time
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -183,7 +184,8 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         self.data               = {}  # data # dictionary with data to plot! data should be acsessable with [quantity][time n][node]
         self.vesselId           = 0
         self.boundaryCondition  = 0
-        self.comType            = ''
+        #self.comType            = ''
+        self.comType            = 'CommunicatorBaroreceptor'
         self.comId              = 0
         
         ### to delete
@@ -203,7 +205,7 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         
         # variables depending on init variables
         self.inititalValues     = []
-        self.Ao                 = self.data['Area'][0][self.node]
+        self.Ao                 = self.data['Area'][0]
                 
         try:    os.remove(''.join([cur,'/',self.filenameRead]))
         except: pass
@@ -218,7 +220,12 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         self.count += 1
         
         ## calculate strain and save
-                
+        
+        epsilon = (self.data['Area'][n] - self.Ao)/self.Ao
+        print 'epsilon'
+        print epsilon
+        
+                       
         time1 = 5.
         time2 = 10
         a = True
