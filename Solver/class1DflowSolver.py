@@ -14,6 +14,7 @@ from classSystemEquations import *
 from classConnections import *
 from classFields import *
 from classCommunicators import *
+from classBaroReceptor import *
 
 sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
@@ -49,7 +50,9 @@ class FlowSolver(object):
         self.connections  = {}                
         # the communicator objects of the vascularNetwork {communicatorID : <instance>::classCommunicator}
         #self.communicators = {}
-        self.communicators = {'0':{'comType': 'CommunicatorBaroreceptor','vesselId':0}}
+        self.communicators = {'0':{'comType': 'CommunicatorBaroreceptor','vesselId':1}}
+        # Baroreceptor model
+        self.baroreceptors = {'0': {'CellMl': True}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -110,6 +113,7 @@ class FlowSolver(object):
         self.initializeConnections()
         self.initializeFields()
         self.initializeCommunicators()
+        self.initializeBaroReceptors()
         self.initializeNumericalObjectList()
         if quiet==False:
             self.initOutput() # feedback
@@ -431,7 +435,9 @@ class FlowSolver(object):
             #try:
             data = {'Pressure': self.vessels[comData['vesselId']].Psol,
                     'Flow'    : self.vessels[comData['vesselId']].Qsol,
-                    'Area'    : self.vessels[comData['vesselId']].Asol
+                    'Area'    : self.vessels[comData['vesselId']].Asol,
+                    'Strain'  : np.zeros(np.shape(self.vessels[comData['vesselId']].Asol)),
+                    'MStrain' : np.zeros(np.shape(self.vessels[comData['vesselId']].Asol)[0])
                         }
             comData['data']           = data
                 
@@ -461,7 +467,25 @@ class FlowSolver(object):
             self.communicators[comId] = eval(comData['comType'])(comData) # call the constructor
             
             
-
+    def initializeBaroReceptors(self):
+        
+        '''
+        function used to initialize Baroreceptor objects
+        '''
+        
+        
+        for baroId, baroData in self.baroreceptors.iteritems():
+            
+            CellML = self.baroreceptors['0']['CellMl']
+            
+            baroData = {}
+                
+            baroData['n']              = self.n
+            baroData['dt']             = self.dt
+            baroData['Tsteps']         = self.Tsteps   
+            baroData['cellMLBaroreceptorModel'] = CellML
+            self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
+    
    
     def initializeNumericalObjectList(self):
         '''
@@ -510,6 +534,10 @@ class FlowSolver(object):
             try:    communicator.startRealTimeVisualisation()
             except: pass
             
+        for baroreceptor in self.baroreceptors.itervalues():
+            self.numericalObjects.append(baroreceptor) 
+            
+            
         if self.multiProcessing == True:
             self.numericalObjects.append("HOlD")
                
@@ -541,7 +569,8 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)               
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
         print self.communicators['0']
-        print np.shape(self.communicators['0'].data['Area'])
+        print np.shape(self.communicators['0'].data['Strain'])
+        print np.shape(self.communicators['0'].data['MStrain'])
         print '===================================== \n'
         
             
@@ -579,7 +608,13 @@ class FlowSolver(object):
                 self.n[0] = n
                 
                 for numericalObject in self.numericalObjects:
-                    numericalObject()
+                    
+                    try:
+                        numericalObject()
+                        
+                    except:
+                        eps = self.communicators['0'].data['MStrain'][self.n[0]]
+                        numericalObject(eps)
                                     
         ## to be concentrated with original !!
         else:
@@ -676,6 +711,7 @@ class FlowSolver(object):
 #                      aortic.state, aortic.B, aortic.L, mitral.state, mitral.B, mitral.L
         
         print "\nSystem solved!"
+        
         
         if self.quiet == False:
             
