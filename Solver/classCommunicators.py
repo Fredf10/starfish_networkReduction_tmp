@@ -2,6 +2,8 @@ import numpy as np
 
 import pprint
 import subprocess
+import math
+import numpy
 
 
 import sys,os,time
@@ -176,7 +178,8 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         '''
         
         '''
-        # def variables to set with comDict          
+        # def variables to set with comDict         
+         
         self.n                  = [0] # n
         self.dn                 = 1  #dn
         self.dt                 = 0.1 #dt
@@ -206,6 +209,17 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         # variables depending on init variables
         self.inititalValues     = []
         self.Ao                 = self.data['Area'][0]
+        
+        # Area, radius and strain
+        self.Ro = numpy.power(self.Ao/math.pi,0.5)
+        self.A = self.Ao
+        self.R = self.Ro
+        
+        sizeEpsilon = numpy.shape(self.A)
+        
+        self.epsilon = numpy.zeros(sizeEpsilon)
+        self.epsMean = 0
+        
                 
         try:    os.remove(''.join([cur,'/',self.filenameRead]))
         except: pass
@@ -219,11 +233,18 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         n = self.n[0]
         self.count += 1
         
-        ## calculate strain and save
+        ## calculate strain and save to data dictionary
         
-        epsilon = (self.data['Area'][n] - self.Ao)/self.Ao
-        print 'epsilon'
-        print epsilon
+        self.A = self.data['Area'][n]
+        self.R = numpy.power(self.A/math.pi,0.5)
+        
+        self.epsilon = (self.R - self.Ro)/self.Ro
+        self.epsMean = numpy.mean(self.epsilon)
+        
+        self.data['Strain'][n] = self.epsilon
+        self.data['MStrain'][n] = self.epsMean
+        #print 'epsilon'
+        #print self.epsMean
         
                        
         time1 = 5.
