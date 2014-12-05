@@ -14,7 +14,7 @@ from classSystemEquations import *
 from classConnections import *
 from classFields import *
 from classCommunicators import *
-from classBaroReceptor import *
+from classBaroReceptor2 import *
 
 sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
