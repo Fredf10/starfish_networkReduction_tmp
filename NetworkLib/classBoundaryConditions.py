@@ -1,6 +1,7 @@
 import numpy as np 
 import csv
 from math import exp
+import ODESolver as OD
 
 import os,sys
 # set the path relative to THIS file not the executing file!
@@ -1445,7 +1446,7 @@ class L_network(BoundaryConditionType2):
 		
 		return np.dot(R,self.omegaNew)
 	
-class VaryingElastance(BoundaryConditionType2):
+class VaryingElastanceold(BoundaryConditionType2):
 	"""
 	An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
 	(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
@@ -1526,6 +1527,14 @@ class VaryingElastance(BoundaryConditionType2):
 		self.pressure = np.zeros(Tsteps)
 		self.volume = np.zeros(Tsteps)
 		self.mitralQ = np.zeros(Tsteps)
+		self.Elastance = np.zeros(Tsteps) #New
+		self.Flow = np.zeros(Tsteps)
+		self.DtFlow = np.zeros(Tsteps)
+		self.Turb=np.zeros(Tsteps)
+		self.Inert=np.zeros(Tsteps)
+		self.InbyTurb=np.zeros(Tsteps)
+		self.deltaP=np.zeros(Tsteps)
+		self.aortaP=np.zeros(Tsteps)
 		
 		""" Initial conditions in the ventricle"""
 		self.pressure[0] = self.atriumPressure
@@ -1537,7 +1546,7 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		self.mitral_annulus_area = 0.0007
 		
-		mitral_M_st          = 0.7
+		mitral_M_st          = 0.4
 		mitral_M_rg = 0.0
 		mitral_delta_p_open = 0
 		mitral_delta_p_close = 0 
@@ -1546,10 +1555,10 @@ class VaryingElastance(BoundaryConditionType2):
 
 		
 		"""Aortic valve parameters"""
-		aortic_M_st          = 0.99
+		aortic_M_st          = 1
 		aortic_M_rg          = 0.00
 		aortic_delta_p_open  = 0*133.32
-		aortic_delta_p_close = 2.0*133.32 # 2mmHg
+		aortic_delta_p_close = 2*133.32 # 2mmHg
 		aortic_K_v_open      = 0.12
 		aortic_K_v_close     = 0.12
 
@@ -1605,31 +1614,47 @@ class VaryingElastance(BoundaryConditionType2):
 		mitrQn1 = self.mitralQ[n-1]
 		venoP = self.atriumPressure
 		t = self.getCycleTime(n+1, dt)
+# 		ttemp = t-dt
 		E = self.E(t)
 		Vn = self.volume[n]
+		self.Elastance[n+1]=E/133.3e6
+		self.Flow[n]=Qn*1e6
+		self.aortaP[n]=Pn
+#		self.DtFlow[n]=(Qn-Qnold)/dt
 		ventrPn = self.pressure[n]
-# 		print "B is: ", B
-# 		print "pn is: ", Pn
-# 		print "ventrPn is: ", ventrPn
+		print "B is: ", B
+		print "pn is: ", Pn
+		print "ventrPn is: ", ventrPn
+		print "ventricle pressure should be:", E*(Vn-self.V0)
+		print "ventrPn-Pn is:", ventrPn-Pn
 # 		print "volume is", Vn
 # 		print "E is,", E
-# 		print "ventricle pressure should be:", E*(Vn-self.V0)
-# 		print "t is:",t
-# 		if B:
-# 			print "Qn is: ", Qn
-# 			print "dp1 is:", abs(Qn)*Qn*B
-# 			print "dp2 is:", L*(Qn-Qn1)/dt
-# 			print "dP total is:", abs(Qn)*Qn*B+L*(Qn-Qn1)/dt
-# 		print "ventrPn-Pn is:", ventrPn-Pn
-# # 		print "A aortic is",A
-# 		print "venop is:", venoP
+		print "t is:",t
+		if B:
+			self.DtFlow[n]=1e6*(Qn-Qn1)/dt
+			self.Turb[n]=abs(Qn)*Qn*B/133
+			self.Inert[n]=L*(Qn-Qn1)/(dt*133)
+			self.deltaP[n]=abs(Qn)*Qn*B/133+L*(Qn-Qn1)/(dt*133)
+#			self.aortaP[n]=self.pressure[n]-self.deltaP[n]
+#			self.aortaP[n]=Pn
+			try:
+				self.InbyTurb[n]=(abs(Qn)*Qn*B)/(L*(Qn-Qn1)/dt)
+				
+			except: pass
+			print "Qn is: ", Qn
+			print "dp1 (B part) is:", abs(Qn)*Qn*B
+			print "dp2 (L part)is:", L*(Qn-Qn1)/dt
+			print "dP total is:", abs(Qn)*Qn*B+L*(Qn-Qn1)/dt
+		
 		""" Because of the large differences in magnitude between pressure and flow in the currently used dimensions some attemts were made to scale the
 		variables using for example these scaling factors for B,p, q,and omega"""
 		B_ref = 1060/(2*A**2)
 		n_p = 1.#self.Emax*self.V0
 		n_q = 1.#(n_p/B_ref)**0.5
 		n_o = 1.#n_q/r21
-		
+		if Qn<-20e-6:
+			B=None
+			
 		args = dt, mitrLdivB, mitrB,LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref
 		
 		
@@ -1643,7 +1668,7 @@ class VaryingElastance(BoundaryConditionType2):
 			domega_ = _domega
 			self.volume[n+1] = self.volume[n] - 0.5*(Qn - mitrQn)*dt
 			self.pressure[n+1] = E*(self.volume[n+1] - self.V0)
-			
+			print "both closed"
 			if Qn == 0:
 				domega_ = _domega
 			else:
@@ -1655,7 +1680,7 @@ class VaryingElastance(BoundaryConditionType2):
 				"""only the aortic valve is open"""
 				x = self.newtonSolver(self.x0,args, partialSystem='aortic open')
 				self.mitralQ[n+1] = 0
-			
+				print "aortic open"
 				self.pressure[n+1] = self.pressure[n] + x[0]*n_p
 				domega_  = x[1]*n_o
 				self.x0 = np.concatenate((np.array([0]), x))
@@ -1687,9 +1712,12 @@ class VaryingElastance(BoundaryConditionType2):
 			self.volume[n+1] = Vn - (Qn + 0.5*(-self.mitralQ[n] - self.mitralQ[n+1] + dQ))*dt
 			
 		self.aorticFlowPreviousTimestep = Qn
+#		Qnold=Qn
 		
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domega
+		
+		
 
 
 	def funcPos1(self, _domega, R, L, n, dt, P, Q, A):
@@ -1764,8 +1792,8 @@ class VaryingElastance(BoundaryConditionType2):
 			return E/n_p*(Vn - (Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dQm))*dt - self.V0)*(1-self.K*(Qn + n_q*domega_*r21 + r22*_domega)) - ventrPn/n_p - dPv
 		
 		def f3():
-			 a = (Qn + r22*_domega)/n_q + domega_*r21
-			 return B*a*abs(a)+(0.5/dt)*L*(3*domega_*r21 + (3*r22*_domega - Qn + Qn1)/n_q)+ (r11*domega_ + _domega*r12 + Pn - ventrPn - n_p*dPv)
+			a = (Qn + r22*_domega)/n_q + domega_*r21
+			return B*a*abs(a)+(0.5/dt)*L*(3*domega_*r21 + (3*r22*_domega - Qn + Qn1)/n_q)+ (r11*domega_ + _domega*r12 + Pn - ventrPn - n_p*dPv)
 		
 		def f1simple():
 			a= mitrQn +dQm
@@ -1907,7 +1935,8 @@ class Valve:
 		elif A/A_eff > 1e4:
 			B = None
 		else:
-			B = 0.5*self.rho*(1/A_eff - 1/A)**2
+			B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
+#			B = 0.5*self.rho*(1/A_eff - 1/A)  #test
 		return B
 
 	def computeL(self, A, n):
@@ -1918,7 +1947,7 @@ class Valve:
 		elif A/A_s > 1e4:
 			L = None
 		else:
-			L = 2*np.pi*self.rho*(1/A_s - 1/A)**0.5
+			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5
 		return L
 
 	
@@ -1967,4 +1996,290 @@ class Valve:
 		else:
 			""" The case where -delta_p_close < delta_p < delta_p_open, the valve state stays unchanged """
 			self.state[n+1] = self.state[n]
+			
+class VaryingElastance(BoundaryConditionType2):
+	"""
+	An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
+	(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
+	
+	The general shape of the elastance function is given by three shape parameters. Various conditions of heart contractility are then created by scaling this 
+	function using the parameters:
+	T - Heart period
+	Emax - Maximum elastance
+	Emin - Minimum elastance
+	Tpeak - Time to peak elastance
+	
+	The equation also requires the two constants:
+	V0 - Volume axis intercept
+	K - Source resistance
+	
+	NB! The source resistance (K) was introduced to the implementation as an experiment. It modifies the elastance curve depending on ventricular outflow,
+	so that it bself.mitral = None # mitral valve
+		self.aortic = None # aortic valve
+		self.initializeValves() # intialize valvesecomes dependent on the afterload of the heart. Introducing the source resistance did produce a load dependence 
+	(shown by curved isochrones in p-v loops), however the results are in no way to be trusted since the modified varying elastance equation was not intended
+	to be used together with the specific varying elastance curve shape used here (Stergiopulos). A proper implementation of the source resistance 
+	requires a different curve shape. The parameter K is therefore set to zero by default, but it should perhaps be removed from the code altogether??
+	
+	Currently only the return method "def funcPos0" has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
+	It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.   """
+	def __init__(self):
+		self.type = 2
 		
+		self.subiterations = 0
+		
+		self.omegaNew = np.empty((2))
+		
+		#Default parameters
+		self.T = 1
+		self.Emax  = 2.31 * 133.3e6 
+		self.Emin = 0.06 * 133.3e6 
+		self.Tpeak = 0.4
+		
+		self.V0 = 20e-6 
+		
+		self.K  =  0.0
+		self.Rv = 0.005*133*10**6
+		
+		"""Shape parameters"""
+		self.alpha = 1.672
+		self.n1 = 1.32
+		self.n2 = 21.9
+		self.R11 = None
+		self.R12 = None
+		self.R21 = None
+		self.R22 = None
+		self.DtW2 = None
+
+		
+
+		#n-1 values
+#		self.aorticFlowPreviousTimestep = None
+		
+#		self.system = {'both open':np.array([0,1,2]), 'mitral open': np.array([0,1]), 'aortic open':np.array([1,2])} 
+		
+				
+		self.cycleNumber = 0
+		self.atriumPressure = 7.5 * 133.32 #Pressure in the atrium ## venouse pressure?!
+		
+#		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
+		
+		
+		self.dQInOut = np.empty((2))
+		
+		
+	def initializeSolutionVectors(self, Tsteps):
+		"""Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state 
+		
+		NB! This method is not called from the class constructor, but is called externally by the initializeSolutionMatrices method in the solver,
+		this is a bit messy, but was the easiest way to do it since the BC is initiated before the number of time steps is known.
+		"""
+		
+		""" Initialize Solution Vectors """
+		
+		print """ Initialize Solution Vectors """
+		
+	
+		self.pressure = np.zeros(Tsteps)
+		self.volume = np.zeros(Tsteps)
+		self.mitralQ = np.zeros(Tsteps)
+		self.Elastance = np.zeros(Tsteps) #New
+		self.Flow = np.zeros(Tsteps)
+		self.DtFlow = np.zeros(Tsteps)
+		self.deltaP=np.zeros(Tsteps)
+		self.aortaP=np.zeros(Tsteps)
+		
+		""" Initial conditions in the ventricle"""
+		self.pressure[0] = self.atriumPressure
+		self.volume[0] = self.atriumPressure/self.E(0) + self.V0
+				
+		
+	
+	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
+	
+#		self.updateValves(P, n, dt)                     # Update the state of the mitral and aortic valve at timestep n + 1
+		self.startNewCycleIfCriteriaIsMet(n, dt)
+		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)      # Compute the riemann variant going into the vessel save in omegaNew
+		
+		self.dQInOut = R[:][1]*self.omegaNew 
+		# calculate du and return this!
+		return np.dot(R,self.omegaNew),self.dQInOut
+
+
+
+
+
+	def getCycleTime(self, n, dt):
+		return n*dt - self.T*self.cycleNumber
+	
+	def startNewCycleIfCriteriaIsMet(self, n, dt):
+		if self.getCycleTime(n, dt) > self.T:
+			self.cycleNumber += 1
+
+	def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
+		
+		# Qn1 == value at old time step
+		# change to self.aorticPressurePreviousTimestep ...
+		
+#		Qn1 = self.aorticFlowPreviousTimestep
+		
+		L=np.linalg.inv(R)
+		L11, L12, L21, L22 = L[0][0],L[0][1],L[1][0],L[1][1]
+		omegaprevious_ = L11*Pn + L12*Qn
+		r11,r12,r21,r22 =  R[0][0],R[0][1],R[1][0],R[1][1]
+	#	deltatdiff = 0.00001
+#		mitrQn = self.mitralQ[n]
+#		mitrQn1 = self.mitralQ[n-1]
+		venoP = self.atriumPressure
+		t = self.getCycleTime(n+1, dt)
+		t2 = self.getCycleTime(n, dt)
+# 		ttemp = t-dt
+		E = self.E(t)
+		e2 = self.E(t)
+	#	dE= (self.E(t+deltatdiff) -E)/deltatdiff
+		Vn = self.volume[n]
+		self.R11 = r11
+		self.R12 = r12
+		self.R21 = r21
+		self.R22 = r22
+		self.DtW2 = _domega/dt
+
+		
+		self.Elastance[n+1]=E/133.3e6
+		self.Flow[n]=Qn*1e6
+		self.aortaP[n]=Pn
+#		self.DtFlow[n]=(Qn-Qnold)/dt
+		ventrPn = self.pressure[n]
+		
+		print "pn is: ", Pn/133
+		print "ventrPn is: ", ventrPn/133
+		print "ventricle pressure should be:", E*(Vn-self.V0)/133
+		print "ventrPn-Pn is:", ventrPn-Pn
+		print "volume is", Vn*10**6
+		print "Qn is", Qn*10**6
+		print "start volume was", self.volume[0]*10**6
+		print "t is:",t
+		print "E is,", E/133.3e6
+		print "e is", e2/133.3e6
+		
+		
+		def diastole(u,t):
+		
+			"""Differential equations during diastole u[0]=V, u[1]=Pv, return dV/dt and dP/dt"""
+			
+			deltatdiff = 0.00001
+			E= self.E(t)
+			dE= (self.E(t+deltatdiff) -E)/deltatdiff
+			DV = (venoP-u[1])/self.Rv
+			DP = (dE*u[0]-self.V0)+E*(venoP-u[1])/self.Rv
+			return [DV,DP]
+	
+	
+		def systole(u,t):
+		
+			deltatdiff = 0.00001
+			Etemp= self.E(t)
+			dE= (self.E(t+deltatdiff) -Etemp)/deltatdiff
+			
+			DV = -u[2]
+			DP = (dE*(u[0]-self.V0) - Etemp*u[2] )
+	#		#DW1 = ((dE*(u[0]-self.V0) - Etemp*u[3] - self.R12*self.DtW2)/self.R11)
+			DQ = (self.R21/self.R11)*(dE*(u[0]-self.V0) - Etemp*u[2] ) +self.DtW2*(self.R22-(self.R12*self.R21)/self.R11)
+			return[DV,DP,DQ]
+			
+		solverSys = OD.RungeKutta4(systole) #Runga Kutta solver for ejection phase, Systole
+
+		solverdias = OD.RungeKutta4(diastole) #Runga Kutta solver for diastole
+			
+			
+		if (venoP>ventrPn):
+			solverdias.set_initial_condition([Vn,ventrPn])
+			if (t2)<01:
+				t_pointsd = np.linspace(0,dt,2)
+				
+			else:
+				t_pointsd = np.linspace(t2,t2+dt,2)
+			print t_pointsd
+			print self.cycleNumber
+
+			udiastole,td = solverdias.solve(t_pointsd)
+			udiastole = udiastole[1]
+			V = udiastole[0]
+			Pv = udiastole[1]
+			self.volume[n+1]=V
+			self.pressure[n+1]=Pv
+			if Qn ==0:
+				domega_=_domega
+			else:
+				domega_ = (-0.5*Qn - r22*_domega)/r21
+
+			print "diastole"
+			
+		elif (Qn>=0 and ventrPn>=Pn):
+			solverSys.set_initial_condition([Vn,Pn,Qn])
+			t_pointss = np.linspace(t2,t2+dt,2)
+			uSystole,ts = solverSys.solve(t_pointss)
+			uSystole = uSystole[1]
+			print t_pointss
+			print t_pointss.shape
+			V = uSystole[0]
+			P = uSystole[1]
+			Q =uSystole[2]
+			omeganew_ = L11*P + L12*Q
+			print "systole"
+			
+			self.volume[n+1]=V
+			self.pressure[n+1]=P
+			domega_= omeganew_ - omegaprevious_
+			
+		else:
+			self.volume[n+1]=Vn
+			self.pressure[n+1]=E*(Vn-self.V0)
+			domega_=_domega
+			print "iso"
+			
+
+		self.omegaNew[0] = domega_
+		self.omegaNew[1] = _domega
+
+
+	def funcPos1(self, _domega, R, L, n, dt, P, Q, A):
+		pass
+
+
+
+	def E(self, t):
+		"""Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
+		   according to Tpeak, T, Emax and Emin. """
+		a1 = 0.708*self.Tpeak
+		a2 = 1.677*a1
+		
+		n1, n2 = self.n1, self.n2
+		shapeFunction1 = (t/(a1))**n1/(1+(t/(a1))**n1)
+		shapeFunction2 = (1 + (t/(a2))**n2)**(-1)	
+		return (self.Emax-self.Emin)*self.alpha*shapeFunction1*shapeFunction2 + self.Emin
+# 	def diastole(self,u,t):
+# 		
+# 		"""Differential equations during diastole u[0]=V, u[1]=Pv, return dV/dt and dP/dt"""
+# 		
+# 		deltatdiff = 0.00001
+# 		E= self.E(t)
+# 		dE= (self.E(t+deltatdiff) -E)/deltatdiff
+# 		DV = (self.atriumPressure-u[1])/self.Rv
+# 		DP = (dE*u[0]-self.V0)+E*(self.atriumPressure-u[1])/self.Rv
+# 		return [DV,DP]
+# 	
+# 	
+# 	def systole(self,u,t):
+# 		
+# 		deltatdiff = 0.00001
+# 		E= self.E(t)
+# 		dE= (self.E(t+deltatdiff) -E)/deltatdiff
+# 		
+# 		DV = -u[3]
+# 		DP = (dE*(u[0]-self.V0) - E*u[3] )
+# 		DW1 = ((dE*(u[0]-self.V0) - E*u[3] - self.R12*self.DtW2)/self.R11)
+# 		DQ = (self.R21/self.R11)*(dE*(u[0]-self.V0) - E*u[3] ) +self.DtW2*(self.R22-(self.R12*self.R21)/self.R11)
+# 		return[DV,DP,DW1,DQ]
+
+
