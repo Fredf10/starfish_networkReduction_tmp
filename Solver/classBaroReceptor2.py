@@ -49,11 +49,13 @@ class BaroReceptor(object):
         
     def solveCellML(self,eps):
                            
-        timeArray = linspace(0,self.dt,2)
+        timeArray = linspace(0,self.dt,5)
         self.constants[34] = eps
         self.voi, self.states, self.algebraic = solver2(timeArray,self.states[-1],self.constants)
         print "heart rate"    
         print self.algebraic[-1][11]
+        print self.algebraic[-1][10]
+        print self.algebraic[-1][9]
         return self.voi, self.states, self.algebraic, self.algebraic[-1][11], self.constants[34]
         
         
