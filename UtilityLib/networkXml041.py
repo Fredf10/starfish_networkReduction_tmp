@@ -47,10 +47,10 @@ vascularNetworkElements = ['simulationContext',
 ## Communicator objects
 
 communicatorRealTimeViz  = ['comType', 'comId', 'vesselId', 'node', 'dn', 'quantitiesToPlot' ]
-CommunicatorBaroreceptor = ['comType', 'comId', 'vesselId', 'node']
+communicatorBaroreceptor = ['comType', 'comId', 'vesselId', 'node']
 
 communicatorReference = {'CommunicatorRealTimeViz' : communicatorRealTimeViz,
-                         'CommunicatorBaroreceptor': CommunicatorBaroreceptor
+                         'CommunicatorBaroreceptor': communicatorBaroreceptor
                          }
 
 ##########################################################################################

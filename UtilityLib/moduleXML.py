@@ -459,7 +459,6 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
                             communicatorData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                             if variable == 'comId': comId = communicatorData[variable]
                         vascularNetwork.updateNetwork({'communicators':{comId:communicatorData}})
-            
             elif xmlElementName == 'globalFluid':
                     
                 globalFluidData = {}

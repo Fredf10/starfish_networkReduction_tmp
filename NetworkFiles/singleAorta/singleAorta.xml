@@ -30,14 +30,14 @@
     <gamma>2.0</gamma>
   </globalFluid>
   <communicators>
-  	<communicatorRealTimeViz>
+  	<CommunicatorRealTimeViz>
   		<comType>CommunicatorRealTimeViz</comType>
   		<comId>1</comId>
   		<vesselId>1</vesselId>
   		<node>25</node>
   		<dn>20</dn>
   		<quantitiesToPlot>Pressure</quantitiesToPlot>
-  	</communicatorRealTimeViz>  		
+  	</CommunicatorRealTimeViz>  		
   </communicators>
   <boundaryConditions>
   	<VaryingElastanceHeart>
