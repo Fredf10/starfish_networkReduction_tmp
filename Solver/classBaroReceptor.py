@@ -23,7 +23,6 @@ class BaroReceptor(object):
         
         '''
         #System and Vessel Variables
-        
         self.dt = 0
         self.n = 0
         self.Tsteps = 0
