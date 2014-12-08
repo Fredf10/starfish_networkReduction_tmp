@@ -50,9 +50,12 @@ class FlowSolver(object):
         self.connections  = {}                
         # the communicator objects of the vascularNetwork {communicatorID : <instance>::classCommunicator}
         self.communicators = {}
-        #self.communicators = {'0':{'comType': 'CommunicatorBaroreceptor','vesselId':1}}
+                
         # Baroreceptor model
-        self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1}}
+        self.baroreceptors = {}
+        baro = True
+        if baro == True:
+            self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -423,22 +426,47 @@ class FlowSolver(object):
                                             self.n,
                                             self.dt, 
                                             self.systemEquations[vesselId],
-                                            self.rigidAreas,)
+                                            self.rigidAreas)
+    
+
+    def initializeBaroReceptors(self):
+        
+        '''
+        function used to initialize Baroreceptor objects
+        '''
+        
+        
+        for baroId, baroData in self.baroreceptors.iteritems():
+                        
+            baroVesselId = baroData['vesselId']
+            
+            data = {'Area'    : self.vessels[baroVesselId].Asol,
+                    'Strain'  : np.zeros(np.shape(self.vessels[baroVesselId].Asol)),
+                    'MStrain' : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0]),
+                    'HR'      : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0])
+                    }
+            
+            baroData['data'] = data
+                           
+            baroData['n']                       = self.n
+            baroData['dt']                      = self.dt
+            baroData['Tsteps']                  = self.Tsteps   
+            baroData['cellMLBaroreceptorModel'] = baroData.pop('CellMl')
+            
+            self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
     
     def initializeCommunicators(self):
         
         
-        #print 'cFS435 Communicators',self.vascularNetwork.communicators
-        #for comId, comData in self.vascularNetwork.communicators.iteritems():
-        for comId, comData in self.communicators.iteritems():      
+        print 'cFS435 Communicators',self.vascularNetwork.communicators
+        for comId, comData in self.vascularNetwork.communicators.iteritems():
+        #for comId, comData in self.communicators.iteritems():      
             ## for baro receptor and visualisation
             #try:
             data = {'Pressure': self.vessels[comData['vesselId']].Psol,
                     'Flow'    : self.vessels[comData['vesselId']].Qsol,
-                    'Area'    : self.vessels[comData['vesselId']].Asol,
-                    'Strain'  : np.zeros(np.shape(self.vessels[comData['vesselId']].Asol)),
-                    'MStrain' : np.zeros(np.shape(self.vessels[comData['vesselId']].Asol)[0])
-                        }
+                    'Area'    : self.vessels[comData['vesselId']].Asol
+                    }
             comData['data']           = data
                 
                 
@@ -466,36 +494,7 @@ class FlowSolver(object):
             
             self.communicators[comId] = eval(comData['comType'])(comData) # call the constructor
             
-            
-    def initializeBaroReceptors(self):
-        
-        '''
-        function used to initialize Baroreceptor objects
-        '''
-        
-        
-        for baroId, baroData in self.baroreceptors.iteritems():
-            
-            CellML = self.baroreceptors['0']['CellMl']
-            
-            data = {'Pressure': self.vessels[baroData['vesselId']].Psol,
-                    'Flow'    : self.vessels[baroData['vesselId']].Qsol,
-                    'Area'    : self.vessels[baroData['vesselId']].Asol,
-                    'Strain'  : np.zeros(np.shape(self.vessels[baroData['vesselId']].Asol)),
-                    'MStrain' : np.zeros(np.shape(self.vessels[baroData['vesselId']].Asol)[0]),
-                    'HR'      : np.zeros(np.shape(self.vessels[baroData['vesselId']].Asol)[0])        
-                         }
-            
-            baroData['data'] = data
-            
-               
-            baroData['n']              = self.n
-            baroData['dt']             = self.dt
-            baroData['Tsteps']         = self.Tsteps   
-            baroData['cellMLBaroreceptorModel'] = CellML
-            self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
-    
-   
+              
     def initializeNumericalObjectList(self):
         '''
         ## fill numObjectList (self.numericalObjects) traversing the treeList 
@@ -620,13 +619,6 @@ class FlowSolver(object):
                     
                     numericalObject()
                     
-                    #try:
-                        #numericalObject()
-                        
-                    #except:
-                        #eps = self.communicators['0'].data['MStrain'][self.n[0]]
-                        #numericalObject(eps)
-                                    
         ## to be concentrated with original !!
         else:
             # steady state variables
@@ -782,11 +774,20 @@ class FlowSolver(object):
             print self.vascularNetwork.boundaryConditions[1][0].volume
             print self.vascularNetwork.boundaryConditions[1][0].pressure
         except: pass
+                
+        try:
+            print "FS792: print self.baroreceptors['0'].data['HR']"
+            #print self.baroreceptors['0'].data['HR']
+            import matplotlib.pyplot as plt
+            plt.plot(self.baroreceptors['0'].data['HR'])
+            plt.plot(self.baroreceptors['0'].data['MStrain'])
+            plt.show()
+            
+            #print np.shape(self.baroreceptors['0'].data['Strain'])
+            #print self.baroreceptors['0'].data['Strain']
+            #print np.shape(self.baroreceptors['0'].data['MStrain'])
+        except: pass
         
-        #print np.shape(self.baroreceptors['0'].data['Strain'])
-        #print self.baroreceptors['0'].data['Strain']
-        #print np.shape(self.baroreceptors['0'].data['MStrain'])
-        print self.baroreceptors['0'].data['HR']
         
         del self.numericalObjects
         del self.fields

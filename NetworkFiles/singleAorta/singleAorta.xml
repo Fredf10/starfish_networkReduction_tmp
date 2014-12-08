@@ -2,7 +2,7 @@
 <singleAorta.xml id="999" version="4.1">
   <simulationContext>
     <description>my STARFiSh simulation</description>
-    <totalTime unit="s">2.0</totalTime>
+    <totalTime unit="s">20.0</totalTime>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
@@ -29,27 +29,36 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-  <communicators/>
+  <communicators>
+  	<communicatorRealTimeViz>
+  		<comType>CommunicatorRealTimeViz</comType>
+  		<comId>1</comId>
+  		<vesselId>1</vesselId>
+  		<node>25</node>
+  		<dn>20</dn>
+  		<quantitiesToPlot>Pressure</quantitiesToPlot>
+  	</communicatorRealTimeViz>  		
+  </communicators>
   <boundaryConditions>
-  	<Flow-Sinus2>
-        <amp unit="m3 s-1">0.0005</amp>
-        <ampConst unit="m3 s-1">0.0</ampConst>
-        <Npulse>50.0</Npulse>
-        <Tpulse unit="s">0.0</Tpulse>
-        <freq unit="s-1">10.0</freq>
-        <Tspace unit="s">0.1</Tspace>
-        <runtimeEvaluation>False</runtimeEvaluation>
-        <prescribe>influx</prescribe>
-      </Flow-Sinus2>
-    <boundaryCondition vesselId="1">
-       <VaryingElastanceHeart>
+  	<VaryingElastanceHeart>
       	<T    unit = 's'>0.8</T>
       	<Emax unit = 'mmHg ml-1'>2.31</Emax>
       	<Emin unit = 'mmHg ml-1'>0.06</Emin>
       	<Tpeak unit = 's'>0.43</Tpeak>
       	<V0 unit = 'ml'>20</V0>
       	<K>0</K>
-      </VaryingElastanceHeart>            
+      </VaryingElastanceHeart>     
+    <boundaryCondition vesselId="1"> 
+      <Flow-Sinus2>
+        <amp unit="m3 s-1">0.0005</amp>
+        <ampConst unit="m3 s-1">0.0</ampConst>
+        <Npulse>50.0</Npulse>
+        <Tpulse unit="s">0.0</Tpulse>
+        <freq unit="s-1">5/3</freq>
+        <Tspace unit="s">0.2</Tspace>
+        <runtimeEvaluation>False</runtimeEvaluation>
+        <prescribe>influx</prescribe>
+      </Flow-Sinus2>      
       <_Windkessel-3Elements>
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">133000000.0</Rtotal>
@@ -70,7 +79,7 @@
         <length unit="m">0.5</length>
         <radiusProximal unit="m">0.0294</radiusProximal>
         <radiusDistal unit="m">0.0288</radiusDistal>
-        <N>100.0</N>
+        <N>50.0</N>
       </geometry>
       <compliance>
         <complianceType>Hayashi</complianceType>

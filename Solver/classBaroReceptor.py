@@ -10,7 +10,7 @@ import math
 
 import sys,os
 
-from CellMLBaroReceptorModel import *
+import CellMLBaroReceptorModel as baroreceptorCellML
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -29,14 +29,14 @@ class BaroReceptor(object):
         self.vesselId = 0
         self.data = {}
         self.boundaryCondition  = 0
-        
+        self.CellML = False
         
         # Model from CellML
         self.cellMLBaroreceptorModel = False
         
         
         # update with the class with information from dictionary
-        self.updateBaro(BaroDict)
+        self.update(BaroDict)
         
         
         # initial area, remains unchanged
@@ -44,36 +44,31 @@ class BaroReceptor(object):
         
         # Area, radius and strain
         self.Ro = np.power(self.Ao/math.pi,0.5)
-        self.A = self.Ao
-        self.R = self.Ro
         
-        sizeEpsilon = np.shape(self.A)
+        sizeEpsilon = np.shape(self.Ao)
         
         self.epsilon = np.zeros(sizeEpsilon)
         self.epsMean = 0
-        
-        # heart rate
-        self.HeartRate = np.zeros(self.Tsteps)    
-        
+                
         
         if self.cellMLBaroreceptorModel == True:
             
             #initialize the CellML Baroreceptor model
             
-            (self.states, self.constants) = initConsts()
-            timeArray = linspace(0,self.dt,2)
-            self.voi, self.states, self.algebraic = solver2(timeArray,self.states,self.constants)
+            (self.states, self.constants) = baroreceptorCellML.initConsts()
+            timeArray = np.linspace(0,self.dt,2)
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states,self.constants)
              
         else:
             print "No CellML Baroreceptor Model provided"
         
         
     #def solveCellML(self,eps):
-    def solveCellML(self):
+    def solveCellML(self, epsMean):
                            
-        timeArray = linspace(0,self.dt,2)
-        self.constants[34] = self.epsMean
-        self.voi, self.states, self.algebraic = solver2(timeArray,self.states[-1],self.constants)
+        timeArray = np.linspace(0,self.dt,2)
+        self.constants[34] = epsMean
+        self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states[-1],self.constants)
         
         return self.voi, self.states, self.algebraic, self.algebraic[-1][11], self.constants[34]
         
@@ -82,25 +77,28 @@ class BaroReceptor(object):
         
     def __call__(self):
         
+        n = self.n[0]
         
         ## read area, calculate radius and strain and save to data dictionary
         
-        self.A = self.data['Area'][self.n]
-        self.R = np.power(self.A/math.pi,0.5)
+        A = self.data['Area'][n]
+        R = np.power(A/math.pi,0.5)
         
-        self.epsilon = (self.R - self.Ro)/self.Ro
-        self.epsMean = np.mean(self.epsilon)
+        epsilon = (R - self.Ro)/self.Ro
+        epsMean = np.mean(epsilon)
         
         # update the data dictionary with the strain and the mean strain
-        self.data['Strain'][self.n] = self.epsilon
-        self.data['MStrain'][self.n] = self.epsMean
+        self.data['Strain'][n+1]  = epsilon
+        self.data['MStrain'][n+1] = epsMean
         
         # print the calculated mean strain
-        print 'epsilon'
-        print self.epsMean
+        print 'cBR95: epsilon'
+        print epsMean
          
-        # solve the cellML system using the function defined above
-        self.solveCellML()
+        if n%20 == 0:
+            # solve the cellML system using the function defined above
+            self.solveCellML(epsMean)
+        
         
         print "heart rate"    
         print self.algebraic[-1][11]
@@ -108,13 +106,12 @@ class BaroReceptor(object):
         print self.algebraic[-1][9]
         
         # update the heart rate and the data dictionary with the current heart rate
-        self.HeartRate[self.n] = self.algebraic[-1][11]
-        self.data['HR'][self.n] = self.algebraic[-1][11]
+        self.data['HR'][n+1] = self.algebraic[-1][11]
         
         # update boundary conditions with new heart rate / period
     
     
-    def updateBaro(self,baroDict):
+    def update(self,baroDict):
             '''
             updates the updateBaroreceptorDict data using a dictionary in form of 
             baroDict = {'variableName': value}
