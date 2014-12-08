@@ -14,7 +14,7 @@ from classSystemEquations import *
 from classConnections import *
 from classFields import *
 from classCommunicators import *
-from classBaroReceptor2 import *
+from classBaroReceptor import *
 
 sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
@@ -49,10 +49,10 @@ class FlowSolver(object):
         # the connections of the Network { motherVesselID : <instance>::classConnections, ...}
         self.connections  = {}                
         # the communicator objects of the vascularNetwork {communicatorID : <instance>::classCommunicator}
-        #self.communicators = {}
-        self.communicators = {'0':{'comType': 'CommunicatorBaroreceptor','vesselId':1}}
+        self.communicators = {}
+        #self.communicators = {'0':{'comType': 'CommunicatorBaroreceptor','vesselId':1}}
         # Baroreceptor model
-        self.baroreceptors = {'0': {'CellMl': True}}
+        self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -478,8 +478,17 @@ class FlowSolver(object):
             
             CellML = self.baroreceptors['0']['CellMl']
             
-            baroData = {}
-                
+            data = {'Pressure': self.vessels[baroData['vesselId']].Psol,
+                    'Flow'    : self.vessels[baroData['vesselId']].Qsol,
+                    'Area'    : self.vessels[baroData['vesselId']].Asol,
+                    'Strain'  : np.zeros(np.shape(self.vessels[baroData['vesselId']].Asol)),
+                    'MStrain' : np.zeros(np.shape(self.vessels[baroData['vesselId']].Asol)[0]),
+                    'HR'      : np.zeros(np.shape(self.vessels[baroData['vesselId']].Asol)[0])        
+                         }
+            
+            baroData['data'] = data
+            
+               
             baroData['n']              = self.n
             baroData['dt']             = self.dt
             baroData['Tsteps']         = self.Tsteps   
@@ -568,9 +577,9 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
         print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)               
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
-        print self.communicators['0']
-        print np.shape(self.communicators['0'].data['Strain'])
-        print np.shape(self.communicators['0'].data['MStrain'])
+        #print self.communicators['0']
+        #print np.shape(self.communicators['0'].data['Strain'])
+        #print np.shape(self.communicators['0'].data['MStrain'])
         print '===================================== \n'
         
             
@@ -609,12 +618,14 @@ class FlowSolver(object):
                 
                 for numericalObject in self.numericalObjects:
                     
-                    try:
-                        numericalObject()
+                    numericalObject()
+                    
+                    #try:
+                        #numericalObject()
                         
-                    except:
-                        eps = self.communicators['0'].data['MStrain'][self.n[0]]
-                        numericalObject(eps)
+                    #except:
+                        #eps = self.communicators['0'].data['MStrain'][self.n[0]]
+                        #numericalObject(eps)
                                     
         ## to be concentrated with original !!
         else:
@@ -771,6 +782,11 @@ class FlowSolver(object):
             print self.vascularNetwork.boundaryConditions[1][0].volume
             print self.vascularNetwork.boundaryConditions[1][0].pressure
         except: pass
+        
+        #print np.shape(self.baroreceptors['0'].data['Strain'])
+        #print self.baroreceptors['0'].data['Strain']
+        #print np.shape(self.baroreceptors['0'].data['MStrain'])
+        print self.baroreceptors['0'].data['HR']
         
         del self.numericalObjects
         del self.fields
