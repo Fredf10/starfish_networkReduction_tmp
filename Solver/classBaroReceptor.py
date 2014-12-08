@@ -6,6 +6,7 @@ import numpy as np
 import copy
 
 import pprint
+import math
 
 import sys,os
 
@@ -18,7 +19,7 @@ sys.path.append(cur+'/NetworkLib')
 class BaroReceptor(object):
     def __init__(self, BaroDict):
         '''
-        Baroreceptor model
+        Baroreceptor model initialisation
         
         '''
         #System and Vessel Variables
@@ -26,14 +27,35 @@ class BaroReceptor(object):
         self.dt = 0
         self.n = 0
         self.Tsteps = 0
-        #self.vesselNi = vesselNi
+        self.vesselId = 0
+        self.data = {}
+        self.boundaryCondition  = 0
         
+        
+        # Model from CellML
         self.cellMLBaroreceptorModel = False
         
+        
+        # update with the class with information from dictionary
         self.updateBaro(BaroDict)
         
-        self.epsilon = np.zeros(self.Tsteps)
-        self.HeartRate = np.zeros(self.Tsteps)
+        
+        # initial area, remains unchanged
+        self.Ao = self.data['Area'][0]
+        
+        # Area, radius and strain
+        self.Ro = np.power(self.Ao/math.pi,0.5)
+        self.A = self.Ao
+        self.R = self.Ro
+        
+        sizeEpsilon = np.shape(self.A)
+        
+        self.epsilon = np.zeros(sizeEpsilon)
+        self.epsMean = 0
+        
+        # heart rate
+        self.HeartRate = np.zeros(self.Tsteps)    
+        
         
         if self.cellMLBaroreceptorModel == True:
             
@@ -47,32 +69,50 @@ class BaroReceptor(object):
             print "No CellML Baroreceptor Model provided"
         
         
-    def solveCellML(self,eps):
+    #def solveCellML(self,eps):
+    def solveCellML(self):
                            
         timeArray = linspace(0,self.dt,2)
-        self.constants[34] = eps
+        self.constants[34] = self.epsMean
         self.voi, self.states, self.algebraic = solver2(timeArray,self.states[-1],self.constants)
-        #print "heart rate"    
-        #print self.algebraic[-1][11]
-        #print self.algebraic[-1][10]
-        #print self.algebraic[-1][9]
+        
         return self.voi, self.states, self.algebraic, self.algebraic[-1][11], self.constants[34]
         
         
         
-    #def solve(self,eps):
-           
-      #  self.epsilon[self.n] = eps
         
-      #  if self.cellMLBaroreceptorModel == True:
-       #         
-         #   self.solveCellML()
-
-     
-    def  __call__(self,eps):
-          
-        (t, s, a, hr, c) = self.solveCellML(eps)
-        self.HeartRate[self.n] = hr
+    def __call__(self):
+        
+        
+        ## read area, calculate radius and strain and save to data dictionary
+        
+        self.A = self.data['Area'][self.n]
+        self.R = np.power(self.A/math.pi,0.5)
+        
+        self.epsilon = (self.R - self.Ro)/self.Ro
+        self.epsMean = np.mean(self.epsilon)
+        
+        # update the data dictionary with the strain and the mean strain
+        self.data['Strain'][self.n] = self.epsilon
+        self.data['MStrain'][self.n] = self.epsMean
+        
+        # print the calculated mean strain
+        print 'epsilon'
+        print self.epsMean
+         
+        # solve the cellML system using the function defined above
+        self.solveCellML()
+        
+        print "heart rate"    
+        print self.algebraic[-1][11]
+        print self.algebraic[-1][10]
+        print self.algebraic[-1][9]
+        
+        # update the heart rate and the data dictionary with the current heart rate
+        self.HeartRate[self.n] = self.algebraic[-1][11]
+        self.data['HR'][self.n] = self.algebraic[-1][11]
+        
+        # update boundary conditions with new heart rate / period
     
     
     def updateBaro(self,baroDict):
@@ -87,79 +127,4 @@ class BaroReceptor(object):
                 except: 
                     print 'ERROR baroreceptor.update(): wrong key: %s, could not set up baroreceptor' %key
         
-        #self.A = A
-        #self.A0 = copy.deepcopy(A[vesselNi])
-        
-        # constants of baroreceptor
-        #self.F0    = 0 #called L0 in article
-        #self.g     = 0
-        #self.alpha = 0
-        #self.tau1  = 0
-        #self.tau2  = 0
-        
-        #self.F1 = F0
-        #self.F2 = F0
-        
-        #self.bc = bc
-        
-           
-    #def loadCellMLBaroModel(self):
-      #   '''
-      #   create the python class for baroreceptor model from cellML file
-      #   '''
-         
-      #   self.filename     
-         
-      #   self.cellMlBaroreceporModel = baroReceptorBuganhage
-        
-   # def __call__(self):
-        
-        # create local variables for this timestep
-      #  dt = self.dt
-      #  n = self.n[0]
-        
-      #  if n%50 == 0:
-        
-            # 1. calculate strain
-        #    An = self.A[n][self.vesselNi]
-        #    A0 = self.A0
-          #  epsilon = (An-A0)/A0
             
-            ## call cellML baor model
-<<<<<<< .mine
-          #  self.cellMlBaroreceporModel.solve(epsilon, dt)
-=======
-            self.cellMlBaroreceporModel.solve(P, dt)
->>>>>>> .r890
-            
-          #  heartRate = self.cellMlBaroreceporModel.heartRate
-            
-            ## update hartRate in VaryingElastance model
-                   
-          #  self.bc.update({'T':1.0/heartRate})
-        
-        
-        
-    #def baroReceptorBuganhage(self,epsilon,dt):        
-         
-        ## 2. solve F1,F2  (== L1 L2) functions
-        # explicit euler
-       # self.F1 = self.F1 + dt/self.tau1 (epsilon-self.F1)
-       # self.F2 = self.F2 + dt/self.tau2 (epsilon-self.F2)
-         
-        # 3. calculate L(L1,L2)
-       # F = (self.alpha * self.F1 - self.F2)*(alpha-1)
-         
-        # 4. calculate firing rate phi
-      #  phi = self.phi0 + self.g*(F-self.F0)* 0.5 * (np.sign((F-self.F0)) + 1)
-         
-        # 5. calcualte phi_sn phi_pn
-         
-        ## should go into the classBoundaryConditions.py
-        # 6. (adrelanin ODE) phi_sn -> calculate heart rate // apply to boundaryConditions
-         
-      #  return phi
- 
-            
-    
-    
