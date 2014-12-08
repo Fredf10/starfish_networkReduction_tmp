@@ -53,7 +53,7 @@ class FlowSolver(object):
                 
         # Baroreceptor model
         self.baroreceptors = {}
-        baro = True
+        baro = False
         if baro == True:
             self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
