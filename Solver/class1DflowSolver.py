@@ -786,17 +786,78 @@ class FlowSolver(object):
         ### garbage collection
         gc.collect()
         
+        
+        print "totaltime is", self.totalTime
+        Tim=np.linspace(0,self.totalTime,self.Tsteps)
+        print "Tsteps is", self.Tsteps
+
         try:
+            
+            
+            
             print "FS726: self.vascularNetwork.boundaryConditions[1][0].volume"
-            print self.vascularNetwork.boundaryConditions[1][0].volume
-            print self.vascularNetwork.boundaryConditions[1][0].pressure
+            
+            import matplotlib.pyplot as plt
+            f, axarr =plt.subplots(3)
+            axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
+            axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
+            axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
+            
+            plt.show(f)
+#             f, axarr =plt.subplots(5)
+#             axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
+#             axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
+#             axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
+#             axarr[3].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].mitral.state)
+#             axarr[4].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Elastance)
+#             axarr[0].set_title("Pressure in LV")
+#             axarr[1].set_title("Volueme in LV")
+#             axarr[2].set_title("aortic state")
+#             axarr[3].set_title("Mitral state")
+#             plt.show(f)
+#             
+#             f2, axarr2 =plt.subplots(3)
+#             axarr2[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
+#             axarr2[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
+#             axarr2[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].DtFlow)
+#             plt.show(f2)
+#             
+#             f3,axarr3=plt.subplots(6)
+#             axarr3[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
+#             axarr3[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
+#             axarr3[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].DtFlow)
+#             axarr3[3].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Turb)
+#             axarr3[4].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Inert)
+#             axarr3[5].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].deltaP)
+#             
+#             plt.show(f3)
+#             
+#             f4,axarr4=plt.subplots(4)
+#             axarr4[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
+#             axarr4[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Turb)
+#             axarr4[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Inert)
+#             axarr4[3].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].InbyTurb)
+#             
+#             plt.show(f4)
+            
+            
+            
+            
+            
+#             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
+#             
+#             plt.show()
+#             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
+#             plt.show()
+#             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].mitral.state)
+#             plt.show()
         except: pass
                 
         try:
             print "FS792: print self.baroreceptors['0'].data['HR']"
             #print self.baroreceptors['0'].data['HR']
-            import matplotlib.pyplot as plt
-            plt.plot(self.baroreceptors['0'].data['HR'])
+#            import matplotlib.pyplot as plt
+#            plt.plot(self.baroreceptors['0'].data['HR'])
             plt.plot(self.baroreceptors['0'].data['MStrain'])
             plt.show()
             
