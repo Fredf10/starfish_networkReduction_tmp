@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<singleVessel.xml id="xxx" version="4.1">
+  <simulationContext>
+    <description>None</description>
+    <totalTime unit="s">4</totalTime>
+    <CFL>0.3</CFL>
+    <gravitationalField>False</gravitationalField>
+    <gravityConstant unit="m s-2">-9.81</gravityConstant>
+    <centralVenousPressure unit="Pa">0</centralVenousPressure>
+    <minimumVenousPressure unit="Pa">0</minimumVenousPressure>
+  </simulationContext>
+  <solverCalibration>
+    <rigidAreas>False</rigidAreas>
+    <simplifyEigenvalues>False</simplifyEigenvalues>
+    <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
+    <automaticGridAdaptation>True</automaticGridAdaptation>
+  </solverCalibration>
+  <initialisationControls>
+    <initialsationMethod>ConstantPressure</initialsationMethod>
+    <initMeanFlow unit="m3 s-1">0.0125</initMeanFlow>
+    <initMeanPressure unit="mmHg">60.0</initMeanPressure>
+    <estimateWindkesselCompliance>Tree</estimateWindkesselCompliance>
+    <compPercentageWK3>0.8</compPercentageWK3>
+    <compPercentageTree>0.2</compPercentageTree>
+    <compTotalSys unit="m3 Pa-1">2.95587352e-08</compTotalSys>
+  </initialisationControls>
+  <globalFluid>
+    <my unit="Pa s">1e-05</my>
+    <rho unit="kg m-3">1060.0</rho>
+    <gamma>2.0</gamma>
+  </globalFluid>
+  <communicators/>
+  <boundaryConditions>
+    <boundaryCondition vesselId="0">
+      <VaryingElastanceHeart>
+        <T unit = 's'>1</T>
+        <Emax unit = 'mmHg ml-1'>2.31</Emax>
+        <Emin unit = 'mmHg ml-1'>0.06</Emin>
+        <Tpeak unit = 's'>0.43</Tpeak>
+        <V0 unit = 'ml'>20</V0>464533599225
+        <K>0</K>
+      </VaryingElastanceHeart>
+      <_Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">167983200.0</Rtotal>
+        <C unit="m3 Pa-1">1.2e-08</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </_Windkessel-3Elements>
+    </boundaryCondition>
+  </boundaryConditions>999.
+  <vessels>
+    <vessel Id="0" name="parentVessel">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">0.0</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>uniform</geometryType>
+        <length unit="m">0.2</length>
+        <radiusProximal unit="m">0.01</radiusProximal>
+        <radiusDistal unit="m">0.01</radiusDistal>
+        <N>20.0</N>
+      </geometry> 
+      <compliance>
+        <complianceType>Laplace2</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">1333.2</Ps>
+        <As unit="m2">None</As>
+        <wallThickness unit="m">0.00163</wallThickness>
+        <youngModulus unit="m2">400000.0</youngModulus>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>2
+        <gamma>2.0</gamma>
+      </fluid>
+    </vessel>
+  </vessels>
+</singleVessel.xml>
