@@ -50,6 +50,10 @@ class BaroReceptor(object):
         self.epsilon = np.zeros(sizeEpsilon)
         self.epsMean = 0
                 
+        # update Time for the heart rate
+        self.oldUpdateTime = 0
+        self.newUpdateTime = self.boundaryCondition.Tperiod/self.dt
+        
         
         if self.cellMLBaroreceptorModel == True:
             
@@ -58,17 +62,31 @@ class BaroReceptor(object):
             (self.states, self.constants) = baroreceptorCellML.initConsts()
             timeArray = np.linspace(0,self.dt,2)
             self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states,self.constants)
-             
+            
         else:
             print "No CellML Baroreceptor Model provided"
         
         
     #def solveCellML(self,eps):
-    def solveCellML(self, epsMean):
+    #def solveCellML(self, epsMean):
                            
-        timeArray = np.linspace(0,self.dt,2)
-        self.constants[34] = epsMean
-        self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states[-1],self.constants)
+        #timeArray = np.linspace(0,self.dt,2)
+        #self.constants[34] = epsMean
+        #self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states[-1],self.constants)
+        
+        #return self.voi, self.states, self.algebraic, self.algebraic[-1][11], self.constants[34]
+
+    # function to calculate new heart rate on a beat to beat basis
+    def solveCellML(self, epsMean):
+        
+        nbElements = np.shape(epsMean)[0]                
+        timeArray = np.linspace(0,(nbElements-2)*self.dt,(nbElements-1))
+        
+        for it in xrange(0,(nbElements-1)):
+            
+            self.constants[34] = epsMean[it]
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray[it:(it+1)],self.states[-1],self.constants)
+        
         
         return self.voi, self.states, self.algebraic, self.algebraic[-1][11], self.constants[34]
         
@@ -80,7 +98,6 @@ class BaroReceptor(object):
         n = self.n[0]
         
         ## read area, calculate radius and strain and save to data dictionary
-        
         A = self.data['Area'][n]
         R = np.power(A/math.pi,0.5)
         
@@ -92,25 +109,35 @@ class BaroReceptor(object):
         self.data['MStrain'][n+1] = epsMean
         
         # print the calculated mean strain
-        print 'cBR95: epsilon'
-        print epsMean
+        #print 'cBR95: epsilon'
+        #print epsMean
          
-        if n%20 == 0:
+        #if n%20 == 0:
+        if n == (round(self.newUpdateTime-2)):
+            
             # solve the cellML system using the function defined above
-            self.solveCellML(epsMean)
-        
-        
-        print "heart rate"    
-        print self.algebraic[-1][11]
-        print self.algebraic[-1][10]
-        print self.algebraic[-1][9]
+            self.solveCellML(self.data['MStrain'][self.oldUpdateTime:(self.newUpdateTime-2)])
+            
+            Tperiod  = self.algebraic[-1][12]
+            #print BR122
+            #print 'T -BC'
+            #print self.boundaryCondition.Tperiod
+            #print 'T'
+            #print Tperiod
+            #print 'HR'
+            print "BR128 - TPeriod"
+            print self.algebraic[-1][12]
+            
+            self.boundaryCondition.updatePeriodRuntime(Tperiod,self.newUpdateTime)
+            print self.boundaryCondition.Tperiod
+            
+            self.oldUpdateTime = self.newUpdateTime
+            self.newUpdateTime = self.oldUpdateTime + self.boundaryCondition.Tperiod/self.dt
         
         # update the heart rate and the data dictionary with the current heart rate
         self.data['HR'][n+1] = self.algebraic[-1][11]
         
-        # update boundary conditions with new heart rate / period
-    
-    
+        
     def update(self,baroDict):
             '''
             updates the updateBaroreceptorDict data using a dictionary in form of 

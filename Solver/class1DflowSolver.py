@@ -453,7 +453,24 @@ class FlowSolver(object):
             baroData['Tsteps']                  = self.Tsteps   
             baroData['cellMLBaroreceptorModel'] = baroData.pop('CellMl')
             
+            
+            #initialization of the boundary condition object
+            
+            try:            
+                for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
+                    if bcId == baroData['vesselId']:
+                        for bc in bcs:
+                            if bc.type == 1:
+                                baroData['boundaryCondition'] = bc
+                                
+                
+                print "FS467: Test"
+                print baroData['boundaryCondition']                                                           
+            except: pass
+            
             self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
+            
+            
     
     def initializeCommunicators(self):
         
@@ -783,9 +800,6 @@ class FlowSolver(object):
             plt.plot(self.baroreceptors['0'].data['MStrain'])
             plt.show()
             
-            #print np.shape(self.baroreceptors['0'].data['Strain'])
-            #print self.baroreceptors['0'].data['Strain']
-            #print np.shape(self.baroreceptors['0'].data['MStrain'])
         except: pass
         
         
