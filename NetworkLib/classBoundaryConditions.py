@@ -2039,7 +2039,7 @@ class VaryingElastance(BoundaryConditionType2):
 		self.V0 = 20e-6 
 		
 		self.K  =  0.0
-		self.Rv = 0.005*133*10**6
+		self.Rv = 0.02*133/(10**-6)
 		
 		"""Shape parameters"""
 		self.alpha = 1.672
@@ -2194,7 +2194,7 @@ class VaryingElastance(BoundaryConditionType2):
 			
 		if (venoP>ventrPn):
 			solverdias.set_initial_condition([Vn,ventrPn])
-			if (t2)<01:
+			if (t2)<0:
 				t_pointsd = np.linspace(0,dt,2)
 				
 			else:
@@ -2215,8 +2215,8 @@ class VaryingElastance(BoundaryConditionType2):
 
 			print "diastole"
 			
-		elif (Qn>=0 and ventrPn>=Pn):
-			solverSys.set_initial_condition([Vn,Pn,Qn])
+		elif (Qn>=0 and ventrPn-Pn>(-0.5*133.32)):
+			solverSys.set_initial_condition([Vn,ventrPn,Qn])
 			t_pointss = np.linspace(t2,t2+dt,2)
 			uSystole,ts = solverSys.solve(t_pointss)
 			uSystole = uSystole[1]
@@ -2235,6 +2235,7 @@ class VaryingElastance(BoundaryConditionType2):
 		else:
 			self.volume[n+1]=Vn
 			self.pressure[n+1]=E*(Vn-self.V0)
+			
 			domega_=_domega
 			print "iso"
 			
