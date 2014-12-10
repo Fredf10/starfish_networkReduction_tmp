@@ -2,7 +2,7 @@
 <singleVessel.xml id="xxx" version="4.1">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">4</totalTime>
+    <totalTime unit="s">2</totalTime>
     <CFL>0.3</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
@@ -57,10 +57,10 @@
       </topology>
       <geometry>
         <geometryType>uniform</geometryType>
-        <length unit="m">0.2</length>
-        <radiusProximal unit="m">0.009</radiusProximal>
-        <radiusDistal unit="m">0.009</radiusDistal>
-        <N>20.0</N>
+        <length unit="m">0.05</length>
+        <radiusProximal unit="m">0.01</radiusProximal>
+        <radiusDistal unit="m">0.01</radiusDistal>
+        <N>5</N>
       </geometry>
       <compliance>
         <complianceType>Laplace2</complianceType>
