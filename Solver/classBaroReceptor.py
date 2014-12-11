@@ -63,6 +63,9 @@ class BaroReceptor(object):
             timeArray = np.linspace(0,self.dt,2)
             self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states,self.constants)
             
+            print "SHAPE"
+            print np.shape(self.states)
+            
         else:
             print "No CellML Baroreceptor Model provided"
         
@@ -79,16 +82,17 @@ class BaroReceptor(object):
     # function to calculate new heart rate on a beat to beat basis
     def solveCellML(self, epsMean):
         
-        nbElements = np.shape(epsMean)[0]                
+        nbElements = np.shape(epsMean)[0]            
         timeArray = np.linspace(0,(nbElements-2)*self.dt,(nbElements-1))
         
         for it in xrange(0,(nbElements-1)):
             
             self.constants[34] = epsMean[it]
-            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray[it:(it+1)],self.states[-1],self.constants)
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray[it:(it+1)],self.states[-1][:],self.constants)
         
-        
-        return self.voi, self.states, self.algebraic, self.algebraic[-1][11], self.constants[34]
+        print "SHAPE"
+        print np.shape(self.states)
+        return self.voi, self.states, self.algebraic
         
         
         
@@ -116,7 +120,7 @@ class BaroReceptor(object):
         if n == (round(self.newUpdateTime-2)):
             
             # solve the cellML system using the function defined above
-            self.solveCellML(self.data['MStrain'][self.oldUpdateTime:(self.newUpdateTime-2)])
+            self.voi, self.states, self.algebraic = self.solveCellML(self.data['MStrain'][self.oldUpdateTime:(self.newUpdateTime-2)])
             
             Tperiod  = self.algebraic[-1][12]
             #print BR122
@@ -128,8 +132,11 @@ class BaroReceptor(object):
             print "BR128 - TPeriod"
             print self.algebraic[-1][12]
             
-            self.boundaryCondition.updatePeriodRuntime(Tperiod,self.newUpdateTime)
+            self.boundaryCondition.updatePeriodRuntime(Tperiod,(self.newUpdateTime-2)*self.dt)
             print self.boundaryCondition.Tperiod
+            
+            print self.constants[34]
+            
             
             self.oldUpdateTime = self.newUpdateTime
             self.newUpdateTime = self.oldUpdateTime + self.boundaryCondition.Tperiod/self.dt
