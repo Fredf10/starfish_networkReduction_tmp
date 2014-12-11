@@ -327,7 +327,7 @@ def solver2(timeArray,init_states,constants):
 
     # Set timespan to solve over
     voi = timeArray
-
+    
     # Construct ODE object to solve
     r = ode(computeRates)
     r.set_integrator('vode', method='bdf', atol=1e-06, rtol=1e-06, max_step=1)
