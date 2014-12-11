@@ -854,8 +854,8 @@ class FlowSolver(object):
         except: pass
                 
         try:
-            print "FS792: print self.baroreceptors['0'].data['HR']"
-            #print self.baroreceptors['0'].data['HR']
+            #print "FS792: print self.baroreceptors['0'].data['MStrain']"
+            #print self.baroreceptors['0'].data['MStrain']
 #            import matplotlib.pyplot as plt
 #            plt.plot(self.baroreceptors['0'].data['HR'])
             plt.plot(self.baroreceptors['0'].data['MStrain'])
