@@ -44,11 +44,22 @@ vascularNetworkElements = ['simulationContext',
                            'initialisationControls']
 
 ##########################################################################################
+## Baroreceptor objects
+
+baroreceptorCellML = ['vesselId']
+
+baroreceptorReference = {'BaroreceptorCellML' : baroreceptorCellML}
+
+
+
+##########################################################################################
 ## Communicator objects
 
 communicatorRealTimeViz  = ['comType', 'comId', 'vesselId', 'node', 'dn', 'quantitiesToPlot' ]
 communicatorBaroreceptor = ['comType', 'comId', 'vesselId', 'node']
 
+
+## need capital C in Communicator.. as it is also name of a class which is instatiated (as BCs)
 communicatorReference = {'CommunicatorRealTimeViz' : communicatorRealTimeViz,
                          'CommunicatorBaroreceptor': communicatorBaroreceptor
                          }
@@ -185,6 +196,7 @@ xmlElements  = [ 'simulationContext',
                  'solverCalibration',
                  'initialisationControls',
                  'globalFluid',
+                 'baroreceptor',
                  'communicators',
                  'boundaryConditions',
                  'vessels' ]
@@ -194,5 +206,6 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'initialisationControls': initialisationControlsElements,
                         'boundaryConditions'    : boundaryConditionElements,
                         'globalFluid'           : globalFluidElements,
+                        'baroreceptor'          : baroreceptorReference,
                         'communicators'         : communicatorReference,
                         'vessels'               : vesselElements }

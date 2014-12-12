@@ -29,15 +29,20 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
+  <baroreceptor>
+  	<BaroreceptorCellML>
+  		<vesselId>1</vesselId>
+  	</BaroreceptorCellML>  		
+  </baroreceptor>
   <communicators>
-  	<CommunicatorRealTimeViz>
+  	<communicatorRealTimeViz>
   		<comType>CommunicatorRealTimeViz</comType>
   		<comId>1</comId>
   		<vesselId>1</vesselId>
   		<node>25</node>
   		<dn>20</dn>
   		<quantitiesToPlot>Pressure</quantitiesToPlot>
-  	</CommunicatorRealTimeViz>  		
+  	</communicatorRealTimeViz>  		
   </communicators>
   <boundaryConditions>
   	<VaryingElastanceHeart>

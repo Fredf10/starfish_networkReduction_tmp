@@ -80,6 +80,8 @@ class VascularNetwork(object):
         self.globalFluid = {'my': 1e-6,'rho': 1050.,'gamma': 2.0}    # dictionary containing the global fluid data if defined
         self.globalFluidPolyChaos = {}
         
+        self.baroreceptors = {} # dictionarz with baroreceptors
+        
         self.communicators = {} # dictionary with communicators, key = communicator id; values = {communicator data} 
         
         ## interal calculated variables
@@ -169,7 +171,7 @@ class VascularNetwork(object):
             try: self.update(updateDict[dictName])
             except: pass
             
-        for dictName in ['globalFluid','globalFluidPolyChaos','communicators']:
+        for dictName in ['globalFluid','globalFluidPolyChaos','communicators','baroreceptors']:
             try: self.getVariableValue(dictName).update(updateDict[dictName])
             except: pass
                         
@@ -203,7 +205,8 @@ class VascularNetwork(object):
         '''
         Initializes vascular network: the compliance of the vessels and the position of the call function of boundary type 2
         Check if boundaryConditions and globalFluid properties are defined in a rigth manner;
-        '''        
+        '''   
+                     
         ## refresh all connections and generate traversing lists
         self.evaluateConnections()
         

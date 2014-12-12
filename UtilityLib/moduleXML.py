@@ -145,6 +145,15 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", filename = None, netw
                     subsubElement = etree.SubElement(subElement, variable)
                     writeXMLsetUnit(subsubElement,variable)
                     writeXMLsaveValues(subsubElement,variable,comData[variable])  
+                    
+        elif xmlElementName == 'baroreceptor':
+            for baroId,baroData in vascularNetwork.baroreceptors.iteritems():
+                baroType = baroData['baroType']
+                subElement = etree.SubElement(xmlFileElement, baroType)
+                for variable in nxmlW.baroreceptorReference[baroData['baroType']]:
+                    subsubElement = etree.SubElement(subElement, variable)
+                    writeXMLsetUnit(subsubElement,variable)
+                    writeXMLsaveValues(subsubElement,variable,baroData[variable])  
                 
         else: # vascularNetwork
             for variable in xmlElement:
@@ -459,6 +468,28 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
                             communicatorData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                             if variable == 'comId': comId = communicatorData[variable]
                         vascularNetwork.updateNetwork({'communicators':{comId:communicatorData}})
+                        
+            elif xmlElementName == 'baroreceptor':
+                # loop through possible communicator class types
+                for baroreceptorType in nxml.xmlElementsReference[xmlElementName]:
+                    # find all communicator of this type
+                    for baroElements in xmlElement.findall(''.join(['.//',baroreceptorType])):
+                        # loop through all variables of this type, convert and save values of these
+                        baroreceptorData = {}
+                        for variable in nxml.xmlElementsReference[xmlElementName][baroreceptorType]: 
+                            try: element = baroElements.findall(''.join(['.//',variable]))[0]
+                            except: loadingErrorMessageVariableError(variable, 'baroreceptor', baroreceptorType)
+                            # get variable value                        
+                            try: variableValueStr = element.text
+                            except: loadingErrorMessageValueError(variable, 'baroreceptor', baroreceptorType)
+                            # get unit
+                            try: variableUnit = element.attrib['unit']
+                            except: variableUnit = None 
+                            baroreceptorData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
+                            #if variable == 'baroId': baroId = communicatorData[variable]
+                        baroreceptorData['baroType'] = baroreceptorType
+                        vascularNetwork.updateNetwork({'baroreceptors':{1:baroreceptorData}})
+                        
             elif xmlElementName == 'globalFluid':
                     
                 globalFluidData = {}
