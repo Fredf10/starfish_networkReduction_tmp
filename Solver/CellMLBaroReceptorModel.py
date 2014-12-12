@@ -318,7 +318,7 @@ def rates_and_algebraic(t, y):
 
 ### END added for cgptoolbox
 
-def solver2(timeArray,init_states,constants):
+def solver2(timeArray,initial_states,constants):
     """Solve model with ODE solver"""
     
     from scipy.integrate import ode
@@ -331,13 +331,13 @@ def solver2(timeArray,init_states,constants):
     # Construct ODE object to solve
     r = ode(computeRates)
     r.set_integrator('vode', method='bdf', atol=1e-06, rtol=1e-06, max_step=1)
-    r.set_initial_value(init_states, voi[0])
+    r.set_initial_value(initial_states, voi[0])
     r.set_f_params(constants)
 
     # Solve model
     states = zeros((len(voi), sizeStates))
     algebraic = zeros((len(voi), sizeAlgebraic))
-    states[0] = init_states
+    states[0] = initial_states
     for i, t in enumerate(voi[1:]):
         if r.successful():
             r.integrate(t)
