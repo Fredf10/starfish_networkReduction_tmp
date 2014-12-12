@@ -458,7 +458,8 @@ class FlowSolver(object):
             
             try:            
                 for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
-                    if bcId == baroData['vesselId']:
+                    #if bcId == baroData['vesselId']:
+                    if bcId == 1:
                         for bc in bcs:
                             if bc.type == 1:
                                 baroData['boundaryCondition'] = bc
