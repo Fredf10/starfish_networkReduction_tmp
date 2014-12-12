@@ -59,9 +59,9 @@ class BaroReceptor(object):
             
             #initialize the CellML Baroreceptor model
             
-            (self.states, self.constants) = baroreceptorCellML.initConsts()
+            (iniStates, self.constants) = baroreceptorCellML.initConsts()
             timeArray = np.linspace(0,self.dt,2)
-            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,self.states,self.constants)
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
             
             print "SHAPE"
             print np.shape(self.states)
@@ -88,7 +88,8 @@ class BaroReceptor(object):
         for it in xrange(0,(nbElements-1)):
             
             self.constants[34] = epsMean[it]
-            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray[it:(it+1)],self.states[-1][:],self.constants)
+            #self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray[it:(it+2)],self.states[-1][:],self.constants)
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2([0,self.dt],self.states[-1][:],self.constants)
         
         print "SHAPE"
         print np.shape(self.states)
@@ -134,9 +135,7 @@ class BaroReceptor(object):
             
             self.boundaryCondition.updatePeriodRuntime(Tperiod,(self.newUpdateTime-2)*self.dt)
             print self.boundaryCondition.Tperiod
-            
-            print self.constants[34]
-            
+            print self.algebraic[-1][11]
             
             self.oldUpdateTime = self.newUpdateTime
             self.newUpdateTime = self.oldUpdateTime + self.boundaryCondition.Tperiod/self.dt
