@@ -46,7 +46,7 @@ vascularNetworkElements = ['simulationContext',
 ##########################################################################################
 ## Baroreceptor objects
 
-baroreceptorCellML = ['vesselId']
+baroreceptorCellML = ['baroId','vesselId']
 
 baroreceptorReference = {'BaroreceptorCellML' : baroreceptorCellML}
 
@@ -87,7 +87,7 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           'Windkessel-2Elements'             :'Windkessel2',
                           'Windkessel-3Elements'             :'Windkessel3',
                           'L-network'                        :'L_network',
-                          'VaryingElastanceHeart'            :'VaryingElastance',
+                          'VaryingElastanceHeart'            :'VaryingElastance',                          
                           # BoundaryCondition names if 1 Vessel '_' == end-positionreference 
                           '_Flow-PhysiologicalFunction'       :'PhysiologicalFunction',
                           '_Flow-Sinus'                       :'Sinus',
@@ -106,7 +106,7 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           '_Windkessel-2Elements'             :'Windkessel2',
                           '_Windkessel-3Elements'             :'Windkessel3',
                           '_L-network'                        :'L_network',
-                          '_VaryingElastanceHeart'            :'VaryingElastance'}
+                          }
 
 #----------------------------------------------------------------------------------------# 
 # Tag dictionary defines the variables a boundaryCondition needs as input via xml!
@@ -196,7 +196,7 @@ xmlElements  = [ 'simulationContext',
                  'solverCalibration',
                  'initialisationControls',
                  'globalFluid',
-                 'baroreceptor',
+                 'baroreceptors',
                  'communicators',
                  'boundaryConditions',
                  'vessels' ]
@@ -206,6 +206,6 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'initialisationControls': initialisationControlsElements,
                         'boundaryConditions'    : boundaryConditionElements,
                         'globalFluid'           : globalFluidElements,
-                        'baroreceptor'          : baroreceptorReference,
+                        'baroreceptors'         : baroreceptorReference,
                         'communicators'         : communicatorReference,
                         'vessels'               : vesselElements }

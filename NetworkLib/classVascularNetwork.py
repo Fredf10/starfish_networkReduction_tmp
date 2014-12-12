@@ -206,7 +206,6 @@ class VascularNetwork(object):
         Initializes vascular network: the compliance of the vessels and the position of the call function of boundary type 2
         Check if boundaryConditions and globalFluid properties are defined in a rigth manner;
         '''   
-                     
         ## refresh all connections and generate traversing lists
         self.evaluateConnections()
         

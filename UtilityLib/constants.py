@@ -373,6 +373,8 @@ variablesDict = {## class Vascular Network
                  'distensibility'    : {'type':'float',  'unitSI': 'Pa-1', 'strCases': None, 'multiVar': False},
                  # fluid 
                  'applyGlobalFluid'  : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                 # baroreceptors
+                 'baroId'            : {'type':'int',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  }
 
 ##########################################################################################

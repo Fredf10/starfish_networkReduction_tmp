@@ -1446,7 +1446,7 @@ class L_network(BoundaryConditionType2):
 		
 		return np.dot(R,self.omegaNew)
 	
-class VaryingElastanceold(BoundaryConditionType2):
+class VaryingElastanceOld(BoundaryConditionType2):
 	"""
 	An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
 	(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
@@ -1478,9 +1478,9 @@ class VaryingElastanceold(BoundaryConditionType2):
 		self.omegaNew = np.empty((2))
 		
 		#Default parameters
-		self.T = 1
+		self.T     = 1
 		self.Emax  = 2.31 * 133.3e6 
-		self.Emin = 0.06 * 133.3e6 
+		self.Emin  = 0.06 * 133.3e6 
 		self.Tpeak = 0.4
 		
 		self.V0 = 20e-6 
