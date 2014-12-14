@@ -1446,7 +1446,11 @@ class L_network(BoundaryConditionType2):
 		
 		return np.dot(R,self.omegaNew)
 	
+<<<<<<< .mine
+class VaryingElastance(BoundaryConditionType2):
+=======
 class VaryingElastanceOld(BoundaryConditionType2):
+>>>>>>> .r916
 	"""
 	An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
 	(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
@@ -1544,9 +1548,9 @@ class VaryingElastanceOld(BoundaryConditionType2):
 	def initializeValves(self):
 		"""Mitral valve parameters"""
 		
-		self.mitral_annulus_area = 0.0007
+		self.mitral_annulus_area = 0.0006
 		
-		mitral_M_st          = 0.4
+		mitral_M_st          = 1
 		mitral_M_rg = 0.0
 		mitral_delta_p_open = 0
 		mitral_delta_p_close = 0 
@@ -1558,7 +1562,7 @@ class VaryingElastanceOld(BoundaryConditionType2):
 		aortic_M_st          = 1
 		aortic_M_rg          = 0.00
 		aortic_delta_p_open  = 0*133.32
-		aortic_delta_p_close = 2*133.32 # 2mmHg
+		aortic_delta_p_close = 0*133.32 # 2mmHg
 		aortic_K_v_open      = 0.12
 		aortic_K_v_close     = 0.12
 
@@ -1602,12 +1606,16 @@ class VaryingElastanceOld(BoundaryConditionType2):
 		
 		Qn1 = self.aorticFlowPreviousTimestep
 		
-		
+		Ao=0.0006
 		r11,r12,r21,r22 =  R[0][0],R[0][1],R[1][0],R[1][1]
-		L = self.aortic.computeL(A, n+1)
+		
 		LdivB = self.aortic.LdivideB(A, n+1)
 		B = self.aortic.computeB(A, n+1)
-		mitrL = self.mitral.computeL(self.mitral_annulus_area, n+1)
+		L = self.aortic.computeL(A, n+1,B,self.aortic.state[n-1])
+		try:
+			print "L/B possible"
+		except: "L/B not possible"
+		mitrL = self.mitral.computeL(self.mitral_annulus_area, n+1,B,self.aortic.state[n-1])
 		mitrLdivB = self.mitral.LdivideB(A, n+1)
 		mitrB = self.mitral.computeB(self.mitral_annulus_area, n+1) #
 		mitrQn = self.mitralQ[n]
@@ -1622,14 +1630,17 @@ class VaryingElastanceOld(BoundaryConditionType2):
 		self.aortaP[n]=Pn
 #		self.DtFlow[n]=(Qn-Qnold)/dt
 		ventrPn = self.pressure[n]
+		print "Ao is",Ao
+		print "A is",A
 		print "B is: ", B
-		print "pn is: ", Pn
-		print "ventrPn is: ", ventrPn
-		print "ventricle pressure should be:", E*(Vn-self.V0)
-		print "ventrPn-Pn is:", ventrPn-Pn
+		print "pn is: ", Pn/133
+		print "ventrPn is: ", ventrPn/133
+		print "ventricle pressure should be:", E*(Vn-self.V0)/133
+		print "ventrPn-Pn is:", (ventrPn-Pn)/133
 # 		print "volume is", Vn
 # 		print "E is,", E
 		print "t is:",t
+		print "aortic valve state is: ", self.aortic.state[n]
 		if B:
 			self.DtFlow[n]=1e6*(Qn-Qn1)/dt
 			self.Turb[n]=abs(Qn)*Qn*B/133
@@ -1641,7 +1652,7 @@ class VaryingElastanceOld(BoundaryConditionType2):
 				self.InbyTurb[n]=(abs(Qn)*Qn*B)/(L*(Qn-Qn1)/dt)
 				
 			except: pass
-			print "Qn is: ", Qn
+			print "Qn is: ", Qn*10**6
 			print "dp1 (B part) is:", abs(Qn)*Qn*B
 			print "dp2 (L part)is:", L*(Qn-Qn1)/dt
 			print "dP total is:", abs(Qn)*Qn*B+L*(Qn-Qn1)/dt
@@ -1652,9 +1663,9 @@ class VaryingElastanceOld(BoundaryConditionType2):
 		n_p = 1.#self.Emax*self.V0
 		n_q = 1.#(n_p/B_ref)**0.5
 		n_o = 1.#n_q/r21
-		if Qn<-20e-6:
-			B=None
-			
+# 		if Qn<-20e-6:
+#		B=None
+		
 		args = dt, mitrLdivB, mitrB,LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref
 		
 		
@@ -1935,19 +1946,25 @@ class Valve:
 		elif A/A_eff > 1e4:
 			B = None
 		else:
-			B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
+#			B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
 #			B = 0.5*self.rho*(1/A_eff - 1/A)  #test
+			B=self.rho/(2*A_eff**2)
 		return B
 
-	def computeL(self, A, n):
+	def computeL(self, A, n,B,state):
 		""" Returns the inertance coefficient L,  used in computing the pressure difference across the valve"""
-		A_s = self.effectiveOrificeArea(A,n)	
+		A_s = self.effectiveOrificeArea(A,n)
+		if B:
+			leff=0.008+0.01*(1-state)
+		else:
+			leff=0.003	
 		if A_s == 0:
 			L = None
 		elif A/A_s > 1e4:
 			L = None
 		else:
-			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5
+#			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5
+			L = self.rho*leff/A_s
 		return L
 
 	
@@ -1997,7 +2014,7 @@ class Valve:
 			""" The case where -delta_p_close < delta_p < delta_p_open, the valve state stays unchanged """
 			self.state[n+1] = self.state[n]
 			
-class VaryingElastance(BoundaryConditionType2):
+class VaryingElastancenew(BoundaryConditionType2):
 	"""
 	An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
 	(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
@@ -2085,6 +2102,7 @@ class VaryingElastance(BoundaryConditionType2):
 		self.mitralQ = np.zeros(Tsteps)
 		self.Elastance = np.zeros(Tsteps) #New
 		self.Flow = np.zeros(Tsteps)
+		self.Flow2 = np.zeros(Tsteps)
 		self.DtFlow = np.zeros(Tsteps)
 		self.deltaP=np.zeros(Tsteps)
 		self.aortaP=np.zeros(Tsteps)
@@ -2154,7 +2172,7 @@ class VaryingElastance(BoundaryConditionType2):
 		print "pn is: ", Pn/133
 		print "ventrPn is: ", ventrPn/133
 		print "ventricle pressure should be:", E*(Vn-self.V0)/133
-		print "ventrPn-Pn is:", ventrPn-Pn
+		print "ventrPn-Pn is:", (ventrPn-Pn)/133
 		print "volume is", Vn*10**6
 		print "Qn is", Qn*10**6
 		print "start volume was", self.volume[0]*10**6
@@ -2215,16 +2233,15 @@ class VaryingElastance(BoundaryConditionType2):
 
 			print "diastole"
 			
-		elif (Qn>=0 and ventrPn-Pn>(-0.5*133.32)):
-			solverSys.set_initial_condition([Vn,ventrPn,Qn])
+		elif (Qn>=0 and ventrPn-Pn>(-0.0001*133.32)):
+			solverSys.set_initial_condition([Vn,ventrPn,self.Flow2[n]])
 			t_pointss = np.linspace(t2,t2+dt,2)
 			uSystole,ts = solverSys.solve(t_pointss)
 			uSystole = uSystole[1]
-			print t_pointss
-			print t_pointss.shape
 			V = uSystole[0]
 			P = uSystole[1]
 			Q =uSystole[2]
+			self.Flow2[n+1]=Q
 			omeganew_ = L11*P + L12*Q
 			print "systole"
 			
