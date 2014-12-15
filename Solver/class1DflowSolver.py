@@ -283,7 +283,7 @@ class FlowSolver(object):
         ## initialse varying elastance model
         for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if bC.name == 'VaryingElastanceHeart':
+                if bC.name in ['VaryingElastanceHeart','VaryingElastanceSimple']:
                     Qm    = initialValues[vesselId]['Flow']
                     bC.update({'aorticFlowPreviousTimestep':Qm})
                     bC.initializeSolutionVectors(self.Tsteps)

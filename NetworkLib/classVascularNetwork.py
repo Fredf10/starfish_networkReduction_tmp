@@ -808,6 +808,7 @@ class VascularNetwork(object):
                 constantPressure = self.initMeanPressure
                 if self.boundaryConditions[root][0].name != 'VaryingElastanceHeart':
                     self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet = self.quiet)
+                    
             except:
                 print "Error: Unable to set given meanFlow at inflow point"
                 exit()

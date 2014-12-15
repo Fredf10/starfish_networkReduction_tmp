@@ -1953,16 +1953,18 @@ class Valve:
 		""" Returns the inertance coefficient L,  used in computing the pressure difference across the valve"""
 		A_s = self.effectiveOrificeArea(A,n)
 		if B:
-			leff=0.008+0.01*(1-state)
+			#leff=0.008+0.01*(1-state) # aortic
+			leff = 0.02 # 2cm
 		else:
-			leff=0.003	
+			leff=0.003	# mitral
+			
 		if A_s == 0:
 			L = None
 		elif A/A_s > 1e4:
 			L = None
 		else:
-#			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5
-			L = self.rho*leff/A_s
+#			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter 
+			L = self.rho*leff/A_s # paper Mynard et al. 2012
 		return L
 
 	
