@@ -283,9 +283,7 @@ class FlowSolver(object):
         ## initialse varying elastance model
         for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                print bC.name
                 if bC.name == 'VaryingElastanceHeart':
-                    print "initialize VEH"
                     Qm    = initialValues[vesselId]['Flow']
                     bC.update({'aorticFlowPreviousTimestep':Qm})
                     bC.initializeSolutionVectors(self.Tsteps)
@@ -465,8 +463,8 @@ class FlowSolver(object):
                                 baroData['boundaryCondition'] = bc
                                 
                 
-                print "FS467: Test"
-                print baroData['boundaryCondition']                                                           
+                #print "FS467: Test"
+                #print baroData['boundaryCondition']                                                           
             except: pass
             
             self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
@@ -476,7 +474,7 @@ class FlowSolver(object):
     def initializeCommunicators(self):
         
         
-        print 'cFS435 Communicators',self.vascularNetwork.communicators
+        #print 'cFS435 Communicators',self.vascularNetwork.communicators
         for comId, comData in self.vascularNetwork.communicators.iteritems():
         #for comId, comData in self.communicators.iteritems():      
             ## for baro receptor and visualisation

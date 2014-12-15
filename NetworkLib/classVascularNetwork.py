@@ -806,7 +806,6 @@ class VascularNetwork(object):
         elif self.initialsationMethod == 'ConstantPressure':
             try:
                 constantPressure = self.initMeanPressure
-                print self.boundaryConditions[root][0].name
                 if self.boundaryConditions[root][0].name != 'VaryingElastanceHeart':
                     self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet = self.quiet)
             except:
