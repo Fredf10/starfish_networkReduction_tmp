@@ -258,6 +258,7 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
                 updateTime = n*self.dt
                         
                 self.boundaryCondition.updatePeriodRuntime(Tnew,updateTime)
+                
     
             if n*self.dt > time2-self.dt/2. and n*self.dt < time2+self.dt/2.: 
                 

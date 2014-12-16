@@ -795,6 +795,7 @@ class VascularNetwork(object):
             except:
                 print "Error: Unable to set given meanFlow at inflow point"
                 exit()
+                
         elif self.initialsationMethod == 'MeanPressure':
             try:
                 meanInPressure = self.initMeanPressure
