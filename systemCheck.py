@@ -123,12 +123,6 @@ def systemCheck():
 #     except:
 #         print "IMPORT ERROR; no version of xdot found (http://pypi.python.org/pypi/xdot )" 
         
-    print "check for pydot      ",
-    try:
-        import pydot
-        print installed
-    except:
-        print "IMPORT ERROR; no version of found (http://pypi.python.org/pypi/pydot/1.0.2)" 
 
 
 if __name__ == '__main__':
