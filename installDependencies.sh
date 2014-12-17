@@ -6,10 +6,12 @@ if [ -f /etc/debian_version ]; then
     echo " %OS detected, starting installation .."
     
     apt-get -y install python-pip
-    apt-get -y install build-essential python-dev
-    apt-get -y install pygtk2
-    apt-get -y install scipy
+    apt-get -y install build-essential 
+    apt-get -y install python-dev
+    apt-get -y install python-gtk2
+    apt-get -y install python-scipy
     apt-get -y install python-matplotlib
+    apt-get -y install graphviz
 
 elif [ -f /etc/redhat-release ]; then
     # TODO add code for Red Hat and CentOS here
@@ -23,6 +25,7 @@ elif [ -f /etc/redhat-release ]; then
     yum -y install pygtk2
     yum -y install scipy
     yum -y install python-matplotlib
+    yum -y install graphviz
     
 else
     OS=$(uname -s)
