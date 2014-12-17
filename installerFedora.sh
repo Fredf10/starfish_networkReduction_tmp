@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 yum -y install gcc
 yum -y install gcc-gfortran
 yum -y install gcc-c++
