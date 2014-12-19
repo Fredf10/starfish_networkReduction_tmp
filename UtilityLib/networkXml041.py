@@ -87,7 +87,8 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           'Windkessel-2Elements'             :'Windkessel2',
                           'Windkessel-3Elements'             :'Windkessel3',
                           'L-network'                        :'L_network',
-                          'VaryingElastanceHeart'            :'VaryingElastance',                          
+                          'VaryingElastanceHeart'            :'VaryingElastance',
+                          'VaryingElastanceSimple'            :'VaryingElastanceSimple',                          
                           # BoundaryCondition names if 1 Vessel '_' == end-positionreference 
                           '_Flow-PhysiologicalFunction'       :'PhysiologicalFunction',
                           '_Flow-Sinus'                       :'Sinus',
@@ -131,6 +132,7 @@ boundaryConditionElements = {
           'Flow-FromFile'               :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','filePathName','prescribe'],
           'L-network'                   :['Z','C'],
           'VaryingElastanceHeart'       :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'K'],
+          'VaryingElastanceSimple'       :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'K'],
           # BoundaryCondition names if 1 Vessel '_' == end-positionreference 
           '_Flow-PhysiologicalFunction' :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
           '_Flow-Sinus'                 :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
