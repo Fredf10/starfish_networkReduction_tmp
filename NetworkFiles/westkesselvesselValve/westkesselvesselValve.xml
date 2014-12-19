@@ -2,7 +2,7 @@
 <singleVessel.xml id="xxx" version="4.1">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">1</totalTime>
+    <totalTime unit="s">18</totalTime>
     <CFL>0.5</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
