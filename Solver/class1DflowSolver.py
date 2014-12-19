@@ -799,9 +799,11 @@ class FlowSolver(object):
             import matplotlib.pyplot as plt
             f, axarr =plt.subplots(3)
             axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
-            axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
-            axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
-            
+            axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
+            axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
+            axarr[0].set_title("Pressure in LV and aorta")
+            axarr[1].set_title("Volume flow")
+            axarr[2].set_title("Volume in LV")
             plt.show(f)
 #             f, axarr =plt.subplots(5)
 #             axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
