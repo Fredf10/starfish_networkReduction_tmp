@@ -2079,6 +2079,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		
 				
 		self.cycleNumber = 0
+		self.num = 0
 		self.atriumPressure = 7.5 * 133.32 #Pressure in the atrium ## venouse pressure?!
 		
 #		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
@@ -2130,11 +2131,12 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
 
 	def getCycleTime(self, n, dt):
-		return n*dt - self.T*self.cycleNumber
+		return self.num*dt
 	
 	def startNewCycleIfCriteriaIsMet(self, n, dt):
-		if self.getCycleTime(n, dt) > self.T:
+		if self.getCycleTime(n+1, dt) > self.T:
 			self.cycleNumber += 1
+			self.num = 0
 
 	def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
 		
@@ -2170,6 +2172,49 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		self.aortaP[n]=Pn
 #		self.DtFlow[n]=(Qn-Qnold)/dt
 		ventrPn = self.pressure[n]
+		if self.cycleNumber == 3:
+			self.T=0.7
+			self.Tpeak =0.43*self.T
+		
+		if self.cycleNumber == 6:
+			self.T=1
+			self.Tpeak =0.43*self.T
+		
+		if self.cycleNumber == 10:
+			self.T=0.8
+			self.Tpeak =0.43*self.T
+			
+		if self.cycleNumber == 11:
+			self.T=0.7
+			self.Tpeak =0.43*self.T
+		
+		if self.cycleNumber == 12:
+			self.T=0.6
+			self.Tpeak =0.43*self.T
+			
+		if self.cycleNumber == 14:
+			self.T=0.5
+			self.Tpeak =0.43*self.T
+		
+		if self.cycleNumber == 18:
+			self.T=0.6
+			self.Tpeak =0.43*self.T
+			
+		if self.cycleNumber == 19:
+			self.T=0.7
+			self.Tpeak =0.43*self.T
+		
+		if self.cycleNumber == 20:
+			self.T=0.8
+			self.Tpeak =0.43*self.T
+			
+		if self.cycleNumber == 21:
+			self.T=0.9
+			self.Tpeak =0.43*self.T
+		
+		if self.cycleNumber == 22:
+			self.T=1
+			self.Tpeak =0.43*self.T
 		
 
 
@@ -2228,7 +2273,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
 
 			
-		elif (Qn>=0 and ventrPn-Pn>(-0.0001*133.32)): #sysstolecondition
+		elif (Qn>=-1e-15 and ventrPn-Pn>(-0.0001)): #sysstolecondition
 			solverSys.set_initial_condition([Vn,ventrPn,self.Flow2[n]])
 			t_pointss = np.linspace(t2,t2+dt,2)
 			uSystole,ts = solverSys.solve(t_pointss)
@@ -2239,6 +2284,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 			self.Flow2[n+1]=Q
 			omeganew_ = L11*P + L12*Q
 
+
 			
 			self.volume[n+1]=V
 			self.pressure[n+1]=P
@@ -2247,11 +2293,11 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		else: #isocondition
 			self.volume[n+1]=Vn
 			self.pressure[n+1]=E*(Vn-self.V0)
-			
+
 			domega_=_domega
-
 			
-
+				
+		self.num = self.num + 1
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domega
 
