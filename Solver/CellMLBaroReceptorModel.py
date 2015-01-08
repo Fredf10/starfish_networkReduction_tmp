@@ -108,9 +108,9 @@ def initConsts(t=0):
     p[19] = 0.2 # tau_ach
     p[20] = 2.1 # tau_HR_nor
     p[21] = 2.5 # tau_HR_ach
-    p[22] = 107 #282.648 # HR zero - intrinsic heart rate
-    p[23] = 220 #483.218 # HR max - max heart rate
-    p[24] = 35 #226.238 # HR min - min heart rate
+    p[22] = 107 #282.648 # HR zero - intrinsic heart rate ## 107 beats/min in 20 year old 90 in beats/min in 50 year old Opthof paper
+    p[23] = 220 #483.218 # HR max - max heart rate # use 208 - 0.7 * age : Tanaka paper
+    p[24] = 35 #226.238 # HR min - min heart rate  # might depend on fitness level 35 is very low, Kostis paper
     p[25] = 0.175 # Beta
     p[26] = 0 # delta_th
     p[27] = 0.1099 # q_nor
@@ -356,22 +356,31 @@ if __name__ == "__main__":
     
     
     (states, constants) = initConsts()
-    timeArray = linspace(0, 6, 61) #second value determined by flow simulation time step? number of intervals determined by timestep for ODE/DAE solving?
+    timeArray = linspace(0, 10, 500) #second value determined by flow simulation time step? number of intervals determined by timestep for ODE/DAE solving?
     strain = 0.0100000+0.00500000*sin(timeArray)
-    timeArray2 = linspace(0,0.1,2)
+    timeArray2 = linspace(0,0.02,2)
     p[34] = strain[0]
     print p[34]
     voi, states, algebraic = solver2(timeArray2,states,constants)
     print algebraic[-1][11]
-    print size(algebraic)
+    
+    HR = np.zeros(np.size(strain))
+    HR[0] = algebraic[-1][11]
     
     for t in xrange((size(strain)-1)):
         
         p[34] = strain[t+1]
         voi, states, algebraic = solver2(timeArray2,states[-1],constants)
-        print size(algebraic)    
+        #print size(algebraic)    
         print p[34]
         print algebraic[-1][11]
+        HR[t+1] = algebraic[-1][11]
+        
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(timeArray, HR)
+    #plt.plot(timeArray, strain)
+    plt.show()
     
 
         
