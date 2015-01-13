@@ -55,7 +55,7 @@ class FlowSolver(object):
         self.baroreceptors = {}
         baro = False
         if baro == True:
-            self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1}}
+            self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1, 'receptorType':'AorticBR'}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -436,13 +436,48 @@ class FlowSolver(object):
         
         for baroId, baroData in self.baroreceptors.iteritems():
                         
-            baroVesselId = baroData['vesselId']
+            if baroData['receptorType'] == 'AorticBR':
+                
+                baroVesselId = np.array([2,14])
+                
+                A1 = self.vessels[baroVesselID[0]].Asol
+                A2 = self.vessels[baroVesselID[1]].Asol
+                A = np.concatenate((A1,A2),axis = 1)
+                
+                
+                data = {'Area'    : A
+                        'Strain'  : np.zeros(np.shape(A)),
+                        'MStrain' : np.zeros(np.shape(A)[0]),
+                        'HR'      : np.zeros(np.shape(A)[0]),
+                        'T'       : np.yeros(np.shape(A)[0])
+                        }
+                
+            elif baroData['receptorType'] == 'CarotidBR':
+                
+                baroVesselId = np.array([81,79]) #left and right ID
+                
+                
+                data = {
+                        'InputLeft'      : self.vessels[baroVesselID[0]].Psol,
+                        'InputRight'     :self.vessels[baroVesselID[1]].Psol,
+                        'LeftAfferentSignal' : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
+                        'RightAfferentSignal': : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
+                        'AfferentSignal'    : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
+                        'EfferentSignal'    : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
+                        'AffectedValue'     : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol))
+                        }
+                
+            else:
+                
+                print 'Error: invalid Baroreceptor type'
             
-            data = {'Area'    : self.vessels[baroVesselId].Asol,
-                    'Strain'  : np.zeros(np.shape(self.vessels[baroVesselId].Asol)),
-                    'MStrain' : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0]),
-                    'HR'      : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0])
-                    }
+            #baroVesselId = baroData['vesselId']
+            
+            #data = {'Area'    : self.vessels[baroVesselId].Asol,
+            #        'Strain'  : np.zeros(np.shape(self.vessels[baroVesselId].Asol)),
+            #        'MStrain' : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0]),
+            #        'HR'      : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0])
+            #        }
             
             baroData['data'] = data
                            
