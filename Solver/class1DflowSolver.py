@@ -55,7 +55,8 @@ class FlowSolver(object):
         self.baroreceptors = {}
         baro = False
         if baro == True:
-            self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1, 'receptorType':'AorticBR'}}
+            #self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1, 'receptorType':'AorticBR'}}
+            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'CellMl': False}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -438,14 +439,12 @@ class FlowSolver(object):
                         
             if baroData['receptorType'] == 'AorticBR':
                 
-                baroVesselId = np.array([2,14])
-                
-                A1 = self.vessels[baroVesselID[0]].Asol
-                A2 = self.vessels[baroVesselID[1]].Asol
+                A1 = self.vessels[baroData['vesselId'][0]].Asol
+                A2 = self.vessels[baroData['vesselId'][1]].Asol
                 A = np.concatenate((A1,A2),axis = 1)
                 
                 
-                data = {'Area'    : A
+                data = {'Area'    : A,
                         'Strain'  : np.zeros(np.shape(A)),
                         'MStrain' : np.zeros(np.shape(A)[0]),
                         'HR'      : np.zeros(np.shape(A)[0]),
@@ -454,17 +453,14 @@ class FlowSolver(object):
                 
             elif baroData['receptorType'] == 'CarotidBR':
                 
-                baroVesselId = np.array([81,79]) #left and right ID
-                
-                
                 data = {
-                        'InputLeft'      : self.vessels[baroVesselID[0]].Psol,
-                        'InputRight'     :self.vessels[baroVesselID[1]].Psol,
-                        'LeftAfferentSignal' : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
-                        'RightAfferentSignal': : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
-                        'AfferentSignal'    : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
-                        'EfferentSignal'    : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol)),
-                        'AffectedValue'     : np.zeros(np.shape(self.vessels[baroVesselID[1]].Psol))
+                        'pressureLeft'      :self.vessels[baroData['vesselIdLeft']].Psol,
+                        'pressureRight'     :self.vessels[baroData['vesselIdRight']].Psol,
+                        'LeftAfferentSignal' : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
+                        'RightAfferentSignal': np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
+                        'AfferentSignal'    : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
+                        'EfferentSignal'    : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
+                        'AffectedValue'     : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
                         }
                 
             else:
@@ -502,7 +498,16 @@ class FlowSolver(object):
                 #print baroData['boundaryCondition']                                                           
             except: pass
             
-            self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
+            
+            if baroData['receptorType'] == 'AorticBR':
+                
+                self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
+                
+            elif baroData['receptorType'] == 'CarotidBR':
+                
+                self.baroreceptors[baroId] = CarotidBaroreceptor(baroData)
+                
+            
             
             
     

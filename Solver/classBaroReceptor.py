@@ -30,12 +30,7 @@ class BaroReceptor(object):
         self.boundaryCondition  = 0
         self.CellML = False
         
-        # Baroreceptor model information - aortic/carotid, input and output of the baroreflex system
-        self.receptorType = '' # Aortic or Carotid
-        self.inputQuantity = '' # either strain or pressure
-        self.affectedQuantity = '' # HR/T, TPR, Emax possibly Vusv, C
-        
-        
+                
         # Model from CellML
         self.cellMLBaroreceptorModel = False
         
@@ -276,7 +271,7 @@ class AorticBaroreceptor(BaroReceptor):
     
     
     
-class CarotidBaroreceptor(BaroReceptor):
+class CarotidBaroreceptor(object):
     
     '''
     
@@ -284,26 +279,154 @@ class CarotidBaroreceptor(BaroReceptor):
     
     '''
     
-    def __init__(self):
+    def __init__(self,BaroDict):
         
-        BaroReceptor.__init(self)
-        self.affectedQuantity = 'TPR'
+        #super().__init(self)
+        #self.affectedQuantity = 'TPR'
+        
+        #System and Vessel Variables
+        self.dt = 0
+        self.n = 0
+        self.Tsteps = 0
+        self.vesselIdLeft = 0
+        self.VesselIDright = 0
+        self.data = {}
+        self.boundaryCondition  = 0
+        self.CellML = False
+        
+        
+        # get data from dictionary
+        self.update(BaroDict)
+    
+        # model parameters afferent part
+        
+        self.pn = 12266.
+        self.ka = 1567.
+        self.fmin = 2.51
+        self.tau_z= 6.37
+        self.fmax = 47.78
+        self.tau_p= 2.076
+        
+        
+        # model parameters efferent part
+        
+        self.fe_inf = 2.10
+        self.fe_0 = 16.11
+        self.ke = 0.0675
+        self.fe_min = 2.66
+        
+        # model parameters effector part
+        
+        self.cR = 42263190800.
+        self.tauR = 6.
+        self.DR = 2.0
+        self.R0 = 81326644700.
+    
+        
+        # states of the model
+        
+        self.PtildLeft = np.zeros(self.Tsteps)
+        self.PtildLeft[0] = 12266.
+        
+        self.PtildRight = np.zeros(self.Tsteps)
+        self.PtildRight[0] = 12266.
+        
+        self.F_cs_left = np.zeros(self.Tsteps)
+        self.F_cs_right = np.zeros(self.Tsteps)
+        
+        self.F_cs = np.zeros(self.Tsteps)
+        self.F_efferent = np.zeros(self.Tsteps)
+        
+        self.delta_TPR = np.zeros(self.Tsteps)
+        
+        
+    
+    def UrsinoAfferent(self,n):
+        
+        pLeft = np.mean(self.data['pressureLeft'][n])
+        pRight = np.mean(self.data['pressureRight'][n])
+        
+        if n == 0:
+            
+            dpLeft =  0.
+            dpRight = 0.
+            
+        else:
+            
+            dpLeft = (pLeft - np.mean(self.data['pressureLeft'][n-1]))/self.dt
+            dpRight = (pRight - np.mean(self.data['pressureRight'][n-1]))/self.dt
+            
+            
+        self.PtildLeft[n+1] = (pLeft + self.tau_z*dpLeft-self.PtildLeft[n])*self.dt/self.tau_p+self.PtildLeft[n]
+        self.PtildRight[n+1] = (pRight + self.tau_z*dpRight-self.PtildRight[n])*self.dt/self.tau_p+self.PtildRight[n]
+        
+        self.F_cs_left[n+1] = (self.fmin + self.fmax*math.exp((self.PtildLeft[n+1]-self.pn)/self.ka))/(1+math.exp((self.PtildLeft[n+1]-self.pn)/self.ka))
+        self.F_cs_right[n+1] = (self.fmin + self.fmax*math.exp((self.PtildRight[n+1]-self.pn)/self.ka))/(1+math.exp((self.PtildRight[n+1]-self.pn)/self.ka))
+        
+        self.F_cs[n+1] = 0.5*(self.F_cs_left[n+1]+self.F_cs_right[n+1])
     
     
-    def solveCellML:
-        '''
-        solve the CellMLmodel
-        '''
-        
     
-    def __call_(self):
+              
+    def UrsinoEfferent(self,n):
         
+        self.F_efferent[n+1] = self.fe_inf + (self.fe_0-self.fe_inf)*math.exp(-self.ke*self.F_cs[n+1])
+        
+            
+    def UrsinoResistanceEffector(self,n):
+        
+        delay = round(self.DR/self.dt)
+        vR = 0.0
+        
+        if n <= delay:
+            
+            vR = 0.
+            
+        elif n > delay:
+            
+            deltaF = self.F_efferent[n+1-delay] > self.fe_min
+            
+            if deltaF >= 0.0:
+                
+                vR = self.cR * math.log(deltaF + 1)
+                
+            elif deltaF < 0.0:
+                
+                vR = 0.0
+        
+        
+        self.delta_TPR[n+1] = self.dt/self.tauR *(-self.delta_TPR[n] + vR) + self.delta_TPR[n]
+        
+        
+     
+    def UrsinoBRmodel(self,n):
+         
+         self.UrsinoAfferent(n)
+         self.UrsinoEfferent(n)
+         self.UrsinoResistanceEffector(n)
+            
+      
+     
+    def __call__(self):
         
         n = self.n[0]
         
-        ## read area, calculate radius and strain and save to data dictionary
-        pressureLeft = np.mean(self.data['pressureLeft'][n])
-        pressureRight = np.mean(self.data['pressureRight'][n])
+        self.UrsinoBRmodel(n)
+        print self.F_efferent[n]
+        print self.delta_TPR[n]
+        
+        
+    def update(self,baroDict):
+            '''
+            updates the updateBaroreceptorDict data using a dictionary in form of 
+            baroDict = {'variableName': value}
+            '''
+            for key,value in baroDict.iteritems():
+                try:
+                    self.__getattribute__(key)
+                    self.__setattr__(key,value)
+                except: 
+                    print 'ERROR baroreceptor.update(): wrong key: %s, could not set up baroreceptor' %key
     
     
     #self.VesselIDleft = [81]
