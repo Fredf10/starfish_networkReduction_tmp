@@ -672,12 +672,10 @@ class FlowSolver(object):
             # original
                        
             for n in xrange(self.Tsteps-1):
-                start = time.clock()
                 self.n[0] = n
                 #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
                     numericalObject()
-                times[n] = time.clock()-start
                 
         ## to be concentrated with original cycle mode !!
         else:

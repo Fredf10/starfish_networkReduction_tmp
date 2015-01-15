@@ -662,7 +662,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData00 = vascularNetwork.vessels[vesselId].Psol[:, [gridNode]] / 133.32
                     ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
                     xData = vascularNetwork.simulationTime
-                                
+                               
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
         

@@ -1756,7 +1756,7 @@ class DotWidget(gtk.DrawingArea):
                                 print " [b] - set boundary conditions"
                                 print " [l] - load network"
                                 print " [s] - save network"
-                                print " [u] - update XML form CSV file"
+                                print " [u] - update XML from CSV file"
                                 print " [g] - print network graph"
                                 print " [f] - print network informations"
                                 print " [q] - quit"

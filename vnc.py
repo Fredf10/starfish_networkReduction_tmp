@@ -78,7 +78,7 @@ def main():
         print " [f] - set global fluid properties"
         print " [l] - load network"
         print " [s] - save network"
-        print " [u] - update XML form CSV file(s)"
+        print " [u] - update XML from CSV file(s)"
         print " [g] - print network graph"
         print " [p] - print network informations"
         print " [q] - quit"

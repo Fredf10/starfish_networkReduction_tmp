@@ -219,6 +219,7 @@ def defineSimulationDescription():
     except:
         print 'ERROR: no String Convertable input given, system exit'
         exit()
+    if simulationDescription in ['',' ']: simulationDescription = '-'
     return simulationDescription
     
     
