@@ -4,12 +4,15 @@ import sys, os
 from math import pi, cos, sin
 import numpy as np
 
+## needs to be imported as modules
 from moduleGrids import *
 from classCompliance import *
-
+##
+from classSolutionData import SolutionDataVessel
 
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../'+'/UtilityLib')
+
 from constants import newestNetworkXml as nxml
 
 class Vessel(object):
@@ -106,12 +109,14 @@ class Vessel(object):
         
         
         ## Solution Data
-        self.Psol      = None  # pressure
-        self.Qsol      = None  # flow 
-        self.Asol      = None  # area 
+        self.solutionData = SolutionDataVessel()    # solutionData Object
+        # pointers to solutionData objects
+        self.Psol         = None  # pressure
+        self.Qsol         = None  # flow 
+        self.Asol         = None  # area 
         # calculated values for post processing
-        self.csol      = None # wave speed
-        self.vsol      = None # mean velocity
+        self.csol         = None # wave speed
+        self.vsol         = None # mean velocity
         
         self.quiet = False
         Vessel.number += 1
@@ -226,6 +231,49 @@ class Vessel(object):
         
         #set hooks waveSpeed function
         if self.c == None: self.c = self.waveSpeed  
+        
+    def initializeSolutionDataForSimulation(self,initialValues, memoryArraySize, dsetGroup, nSaveBegin, nSaveEnd):
+        '''
+        Initialize the solution data and allocates memory for it
+        
+        Input:
+            memoryArraySize := size of one array in memory
+            dsetGroup       := data set group in the hdf5 file
+            nSaveBegin      := time index when to start saving
+            nSaveEnd        := time index when to stop saving
+            '''
+        # calculate solution for the area based on pressure
+        self.data.allocateMemory(memoryArraySize,
+                                 vesselGroup,
+                                 nSaveBegin,
+                                 nSaveEnd,
+                                 self.N)      
+        # backlink solution variables
+        self.Psol = self.data.P
+        self.Asol = self.data.A
+        self.Qsol = self.data.Q
+        # set initial values
+        try:
+            p0,p1 = initialValues[vesselId]['Pressure']
+            Qm    = initialValues[vesselId]['Flow']
+            self.Psol[0] = np.linspace(p0,p1,vessel.N)   
+            self.Qsol[0] = np.ones((1,self.N))*Qm  
+        except:
+            print "Error: cFS could not use initial values from network"
+            pass
+        
+        self.Asol[0] = np.ones((1,vessel.N))*self.A(self.Psol[0])
+        # save initial values
+        self.data.saveInitialState()
+    
+    def initializeSolutionDataFromFile(self,dsetGroup):
+        '''
+        Initilalize solution data after loading a file
+        
+        Input:
+            dsetGroup       := data set group in the hdf5 file
+        '''
+        self.data.linkDataSets(dsetGroup)
         
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):

@@ -40,7 +40,7 @@ class VascularNetwork(object):
         self.motionAngles   = {}
         
         # gravity controls
-        self.gravitationalField = True  # bool, turn gravity on or off
+        self.gravitationalField = False  # bool, turn gravity on or off
         self.gravityConstant    = -9.81 # earth gravity
                 
         # venous system
@@ -296,7 +296,7 @@ class VascularNetwork(object):
         
         
         ## initialze 3d positions of the vascularNetwork
-        self.calculate3DpositionsAndGravity(0) 
+        self.calculate3DpositionsAndGravity(nSet = 0) 
         
         ### initialise for simulation
         if initializeForSimulation == True:
@@ -326,7 +326,7 @@ class VascularNetwork(object):
             # show wave speed of network
             if self.quiet == False: self.showWaveSpeedOfNetwork()
             
-            # omptimize tree relfection coefficients
+            # omptimize tree relfection coefficients BADDDDD
             if self.optimizeTree: self.optimizeTreeRefelctionCoefficients()
             
             if self.quiet == False: self.showReflectionCoefficientsConnectionInitialValues()
@@ -784,7 +784,7 @@ class VascularNetwork(object):
                 self.boundaryConditions[root][0].findMeanFlowAndMeanTime(quiet = self.quiet)
                 meanInflow = self.boundaryConditions[root][0].MeanFlow
             except:
-                print "Error: Unable to calculate mean flow at inflow point"
+                print "Error: classVascularNetwork: Unable to calculate mean flow at inflow point"
                 exit()
                 
         elif self.initialsationMethod == 'MeanFlow':
@@ -793,16 +793,15 @@ class VascularNetwork(object):
                 ## addjust bc condition
                 self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet = self.quiet)
             except:
-                print "Error: Unable to set given meanFlow at inflow point"
+                print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
                 exit()
                 
         elif self.initialsationMethod == 'MeanPressure':
             try:
                 meanInPressure = self.initMeanPressure
             except:
-                print "Error: Unable to set given meanFlow at inflow point"
+                print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
                 exit()
-        
         
         elif self.initialsationMethod == 'ConstantPressure':
             try:
@@ -811,9 +810,9 @@ class VascularNetwork(object):
                     self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet = self.quiet)
                     
             except:
-                print "Error: Unable to set given meanFlow at inflow point"
+                print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
                 exit()
-            #############################Inititalisation Method constant pressure#############
+            #############################Inititalisation Method constant pressure #############
             initialValues[root]             = {}
             initialValues[root]['Pressure'] = [constantPressure,constantPressure]
             initialValues[root]['Flow']     = 0
@@ -862,10 +861,10 @@ class VascularNetwork(object):
             if boundaryCondition.name == 'ReflectionCoefficientTimeVarying':
                 boundaryCondition.update(bcdict)
         ######
+        
         if self.venousSystemCollaps == True:
             "WARNING: no method  for venous collapsing system is implemented to initialize network with method 'Tree' !!!"
             pass
-            
         
         if meanInflow != None:
             p0 = self.Rcum[root]*meanInflow 
@@ -875,7 +874,9 @@ class VascularNetwork(object):
             p0 = meanInPressure  
             ## addjust bc condition
             try:    self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet = self.quiet)
-            except: pass
+            except:
+                print "Error: Unable to adjust calculated meanFlow at inflow point boundary condition !"
+                exit()
             p1 = p0-self.vessels[root].resistance*meanInflow
         else: 
             print "Error: Neither flow or pressure value given at inflow point!"
@@ -1023,6 +1024,9 @@ class VascularNetwork(object):
     def optimizeTreeRefelctionCoefficients(self):
         '''
         Calculates the optimal reflection coeffiecients for the network
+        
+        addapted from article Reymond et al.2009
+        (very poor and instable method)
         '''  
         
         ## add rest of the vessels by traversing the connections
@@ -1184,7 +1188,7 @@ class VascularNetwork(object):
                 # update p0 with new p1 from mother including gravity
                 p0 = initialValues[leftMother]['Pressure'][1]
                 
-                p1 = p0 + initialPressureDiff + self.vessels[root].netGravity[0] * self.vessels[root].length
+                p1 = p0 + initialPressureDiff + self.vessels[daughter].netGravity[0] * self.vessels[daughter].length
                 
                 initialValues[daughter]['Pressure'] = [p0,p1]
                 
@@ -1245,34 +1249,40 @@ class VascularNetwork(object):
             if self.gravitationalField==True:
                 print '%s %2i %19.3f'           % ('Net gravity     : vessel ',vesselId, self.vessels[vesselId].netGravity[0])
         
-    def calculate3DpositionsAndGravity(self, n):
+    def calculate3DpositionsAndGravity(self, Tsteps = None, nSet = None):
         '''
         Initializing the position and rotation of each vessel in 3D space
         Initializing netGravity of the vessels.
         '''
-        
-        if n == 0:
-            self.vessels[self.root].angleXMother = 90.*np.pi/180.
-            self.vessels[self.root].angleYMother = 0#45*np.pi/180.
-            self.vessels[self.root].angleZMother = 0#45*np.pi/180.
-                                
-        positionEndMother = np.zeros(3)
-        rotToGlobalSysMother = np.eye(3)
-        self.vessels[self.root].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother)
-        
-        for leftMother,rightMother,leftDaughter,rightDaughter in self.treeTraverseConnections:
-            # initialize left daughter
-            positionEndMother        = self.vessels[leftMother].positionEnd[n]
-            rotToGlobalSysMother     = self.vessels[leftMother].rotToGlobalSys[n]
-            self.vessels[leftDaughter].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother) 
-            # initiaize right daughter
-            if rightDaughter != None:                               
-                self.vessels[rightDaughter].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother) 
+        if nSet != None:
+            Tsteps = 2
             
-            if rightMother != None:
-                if np.sum(self.vessels[rightMother].positionEnd-self.vessels[leftMother].positionEnd) < 3.e-15:
-                    print 'ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother,rightMother,leftDaughter)
-    
+        for n in xrange(Tsteps-1):
+        
+            if nSet != None: n = nSet
+        
+            if n == 0:
+                self.vessels[self.root].angleXMother = 90.*np.pi/180.
+                self.vessels[self.root].angleYMother = 0#45*np.pi/180.
+                self.vessels[self.root].angleZMother = 0#45*np.pi/180.
+                                    
+            positionEndMother = np.zeros(3)
+            rotToGlobalSysMother = np.eye(3)
+            self.vessels[self.root].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother)
+            
+            for leftMother,rightMother,leftDaughter,rightDaughter in self.treeTraverseConnections:
+                # initialize left daughter
+                positionEndMother        = self.vessels[leftMother].positionEnd[n]
+                rotToGlobalSysMother     = self.vessels[leftMother].rotToGlobalSys[n]
+                self.vessels[leftDaughter].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother) 
+                # initiaize right daughter
+                if rightDaughter != None:                               
+                    self.vessels[rightDaughter].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother) 
+                
+                if rightMother != None:
+                    if np.sum(self.vessels[rightMother].positionEnd-self.vessels[leftMother].positionEnd) < 3.e-15:
+                        print 'ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother,rightMother,leftDaughter)
+        
     def initializeVenousGravityPressureTime(self, Tsteps):
         '''
         Calculate and initialze the venous pressure depending on gravity for the 2 and 3 element windkessel models

@@ -104,8 +104,7 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.MeanFlow    = 0.0
 		self.Tperiod     = 0.0
 		self.pulseTime   = []
-		self.initialStep = False
-		self.duMatrix    =  np.ones(2)
+		self.duMatrix    = np.ones(2)
 		self.duVector    = np.empty(2)
 		
 		# values to manipulate period during runtime
@@ -126,27 +125,15 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.Tperiod = self.Tspace+1.0/self.freq
 				
 		self.pulseTime = []
-		for puls in np.arange(self.Npulse):
-			#self.pulseTime.append([self.Tpulse + (self.Tperiod)*puls,
-			#						   self.Tpulse + 1.0/self.freq+ (self.Tperiod)*puls - self.TmeanFlow,
-			#						   self.Tpulse + self.Tperiod +(self.Tperiod)*puls  + self.TmeanFlow,
-			#						   self.Tpulse + self.Tperiod +(self.Tperiod)*puls  + self.TmeanFlow])
-			
-			
-			if puls == 0:
-				self.pulseTime.append([self.Tpulse + (self.Tperiod)*puls,
-									   self.Tpulse + 1.0/self.freq+ (self.Tperiod)*puls - self.TmeanFlow,
-									   self.Tpulse + self.Tperiod +(self.Tperiod)*puls ,
-									   self.Tpulse + self.Tperiod +(self.Tperiod)*puls ])
+		for puls in np.arange(self.Npulse):			
+			self.pulseTime.append([self.Tpulse + (self.Tperiod)*puls,
+								   self.Tpulse + 1.0/self.freq+ (self.Tperiod)*puls,
+								   self.Tpulse + self.Tperiod +(self.Tperiod)*puls])
+		
+		self.pulseTimeInit = [[0,
+							   1.0/self.freq,
+							   self.Tperiod]]
 				
-			else:
-				self.pulseTime.append([self.Tpulse + (self.Tperiod)*puls,
-									   self.Tpulse + 1.0/self.freq+ (self.Tperiod)*puls,
-									   self.Tpulse + self.Tperiod +(self.Tperiod)*puls,
-									   self.Tpulse + self.Tperiod +(self.Tperiod)*puls ])
-		
-		self.initialStep = False
-		
 		self.lastU = self.calculateOneStep(0,0)
 		
 		if self.prescribe == 'total':
@@ -168,7 +155,7 @@ class BoundaryConditionType1(BoundaryCondition):
 			
 	def updatePeriodRuntime(self, TperiodNew, updateTime):
 		'''
-		This function updates the freq, Tspace and pulsTime for  new given Tperiod
+		This function updates the freq, Tspace and pulsTime for new given Tperiod
 		'''
 				
 		freq    = self.freq
@@ -184,21 +171,17 @@ class BoundaryConditionType1(BoundaryCondition):
 		for pulse in self.pulseTime:
 			
 			if  updateTime >= pulse[0] and updateTime <= pulse[2] and findFirstPulse == True:
-				pStart = pulse[3]
+				pStart = pulse[2]
 				manipulateOtherPulses = True
 				
 				self.updateTime = pulse[2]				
-								
-			elif updateTime >= pulse[2] and updateTime <= pulse[3]:
-				updateTime = pulse[3] 
-					
+													
 			if manipulateOtherPulses == True:
 				if findFirstPulse == False:
 					pulse[0] = pStart
 					pulse[1] = pStart + 1.0/self.freqNew  #- self.TmeanFlow
 					pulse[2] = pStart + TperiodNew        #- self.TmeanFlow
-					pulse[3] = pStart + TperiodNew 				
-					pStart = pulse[3]
+					pStart = pulse[2]
 				else: findFirstPulse = False
 		
 	def calculateDuVector(self,Tsteps,dt):
@@ -209,8 +192,25 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.duVector = np.zeros((Tsteps,2))
 		
 		lastStep = self.calculateOneStep(0,dt)
-		for nt in range(len(self.duVector)):
+		
+		for nt in xrange(len(self.duVector)):
 			nextStep = self.calculateOneStep(nt+1,dt)
+			self.duVector[nt] = nextStep - lastStep
+			lastStep = nextStep
+			
+		return self.duVector
+		
+	def calculateDuVectorInitPhase(self,Tsteps,dt):
+		'''
+		Function calculates the duVector for a given number of time steps Tsteps and dt
+		return: self.duVector
+		'''
+		self.duVector = np.zeros((Tsteps,2))
+		
+		lastStep = self.calculateOneStep(0,dt,initPhase = True)
+		
+		for nt in xrange(len(self.duVector)):
+			nextStep = self.calculateOneStep(nt+1,dt,initPhase = True)
 			self.duVector[nt] = nextStep - lastStep
 			lastStep = nextStep
 			
@@ -233,11 +233,10 @@ class BoundaryConditionType1(BoundaryCondition):
 			self.Tperiod = self.TspaceNew + 1.0/self.freqNew
 			
 			self.updateTime = -10
-			#print "bcType1 updatedTime", n*dt, self.updateTime + dt, self.updateTime - dt, self.freq , self.Tperiod
 			
 		return du
 		
-	def calculateOneStep(self,n,dt):
+	def calculateOneStep(self, n, dt, initPhase = False):
 		'''
 		calculates the amplitude value for one time step n and dt
 		
@@ -245,45 +244,35 @@ class BoundaryConditionType1(BoundaryCondition):
 		'''
 		t = n*dt
 		ampT = self.ampConst
-				
 		timeInPulseTime = False
+		
+		pulseTime = self.pulseTime
+		if initPhase == True: pulseTime = self.pulseTimeInit
 		# get time slots
-		for pTA in self.pulseTime:
-			if pTA[0] <= t and t <= pTA[3]:
-				pulsNum = self.pulseTime.index(pTA)
+		for pTA in pulseTime:
+			if pTA[0] <= t and t <= pTA[2]:
+				pulsNum = pulseTime.index(pTA)
 				pTA1 = pTA[0]
 				pTA2 = pTA[1]
 				pTA3 = pTA[2]
-				pTA4 = pTA[3]
 				timeInPulseTime = True
 				break
 		if timeInPulseTime == False:
-			#print "WARNING BoundaryCondtitionType1.calculateOneStep(): t = {} not in pulseTime, return constant amp!".format(t)
-			return ampT
+			return ampT*self.duMatrix
 		
-		if pulsNum == 0: tmeanFlowShift = self.TmeanFlow
-		else : tmeanFlowShift =  0
-				
+		if initPhase == True: t = t + self.TmeanFlow 
+							
 		try:
-			if pTA1 <= t and t <= pTA2:# and self.initialStep == True:
-				t = t + tmeanFlowShift#self.TmeanFlow
-				t0 = pTA1 #self.Tpulse+pulsNum*self.Tperiod
-								
+			if pTA1 <= t and t <= pTA2:
+				t0 = pTA1
 				## function1 according to the signal type
 				ampT = ampT + self.function1(t,t0,pulsNum)
 				
 			elif pTA2 <= t and t < pTA3:
-				t = t+ tmeanFlowShift#self.TmeanFlow
-				t0 = pTA1 #self.Tpulse+pulsNum*self.Tperiod
+				t0 =  pTA1
 				## function2 according to the signal type in most cases return self.ampConst
 				ampT = ampT + self.function2(t,t0,pulsNum)
-			
-			elif pTA3 <= t and t <= pTA4: 
-				t = t-self.Tperiod++tmeanFlowShift #+self.TmeanFlow#
-				t0 = pTA1 #self.Tpulse+pulsNum*self.Tperiod
-				## function3 according to the signal type in most cases same as function 1
-				ampT = ampT + self.function3(t,t0,pulsNum)
-			
+						
 			t = n*dt
 			if self.Tpulse <= t and t < self.Tpulse+1.5*dt and self.initialStep == False:
 				self.initialStep = True
@@ -293,7 +282,7 @@ class BoundaryConditionType1(BoundaryCondition):
 		except:
 			return ampT*self.duMatrix	
 		
-	def findMeanFlowAndMeanTime(self,givenMeanFlow = None, quiet = False):
+	def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
 		'''
 		This function calculates the mean flow of the signal self.MeanFlow
 		and the first occurence time of the mean flow self.TmeanFlow
@@ -302,7 +291,7 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.initialize({})
 		
 		period = self.Tperiod
-		totalTime = self.Tperiod+self.Tpulse
+		totalTime = period+self.Tpulse
 		dt = 0.001
 		nTsteps = int(np.round(totalTime/dt, 0))
 		nTstepsStart = int(np.round(self.Tpulse/dt, 0))
@@ -334,7 +323,7 @@ class BoundaryConditionType1(BoundaryCondition):
 		newTime = np.linspace(0,time[-1], numberIntPoints)
 		newValues = inflowFunction(newTime)
 		self.TmeanFlow = 0
-		for n in np.linspace(0,numberIntPoints-1,numberIntPoints ): 
+		for n in np.linspace(0,numberIntPoints-1,numberIntPoints): 
 			ti = newTime[n]
 			qi = newValues[n]
 			if abs(self.MeanFlow-qi) <= 1.e-5:
@@ -342,20 +331,25 @@ class BoundaryConditionType1(BoundaryCondition):
 				while notFound == True:
 					self.TmeanFlow = ti
 					n = n+1
-					if n == numberIntPoints: break
+					if n == numberIntPoints-1: break
 					if abs(self.MeanFlow-newValues[n+1]) > abs(self.MeanFlow-newValues[n]):
 						self.TmeanFlow = newTime[n]
 						break
 				break
 		
+		print "cBC350 totalTime",totalTime
+		print "cBC350 period: ",period
+		print "cBC350 initPhase timespan: ", period-self.TmeanFlow
+		
+		
 		if quiet == False:
 			print '====================================='
 			print '___BC _Type1: mean flow evaluation___'
-			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str((integral*dt/period)[1]).ljust(5))
+			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str((integral*dt/period*1e6)[1]).ljust(5))
 			print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
 			print 'total volume/period (ml)   {:.6}'.format(str(integral[1]*dt*1e6).ljust(5))
 		
-		if self.TmeanFlow != 0.0: self.Tpulse = 0.0
+		#if self.TmeanFlow != 0.0: self.Tpulse = 0.0
 		self.initialize({})
 		
 	def function1(self,t,t0,pulsNum):
@@ -369,12 +363,6 @@ class BoundaryConditionType1(BoundaryCondition):
 		'''
 		return 0
 	
-	def function3(self,t,t0,pulsNum):
-		'''
-		amplitude function caracterized by signal type
-		'''
-		return self.function1(t,t0,pulsNum)
-
 class RampMean(BoundaryConditionType1):
 	"""	
 	Boundary profile - type 1
@@ -387,10 +375,7 @@ class RampMean(BoundaryConditionType1):
 	
 	def function2(self,t,t0,pulsNum):
 		return self.amp
-	
-	def function3(self,t,t0,pulsNum):
-		return self.amp
-	
+		
 class Sinus(BoundaryConditionType1):
 	"""	
 	Boundary profile - type 1
@@ -451,7 +436,7 @@ class expVelocity(BoundaryConditionType1):
 	def __init__(self):
 		
 		BoundaryConditionType1.__init__(self)
-				
+			
 		## additional variables for this function
 		self.gaussC = 5000
 		self.area   = 1
@@ -576,6 +561,7 @@ class FlowFromFile(BoundaryConditionType1):
 		Q = np.interp(tInter,self.dataTime,self.dataFlow)
 		#P = np.interp(t-pulseNumber*self.tmax,self.data.t,self.data.P)
 		return Q*self.duMatrix
+		
 		
 		
 	
