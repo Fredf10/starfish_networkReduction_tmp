@@ -41,7 +41,7 @@ class Boundary():
         
         #Function which gives du-vector back
         self.duFunction = None
-        self.duVector = np.zeros((Tsteps,2))
+        self.duVector = np.zeros((Tsteps-1,2))
         self._du_ = np.empty(2)
         # list of all type1 functions found in the given boundaryConditions, which determine 
         # the du-Function
@@ -162,6 +162,7 @@ class Boundary():
         '''
         Pre-Calculate the BoundaryConditions duVector of Type1
         '''
+        self.duVector = self.duVector*0.
         for bc in self.bcType1:
             self.duVector = self.duVector+bc.calculateDuVector(len(self.duVector),self.dt)
         

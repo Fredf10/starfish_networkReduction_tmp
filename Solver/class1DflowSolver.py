@@ -111,7 +111,8 @@ class FlowSolver(object):
         
         self.initializeTimeVariables(quiet)
         
-        self.initializeSolutionMatrices()
+        self.initializeSolutionMatrices() # init data in vessels
+        
         self.initializeSystemEquations()
         self.initializeBoundarys()
         self.initializeConnections()
@@ -250,22 +251,26 @@ class FlowSolver(object):
             
         self.output['gridNodens'] = int(gridNodens)
         
-        
+                
     def initializeSolutionMatrices(self):
         '''
-        initialize solution matrices
+        initialize solution matrices --> moved to vascularNetwork
         '''
-        
-        
+                
         initialValues = self.vascularNetwork.initialValues
         
         for vesselId,vessel in self.vessels.iteritems():
             
+            # get init values from init phase
+            #Pinit = vessel.Psol[-1,:]
+            #Qinit = vessel.Qsol[-1,:]
+            #Ainit = vessel.Asol[-1,:]
+            
+            # create new arrays for simulations
             vessel.Psol = np.ones((self.Tsteps,vessel.N))
             vessel.Qsol = np.zeros((self.Tsteps,vessel.N))
             vessel.Asol = np.zeros((self.Tsteps,vessel.N))
-            
-            
+            # apply initial values to arrays
             try:
                 p0,p1 = initialValues[vesselId]['Pressure']
                 Qm    = initialValues[vesselId]['Flow']
@@ -274,6 +279,7 @@ class FlowSolver(object):
             except:
                 print "Error: cFS could not use initial values from network"
                 pass
+            
             vessel.Asol[0] = np.ones((1,vessel.N))*vessel.A(self.vessels[vesselId].Psol[0])   
                    
             vessel.positionStart    = np.zeros((self.Tsteps,3))
@@ -312,9 +318,8 @@ class FlowSolver(object):
         for vesselId,angleDict in motionDict.iteritems():
             self.vessels[vesselId].update(angleDict)
             
-        ## calculate gravity and positions
-        for n in xrange(self.Tsteps-1):            
-            self.vascularNetwork.calculate3DpositionsAndGravity(n)
+        ## calculate gravity and positions   
+        self.vascularNetwork.calculate3DpositionsAndGravity(Tsteps = self.Tsteps)
             
         ## calculate venous pressure for windkessel
         self.vascularNetwork.initializeVenousGravityPressureTime(self.Tsteps)
@@ -514,10 +519,9 @@ class FlowSolver(object):
     def initializeCommunicators(self):
         
         
-        #print 'cFS435 Communicators',self.vascularNetwork.communicators
+        #print 'cFS 435 Communicators',self.vascularNetwork.communicators
         for comId, comData in self.vascularNetwork.communicators.iteritems():
         #for comId, comData in self.communicators.iteritems():      
-            ## for baro receptor and visualisation
             #try:
             data = {'Pressure': self.vessels[comData['vesselId']].Psol,
                     'Flow'    : self.vessels[comData['vesselId']].Qsol,
@@ -630,6 +634,7 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumConnections',len(self.connections))
         print '%-20s %4d' % ('NumBoundarys',len(self.boundarys))
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
+        print '%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors))
         print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)               
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
         #print self.communicators['0']
@@ -648,7 +653,7 @@ class FlowSolver(object):
     #
     ########################################################################################
     '''
-    
+       
     def MacCormack_Field(self):
         '''
         MacCormack solver method with forward-euler time steping,
@@ -662,20 +667,19 @@ class FlowSolver(object):
         
         reflectionCoefficientCount = 0
         maxRef = 0
-        
-        
-        
+               
         if self.cycleMode == False:
             # original
+                       
             for n in xrange(self.Tsteps-1):
-                
+                start = time.clock()
                 self.n[0] = n
-                
+                #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
-                    
                     numericalObject()
-                    
-        ## to be concentrated with original !!
+                times[n] = time.clock()-start
+                
+        ## to be concentrated with original cycle mode !!
         else:
             # steady state variables
             P_lastCycle  = {}
@@ -693,7 +697,7 @@ class FlowSolver(object):
                 A_lastCycle[vesselId]  = np.ones((self.Tsteps,vessel.N))
                 
             
-            for cycle in xrange(self.numberCycles):
+            for cycle in xrange(self.numberCycles-1):
                 print ' solving cycle {}'.format(cycle+1)
                 # 1. solve cycle
                 for n in xrange(self.Tsteps-1):
@@ -831,7 +835,6 @@ class FlowSolver(object):
         print "Tsteps is", self.Tsteps
 
         try:
-            
             
             
             print "FS726: self.vascularNetwork.boundaryConditions[1][0].volume"
