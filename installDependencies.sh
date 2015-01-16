@@ -12,6 +12,7 @@ if [ -f /etc/debian_version ]; then
     apt-get -y install python-scipy
     apt-get -y install python-matplotlib
     apt-get -y install graphviz
+    apt.get -y install hdf5-devel
 
 elif [ -f /etc/redhat-release ]; then
     # TODO add code for Red Hat and CentOS here
@@ -26,7 +27,7 @@ elif [ -f /etc/redhat-release ]; then
     yum -y install scipy
     yum -y install python-matplotlib
     yum -y install graphviz
-    yum -y install hdf5
+    yum -y install hdf5-devel
     
 else
     OS=$(uname -s)
