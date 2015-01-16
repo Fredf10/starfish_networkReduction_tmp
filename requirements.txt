@@ -5,4 +5,4 @@ pyglet>=1.1
 pydot>=1.0.2
 psutil>=1.0.1
 pycallgraph>=0.5.1
-
+h5py>=2.4
