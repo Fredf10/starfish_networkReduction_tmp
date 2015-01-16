@@ -14,7 +14,7 @@ from classSystemEquations import *
 from classConnections import *
 from classFields import *
 from classCommunicators import *
-from classBaroReceptor import *
+from classBaroreceptor import *
 
 sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
@@ -56,7 +56,7 @@ class FlowSolver(object):
         baro = False
         if baro == True:
             #self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1, 'receptorType':'AorticBR'}}
-            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'CellMl': False}}
+            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -118,7 +118,7 @@ class FlowSolver(object):
         self.initializeConnections()
         self.initializeFields()
         self.initializeCommunicators()
-        self.initializeBaroReceptors()
+        self.initializeBaroreceptors()
         self.initializeNumericalObjectList()
         if quiet==False:
             self.initOutput() # feedback
@@ -433,7 +433,7 @@ class FlowSolver(object):
                                             self.rigidAreas)
     
 
-    def initializeBaroReceptors(self):
+    def initializeBaroreceptors(self):
         
         '''
         function used to initialize Baroreceptor objects
@@ -485,7 +485,6 @@ class FlowSolver(object):
             baroData['n']                       = self.n
             baroData['dt']                      = self.dt
             baroData['Tsteps']                  = self.Tsteps   
-            baroData['cellMLBaroreceptorModel'] = baroData.pop('CellMl')
             
             
             #initialization of the boundary condition object
@@ -506,7 +505,7 @@ class FlowSolver(object):
             
             if baroData['receptorType'] == 'AorticBR':
                 
-                self.baroreceptors[baroId] = BaroReceptor(baroData) # call the constructor
+                self.baroreceptors[baroId] = Baroreceptor(baroData) # call the constructor
                 
             elif baroData['receptorType'] == 'CarotidBR':
                 
@@ -540,7 +539,7 @@ class FlowSolver(object):
 #                     except: comData['data']['bloodVolume'] = [boundary.BloodVolumen]
 #             
             
-            ## for baroReceptor
+            ## for baroreceptor
             try:            
                 for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
                     if bcId == comData['vesselId']:
