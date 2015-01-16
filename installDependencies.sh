@@ -26,6 +26,7 @@ elif [ -f /etc/redhat-release ]; then
     yum -y install scipy
     yum -y install python-matplotlib
     yum -y install graphviz
+    yum -y install hdf5
     
 else
     OS=$(uname -s)
