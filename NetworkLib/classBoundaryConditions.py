@@ -337,9 +337,9 @@ class BoundaryConditionType1(BoundaryCondition):
 						break
 				break
 		
-		print "cBC350 totalTime",totalTime
-		print "cBC350 period: ",period
-		print "cBC350 initPhase timespan: ", period-self.TmeanFlow
+		print "cBC 350 totalTime",totalTime
+		print "cBC 350 period: ",period
+		print "cBC 350 initPhase timespan: ", period-self.TmeanFlow
 		
 		
 		if quiet == False:

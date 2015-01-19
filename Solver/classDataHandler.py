@@ -39,18 +39,19 @@ class DataHandler(object):
         call function for DataHandler to save the data for each vessel in the network
         '''
         currentMemoryIndex = self.currentMemoryIndex[0]
+        currentTimeStep    = self.currentTimeStep[0]
         
         if currentMemoryIndex == self.memoryArraySizeTime - 2:
             # ## after the memory is filled
             # # initiate flush of memoryArrays
             for vessel in self.vessels.itervalues():
-                vessel.data.flushMemory(self.chunkCount, self.memoryOffset[0])
+                vessel.flushMemory(self.chunkCount, self.memoryOffset[0])
                 
             self.chunkCount += 1
             self.memoryOffset[0] = (self.memoryArraySizeTime - 1) * self.chunkCount
 
-        elif self.currentTimeStep[0] == self.nTsteps - 1:
+        elif currentTimeStep == self.nTsteps - 1:
             #### if the simulation is finished but memory not filled
             # # initiate flush of memoryArrays
             for vessel in self.vessels.itervalues():
-                vessel.data.flushMemory(self.chunkCount, self.memoryOffset[0])
+                vessel.flushMemory(self.chunkCount, self.memoryOffset[0])

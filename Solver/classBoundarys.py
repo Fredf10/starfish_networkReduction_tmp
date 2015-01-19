@@ -15,7 +15,7 @@ from classBoundaryConditions import *
 
 
 class Boundary():
-    def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, Tsteps, systemEquation):
+    def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, nTsteps, systemEquation):
         '''
         Constructor of Boundary
         s
@@ -41,7 +41,7 @@ class Boundary():
         
         #Function which gives du-vector back
         self.duFunction = None
-        self.duVector = np.zeros((Tsteps-1,2))
+        self.duVector = np.zeros((nTsteps,2))
         self._du_ = np.empty(2)
         # list of all type1 functions found in the given boundaryConditions, which determine 
         # the du-Function
@@ -65,7 +65,7 @@ class Boundary():
         self.Q = vessel.Qsol
         self.A = vessel.Asol
         
-        self.BloodFlowSep  = np.zeros((Tsteps,2)) ## [ dbloodVolume in, dbloodVolume out] blood volume from one timestep to the next
+        self.BloodFlowSep  = np.zeros((nTsteps,2)) ## [ dbloodVolume in, dbloodVolume out] blood volume from one timestep to the next
         self.BloodVolumen  = np.zeros(2)
                 
         posTemp = []
@@ -202,8 +202,8 @@ class Boundary():
         
         # create local variables for this timestep
         dt = self.dt
-        currentMemoryIndex = self.currentMemoryIndex
-        currentTimeStep = self.currentTimeStep
+        currentMemoryIndex = self.currentMemoryIndex[0]
+        currentTimeStep = self.currentTimeStep[0]
         
         P = self.P[currentMemoryIndex]
         Q = self.Q[currentMemoryIndex]

@@ -28,10 +28,11 @@ class VascularNetwork(object):
         self.quiet = quiet              # bool to suppress output
         
         # saving options
-        self.tSaveBegin       = 0.      # time when to start saving
-        self.tSaveEnd         = 1.0     # time when to end saving
-        self.solutionDataFile = None    # file name of the solution data
-        self.maxMemory        =  500.   # maximum memory in MB 
+        self.tSaveBegin          = 0.      # time when to start saving
+        self.tSaveEnd            = 8.0     # time when to end saving
+        self.solutionDataFile    = None    # file name of the solution data
+        self.maxMemory           =  500    # maximum memory in MB 
+        self.memoryArraySizeTime =  None   # memory array size for the time arrays
         
         # running options
         self.cycleMode = False
@@ -372,22 +373,21 @@ class VascularNetwork(object):
         self.nSaveBegin = int(np.floor(self.tSaveBegin/dt))
         self.nSaveEnd   = int(np.ceil(self.tSaveEnd/dt))
         
-        
         ## -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
         estimatedMemorySolutionDataSpace  = 0
         for vessel in self.vessels.itervalues():
              estimatedMemorySolutionDataSpace += vessel.N*8*3 # byte
-        memoryArraySizeTime = int(np.floor(self.maxMemory*1024.*1024. / estimatedMemorySolutionDataSpace))       
-        if memoryArraySizeTime > (nTsteps+1):
-            memoryArraySizeTime = nTsteps+1
+        self.memoryArraySizeTime = int(np.floor(self.maxMemory*1024.*1024. / estimatedMemorySolutionDataSpace))       
+        if self.memoryArraySizeTime > (nTsteps+1):
+            self.memoryArraySizeTime = nTsteps+1
                 
         # initialize for simulation
         for vesselId,vessel in self.vessels.iteritems():
             # create a new group in the data file
-            dsetGroup = self.solutionDataFile.create_group(' '.join([vessel.name,str(vessel.Id)]))
+            dsetGroup = self.solutionDataFile.create_group(' '.join([vessel.name,' - ',str(vessel.Id)]))
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
-                                           memoryArraySizeTime,
+                                           self.memoryArraySizeTime,
                                            dsetGroup,
                                            self.nSaveBegin,
                                            self.nSaveEnd,
@@ -470,7 +470,7 @@ class VascularNetwork(object):
         
         
         
-    def prepareSolutionDataAfterLoad(self, solutionData):
+    def loadSolutionData(self):
         '''
         This function prepares the solution data when the network is loaded
         and saves it in the corresponding vessel instance
@@ -479,13 +479,58 @@ class VascularNetwork(object):
         - wave speed
         - mean velocity
         '''
-        print " i am not working correctly"
-        for vesselId,data in solutionData['vessels'].iteritems():
-            self.vessels[vesselId].update(data)
-            self.vessels[vesselId].postProcessing() 
-            
-        self.update(solutionData['vascularNetwork'])
         
+        
+        ## verify if path is existing with modulepickle function
+        # parseDirectoryForSimulationCases(networkName)
+        
+        ### to be moved to a path handler
+        solutionDirectory = ''.join([cur,'/..','/NetworkFiles/',self.name,'/SolutionData'])
+        pathSolutionDataFilename = ''.join([solutionDirectory,'/',self.name,'_SolutionData_',self.dataNumber,'.hdf5'])
+        if not os.path.exists(solutionDirectory):
+            os.makedirs(solutionDirectory)  
+        
+        self.solutionDataFile = h5py.File(pathSolutionDataFilename, "r")
+        
+        vesselId = None
+        for groupName, group in self.solutionDataFile.iteritems():
+            print groupName
+            
+            if groupName == 'VascularNetwork':
+                self.dt      = group.attrs['dt']
+                self.nTsteps = group.attrs['nTsteps']
+                self.simulationTime = group['Time'][:]
+            else:
+                #try: 
+                    vesselId = int(groupName.split(' - ')[-1])
+                    #try:
+                    # link data
+                    self.vessels[vesselId].linkSolutionData(group)
+                    # load in memeory
+                    self.vessels[vesselId].loadDataInMemory()
+                    #except: 
+                        #print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
+                #except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
+        
+        import matplotlib.pyplot as plt
+        plt.subplot(311)
+        plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]/133.32)
+        plt.ylabel('Pressure')
+        plt.subplot(312)
+        plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1.e6)
+        plt.ylabel('Flow')
+        plt.subplot(313)
+        plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1000.**2.)
+        plt.ylabel('Area')
+        plt.show()
+        
+        print "vascularNetwork.loadSolutionData() exits"
+        exit()
+        
+        self.initialize()
+        # vessel postprocessing # should be moved where it is used
+        for vessel in self.vessels.itervalues():
+            vessel.postProcessing()
         
         
     def findRootVessel(self):
@@ -1346,7 +1391,7 @@ class VascularNetwork(object):
         if nSet != None:
             nTsteps = 2
             
-        for n in xrange(nTsteps-1):
+        for n in xrange(nTsteps):
         
             if nSet != None: n = nSet
         
@@ -1382,7 +1427,7 @@ class VascularNetwork(object):
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
             relativeVenousPressure = np.empty(nTsteps)
-            for n in xrange(nTsteps-1):
+            for n in xrange(nTsteps):
                            
                 relativeVP = self.centralVenousPressure + self.globalFluid['rho']* self.vessels[vesselId].positionEnd[n][2]* self.gravityConstant - self.vessels[vesselId].externalPressure
                 

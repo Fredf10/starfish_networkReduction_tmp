@@ -117,11 +117,11 @@ def loadSolutionDataFile(networkName, dataNumber):
         
     # 1. load network xml and create vascularNetwork instance
     vascularNetwork = loadNetworkFromXML(filename = networkName, dataNumber = dataNumber, networkPath = simCasePathXml)
+    
+    
     vascularNetwork.initialize()
     # 2. try load solution data dictionary
-    solutioDataFile = open(simCasePathPickle,"rb")
-    solutionData = cPickle.load(solutioDataFile)
-    solutioDataFile.close()    
+    
     # 3. update vascular network with solution data
     vascularNetwork.prepareSolutionDataAfterLoad(solutionData)
     
@@ -143,7 +143,7 @@ def parseDirectoryForSimulationCases(networkName):
     
     for dirName, dirNames, fileNames in os.walk(path):
         for fileName in fileNames:
-            if ".pickle" in fileName and "polyChaos" not in fileName and "pure" not in fileName:
+            if ".hdf5" in fileName and "polyChaos" not in fileName and "pure" not in fileName:
                 dataNumber = fileName.split('.')[0].split('_SolutionData_')[-1]
                 simulationCases[dataNumber] = ''.join([path,fileName])
                 

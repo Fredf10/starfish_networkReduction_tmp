@@ -63,7 +63,7 @@ class FlowSolver(object):
         # time step
         self.dt = None
         # number of Timesteps
-        self.Tsteps = None     
+        self.nTsteps = None     
         
         # total Simulation time
         self.totalTime = None
@@ -179,7 +179,10 @@ class FlowSolver(object):
         # Set time variables 
         self.dt = min(dt_min)
 
-        self.Tsteps = int(round(self.totalTime/self.dt))
+        self.nTsteps = int(np.ceil(self.totalTime/self.dt))
+        
+        
+        print "cFS", self.nTsteps, self.dt, self.totalTime, self.nTsteps*self.dt
 
         self.output['dz_min']     = min(dz_min)
         self.output['c_min']      = min(c_max)
@@ -222,7 +225,7 @@ class FlowSolver(object):
         logfile.close()
         logfile2.close()    
         
-        self.vascularNetwork.update({'dt':self.dt, 'nTsteps': self.Tsteps})
+        self.vascularNetwork.update({'dt':self.dt, 'nTsteps': self.nTsteps})
         
         if self.output['CFLcorrect'] != []:
             if quiet == False:
@@ -261,7 +264,7 @@ class FlowSolver(object):
         initialize solution matrices --> moved to vascularNetwork
         '''
                 
-        self.vascularNetwork.initializeNetworkForSimulation(self.dt, self.Tsteps)
+        self.vascularNetwork.initializeNetworkForSimulation(self.dt, self.nTsteps)
         #exit()
                 
 #        initialValues = self.vascularNetwork.initialValues
@@ -274,9 +277,9 @@ class FlowSolver(object):
 #             #Ainit = vessel.Asol[-1,:]
 #             
 #             # create new arrays for simulations
-#             vessel.Psol = np.ones((self.Tsteps,vessel.N))
-#             vessel.Qsol = np.zeros((self.Tsteps,vessel.N))
-#             vessel.Asol = np.zeros((self.Tsteps,vessel.N))
+#             vessel.Psol = np.ones((self.nTsteps,vessel.N))
+#             vessel.Qsol = np.zeros((self.nTsteps,vessel.N))
+#             vessel.Asol = np.zeros((self.nTsteps,vessel.N))
 #             # apply initial values to arrays
 #             try:
 #                 p0,p1 = initialValues[vesselId]['Pressure']
@@ -289,10 +292,10 @@ class FlowSolver(object):
 #             
 #             vessel.Asol[0] = np.ones((1,vessel.N))*vessel.A(self.vessels[vesselId].Psol[0])   
 #                    
-#             vessel.positionStart    = np.zeros((self.Tsteps,3))
-#             vessel.positionEnd      = np.zeros((self.Tsteps,3))
-#             vessel.rotToGlobalSys   = np.zeros((self.Tsteps,3,3))
-#             vessel.netGravity       = np.zeros((self.Tsteps,1))
+#             vessel.positionStart    = np.zeros((self.nTsteps,3))
+#             vessel.positionEnd      = np.zeros((self.nTsteps,3))
+#             vessel.rotToGlobalSys   = np.zeros((self.nTsteps,3,3))
+#             vessel.netGravity       = np.zeros((self.nTsteps,1))
                        
 #         ## initialse varying elastance model
 #         for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
@@ -300,23 +303,23 @@ class FlowSolver(object):
 #                 if bC.name in ['VaryingElastanceHeart','VaryingElastanceSimple']:
 #                     Qm    = initialValues[vesselId]['Flow']
 #                     bC.update({'aorticFlowPreviousTimestep':Qm})
-#                     bC.initializeSolutionVectors(self.Tsteps)
+#                     bC.initializeSolutionVectors(self.nTsteps)
 #                     
 #         ## initialize gravity and 3d positions over time
 #         # create motion decription out of motion dict of vascularNetwork
-#         #self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,Tsteps-1)
+#         #self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,nTsteps-1)
 #         
 #         # define motion
 #         motionDict = {}
 #         headUpTilt = False
 #         ## head up tilt
 #         if headUpTilt == True:
-#             tSteps4 = int(self.Tsteps/6.0)
+#             tSteps4 = int(self.nTsteps/6.0)
 #             start = self.vessels[1].angleXMother
 #             end   = start-80*np.pi/180
 #             startAngle = np.ones(tSteps4*2.0)*start
 #             endAngle   = np.ones(tSteps4)*end
-#             tiltAngle  = np.linspace(start, end, self.Tsteps-3*tSteps4)
+#             tiltAngle  = np.linspace(start, end, self.nTsteps-3*tSteps4)
 #              
 #             angleXSystem = np.append(startAngle,np.append(tiltAngle,endAngle))
 #                      
@@ -326,10 +329,10 @@ class FlowSolver(object):
 #             self.vessels[vesselId].update(angleDict)
 #             
 #         ## calculate gravity and positions   
-#         self.vascularNetwork.calculate3DpositionsAndGravity(Tsteps = self.Tsteps)
+#         self.vascularNetwork.calculate3DpositionsAndGravity(nTsteps = self.nTsteps)
 #             
 #         ## calculate venous pressure for windkessel
-#         self.vascularNetwork.initializeVenousGravityPressureTime(self.Tsteps)
+#         self.vascularNetwork.initializeVenousGravityPressureTime(self.nTsteps)
                   
     def initializeSystemEquations(self):
         '''
@@ -361,15 +364,17 @@ class FlowSolver(object):
                                                 bcList0,
                                                 self.rigidAreas,
                                                 self.dt,
+                                                self.currentMemoryIndex,
                                                 self.currentTimeStep,
-                                                self.Tsteps,
+                                                self.nTsteps,
                                                 self.systemEquations[rootId]),
                                       Boundary( self.vessels[rootId],
                                                 bcList1,
                                                 self.rigidAreas,
                                                 self.dt,
+                                                self.currentMemoryIndex,
                                                 self.currentTimeStep,
-                                                self.Tsteps,
+                                                self.nTsteps,
                                                 self.systemEquations[rootId])]
             self.output['BndrNR'] = 2
         else:
@@ -378,8 +383,9 @@ class FlowSolver(object):
                                                         boundaryConditions,
                                                         self.rigidAreas,
                                                         self.dt,
+                                                        self.currentMemoryIndex,
                                                         self.currentTimeStep,
-                                                        self.Tsteps,
+                                                        self.nTsteps,
                                                         self.systemEquations[vesselId])]
                 
             self.output['BndrNR'] = len(self.boundarys)
@@ -490,7 +496,7 @@ class FlowSolver(object):
                            
             baroData['n']                       = self.currentTimeStep
             baroData['dt']                      = self.dt
-            baroData['Tsteps']                  = self.Tsteps    
+            baroData['nTsteps']                  = self.nTsteps    
             
             #initialization of the proximal boundary condition object
             # needs to be extended to include Type 2 boundaries --> varying elastance heart
@@ -556,7 +562,7 @@ class FlowSolver(object):
                         
             comData['currentMemoryIndex'] = self.currentMemoryIndex
             comData['currentTimeStep']    = self.currentTimeStep
-            comData['dt']                 = self.dtss
+            comData['dt']                 = self.dt
             
             self.communicators[comId] = eval(comData['comType'])(comData) # call the constructor
             
@@ -611,9 +617,9 @@ class FlowSolver(object):
         for baroreceptor in self.baroreceptors.itervalues():
             self.numericalObjects.append(baroreceptor) 
             
-        dataHandler = DataHandler(self.currentTimseStep,
-                                  self.Tsteps,
-                                  self.vascularNetwork.vessels,
+        dataHandler = DataHandler(self.currentTimeStep,
+                                  self.nTsteps,
+                                  self.vessels,
                                   self.currentMemoryIndex,
                                   self.vascularNetwork.memoryArraySizeTime)
         
@@ -633,7 +639,7 @@ class FlowSolver(object):
         print '___________Time variables ___________'
         print '%-20s %2.1f' % ('totaltime (sec)',self.totalTime)
         print '%-20s %2.3f' % ('dt (ms)',self.dt*1.0E3)
-        print '%-20s %4d' % ('Tsteps',self.Tsteps)
+        print '%-20s %4d' % ('nTsteps',self.nTsteps)
         print '___________Div variables ____________'
         print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
         print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
@@ -651,7 +657,7 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumBoundarys',len(self.boundarys))
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
         print '%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors))
-        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.Tsteps)               
+        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTsteps)               
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
         #print self.communicators['0']
         #print np.shape(self.communicators['0'].data['Strain'])
@@ -687,9 +693,10 @@ class FlowSolver(object):
         if self.cycleMode == False:
             # original
                        
-            for n in xrange(self.Tsteps-1):
+            for n in xrange(self.nTsteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
+                
                 #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
                     numericalObject()
@@ -707,15 +714,15 @@ class FlowSolver(object):
                 p0,p1 = initialValues[vesselId]['Pressure']
                 Qm    = initialValues[vesselId]['Flow']
                 
-                P_lastCycle[vesselId]  = np.ones((self.Tsteps,vessel.N))
-                Q_lastCycle[vesselId]  = np.ones((self.Tsteps,vessel.N))
-                A_lastCycle[vesselId]  = np.ones((self.Tsteps,vessel.N))
+                P_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
+                Q_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
+                A_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
                 
             
             for cycle in xrange(self.numberCycles-1):
                 print ' solving cycle {}'.format(cycle+1)
                 # 1. solve cycle
-                for n in xrange(self.Tsteps-1):
+                for n in xrange(self.nTsteps-1):
                     
                     self.currentTimeStep[0] = n
                     for numericalObject in self.numericalObjects:
@@ -846,8 +853,8 @@ class FlowSolver(object):
         
         
         print "totaltime is", self.totalTime
-        Tim=np.linspace(0,self.totalTime,self.Tsteps)
-        print "Tsteps is", self.Tsteps
+        Tim=np.linspace(0,self.totalTime,self.nTsteps)
+        print "nTsteps is", self.nTsteps
 
         try:
             

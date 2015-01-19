@@ -24,6 +24,8 @@ from moduleStartUp import parseOptions
 
 from modulePickle import loadSolutionDataFile
 from modulePickle import loadExternalDataSet
+import moduleXML
+
 
 import numpy as np
 from pprint import pprint as pp
@@ -1597,7 +1599,8 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         The network is added to the existing ones if is not existing
         '''
         # load vascular network
-        vascularNetwork = loadSolutionDataFile(networkName, dataNumber) 
+        vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber)
+        vascularNetwork.loadSolutionData()
         # # save it and refresh GUi setup
         networkSolutionName = '_'.join([networkName, dataNumber])  
         # # add data name and corresponding network

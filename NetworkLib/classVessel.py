@@ -244,6 +244,8 @@ class Vessel(object):
             nSaveEnd        := time index when to stop saving
             '''
         # calculate solution for the area based on pressure
+        self.solutionData = SolutionDataVessel()
+        
         self.solutionData.allocateMemory(memoryArraySize,
                                          dsetGroup,
                                          nSaveBegin,
@@ -274,15 +276,29 @@ class Vessel(object):
         self.rotToGlobalSys   = np.zeros((nTsteps,3,3))
         self.netGravity       = np.zeros((nTsteps,1))
     
-    def initializeSolutionDataFromFile(self,dsetGroup):
+    def linkSolutionData(self,dsetGroup):
         '''
         Initilalize solution data after loading a file
         
         Input:
             dsetGroup       := data set group in the hdf5 file
         '''
+        self.solutionData = SolutionDataVessel()
         self.solutionData.linkDataSets(dsetGroup)
         
+    def loadDataInMemory(self):
+        '''
+        Loads everything into the memory which is saved in the dataset-files
+        '''
+        # load data
+        self.solutionData.loadDataInMemory()
+        # backlink solution variables
+        self.Psol = self.solutionData.P
+        self.Asol = self.solutionData.A
+        self.Qsol = self.solutionData.Q 
+        
+    def flushMemory(self, chunkCount, offset):
+        self.solutionData.flushMemory(chunkCount, offset)
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
         '''

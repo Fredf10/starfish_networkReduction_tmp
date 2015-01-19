@@ -285,15 +285,17 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
         return None
     
     networkDirectory = filename.split('.')[0]
-    
+    solutionDataFileDirectory = ''
+        
     if dataNumber is not 'xxx':        
         filename = ''.join([filename.split('.')[0],'_SolutionData_',dataNumber,'.xml'])
-    
+        solutionDataFileDirectory = '/SolutionData/'
+        
     if '.xml' not in filename:
         filename = ''.join([filename,'.xml'])  
         
     if networkDirectory not in networkPath.split('/'):
-        folderPath = ''.join([networkPath,networkDirectory])
+        folderPath = ''.join([networkPath,networkDirectory,solutionDataFileDirectory])
     else:
         folderPath = networkPath
     
@@ -308,7 +310,8 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
     # create vascularNetwork instance
     vascularNetwork = VascularNetwork()
     # set name
-    vascularNetwork.name = networkDirectory
+    vascularNetwork.update({'name':networkDirectory,
+                            'dataNumber' : dataNumber})
     
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')

@@ -46,7 +46,7 @@ class System(object):
         # properties for Riemann invariant calculation
         self.z = vessel.z
         self.dt = dt 
-        self.currentTimeSTep = currentTimeSTep
+        self.currentTimeStep = currentTimeStep
                 
         # system matrices
         self.m12    = None
@@ -133,7 +133,7 @@ class System(object):
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
-        n = self.currentTimeSTep[0]
+        n = self.currentTimeStep[0]
                
         C = self.C_nID(P,position)
         c = self.c(A[position],C)
@@ -198,7 +198,7 @@ class System(object):
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
-        n = self.currentTimeSTep[0]
+        n = self.currentTimeStep[0]
         
         C = self.C_nID(P,position)
         c = self.c(A[position],C)
@@ -265,7 +265,7 @@ class System(object):
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
         dlt = self.dlt  
-        n = self.currentTimeSTep[0]
+        n = self.currentTimeStep[0]
         
         Aid = A[position]
         
@@ -336,10 +336,10 @@ class System(object):
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
         dlt = self.dlt  
-        n = self.currentTimeSTep[0]
+        n = self.currentTimeStep[0]
             
         Aid = A[position]       
-           
+                     
         C = self.C_nID(P,position)
         c = self.c(Aid,C)
         
@@ -347,7 +347,7 @@ class System(object):
         
         l1 = dlt*v+sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
         l2 = dlt*v-sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
-                
+                        
         LAMBDA = self.LAMBDA
         LAMBDA[0] = l1
         LAMBDA[1] = l2

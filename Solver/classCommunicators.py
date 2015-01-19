@@ -98,6 +98,7 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         # def variables to set with comDict          
         self.currentMemoryIndex = [0] # n
         self.currentTimeIndex   = [0]
+        self.currentTimeStep    = None
         self.dn                 = 1   #dn
         self.dt                 = 0.1 #dt
         self.node               = 0   # node

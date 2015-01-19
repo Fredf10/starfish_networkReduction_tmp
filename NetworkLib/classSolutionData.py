@@ -44,7 +44,7 @@ class SolutionDataVessel(object):
         self.P = np.ones((memoryArraySizeTime,numberOfGridPoints))
         self.Q = np.zeros((memoryArraySizeTime,numberOfGridPoints))
         self.A = np.zeros((memoryArraySizeTime,numberOfGridPoints))
-                        
+        
         self.memoryArraySizeTime = memoryArraySizeTime
                 
         if self.save == True:
@@ -87,7 +87,7 @@ class SolutionDataVessel(object):
         '''
         self.P = self.dsetP[:]
         self.Q = self.dsetQ[:]
-        self.A = self.dsetA[:]
+        self.A = self.dsetA[:]        
         
     def flushMemory(self, chunkCount, offset):
         '''
@@ -98,6 +98,7 @@ class SolutionDataVessel(object):
         chunkCount := current chunk number to save
         offset := offset in the time point counter
         '''
+        print "classSolutionData: i will flush the memory"
         if self.save == True:
             # stored data saving indices
             nCB = offset+1
@@ -127,6 +128,8 @@ class SolutionDataVessel(object):
                 self.dsetA[nDB:nDE] = self.A[nMB:nME]
                 
                 self.nDCurrent += lengthToWrite
+                
+                print self.P, self.dsetP
                             
             # re initialize
             self.P[0] = self.P[-1]
