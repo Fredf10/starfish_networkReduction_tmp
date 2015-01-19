@@ -67,18 +67,15 @@ class FlowSolver(object):
         
         # total Simulation time
         self.totalTime = None
-        # cycle Mode
-        self.cycleMode         = self.vascularNetwork.cycleMode     # determins if simulation should run in cycles # False, True, Conversion
-        self.numberCycles      = self.vascularNetwork.numberCycles  # number of Cycles to be run
-        self.numberSavedCycles = self.vascularNetwork.cycleMode     # number of cycles which should be saved overried
-        
+    
         # timestep Counter
         self.currentTimeStep = [0]
+        
+        self.cycleMode = False
         
         # Initialize idices to track where in memory the current solution is stored
         self.memoryOffset = [0]
         self.currentMemoryIndex = [0]
-        
         
         # Set div output 
         self.output = {}
@@ -264,72 +261,75 @@ class FlowSolver(object):
         initialize solution matrices --> moved to vascularNetwork
         '''
                 
-        initialValues = self.vascularNetwork.initialValues
-        
-        for vesselId,vessel in self.vessels.iteritems():
-            
-            # get init values from init phase
-            #Pinit = vessel.Psol[-1,:]
-            #Qinit = vessel.Qsol[-1,:]
-            #Ainit = vessel.Asol[-1,:]
-            
-            # create new arrays for simulations
-            vessel.Psol = np.ones((self.Tsteps,vessel.N))
-            vessel.Qsol = np.zeros((self.Tsteps,vessel.N))
-            vessel.Asol = np.zeros((self.Tsteps,vessel.N))
-            # apply initial values to arrays
-            try:
-                p0,p1 = initialValues[vesselId]['Pressure']
-                Qm    = initialValues[vesselId]['Flow']
-                vessel.Psol[0] = np.linspace(p0,p1,vessel.N)   
-                vessel.Qsol[0] = np.ones((1,vessel.N))*Qm  
-            except:
-                print "Error: cFS could not use initial values from network"
-                pass
-            
-            vessel.Asol[0] = np.ones((1,vessel.N))*vessel.A(self.vessels[vesselId].Psol[0])   
-                   
-            vessel.positionStart    = np.zeros((self.Tsteps,3))
-            vessel.positionEnd      = np.zeros((self.Tsteps,3))
-            vessel.rotToGlobalSys   = np.zeros((self.Tsteps,3,3))
-            vessel.netGravity       = np.zeros((self.Tsteps,1))
+        self.vascularNetwork.initializeNetworkForSimulation(self.dt, self.Tsteps)
+        #exit()
+                
+#        initialValues = self.vascularNetwork.initialValues
+#        
+#         for vesselId,vessel in self.vessels.iteritems():
+#             
+#             # get init values from init phase
+#             #Pinit = vessel.Psol[-1,:]
+#             #Qinit = vessel.Qsol[-1,:]
+#             #Ainit = vessel.Asol[-1,:]
+#             
+#             # create new arrays for simulations
+#             vessel.Psol = np.ones((self.Tsteps,vessel.N))
+#             vessel.Qsol = np.zeros((self.Tsteps,vessel.N))
+#             vessel.Asol = np.zeros((self.Tsteps,vessel.N))
+#             # apply initial values to arrays
+#             try:
+#                 p0,p1 = initialValues[vesselId]['Pressure']
+#                 Qm    = initialValues[vesselId]['Flow']
+#                 vessel.Psol[0] = np.linspace(p0,p1,vessel.N)   
+#                 vessel.Qsol[0] = np.ones((1,vessel.N))*Qm  
+#             except:
+#                 print "Error: cFS could not use initial values from network"
+#                 pass
+#             
+#             vessel.Asol[0] = np.ones((1,vessel.N))*vessel.A(self.vessels[vesselId].Psol[0])   
+#                    
+#             vessel.positionStart    = np.zeros((self.Tsteps,3))
+#             vessel.positionEnd      = np.zeros((self.Tsteps,3))
+#             vessel.rotToGlobalSys   = np.zeros((self.Tsteps,3,3))
+#             vessel.netGravity       = np.zeros((self.Tsteps,1))
                        
-        ## initialse varying elastance model
-        for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
-            for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart','VaryingElastanceSimple']:
-                    Qm    = initialValues[vesselId]['Flow']
-                    bC.update({'aorticFlowPreviousTimestep':Qm})
-                    bC.initializeSolutionVectors(self.Tsteps)
-                    
-        ## initialize gravity and 3d positions over time
-        # create motion decription out of motion dict of vascularNetwork
-        #self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,Tsteps-1)
-        
-        # define motion
-        motionDict = {}
-        headUpTilt = False
-        ## head up tilt
-        if headUpTilt == True:
-            tSteps4 = int(self.Tsteps/6.0)
-            start = self.vessels[1].angleXMother
-            end   = start-80*np.pi/180
-            startAngle = np.ones(tSteps4*2.0)*start
-            endAngle   = np.ones(tSteps4)*end
-            tiltAngle  = np.linspace(start, end, self.Tsteps-3*tSteps4)
-             
-            angleXSystem = np.append(startAngle,np.append(tiltAngle,endAngle))
-                     
-            motionDict = {1:{'angleXMotherTime': angleXSystem}}
-         
-        for vesselId,angleDict in motionDict.iteritems():
-            self.vessels[vesselId].update(angleDict)
-            
-        ## calculate gravity and positions   
-        self.vascularNetwork.calculate3DpositionsAndGravity(Tsteps = self.Tsteps)
-            
-        ## calculate venous pressure for windkessel
-        self.vascularNetwork.initializeVenousGravityPressureTime(self.Tsteps)
+#         ## initialse varying elastance model
+#         for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
+#             for bC in boundaryConditions:
+#                 if bC.name in ['VaryingElastanceHeart','VaryingElastanceSimple']:
+#                     Qm    = initialValues[vesselId]['Flow']
+#                     bC.update({'aorticFlowPreviousTimestep':Qm})
+#                     bC.initializeSolutionVectors(self.Tsteps)
+#                     
+#         ## initialize gravity and 3d positions over time
+#         # create motion decription out of motion dict of vascularNetwork
+#         #self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,Tsteps-1)
+#         
+#         # define motion
+#         motionDict = {}
+#         headUpTilt = False
+#         ## head up tilt
+#         if headUpTilt == True:
+#             tSteps4 = int(self.Tsteps/6.0)
+#             start = self.vessels[1].angleXMother
+#             end   = start-80*np.pi/180
+#             startAngle = np.ones(tSteps4*2.0)*start
+#             endAngle   = np.ones(tSteps4)*end
+#             tiltAngle  = np.linspace(start, end, self.Tsteps-3*tSteps4)
+#              
+#             angleXSystem = np.append(startAngle,np.append(tiltAngle,endAngle))
+#                      
+#             motionDict = {1:{'angleXMotherTime': angleXSystem}}
+#          
+#         for vesselId,angleDict in motionDict.iteritems():
+#             self.vessels[vesselId].update(angleDict)
+#             
+#         ## calculate gravity and positions   
+#         self.vascularNetwork.calculate3DpositionsAndGravity(Tsteps = self.Tsteps)
+#             
+#         ## calculate venous pressure for windkessel
+#         self.vascularNetwork.initializeVenousGravityPressureTime(self.Tsteps)
                   
     def initializeSystemEquations(self):
         '''

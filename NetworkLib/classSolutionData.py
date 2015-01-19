@@ -1,4 +1,5 @@
 import h5py
+import numpy as np
 
 class SolutionDataVessel(object):
     '''
@@ -28,7 +29,7 @@ class SolutionDataVessel(object):
         self.nSaveBegin = None
         self.nSaveEnd = None
                 
-    def allocateMemory(self, memoryArraySizeTime, dsetGroup, nSaveBegin, nSaveEnd, numberOfGridPoints):
+    def allocateMemory(self, memoryArraySizeTime, dsetGroup, nSaveBegin, nSaveEnd, nTsteps, numberOfGridPoints):
         '''
         allocates memory for the solution data to store data of a simulation
         Input:
@@ -40,14 +41,10 @@ class SolutionDataVessel(object):
             numberOfGridPoints  := number of spacial grid points of the vessel
         '''
         
-        startmemory =  mU.memory()
-        #print 'startmemory',startmemory
         self.P = np.ones((memoryArraySizeTime,numberOfGridPoints))
         self.Q = np.zeros((memoryArraySizeTime,numberOfGridPoints))
         self.A = np.zeros((memoryArraySizeTime,numberOfGridPoints))
-        
-        #print "arrayMemory",mU.memory(startmemory)/(1024.*1024), (self.P.nbytes+self.Q.nbytes+self.A.nbytes)/(1024.*1024)
-                
+                        
         self.memoryArraySizeTime = memoryArraySizeTime
                 
         if self.save == True:
@@ -57,11 +54,9 @@ class SolutionDataVessel(object):
         
             savedArraySize = nSaveEnd-nSaveBegin+1
             
-            startmemory2 =  mU.memory()
             self.dsetP = dsetGroup.create_dataset("Pressure", (savedArraySize,numberOfGridPoints), dtype='float64')
             self.dsetQ = dsetGroup.create_dataset("Flow", (savedArraySize,numberOfGridPoints), dtype='float64')
             self.dsetA = dsetGroup.create_dataset("Area", (savedArraySize,numberOfGridPoints), dtype='float64')
-            print mU.memory(startmemory2)
             
             self.nDCurrent = 0
             

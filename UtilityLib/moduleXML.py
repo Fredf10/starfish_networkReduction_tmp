@@ -53,7 +53,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", filename = None, netw
         
     #print filename
     if filename == None:
-        filename = "newNetwork.xml"
+        filename = vascularNetwork.getVariableValue('name')
         
     if dataNumber is not 'xxx':
         filename = filename.split('.')[0]
@@ -63,7 +63,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", filename = None, netw
         networkDirectory = filename.split('.')[0]
     
     if networkDirectory not in networkPath.split('/'):
-        folderPath = ''.join([networkPath,networkDirectory])
+        folderPath = ''.join([networkPath,networkDirectory,'/SolutionData/'])
         if not os.path.exists(folderPath):
             os.makedirs(folderPath)  
     else:
@@ -328,7 +328,6 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
     
     if xmlFileVersion == newestNetworkXmlVersion:
         from constants import newestNetworkXml as nxml
-    
     elif xmlFileVersion == '4.0':
         import networkXml040 as nxml  
     

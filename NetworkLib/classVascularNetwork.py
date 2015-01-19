@@ -11,6 +11,7 @@ import numpy as np
 from math import pi,cos,sin
 import pprint
 
+import h5py
 
 class VascularNetwork(object):
     '''
@@ -23,7 +24,17 @@ class VascularNetwork(object):
         ## vascularNetwork variables to set via XML
         self.name = 'vascularNetwork'   # name of the network
         self.description = ''           # description of the current case
+        self.dataNumber  = 'xxx'        # data number of the network
         self.quiet = quiet              # bool to suppress output
+        
+        # saving options
+        self.tSaveBegin       = 0.      # time when to start saving
+        self.tSaveEnd         = 1.0     # time when to end saving
+        self.solutionDataFile = None    # file name of the solution data
+        self.maxMemory        =  500.   # maximum memory in MB 
+        
+        # running options
+        self.cycleMode = False
         
         # simulation Context
         self.totalTime      = 1.0       # simulation time in seconds
@@ -46,10 +57,6 @@ class VascularNetwork(object):
         # venous system
         self.centralVenousPressure  = 0.0       # central venous pressure
         self.minimumVenousPressure  = 0.0       # minimum allowed venous pressure
-        
-        self.cycleMode              = False  # determins if simulation should run in cycles # False, True, Conversion
-        self.numberCycles           = 3      # number of Cycles to be run
-        self.numberSavedCycles      = 1      # number of cycles which should be saved overried
         
         # the solver calibration 
         self.rigidAreas                   = False        ## 'True' 'False' to change
@@ -335,51 +342,133 @@ class VascularNetwork(object):
                 # calculate terminal vessel compliance
                 self.evaluateWindkesselCompliance()
                 
-            
-                       
-    def prepareToSave(self):
+    def initializeNetworkForSimulation(self, dt, nTsteps):
         '''
-        To be able to store the network with cPickle variable which are "pointer" to methods (compliance (Vessel)/returnFunction (BC))
-        are decoupled, as cPickle is not able to deserialize this.
-        After unpickling, the former state can be established with the "initialize" method. 
+        Method to initialize the network for a simulation.
+        Creates hdf5 File and groups for the vessels
+        Envoces memory allocation.
+        Set initial values for the simulations.
         '''
-        # uncouple the returnFunction for bc.type = 2 before pickeling 
-        for bcs in self.boundaryConditions.itervalues():
-            for bc in bcs:
-                if bc.type == 2: bc.returnFunction = None
-                
-        upDict = {'C':None,'A':None,'c':None,'C_nID':None,'A_nID':None}
+        self.dt      = dt
+        self.nTsteps = nTsteps
+        
+        ### to be moved to a path handler
+        solutionDirectory = ''.join([cur,'/..','/NetworkFiles/',self.name,'/SolutionData'])
+        pathSolutionDataFilename = ''.join([solutionDirectory,'/',self.name,'_SolutionData_',self.dataNumber,'.hdf5'])
+        if not os.path.exists(solutionDirectory):
+            os.makedirs(solutionDirectory)  
+        
+        self.solutionDataFile = h5py.File(pathSolutionDataFilename, "w")
+        
+        # initialize saving indices
+        if  self.tSaveEnd < 0 or self.tSaveEnd > self.totalTime:
+            print "ERROR: VascularNetwork.initializeSolutionMatrices(): tSaveEnd not in [0, totalTime], exit()"
+            exit()
+        
+        if self.tSaveBegin < 0 or self.tSaveBegin > self.tSaveEnd:
+            print "WARNING: VascularNetwork.initializeSolutionMatrices(): tSaveBegin not in [0, tSaveEnd], exit()"
+            exit()
+        
+        self.nSaveBegin = int(np.floor(self.tSaveBegin/dt))
+        self.nSaveEnd   = int(np.ceil(self.tSaveEnd/dt))
+        
+        
+        ## -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
+        estimatedMemorySolutionDataSpace  = 0
         for vessel in self.vessels.itervalues():
-            vessel.update(upDict)
+             estimatedMemorySolutionDataSpace += vessel.N*8*3 # byte
+        memoryArraySizeTime = int(np.floor(self.maxMemory*1024.*1024. / estimatedMemorySolutionDataSpace))       
+        if memoryArraySizeTime > (nTsteps+1):
+            memoryArraySizeTime = nTsteps+1
+                
+        # initialize for simulation
+        for vesselId,vessel in self.vessels.iteritems():
+            # create a new group in the data file
+            dsetGroup = self.solutionDataFile.create_group(' '.join([vessel.name,str(vessel.Id)]))
+            # initialize the vessel for simulation
+            vessel.initializeForSimulation(self.initialValues[vesselId],
+                                           memoryArraySizeTime,
+                                           dsetGroup,
+                                           self.nSaveBegin,
+                                           self.nSaveEnd,
+                                           self.nTsteps)       
+            
+        ## initialse varying elastance model
+        for vesselId,boundaryConditions in self.boundaryConditions.iteritems():
+            for bC in boundaryConditions:
+                if bC.name in ['VaryingElastanceHeart','VaryingElastanceSimple']:
+                    Qm    = initialValues[vesselId]['Flow']
+                    bC.update({'aorticFlowPreviousTimestep':Qm})
+                    bC.initializeSolutionVectors(Tsteps)
+                    
+        ## initialize gravity and 3d positions over time
+        # create motion decription out of motion dict of vascularNetwork
+        #self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,Tsteps-1)
         
-        # return solution data
-        return self.prepareSolutionDataToSave()
-    
-    def prepareSolutionDataToSave(self):
+        # define motion
+        motionDict = {}
+        headUpTilt = False
+        ## head up tilt
+        if headUpTilt == True:
+            tSteps4 = int(nTsteps/6.0)
+            start = self.vessels[1].angleXMother
+            end   = start-80*np.pi/180
+            startAngle = np.ones(tSteps4*2.0)*start
+            endAngle   = np.ones(tSteps4)*end
+            tiltAngle  = np.linspace(start, end, nTsteps-3*tSteps4)
+             
+            angleXSystem = np.append(startAngle,np.append(tiltAngle,endAngle))
+                     
+            motionDict = {1:{'angleXMotherTime': angleXSystem}}
+         
+        for vesselId,angleDict in motionDict.iteritems():
+            self.vessels[vesselId].update(angleDict)
+            
+        ## calculate gravity and positions   
+        self.calculate3DpositionsAndGravity(nTsteps = nTsteps)
+            
+        ## calculate venous pressure for windkessel
+        self.initializeVenousGravityPressureTime(nTsteps)
+            
+                    
+    def saveSolutionData(self):
         '''
-        
         # solution of the system over time 
         # {vesselID: { 'Psol' : [ [solution at N nodes]<-one array for each timePoint , ...  ], ..  }
-        '''
-        solutionData = {'vessels':{}, 'vascularNetwork' : {}}
-        # hash solition data
-        for vesselId,vessel in self.vessels.iteritems():
-            solutionData['vessels'][vesselId]   = {'Psol': vessel.Psol,
-                                                   'Qsol': vessel.Qsol,
-                                                   'Asol': vessel.Asol,
-                                                   'rotToGlobalSys':vessel.rotToGlobalSys,
-                                                   'positionStart' :vessel.positionStart,
-                                                   'netGravity'    :vessel.netGravity}
-            
+        '''        
+        globalData = self.solutionDataFile.create_group('VascularNetwork')
         
-        try: simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
-        except: simulationTime = self.simulationTime
+        globalData.attrs['dt'] = self.dt
+        globalData.attrs['nTsteps'] = self.nTsteps
         
-        solutionData['vascularNetwork'] = { 'simulationTime': simulationTime,
-                                            'dt'            : self.dt,
-                                            'nTsteps'       : self.nTsteps }
+        savedArraySize = self.nSaveEnd-self.nSaveBegin+1
         
-        return solutionData
+        dsetTime = globalData.create_dataset('Time', (savedArraySize,),dtype='float64')
+        dsetTime[:] = np.linspace(self.nSaveBegin*self.dt, self.dt*self.nSaveEnd, savedArraySize).reshape(savedArraySize,)
+        
+        self.solutionDataFile.close()
+        
+####        old version
+#
+#         solutionData = {'vessels':{}, 'vascularNetwork' : {}}
+#         # hash solition data
+#         for vesselId,vessel in self.vessels.iteritems():
+#             solutionData['vessels'][vesselId]   = {'Psol': vessel.Psol,
+#                                                    'Qsol': vessel.Qsol,
+#                                                    'Asol': vessel.Asol,
+#                                                    'rotToGlobalSys':vessel.rotToGlobalSys,
+#                                                    'positionStart' :vessel.positionStart,
+#                                                    'netGravity'    :vessel.netGravity}
+#             
+#         
+#         try: simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
+#         except: simulationTime = self.simulationTime
+#         
+#         solutionData['vascularNetwork'] = { 'simulationTime': simulationTime,
+#                                             'dt'            : self.dt,
+#                                             'nTsteps'       : self.nTsteps }
+        
+        
         
     def prepareSolutionDataAfterLoad(self, solutionData):
         '''
@@ -390,7 +479,7 @@ class VascularNetwork(object):
         - wave speed
         - mean velocity
         '''
-        
+        print " i am not working correctly"
         for vesselId,data in solutionData['vessels'].iteritems():
             self.vessels[vesselId].update(data)
             self.vessels[vesselId].postProcessing() 
@@ -1249,15 +1338,15 @@ class VascularNetwork(object):
             if self.gravitationalField==True:
                 print '%s %2i %19.3f'           % ('Net gravity     : vessel ',vesselId, self.vessels[vesselId].netGravity[0])
         
-    def calculate3DpositionsAndGravity(self, Tsteps = None, nSet = None):
+    def calculate3DpositionsAndGravity(self, nTsteps = None, nSet = None):
         '''
         Initializing the position and rotation of each vessel in 3D space
         Initializing netGravity of the vessels.
         '''
         if nSet != None:
-            Tsteps = 2
+            nTsteps = 2
             
-        for n in xrange(Tsteps-1):
+        for n in xrange(nTsteps-1):
         
             if nSet != None: n = nSet
         
@@ -1283,7 +1372,7 @@ class VascularNetwork(object):
                     if np.sum(self.vessels[rightMother].positionEnd-self.vessels[leftMother].positionEnd) < 3.e-15:
                         print 'ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother,rightMother,leftDaughter)
         
-    def initializeVenousGravityPressureTime(self, Tsteps):
+    def initializeVenousGravityPressureTime(self, nTsteps):
         '''
         Calculate and initialze the venous pressure depending on gravity for the 2 and 3 element windkessel models
         '''
@@ -1292,8 +1381,8 @@ class VascularNetwork(object):
         
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
-            relativeVenousPressure = np.empty(Tsteps)
-            for n in xrange(Tsteps-1):
+            relativeVenousPressure = np.empty(nTsteps)
+            for n in xrange(nTsteps-1):
                            
                 relativeVP = self.centralVenousPressure + self.globalFluid['rho']* self.vessels[vesselId].positionEnd[n][2]* self.gravityConstant - self.vessels[vesselId].externalPressure
                 

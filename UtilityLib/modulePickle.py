@@ -33,6 +33,28 @@ from copy import copy as copy
 
 from pprint import pprint as pp
 
+
+def getDirectoryPath(networkName, type):
+    '''
+    Function which returns the path for "type" relative to the Main directory!
+        'networkDirectory'
+        'solutionDirectory'
+    '''
+    
+    networkDirectory  = ''.join(['/NetworkFiles/',networkName])
+    solutionDirectory = ''.join(['/NetworkFiles/',networkName,'/SolutionData'])
+    
+    pathDicts = {'networkDirectory' : networkDirectory,
+                 'solutionDirectory': solutionDirectory}
+    
+    requestedPath = pathDicts[type]
+    
+    if not os.path.exists(''.join([cur,requestedPath])):
+        os.makedirs(''.join([cur,requestedPath]))  
+    
+    return requestedPath    
+    
+
 def saveSolutionDataFile(vascularNetwork, dataNumber):
     '''
     Function to save solutionData after a simulation is run or the solutionData was manipulated
@@ -83,7 +105,6 @@ def loadSolutionDataFile(networkName, dataNumber):
     vascularNetwork = None
     
     # 
-    
     simulationCasesAvailable = parseDirectoryForSimulationCases(networkName)    
     try: simCasePathPickle = simulationCasesAvailable[dataNumber]    
     except: 
@@ -106,72 +127,6 @@ def loadSolutionDataFile(networkName, dataNumber):
     
     # 4. return vascular network  
     return vascularNetwork
-
-
-##     old version of STRAFiSh 3.0
-#     vascularNetwork = None
-#     solutionDataSets = []
-#     simulationCaseDescriptions =  []
-#     
-#     vascularNetworks = []
-#     
-#     dataNumbers = copy(dataNumbersInput)
-#     
-#     if dataNumbers == ['all']: dataNumbers = simulationCasesAvailable.keys()
-#     
-#     for dataNumber in dataNumbers:
-#         simCasePathAv = simulationCasesAvailable[dataNumber]
-#         #try:
-#         FILE = open(simCasePathAv,"rb")
-#         loadedData = cPickle.load(FILE)
-#         if vascularNetwork == None: 
-#             
-#             vascularNetwork = loadedData[0]
-#             vascularNetwork.quiet = True
-#             try:
-#                 vascularNetwork.initialize()
-#             except:
-#                 try:
-#                     ##
-#                     print "WARNING: some <instances> of the vascularNetwork are out of date.. try to update"
-#                     ## update vessel variables
-#                     vesselDataDict = {} 
-#                     
-#                     # get vessel data
-#                     for Id_i,vessel_i in vascularNetwork.vessels.iteritems():
-#                         vesselDataDict[Id_i] = copy(vessel_i.__dict__)
-#                                             
-#                     # create new data
-#                     for Id_i,data_i in vesselDataDict.iteritems():
-#                         vascularNetwork.deleteVessel(Id_i)
-#                         #print type(data_i['As'])
-#                         if type(data_i['As']) is not float and data_i['As'] is not None:
-#                             data_i['As'] = data_i['As'][0]
-#                         if type(data_i['beta']) is not float and data_i['beta'] is not None:
-#                             data_i['beta'] = data_i['beta'][0]
-#                         
-#                         vascularNetwork.addVessel(vesselId = Id_i, dataDict = data_i)
-#                     vascularNetwork.quiet = False
-#                 except:
-#                     print "ERROR: could not update <instances> -> modulePickle could initialize network, exit()"
-#                     exit()
-#             
-#             vascularNetworks.append(vascularNetwork)
-#         else: loadedData[0].quiet = True
-#         solutionDataLoad = loadedData[1]
-#         for sol in solutionDataLoad:
-#             solutionDataSets.append(sol)
-#         try:
-#             simulationCaseDescriptions.append([loadedData[2],dataNumber])
-#         except:
-#             print "ERROR modulePickle: no Simulation-Case description for solution file {} - {} description to <<not available>>".format(dataNumber,networkName)
-#             simulationCaseDescriptions.append(['not available',dataNumber])
-#         FILE.close() 
-# #         except:
-# #             print "ERROR modulePickle: no solution file with given data number {} and networkName {} or it is corrupted! system exit".format(dataNumber,networkName)
-# #             exit()
-    
-#    return vascularNetwork, solutionDataSets, simulationCaseDescriptions
 
 
 def parseDirectoryForSimulationCases(networkName):

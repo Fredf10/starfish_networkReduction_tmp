@@ -109,6 +109,7 @@ class Vessel(object):
         
         
         ## Solution Data
+        self.save         = True
         self.solutionData = SolutionDataVessel()    # solutionData Object
         # pointers to solutionData objects
         self.Psol         = None  # pressure
@@ -232,7 +233,7 @@ class Vessel(object):
         #set hooks waveSpeed function
         if self.c == None: self.c = self.waveSpeed  
         
-    def initializeSolutionDataForSimulation(self,initialValues, memoryArraySize, dsetGroup, nSaveBegin, nSaveEnd):
+    def initializeForSimulation(self,initialValues, memoryArraySize, dsetGroup, nSaveBegin, nSaveEnd, nTsteps):
         '''
         Initialize the solution data and allocates memory for it
         
@@ -243,28 +244,35 @@ class Vessel(object):
             nSaveEnd        := time index when to stop saving
             '''
         # calculate solution for the area based on pressure
-        self.data.allocateMemory(memoryArraySize,
-                                 vesselGroup,
-                                 nSaveBegin,
-                                 nSaveEnd,
-                                 self.N)      
+        self.solutionData.allocateMemory(memoryArraySize,
+                                         dsetGroup,
+                                         nSaveBegin,
+                                         nSaveEnd,
+                                         nTsteps,
+                                         self.N)      
         # backlink solution variables
-        self.Psol = self.data.P
-        self.Asol = self.data.A
-        self.Qsol = self.data.Q
+        self.Psol = self.solutionData.P
+        self.Asol = self.solutionData.A
+        self.Qsol = self.solutionData.Q
         # set initial values
         try:
-            p0,p1 = initialValues[vesselId]['Pressure']
-            Qm    = initialValues[vesselId]['Flow']
-            self.Psol[0] = np.linspace(p0,p1,vessel.N)   
+            p0,p1 = initialValues['Pressure']
+            Qm    = initialValues['Flow']
+            self.Psol[0] = np.linspace(p0,p1,self.N)   
             self.Qsol[0] = np.ones((1,self.N))*Qm  
         except:
-            print "Error: cFS could not use initial values from network"
+            print "Error: cV could not use initial values from network"
             pass
         
-        self.Asol[0] = np.ones((1,vessel.N))*self.A(self.Psol[0])
+        self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
         # save initial values
-        self.data.saveInitialState()
+        self.solutionData.saveInitialState()
+        
+        # init 
+        self.positionStart    = np.zeros((nTsteps,3))
+        self.positionEnd      = np.zeros((nTsteps,3))
+        self.rotToGlobalSys   = np.zeros((nTsteps,3,3))
+        self.netGravity       = np.zeros((nTsteps,1))
     
     def initializeSolutionDataFromFile(self,dsetGroup):
         '''
@@ -273,7 +281,7 @@ class Vessel(object):
         Input:
             dsetGroup       := data set group in the hdf5 file
         '''
-        self.data.linkDataSets(dsetGroup)
+        self.solutionData.linkDataSets(dsetGroup)
         
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
@@ -398,14 +406,13 @@ class Vessel(object):
             rotToGlobalSys = np.dot(rotDaughterMotherZ,rotToGlobalSys)
             
         # 3. calulate pos end
-        positionEnd = np.array([0,0,self.length])
-        positionEnd = (np.dot(positionEnd,rotToGlobalSys) + positionEndMother)
+        self.positionEnd[n][2] = self.length
+        self.positionEnd[n] = (np.dot(self.positionEnd[n],rotToGlobalSys) + positionEndMother)
         
         gravityVector = np.array([0,0,self.gravityConstant])
         netGravity = np.dot(gravityVector,rotToGlobalSys)[2] 
         
         self.positionStart[n]  = positionEndMother ## positionStart
-        self.positionEnd[n]    = positionEnd
         self.rotToGlobalSys[n] = rotToGlobalSys
         self.netGravity[n]     = netGravity
         

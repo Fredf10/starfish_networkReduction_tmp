@@ -2,7 +2,7 @@
 <singleAorta.xml id="999" version="4.1">
   <simulationContext>
     <description>my STARFiSh simulation</description>
-    <totalTime unit="s">20.0</totalTime>
+    <totalTime unit="s">8.0</totalTime>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
@@ -16,9 +16,9 @@
     <automaticGridAdaptation>True</automaticGridAdaptation>
   </solverCalibration>
   <initialisationControls>
-    <initialsationMethod>MeanPressure</initialsationMethod>
+    <initialsationMethod>Auto</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0.000125</initMeanFlow>
-    <initMeanPressure unit="mmHg">100</initMeanPressure>
+    <initMeanPressure unit="mmHg">187.1</initMeanPressure>
     <estimateWindkesselCompliance>Tree</estimateWindkesselCompliance>
     <compPercentageWK3>0.8</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
@@ -40,9 +40,9 @@
   		<comType>CommunicatorRealTimeViz</comType>
   		<comId>1</comId>
   		<vesselId>1</vesselId>
-  		<node>25</node>
+  		<node>0</node>
   		<dn>20</dn>
-  		<quantitiesToPlot>Pressure</quantitiesToPlot>
+  		<quantitiesToPlot>Pressure Flow Area</quantitiesToPlot>
   	</communicatorRealTimeViz>  		
   </communicators>
   <boundaryConditions>
@@ -56,11 +56,11 @@
       </VaryingElastanceHeart>     
     <boundaryCondition vesselId="1"> 
       <Flow-Sinus2>
-        <amp unit="m3 s-1">0.0005</amp>
+        <amp unit="ml s-1">500.0</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
-        <Npulse>50.0</Npulse>
+        <Npulse>75.0</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
-        <freq unit="s-1">5/3</freq>
+        <freq unit="s-1">5./3</freq>
         <Tspace unit="s">0.2</Tspace>
         <runtimeEvaluation>False</runtimeEvaluation>
         <prescribe>influx</prescribe>
@@ -84,6 +84,7 @@
         <geometryType>uniform</geometryType>
         <length unit="m">0.5</length>
         <radiusProximal unit="m">0.0294</radiusProximal>
+        <radiusProxmial-polyChaos>Uniform 0.2 10.</radiusProxmial-polyChaos>
         <radiusDistal unit="m">0.0288</radiusDistal>
         <N>50.0</N>
       </geometry>
