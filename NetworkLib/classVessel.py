@@ -276,6 +276,7 @@ class Vessel(object):
         self.rotToGlobalSys   = np.zeros((nTsteps,3,3))
         self.netGravity       = np.zeros((nTsteps,1))
     
+    
     def linkSolutionData(self,dsetGroup):
         '''
         Initilalize solution data after loading a file
@@ -292,6 +293,7 @@ class Vessel(object):
         '''
         # load data
         self.solutionData.loadDataInMemory()
+        
         # backlink solution variables
         self.Psol = self.solutionData.P
         self.Asol = self.solutionData.A

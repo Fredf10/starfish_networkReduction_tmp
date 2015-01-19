@@ -28,10 +28,10 @@ class VascularNetwork(object):
         self.quiet = quiet              # bool to suppress output
         
         # saving options
-        self.tSaveBegin          = 0.      # time when to start saving
-        self.tSaveEnd            = 8.0     # time when to end saving
+        self.tSaveBegin          = 2.75      # time when to start saving
+        self.tSaveEnd            = 4.5      # time when to end saving
         self.solutionDataFile    = None    # file name of the solution data
-        self.maxMemory           =  500    # maximum memory in MB 
+        self.maxMemory           =  0.500    # maximum memory in MB 
         self.memoryArraySizeTime =  None   # memory array size for the time arrays
         
         # running options
@@ -512,20 +512,18 @@ class VascularNetwork(object):
                         #print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                 #except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
         
-        import matplotlib.pyplot as plt
-        plt.subplot(311)
-        plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]/133.32)
-        plt.ylabel('Pressure')
-        plt.subplot(312)
-        plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1.e6)
-        plt.ylabel('Flow')
-        plt.subplot(313)
-        plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1000.**2.)
-        plt.ylabel('Area')
-        plt.show()
-        
-        print "vascularNetwork.loadSolutionData() exits"
-        exit()
+#         import matplotlib.pyplot as plt
+#         plt.subplot(311)
+#         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]/133.32)
+#         plt.ylabel('Pressure')
+#         plt.subplot(312)
+#         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1.e6)
+#         plt.ylabel('Flow')
+#         plt.subplot(313)
+#         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1000.**2.)
+#         plt.ylabel('Area')
+#         plt.show()
+#         
         
         self.initialize()
         # vessel postprocessing # should be moved where it is used

@@ -106,10 +106,7 @@ class FlowSolver(object):
         
         #define solve function
         self.solve = self.MacCormack_Field
-        
-        ## for future use !!
-        self.multiProcessing = False
-        
+                
         # initialize system
         self.vascularNetwork.initialize(initializeForSimulation = True)
         
@@ -404,7 +401,7 @@ class FlowSolver(object):
                                                       self.systemEquations[leftMother],
                                                       self.vessels[leftDaughter],
                                                       self.systemEquations[leftDaughter],
-                                                      self.currentTimeStep,
+                                                      self.currentMemoryIndex,
                                                       self.dt,
                                                       self.rigidAreas,
                                                       self.solvingSchemeConnections)
@@ -416,7 +413,7 @@ class FlowSolver(object):
                                                              self.systemEquations[leftDaughter],
                                                              self.vessels[rightDaughter],
                                                              self.systemEquations[rightDaughter],
-                                                             self.currentTimeStep,
+                                                             self.currentMemoryIndex,
                                                              self.dt,
                                                              self.rigidAreas,
                                                              self.solvingSchemeConnections)
@@ -431,7 +428,7 @@ class FlowSolver(object):
                                                              self.systemEquations[rightMother],
                                                              self.vessels[leftDaughter],
                                                              self.systemEquations[leftDaughter],
-                                                             self.currentTimeStep,
+                                                             self.currentMemoryIndex,
                                                              self.dt,
                                                              self.rigidAreas,
                                                              self.solvingSchemeConnections)
@@ -440,7 +437,7 @@ class FlowSolver(object):
         
         for vesselId,vessel in self.vessels.iteritems():    
             self.fields[vesselId] = Field(  vessel,
-                                            self.currentTimeStep,
+                                            self.currentMemoryIndex,
                                             self.dt, 
                                             self.systemEquations[vesselId],
                                             self.rigidAreas)
@@ -626,11 +623,7 @@ class FlowSolver(object):
         self.numericalObjects.append(dataHandler)
         
         self.memoryOffset = dataHandler.memoryOffset
-        
-            
-        if self.multiProcessing == True:
-            self.numericalObjects.append("HOlD")
-               
+                                   
     def initOutput(self):
         '''
         initialize solution matrices
@@ -696,7 +689,6 @@ class FlowSolver(object):
             for n in xrange(self.nTsteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
-                
                 #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
                     numericalObject()

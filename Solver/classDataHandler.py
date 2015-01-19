@@ -42,11 +42,11 @@ class DataHandler(object):
         currentTimeStep    = self.currentTimeStep[0]
         
         if currentMemoryIndex == self.memoryArraySizeTime - 2:
+            
             # ## after the memory is filled
             # # initiate flush of memoryArrays
             for vessel in self.vessels.itervalues():
                 vessel.flushMemory(self.chunkCount, self.memoryOffset[0])
-                
             self.chunkCount += 1
             self.memoryOffset[0] = (self.memoryArraySizeTime - 1) * self.chunkCount
 
