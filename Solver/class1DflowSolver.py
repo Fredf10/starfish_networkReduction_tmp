@@ -449,22 +449,28 @@ class FlowSolver(object):
         function used to initialize Baroreceptor objects
         '''
         
-        
         for baroId, baroData in self.baroreceptors.iteritems():
-                        
+            
+            
+            # this could be rewritten in a nicer way            
             if baroData['receptorType'] == 'AorticBR':
                 
                 A1 = self.vessels[baroData['vesselId'][0]].Asol
                 A2 = self.vessels[baroData['vesselId'][1]].Asol
-                A = np.concatenate((A1,A2),axis = 1)
                 
-                
-                data = {'Area'    : A,
-                        'Strain'  : np.zeros(np.shape(A)),
+                data = {'Area1'   : A1,
+                        'Area2'   : A2,
+                        'Pressure1': P1,
+                        'Pressure2':P2,
+                        'Strain'  : np.zeros([np.shape(A)[0],2*np.shape(A)[1]]),
                         'MStrain' : np.zeros(np.shape(A)[0]),
                         'T'       : np.yeros(np.shape(A)[0])
                         }
                 
+                baroData['initialCompliance1'] = self.vessels[baroData['vesselId'][0]].compliance
+                baroData['initialCompliance2'] = self.vessels[baroData['vesselId'][1]].compliance
+                
+                    
             elif baroData['receptorType'] == 'CarotidBR':
                 
                 data = {
@@ -481,34 +487,34 @@ class FlowSolver(object):
                 
                 print 'Error: invalid Baroreceptor type'
             
-            #baroVesselId = baroData['vesselId']
-            
-            #data = {'Area'    : self.vessels[baroVesselId].Asol,
-            #        'Strain'  : np.zeros(np.shape(self.vessels[baroVesselId].Asol)),
-            #        'MStrain' : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0]),
-            #        'HR'      : np.zeros(np.shape(self.vessels[baroVesselId].Asol)[0])
-            #        }
-            
-            baroData['data'] = data
-                           
+            baroData['data'] = data               
             baroData['n']                       = self.currentTimeStep
             baroData['dt']                      = self.dt
             baroData['nTsteps']                  = self.nTsteps    
             
-            #initialization of the proximal boundary condition object
-            # needs to be extended to include Type 2 boundaries --> varying elastance heart
-            # needs to be extended to include terminal boundary conditions
+            
             try:            
+                
+                baroData['boundaryConditionII'] = {}
+                terminalBoundaries = 0
+                
                 for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
                     #if bcId == baroData['vesselId']:
-                    if bcId == 1:
+                    if bcId == 1: #type 1 boundary condition at inflow
                         for bc in bcs:
                             if bc.type == 1:
                                 baroData['boundaryCondition'] = bc
+                    
+                    elif bcId != 1:
+                        for bc in bcs:
+                            if bc.type == 2: # type 2 BC, outflow or Varying Elastance heart
+                                baroData['boundaryConditionII'][bcID] = bc
                                 
-                
-                #print "FS467: Test"
-                #print baroData['boundaryCondition']                                                           
+                                if bc.position == -1:
+                                    terminalBoundaries = terminalBoundaries + 1
+                                    
+                                else: pass
+                                                                       
             except: pass
             
             
@@ -518,6 +524,7 @@ class FlowSolver(object):
                 
             elif baroData['receptorType'] == 'CarotidBR':
                 
+                baroData['terminalBoundaries'] = terminalBoundaries
                 self.baroreceptors[baroId] = CarotidBaroreceptor(baroData)
                 
             
