@@ -15,10 +15,10 @@ from classBoundaryConditions import *
 
 
 class Boundary():
-    def __init__(self, vessel, boundaryConditions, rigidArea, dt, n, Tsteps, systemEquation):
+    def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, Tsteps, systemEquation):
         '''
         Constructor of Boundary
-        
+        s
         Initializes one Boundary of a vessel
         input: - boundaryConditions:
                   a list of all boundaryConditions of the vessel at one position i.g 0 or -1 
@@ -56,7 +56,8 @@ class Boundary():
         #System and Vessel Variables
         self.z  = vessel.z
         self.dt = dt
-        self.n  = n
+        self.currentTimeStep = currentTimeStep
+        self.currentMemoryIndex = currentMemoryIndex
         self.systemEquation = systemEquation
         
         #SolutionVariables
@@ -135,27 +136,27 @@ class Boundary():
         #    self.__call__ = self.callMacCormackField
 
     ### Function which calculated du
-    def duFunctionZero(self,n,dt):
+    def duFunctionZero(self,currentTimeStep,dt):
         '''
         Determine the du-vector = [0,0] if no type1 boundaryConditions are given
         '''
         return np.zeros(2)
     
-    def duFunctionSingle(self,n,dt):
+    def duFunctionSingle(self,currentTimeStep,dt):
         '''
         Determine the du-vector with the values of the given
         type1 boundaryCondition 
         '''     
-        return self.bcType1.calculateDu(n,dt)
+        return self.bcType1.calculateDu(currentTimeStep,dt)
     
-    def duFunctionMulti(self,n,dt):
+    def duFunctionMulti(self,currentTimeStep,dt):
         '''
         Determine the summized du-vector with the values of all given
         type1 boundaryConditions 
         '''
         du = np.zeros(2)
         for bc in self.bcType1:
-            du = du + bc.calculateDu(n,dt)
+            du = du + bc.calculateDu(currentTimeStep,dt)
         return du
     
     def duEvaluateVector(self):
@@ -166,12 +167,12 @@ class Boundary():
         for bc in self.bcType1:
             self.duVector = self.duVector+bc.calculateDuVector(len(self.duVector),self.dt)
         
-    def duFunctionRuntime(self,n,dt,Z1,Z2,position):   
+    def duFunctionRuntime(self,currentTimeStep,dt,Z1,Z2,position):   
         
         if self.duRuntimeEvaluation == True:
-            duPrescribed = self.duFunction(n,dt) 
+            duPrescribed = self.duFunction(currentTimeStep,dt) 
         else:
-            duPrescribed = self.duVector[n]
+            duPrescribed = self.duVector[currentTimeStep]
         # check if influx Values should be prescribed
         if self.bcType1 != []:
             # check if Flow is prescribed
@@ -201,11 +202,12 @@ class Boundary():
         
         # create local variables for this timestep
         dt = self.dt
-        n = self.n[0]
+        currentMemoryIndex = self.currentMemoryIndex
+        currentTimeStep = self.currentTimeStep
         
-        P = self.P[n]
-        Q = self.Q[n]
-        A = self.A[n]
+        P = self.P[currentMemoryIndex]
+        Q = self.Q[currentMemoryIndex]
+        A = self.A[currentMemoryIndex]
         
         z = self.z
         position = self.position
@@ -214,10 +216,10 @@ class Boundary():
         L,R,LMBD,Z1,Z2,_omega_field = self.systemEquation.updateLARL(P,Q,A,position)
         
         #calculate the du_vector using given boundaryConditions of type 1
-        duPrescribed = self.duFunctionRuntime(n, dt, Z1, Z2, position)
+        duPrescribed = self.duFunctionRuntime(currentTimeStep, dt, Z1, Z2, position)
         
         #calculate the dp and dq using given boundaryConditions of type 2
-        dPQ_calc,dBloodVolumen = self.omegaFunction(_omega_field, duPrescribed, R, L, n, dt, P[position], Q[position], A[position],Z1, Z2)      
+        dPQ_calc,dBloodVolumen = self.omegaFunction(_omega_field, duPrescribed, R, L, currentTimeStep, dt, P[position], Q[position], A[position],Z1, Z2)      
 
         # calculate new values for p and q
         P_calc = dPQ_calc[0]+ P[position]
@@ -225,24 +227,22 @@ class Boundary():
                         
         # check new p value
         if P_calc < 0:
-            print "ERROR: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "ERROR: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,currentTimeStep*dt,currentTimeStep,dt)
             print P_calc
             exit()
         
         # calculate new value for the area
         A_calc = A[position] # assign old value
         if self.rigidArea == False:
-              A_calc =  self.A_nID([P_calc],position)         
+            A_calc =  self.A_nID([P_calc],position)         
                 
         # apply values to solution array
-        self.P[n+1][position] = P_calc
-        self.Q[n+1][position] = Q_calc
-        self.A[n+1][position] = A_calc
+        self.P[currentMemoryIndex+1][position] = P_calc
+        self.Q[currentMemoryIndex+1][position] = Q_calc
+        self.A[currentMemoryIndex+1][position] = A_calc
         
-        try: self.BloodFlowSep[n] = self.BloodFlowSep[n-1]+dBloodVolumen
+        try: self.BloodFlowSep[currentTimeStep] = self.BloodFlowSep[currentTimeStep-1]+dBloodVolumen
         except: print "passed bloodflow integration"
-        try:    self.BloodVolumen = self.BloodVolumen + 0.5*(self.BloodFlowSep[n-1]+self.BloodFlowSep[n])*dt
-        except: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[n]*dt
-        
-        #if n > 3680: print "cB285 ", abs(position), self.BloodVolumen[0]*1.e6, self.BloodVolumen[1]*1.e6
+        try:    self.BloodVolumen = self.BloodVolumen + 0.5*(self.BloodFlowSep[currentTimeStep-1]+self.BloodFlowSep[currentTimeStep])*dt
+        except: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[currentTimeStep]*dt
         

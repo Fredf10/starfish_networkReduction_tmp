@@ -12,7 +12,7 @@ class Link():
     '''
     def __init__(self, mother, motherSys, 
                      daughter, daughterSys,
-                     n, dt, rigidAreas, solvingScheme):
+                     currentMemoryIndex, dt, rigidAreas, solvingScheme):
         self.type = 'Link'
         
         self.name = ' '.join(['Link',str(mother.Id),str(daughter.Id)])
@@ -26,7 +26,8 @@ class Link():
 #       self.vz = []
 
         self.dt = dt
-        self.n  = n
+        
+        self.currentMemoryIndex  = currentMemoryIndex
         
         # equations to solve in f solve
         self.fsolveFunction = None
@@ -92,7 +93,7 @@ class Link():
         Call function for vessel-vessel connection
         '''        
         dt = self.dt
-        n = self.n[0]
+        n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
         pos2 = self.positions[1]
         
@@ -204,7 +205,7 @@ class Link():
 #         Call function for vessel-vessel connection
 #         '''        
 #         dt = self.dt
-#         n = self.n[0]
+#         n = self.currentMemoryIndex[0]
 #         pos1 = self.positions[0]
 #         pos2 = self.positions[1]
 #         
@@ -538,7 +539,7 @@ class Bifurcation():
         Call function for vessel-vessel connection
         '''        
         dt = self.dt
-        n = self.n[0]
+        n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
         pos2 = self.positions[1]
         pos3 = self.positions[2]
@@ -683,7 +684,7 @@ class Bifurcation():
 #         
 #         
 #         dt = self.dt
-#         n = self.n[0]  
+#         n = self.currentMemoryIndex[0]  
 #         pos1 = self.positions[0]
 #         pos2 = self.positions[1]
 #         pos3 = self.positions[2]
@@ -1050,7 +1051,7 @@ class Anastomosis():
         Call function for vessel-vessel connection
         '''        
         dt = self.dt
-        n = self.n[0]
+        n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
         pos2 = self.positions[1]
         pos3 = self.positions[2]

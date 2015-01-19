@@ -15,6 +15,7 @@ from classConnections import *
 from classFields import *
 from classCommunicators import *
 from classBaroreceptor import *
+from classDataHandler import DataHandler
 
 sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
@@ -62,7 +63,8 @@ class FlowSolver(object):
         # time step
         self.dt = None
         # number of Timesteps
-        self.Tsteps = None
+        self.Tsteps = None     
+        
         # total Simulation time
         self.totalTime = None
         # cycle Mode
@@ -71,7 +73,12 @@ class FlowSolver(object):
         self.numberSavedCycles = self.vascularNetwork.cycleMode     # number of cycles which should be saved overried
         
         # timestep Counter
-        self.n = [0]
+        self.currentTimeStep = [0]
+        
+        # Initialize idices to track where in memory the current solution is stored
+        self.memoryOffset = [0]
+        self.currentMemoryIndex = [0]
+        
         
         # Set div output 
         self.output = {}
@@ -332,7 +339,7 @@ class FlowSolver(object):
             self.systemEquations[vesselId] = System(vessel,
                                                     self.simplifyEigenvalues,
                                                     self.riemannInvariantUnitBase,
-                                                    self.n,
+                                                    self.currentTimeStep,
                                                     self.dt)
             # initialize system equations
             self.systemEquations[vesselId].updateSystem(self.vessels[vesselId].Psol[0],
@@ -354,14 +361,14 @@ class FlowSolver(object):
                                                 bcList0,
                                                 self.rigidAreas,
                                                 self.dt,
-                                                self.n,
+                                                self.currentTimeStep,
                                                 self.Tsteps,
                                                 self.systemEquations[rootId]),
                                       Boundary( self.vessels[rootId],
                                                 bcList1,
                                                 self.rigidAreas,
                                                 self.dt,
-                                                self.n,
+                                                self.currentTimeStep,
                                                 self.Tsteps,
                                                 self.systemEquations[rootId])]
             self.output['BndrNR'] = 2
@@ -371,7 +378,7 @@ class FlowSolver(object):
                                                         boundaryConditions,
                                                         self.rigidAreas,
                                                         self.dt,
-                                                        self.n,
+                                                        self.currentTimeStep,
                                                         self.Tsteps,
                                                         self.systemEquations[vesselId])]
                 
@@ -391,7 +398,7 @@ class FlowSolver(object):
                                                       self.systemEquations[leftMother],
                                                       self.vessels[leftDaughter],
                                                       self.systemEquations[leftDaughter],
-                                                      self.n,
+                                                      self.currentTimeStep,
                                                       self.dt,
                                                       self.rigidAreas,
                                                       self.solvingSchemeConnections)
@@ -403,7 +410,7 @@ class FlowSolver(object):
                                                              self.systemEquations[leftDaughter],
                                                              self.vessels[rightDaughter],
                                                              self.systemEquations[rightDaughter],
-                                                             self.n,
+                                                             self.currentTimeStep,
                                                              self.dt,
                                                              self.rigidAreas,
                                                              self.solvingSchemeConnections)
@@ -418,7 +425,7 @@ class FlowSolver(object):
                                                              self.systemEquations[rightMother],
                                                              self.vessels[leftDaughter],
                                                              self.systemEquations[leftDaughter],
-                                                             self.n,
+                                                             self.currentTimeStep,
                                                              self.dt,
                                                              self.rigidAreas,
                                                              self.solvingSchemeConnections)
@@ -427,7 +434,7 @@ class FlowSolver(object):
         
         for vesselId,vessel in self.vessels.iteritems():    
             self.fields[vesselId] = Field(  vessel,
-                                            self.n,
+                                            self.currentTimeStep,
                                             self.dt, 
                                             self.systemEquations[vesselId],
                                             self.rigidAreas)
@@ -481,7 +488,7 @@ class FlowSolver(object):
             
             baroData['data'] = data
                            
-            baroData['n']                       = self.n
+            baroData['n']                       = self.currentTimeStep
             baroData['dt']                      = self.dt
             baroData['Tsteps']                  = self.Tsteps    
             
@@ -547,15 +554,16 @@ class FlowSolver(object):
                                 comData['boundaryCondition'] = bc                                                            
             except: pass
                         
-            comData['n']              = self.n
-            comData['dt']             = self.dt
+            comData['currentMemoryIndex'] = self.currentMemoryIndex
+            comData['currentTimeStep']    = self.currentTimeStep
+            comData['dt']                 = self.dtss
             
             self.communicators[comId] = eval(comData['comType'])(comData) # call the constructor
             
               
     def initializeNumericalObjectList(self):
         '''
-        ## fill numObjectList (self.numericalObjects) traversing the treeList 
+        ## fill numObjectList (self.currentTimeStepumericalObjects) traversing the treeList 
         # 1. add root boundary
         # 2  add vessels
         # 3  add connection or distal boundary condition
@@ -603,6 +611,16 @@ class FlowSolver(object):
         for baroreceptor in self.baroreceptors.itervalues():
             self.numericalObjects.append(baroreceptor) 
             
+        dataHandler = DataHandler(self.currentTimseStep,
+                                  self.Tsteps,
+                                  self.vascularNetwork.vessels,
+                                  self.currentMemoryIndex,
+                                  self.vascularNetwork.memoryArraySizeTime)
+        
+        self.numericalObjects.append(dataHandler)
+        
+        self.memoryOffset = dataHandler.memoryOffset
+        
             
         if self.multiProcessing == True:
             self.numericalObjects.append("HOlD")
@@ -670,7 +688,8 @@ class FlowSolver(object):
             # original
                        
             for n in xrange(self.Tsteps-1):
-                self.n[0] = n
+                self.currentTimeStep[0] = n
+                self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
                     numericalObject()
@@ -698,7 +717,7 @@ class FlowSolver(object):
                 # 1. solve cycle
                 for n in xrange(self.Tsteps-1):
                     
-                    self.n[0] = n
+                    self.currentTimeStep[0] = n
                     for numericalObject in self.numericalObjects:
                         numericalObject()
                 # 2. check for steady state

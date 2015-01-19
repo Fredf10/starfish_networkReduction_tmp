@@ -3,7 +3,7 @@ import numpy as np
 
 class System(object):
     
-    def __init__(self,vessel,simplifyEigenvalues,riemannInvariantUnitBase,n,dt):
+    def __init__(self,vessel,simplifyEigenvalues,riemannInvariantUnitBase,currentTimeStep,dt):
         '''
         Constructor of System with the SystemEqations
         
@@ -46,7 +46,7 @@ class System(object):
         # properties for Riemann invariant calculation
         self.z = vessel.z
         self.dt = dt 
-        self.n = n
+        self.currentTimeSTep = currentTimeSTep
                 
         # system matrices
         self.m12    = None
@@ -88,7 +88,8 @@ class System(object):
             A <np.array> : current area values of the vessel
         
         '''
-        n = self.n[0]
+        # current time step of solution
+        n = self.currentTimeStep[0]
         # calculate needed values
         C = self.C(P) 
         c = self.c(A,C)
@@ -132,7 +133,7 @@ class System(object):
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
-        n = self.n[0]
+        n = self.currentTimeSTep[0]
                
         C = self.C_nID(P,position)
         c = self.c(A[position],C)
@@ -197,7 +198,7 @@ class System(object):
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
-        n = self.n[0]
+        n = self.currentTimeSTep[0]
         
         C = self.C_nID(P,position)
         c = self.c(A[position],C)
@@ -264,7 +265,7 @@ class System(object):
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
         dlt = self.dlt  
-        n = self.n[0]
+        n = self.currentTimeSTep[0]
         
         Aid = A[position]
         
@@ -335,7 +336,7 @@ class System(object):
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
         '''
         dlt = self.dlt  
-        n = self.n[0]
+        n = self.currentTimeSTep[0]
             
         Aid = A[position]       
            

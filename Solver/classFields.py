@@ -11,7 +11,7 @@ from copy import copy as copy
 
 class Field(object):
     
-    def __init__(self, vessel, n, dt, systemEquation, rigidArea):
+    def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea):
         '''
         Constructor of Field object
         
@@ -24,7 +24,9 @@ class Field(object):
         #System and Vessel Variables
         self.dz = vessel.dz
         self.dt = dt
-        self.n = n
+        # current time index in memory
+        self.currentMemoryIndex = currentMemoryIndex
+        
         self.systemEquation = systemEquation
         self.AFunction = vessel.A
         self.rigidArea = rigidArea
@@ -45,7 +47,9 @@ class Field(object):
         '''
         # solve vessel objects
         dt = self.dt
-        n = self.n[0]
+        
+        # the current position in solution memory
+        n = self.currentMemoryIndex[0]
         
         P = self.P[n]
         Q = self.Q[n]
@@ -109,7 +113,7 @@ class Field(object):
          
         # check pressure solution
         if self.P[n+1].any() < 0:
-            print "ERROR: {} calculated negativ pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print self.P[n+1]
             exit()
          

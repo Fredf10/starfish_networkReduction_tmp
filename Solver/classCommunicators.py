@@ -96,8 +96,9 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         Communicator class envokes and communicates with realTimeVisualisation
         '''
         # def variables to set with comDict          
-        self.n                  = [0] # n
-        self.dn                 = 1  #dn
+        self.currentMemoryIndex = [0] # n
+        self.currentTimeIndex   = [0]
+        self.dn                 = 1   #dn
         self.dt                 = 0.1 #dt
         self.node               = 0   # node
         self.quantitiesToPlot   = []  # quantitiesToPlot  #['Pressure','Flow']
@@ -148,7 +149,7 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         call function of communicator realtimevisualisation
         saves data in file
         '''
-        n = self.n[0]
+        n = self.currentMemoryIndex[0]
         self.count += 1
         
         if self.count == self.dn:        
@@ -180,7 +181,8 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         '''
         # def variables to set with comDict         
          
-        self.n                  = [0] # n
+        self.currentTimeStep    = [0] # n
+        self.currentMemoryIndex = [0]
         self.dn                 = 1  #dn
         self.dt                 = 0.1 #dt
         self.node               = 0   # node
@@ -230,7 +232,7 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         '''
         
         '''
-        n = self.n[0]
+        n = self.currentTimeStep[0]
         self.count += 1
         
         ## calculate strain and save to data dictionary
