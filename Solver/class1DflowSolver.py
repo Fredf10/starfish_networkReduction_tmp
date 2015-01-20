@@ -178,6 +178,7 @@ class FlowSolver(object):
         # calculate time steps
         self.nTsteps = int(np.ceil(self.totalTime/self.dt))
         # calculate time steps for initialisation phase
+        nTstepsInitPhase = 0
         if self.vascularNetwork.initialisationPhaseExist:
             initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
             nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
