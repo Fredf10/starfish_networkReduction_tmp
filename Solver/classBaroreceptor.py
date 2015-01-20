@@ -222,7 +222,6 @@ class AorticBaroreceptor(Baroreceptor):
                 self.data['T'][n+1] = self.states[-1][self.CellMLoutputID]
             
         else:
-            
              print 'Error: currently no hardcoded models for the Aortic BR available'
             
         
@@ -381,11 +380,9 @@ class CarotidBaroreceptor(object):
             deltaF = self.F_efferent[n+1-delay] > self.fe_min
             
             if deltaF >= 0.0:
-                
                 vR = self.cR * math.log(deltaF + 1)
                 
             elif deltaF < 0.0:
-                
                 vR = 0.0
         
         self.delta_TPR[n+1] = self.dt/self.tauR *(-self.delta_TPR[n] + vR) + self.delta_TPR[n]
@@ -399,7 +396,6 @@ class CarotidBaroreceptor(object):
         vE = 0.0
         
         if n <= delay:
-            
             vE = 0.
             
         elif n > delay:
@@ -407,11 +403,9 @@ class CarotidBaroreceptor(object):
             deltaF = self.F_efferent[n+1-delay] > self.fe_min
             
             if deltaF >= 0.0:
-                
                 vE = self.cE * math.log(deltaF + 1)
                 
             elif deltaF < 0.0:
-                
                 vE = 0.0
         
         self.delta_Emax[n+1] = self.dt/self.tauE *(-self.delta_Emax[n] + vE) + self.delta_Emax[n]
@@ -457,47 +451,42 @@ class CarotidBaroreceptor(object):
         for bcId,bcs in self.boundaryConditionII:
             
                 
-            if bcs.name == 'Windkessel-3Elements':
-                    
+            if bcs.name == 'Windkessel-3Elements':    
                 bcs.Rtotal = bcs.Rtotal + deltaWK_resistance
                     
             elif bcs.name == 'Resistance':
-                
                 bcs.Rc = bcs.Rc + deltaWK_resistance
                     
-            elif bcs.name == 'Windkessel-2Elements':
-                    
+            elif bcs.name == 'Windkessel-2Elements':    
                 bcs.Rc = bcs.Rc + deltaWK_resistance
                     
             elif bcs.name == 'VaryingElastanceHeart':
-                
                 if bcs.newCycle == True:
-                    
                     bcs.Emax = bcs.Emax + self.delta_Emax[n+1]
                 
-    
-#         
+            
+
+       
 #     #def updateVenousSide(self):
 #       #  """
 #       #  to update the Venous unstretched Volume
 #       #  """
-#            
-#     
-#      
-#     def UrsinoBRmodel(self,n):
-#         """
-#         Calculate Baroreflex as described by Ursino_1999
-#         Effected quantities are TPR, Emax of the left heart, Vusv
-#         """
-#          
-#          self.UrsinoAfferent(n)
-#          self.UrsinoEfferent(n)
-#          self.UrsinoResistanceEffector(n)
-#          self.UrsinoEmaxLVEffector(n) 
-#          self.UrsinoVusvEffector(n)
-#          #self.updateBC2()
-#          #self.updateVenousSide()
-#       
+#               
+     
+    def UrsinoBRmodel(self,n):
+        """
+        Calculate Baroreflex as described by Ursino_1999
+        Effected quantities are TPR, Emax of the left heart, Vusv
+        """
+          
+        self.UrsinoAfferent(n)
+        self.UrsinoEfferent(n)
+        self.UrsinoResistanceEffector(n)
+        self.UrsinoEmaxLVEffector(n) 
+        self.UrsinoVusvEffector(n)
+        #self.updateBC2()
+        #self.updateVenousSide()
+
      
     def __call__(self):
         
@@ -510,3 +499,4 @@ class CarotidBaroreceptor(object):
             print self.F_efferent[n]
             print self.delta_TPR[n]
             
+
