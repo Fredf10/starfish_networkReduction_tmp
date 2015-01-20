@@ -1,9 +1,0 @@
-DataNumber   Description 
-  999        - 
-  001        ConstantPressure 
-  123        - 
-  002        - 
-  012         
-  004        Auto - Inlfux 
-  005        - 
-  122        - 
