@@ -42,10 +42,10 @@ class venousPool(object):
         Qin = 0
         
         
-        for bcID,bcs in self.boundarys:
+        for boundaryID, boundary in self.boundarys:
             
-            if bcs.position == -1: #distal boundaries    
-                Qin = Qin + bcs.Q[n]
+            if boundary.position == -1: #distal boundaries    
+                Qin = Qin + boundary.Q[n]
                 
         self.Qin = Qin
         
@@ -60,9 +60,14 @@ class venousPool(object):
         
         for boundaryID,boundary in self.boundarys:
             
-            if boundary.position == 0: #proximal boundaries    
-                Qout = Qout + bcs.Q[n]
+            if boundary.position == 0: #proximal boundaries
                 
+                if boundary.bcType2[0].name == 'VaryingElastanceHeart':     
+                    Qout = Qout + boundary.bcType2[0].mitralQ[n]
+                
+                else:
+                    Qout = Qout + boundary.Q[n]
+                           
         self.Qout = Qout
         
         
