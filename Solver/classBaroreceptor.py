@@ -8,7 +8,7 @@ import copy
 import pprint
 import math
 import sys,os
-import CellMLBaroReceptorModel as baroreceptorCellML
+#import CellMLBaroReceptorModel as baroreceptorCellML
 
 
 # set the path relative to THIS file not the executing file!
@@ -16,109 +16,109 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/NetworkLib')
 
 class Baroreceptor(object):
-	"""
-	Mother class for all baroreceptor models
-	"""
-	
-	def __init__(self, BaroDict):
-		'''
-		Baroreceptor model initialisation
-		
-		'''
-		#System and Vessel Variables
-		self.dt = 0
-		self.n = 0
-		self.Tsteps = 0
-		self.data = {}
-		self.modelName = ''
-		
-		# the boundary conditions of type 1 and type 2
-		self.boundaryCondition = 0
-		self.boundaryConditionII = 0
-		
-		# Model from CellML or hardcoded
-		self.cellMLBaroreceptorModel = False
-		
-		  
-		# update Time for proximal boundary
-		self.oldUpdateTime = 0
-		self.newUpdateTime = self.boundaryCondition.Tperiod/self.dt
-		
-		#initialize the CellML Baroreceptor model
-		if self.cellMLBaroreceptorModel == True:
-			
-			# import the model from the file which defines it
-			cellMLimport = "import" + " " + self.modelName + " " + " as " + " baroreceptorCellML "
-			exec(cellMLimport)
-			
-			# input to te CellML model and output from it
-			self.CellMLinputID = baroreceptorCellML.inputID
-			self.CellMLoutputArray = baroreceptorCellML.outputArray
-			self.CellMLoutputID = baroreceptorCellML.outputID
-			
-			 
-			(iniStates, self.constants) = baroreceptorCellML.initConsts()
-			timeArray = np.linspace(0,self.dt,2)
-			self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
-			 
-			   
-		else:
-			print "Error: No CellML Baroreceptor Model provided!"
+    """
+    Mother class for all baroreceptor models
+    """
+    
+    def __init__(self, BaroDict):
+        '''
+        Baroreceptor model initialisation
+        
+        '''
+        #System and Vessel Variables
+        self.dt = 0
+        self.n = 0
+        self.Tsteps = 0
+        self.data = {}
+        self.modelName = ''
+        
+        # the boundary conditions of type 1 and type 2
+        self.boundaryCondition = 0
+        self.boundaryConditionII = 0
+        
+        # Model from CellML or hardcoded
+        self.cellMLBaroreceptorModel = False
+        
+          
+        # update Time for proximal boundary
+        self.oldUpdateTime = 0
+        self.newUpdateTime = self.boundaryCondition.Tperiod/self.dt
+        
+        #initialize the CellML Baroreceptor model
+        if self.cellMLBaroreceptorModel == True:
+            
+            # import the model from the file which defines it
+            cellMLimport = "import" + " " + self.modelName + " " + " as " + " baroreceptorCellML "
+            exec(cellMLimport)
+            
+            # input to te CellML model and output from it
+            self.CellMLinputID = baroreceptorCellML.inputID
+            self.CellMLoutputArray = baroreceptorCellML.outputArray
+            self.CellMLoutputID = baroreceptorCellML.outputID
+            
+             
+            (iniStates, self.constants) = baroreceptorCellML.initConsts()
+            timeArray = np.linspace(0,self.dt,2)
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
+             
+               
+        else:
+            print "Error: No CellML Baroreceptor Model provided!"
 
-			
-	### solving of imported CellML model
-	def solveCellML(self, input):
-		"""
-		solve CellML model
-		
-		"""
-		nbElements = np.shape(input)[0]			
-		#timeArray = np.linspace(0,(nbElements-2)*self.dt,(nbElements-1))
-		
-		#for it in xrange(0,(nbElements-1)):
-		for it in xrange(0,(nbElements)):
-				
-			self.constants[self.cellMLinputID] = input[it]
-			self.voi, self.states, self.algebraic = baroreceptorCellML.solver2([0,self.dt],self.states[-1][:],self.constants)
-		
-		
-		return self.voi, self.states, self.algebraic
-	
-	
-	def calcAndupdatePeriodTypeIcellML(self,n,input):
-		 """
-		 Function to calculate new period
-		 Calls self.solveCellML()
-		 is used by self.__call__()
-		 """
-		 
-		 if n == (round(self.newUpdateTime-2)):
-			
-			# solve the cellML system using the function defined above
-			self.voi, self.states, self.algebraic = self.solveCellML(input)
-			
-			Tperiod  = self.algebraic[-1][self.CellMLoutputID]
-			#print "BR128 - TPeriod"
-			#print self.algebraic[-1][self.CellMLoutputID]
-			
-			self.boundaryCondition.updatePeriodRuntime(Tperiod,(self.newUpdateTime-2)*self.dt)
-			
-			self.oldUpdateTime = self.newUpdateTime
-			self.newUpdateTime = self.oldUpdateTime + self.boundaryCondition.Tperiod/self.dt
-		
-			
-	def update(self,baroDict):
-			'''
-			updates the updateBaroreceptorDict data using a dictionary in form of 
-			baroDict = {'variableName': value}
-			'''
-			for key,value in baroDict.iteritems():
-				try:
-					self.__getattribute__(key)
-					self.__setattr__(key,value)
-				except: 
-					print 'ERROR baroreceptor.update(): wrong key: %s, could not set up baroreceptor' %key
-		
+            
+    ### solving of imported CellML model
+    def solveCellML(self, input):
+        """
+        solve CellML model
+        
+        """
+        nbElements = np.shape(input)[0]            
+        #timeArray = np.linspace(0,(nbElements-2)*self.dt,(nbElements-1))
+        
+        #for it in xrange(0,(nbElements-1)):
+        for it in xrange(0,(nbElements)):
+                
+            self.constants[self.cellMLinputID] = input[it]
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2([0,self.dt],self.states[-1][:],self.constants)
+        
+        
+        return self.voi, self.states, self.algebraic
+    
+    
+    def calcAndupdatePeriodTypeIcellML(self,n,input):
+         """
+         Function to calculate new period
+         Calls self.solveCellML()
+         is used by self.__call__()
+         """
+         
+         if n == (round(self.newUpdateTime-2)):
+            
+            # solve the cellML system using the function defined above
+            self.voi, self.states, self.algebraic = self.solveCellML(input)
+            
+            Tperiod  = self.algebraic[-1][self.CellMLoutputID]
+            #print "BR128 - TPeriod"
+            #print self.algebraic[-1][self.CellMLoutputID]
+            
+            self.boundaryCondition.updatePeriodRuntime(Tperiod,(self.newUpdateTime-2)*self.dt)
+            
+            self.oldUpdateTime = self.newUpdateTime
+            self.newUpdateTime = self.oldUpdateTime + self.boundaryCondition.Tperiod/self.dt
+        
+            
+    def update(self,baroDict):
+            '''
+            updates the updateBaroreceptorDict data using a dictionary in form of 
+            baroDict = {'variableName': value}
+            '''
+            for key,value in baroDict.iteritems():
+                try:
+                    self.__getattribute__(key)
+                    self.__setattr__(key,value)
+                except: 
+                    print 'ERROR baroreceptor.update(): wrong key: %s, could not set up baroreceptor' %key
+        
 
            
 class AorticBaroreceptor(Baroreceptor):
