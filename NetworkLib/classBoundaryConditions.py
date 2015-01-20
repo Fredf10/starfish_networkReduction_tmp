@@ -3,9 +3,9 @@ import csv
 from math import exp
 import ODESolver as OD
 
-import os,sys
+import os, sys
 # set the path relative to THIS file not the executing file!
-cur = os.path.dirname( os.path.realpath( __file__ ) )
+cur = os.path.dirname(os.path.realpath(__file__))
 
 class BoundaryCondition(object):
 	'''
@@ -14,32 +14,32 @@ class BoundaryCondition(object):
 	position = None
 	name = None
 	
-	##
+	# #
 	# if False prescribe influx of Flow and Pressure 
 	# if True  prescribe total Values of Pessure and Flow
 	prescribeTotalValues = False
-	##
+	# #
 	# conditionQuantity <string> should be either 'Flow' or 'Pressure'
 	conditionQuantity = None  
 	
 	
-	def update(self,bcDict):
+	def update(self, bcDict):
 		'''
 		updates the updateBoundaryDict data using a dictionary in form of 
 		bcDict = {'variableName': value}
 		'''
-		for key,value in bcDict.iteritems():
+		for key, value in bcDict.iteritems():
 			try:
 				self.__getattribute__(key)
-				self.__setattr__(key,value)
+				self.__setattr__(key, value)
 			except: 
-				print 'Error boundaryConditions.update(): wrong key: %s, could not set up boundaryCondition' %key
+				print 'Error boundaryConditions.update(): wrong key: %s, could not set up boundaryCondition' % key
 				
 	def setPosition(self, position):
 		'''Set the position of the boundaryCondition '''
 		self.position = position
 	
-	def getVariableValue(self,variableName):
+	def getVariableValue(self, variableName):
 		'''
 		Returns value of variable with name : variableName
 		States Error if not such variable
@@ -60,7 +60,7 @@ class BoundaryConditionType2(BoundaryCondition):
 		self.position = position
 		if self.position == 0:
 			self.returnFunction = self.funcPos0
-		elif self.position ==-1:
+		elif self.position == -1:
 			self.returnFunction = self.funcPos1
 		else:
 			self.returnFunction = None
@@ -89,34 +89,34 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.type = 1
 		self.prescribe = 'influx'
 		
-		## variables from xml
-		self.amp	  = 0
+		# # variables from xml
+		self.amp	 = 0
 		self.ampConst = 0 
-		self.Npulse   = 1.
-		self.freq	  = 1.
-		self.Tpulse   = 0.
-		self.Tspace   = 0.
+		self.Npulse = 1.
+		self.freq	 = 1.
+		self.Tpulse = 0.
+		self.Tspace = 0.
 		self.runtimeEvaluation = False
 				
-		## evaluated values
-		self.lastU       		= 0.0
-		self.TmeanFlow   		= 0.0
-		self.initPhaseTimeSpan 	= 0.0
-		self.MeanFlow    		= 0.0
-		self.Tperiod     		= 0.0
-		self.pulseTime   		= []
-		self.duMatrix    		= np.ones(2)
-		self.duVector    		= np.empty(2)
+		# # evaluated values
+		self.lastU       		 = 0.0
+		self.TmeanFlow   		 = 0.0
+		self.initPhaseTimeSpan 	 = 0.0
+		self.MeanFlow    		 = 0.0
+		self.Tperiod     		 = 0.0
+		self.pulseTime   		 = []
+		self.duMatrix    		 = np.ones(2)
+		self.duVector    		 = np.empty(2)
 		
 		self.initialisationPhaseExist = False
-		self.nTstepsInitPhase 		  = 0
+		self.nTstepsInitPhase 		 = 0
 		
 		# values to manipulate period during runtime
 		self.updateTime = -10.0
-		self.freqNew    = self.freq
-		self.TspaceNew  = self.Tspace
+		self.freqNew = self.freq
+		self.TspaceNew = self.Tspace
 	
-	def initialize(self,bcDict):
+	def initialize(self, bcDict):
 		'''
 		updates - the updateBoundaryDict data using a dictionary in from of 
 				  bcDict = {'variableName': value}
@@ -126,19 +126,19 @@ class BoundaryConditionType1(BoundaryCondition):
 		
 		self.update(bcDict)
 		
-		self.Tperiod = self.Tspace+1.0/self.freq
+		self.Tperiod = self.Tspace + 1.0 / self.freq
 				
 		self.pulseTime = []
 		for puls in np.arange(self.Npulse):			
-			self.pulseTime.append([self.Tpulse + (self.Tperiod)*puls,
-								   self.Tpulse + 1.0/self.freq+ (self.Tperiod)*puls,
-								   self.Tpulse + self.Tperiod +(self.Tperiod)*puls])
+			self.pulseTime.append([self.Tpulse + (self.Tperiod) * puls,
+								   self.Tpulse + 1.0 / self.freq + (self.Tperiod) * puls,
+								   self.Tpulse + self.Tperiod + (self.Tperiod) * puls])
 		
 		self.pulseTimeInit = [[0,
-							   1.0/self.freq,
+							   1.0 / self.freq,
 							   self.Tperiod]]
 				
-		self.lastU = self.calculateOneStep(0,0)
+		self.lastU = self.calculateOneStep(0, 0)
 		
 		if self.prescribe == 'total':
 			self.prescribeTotalValues = True
@@ -146,13 +146,13 @@ class BoundaryConditionType1(BoundaryCondition):
 			self.prescribeTotalValues = False
 			
 		if 'Flow' in self.name:
-			self.duMatrix = np.array([0,1])
+			self.duMatrix = np.array([0, 1])
 			self.conditionQuantity = 'Flow'
 		elif 'Pressure' in self.name:
-			self.duMatrix = np.array([1,0])
+			self.duMatrix = np.array([1, 0])
 			self.conditionQuantity = 'Pressure'
 		
-		## load file for Flow-From File
+		# # load file for Flow-From File
 		if self.name == 'Flow-FromFile':
 			if self.loadedFile == False:
 				self.loadFile()
@@ -162,12 +162,12 @@ class BoundaryConditionType1(BoundaryCondition):
 		This function updates the freq, Tspace and pulsTime for new given Tperiod
 		'''
 				
-		freq    = self.freq
-		Tspace  = self.Tspace
+		freq = self.freq
+		Tspace = self.Tspace
 		Tperiod = self.Tperiod
-		## calculate new values
-		self.freqNew   = Tperiod*freq/TperiodNew
-		self.TspaceNew = TperiodNew*Tspace/Tperiod
+		# # calculate new values
+		self.freqNew = Tperiod * freq / TperiodNew
+		self.TspaceNew = TperiodNew * Tspace / Tperiod
 		
 		manipulateOtherPulses = False
 		findFirstPulse = True
@@ -183,62 +183,62 @@ class BoundaryConditionType1(BoundaryCondition):
 			if manipulateOtherPulses == True:
 				if findFirstPulse == False:
 					pulse[0] = pStart
-					pulse[1] = pStart + 1.0/self.freqNew  #- self.TmeanFlow
-					pulse[2] = pStart + TperiodNew        #- self.TmeanFlow
+					pulse[1] = pStart + 1.0 / self.freqNew  # - self.TmeanFlow
+					pulse[2] = pStart + TperiodNew  # - self.TmeanFlow
 					pStart = pulse[2]
 				else: findFirstPulse = False
 		
-	def calculateDuVector(self,nTsteps,dt):
+	def calculateDuVector(self, nTsteps, dt):
 		'''
 		Function calculates the duVector for a given number of time steps Tsteps and dt
 		return: self.duVector
 		'''
 		# create du Vector
-		self.duVector = np.zeros((nTsteps,2))
+		self.duVector = np.zeros((nTsteps, 2))
 		
 		initPhase = False
 		# check if initphase needs to be added at start
 		if self.initialisationPhaseExist:
 			initPhase = True
 		
-		lastStep = self.calculateOneStep(0, dt, initPhase = initPhase)
+		lastStep = self.calculateOneStep(0, dt, initPhase=initPhase)
 			
 		# add rest of simulation time
 		for nt in xrange(nTsteps):
 			if nt == self.nTstepsInitPhase: initPhase = False
-			nextStep = self.calculateOneStep(nt+1, dt, initPhase = initPhase)
+			nextStep = self.calculateOneStep(nt + 1, dt, initPhase=initPhase)
 			self.duVector[nt] = nextStep - lastStep
 			lastStep = nextStep
 			
 		return self.duVector
 			
-	def calculateDu(self,n,dt):
+	def calculateDu(self, n, dt):
 		'''
 		Function calculates the du for a given time step and dt
 		return: du
 		'''
-		nextStep = self.calculateOneStep(n+1,dt)	
+		nextStep = self.calculateOneStep(n + 1, dt)	
 		du = nextStep - self.lastU
 		self.lastU = nextStep
 		
 		
-		if n*dt > self.updateTime-dt and n*dt < self.updateTime + dt :
+		if n * dt > self.updateTime - dt and n * dt < self.updateTime + dt :
 			
-			self.freq    = self.freqNew
-			self.Tspace  = self.TspaceNew		
-			self.Tperiod = self.TspaceNew + 1.0/self.freqNew
+			self.freq = self.freqNew
+			self.Tspace = self.TspaceNew		
+			self.Tperiod = self.TspaceNew + 1.0 / self.freqNew
 			
 			self.updateTime = -10
 			
 		return du
 		
-	def calculateOneStep(self, n, dt, initPhase = False):
+	def calculateOneStep(self, n, dt, initPhase=False):
 		'''
 		calculates the amplitude value for one time step n and dt
 		
 		return: array([ampP,ampQ])
 		'''
-		t = n*dt
+		t = n * dt
 		ampT = self.ampConst
 		timeInPulseTime = False
 		
@@ -254,111 +254,111 @@ class BoundaryConditionType1(BoundaryCondition):
 				timeInPulseTime = True
 				break
 		if timeInPulseTime == False:
-			return ampT*self.duMatrix
+			return ampT * self.duMatrix
 		
 		if initPhase == True: t = t + self.TmeanFlow 
 							
 		try:
 			if pTA1 <= t and t <= pTA2:
 				t0 = pTA1
-				## function1 according to the signal type
-				ampT = ampT + self.function1(t,t0,pulsNum)
+				# # function1 according to the signal type
+				ampT = ampT + self.function1(t, t0, pulsNum)
 				
 			elif pTA2 <= t and t < pTA3:
-				t0 =  pTA1
-				## function2 according to the signal type in most cases return self.ampConst
-				ampT = ampT + self.function2(t,t0,pulsNum)
+				t0 = pTA1
+				# # function2 according to the signal type in most cases return self.ampConst
+				ampT = ampT + self.function2(t, t0, pulsNum)
 						
-			t = n*dt
-			if self.Tpulse <= t and t < self.Tpulse+1.5*dt and self.initialStep == False:
+			t = n * dt
+			if self.Tpulse <= t and t < self.Tpulse + 1.5 * dt and self.initialStep == False:
 				self.initialStep = True
 				
-			return ampT*self.duMatrix
+			return ampT * self.duMatrix
 		
 		except:
-			return ampT*self.duMatrix	
+			return ampT * self.duMatrix	
 		
-	def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
+	def findMeanFlowAndMeanTime(self, givenMeanFlow=None, quiet=False):
 		'''
 		This function calculates the mean flow of the signal self.MeanFlow
 		and the first occurence time of the mean flow self.TmeanFlow
 		'''
-		#find meanFlow
+		# find meanFlow
 		self.initialize({})
 		
 		period = self.Tperiod
-		totalTime = period+self.Tpulse
+		totalTime = period + self.Tpulse
 		dt = 0.001
-		nTsteps = int(np.round(totalTime/dt, 0))
-		nTstepsStart = int(np.round(self.Tpulse/dt, 0))
+		nTsteps = int(np.round(totalTime / dt, 0))
+		nTstepsStart = int(np.round(self.Tpulse / dt, 0))
 		integral = 0.0
-		bcFunction = np.zeros(nTsteps-nTstepsStart-1)
-		time = np.zeros(nTsteps-nTstepsStart-1)
+		bcFunction = np.zeros(nTsteps - nTstepsStart - 1)
+		time = np.zeros(nTsteps - nTstepsStart - 1)
 		
-		for n in xrange(nTstepsStart,nTsteps-1):
-			flow = self.calculateOneStep(n,dt)
-			integral = integral + (flow+self.calculateOneStep(n+1,dt))/2.0
-			bcFunction[n-nTstepsStart] = flow[1]
-			time[n-nTstepsStart]= (n-nTstepsStart)*dt
+		for n in xrange(nTstepsStart, nTsteps - 1):
+			flow = self.calculateOneStep(n, dt)
+			integral = integral + (flow + self.calculateOneStep(n + 1, dt)) / 2.0
+			bcFunction[n - nTstepsStart] = flow[1]
+			time[n - nTstepsStart] = (n - nTstepsStart) * dt
 			
 		if givenMeanFlow == None:
-			self.MeanPressure = (integral*dt/period)[0]
-			self.MeanFlow = (integral*dt/period)[1]
+			self.MeanPressure = (integral * dt / period)[0]
+			self.MeanFlow = (integral * dt / period)[1]
 		else:
 			self.MeanFlow = givenMeanFlow
-			difference = abs(givenMeanFlow - (integral*dt/period)[1])
+			difference = abs(givenMeanFlow - (integral * dt / period)[1])
 			if quiet == False:
 				print '''\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
 	            (evaluated with integral over one period). 
-	            The difference is {} ml s-1 \n'''.format(givenMeanFlow*1.e6,(integral*dt/period)[1]*1.e6,difference*1.e6) 
+	            The difference is {} ml s-1 \n'''.format(givenMeanFlow * 1.e6, (integral * dt / period)[1] * 1.e6, difference * 1.e6) 
 						
-		## finde meanFlow time
+		# # finde meanFlow time
 		from scipy import interpolate as interpolate
 		numberIntPoints = 1000000
-		inflowFunction = interpolate.interp1d(time,bcFunction)
-		newTime = np.linspace(0,time[-1], numberIntPoints)
+		inflowFunction = interpolate.interp1d(time, bcFunction)
+		newTime = np.linspace(0, time[-1], numberIntPoints)
 		newValues = inflowFunction(newTime)
 		self.TmeanFlow = 0
-		for n in np.linspace(0,numberIntPoints-1,numberIntPoints): 
+		for n in np.linspace(0, numberIntPoints - 1, numberIntPoints): 
 			ti = newTime[n]
 			qi = newValues[n]
-			if abs(self.MeanFlow-qi) <= 1.e-5:
+			if abs(self.MeanFlow - qi) <= 1.e-5:
 				notFound = True
 				while notFound == True:
 					self.TmeanFlow = ti
-					n = n+1
-					if n == numberIntPoints-1: break
-					if abs(self.MeanFlow-newValues[n+1]) > abs(self.MeanFlow-newValues[n]):
+					n = n + 1
+					if n == numberIntPoints - 1: break
+					if abs(self.MeanFlow - newValues[n + 1]) > abs(self.MeanFlow - newValues[n]):
 						self.TmeanFlow = newTime[n]
 						break
 				break
 		
-		print "cBC 350 totalTime",totalTime
-		print "cBC 350 period: ",period
-		print "cBC 350 initPhase timespan: ", period-self.TmeanFlow
+		print "cBC 350 totalTime", totalTime
+		print "cBC 350 period: ", period
+		print "cBC 350 initPhase timespan: ", period - self.TmeanFlow
 				
 		self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
 		
 		if quiet == False:
 			print '====================================='
 			print '___BC _Type1: mean flow evaluation___'
-			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str((integral*dt/period*1e6)[1]).ljust(5))
+			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str((integral * dt / period * 1e6)[1]).ljust(5))
 			print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
 			print 'initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5))
-			print 'total volume/period (ml)   {:.6}'.format(str(integral[1]*dt*1e6).ljust(5))
+			print 'total volume/period (ml)   {:.6}'.format(str(integral[1] * dt * 1e6).ljust(5))
 		
 		
-		#if self.TmeanFlow != 0.0: self.Tpulse = 0.0
+		# if self.TmeanFlow != 0.0: self.Tpulse = 0.0
 		self.initialize({})
 		
 		return  self.MeanFlow, self.initPhaseTimeSpan
 		
-	def function1(self,t,t0,pulsNum):
+	def function1(self, t, t0, pulsNum):
 		'''
 		amplitude function caracterized by signal type
 		'''
 		pass
-	def function2(self,t,t0,pulsNum):
+	def function2(self, t, t0, pulsNum):
 		'''
 		amplitude function caracterized by signal type
 		'''
@@ -371,10 +371,10 @@ class RampMean(BoundaryConditionType1):
 		ramps to a mean amplitude self.amp starting from self.ampConst
 	"""
 		
-	def function1(self,t,t0,pulsNum):
-		return self.amp*pow(np.sin(np.pi*(t - self.Tpulse)/(1./self.freq*2.0)),2.0)
+	def function1(self, t, t0, pulsNum):
+		return self.amp * pow(np.sin(np.pi * (t - self.Tpulse) / (1. / self.freq * 2.0)), 2.0)
 	
-	def function2(self,t,t0,pulsNum):
+	def function2(self, t, t0, pulsNum):
 		return self.amp
 		
 class Sinus(BoundaryConditionType1):
@@ -383,8 +383,8 @@ class Sinus(BoundaryConditionType1):
 	
 		creates in a periodic sinus signal
 	"""
-	def function1(self,t,t0,pulsNum):
-		return self.amp*np.sin(2*np.pi*self.freq*(t - t0))
+	def function1(self, t, t0, pulsNum):
+		return self.amp * np.sin(2 * np.pi * self.freq * (t - t0))
 	
 
 class Sinus2(BoundaryConditionType1):
@@ -393,8 +393,8 @@ class Sinus2(BoundaryConditionType1):
 	
 		creates in a periodic sinus-squared signal
 	"""
-	def function1(self,t,t0,pulsNum):
-		return self.amp*pow(np.sin(np.pi*self.freq*(t - t0 ) ),2.0)
+	def function1(self, t, t0, pulsNum):
+		return self.amp * pow(np.sin(np.pi * self.freq * (t - t0)), 2.0)
 
 class PhysiologicalFunction(BoundaryConditionType1):
 	"""	
@@ -410,21 +410,21 @@ class PhysiologicalFunction(BoundaryConditionType1):
 		
 		BoundaryConditionType1.__init__(self)
 				
-		## additional variables for this function
+		# # additional variables for this function
 		self.lowPoint = 0.1739
 		self.fracSin2 = 0.36
 		self.fracCos = 0.43
-		self.fracRes = 1.0 - (self.fracSin2+self.fracCos)
+		self.fracRes = 1.0 - (self.fracSin2 + self.fracCos)
 			
-	def function1(self,t,t0,pulsNum):
-		if t < self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq)+self.fracSin2*1/self.freq:
-			ampT = self.amp*pow(np.sin(np.pi*self.freq/(2*self.fracSin2)*(t - (self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq)))),2.0)
-		elif t < self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq)+(self.fracSin2+self.fracCos)*1/self.freq:
-			ampT = self.amp*(np.cos((np.pi*self.freq/(2.0*self.fracCos)*(t-self.fracSin2/self.freq- (self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq))))) )
-		elif t < self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq)+(self.fracSin2+self.fracCos+self.fracRes*3.0/8.0)*1/self.freq:
-			ampT =self.amp*(pow(np.sin((t-(self.fracSin2+self.fracCos)/self.freq-(self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq))-(1.0/(self.freq)*self.fracRes)*3./8.)*np.pi*self.freq/(1.5*self.fracRes)),2.0)*2*self.lowPoint-self.lowPoint)
+	def function1(self, t, t0, pulsNum):
+		if t < self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq) + self.fracSin2 * 1 / self.freq:
+			ampT = self.amp * pow(np.sin(np.pi * self.freq / (2 * self.fracSin2) * (t - (self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq)))), 2.0)
+		elif t < self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq) + (self.fracSin2 + self.fracCos) * 1 / self.freq:
+			ampT = self.amp * (np.cos((np.pi * self.freq / (2.0 * self.fracCos) * (t - self.fracSin2 / self.freq - (self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq))))))
+		elif t < self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq) + (self.fracSin2 + self.fracCos + self.fracRes * 3.0 / 8.0) * 1 / self.freq:
+			ampT = self.amp * (pow(np.sin((t - (self.fracSin2 + self.fracCos) / self.freq - (self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq)) - (1.0 / (self.freq) * self.fracRes) * 3. / 8.) * np.pi * self.freq / (1.5 * self.fracRes)), 2.0) * 2 * self.lowPoint - self.lowPoint)
 		else:
-			ampT =self.amp*(pow(np.sin((t-(self.fracSin2+self.fracCos)/self.freq-(self.Tpulse+pulsNum*(self.Tspace+1.0/self.freq))-(1.0/(self.freq)*self.fracRes)*3./8.0)*np.pi*self.freq/(self.fracRes*1.25)),2.0)*self.lowPoint-self.lowPoint)		
+			ampT = self.amp * (pow(np.sin((t - (self.fracSin2 + self.fracCos) / self.freq - (self.Tpulse + pulsNum * (self.Tspace + 1.0 / self.freq)) - (1.0 / (self.freq) * self.fracRes) * 3. / 8.0) * np.pi * self.freq / (self.fracRes * 1.25)), 2.0) * self.lowPoint - self.lowPoint)		
 		return ampT
 
 class expVelocity(BoundaryConditionType1):
@@ -438,16 +438,16 @@ class expVelocity(BoundaryConditionType1):
 		
 		BoundaryConditionType1.__init__(self)
 			
-		## additional variables for this function
+		# # additional variables for this function
 		self.gaussC = 5000
-		self.area   = 1
+		self.area = 1
 		
-		## set to duMatrix
+		# # set to duMatrix
 		self.duMatrix[1] = 1
 		
 		
-	def function1(self,t,t0,pulsNum):
-		return self.amp * exp(-self.gaussC*(t-t0+0.5/self.freq)**2)* self.area
+	def function1(self, t, t0, pulsNum):
+		return self.amp * exp(-self.gaussC * (t - t0 + 0.5 / self.freq) ** 2) * self.area
 
 class Fourier(BoundaryConditionType1):
 	"""	
@@ -459,20 +459,20 @@ class Fourier(BoundaryConditionType1):
 		
 		BoundaryConditionType1.__init__(self)
 		
-		## additional variables for this function
-		self.scale  = 1
-		self.harm = [[0.2465,0.1975,0.2624,0.2132,0.0424,0.0722,0.0411,0.0093,0.0141,0.0044],
-					 [0.0,2.2861,4.5723,6.8584,9.1445,11.4307,13.7168,16.0029,18.2891,20.5752],
-					 [0.0,2.5010,-2.9986,-0.2689,1.4904,-2.9854,-0.0317,1.5292,-2.5394,0.5771]]
+		# # additional variables for this function
+		self.scale = 1
+		self.harm = [[0.2465, 0.1975, 0.2624, 0.2132, 0.0424, 0.0722, 0.0411, 0.0093, 0.0141, 0.0044],
+					 [0.0, 2.2861, 4.5723, 6.8584, 9.1445, 11.4307, 13.7168, 16.0029, 18.2891, 20.5752],
+					 [0.0, 2.5010, -2.9986, -0.2689, 1.4904, -2.9854, -0.0317, 1.5292, -2.5394, 0.5771]]
 		
-		## set variables
-		self.freq =  self.harm[1][1]
+		# # set variables
+		self.freq = self.harm[1][1]
 				
-	def function1(self,t,t0,pulsNum):
+	def function1(self, t, t0, pulsNum):
 		amp = 0
 		for i in range(len(self.harm[0])):
-			amp += self.harm[0][i]*np.sin(2.0*np.pi*self.harm[1][i]*(t - t0) + self.harm[2][i] + np.pi/2.0)
-		#amp = amp*self.scale
+			amp += self.harm[0][i] * np.sin(2.0 * np.pi * self.harm[1][i] * (t - t0) + self.harm[2][i] + np.pi / 2.0)
+		# amp = amp*self.scale
 		return amp
 		
 
@@ -487,22 +487,22 @@ class PhysiologicalData(BoundaryConditionType1):
 		
 		BoundaryConditionType1.__init__(self)
 		
-		## additional variables for this function
+		# # additional variables for this function
 		from physiologicalData import aorticFlowPressure
 		self.data = aorticFlowPressure()
 		
 		tDataMax = max(self.data.t)
 		tDataMin = min(self.data.t)
-		self.timeData = np.linspace(tDataMin,tDataMax,2000)
+		self.timeData = np.linspace(tDataMin, tDataMax, 2000)
 		
 		
-	def function1(self,t,t0,pulsNum):
-		self.timeSim = np.linspace(0.0,1./self.freq,2000)
+	def function1(self, t, t0, pulsNum):
+		self.timeSim = np.linspace(0.0, 1. / self.freq, 2000)
 		tReset = t - t0
-		tInter = np.interp(tReset,self.timeSim,self.timeData) 
-		Q = np.interp(tInter,self.data.t,self.data.Q)*1.e6
-		#P = np.interp(t-pulseNumber*self.tmax,self.data.t,self.data.P)
-		return Q*self.duMatrix
+		tInter = np.interp(tReset, self.timeSim, self.timeData) 
+		Q = np.interp(tInter, self.data.t, self.data.Q) * 1.e6
+		# P = np.interp(t-pulseNumber*self.tmax,self.data.t,self.data.P)
+		return Q * self.duMatrix
 			
 class FlowFromFile(BoundaryConditionType1):
 	"""	
@@ -523,7 +523,7 @@ class FlowFromFile(BoundaryConditionType1):
 		
 		BoundaryConditionType1.__init__(self)
 		
-		## additional variables fill in with data in the readXML file
+		# # additional variables fill in with data in the readXML file
 		self.filePathName = ''
 		self.dataTime = []
 		self.dataFlow = []
@@ -532,9 +532,9 @@ class FlowFromFile(BoundaryConditionType1):
 	def loadFile(self):
 		try:
 			# set the path relative to THIS file not the executing file!
-			if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['','.csv'])
-			pathAndFilename = ''.join([cur,'/../NetworkFiles/',self.filePathName])
-			reader = csv.DictReader(open(pathAndFilename,'rb'),delimiter=';')
+			if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
+			pathAndFilename = ''.join([cur, '/../NetworkFiles/', self.filePathName])
+			reader = csv.DictReader(open(pathAndFilename, 'rb'), delimiter=';')
 		except:
 			print 'ERROR: boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit'.format(self.filePathName.split('/')[-1])
 			exit()
@@ -550,18 +550,18 @@ class FlowFromFile(BoundaryConditionType1):
 		except: pass
 		
 		
-	def function1(self,t,t0,pulsNum):
+	def function1(self, t, t0, pulsNum):
 		# set up simulation time (needed here if freq changes after init known to slow down)
-		self.timeData = np.linspace(min(self.dataTime),max(self.dataTime),2000)
-		self.timeSim = np.linspace(0.0,1./self.freq,2000)
+		self.timeData = np.linspace(min(self.dataTime), max(self.dataTime), 2000)
+		self.timeSim = np.linspace(0.0, 1. / self.freq, 2000)
 		# reset time to fit in array [0 , 1/freq]
 		tReset = t - t0
 		# interpolate time to dataTime
-		tInter = np.interp(tReset,self.timeSim,self.timeData) 
+		tInter = np.interp(tReset, self.timeSim, self.timeData) 
 		# interpolate the Q value from data and dataTime
-		Q = np.interp(tInter,self.dataTime,self.dataFlow)
-		#P = np.interp(t-pulseNumber*self.tmax,self.data.t,self.data.P)
-		return Q*self.duMatrix
+		Q = np.interp(tInter, self.dataTime, self.dataFlow)
+		# P = np.interp(t-pulseNumber*self.tmax,self.data.t,self.data.P)
+		return Q * self.duMatrix
 		
 		
 		
@@ -590,37 +590,37 @@ class PrescribedInflux(BoundaryConditionType2):
 		self.omegaNew = np.empty((2))
 		self.dQInOut = np.empty((2))
 		
-	def __call__(self,_domegaField_,duPrescribed,R,L,n,dt, P, Q, A, Z1, Z2):
-		return self.returnFunction(_domegaField_,duPrescribed,L,R)
+	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
+		return self.returnFunction(_domegaField_, duPrescribed, L, R)
 
-	def funcPos0(self,_domegaField,duPrescribed,L,R):
+	def funcPos0(self, _domegaField, duPrescribed, L, R):
 		'''
 		return function for position 0 at the start
 		of the vessel
 		'''
-		domegaPrescribed_ = np.dot(L[0],duPrescribed)
+		domegaPrescribed_ = np.dot(L[0], duPrescribed)
 
 		self.omegaNew[0] = domegaPrescribed_
-		self.omegaNew[1] =  _domegaField
+		self.omegaNew[1] = _domegaField
 		
-		self.dQInOut = R[:][1]*self.omegaNew 	
+		self.dQInOut = R[:][1] * self.omegaNew 	
 						
-		return np.dot(R,self.omegaNew),self.dQInOut	
+		return np.dot(R, self.omegaNew), self.dQInOut	
 		
 	
-	def funcPos1(self,domegaField_,duPrescribed,L,R):
+	def funcPos1(self, domegaField_, duPrescribed, L, R):
 		'''
 		return function for position -1 at the end
 		of the vessel
 		'''
-		_domegaPrescribed = np.dot(L[1],duPrescribed)
+		_domegaPrescribed = np.dot(L[1], duPrescribed)
 		
 		self.omegaNew[0] = domegaField_
-		self.omegaNew[1] =  _domegaPrescribed
+		self.omegaNew[1] = _domegaPrescribed
 		
-		self.dQInOut = (R[:][1]*self.omegaNew)[::-1].copy()	
+		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()	
 		
-		return np.dot(R,self.omegaNew) ,self.dQInOut
+		return np.dot(R, self.omegaNew) , self.dQInOut
 		
 	
 class PrescribedTotalFlow(BoundaryConditionType2):
@@ -639,17 +639,17 @@ class PrescribedTotalFlow(BoundaryConditionType2):
 		self.type = 2
 		self.name = "standardType2"
 
-		self.R = np.empty((2,2))
+		self.R = np.empty((2, 2))
 		self.returnFunction = None
 		self.omegaNew = np.empty((2))
 		self.duNew = np.empty((2)) 
 		self.dQInOut = np.zeros((2))
 	
-	def __call__(self,_domegaField_,duPrescribed,R,L,n,dt, P, Q, A, Z1, Z2):
-		return self.returnFunction(_domegaField_,duPrescribed,L)
+	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
+		return self.returnFunction(_domegaField_, duPrescribed, L)
 
 	
-	def funcPos0(self,_domegaField,duPrescribed,L):
+	def funcPos0(self, _domegaField, duPrescribed, L):
 		'''
 		return function for position 0 at the start
 		of the vessel
@@ -670,12 +670,12 @@ class PrescribedTotalFlow(BoundaryConditionType2):
 		How it is done:
 			inserted R in dot product
 		'''
-		self.duNew[0] = - L[1][1] / L[1][0] * duPrescribed[1] + 1./L[1][0] * _domegaField
+		self.duNew[0] = -L[1][1] / L[1][0] * duPrescribed[1] + 1. / L[1][0] * _domegaField
 		self.duNew[1] = duPrescribed[1]
 		self.dQInOut[0] = duPrescribed[1]
 		return self.duNew, self.dQInOut
 	
-	def funcPos1(self,domegaField_,duPrescribed,L):
+	def funcPos1(self, domegaField_, duPrescribed, L):
 		'''
 		return function for position -1 at the end
 		of the vessel
@@ -697,7 +697,7 @@ class PrescribedTotalFlow(BoundaryConditionType2):
 		How it is done:
 			inserted R in dot product
 		'''
-		self.duNew[0] = domegaField_ / L[0][0]  - L[0][1] / L[0][0] * duPrescribed[1]
+		self.duNew[0] = domegaField_ / L[0][0] - L[0][1] / L[0][0] * duPrescribed[1]
 		self.duNew[1] = duPrescribed[1]
 		
 		self.dQInOut[1] = duPrescribed[1]		
@@ -721,15 +721,15 @@ class PrescribedTotalPressure(BoundaryConditionType2):
 
 		self.returnFunction = None
 		self.omegaNew = np.empty((2))
-		self.R = np.empty((2,2))
+		self.R = np.empty((2, 2))
 		self.duNew = np.empty((2)) 
 		self.dQInOut = np.zeros(2)
 		
-	def __call__(self,_domegaField_,duPrescribed,R,L,n,dt, P, Q, A, Z1, Z2):
-		return self.returnFunction(_domegaField_,duPrescribed,L)
+	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
+		return self.returnFunction(_domegaField_, duPrescribed, L)
 
 	
-	def funcPos0(self,_domegaField,duPrescribed,L):
+	def funcPos0(self, _domegaField, duPrescribed, L):
 		'''
 		return function for position 0 at the start
 		of the vessel
@@ -752,11 +752,11 @@ class PrescribedTotalPressure(BoundaryConditionType2):
 			inserted R in dot product
 		'''
 		self.duNew[0] = duPrescribed[0]
-		self.duNew[1] = -L[1][0]/L[1][1] * duPrescribed[0] + _domegaField / L[1][1] 
+		self.duNew[1] = -L[1][0] / L[1][1] * duPrescribed[0] + _domegaField / L[1][1] 
 		self.dQInOut[0] = self.duNew[1]
 		return self.duNew, self.dQInOut
 	
-	def funcPos1(self,domegaField_,duPrescribed,L):
+	def funcPos1(self, domegaField_, duPrescribed, L):
 		'''
 		return function for position -1 at the end
 		of the vessel
@@ -780,7 +780,7 @@ class PrescribedTotalPressure(BoundaryConditionType2):
 			inserted R in dot product
 		'''
 		self.duNew[0] = duPrescribed[0]
-		self.duNew[1] = domegaField_ / L[0][1] - L[0][0] / L[0][1]  * duPrescribed[0] 
+		self.duNew[1] = domegaField_ / L[0][1] - L[0][0] / L[0][1] * duPrescribed[0] 
 		self.dQInOut[1] = self.duNew[1]
 		return self.duNew, self.dQInOut
 
@@ -805,38 +805,38 @@ class ReflectionCoefficient(BoundaryConditionType2):
 		self.omegaNew = np.empty((2))
 	
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
-		return self.returnFunction(_domegaField_,duPrescribed,L,R)
+		return self.returnFunction(_domegaField_, duPrescribed, L, R)
 		
-	def funcPos0(self,_domegaField,duPrescribed,L,R):
+	def funcPos0(self, _domegaField, duPrescribed, L, R):
 		'''
 		return function for position 0 at the start
 		of the vessel
 		'''
-		domegaPrescribed_ = np.dot(L[0],duPrescribed)
-		domegaReflected_ = _domegaField*self.Rt + domegaPrescribed_
+		domegaPrescribed_ = np.dot(L[0], duPrescribed)
+		domegaReflected_ = _domegaField * self.Rt + domegaPrescribed_
 		
 		self.omegaNew[0] = domegaReflected_
 		self.omegaNew[1] = _domegaField
 		
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 		
-		return np.dot(R,self.omegaNew),self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 		
 
-	def funcPos1(self,domegaField_,duPrescribed,L,R):
+	def funcPos1(self, domegaField_, duPrescribed, L, R):
 		'''
 		return function for position -1 at the end
 		of the vessel
 		'''
-		_domegaPrescribed = np.dot(L[1],duPrescribed)
-		_domegaReflected = domegaField_*self.Rt + _domegaPrescribed
+		_domegaPrescribed = np.dot(L[1], duPrescribed)
+		_domegaReflected = domegaField_ * self.Rt + _domegaPrescribed
 		
 		self.omegaNew[0] = domegaField_
 		self.omegaNew[1] = _domegaReflected
 		
-		self.dQInOut = (R[:][1]*self.omegaNew)[::-1].copy()
+		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
 		
-		return np.dot(R,self.omegaNew),self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 	
 
 class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
@@ -854,25 +854,25 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
 	def __init__(self):
 		self.type = 2
 		
-		## reflection Values
-		self.RtOpen   = 0.2
+		# # reflection Values
+		self.RtOpen = 0.2
 		self.RtClosed = 0.8
 		
-		## Timing
-		self.Topen1 =  0.0 #verschiebung nach rechts von 0.5/freq
-		self.Topen2 =  0.0 #verschiebung nach links von 0.5/freq
+		# # Timing
+		self.Topen1 = 0.0  # verschiebung nach rechts von 0.5/freq
+		self.Topen2 = 0.0  # verschiebung nach links von 0.5/freq
 		
-		self.Tclosed1 = -0.0 #verschiebung nach rechts von Tspace anfang
-		self.Tclosed2 =  0.0 # verschiebung nach links von Tspace ende
+		self.Tclosed1 = -0.0  # verschiebung nach rechts von Tspace anfang
+		self.Tclosed2 = 0.0  # verschiebung nach links von Tspace ende
 		
 		### need this from boundaryConditionType1 ####
-		## is set with update method in vascularNetwork in calculateInitialValues
+		# # is set with update method in vascularNetwork in calculateInitialValues
 		self.Tpulse = 0.0
 		self.Tspace = 0.0
-		self.freq   = 1.
-		self.Npulse	= 1.
+		self.freq = 1.
+		self.Npulse	 = 1.
 		self.TmeanFlow = 0.0
-		###
+		# ##
 		
 		self.pulseTimeR = []
 		
@@ -882,83 +882,83 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
 		self.dQInOut = np.empty((2))
 	
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
-		return self.returnFunction(_domegaField_,duPrescribed,L,R,n,dt)
+		return self.returnFunction(_domegaField_, duPrescribed, L, R, n, dt)
 		
-	def funcPos0(self,_domegaField, duPrescribed, L, R, n, dt):
+	def funcPos0(self, _domegaField, duPrescribed, L, R, n, dt):
 		'''
 		return function for position 0 at the start
 		of the vessel
 		'''
-		Rt = self.calcRt(n,dt)
-		domegaPrescribed_ = np.dot(L[0],duPrescribed)
-		domegaReflected_ = _domegaField*Rt + domegaPrescribed_
+		Rt = self.calcRt(n, dt)
+		domegaPrescribed_ = np.dot(L[0], duPrescribed)
+		domegaReflected_ = _domegaField * Rt + domegaPrescribed_
 		
 		self.omegaNew[0] = domegaReflected_
 		self.omegaNew[1] = _domegaField
 				
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 				
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 		
 
-	def funcPos1(self,domegaField_, duPrescribed, L, R, n, dt):
+	def funcPos1(self, domegaField_, duPrescribed, L, R, n, dt):
 		'''
 		return function for position -1 at the end
 		of the vessel
 		'''
-		Rt = self.calcRt(n,dt)
-		_domegaPrescribed = np.dot(L[1],duPrescribed)
-		_domegaReflected = domegaField_*Rt + _domegaPrescribed
+		Rt = self.calcRt(n, dt)
+		_domegaPrescribed = np.dot(L[1], duPrescribed)
+		_domegaReflected = domegaField_ * Rt + _domegaPrescribed
 		
 		self.omegaNew[0] = domegaField_
 		self.omegaNew[1] = _domegaReflected
 		
-		self.dQInOut = (R[:][1]*self.omegaNew)[::-1].copy()	
+		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()	
 		
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 		
 
 
-	def update(self,bcDict):
+	def update(self, bcDict):
 		'''
 		updates the updateBoundaryDict data using a dictionary in from of 
 		bcDict = {'variableName': value}
 		'''
-		for key,value in bcDict.iteritems():
+		for key, value in bcDict.iteritems():
 			try:
 				self.__getattribute__(key)
-				self.__setattr__(key,value)
+				self.__setattr__(key, value)
 			except: pass
-				#print 'ValueError: wrong key: %s, could not set up boundaryCondition' %key	
+				# print 'ValueError: wrong key: %s, could not set up boundaryCondition' %key	
 
 		self.type = 2
 		self.name = 'ReflectionCoefficientTimeVarying'
 
 		self.pulseTimeR = []
 		
-		#let the valve be open 20 + of the pulse
-		#self.Topen1 = - (0.5/self.freq)*0.1 
-		#self.Topen2 =   (0.5/self.freq)*0.1 
+		# let the valve be open 20 + of the pulse
+		# self.Topen1 = - (0.5/self.freq)*0.1 
+		# self.Topen2 =   (0.5/self.freq)*0.1 
 		
-		self.Tperiod = self.Tspace+1.0/self.freq
+		self.Tperiod = self.Tspace + 1.0 / self.freq
 		
 		for puls in np.arange(self.Npulse):
-			self.pulseTimeR.append([self.Tpulse + (self.Tperiod)*puls + self.Tclosed2 - self.TmeanFlow,
-									self.Tpulse + 0.5/self.freq+ (self.Tperiod)*puls - self.TmeanFlow + self.Topen1,
-									self.Tpulse + 0.5/self.freq+ (self.Tperiod)*puls - self.TmeanFlow + self.Topen2,
-									self.Tpulse + 1.0/self.freq+ (self.Tperiod)*puls - self.TmeanFlow + self.Tclosed1,
-									self.Tpulse + self.Tperiod +(self.Tperiod)*puls  - self.TmeanFlow + self.Tclosed2,
-									self.Tpulse + self.Tperiod +(self.Tperiod)*puls + self.Tclosed2 ])
+			self.pulseTimeR.append([self.Tpulse + (self.Tperiod) * puls + self.Tclosed2 - self.TmeanFlow,
+									self.Tpulse + 0.5 / self.freq + (self.Tperiod) * puls - self.TmeanFlow + self.Topen1,
+									self.Tpulse + 0.5 / self.freq + (self.Tperiod) * puls - self.TmeanFlow + self.Topen2,
+									self.Tpulse + 1.0 / self.freq + (self.Tperiod) * puls - self.TmeanFlow + self.Tclosed1,
+									self.Tpulse + self.Tperiod + (self.Tperiod) * puls - self.TmeanFlow + self.Tclosed2,
+									self.Tpulse + self.Tperiod + (self.Tperiod) * puls + self.Tclosed2 ])
 	
 
-	def calcRt(self,n,dt):
-		t = n*dt
+	def calcRt(self, n, dt):
+		t = n * dt
 		RC = self.RtClosed
 		
 		# get time slots
 		for pTA in self.pulseTimeR:
-			if pTA[0]< t and t < pTA[5]:
-				#pulsNum = self.pulseTimeR.index(pTA)
+			if pTA[0] < t and t < pTA[5]:
+				# pulsNum = self.pulseTimeR.index(pTA)
 				pTA1 = pTA[0]
 				pTA2 = pTA[1]
 				pTA3 = pTA[2]
@@ -968,14 +968,14 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
 				break
 		try:
 			if (pTA1 < t and t < pTA2):
-				RC = (self.RtOpen-self.RtClosed)/(pTA2-pTA1)*(t-pTA1) +self.RtClosed
+				RC = (self.RtOpen - self.RtClosed) / (pTA2 - pTA1) * (t - pTA1) + self.RtClosed
 			elif pTA2 <= t and t <= pTA3: 
 				RC = self.RtOpen
 			elif pTA3 < t and t < pTA4:
-				RC = -(self.RtOpen-self.RtClosed)/(pTA4-pTA3)*(t-pTA3) + self.RtOpen
+				RC = -(self.RtOpen - self.RtClosed) / (pTA4 - pTA3) * (t - pTA3) + self.RtOpen
 			elif (pTA5 < t and t < pTA6):
-				#RC = self.RtOpen
-				RC = (self.RtOpen-self.RtClosed)/(pTA2-pTA1)*(t-pTA5) +self.RtClosed
+				# RC = self.RtOpen
+				RC = (self.RtOpen - self.RtClosed) / (pTA2 - pTA1) * (t - pTA5) + self.RtClosed
 			else: pass
 			return RC
 		except:
@@ -998,55 +998,55 @@ class Resistance(BoundaryConditionType2):
 		self.type = 2
 		self.Rc = 1
 		
-		self.venousPressure = 20.*133# not needed
+		self.venousPressure = 20.*133  # not needed
 		
 		self.returnFunction = None
 		self.omegaNew = np.empty((2))
 		self.dQInOut = np.empty((2))
 		
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
-		return self.returnFunction(_domegaField_,R,Z1)
+		return self.returnFunction(_domegaField_, R, Z1)
 	
-	def funcPos0(self,_domegaField, R, Z1):
+	def funcPos0(self, _domegaField, R, Z1):
 		'''
 		return function for position 0 at the start
 		of the vessel
 		'''
-		r11,r12,r21,r22 = R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		Rc = self.Rc
 		if Rc == 'VesselImpedance':
 			Rc = Z1
 		
-		domega_ = -(r22*Rc + r12)/(r21*Rc + r11)*_domegaField
+		domega_ = -(r22 * Rc + r12) / (r21 * Rc + r11) * _domegaField
 
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domegaField
 		
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 				
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 			
 	
-	def funcPos1(self,domegaField_, R, Z1):
+	def funcPos1(self, domegaField_, R, Z1):
 		'''
 		return function for position -1 at the end
 		of the vessel
 		'''
-		r11,r12,r21,r22 = R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		Rc = self.Rc
 		if Rc == 'VesselImpedance':
 			Rc = Z1
 		
-		_domega = (r11 - r21*Rc)/(r22*Rc - r12)*domegaField_
+		_domega = (r11 - r21 * Rc) / (r22 * Rc - r12) * domegaField_
 			
 		self.omegaNew[0] = domegaField_
 		self.omegaNew[1] = _domega
 		
-		self.dQInOut = (R[:][1]*self.omegaNew)[::-1].copy()	
+		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()	
 		
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 			
 
 class Windkessel2(BoundaryConditionType2):
@@ -1065,7 +1065,7 @@ class Windkessel2(BoundaryConditionType2):
 		self.type = 2
 		
 		self.Rc = 1
-		self.C  = 0
+		self.C = 0
 		
 		self.venousPressure = 7.*133
 		
@@ -1076,7 +1076,7 @@ class Windkessel2(BoundaryConditionType2):
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 		return self.returnFunction(_domegaField_, R, dt, P, Q, n)
 	
-	def funcPos0(self,_domegaField, R, dt, P, Q, n):
+	def funcPos0(self, _domegaField, R, dt, P, Q, n):
 		"""return function for position 0 at the start
 		of the vessel
 		"""
@@ -1110,23 +1110,23 @@ class Windkessel2(BoundaryConditionType2):
 		self.omegaNew[1] = _domegaField_
 		return self.omegaNew	
 		'''
-		r11,r12,r21,r22 = R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
-		taudt = self.Rc*self.C/dt
-		a = -self.Rc*r21 - (1. + 2.*taudt)*r11
-		b = (2.*taudt+1.)*r12 + self.Rc*r22
+		taudt = self.Rc * self.C / dt
+		a = -self.Rc * r21 - (1. + 2.*taudt) * r11
+		b = (2.*taudt + 1.) * r12 + self.Rc * r22
 		
-		domega_ = (2*(self.Rc*Q + (P - self.venousPressure[n])) + b*_domegaField)/a
+		domega_ = (2 * (self.Rc * Q + (P - self.venousPressure[n])) + b * _domegaField) / a
 		
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domegaField
 		
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 		
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 		
 		
-	def funcPos1(self,domegaField_, R, dt, P, Q, n):
+	def funcPos1(self, domegaField_, R, dt, P, Q, n):
 		'''
 		return function for position -1 at the end
 		of the vessel
@@ -1157,21 +1157,21 @@ class Windkessel2(BoundaryConditionType2):
 		return self.omegaNew	
 		#return np.array([domega_ , _domega])
 		'''
-		r11,r12,r21,r22 = R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
-		taudt = self.Rc*self.C/dt
+		taudt = self.Rc * self.C / dt
 		
-		a = self.Rc*r21 - (1. + 2.*taudt)*r11
-		b = (2.*taudt+1.)*r12 - self.Rc*r22
+		a = self.Rc * r21 - (1. + 2.*taudt) * r11
+		b = (2.*taudt + 1.) * r12 - self.Rc * r22
 		
-		_domega = (2*(self.Rc*Q - (P - self.venousPressure[n])) + a*domegaField_)/b
+		_domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
 		
 		self.omegaNew[0] = domegaField_
 		self.omegaNew[1] = _domega
 		
-		self.dQInOut = (R[:][1]*self.omegaNew)[::-1].copy()
+		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
 		
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 			
 		
 class Windkessel3(BoundaryConditionType2):
@@ -1190,15 +1190,15 @@ class Windkessel3(BoundaryConditionType2):
 		self.type = 2
 		
 		# parameters in xml
-		self.Rc  = None
-		self.Z   = 'VesselImpedance'
-		self.C   = 1
+		self.Rc = None
+		self.Z = 'VesselImpedance'
+		self.C = 1
 		self.Rtotal = None
 		# parameters for calculation
-		self.Z0    = None # vesselimpedance at first step
+		self.Z0 = None  # vesselimpedance at first step
 		self.RcNum = None
 			
-		self.venousPressure = 0 #7.*133.
+		self.venousPressure = 0  # 7.*133.
 		self.returnFunction = None
 		self.omegaNew = np.empty((2))
 		self.dQInOut = np.empty((2))
@@ -1208,7 +1208,7 @@ class Windkessel3(BoundaryConditionType2):
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 		return self.returnFunction(_domegaField_, R, dt, P, Q, Z1, Z2, n)
 	
-	def funcPos0(self,_domegaField, R, dt, P, Q, Z1, Z2, n):
+	def funcPos0(self, _domegaField, R, dt, P, Q, Z1, Z2, n):
 		'''
 		return function for position 0 at the start
 		of the vessel
@@ -1254,14 +1254,14 @@ class Windkessel3(BoundaryConditionType2):
 		self.omegaNew[1] = _domega_
 		return self.omegaNew	
 		'''
-		r11,r12,r21,r22 = R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		
 		
 		
 		if self.Z == 'VesselImpedance' and self.firstRun == False: 
 			Z = Z1 
-			## Z not time-varying activate this lines:
+			# # Z not time-varying activate this lines:
 			self.Z0 = Z1
 			self.firstRun = True
 		elif self.firstRun == True:
@@ -1272,23 +1272,23 @@ class Windkessel3(BoundaryConditionType2):
 		Rc = self.Rc
 		if self.Rc == None:
 			Rc = self.Rtotal - Z
-			## Rc not time-varying activate this line:
-			#self.Rc = Rc
-			##
+			# # Rc not time-varying activate this line:
+			# self.Rc = Rc
+			# #
 		
 		C = self.C
 		
-		a = Z*Rc*C+0.5*dt*(Z+Rc)
-		b = 0.5*dt+Rc*C 
+		a = Z * Rc * C + 0.5 * dt * (Z + Rc)
+		b = 0.5 * dt + Rc * C 
 		
-		domega_ = (dt*(P-self.venousPressure[n])+dt*(Z+Rc)*Q+_domegaField*(a*r22+b*r12))/(-a*r21-b*r11)
+		domega_ = (dt * (P - self.venousPressure[n]) + dt * (Z + Rc) * Q + _domegaField * (a * r22 + b * r12)) / (-a * r21 - b * r11)
 		
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domegaField
 		
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 				
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 			
 		
 	
@@ -1328,12 +1328,12 @@ class Windkessel3(BoundaryConditionType2):
 		self.omegaNew[1] = _domega
 		return self.omegaNew	
 		'''
-		r11,r12,r21,r22 = R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		
 		if self.Z == 'VesselImpedance' and self.firstRun == False: 
 			Z = Z1 
-			## Z not time-varying activate this lines:
+			# # Z not time-varying activate this lines:
 			self.Z0 = Z1
 			self.firstRun = True
 		elif self.firstRun == True:
@@ -1344,22 +1344,22 @@ class Windkessel3(BoundaryConditionType2):
 		Rc = self.Rc
 		if self.Rc == None:
 			Rc = self.Rtotal - Z
-			## Rc not time-varying activate this line:
-			#self.Rc = Rc
+			# # Rc not time-varying activate this line:
+			# self.Rc = Rc
 		
 		C = self.C
 		
-		a = Z*Rc*C+0.5*dt*(Z+Rc)
-		b = 0.5*dt+Rc*C 
+		a = Z * Rc * C + 0.5 * dt * (Z + Rc)
+		b = 0.5 * dt + Rc * C 
 		
-		_domega = (dt*(P-self.venousPressure[n])-dt*(Z+Rc)*Q+domegaField_*(b*r11-a*r21))/(a*r22-b*r12)
+		_domega = (dt * (P - self.venousPressure[n]) - dt * (Z + Rc) * Q + domegaField_ * (b * r11 - a * r21)) / (a * r22 - b * r12)
 		
 		self.omegaNew[0] = domegaField_
 		self.omegaNew[1] = _domega
 		
-		self.dQInOut = (R[:][1]*self.omegaNew)[::-1].copy()	
+		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()	
 		
-		return np.dot(R,self.omegaNew), self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 		
 
 
@@ -1378,7 +1378,7 @@ class L_network(BoundaryConditionType2):
 	def __init__(self):
 		self.type = 2
 		
-		self.C  = 0
+		self.C = 0
 		self.R1 = 1
 
 		self.returnFunction = None
@@ -1387,7 +1387,7 @@ class L_network(BoundaryConditionType2):
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 		return self.returnFunction(_domegaField_, duPrescribed, R, L, n, dt)
 	
-	def funcPos0(self,_domega_, du, R, dt):
+	def funcPos0(self, _domega_, du, R, dt):
 		'''
 		return function for position 0 at the start
 		of the vessel
@@ -1395,22 +1395,22 @@ class L_network(BoundaryConditionType2):
 		print "ERROR: boundaryCondition Lnet is not implemented correct!"
 		exit()
 		
-		dQ0 = du[1]/2.0
+		dQ0 = du[1] / 2.0
 
-		r21,r22 = R[1][0],R[1][1]
-		dw_,_dw = 23,23 ## dO[self.position][0],dO[self.position][1]
-		if self.R1 == None: self.R1 = -1./R[1][1]	
-		tau = 2.*self.R1*self.C
-		taudt = tau/dt	
-		denom = taudt + taudt*r21*self.R1 + r21*self.R1
-		domega_ = ((1.+r21*self.R1)*taudt*dw_ + (1.+r22*self.R1)*taudt*_dw + (-taudt - taudt*r22*self.R1 - r22*self.R1)*_domega_ + self.R1*dQ0)/denom
-		#return np.array([domega_ , _domega_])
+		r21, r22 = R[1][0], R[1][1]
+		dw_, _dw = 23, 23  # # dO[self.position][0],dO[self.position][1]
+		if self.R1 == None: self.R1 = -1. / R[1][1]	
+		tau = 2.*self.R1 * self.C
+		taudt = tau / dt	
+		denom = taudt + taudt * r21 * self.R1 + r21 * self.R1
+		domega_ = ((1. + r21 * self.R1) * taudt * dw_ + (1. + r22 * self.R1) * taudt * _dw + (-taudt - taudt * r22 * self.R1 - r22 * self.R1) * _domega_ + self.R1 * dQ0) / denom
+		# return np.array([domega_ , _domega_])
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domega_
 		
-		return np.dot(R,self.omegaNew)
+		return np.dot(R, self.omegaNew)
 	
-	def funcPos1(self,_domega_, du, R, dt):
+	def funcPos1(self, _domega_, du, R, dt):
 		'''
 		return function for position -1 at the end
 		of the vessel
@@ -1419,19 +1419,19 @@ class L_network(BoundaryConditionType2):
 		print "ERROR: boundaryCondition Lnet is not implemented correct!"
 		exit()
 		
-		dQ0 = du[1]/2.0
-		r21,r22 = R[1][0],R[1][1]
-		dw_,_dw = 23,23 #dO[self.position][0],dO[self.position][1]
-		if self.R1 == None: self.R1 = 1./R[1][0]	
-		tau = 2.*self.R1*self.C
-		taudt = tau/dt
-		denom = -taudt + taudt*r22*self.R1 + r22*self.R1
-		_domega = ((-1.+r21*self.R1)*taudt*dw_ + (-1.+r22*self.R1)*taudt*_dw + (taudt - taudt*r21*self.R1 - r21*self.R1)*_domega_ + self.R1*dQ0)/denom
+		dQ0 = du[1] / 2.0
+		r21, r22 = R[1][0], R[1][1]
+		dw_, _dw = 23, 23  # dO[self.position][0],dO[self.position][1]
+		if self.R1 == None: self.R1 = 1. / R[1][0]	
+		tau = 2.*self.R1 * self.C
+		taudt = tau / dt
+		denom = -taudt + taudt * r22 * self.R1 + r22 * self.R1
+		_domega = ((-1. + r21 * self.R1) * taudt * dw_ + (-1. + r22 * self.R1) * taudt * _dw + (taudt - taudt * r21 * self.R1 - r21 * self.R1) * _domega_ + self.R1 * dQ0) / denom
 		
 		self.omegaNew[0] = _domega_
 		self.omegaNew[1] = _domega
 		
-		return np.dot(R,self.omegaNew)
+		return np.dot(R, self.omegaNew)
 	
 
 class VaryingElastance(BoundaryConditionType2):
@@ -1466,36 +1466,36 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		self.omegaNew = np.empty((2))
 		
-		#Default parameters
-		self.T     = 1
-		self.Emax  = 2.31 * 133.3e6 
-		self.Emin  = 0.06 * 133.3e6 
+		# Default parameters
+		self.T = 1
+		self.Emax = 2.31 * 133.3e6 
+		self.Emin = 0.06 * 133.3e6 
 		self.Tpeak = 0.4
 		
 		self.V0 = 20e-6 
 		
-		self.K  =  0.0
+		self.K = 0.0
 		
 		"""Shape parameters"""
 		self.alpha = 1.672
 		self.n1 = 1.32
 		self.n2 = 21.9
 
-		#n-1 values
+		# n-1 values
 		self.aorticFlowPreviousTimestep = None
 		
-		self.system = {'both open':np.array([0,1,2]), 'mitral open': np.array([0,1]), 'aortic open':np.array([1,2])} 
+		self.system = {'both open':np.array([0, 1, 2]), 'mitral open': np.array([0, 1]), 'aortic open':np.array([1, 2])} 
 		
 				
 		self.cycleNumber = 0
 		self.num = 0
-		self.atriumPressure = 7.5 * 133.32 #Pressure in the atrium ## venouse pressure?!
+		self.atriumPressure = 7.5 * 133.32  # Pressure in the atrium ## venouse pressure?!
 		
-		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
+		self.x0 = np.array([0.0, 0.0, 0.0])  # Initial values for the iterative solver
 		
-		self.mitral = None # mitral valve
-		self.aortic = None # aortic valve
-		self.initializeValves() # intialize valves
+		self.mitral = None  # mitral valve
+		self.aortic = None  # aortic valve
+		self.initializeValves()  # intialize valves
 		
 		self.dQInOut = np.empty((2))
 		
@@ -1511,24 +1511,24 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		print """ Initialize Solution Vectors """
 		
-		self.mitral.initializeSolutions(Tsteps)
-		self.aortic.initializeSolutions(Tsteps)
+		self.mitral.initializeSolutions(Tsteps+1)
+		self.aortic.initializeSolutions(Tsteps+1)
 	
-		self.pressure = np.zeros(Tsteps)
-		self.volume = np.zeros(Tsteps)
-		self.mitralQ = np.zeros(Tsteps)
-		self.Elastance = np.zeros(Tsteps) #New
-		self.Flow = np.zeros(Tsteps)
-		self.DtFlow = np.zeros(Tsteps)
-		self.Turb=np.zeros(Tsteps)
-		self.Inert=np.zeros(Tsteps)
-		self.InbyTurb=np.zeros(Tsteps)
-		self.deltaP=np.zeros(Tsteps)
-		self.aortaP=np.zeros(Tsteps)
+		self.pressure = np.zeros(Tsteps+1)
+		self.volume = np.zeros(Tsteps+1)
+		self.mitralQ = np.zeros(Tsteps+1)
+		self.Elastance = np.zeros(Tsteps+1)  # New
+		self.Flow = np.zeros(Tsteps+1)
+		self.DtFlow = np.zeros(Tsteps+1)
+		self.Turb = np.zeros(Tsteps+1)
+		self.Inert = np.zeros(Tsteps+1)
+		self.InbyTurb = np.zeros(Tsteps+1)
+		self.deltaP = np.zeros(Tsteps+1)
+		self.aortaP = np.zeros(Tsteps+1)
 		
 		""" Initial conditions in the ventricle"""
 		self.pressure[0] = self.atriumPressure
-		self.volume[0] = self.atriumPressure/self.E(0) + self.V0
+		self.volume[0] = self.atriumPressure / self.E(0) + self.V0
 				
 		
 	def initializeValves(self):
@@ -1536,7 +1536,7 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		self.mitral_annulus_area = 0.0006
 		
-		mitral_M_st          = 1
+		mitral_M_st = 1
 		mitral_M_rg = 0.0
 		mitral_delta_p_open = 0
 		mitral_delta_p_close = 0 
@@ -1545,15 +1545,15 @@ class VaryingElastance(BoundaryConditionType2):
 
 		
 		"""Aortic valve parameters"""
-		aortic_M_st          =1
-		aortic_M_rg          = 0
-		aortic_delta_p_open  = 0*133.32
-		aortic_delta_p_close = 0*133.32 # 2mmHg
-		aortic_K_v_open      = 0.12
-		aortic_K_v_close     = 0.12
+		aortic_M_st = 1
+		aortic_M_rg = 0
+		aortic_delta_p_open = 0 * 133.32
+		aortic_delta_p_close = 0 * 133.32  # 2mmHg
+		aortic_K_v_open = 0.12
+		aortic_K_v_close = 0.12
 
 		
-		#Create valves
+		# Create valves
 		self.mitral = Valve(mitral_M_st, mitral_M_rg, mitral_delta_p_open, \
 						mitral_delta_p_close, mitral_K_v_open, mitral_K_v_close)
 		self.aortic = Valve(aortic_M_st, aortic_M_rg, aortic_delta_p_open, \
@@ -1561,28 +1561,28 @@ class VaryingElastance(BoundaryConditionType2):
 	
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 	
-		self.updateValves(P, n, dt)                     # Update the state of the mitral and aortic valve at timestep n + 1
+		self.updateValves(P, n, dt)  # Update the state of the mitral and aortic valve at timestep n + 1
 		self.startNewCycleIfCriteriaIsMet(n, dt)
-		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)      # Compute the riemann variant going into the vessel save in omegaNew
+		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)  # Compute the riemann variant going into the vessel save in omegaNew
 		
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 		# calculate du and return this!
-		return np.dot(R,self.omegaNew),self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 
 
 	def updateValves(self, P, n, dt):
 		mitralPressureDifference = self.atriumPressure - self.pressure[n]
 		self.mitral.updateValveState(mitralPressureDifference, n, dt)
 		
-		aorticPressureDifference  = self.pressure[n] - P
+		aorticPressureDifference = self.pressure[n] - P
 		self.aortic.updateValveState(aorticPressureDifference, n, dt)
 
 
 	def getCycleTime(self, n, dt):
-		return self.num*dt
+		return self.num * dt
 	
 	def startNewCycleIfCriteriaIsMet(self, n, dt):
-		if self.getCycleTime(n+1, dt) > self.T:
+		if self.getCycleTime(n + 1, dt) > self.T:
 			self.cycleNumber += 1
 			self.num = 0
 	def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
@@ -1592,72 +1592,72 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		Qn1 = self.aorticFlowPreviousTimestep
 		
-		r11,r12,r21,r22 =  R[0][0],R[0][1],R[1][0],R[1][1]
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
-		LdivB = self.aortic.LdivideB(A, n+1)
-		B = self.aortic.computeB(A, n+1)
-		L = self.aortic.computeL(A, n+1,B,self.aortic.state[n-1])
-		mitrL = self.mitral.computeL(self.mitral_annulus_area, n+1,B,self.aortic.state[n-1])
-		mitrLdivB = self.mitral.LdivideB(A, n+1)
-		mitrB = self.mitral.computeB(self.mitral_annulus_area, n+1) #
+		LdivB = self.aortic.LdivideB(A, n + 1)
+		B = self.aortic.computeB(A, n + 1)
+		L = self.aortic.computeL(A, n + 1, B, self.aortic.state[n - 1])
+		mitrL = self.mitral.computeL(self.mitral_annulus_area, n + 1, B, self.aortic.state[n - 1])
+		mitrLdivB = self.mitral.LdivideB(A, n + 1)
+		mitrB = self.mitral.computeB(self.mitral_annulus_area, n + 1)  #
 		mitrQn = self.mitralQ[n]
-		mitrQn1 = self.mitralQ[n-1]
+		mitrQn1 = self.mitralQ[n - 1]
 		venoP = self.atriumPressure
-		t = self.getCycleTime(n+1, dt)
+		t = self.getCycleTime(n + 1, dt)
 # 		ttemp = t-dt
 # 		print "n is",n
 # 		print "self num is", self.num
-#		print "time is",t
-#		print "numtime is", self.num*dt
+# 		print "time is",t
+# 		print "numtime is", self.num*dt
 		E = self.E(t)
 		Vn = self.volume[n]
-		self.Elastance[n+1]=E/133.3e6
-		self.Flow[n]=Qn*1e6
-		self.aortaP[n]=Pn
-#		self.DtFlow[n]=(Qn-Qnold)/dt
+		self.Elastance[n + 1] = E / 133.3e6
+		self.Flow[n] = Qn * 1e6
+		self.aortaP[n] = Pn
+# 		self.DtFlow[n]=(Qn-Qnold)/dt
 		ventrPn = self.pressure[n]
 		if self.cycleNumber == 3:
-			self.T=0.7
-			self.Tpeak =0.43*self.T
+			self.T = 0.7
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 6:
-			self.T=1
-			self.Tpeak =0.43*self.T
+			self.T = 1
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 10:
-			self.T=0.8
-			self.Tpeak =0.43*self.T
+			self.T = 0.8
+			self.Tpeak = 0.43 * self.T
 			
 		if self.cycleNumber == 11:
-			self.T=0.7
-			self.Tpeak =0.43*self.T
+			self.T = 0.7
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 12:
-			self.T=0.6
-			self.Tpeak =0.43*self.T
+			self.T = 0.6
+			self.Tpeak = 0.43 * self.T
 			
 		if self.cycleNumber == 14:
-			self.T=0.5
-			self.Tpeak =0.43*self.T
+			self.T = 0.5
+			self.Tpeak = 0.43 * self.T
 			
 		if B:
 
-			self.Turb[n]=abs(Qn)*Qn*B/133
-			self.Inert[n]=L*(Qn-Qn1)/(dt*133)
-			self.deltaP[n]=abs(Qn)*Qn*B/133+L*(Qn-Qn1)/(dt*133)
+			self.Turb[n] = abs(Qn) * Qn * B / 133
+			self.Inert[n] = L * (Qn - Qn1) / (dt * 133)
+			self.deltaP[n] = abs(Qn) * Qn * B / 133 + L * (Qn - Qn1) / (dt * 133)
 
 
 		
 		""" Because of the large differences in magnitude between pressure and flow in the currently used dimensions some attemts were made to scale the
 		variables using for example these scaling factors for B,p, q,and omega"""
-		B_ref = 1060/(2*A**2)
-		n_p = 1.#self.Emax*self.V0
-		n_q = 1.#(n_p/B_ref)**0.5
-		n_o = 1.#n_q/r21
+		B_ref = 1060 / (2 * A ** 2)
+		n_p = 1.  # self.Emax*self.V0
+		n_q = 1.  # (n_p/B_ref)**0.5
+		n_o = 1.  # n_q/r21
 # 		if Qn<-20e-6:
-#		B=None
+# 		B=None
 		
-		args = dt, mitrLdivB, mitrB,LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref
+		args = dt, mitrLdivB, mitrB, LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref
 		
 		
 		"""The following section computes the increment domega_ which goes into the vessel from the ventricle, """
@@ -1666,52 +1666,52 @@ class VaryingElastance(BoundaryConditionType2):
 			"""both valves are closed: """
 			
 			
-			self.mitralQ[n+1] = 0 
+			self.mitralQ[n + 1] = 0 
 			domega_ = _domega
-			self.volume[n+1] = self.volume[n] - 0.5*(Qn - mitrQn)*dt
-			self.pressure[n+1] = E*(self.volume[n+1] - self.V0)
+			self.volume[n + 1] = self.volume[n] - 0.5 * (Qn - mitrQn) * dt
+			self.pressure[n + 1] = E * (self.volume[n + 1] - self.V0)
 			if Qn == 0:
 				domega_ = _domega
 			else:
-				domega_ = (-0.5*Qn - r22*_domega)/r21 #Correction for non-zero flow at full aortic valve closure
+				domega_ = (-0.5 * Qn - r22 * _domega) / r21  # Correction for non-zero flow at full aortic valve closure
 				
-			self.x0 = np.array([0,0,domega_])
+			self.x0 = np.array([0, 0, domega_])
 		else:
 			if not mitrB:
 				"""only the aortic valve is open"""
-				x = self.newtonSolver(self.x0,args, partialSystem='aortic open')
-				self.mitralQ[n+1] = 0
-				self.pressure[n+1] = self.pressure[n] + x[0]*n_p
-				domega_  = x[1]*n_o
+				x = self.newtonSolver(self.x0, args, partialSystem='aortic open')
+				self.mitralQ[n + 1] = 0
+				self.pressure[n + 1] = self.pressure[n] + x[0] * n_p
+				domega_ = x[1] * n_o
 				self.x0 = np.concatenate((np.array([0]), x))
 				
 			elif not B:
 				"""only  the mitral valve is open"""
-				x = self.newtonSolver(self.x0,args, partialSystem='mitral open')
-				self.mitralQ[n+1] = self.mitralQ[n] + x[0]*n_q
-				self.pressure[n+1] = self.pressure[n] + x[1]*n_p
+				x = self.newtonSolver(self.x0, args, partialSystem='mitral open')
+				self.mitralQ[n + 1] = self.mitralQ[n] + x[0] * n_q
+				self.pressure[n + 1] = self.pressure[n] + x[1] * n_p
 				
 			
 				if Qn == 0:
 					domega_ = _domega
 				else:
-					domega_ = (-0.5*Qn - r22*_domega)/r21 #Correction for non-zero flow at full aortic valve closure
+					domega_ = (-0.5 * Qn - r22 * _domega) / r21  # Correction for non-zero flow at full aortic valve closure
 					
 				self.x0 = np.concatenate((x, np.array([0])))	
 			else:
 				"""both valves are open"""
-				x = self.newtonSolver(self.x0,args)
-				self.mitralQ[n+1] = self.mitralQ[n] + x[0]*n_q
-				self.pressure[n+1] = self.pressure[n] + x[1]*n_p
-				domega_ = x[2]*n_o
+				x = self.newtonSolver(self.x0, args)
+				self.mitralQ[n + 1] = self.mitralQ[n] + x[0] * n_q
+				self.pressure[n + 1] = self.pressure[n] + x[1] * n_p
+				domega_ = x[2] * n_o
 				self.x0 = x
 				
-			dQ = r21*domega_ + r22*_domega
-			self.volume[n+1] = Vn - (Qn + 0.5*(-self.mitralQ[n] - self.mitralQ[n+1] + dQ))*dt
+			dQ = r21 * domega_ + r22 * _domega
+			self.volume[n + 1] = Vn - (Qn + 0.5 * (-self.mitralQ[n] - self.mitralQ[n + 1] + dQ)) * dt
 			
 		self.aorticFlowPreviousTimestep = Qn
-#		Qnold=Qn
-		self.num = self.num +1
+# 		Qnold=Qn
+		self.num = self.num + 1
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domega
 		
@@ -1724,38 +1724,38 @@ class VaryingElastance(BoundaryConditionType2):
 	def E(self, t):
 		"""Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
 		   according to Tpeak, T, Emax and Emin. """
-		a1 = 0.708*self.Tpeak
-		a2 = 1.677*a1
+		a1 = 0.708 * self.Tpeak
+		a2 = 1.677 * a1
 		
 		n1, n2 = self.n1, self.n2
-		shapeFunction1 = (t/(a1))**n1/(1+(t/(a1))**n1)
-		shapeFunction2 = (1 + (t/(a2))**n2)**(-1)	
-		return (self.Emax-self.Emin)*self.alpha*shapeFunction1*shapeFunction2 + self.Emin
+		shapeFunction1 = (t / (a1)) ** n1 / (1 + (t / (a1)) ** n1)
+		shapeFunction2 = (1 + (t / (a2)) ** n2) ** (-1)	
+		return (self.Emax - self.Emin) * self.alpha * shapeFunction1 * shapeFunction2 + self.Emin
 
-	def newtonSolver(self, x0, args,  partialSystem = 'both open'):
+	def newtonSolver(self, x0, args, partialSystem='both open'):
 		"""Solves the partial or full equation system of the varying elastance model"""
 		maxIterations = 20 
 		iterations = 0
 
 		xn = x0[self.system[partialSystem]]
-		res = self.solverResiduals(xn,*args, partialSystem = partialSystem)
-		#error = np.linalg.norm(res, 2)
+		res = self.solverResiduals(xn, *args, partialSystem=partialSystem)
+		# error = np.linalg.norm(res, 2)
 								
 		while True:
-			#print x0
-			iterations +=1
-			J_inv = self.solverInverseJacobian(xn, *args, partialSystem = partialSystem)
+			# print x0
+			iterations += 1
+			J_inv = self.solverInverseJacobian(xn, *args, partialSystem=partialSystem)
 			
  			
 			
 			x = xn - np.dot(J_inv, res).T
 			
 						
-			error = np.linalg.norm(x - xn, 2)/np.linalg.norm(xn, 2)
+			error = np.linalg.norm(x - xn, 2) / np.linalg.norm(xn, 2)
 			if error < 0.0001:
 				break
 			xn = x
-			res = self.solverResiduals(x, *args, partialSystem = partialSystem)
+			res = self.solverResiduals(x, *args, partialSystem=partialSystem)
 
 			if iterations > maxIterations: 
 				x *= 0
@@ -1763,7 +1763,7 @@ class VaryingElastance(BoundaryConditionType2):
 
 		return x
 		
-	def solverResiduals(self, x_partial, dt, mitrLdivB, mitrB, LdivB, L, mitrL, B, mitrQn1, mitrQn,ventrPn, atrP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref, partialSystem = np.array([0,1,2])):#dt, mitrL, mitrB,L,B, mitrQn1, mitrQn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega):
+	def solverResiduals(self, x_partial, dt, mitrLdivB, mitrB, LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, atrP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref, partialSystem=np.array([0, 1, 2])):  # dt, mitrL, mitrB,L,B, mitrQn1, mitrQn, venoP, E, Vn, Qn, Qn1, r21, r22, Pn, _domega):
 		"""Computes  are the resisduals of the functions f1,f2 and f3, they are defined as functions that are only called when they are needed. The
 		argument partialSystem determines which of the residuals are computed and returned."""
 		
@@ -1782,32 +1782,32 @@ class VaryingElastance(BoundaryConditionType2):
 			a = (Qn + r22*_domega)/n_q + domega_
 			return a*abs(a) + LdivB/(2*n_q*dt)*(3*domega_ + (3*r22 - Qn + Qn1)/n_q) + (n_q/r21*domega_ + _domega + Pn - ventrPn - n_p*dPv)/(B*n_q**2)
 		"""
-		#Simple, K is set to 0
+		# Simple, K is set to 0
 		def f1():
-			a = mitrQn/n_q + dQm
-			return mitrB*a*abs(a)+(0.5/dt)*mitrL*(3*dQm + (mitrQn1 - mitrQn)/n_q)+(n_p*dPv + ventrPn - atrP)
+			a = mitrQn / n_q + dQm
+			return mitrB * a * abs(a) + (0.5 / dt) * mitrL * (3 * dQm + (mitrQn1 - mitrQn) / n_q) + (n_p * dPv + ventrPn - atrP)
 		def f2():
-			return E/n_p*(Vn - (Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dQm))*dt - self.V0)*(1-self.K*(Qn + n_q*domega_*r21 + r22*_domega)) - ventrPn/n_p - dPv
+			return E / n_p * (Vn - (Qn - mitrQn + 0.5 * (n_q * domega_ * r21 + r22 * _domega - n_q * dQm)) * dt - self.V0) * (1 - self.K * (Qn + n_q * domega_ * r21 + r22 * _domega)) - ventrPn / n_p - dPv
 		
 		def f3():
-			a = (Qn + r22*_domega)/n_q + domega_*r21
-			return B*a*abs(a)+(0.5/dt)*L*(3*domega_*r21 + (3*r22*_domega - Qn + Qn1)/n_q)+ (r11*domega_ + _domega*r12 + Pn - ventrPn - n_p*dPv)
+			a = (Qn + r22 * _domega) / n_q + domega_ * r21
+			return B * a * abs(a) + (0.5 / dt) * L * (3 * domega_ * r21 + (3 * r22 * _domega - Qn + Qn1) / n_q) + (r11 * domega_ + _domega * r12 + Pn - ventrPn - n_p * dPv)
 		
 		def f1simple():
-			a= mitrQn +dQm
-			return mitrB*a*abs(a)+0.5*mitrL*(3*dQm+mitrQn1-mitrQn)/dt-atrP+ventrPn+dPv
+			a = mitrQn + dQm
+			return mitrB * a * abs(a) + 0.5 * mitrL * (3 * dQm + mitrQn1 - mitrQn) / dt - atrP + ventrPn + dPv
 		
 		def f2simple():
-			return E*(Vn-0.5*dt*(r21*domega_+r22*_domega+2*Qn-2*mitrQn-dQm)-self.V0)-ventrPn-dPv
+			return E * (Vn - 0.5 * dt * (r21 * domega_ + r22 * _domega + 2 * Qn - 2 * mitrQn - dQm) - self.V0) - ventrPn - dPv
 		
 		def f3simple():
-			a=r21*domega_+r22*_domega+Qn
-			return B*a*abs(a)+(L/(2*dt))*(3*r21*domega_+3*r22*_domega-Qn+Qn1)-ventrPn -dPv + Pn + r11*domega_ + _domega*r12
+			a = r21 * domega_ + r22 * _domega + Qn
+			return B * a * abs(a) + (L / (2 * dt)) * (3 * r21 * domega_ + 3 * r22 * _domega - Qn + Qn1) - ventrPn - dPv + Pn + r11 * domega_ + _domega * r12
 			
 		functions = np.array([f1simple, f2simple, f3simple])
 		return np.array([f() for f in functions[self.system[partialSystem]]])
 	
-	def solverInverseJacobian(self, x_partial, dt, mitrLdivB, mitrB,LdivB, L, mitrL, B, mitrQn1, mitrQn,ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p,B_ref, partialSystem = np.array([0,1,2])):
+	def solverInverseJacobian(self, x_partial, dt, mitrLdivB, mitrB, LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref, partialSystem=np.array([0, 1, 2])):
 		"""Computes the inverse Jacobian of the system. The components a1, a2, a3, a4, a5 and a6 are declared using strings, and evaluated using eval()
 		 only when needed. (Not sure how smart this is). Reduces lines of code, but is probably slower."""
 		
@@ -1817,41 +1817,41 @@ class VaryingElastance(BoundaryConditionType2):
 		dmQ, dvP, domega_ = x
 		
 		if partialSystem == 'mitral open':
-			#simple -> K is not part of the jacobi
-			a1 = mitrB*2*(mitrQn/n_q + dmQ)*np.sign(mitrQn/n_q + dmQ)+1.5*mitrL/dt
-			a2 = 0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))
+			# simple -> K is not part of the jacobi
+			a1 = mitrB * 2 * (mitrQn / n_q + dmQ) * np.sign(mitrQn / n_q + dmQ) + 1.5 * mitrL / dt
+			a2 = 0.5 * E * dt * (1 - self.K * (r21 * domega_ + r22 * _domega + Qn))
 			
-			a1simple = mitrB*2*abs(mitrQn+dmQ)+1.5*mitrL/dt
-			a2simple = 0.5*E*dt
+			a1simple = mitrB * 2 * abs(mitrQn + dmQ) + 1.5 * mitrL / dt
+			a2simple = 0.5 * E * dt
 			
-			J_inv = np.array([[1,  1], 
-							  [a2simple, -a1simple]])/(a1simple+a2simple)
+			J_inv = np.array([[1, 1],
+							  [a2simple, -a1simple]]) / (a1simple + a2simple)
 			return J_inv
 		elif partialSystem == 'aortic open':
-			a3 = -0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))-r21*E*self.K*(Vn -(Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dmQ))*dt - self.V0)
-			a4 = B*r21*2*(Qn + r21*domega_+ r22*_domega)*np.sign(Qn + r21*domega_+ r22*_domega)+1.5*L*r21/dt+r11
+			a3 = -0.5 * E * dt * (1 - self.K * (r21 * domega_ + r22 * _domega + Qn)) - r21 * E * self.K * (Vn - (Qn - mitrQn + 0.5 * (n_q * domega_ * r21 + r22 * _domega - n_q * dmQ)) * dt - self.V0)
+			a4 = B * r21 * 2 * (Qn + r21 * domega_ + r22 * _domega) * np.sign(Qn + r21 * domega_ + r22 * _domega) + 1.5 * L * r21 / dt + r11
 			
-			a3simple = -0.5*E*dt*r21
-			a4simple = 2*r21*B*abs(r21*domega_+r22*_domega+Qn)+1.5*L*r21/(dt)+r11
+			a3simple = -0.5 * E * dt * r21
+			a4simple = 2 * r21 * B * abs(r21 * domega_ + r22 * _domega + Qn) + 1.5 * L * r21 / (dt) + r11
 			
-			J_inv =np.array([[a4simple, -a3simple], 
-							 [1, -1]])/(-a4simple +a3simple)
+			J_inv = np.array([[a4simple, -a3simple],
+							 [1, -1]]) / (-a4simple + a3simple)
 			return J_inv
 		else:
-			a1 = mitrB*2*(mitrQn/n_q + dmQ)*np.sign(mitrQn/n_q + dmQ)+1.5*mitrL/dt
-			a2 = 0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))
-			a3 = -0.5*E*dt*(1-self.K*(r21*domega_ + r22*_domega + Qn))-r21*E*self.K*(Vn -(Qn - mitrQn + 0.5*(n_q*domega_*r21 + r22*_domega - n_q*dmQ))*dt - self.V0)
-			a4 = B*r21*2*(Qn + r21*domega_+ r22*_domega)*np.sign(Qn + r21*domega_+ r22*_domega)+1.5*L*r21/dt+r11
+			a1 = mitrB * 2 * (mitrQn / n_q + dmQ) * np.sign(mitrQn / n_q + dmQ) + 1.5 * mitrL / dt
+			a2 = 0.5 * E * dt * (1 - self.K * (r21 * domega_ + r22 * _domega + Qn))
+			a3 = -0.5 * E * dt * (1 - self.K * (r21 * domega_ + r22 * _domega + Qn)) - r21 * E * self.K * (Vn - (Qn - mitrQn + 0.5 * (n_q * domega_ * r21 + r22 * _domega - n_q * dmQ)) * dt - self.V0)
+			a4 = B * r21 * 2 * (Qn + r21 * domega_ + r22 * _domega) * np.sign(Qn + r21 * domega_ + r22 * _domega) + 1.5 * L * r21 / dt + r11
 
-			J_inv = np.array([[ -a4+a3,  -a4,  a3  ],
-						      [ -a2*a4, a1*a4, -a1*a3 ],
-						      [  -a2, a1, a1+a2 ]])/(a1*a3 - a1*a4 - a2*a4)
+			J_inv = np.array([[ -a4 + a3, -a4, a3  ],
+						      [ -a2 * a4, a1 * a4, -a1 * a3 ],
+						      [  -a2, a1, a1 + a2 ]]) / (a1 * a3 - a1 * a4 - a2 * a4)
 			
 
 			return J_inv 
 		
 		
-		#Version from Master Thesis Knut Petter:
+		# Version from Master Thesis Knut Petter:
 		"""Version from Master Thesis Knut Petter
 		expressions = np.array([
 		'2*(mitrQn/n_q + dmQ)*np.sign(mitrQn/n_q + dmQ) + 1.5*mitrLdivB/(n_q*dt)',
@@ -1915,7 +1915,7 @@ class Valve:
 		self.K_v_open = K_v_open
 		self.K_v_close = K_v_close
 		
-		self.rho = 1060 ## default value is update while start up in classVascularNetwork.initialize()
+		self.rho = 1060  # # default value is update while start up in classVascularNetwork.initialize()
 	
 	def initializeSolutions(self, Tsteps):
 		"""This method is called by the initializeSolutionVectors method in the VaryingElastance-instance to initialize the vector containing the state variable,
@@ -1924,54 +1924,54 @@ class Valve:
 	
 	def computeB(self, A, n):
 		""" Returns the turbulent resistance coefficient B, used in computing the pressure difference across the valve"""
-		A_eff = self.effectiveOrificeArea(A,n)
+		A_eff = self.effectiveOrificeArea(A, n)
 		
 
 		
 		if A_eff == 0:
 			B = None
-		elif A/A_eff > 1e4:
+		elif A / A_eff > 1e4:
 			B = None
 		else:
-#			B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
-#			B = 0.5*self.rho*(1/A_eff - 1/A)  # expression: Masterthesis Knut Petter
-			B=self.rho/(2*A_eff**2) # paper Mynard et al. 2012
+# 			B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
+# 			B = 0.5*self.rho*(1/A_eff - 1/A)  # expression: Masterthesis Knut Petter
+			B = self.rho / (2 * A_eff ** 2)  # paper Mynard et al. 2012
 		return B
 
-	def computeL(self, A, n,B,state):
+	def computeL(self, A, n, B, state):
 		""" Returns the inertance coefficient L,  used in computing the pressure difference across the valve"""
-		A_s = self.effectiveOrificeArea(A,n)
+		A_s = self.effectiveOrificeArea(A, n)
 		if B:
-			#leff=0.008+0.01*(1-state) # aortic
-			leff = 0.018 # 2cm
+			# leff=0.008+0.01*(1-state) # aortic
+			leff = 0.018  # 2cm
 		else:
-			leff=0.01	# mitral
+			leff = 0.01  # mitral
 			
 		if A_s == 0:
 			L = None
-		elif A/A_s > 1e4:
+		elif A / A_s > 1e4:
 			L = None
 		else:
-#			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter 
-			L = self.rho*leff/A_s # paper Mynard et al. 2012
+# 			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter 
+			L = self.rho * leff / A_s  # paper Mynard et al. 2012
 		return L
 
 	
 	def LdivideB(self, A, n):
-		A_s = self.effectiveOrificeArea(A,n)
+		A_s = self.effectiveOrificeArea(A, n)
 		if A_s == 0:
 			return None
-		elif A/A_s > 1e4:
+		elif A / A_s > 1e4:
 			return None
 		else:
-			return 4*np.pi*(1/A_s - 1/A)**(-1.5)
+			return 4 * np.pi * (1 / A_s - 1 / A) ** (-1.5)
 
 	def effectiveOrificeArea(self, A, n):
 		""" Computes the effective orifice area (A_eff) by interpolating between maximum and minimum area."""
 		A_max = self.M_st * A
 		A_min = self.M_rg * A
 		
-		return (A_max - A_min) * self.state[n]  + A_min
+		return (A_max - A_min) * self.state[n] + A_min
 	
 	def A_max(self, A):
 		return self.M_st * A
@@ -1985,23 +1985,23 @@ class Valve:
 		if delta_p > self.delta_p_open:
 			"""The valve starts to open if the pressure difference is positive and above the opening threshold pressure"""
 			if self.state[n] == 1.0:
-				self.state[n+1] = 1.0
+				self.state[n + 1] = 1.0
 			else:
-				self.state[n+1] = self.state[n] + (1 - self.state[n])*self.K_v_open*(delta_p - self.delta_p_open)*dt
-				if self.state[n+1] > 1.0:
-					self.state[n+1] = 1.0
+				self.state[n + 1] = self.state[n] + (1 - self.state[n]) * self.K_v_open * (delta_p - self.delta_p_open) * dt
+				if self.state[n + 1] > 1.0:
+					self.state[n + 1] = 1.0
 					
 		elif delta_p < -self.delta_p_close:
 			""" The valve starts to close """
 			if self.state[n] == 0.0:
-				self.state[n+1] = 0.0
+				self.state[n + 1] = 0.0
 			else:
-				self.state[n+1] = self.state[n] + self.state[n]*self.K_v_close*(delta_p - self.delta_p_close)*dt
-				if self.state[n+1] < 0:
-					self.state[n+1] = 0.0
+				self.state[n + 1] = self.state[n] + self.state[n] * self.K_v_close * (delta_p - self.delta_p_close) * dt
+				if self.state[n + 1] < 0:
+					self.state[n + 1] = 0.0
 		else:
 			""" The case where -delta_p_close < delta_p < delta_p_open, the valve state stays unchanged """
-			self.state[n+1] = self.state[n]
+			self.state[n + 1] = self.state[n]
 			
 class VaryingElastanceSimple(BoundaryConditionType2):
 	"""
@@ -2036,16 +2036,16 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		
 		self.omegaNew = np.empty((2))
 		
-		#Default parameters
+		# Default parameters
 		self.T = 1
-		self.Emax  = 2.31 * 133.3e6 
+		self.Emax = 2.31 * 133.3e6 
 		self.Emin = 0.06 * 133.3e6 
 		self.Tpeak = 0.4
 		
 		self.V0 = 20e-6 
 		
-		self.K  =  0.0
-		self.Rv = 0.005*133/(10**-6)
+		self.K = 0.0
+		self.Rv = 0.005 * 133 / (10 ** -6)
 		
 		"""Shape parameters"""
 		self.alpha = 1.672
@@ -2059,17 +2059,17 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
 		
 
-		#n-1 values
-#		self.aorticFlowPreviousTimestep = None
+		# n-1 values
+# 		self.aorticFlowPreviousTimestep = None
 		
-#		self.system = {'both open':np.array([0,1,2]), 'mitral open': np.array([0,1]), 'aortic open':np.array([1,2])} 
+# 		self.system = {'both open':np.array([0,1,2]), 'mitral open': np.array([0,1]), 'aortic open':np.array([1,2])} 
 		
 				
 		self.cycleNumber = 0
 		self.num = 0
-		self.atriumPressure = 7.5 * 133.32 #Pressure in the atrium ## venouse pressure?!
+		self.atriumPressure = 7.5 * 133.32  # Pressure in the atrium ## venouse pressure?!
 		
-#		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
+# 		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
 		
 		
 		self.dQInOut = np.empty((2))
@@ -2087,41 +2087,41 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		print """ Initialize Solution Vectors """
 		
 	
-		self.pressure = np.zeros(Tsteps)
-		self.volume = np.zeros(Tsteps)
-		self.mitralQ = np.zeros(Tsteps)
-		self.Elastance = np.zeros(Tsteps) #New
-		self.Flow = np.zeros(Tsteps)
-		self.Flow2 = np.zeros(Tsteps)
-		self.DtFlow = np.zeros(Tsteps)
-		self.deltaP=np.zeros(Tsteps)
-		self.aortaP=np.zeros(Tsteps)
+		self.pressure = np.zeros(Tsteps+1)
+		self.volume = np.zeros(Tsteps+1)
+		self.mitralQ = np.zeros(Tsteps+1)
+		self.Elastance = np.zeros(Tsteps+1)  # New
+		self.Flow = np.zeros(Tsteps+1)
+		self.Flow2 = np.zeros(Tsteps+1)
+		self.DtFlow = np.zeros(Tsteps+1)
+		self.deltaP = np.zeros(Tsteps+1)
+		self.aortaP = np.zeros(Tsteps+1)
 		
 		""" Initial conditions in the ventricle"""
 		self.pressure[0] = self.atriumPressure
-		self.volume[0] = self.atriumPressure/self.E(0) + self.V0
+		self.volume[0] = self.atriumPressure / self.E(0) + self.V0
 				
 		
 	
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 	
-#		self.updateValves(P, n, dt)                     # Update the state of the mitral and aortic valve at timestep n + 1
+# 		self.updateValves(P, n, dt)                     # Update the state of the mitral and aortic valve at timestep n + 1
 		self.startNewCycleIfCriteriaIsMet(n, dt)
-		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)      # Compute the riemann variant going into the vessel save in omegaNew
+		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)  # Compute the riemann variant going into the vessel save in omegaNew
 		
-		self.dQInOut = R[:][1]*self.omegaNew 
+		self.dQInOut = R[:][1] * self.omegaNew 
 		# calculate du and return this!
-		return np.dot(R,self.omegaNew),self.dQInOut
+		return np.dot(R, self.omegaNew), self.dQInOut
 
 
 
 
 
 	def getCycleTime(self, n, dt):
-		return self.num*dt
+		return self.num * dt
 	
 	def startNewCycleIfCriteriaIsMet(self, n, dt):
-		if self.getCycleTime(n+1, dt) > self.T:
+		if self.getCycleTime(n + 1, dt) > self.T:
 			self.cycleNumber += 1
 			self.num = 0
 
@@ -2130,158 +2130,158 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		# Qn1 == value at old time step
 		# change to self.aorticPressurePreviousTimestep ...
 		
-#		Qn1 = self.aorticFlowPreviousTimestep
+# 		Qn1 = self.aorticFlowPreviousTimestep
 		
-		L=np.linalg.inv(R)
-		L11, L12, L21, L22 = L[0][0],L[0][1],L[1][0],L[1][1]
-		omegaprevious_ = L11*Pn + L12*Qn
-		r11,r12,r21,r22 =  R[0][0],R[0][1],R[1][0],R[1][1]
-	#	deltatdiff = 0.00001
-#		mitrQn = self.mitralQ[n]
-#		mitrQn1 = self.mitralQ[n-1]
+		L = np.linalg.inv(R)
+		L11, L12, L21, L22 = L[0][0], L[0][1], L[1][0], L[1][1]
+		omegaprevious_ = L11 * Pn + L12 * Qn
+		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
+	# 	deltatdiff = 0.00001
+# 		mitrQn = self.mitralQ[n]
+# 		mitrQn1 = self.mitralQ[n-1]
 		venoP = self.atriumPressure
-		t = self.getCycleTime(n+1, dt)
+		t = self.getCycleTime(n + 1, dt)
 		t2 = self.getCycleTime(n, dt)
 # 		ttemp = t-dt
 		E = self.E(t)
 		e2 = self.E(t)
-	#	dE= (self.E(t+deltatdiff) -E)/deltatdiff
+	# 	dE= (self.E(t+deltatdiff) -E)/deltatdiff
 		Vn = self.volume[n]
 		self.R11 = r11
 		self.R12 = r12
 		self.R21 = r21
 		self.R22 = r22
-		self.DtW2 = _domega/dt
+		self.DtW2 = _domega / dt
 
 		
-		self.Elastance[n+1]=E/133.3e6
-		self.Flow[n]=Qn*1e6
-		self.aortaP[n]=Pn
-#		self.DtFlow[n]=(Qn-Qnold)/dt
+		self.Elastance[n + 1] = E / 133.3e6
+		self.Flow[n] = Qn * 1e6
+		self.aortaP[n] = Pn
+# 		self.DtFlow[n]=(Qn-Qnold)/dt
 		ventrPn = self.pressure[n]
 		if self.cycleNumber == 3:
-			self.T=0.7
-			self.Tpeak =0.43*self.T
+			self.T = 0.7
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 6:
-			self.T=1
-			self.Tpeak =0.43*self.T
+			self.T = 1
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 10:
-			self.T=0.8
-			self.Tpeak =0.43*self.T
+			self.T = 0.8
+			self.Tpeak = 0.43 * self.T
 			
 		if self.cycleNumber == 11:
-			self.T=0.7
-			self.Tpeak =0.43*self.T
+			self.T = 0.7
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 12:
-			self.T=0.6
-			self.Tpeak =0.43*self.T
+			self.T = 0.6
+			self.Tpeak = 0.43 * self.T
 			
 		if self.cycleNumber == 14:
-			self.T=0.5
-			self.Tpeak =0.43*self.T
+			self.T = 0.5
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 18:
-			self.T=0.6
-			self.Tpeak =0.43*self.T
+			self.T = 0.6
+			self.Tpeak = 0.43 * self.T
 			
 		if self.cycleNumber == 19:
-			self.T=0.7
-			self.Tpeak =0.43*self.T
+			self.T = 0.7
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 20:
-			self.T=0.8
-			self.Tpeak =0.43*self.T
+			self.T = 0.8
+			self.Tpeak = 0.43 * self.T
 			
 		if self.cycleNumber == 21:
-			self.T=0.9
-			self.Tpeak =0.43*self.T
+			self.T = 0.9
+			self.Tpeak = 0.43 * self.T
 		
 		if self.cycleNumber == 22:
-			self.T=1
-			self.Tpeak =0.43*self.T
+			self.T = 1
+			self.Tpeak = 0.43 * self.T
 		
 
 
 		
 		
-		def diastole(u,t):
+		def diastole(u, t):
 		
 			"""Differential equations during diastole u[0]=V, u[1]=Pv, return dV/dt and dP/dt"""
 			
 			deltatdiff = 0.00001
-			E= self.E(t)
-			dE= (self.E(t+deltatdiff) -E)/deltatdiff
-			DV = (venoP-u[1])/self.Rv
-			DP = dE*(u[0]-self.V0)+E*(venoP-u[1])/self.Rv
-			return [DV,DP]
+			E = self.E(t)
+			dE = (self.E(t + deltatdiff) - E) / deltatdiff
+			DV = (venoP - u[1]) / self.Rv
+			DP = dE * (u[0] - self.V0) + E * (venoP - u[1]) / self.Rv
+			return [DV, DP]
 	
 	
-		def systole(u,t):
+		def systole(u, t):
 			
 			"""Differential equations during systole u[0]=V, u[1]=Pv=Pa, u[2]=Q return dV/dt and dP/dt, dQ/dt"""
 			
 			deltatdiff = 0.00001
-			Etemp= self.E(t)
-			dE= (self.E(t+deltatdiff) -Etemp)/deltatdiff
+			Etemp = self.E(t)
+			dE = (self.E(t + deltatdiff) - Etemp) / deltatdiff
 			
 			DV = -u[2]
-			DP = (dE*(u[0]-self.V0) - Etemp*u[2] )
-	#		#DW1 = ((dE*(u[0]-self.V0) - Etemp*u[3] - self.R12*self.DtW2)/self.R11)
-			DQ = (self.R21/self.R11)*(dE*(u[0]-self.V0) - Etemp*u[2] ) +self.DtW2*(self.R22-(self.R12*self.R21)/self.R11)
-			return[DV,DP,DQ]
+			DP = (dE * (u[0] - self.V0) - Etemp * u[2])
+	# 		#DW1 = ((dE*(u[0]-self.V0) - Etemp*u[3] - self.R12*self.DtW2)/self.R11)
+			DQ = (self.R21 / self.R11) * (dE * (u[0] - self.V0) - Etemp * u[2]) + self.DtW2 * (self.R22 - (self.R12 * self.R21) / self.R11)
+			return[DV, DP, DQ]
 			
-		solverSys = OD.ForwardEuler(systole) #Runga Kutta solver for ejection phase, Systole
+		solverSys = OD.ForwardEuler(systole)  # Runga Kutta solver for ejection phase, Systole
 
-		solverdias = OD.ForwardEuler(diastole) #Runga Kutta solver for diastole
+		solverdias = OD.ForwardEuler(diastole)  # Runga Kutta solver for diastole
 			
 			
-		if (venoP>ventrPn): #Diastolecondition
-			solverdias.set_initial_condition([Vn,ventrPn])
-			if (t2)<0: 
-				t_pointsd = np.linspace(0,dt,2)
+		if (venoP > ventrPn):  # Diastolecondition
+			solverdias.set_initial_condition([Vn, ventrPn])
+			if (t2) < 0: 
+				t_pointsd = np.linspace(0, dt, 2)
 				
 			else:
-				t_pointsd = np.linspace(t2,t2+dt,2)
+				t_pointsd = np.linspace(t2, t2 + dt, 2)
 
 
-			udiastole,td = solverdias.solve(t_pointsd)
+			udiastole, td = solverdias.solve(t_pointsd)
 			udiastole = udiastole[1]
 			V = udiastole[0]
 			Pv = udiastole[1]
-			self.volume[n+1]=V
-			self.pressure[n+1]=Pv
-			if Qn ==0:
-				domega_=_domega
+			self.volume[n + 1] = V
+			self.pressure[n + 1] = Pv
+			if Qn == 0:
+				domega_ = _domega
 			else:
-				domega_ = (-0.5*Qn - r22*_domega)/r21
+				domega_ = (-0.5 * Qn - r22 * _domega) / r21
 
 
 			
-		elif (Qn>=-1e-15 and ventrPn-Pn>(-0.0001)): #sysstolecondition
-			solverSys.set_initial_condition([Vn,ventrPn,self.Flow2[n]])
-			t_pointss = np.linspace(t2,t2+dt,2)
-			uSystole,ts = solverSys.solve(t_pointss)
+		elif (Qn >= -1e-15 and ventrPn - Pn > (-0.0001)):  # sysstolecondition
+			solverSys.set_initial_condition([Vn, ventrPn, self.Flow2[n]])
+			t_pointss = np.linspace(t2, t2 + dt, 2)
+			uSystole, ts = solverSys.solve(t_pointss)
 			uSystole = uSystole[1]
 			V = uSystole[0]
 			P = uSystole[1]
-			Q =uSystole[2]
-			self.Flow2[n+1]=Q
-			omeganew_ = L11*P + L12*Q
+			Q = uSystole[2]
+			self.Flow2[n + 1] = Q
+			omeganew_ = L11 * P + L12 * Q
 
 
 			
-			self.volume[n+1]=V
-			self.pressure[n+1]=P
-			domega_= omeganew_ - omegaprevious_
+			self.volume[n + 1] = V
+			self.pressure[n + 1] = P
+			domega_ = omeganew_ - omegaprevious_
 			
-		else: #isocondition
-			self.volume[n+1]=Vn
-			self.pressure[n+1]=E*(Vn-self.V0)
+		else:  # isocondition
+			self.volume[n + 1] = Vn
+			self.pressure[n + 1] = E * (Vn - self.V0)
 
-			domega_=_domega
+			domega_ = _domega
 			
 				
 		self.num = self.num + 1
@@ -2297,13 +2297,13 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 	def E(self, t):
 		"""Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
 		   according to Tpeak, T, Emax and Emin. """
-		a1 = 0.708*self.Tpeak
-		a2 = 1.677*a1
+		a1 = 0.708 * self.Tpeak
+		a2 = 1.677 * a1
 		
 		n1, n2 = self.n1, self.n2
-		shapeFunction1 = (t/(a1))**n1/(1+(t/(a1))**n1)
-		shapeFunction2 = (1 + (t/(a2))**n2)**(-1)	
-		return (self.Emax-self.Emin)*self.alpha*shapeFunction1*shapeFunction2 + self.Emin
+		shapeFunction1 = (t / (a1)) ** n1 / (1 + (t / (a1)) ** n1)
+		shapeFunction2 = (1 + (t / (a2)) ** n2) ** (-1)	
+		return (self.Emax - self.Emin) * self.alpha * shapeFunction1 * shapeFunction2 + self.Emin
 # 	def diastole(self,u,t):
 # 		
 # 		"""Differential equations during diastole u[0]=V, u[1]=Pv, return dV/dt and dP/dt"""
