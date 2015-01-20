@@ -376,7 +376,6 @@ class CarotidBaroreceptor(object):
             vR = 0.
             
         elif n > delay:
-            
             deltaF = self.F_efferent[n+1-delay] > self.fe_min
             
             if deltaF >= 0.0:
