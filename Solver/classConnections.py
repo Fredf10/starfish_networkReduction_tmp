@@ -447,7 +447,7 @@ class Bifurcation():
     def __init__(self, mother, motherSys,
                        leftDaughter, leftDaughterSys,
                        rightDaughter, rightDaughterSys, 
-                       n, dt, rigidAreas, solvingScheme):
+                       currentMemoryIndex, dt, rigidAreas, solvingScheme):
         # vessel variables initially set, constant through simulation
         self.type = 'Bifurcation'
         
@@ -455,7 +455,7 @@ class Bifurcation():
         
         #System Variables
         self.dt = dt
-        self.n = n
+        self.currentMemoryIndex = currentMemoryIndex
         
         self.rho = []
         self.systemEquations = []
@@ -968,7 +968,7 @@ class Anastomosis():
     def __init__(self, leftMother, leftMotherSys,
                        rightMother, rightMotherSys,
                        daughter, daughterSys, 
-                       n, dt, rigidAreas, solvingScheme):
+                       currentMemoryIndex, dt, rigidAreas, solvingScheme):
         
         
         # vessel variables initially set, constant through simulation
@@ -978,7 +978,7 @@ class Anastomosis():
         
         #System Variables
         self.dt = dt
-        self.n = n
+        self.currentMemoryIndex = currentMemoryIndex
         
         self.rho = []
         self.systemEquations = []
