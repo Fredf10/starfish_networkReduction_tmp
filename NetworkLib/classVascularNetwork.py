@@ -28,11 +28,13 @@ class VascularNetwork(object):
         self.quiet = quiet              # bool to suppress output
         
         # saving options
-        self.tSaveBegin          = 2.75      # time when to start saving
-        self.tSaveEnd            = 4.5      # time when to end saving
-        self.solutionDataFile    = None    # file name of the solution data
-        self.maxMemory           =  0.500    # maximum memory in MB 
+        self.tSaveBegin              = 0.0    # time when to start saving
+        self.tSaveEnd                = 8.0     # time when to end saving
+        self.maxMemory               = 0.500  # maximum memory in MB 
+        self.saveInitialisationPhase = False    # bool to enable saving of the initPhase
+                
         self.memoryArraySizeTime =  None   # memory array size for the time arrays
+        self.solutionDataFile    = None    # file name of the solution data
         
         # running options
         self.cycleMode = False
@@ -67,10 +69,13 @@ class VascularNetwork(object):
         #self.solvingSchemeField       = 'MacCormack' # MacCormack
         self.solvingSchemeConnections     = 'Linear'     # 'Linear'
                 
-        # initialisation contorls
+        # initialisation controls
         self.initialsationMethod          = 'Auto'   # 'Auto', 'MeanFlow', 'MeanPressure', 'ConstantPressure'
         self.initMeanFlow                 = 0.0      # initial mean flow value (at inflow point)
         self.initMeanPressure             = 0.0      # initial pressure value (at inflow point)
+        self.initialisationPhaseExist     = True     # bool is False only for 'ConstantPressure'
+        self.initPhaseTimeSpan            = 0.0      # time span of the init phase
+        self.nTstepsInitPhase             = 0        # number of timesteps of the initPhase
         
         self.estimateWindkesselCompliance = 'Tree'   # 'Tree', 'Sys', 'Wk3', 'None'
         self.compPercentageWK3            = 0.3      # Cwk3 percentage on total Csys
@@ -314,16 +319,7 @@ class VascularNetwork(object):
             
             ## print 3D positions
             if self.quiet == False: self.print3D()
-             
-            ### check if cycle mode and set new total time
-            ## if cycle mode reset total time
-            if self.cycleMode == True:
-                try:
-                    self.totalTime = self.boundaryConditions[self.root][0].Tperiod
-                except:
-                    print "ERROR VascularNetwork.calculateInitialValues(): could not set totalTime = Tperiod from BC for cycle mode!"
-                    exit()
-            
+                         
             # calculate the cumultative network resistances and vessel resistances of the network
             if self.initialsationMethod != 'ConstantPressure':
                 self.calculateNetworkResistance()    
@@ -343,16 +339,14 @@ class VascularNetwork(object):
                 # calculate terminal vessel compliance
                 self.evaluateWindkesselCompliance()
                 
-    def initializeNetworkForSimulation(self, dt, nTsteps):
+    def initializeNetworkForSimulation(self):
         '''
         Method to initialize the network for a simulation.
         Creates hdf5 File and groups for the vessels
         Envoces memory allocation.
         Set initial values for the simulations.
         '''
-        self.dt      = dt
-        self.nTsteps = nTsteps
-        
+                
         ### to be moved to a path handler
         solutionDirectory = ''.join([cur,'/..','/NetworkFiles/',self.name,'/SolutionData'])
         pathSolutionDataFilename = ''.join([solutionDirectory,'/',self.name,'_SolutionData_',self.dataNumber,'.hdf5'])
@@ -370,16 +364,24 @@ class VascularNetwork(object):
             print "WARNING: VascularNetwork.initializeSolutionMatrices(): tSaveBegin not in [0, tSaveEnd], exit()"
             exit()
         
-        self.nSaveBegin = int(np.floor(self.tSaveBegin/dt))
-        self.nSaveEnd   = int(np.ceil(self.tSaveEnd/dt))
+        self.nSaveBegin = int(np.floor(self.tSaveBegin/self.dt))
+        self.nSaveEnd   = int(np.ceil(self.tSaveEnd/self.dt))
+        
+        # set save counter to the correct parts
+        if self.initialisationPhaseExist:
+            self.nSaveEnd += self.nTstepsInitPhase
+            if self.saveInitialisationPhase:
+                self.nSaveBegin = 0
+            else:
+                self.nSaveBegin += self.nTstepsInitPhase
         
         ## -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
         estimatedMemorySolutionDataSpace  = 0
         for vessel in self.vessels.itervalues():
              estimatedMemorySolutionDataSpace += vessel.N*8*3 # byte
         self.memoryArraySizeTime = int(np.floor(self.maxMemory*1024.*1024. / estimatedMemorySolutionDataSpace))       
-        if self.memoryArraySizeTime > (nTsteps+1):
-            self.memoryArraySizeTime = nTsteps+1
+        if self.memoryArraySizeTime > (self.nTsteps+1):
+            self.memoryArraySizeTime = self.nTsteps+1
                 
         # initialize for simulation
         for vesselId,vessel in self.vessels.iteritems():
@@ -392,14 +394,19 @@ class VascularNetwork(object):
                                            self.nSaveBegin,
                                            self.nSaveEnd,
                                            self.nTsteps)       
-            
-        ## initialse varying elastance model
+        
+        ## initialize varying elastance model
+        ## initialize boundary condition type 1: initial phase
         for vesselId,boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
                 if bC.name in ['VaryingElastanceHeart','VaryingElastanceSimple']:
                     Qm    = initialValues[vesselId]['Flow']
                     bC.update({'aorticFlowPreviousTimestep':Qm})
                     bC.initializeSolutionVectors(Tsteps)
+                if bC.type == 1:
+                    if self.initialisationPhaseExist:
+                        bC.update({'initialisationPhaseExist': True,
+                                   'nTstepsInitPhase': self.nTstepsInitPhase})
                     
         ## initialize gravity and 3d positions over time
         # create motion decription out of motion dict of vascularNetwork
@@ -415,7 +422,7 @@ class VascularNetwork(object):
             end   = start-80*np.pi/180
             startAngle = np.ones(tSteps4*2.0)*start
             endAngle   = np.ones(tSteps4)*end
-            tiltAngle  = np.linspace(start, end, nTsteps-3*tSteps4)
+            tiltAngle  = np.linspace(start, end, self.nTsteps-3*tSteps4)
              
             angleXSystem = np.append(startAngle,np.append(tiltAngle,endAngle))
                      
@@ -425,10 +432,10 @@ class VascularNetwork(object):
             self.vessels[vesselId].update(angleDict)
             
         ## calculate gravity and positions   
-        self.calculate3DpositionsAndGravity(nTsteps = nTsteps)
+        self.calculate3DpositionsAndGravity(nTsteps = self.nTsteps)
             
         ## calculate venous pressure for windkessel
-        self.initializeVenousGravityPressureTime(nTsteps)
+        self.initializeVenousGravityPressureTime(self.nTsteps)
             
                     
     def saveSolutionData(self):
@@ -438,13 +445,27 @@ class VascularNetwork(object):
         '''        
         globalData = self.solutionDataFile.create_group('VascularNetwork')
         
-        globalData.attrs['dt'] = self.dt
-        globalData.attrs['nTsteps'] = self.nTsteps
+        globalData.attrs['dt']               = self.dt
+        globalData.attrs['nTsteps']          = self.nTsteps
+        globalData.attrs['nTstepsInitPhase'] = self.nTstepsInitPhase
+        
         
         savedArraySize = self.nSaveEnd-self.nSaveBegin+1
-        
         dsetTime = globalData.create_dataset('Time', (savedArraySize,),dtype='float64')
-        dsetTime[:] = np.linspace(self.nSaveBegin*self.dt, self.dt*self.nSaveEnd, savedArraySize).reshape(savedArraySize,)
+                
+        # find start and end time of the time vector of the solution data
+        if self.initialisationPhaseExist:
+            if self.saveInitialisationPhase:
+                startTime = -self.dt*self.nTstepsInitPhase
+                endTime   = self.dt*(self.nSaveEnd-self.nTstepsInitPhase)
+            else:
+                startTime =  self.dt*(self.nSaveBegin-self.nTstepsInitPhase)
+                endTime   =  self.dt*(self.nSaveEnd-self.nTstepsInitPhase)
+        else:
+            startTime =  self.nSaveBegin*self.dt
+            endTime   =  self.dt*self.nSaveEnd
+            
+        dsetTime[:] = np.linspace(startTime, endTime, savedArraySize).reshape(savedArraySize,)
         
         self.solutionDataFile.close()
         
@@ -913,8 +934,8 @@ class VascularNetwork(object):
         
         if self.initialsationMethod == 'Auto':
             try:
-                self.boundaryConditions[root][0].findMeanFlowAndMeanTime(quiet = self.quiet)
-                meanInflow = self.boundaryConditions[root][0].MeanFlow
+                meanInflow, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(quiet = self.quiet)
+                self.initialisationPhaseExist = True
             except:
                 print "Error: classVascularNetwork: Unable to calculate mean flow at inflow point"
                 exit()
@@ -923,7 +944,8 @@ class VascularNetwork(object):
             try:
                 meanInflow = self.initMeanFlow
                 ## addjust bc condition
-                self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet = self.quiet)
+                xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet = self.quiet)
+                self.initialisationPhaseExist = True
             except:
                 print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
                 exit()
@@ -931,6 +953,7 @@ class VascularNetwork(object):
         elif self.initialsationMethod == 'MeanPressure':
             try:
                 meanInPressure = self.initMeanPressure
+                self.initialisationPhaseExist = True
             except:
                 print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
                 exit()
@@ -940,6 +963,7 @@ class VascularNetwork(object):
                 constantPressure = self.initMeanPressure
                 if self.boundaryConditions[root][0].name not in ['VaryingElastanceHeart','VaryingElastanceSimple']:
                     self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet = self.quiet)
+                self.initialisationPhaseExist = False 
                     
             except:
                 print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
@@ -1001,13 +1025,14 @@ class VascularNetwork(object):
         if meanInflow != None:
             p0 = self.Rcum[root]*meanInflow 
             p1 = p0-self.vessels[root].resistance*meanInflow
+            
         elif meanInPressure != None:
             meanInflow = meanInPressure/self.Rcum[root] # calculate mean flow
             p0 = meanInPressure  
             ## addjust bc condition
-            try:    self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet = self.quiet)
+            try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet = self.quiet)
             except:
-                print "Error: Unable to adjust calculated meanFlow at inflow point boundary condition !"
+                print "Error: VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !"
                 exit()
             p1 = p0-self.vessels[root].resistance*meanInflow
         else: 
@@ -1038,7 +1063,7 @@ class VascularNetwork(object):
                                         
             ## anastomosis
             elif rightDaughter == None:
-                print "WARNING: no method  for anastomosis is implemented to initialize network with method 'Tree' !!!"
+                print "WARNING: VascularNetwork: no method for anastomosis is implemented to initialize network !!!"
                 pass
 
         

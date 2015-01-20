@@ -324,6 +324,7 @@ class Vessel(object):
         calulate wave speed vector from solution data for pressure and flow
         calcuate mean flow from the solution data of flow and area
         '''
+        
         self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
         self.vsol = self.Qsol/self.Asol
         
@@ -365,8 +366,8 @@ class Vessel(object):
         '''
         Returns a deep copy of the class variable dict
         '''
-        return deepcopy(self.__dict__)
-    
+        return self.__dict__
+        
     def printToConsole(self):
         '''
         writes all variables and their values to the console

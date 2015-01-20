@@ -175,18 +175,29 @@ class FlowSolver(object):
             
         # Set time variables 
         self.dt = min(dt_min)
-
+        # calculate time steps
         self.nTsteps = int(np.ceil(self.totalTime/self.dt))
-        
-        
-        print "cFS", self.nTsteps, self.dt, self.totalTime, self.nTsteps*self.dt
-
+        # calculate time steps for initialisation phase
+        if self.vascularNetwork.initialisationPhaseExist:
+            initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
+            nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
+        # correct time steps
+        self.nTsteps += nTstepsInitPhase
+            
+        # update vascular network variables
+        self.vascularNetwork.update({'dt':self.dt,
+                                     'nTsteps': self.nTsteps,
+                                     'nTstepsInitPhase': nTstepsInitPhase})
+                    
         self.output['dz_min']     = min(dz_min)
         self.output['c_min']      = min(c_max)
         self.output['c_max']      = max(c_max)
         self.output['gridNodens'] = sum(gridNodens)
         
         self.output['CFLcorrect'] = []
+                
+        ###########
+        #### grid correction methods
         
         automaticGridCorrection = {}
         
@@ -221,9 +232,7 @@ class FlowSolver(object):
             logfile2.write(''.join([str(int(Nnew)),'\n']))
         logfile.close()
         logfile2.close()    
-        
-        self.vascularNetwork.update({'dt':self.dt, 'nTsteps': self.nTsteps})
-        
+                
         if self.output['CFLcorrect'] != []:
             if quiet == False:
                 print '====================================='
@@ -243,25 +252,26 @@ class FlowSolver(object):
                     #if quiet == False: print ' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys())
                     arrayN = 0
                     for vesselId,Nnew in automaticGridCorrection.iteritems():
-                        self.vessels[vesselId].N = Nnew
+                        self.vessels[vesselId].update({'N':Nnew})
                         self.vessels[vesselId].initialize({})
                         
                         newOutput = self.output['CFLcorrect'][arrayN].split(' no')[0]
                         self.output['CFLcorrect'][arrayN] = ' '.join([newOutput,'yes'])
                         arrayN = arrayN+1
-        gridNodens = 0
+        gridNodes = 0
         for vessel in self.vascularNetwork.vessels.itervalues():
-            gridNodens += vessel.N 
+            gridNodes += vessel.N 
             
-        self.output['gridNodens'] = int(gridNodens)
+        self.output['gridNodens'] = int(gridNodes)
         
                 
     def initializeSolutionMatrices(self):
         '''
         initialize solution matrices --> moved to vascularNetwork
         '''
-                
-        self.vascularNetwork.initializeNetworkForSimulation(self.dt, self.nTsteps)
+        # initialiase solution matrices, gravity and position over space
+        self.vascularNetwork.initializeNetworkForSimulation()
+        
         #exit()
                 
 #        initialValues = self.vascularNetwork.initialValues

@@ -99,13 +99,17 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.runtimeEvaluation = False
 				
 		## evaluated values
-		self.lastU       = 0.0
-		self.TmeanFlow   = 0.0
-		self.MeanFlow    = 0.0
-		self.Tperiod     = 0.0
-		self.pulseTime   = []
-		self.duMatrix    = np.ones(2)
-		self.duVector    = np.empty(2)
+		self.lastU       		= 0.0
+		self.TmeanFlow   		= 0.0
+		self.initPhaseTimeSpan 	= 0.0
+		self.MeanFlow    		= 0.0
+		self.Tperiod     		= 0.0
+		self.pulseTime   		= []
+		self.duMatrix    		= np.ones(2)
+		self.duVector    		= np.empty(2)
+		
+		self.initialisationPhaseExist = False
+		self.nTstepsInitPhase 		  = 0
 		
 		# values to manipulate period during runtime
 		self.updateTime = -10.0
@@ -152,7 +156,7 @@ class BoundaryConditionType1(BoundaryCondition):
 		if self.name == 'Flow-FromFile':
 			if self.loadedFile == False:
 				self.loadFile()
-			
+						
 	def updatePeriodRuntime(self, TperiodNew, updateTime):
 		'''
 		This function updates the freq, Tspace and pulsTime for new given Tperiod
@@ -184,38 +188,30 @@ class BoundaryConditionType1(BoundaryCondition):
 					pStart = pulse[2]
 				else: findFirstPulse = False
 		
-	def calculateDuVector(self,Tsteps,dt):
+	def calculateDuVector(self,nTsteps,dt):
 		'''
 		Function calculates the duVector for a given number of time steps Tsteps and dt
 		return: self.duVector
 		'''
-		self.duVector = np.zeros((Tsteps,2))
+		# create du Vector
+		self.duVector = np.zeros((nTsteps,2))
 		
-		lastStep = self.calculateOneStep(0,dt)
+		initPhase = False
+		# check if initphase needs to be added at start
+		if self.initialisationPhaseExist:
+			initPhase = True
 		
-		for nt in xrange(len(self.duVector)):
-			nextStep = self.calculateOneStep(nt+1,dt)
+		lastStep = self.calculateOneStep(0, dt, initPhase = initPhase)
+			
+		# add rest of simulation time
+		for nt in xrange(nTsteps):
+			if nt == self.nTstepsInitPhase: initPhase = False
+			nextStep = self.calculateOneStep(nt+1, dt, initPhase = initPhase)
 			self.duVector[nt] = nextStep - lastStep
 			lastStep = nextStep
 			
 		return self.duVector
-		
-	def calculateDuVectorInitPhase(self,Tsteps,dt):
-		'''
-		Function calculates the duVector for a given number of time steps Tsteps and dt
-		return: self.duVector
-		'''
-		self.duVector = np.zeros((Tsteps,2))
-		
-		lastStep = self.calculateOneStep(0,dt,initPhase = True)
-		
-		for nt in xrange(len(self.duVector)):
-			nextStep = self.calculateOneStep(nt+1,dt,initPhase = True)
-			self.duVector[nt] = nextStep - lastStep
-			lastStep = nextStep
 			
-		return self.duVector
-		
 	def calculateDu(self,n,dt):
 		'''
 		Function calculates the du for a given time step and dt
@@ -340,17 +336,22 @@ class BoundaryConditionType1(BoundaryCondition):
 		print "cBC 350 totalTime",totalTime
 		print "cBC 350 period: ",period
 		print "cBC 350 initPhase timespan: ", period-self.TmeanFlow
-		
+				
+		self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
 		
 		if quiet == False:
 			print '====================================='
 			print '___BC _Type1: mean flow evaluation___'
 			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str((integral*dt/period*1e6)[1]).ljust(5))
 			print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
+			print 'initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5))
 			print 'total volume/period (ml)   {:.6}'.format(str(integral[1]*dt*1e6).ljust(5))
+		
 		
 		#if self.TmeanFlow != 0.0: self.Tpulse = 0.0
 		self.initialize({})
+		
+		return  self.MeanFlow, self.initPhaseTimeSpan
 		
 	def function1(self,t,t0,pulsNum):
 		'''

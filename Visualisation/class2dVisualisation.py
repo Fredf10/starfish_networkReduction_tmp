@@ -665,6 +665,8 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
                     xData = vascularNetwork.simulationTime
                                
+                    print 
+                               
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
         
@@ -1066,7 +1068,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             # time
             limit = 'Time'
             sol = vascularNetwork.simulationTime
-            self.limits[limit] = [0,
+            self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
                                   max(self.limits[limit][1], np.max(sol))]
             # space
             limit = 'Space'
@@ -1624,7 +1626,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         '''
         fileFilter = gtk.FileFilter()
         fileFilter.set_name("SolutionData")
-        fileFilter.add_pattern("*.pickle")
+        fileFilter.add_pattern("*.hdf5")
         
         filenames = self.LoadDialog(fileFilter)
         

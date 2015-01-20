@@ -52,6 +52,10 @@ Psol = vascularNetwork.vessels[vesselId].Psol[:,[n]]
 Qsol = vascularNetwork.vessels[vesselId].Qsol[:,[n]]
 Asol = vascularNetwork.vessels[vesselId].Asol[:,[n]]
 
+Psol,Qsol,Asol = vascularNetwork.getSolutionData(['Pressure','Qsol','Asol'], vesselId, t1, t2, gridnode)
+
+Psol2,Qsol2,Asol2 = vascularNetwork.getSolutionData(['Pressure','Qsol','Asol'], vesselId, t1, t2, gridnode)
+
 timeValues = vascularNetwork.simulationTime.ravel()
 
 #'P_f [Pa]','P_b [Pa]', 'Q_f [m^3/s]', 'Q_b [m^3/s]'

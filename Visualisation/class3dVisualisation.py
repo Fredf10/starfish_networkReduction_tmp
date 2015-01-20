@@ -5,7 +5,7 @@ sys.path.append(cur+'/../UtilityLib')
 
 import subprocess
 
-from moduleXML import loadNetworkFromXML 
+import moduleXML
 from moduleStartUp import parseOptions
 from modulePickle import loadSolutionDataFile
 from modulePickle import loadExternalDataSet
@@ -723,7 +723,9 @@ class Visualisation3D(Visualisation3DGUI):
         saves vascularNetwork instance in self.vascularNetwork
         '''
         if self.networkName and self.dataNumber:
-            vascularNetwork = loadSolutionDataFile(self.networkName, self.dataNumber) 
+            # load vascular network
+            vascularNetwork = moduleXML.loadNetworkFromXML(filename = self.networkName, dataNumber = self.dataNumber)
+            vascularNetwork.loadSolutionData()
             self.vascularNetwork = vascularNetwork    
         
     def createVessel3D(self):

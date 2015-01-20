@@ -121,7 +121,7 @@ class Baroreceptor(object):
 		
 
            
-class AorticBaroreceptor(BaroReceptor):
+class AorticBaroreceptor(Baroreceptor):
     
     '''
     for models of the AorticBaroreceptors
@@ -476,28 +476,28 @@ class CarotidBaroreceptor(object):
                     bcs.Emax = bcs.Emax + self.delta_Emax[n+1]
                 
     
-        
-    #def updateVenousSide(self):
-      #  """
-      #  to update the Venous unstretched Volume
-      #  """
-           
-    
-     
-    def UrsinoBRmodel(self,n):
-        """
-        Calculate Baroreflex as described by Ursino_1999
-        Effected quantities are TPR, Emax of the left heart, Vusv
-        """
-         
-         self.UrsinoAfferent(n)
-         self.UrsinoEfferent(n)
-         self.UrsinoResistanceEffector(n)
-         self.UrsinoEmaxLVEffector(n) 
-         self.UrsinoVusvEffector(n)
-         #self.updateBC2()
-         #self.updateVenousSide()
-      
+#         
+#     #def updateVenousSide(self):
+#       #  """
+#       #  to update the Venous unstretched Volume
+#       #  """
+#            
+#     
+#      
+#     def UrsinoBRmodel(self,n):
+#         """
+#         Calculate Baroreflex as described by Ursino_1999
+#         Effected quantities are TPR, Emax of the left heart, Vusv
+#         """
+#          
+#          self.UrsinoAfferent(n)
+#          self.UrsinoEfferent(n)
+#          self.UrsinoResistanceEffector(n)
+#          self.UrsinoEmaxLVEffector(n) 
+#          self.UrsinoVusvEffector(n)
+#          #self.updateBC2()
+#          #self.updateVenousSide()
+#       
      
     def __call__(self):
         

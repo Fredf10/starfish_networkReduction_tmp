@@ -98,7 +98,6 @@ class SolutionDataVessel(object):
         chunkCount := current chunk number to save
         offset := offset in the time point counter
         '''
-        print "classSolutionData: i will flush the memory"
         if self.save == True:
             # stored data saving indices
             nCB = offset+1
@@ -129,8 +128,6 @@ class SolutionDataVessel(object):
                 
                 self.nDCurrent += lengthToWrite
                 
-                print self.P, self.dsetP
-                            
             # re initialize
             self.P[0] = self.P[-1]
             self.Q[0] = self.Q[-1]
