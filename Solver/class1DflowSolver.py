@@ -51,13 +51,13 @@ class FlowSolver(object):
         self.connections  = {}                
         # the communicator objects of the vascularNetwork {communicatorID : <instance>::classCommunicator}
         self.communicators = {}
-                
+              
         # Baroreceptor model
         self.baroreceptors = {}
         baro = False
         if baro == True:
-            #self.baroreceptors = {'0': {'CellMl': True, 'vesselId':1, 'receptorType':'AorticBR', 'modelName':bugenhagenAorticBR}}
-            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[0,1], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
+            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -468,14 +468,16 @@ class FlowSolver(object):
                 
                 A1 = self.vessels[baroData['vesselId'][0]].Asol
                 A2 = self.vessels[baroData['vesselId'][1]].Asol
+                P1 = self.vessels[baroData['vesselId'][0]].Psol
+                P2 = self.vessels[baroData['vesselId'][1]].Psol
                 
                 data = {'Area1'   : A1,
                         'Area2'   : A2,
-                        'Pressure1': P1,
+                        'Pressure1':P1,
                         'Pressure2':P2,
-                        'Strain'  : np.zeros([np.shape(A)[0],2*np.shape(A)[1]]),
-                        'MStrain' : np.zeros(np.shape(A)[0]),
-                        'T'       : np.yeros(np.shape(A)[0])
+                        'Strain'  : np.zeros([self.nTsteps,np.shape(A1)[1]+np.shape(A2)[1]]),
+                        'MStrain' : np.zeros(self.nTsteps),
+                        'T'       : np.zeros(self.nTsteps)
                         }
                 
                 baroData['initialCompliance1'] = self.vessels[baroData['vesselId'][0]].compliance
@@ -493,15 +495,16 @@ class FlowSolver(object):
                         'EfferentSignal'    : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
                         'AffectedValue'     : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
                         }
-                
+            
             else:
-                
                 print 'Error: invalid Baroreceptor type'
+    
             
             baroData['data'] = data               
-            baroData['n']                       = self.currentTimeStep
+            baroData['currentTimeStep']         = self.currentTimeStep
+            baroData['currentMemoryIndex']      = self.currentMemoryIndex
             baroData['dt']                      = self.dt
-            baroData['nTsteps']                  = self.nTsteps    
+            baroData['nTsteps']                 = self.nTsteps    
             
             
             try:            
@@ -510,17 +513,22 @@ class FlowSolver(object):
                 terminalBoundaries = 0
                 
                 for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
-                    #if bcId == baroData['vesselId']:
-                    if bcId == 1: #type 1 boundary condition at inflow
+                    
+                    if bcId == self.vascularNetwork.root:
                         for bc in bcs:
                             if bc.type == 1:
                                 baroData['boundaryCondition'] = bc
-                    
-                    elif bcId != 1:
+                            
+                            elif bc.type == 2:
+                                baroData['boundaryConditionII'][bcID] = bcs
+                            
+                            else:
+                                print "ERROR FS 525: Wrong type of boundary condition"   
+                
+                    elif bcId != self.vascularNetwork.root:
                         for bc in bcs:
                             if bc.type == 2: # type 2 BC, outflow or Varying Elastance heart
                                 baroData['boundaryConditionII'][bcID] = bc
-                                
                                 if bc.position == -1:
                                     terminalBoundaries = terminalBoundaries + 1
                                     
