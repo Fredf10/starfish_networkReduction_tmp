@@ -5,14 +5,26 @@ import math
 
 class venousPool(object):
     """
-    Very simple model of the venous side, considering the veins as one big reservoir,
+    Very simple model of the venous side, considering the veins as one big compliant reservoir,
     and assuming a pure pressure gain between CVP and LAP
+    The Baroreflex regulates the unstretched volume of the venous side, through which the CVP and ultimately
+    the LAP are changed
+    
+    self.V is the blood volume in the veins
+    self.Vusv: unstretched Volume of Veins
+    self.P0: constant
+    self.k: constant
+    self.pressureGain: pressure gain from CVP to LAP --> a pure gain is used, value according to Bell
+    self.P: CVP
+    self.P_LA: pressure in left atrium (LAP)
+    self.Qin: inflow
+    self.Qout: outflow
     """
     
     __init__(self):
         
         self.dt = 0 #will be updated with update method
-        self.n = 0
+        self.n = 0 # current time step
         
         self.boundarys = 0 # make it a dictionary/needs to be initialized in FlowSolver
         
@@ -75,7 +87,7 @@ class venousPool(object):
     def updateVenousPool(self):
         """
         update the state of the venous pool (volume and pressure)
-        the model is from Ursino
+        the model is from Ursino_1999
         """
         
         self.V = self.V + self.dt*(-self.Qin + self.Qout)
