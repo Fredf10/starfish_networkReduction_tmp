@@ -54,7 +54,7 @@ class Field(object):
         P = self.P[n]
         Q = self.Q[n]
         A = self.A[n]
-                
+        
         # set bc values of predictor step arrays
         self.P_pre[0]   = P[0]
         self.P_pre[-1]  = P[-1] 
@@ -86,7 +86,7 @@ class Field(object):
         Q_pre[1:-1] = (Q[1:-1] - (m21*dPdz + m22*dQ2dz - b2 )*dt)
          
         # check pressure solution
-        if P_pre.any()<0:
+        if (P_pre < 0).any():
             print "ERROR: {} calculated negativ pressure in predictor step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print P_pre
             exit()
@@ -96,7 +96,7 @@ class Field(object):
             A_pre = A
         else:
             A_pre[1:-1] = self.AFunction(P_pre)[1:-1]        
-                         
+                                          
         #'''Corrector Step'''    
         # update matrices  
         m12,m21,m22,b2 = self.systemEquation.updateSystem(P_pre,Q_pre,A_pre)
@@ -112,7 +112,7 @@ class Field(object):
         self.Q[n+1][1:-1] = (Q[1:-1] + Q_pre[1:-1] - (m21*dPdz + m22*dQ2dz - b2 )*dt )/2.0
          
         # check pressure solution
-        if self.P[n+1].any() < 0:
+        if (self.P[n+1] < 0).any():
             print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print self.P[n+1]
             exit()

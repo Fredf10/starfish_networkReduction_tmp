@@ -313,9 +313,10 @@ class Vessel(object):
         '''
         try : return sqrt(Area/(self.rho*Compliance))
         except:
-            print "ERROR: classVessel.waveSpeed(): wave speed calculation of vessel id {}!".format(self.Id)
-            if Area.any() < 0: print "     Area < 0 !!!"
-            if Compliance.any() < 0: print "     Compliance < 0 !!!"
+            errorMessage = "ERROR: classVessel.waveSpeed(): wave speed calculation of vessel id {}!".format(self.Id)
+            if (Area < 0).any()  : errorMessage = errorMessage.join(["\n     Area < 0 !!!"])
+            if (Compliance < 0).any() : errorMessage = errorMessage.join(["\n    Compliance < 0 !!!"]) 
+            raise NameError(errorMessage)
             exit()
     
     def postProcessing(self):

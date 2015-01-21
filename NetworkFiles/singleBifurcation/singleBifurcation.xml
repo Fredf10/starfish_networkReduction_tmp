@@ -17,7 +17,7 @@
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0.000125</initMeanFlow>
-    <initMeanPressure unit="mmHg">33.</initMeanPressure>
+    <initMeanPressure unit="mmHg">100.</initMeanPressure>
     <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
     <compPercentageWK3>0.8</compPercentageWK3>
     <compPercentageTree>0.2</compPercentageTree>
@@ -28,7 +28,16 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-  <communicators/>
+  <communicators>
+  	<CommunicatorRealTimeViz>
+  		<comType>CommunicatorRealTimeViz</comType>
+  		<comId>1</comId>
+  		<vesselId>1</vesselId>
+  		<node>0</node>
+  		<dn>20</dn>
+  		<quantitiesToPlot>Pressure Flow</quantitiesToPlot>
+  	</CommunicatorRealTimeViz>  		
+  </communicators>
   <boundaryConditions>
     <boundaryCondition vesselId="0">
       <Flow-Sinus2>
