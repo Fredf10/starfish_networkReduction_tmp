@@ -293,7 +293,7 @@ def chooseSolutionDataCase():
     for dirName, dirNames, fileNames in os.walk(path):
         # print path to all filenames.
         for fileName in fileNames:
-            if ".pickle" in fileName and "polyChaos" not in fileName and "pure" not in fileName:
+            if ".hdf5" in fileName and "polyChaos" not in fileName and "pure" not in fileName:
                 fileName = fileName.split('.')[0]
                 splitName = fileName.split('_SolutionData_')
                 fileName = splitName[0]

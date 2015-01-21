@@ -1421,7 +1421,7 @@ class Visualisation2DMainGUI(gtk.Window):
         
         super(Visualisation2DMainGUI, self).__init__()
         # variables for windows                
-        self.set_size_request(550, 290)
+        self.set_size_request(650, 290)
         self.set_position(gtk.WIN_POS_CENTER)
         self.connect("destroy", gtk.main_quit)
         self.mainTitle = "2D Visualisation - "
