@@ -2,6 +2,10 @@
 <vascularNetwork55_Mod.xml id="1.0" version="4.0">
   <simulationContext>
     <totalTime unit="s">4.0</totalTime>
+    <timeSaveBegin unit="s">0.0</timeSaveBegin>
+	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+	<maxMemory unit="MB">500</maxMemory>
+	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.85</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>

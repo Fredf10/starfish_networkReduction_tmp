@@ -28,8 +28,8 @@ class VascularNetwork(object):
         self.quiet = quiet  # bool to suppress output
         
         # saving options
-        self.tSaveBegin = 0.0  # time when to start saving
-        self.tSaveEnd = 1.0  # time when to end saving
+        self.timeSaveBegin = 0.0  # time when to start saving
+        self.timeSaveEnd = 1.0  # time when to end saving
         self.maxMemory = 0.500  # maximum memory in MB 
         self.saveInitialisationPhase = False  # bool to enable saving of the initPhase
                 
@@ -356,16 +356,16 @@ class VascularNetwork(object):
         self.solutionDataFile = h5py.File(pathSolutionDataFilename, "w")
         
         # initialize saving indices
-        if  self.tSaveEnd < 0 or self.tSaveEnd > self.totalTime:
-            print "ERROR: VascularNetwork.initializeSolutionMatrices(): tSaveEnd not in [0, totalTime], exit()"
+        if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
+            print "ERROR: VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime], exit()"
             exit()
         
-        if self.tSaveBegin < 0 or self.tSaveBegin > self.tSaveEnd:
-            print "WARNING: VascularNetwork.initializeSolutionMatrices(): tSaveBegin not in [0, tSaveEnd], exit()"
+        if self.timeSaveBegin < 0 or self.timeSaveBegin > self.timeSaveEnd:
+            print "WARNING: VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd], exit()"
             exit()
         
-        self.nSaveBegin = int(np.floor(self.tSaveBegin / self.dt))
-        self.nSaveEnd = int(np.ceil(self.tSaveEnd / self.dt))
+        self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
+        self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
         
         # set save counter to the correct parts
         if self.initialisationPhaseExist:
@@ -514,9 +514,7 @@ class VascularNetwork(object):
         self.solutionDataFile = h5py.File(pathSolutionDataFilename, "r")
         
         vesselId = None
-        for groupName, group in self.solutionDataFile.iteritems():
-            print groupName
-            
+        for groupName, group in self.solutionDataFile.iteritems():            
             if groupName == 'VascularNetwork':
                 self.dt = group.attrs['dt']
                 self.nTsteps = group.attrs['nTsteps']

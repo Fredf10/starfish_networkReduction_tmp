@@ -3,6 +3,10 @@
   <simulationContext>
     <description>None</description>
     <totalTime unit="s">6.0</totalTime>
+    <timeSaveBegin unit="s">0.0</timeSaveBegin>
+	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+	<maxMemory unit="MB">500</maxMemory>
+	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>

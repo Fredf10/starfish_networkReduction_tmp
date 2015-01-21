@@ -61,7 +61,10 @@ unitsDictSI = {'m':1.0,
             'g': 1.E-3,
             'mg': 1.E-6,
             'rad':1.0,
-            'deg':np.pi/180.
+            'deg':np.pi/180.,
+            'MB': 1.0,
+            'KB': 1./1024.,
+            'GB': 1024.,
             }
 
 #----------------------------------------------------------------------------------------# 
@@ -116,7 +119,10 @@ unitsDictMed = {'m':1.0E2,
                 'g': 1.0,
                 'mg': 1.E-3,
                 'rad':1.0,
-                'deg':np.pi/180.0
+                'deg':np.pi/180.0,
+                'MB': 1.0,
+                'KB': 1./1024.,
+                'GB': 1024.,
                 }
 
 #----------------------------------------------------------------------------------------# 
@@ -278,10 +284,11 @@ variablesDict = {## class Vascular Network
                  # simulation context
                  'description'              : {'type':'str',   'unitSI': None,  'strCases': ['anything'], 'multiVar': False},
                  'totalTime'                : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
+                 'timeSaveBegin'            : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
+                 'timeSaveEnd'              : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
+                 'maxMemory'                : {'type':'float', 'unitSI': 'MB',  'strCases': None, 'multiVar': False},
+                 'saveInitialisationPhase'  : {'type':'bool',  'unitSI': None,      'strCases': None, 'multiVar': False},
                  'CFL'                      : {'type':'float', 'unitSI': None, 'strCases': None, 'multiVar': False},
-                 'cycleMode'                : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},
-                 'numberCycles'             : {'type':'int',   'unitSI': None, 'strCases': None, 'multiVar': False},
-                 'numberSavedCycles'        : {'type':'int',   'unitSI': None, 'strCases': None, 'multiVar': False},
                  'gravitationalField'       : {'type':'bool',  'unitSI': None,      'strCases': None, 'multiVar': False},
                  'gravityConstant'          : {'type':'float', 'unitSI': 'm s-2',   'strCases': None, 'multiVar': False},
                  'centralVenousPressure'    : {'type':'float',      'unitSI': 'Pa',      'strCases': None, 'multiVar': False},

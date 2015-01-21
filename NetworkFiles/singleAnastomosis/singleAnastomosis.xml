@@ -1,7 +1,11 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleAnastomosis.xml id="1.0" version="4.0">
+<singleAnastomosis.xml id="xxx" version="4.1">
   <simulationContext>
     <totalTime unit="s">2.0</totalTime>
+    <timeSaveBegin unit="s">0.0</timeSaveBegin>
+	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+	<maxMemory unit="MB">500</maxMemory>
+	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>

@@ -6,13 +6,14 @@
 simulationContextElements = ['description',
                              'totalTime',
                              'CFL',
-#                             'cycleMode'
-#                             'numberCycles',
-#                             'numberSavedCycles'
-                            'gravitationalField',
-                            'gravityConstant',
-                            'centralVenousPressure',
-                            'minimumVenousPressure']
+                             'timeSaveBegin',
+                             'timeSaveEnd',
+                             'maxMemory',
+                             'saveInitialisationPhase',
+                             'gravitationalField',
+                             'gravityConstant',
+                             'centralVenousPressure',
+                             'minimumVenousPressure']
 
 # initialisation controls
 solverCalibrationElements =  [
