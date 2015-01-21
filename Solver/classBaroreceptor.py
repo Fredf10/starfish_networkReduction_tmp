@@ -8,7 +8,6 @@ import copy
 import pprint
 import math
 import sys,os
-#import CellMLBaroReceptorModel as baroreceptorCellML
 
 
 # set the path relative to THIS file not the executing file!
@@ -27,7 +26,7 @@ class Baroreceptor(object):
         '''
         #System and Vessel Variables
         self.dt = 0
-        self.n = 0
+        self.n = 0 # current time step
         self.Tsteps = 0
         self.data = {}
         self.modelName = ''
