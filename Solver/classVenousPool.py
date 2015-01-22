@@ -118,10 +118,10 @@ class venousPool(object):
 
                 if self.boundarys[key][x].position == -1:
                     if self.boundarys[key][x].type == 'Windkessel-2Elements':
-                        self.boundarys[key][x].bcType2[0].venousPressure[n] = self.P
+                        self.boundarys[key][x].bcType2[0].venousPressure[n+1] = self.boundarys[key][x].bcType2[0].venousPressure[n+1]-self.boundarys[key][x].bcType2[0].venousPressure[0]+self.P
                             
                     if self.boundarys[key][x].type == 'Windkessel-3Elements':
-                        self.boundarys[key][x].bcType2[0].venousPressure[n] = self.P
+                        self.boundarys[key][x].bcType2[0].venousPressure[n+1] = self.boundarys[key][x].bcType2[0].venousPressure[n+1]-self.boundarys[key][x].bcType2[0].venousPressure[0]+self.P
                         print "VP126 venous pressure"
                         #print self.boundarys[key][x].bcType2[0].venousPressure[n]
                         #print self.V
@@ -132,7 +132,7 @@ class venousPool(object):
                         #print self.Qout
                         
                     if self.boundarys[key][x].type == 'Resistance':
-                        self.boundarys[key][x].bcType2[0].venousPressure[n] = self.P
+                        self.boundarys[key][x].bcType2[0].venousPressure[n+1] = self.boundarys[key][x].bcType2[0].venousPressure[n+1]-self.boundarys[key][x].bcType2[0].venousPressure[0]+self.P
                 
                 
              
