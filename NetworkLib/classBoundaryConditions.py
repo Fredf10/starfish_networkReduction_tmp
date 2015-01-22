@@ -1486,7 +1486,7 @@ class VaryingElastance(BoundaryConditionType2):
 		
 		self.system = {'both open':np.array([0, 1, 2]), 'mitral open': np.array([0, 1]), 'aortic open':np.array([1, 2])} 
 		
-				
+		self.newCycle = False		
 		self.cycleNumber = 0
 		self.num = 0
 		self.atriumPressure = 7.5 * 133.32  # Pressure in the atrium ## venouse pressure?!
@@ -1560,7 +1560,8 @@ class VaryingElastance(BoundaryConditionType2):
 						aortic_delta_p_close, aortic_K_v_open, aortic_K_v_close)
 	
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
-	
+		
+		self.newCycle = False
 		self.updateValves(P, n, dt)  # Update the state of the mitral and aortic valve at timestep n + 1
 		self.startNewCycleIfCriteriaIsMet(n, dt)
 		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)  # Compute the riemann variant going into the vessel save in omegaNew
@@ -1585,6 +1586,8 @@ class VaryingElastance(BoundaryConditionType2):
 		if self.getCycleTime(n + 1, dt) > self.T:
 			self.cycleNumber += 1
 			self.num = 0
+			self.newCycle = True
+			
 	def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
 		
 		# Qn1 == value at old time step
@@ -2064,7 +2067,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		
 # 		self.system = {'both open':np.array([0,1,2]), 'mitral open': np.array([0,1]), 'aortic open':np.array([1,2])} 
 		
-				
+		self.newCycle = False		
 		self.cycleNumber = 0
 		self.num = 0
 		self.atriumPressure = 7.5 * 133.32  # Pressure in the atrium ## venouse pressure?!
@@ -2105,7 +2108,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 	
 	def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 	
-# 		self.updateValves(P, n, dt)                     # Update the state of the mitral and aortic valve at timestep n + 1
+# 		self.updateValves(P, n, dt)
+		self.newCycle = False                     # Update the state of the mitral and aortic valve at timestep n + 1
 		self.startNewCycleIfCriteriaIsMet(n, dt)
 		self.funcPos0(_domegaField_, R, n, dt, P, Q, A)  # Compute the riemann variant going into the vessel save in omegaNew
 		
@@ -2124,6 +2128,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		if self.getCycleTime(n + 1, dt) > self.T:
 			self.cycleNumber += 1
 			self.num = 0
+			self.newCycle = True
 
 	def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
 		
