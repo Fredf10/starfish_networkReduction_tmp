@@ -34,7 +34,12 @@ class Baroreceptor(object):
         
         # Model from CellML or hardcoded
         self.cellMLBaroreceptorModel = False
-        self.cellMLimport = ''
+        self.cellMLimport = '' # for the import of the CellML file
+        
+        self.boundaryCondition = 0
+        self.boundaryConditionII = 0
+        self.boundaryConditionIIout = {}
+        
         
         self.update(BaroDict)
                 
@@ -121,7 +126,7 @@ class Baroreceptor(object):
             
     def update(self,baroDict):
             '''
-            updates the updateBaroreceptorDict data using a dictionary in form of 
+            updates the Baroreceptor using a dictionary in form of 
             baroDict = {'variableName': value}
             '''
             for key,value in baroDict.iteritems():
@@ -130,7 +135,8 @@ class Baroreceptor(object):
                     self.__setattr__(key,value)
                 except: 
                     print 'ERROR baroreceptor.update(): wrong key: %s, could not set up baroreceptor' %key
-          
+
+         
 class AorticBaroreceptor(Baroreceptor):
     
     '''
@@ -144,30 +150,35 @@ class AorticBaroreceptor(Baroreceptor):
         Baroreceptor.__init__(self,BaroDict)
         self.vesselId = 0
         
-        # boundary condition that will be adjusted (type 1 condition)
-        self.boundaryCondition  = 0
-        self.boundaryConditionII = 0
-        self.data = {}
+        # boundary conditions
+        #self.boundaryCondition  = 0
+        #self.boundaryConditionII = 0
+        
+        self.Area1 = 0
+        self.Area2 = 0
+        self.Pressure1 = 0
+        self.Pressure2 = 0
+        self.Strain = 0
+        self.MStrain = 0
+        self.T = 0
+        
         
         # initial Compliance information for estimation of unstretched radius
-        self.initialCompliance1 = 0
-        self.initialCompliance2 = 0
+        #self.initialCompliance1 = 0
+        #self.initialCompliance2 = 0
         
-        # update with data from dictionary
+        # update with dictionary
         self.update(BaroDict)
-        print "BR160"
-        print self.boundaryConditionII
         
-        self.Ao_1 = self.data['Area1'][0] 
-        self.Ao_2 = self.data['Area2'][0]
+        self.Ao_1 = self.Area1[0] 
+        self.Ao_2 = self.Area2[0]
         
-        self.Po_1 = self.data['Pressure1'][0]
-        self.Po_2 = self.data['Pressure2'][0]
-        
+        self.Po_1 = self.Pressure1[0]
+        self.Po_2 = self.Pressure2[0]
             
         #initial area and unstretched radius
-        self.Ro_1 = np.zeros(np.shape(self.data['Area1'])[0])
-        self.Ro_2 = np.zeros(np.shape(self.data['Area2'])[0])
+        self.Ro_1 = np.zeros(np.shape(self.Area1)[0])
+        self.Ro_2 = np.zeros(np.shape(self.Area2)[0])
         
         # estimate the unstretched Radii R0 for the calculation of the strain
         self.estimateUnstretchedRadius()
@@ -189,17 +200,17 @@ class AorticBaroreceptor(Baroreceptor):
         strain can be calculated.
         """
         
-        compliance1 = self.initialCompliance1.C(self.Po_1)
-        compliance2 = self.initialCompliance2.C(self.Po_2)
+        #compliance1 = self.initialCompliance1.C(self.Po_1)
+        #compliance2 = self.initialCompliance2.C(self.Po_2)
         
-        deltaA1 = compliance1 * self.Po_1
-        deltaA2 = compliance2 * self.Po_2
-        
-        
-        f = 1.6 # estimated value
-        
+        #deltaA1 = compliance1 * self.Po_1
+        #deltaA2 = compliance2 * self.Po_2
+
         #self.Ro_1 = np.power((self.Ao_1 - deltaA1)/math.pi,0.5)
         #self.Ro_2 = np.power((self.Ao_2 - deltaA2)/math.pi,0.5)
+        
+        
+        f = 1.35 # estimated value
         
         self.Ro_1 = np.power((self.Ao_1)/math.pi,0.5)/f
         self.Ro_2 = np.power((self.Ao_2)/math.pi,0.5)/f
@@ -211,11 +222,11 @@ class AorticBaroreceptor(Baroreceptor):
         n = self.currentTimeStep[0]
         n_mem = self.currentMemoryIndex[0]
         
-        ## read area, calculate radius and strain and save to data dictionary
-        A1 = self.data['Area1'][n_mem]
+        ## read area, calculate radius and strain
+        A1 = self.Area1[n_mem]
         R1 = np.power(A1/math.pi,0.5)
        
-        A2 = self.data['Area2'][n_mem]
+        A2 = self.Area2[n_mem]
         R2 = np.power(A2/math.pi,0.5)
         
         epsilon1 = (R1 - self.Ro_1)/self.Ro_1
@@ -225,10 +236,10 @@ class AorticBaroreceptor(Baroreceptor):
         epsilon = np.concatenate((epsilon1,epsilon2),axis=0)
         epsMean = np.mean(epsilon)
         
-        # update the data dictionary with the strain and the mean strain
+        # update the strain and the mean strain
         if n < self.nTsteps-1:
-            self.data['Strain'][n+1]  = epsilon
-            self.data['MStrain'][n+1] = epsMean
+            self.Strain[n+1]  = epsilon
+            self.MStrain[n+1] = epsMean
         
         
         # use CellML model to calculate new period, the method calcAndupdatePeriodcellML
@@ -236,24 +247,24 @@ class AorticBaroreceptor(Baroreceptor):
         if self.cellMLBaroreceptorModel == True:
             
             if self.boundaryCondition != 0:
-                self.calcAndupdatePeriodTypeIcellML(n,self.data['MStrain'][self.oldUpdateTime:(self.newUpdateTime-2)])
+                self.calcAndupdatePeriodTypeIcellML(n,self.MStrain[self.oldUpdateTime:(self.newUpdateTime-2)])
                 print "BR230"
                 print self.algebraic[-1][self.cellMLoutputID]
                 print self.boundaryCondition.Tperiod
                 
             else:
-                self.calcAndupdatePeriodTypeIIcellML(self.data['MStrain'][n:(n+1)])
+                self.calcAndupdatePeriodTypeIIcellML(self.MStrain[n:(n+1)])
             
-            # update the data dictionary with current period
+            # update the current period
             if self.cellMLoutputArray == 'algebraic':
                 
                 if n < self.nTsteps-1:
-                    self.data['T'][n+1] = self.algebraic[-1][self.cellMLoutputID]
+                    self.T[n+1] = self.algebraic[-1][self.cellMLoutputID]
             
             elif self.cellMLoutputArray == 'states':
                 
                 if n < self.nTsteps-1:
-                    self.data['T'][n+1] = self.states[-1][self.cellMLoutputID]    
+                    self.T[n+1] = self.states[-1][self.cellMLoutputID]    
         else:
             print 'Error: currently no hardcoded models for the Aortic BR available'
             
@@ -273,15 +284,23 @@ class CarotidBaroreceptor(Baroreceptor):
         self.vesselIdLeft = 0
         self.vesselIdRight = 0
         self.terminalBoundaries = 0
-        self.data = {}
         self.VenousPool = 0
         
         # the boundary conditions of type 1 and type 2
-        self.boundaryCondition = 0
-        self.boundaryConditionII = 0
-        self.boundaryConditionIIout = {}
+        #self.boundaryCondition = 0
+        #self.boundaryConditionII = 0
+        #self.boundaryConditionIIout = {}
         
-        # get data from dictionary
+        self.pressureLeft = 0
+        self.pressureRight = 0
+        self.LeftAfferentSignal = 0
+        self.RightAfferentSignal = 0
+        self.AfferentSignal = 0
+        self.EfferentSignal = 0
+        self.AffectedValue = 0
+        
+        
+        # update with dictionary
         self.update(BaroDict)
                 
         print "BR286"
@@ -364,8 +383,8 @@ class CarotidBaroreceptor(Baroreceptor):
         the firing rate of the carotid sinus will be processed by the efferent part
         """
         
-        pLeft = np.mean(self.data['pressureLeft'][n_mem])
-        pRight = np.mean(self.data['pressureRight'][n_mem])
+        pLeft = np.mean(self.pressureLeft[n_mem])
+        pRight = np.mean(self.pressureRight[n_mem])
         
         if n == 0:
             
@@ -374,8 +393,8 @@ class CarotidBaroreceptor(Baroreceptor):
             
         else:
             
-            dpLeft = (pLeft - np.mean(self.data['pressureLeft'][n_mem-1]))/self.dt
-            dpRight = (pRight - np.mean(self.data['pressureRight'][n_mem-1]))/self.dt
+            dpLeft = (pLeft - np.mean(self.pressureLeft[n_mem-1]))/self.dt
+            dpRight = (pRight - np.mean(self.pressureRight[n_mem-1]))/self.dt
                 
         self.PtildLeft[n+1] = (pLeft + self.tau_z*dpLeft-self.PtildLeft[n])*self.dt/self.tau_p+self.PtildLeft[n]
         self.PtildRight[n+1] = (pRight + self.tau_z*dpRight-self.PtildRight[n])*self.dt/self.tau_p+self.PtildRight[n]
@@ -508,9 +527,9 @@ class CarotidBaroreceptor(Baroreceptor):
         self.UrsinoEfferent(n)
         self.UrsinoResistanceEffector(n)
         self.UrsinoEmaxLVEffector(n) 
-        self.UrsinoVusvEffector(n)
+        #self.UrsinoVusvEffector(n)
         self.updateBC2(n)
-        self.updateVenousSide(n)
+        #self.updateVenousSide(n)
 
      
     def __call__(self):

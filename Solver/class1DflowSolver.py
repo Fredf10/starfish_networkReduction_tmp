@@ -55,10 +55,10 @@ class FlowSolver(object):
               
         # Baroreceptor model
         self.baroreceptors = {}
-        baro = False
+        baro = True
         if baro == True:
-            #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[0,1], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
-            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
         vein = False
         self.venousPool = 0
         
@@ -464,58 +464,17 @@ class FlowSolver(object):
     def initializeBaroreceptors(self):
         
         '''
-        function used to initialize Baroreceptor objects
+        method used to initialize Baroreceptor (baroreflex) objects
         '''
         
         for baroId, baroData in self.baroreceptors.iteritems():
             
-            
-            # this could be rewritten in a nicer way            
-            if baroData['receptorType'] == 'AorticBR':
-                
-                A1 = self.vessels[baroData['vesselId'][0]].Asol
-                A2 = self.vessels[baroData['vesselId'][1]].Asol
-                P1 = self.vessels[baroData['vesselId'][0]].Psol
-                P2 = self.vessels[baroData['vesselId'][1]].Psol
-                
-                data = {'Area1'   : A1,
-                        'Area2'   : A2,
-                        'Pressure1':P1,
-                        'Pressure2':P2,
-                        'Strain'  : np.zeros([self.nTsteps,np.shape(A1)[1]+np.shape(A2)[1]]),
-                        'MStrain' : np.zeros(self.nTsteps),
-                        'T'       : np.zeros(self.nTsteps)
-                        }
-                
-                baroData['initialCompliance1'] = self.vessels[baroData['vesselId'][0]].compliance
-                baroData['initialCompliance2'] = self.vessels[baroData['vesselId'][1]].compliance
-                
-                    
-            elif baroData['receptorType'] == 'CarotidBR':
-                
-                data = {
-                        'pressureLeft'      :self.vessels[baroData['vesselIdLeft']].Psol,
-                        'pressureRight'     :self.vessels[baroData['vesselIdRight']].Psol,
-                        'LeftAfferentSignal' : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
-                        'RightAfferentSignal': np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
-                        'AfferentSignal'    : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
-                        'EfferentSignal'    : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol)),
-                        'AffectedValue'     : np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
-                        }
-            
-            else:
-                print 'Error: invalid Baroreceptor type'
-    
-            
-            baroData['data'] = data               
             baroData['currentTimeStep']         = self.currentTimeStep
             baroData['currentMemoryIndex']      = self.currentMemoryIndex
             baroData['dt']                      = self.dt
-            baroData['nTsteps']                 = self.nTsteps    
+            baroData['nTsteps']                 = self.nTsteps
             
-            
-            try:            
-                
+            try:                
                 bc2out = {}
                 terminalBoundaries = 0
                 
@@ -551,19 +510,57 @@ class FlowSolver(object):
                                                                        
             except: pass
             
-            
+             
+            #for an aortic baroreceptor
+            #usually the aortic arch is modelled with two vessel segments (Aortic Arch A and Aortic Arch B)
+            # therefore it takes two vessels with their respective vesselID's
+                       
             if baroData['receptorType'] == 'AorticBR':
+                
+                A1 = self.vessels[baroData['vesselId'][0]].Asol
+                A2 = self.vessels[baroData['vesselId'][1]].Asol
+                P1 = self.vessels[baroData['vesselId'][0]].Psol
+                P2 = self.vessels[baroData['vesselId'][1]].Psol
+                
+                baroData['Area1'] = A1
+                baroData['Area2'] = A2
+                baroData['Pressure1'] = P1
+                baroData['Pressure2'] = P2
+                baroData['Strain'] = np.zeros([self.nTsteps,np.shape(A1)[1]+np.shape(A2)[1]])
+                baroData['MStrain'] = np.zeros(self.nTsteps)
+                baroData['T']       = np.zeros(self.nTsteps)
+                
+                #baroData['initialCompliance1'] = self.vessels[baroData['vesselId'][0]].compliance
+                #baroData['initialCompliance2'] = self.vessels[baroData['vesselId'][1]].compliance
                 
                 self.baroreceptors[baroId] = AorticBaroreceptor(baroData) # call the constructor
                 
+            
+            ## usually the left and right carotid sinus are modelled with one vessel each
+            ## therefore the CarotidBR takes two Vessel Id's one for the left CS and one for the right CS        
             elif baroData['receptorType'] == 'CarotidBR':
                 
-                baroData['terminalBoundaries'] = terminalBoundaries
-                baroData['VenousPool'] = self.venousPool
-                self.baroreceptors[baroId] = CarotidBaroreceptor(baroData)
+                baroData['pressureLeft']   = self.vessels[baroData['vesselIdLeft']].Psol
+                baroData['pressureRight']  = self.vessels[baroData['vesselIdRight']].Psol
+                baroData['LeftAfferentSignal'] = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
+                baroData['RightAfferentSignal']= np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
+                baroData['AfferentSignal'] = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
+                baroData['EfferentSignal'] = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
+                baroData['AffectedValue']  = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
+
+                baroData['terminalBoundaries'] = terminalBoundaries # number of terminal boundaries used to calculate delta_R for each WK at the distal end of a network
+                baroData['VenousPool'] = self.venousPool # venous pool object for the update of Vusv
                 
-            
+                self.baroreceptors[baroId] = CarotidBaroreceptor(baroData) # call the constructor
+                
+            else:
+                print 'Error: invalid Baroreceptor type'
+    
+        
     def initializeVenousPool(self):
+        """
+        method for the initialization of a "venous pool"
+        """
         
         VPdict = {}
         VPdict['currentTimeStep'] = self.currentTimeStep
@@ -571,7 +568,7 @@ class FlowSolver(object):
         VPdict['dt'] = self.dt
         VPdict['boundarys'] = self.boundarys
         
-        self.venousPool = venousPool(VPdict)        
+        self.venousPool = venousPool(VPdict) # call to the constructor of venousPool       
             
     
     def initializeCommunicators(self):
