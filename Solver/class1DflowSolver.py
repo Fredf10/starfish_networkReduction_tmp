@@ -15,6 +15,7 @@ from classConnections import *
 from classFields import *
 from classCommunicators import *
 from classBaroreceptor import *
+from classVenousPool import *
 from classDataHandler import DataHandler
 
 sys.path.append(cur+'/UtilityLib/')
@@ -56,8 +57,11 @@ class FlowSolver(object):
         self.baroreceptors = {}
         baro = False
         if baro == True:
-            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[0,1], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
-            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[0,1], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+        vein = False
+        self.venousPool = 0
+        
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
         # time step
@@ -119,6 +123,9 @@ class FlowSolver(object):
         self.initializeConnections()
         self.initializeFields()
         self.initializeCommunicators()
+        if vein == True:
+            self.initializeVenousPool()
+        
         self.initializeBaroreceptors()
         self.initializeNumericalObjectList()
         if quiet==False:
@@ -509,7 +516,7 @@ class FlowSolver(object):
             
             try:            
                 
-                baroData['boundaryConditionII'] = {}
+                bc2out = {}
                 terminalBoundaries = 0
                 
                 for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
@@ -520,7 +527,9 @@ class FlowSolver(object):
                                 baroData['boundaryCondition'] = bc
                             
                             elif bc.type == 2:
-                                baroData['boundaryConditionII'][bcID] = bcs
+                                baroData['boundaryConditionII'] = bc
+                                print "FS524"
+                                print bc2
                             
                             else:
                                 print "ERROR FS 525: Wrong type of boundary condition"   
@@ -528,11 +537,17 @@ class FlowSolver(object):
                     elif bcId != self.vascularNetwork.root:
                         for bc in bcs:
                             if bc.type == 2: # type 2 BC, outflow or Varying Elastance heart
-                                baroData['boundaryConditionII'][bcID] = bc
+                                #bc2[bcId] = bc
                                 if bc.position == -1:
+                                    print "FS535"
+                                    print bc
+                                    bc2out[bcId] = bc
                                     terminalBoundaries = terminalBoundaries + 1
                                     
                                 else: pass
+                baroData['boundaryConditionIIout'] = bc2out
+                print"FS537"
+                print bc2out
                                                                        
             except: pass
             
@@ -544,10 +559,19 @@ class FlowSolver(object):
             elif baroData['receptorType'] == 'CarotidBR':
                 
                 baroData['terminalBoundaries'] = terminalBoundaries
+                baroData['VenousPool'] = self.venousPool
                 self.baroreceptors[baroId] = CarotidBaroreceptor(baroData)
                 
             
-            
+    def initializeVenousPool(self):
+        
+        VPdict = {}
+        VPdict['currentTimeStep'] = self.currentTimeStep
+        VPdict['currentMemoryIndex'] = self.currentMemoryIndex
+        VPdict['dt'] = self.dt
+        VPdict['boundarys'] = self.boundarys
+        
+        self.venousPool = venousPool(VPdict)        
             
     
     def initializeCommunicators(self):
@@ -638,7 +662,11 @@ class FlowSolver(object):
             except: pass
             
         for baroreceptor in self.baroreceptors.itervalues():
-            self.numericalObjects.append(baroreceptor) 
+            self.numericalObjects.append(baroreceptor)
+            
+        if self.venousPool != 0:
+            self.numericalObjects.append(self.venousPool)
+        else: pass
             
         dataHandler = DataHandler(self.currentTimeStep,
                                   self.nTsteps,
