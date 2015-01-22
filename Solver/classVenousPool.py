@@ -21,65 +21,71 @@ class venousPool(object):
     self.Qout: outflow
     """
     
-    __init__(self):
+    def __init__(self,dataDict):
         
         self.dt = 0 #will be updated with update method
-        self.n = 0 # current time step
+        self.currentTimeStep = 0 # current time step
+        self.currentMemoryIndex = 0
         
         self.boundarys = 0 # make it a dictionary/needs to be initialized in FlowSolver
         
-        self.update()
+        self.update(dataDict)
         
-        self.V = 5600.0 * 10e-6 * 0.61 # estimated blood volume on venous side under normal conditions
-        self.Vusv0 = 3213 * 10e-6 # unstretched volume at reference state
+        self.V = 5600.0e-6 * 0.61 # estimated blood volume on venous side under normal conditions
+        self.Vusv0 = 3213e-6 # unstretched volume at reference state
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
-        self.k = 0.1124*10e-9 # constant
+        self.k = 0.1124 #0.1124e-9 # constant
         
         self.pressureGain = 1.0/0.228 # pressure gain between CVP and LAP - Bell paper
         
-        self.Vusv = 2378.0 *10e-3 # initial states for Vus, CVP and LAP
-        self.P = self.P0*(math.exp(self.k*math.pow((self.V-self.Vusv),1.5)/self.V))
+        self.Vusv = 2378.0e-6 # initial states for Vus, CVP and LAP
+        self.P = self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
+        print "VP44"
+        print self.P
+        print self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)
+        print self.V
         self.P_LA = self.pressureGain*self.P
         
         self.Qin = 0.0 # in and outflow to the venous pool
         self.Qout = 0.0
-        
             
     def estimateInflow(self):
         """
         calculate the inflow to the venous side, from terminal boundary conditions
         """
-        n = self.n[0]
+        n = self.currentTimeStep[0]
         Qin = 0
         
-        
-        for boundaryID, boundary in self.boundarys:
-            
-            if boundary.position == -1: #distal boundaries    
-                Qin = Qin + boundary.Q[n]
-                
+        for key in self.boundarys:
+            for x in range(len(self.boundarys[key])):
+                if self.boundarys[key][x].position == -1: #distal boundaries    
+                    Qin = Qin + self.boundarys[key][x].Q[self.currentMemoryIndex,-1]
+
         self.Qin = Qin
         
         
     
-    def estimateOutflow
+    def estimateOutflow(self):
         """
         calculate outflow
         """
-        n = self.n[0]
+        n = self.currentTimeStep[0]
         Qout = 0
         
-        for boundaryID,boundary in self.boundarys:
-            
-            if boundary.position == 0: #proximal boundaries
-                
-                if boundary.bcType2[0].name == 'VaryingElastanceHeart':     
-                    Qout = Qout + boundary.bcType2[0].mitralQ[n]
-                
-                else:
-                    Qout = Qout + boundary.Q[n]
-                           
+        for key in self.boundarys:
+            for x in range(len(self.boundarys[key])):
+                if self.boundarys[key][x].position == 0: #proximal boundaries
+                    
+                    if self.boundarys[key][x].bcType2[0].name == 'VaryingElastanceHeart':     
+                        Qout = Qout + self.boundarys[key][x].bcType2[0].mitralQ[n]
+                        #print "VP 78"
+                        #print self.boundarys[key][x].bcType2[0].mitralQ[n]
+                        
+                    else:
+                        Qout = Qout + self.boundarys[key][x].Q[self.currentMemoryIndex,0]
+                        
+                        
         self.Qout = Qout
         
         
@@ -89,9 +95,8 @@ class venousPool(object):
         update the state of the venous pool (volume and pressure)
         the model is from Ursino_1999
         """
-        
         self.V = self.V + self.dt*(-self.Qin + self.Qout)
-        self.P = self.P0*(math.exp(self.k*math.pow((self.V-self.Vusv),1.5)/self.V))
+        self.P = self.P0*(math.exp(self.k*math.pow((self.V[0]*1e6-self.Vusv*1e6),1.5)/(self.V[0]*1e6)))
         self.P_LA = self.pressureGain*self.P
         
     
@@ -100,21 +105,34 @@ class venousPool(object):
         """
         update all the boundary conditions
         """
+        n = self.currentTimeStep[0]
         
-        for boundaryID,boundary in self.boundarys:
-            
-            for bc in boundary.bcType2:
-                if bc.name == 'VaryingElastanceHeart':
-                    bc.atriumPressure = self.P_LA
-                    
-                elif bc.name == 'Windkessel-2Elements':
-                    bc.venousPressure = self.P
-                    
-                elif bc.name == 'Windkessel-3Elements':
-                    bc.venousPressure = self.P
-                    
-                elif bc.name == 'Resistance':
-                    bc.venousPressure = self.P
+        for key in self.boundarys:
+            for x in range(len(self.boundarys[key])):
+                
+                if self.boundarys[key][x].position == 0:
+                    if self.boundarys[key][x].type == 'VaryingElastanceHeart':
+                        self.boundarys[key][x].atriumPressure = self.P_LA
+                        
+                    else: pass
+
+                if self.boundarys[key][x].position == -1:
+                    if self.boundarys[key][x].type == 'Windkessel-2Elements':
+                        self.boundarys[key][x].bcType2[0].venousPressure[n] = self.P
+                            
+                    if self.boundarys[key][x].type == 'Windkessel-3Elements':
+                        self.boundarys[key][x].bcType2[0].venousPressure[n] = self.P
+                        print "VP126 venous pressure"
+                        #print self.boundarys[key][x].bcType2[0].venousPressure[n]
+                        #print self.V
+                        print self.P
+                        #print self.P_LA
+                        print self.Vusv
+                        #print self.Qin
+                        #print self.Qout
+                        
+                    if self.boundarys[key][x].type == 'Resistance':
+                        self.boundarys[key][x].bcType2[0].venousPressure[n] = self.P
                 
                 
              
