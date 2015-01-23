@@ -13,6 +13,7 @@ import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/NetworkLib')
+sys.path.append(cur+'/cellMLBaroreflexModels')
 
 class Baroreceptor(object):
     """
@@ -210,7 +211,7 @@ class AorticBaroreceptor(Baroreceptor):
         #self.Ro_2 = np.power((self.Ao_2 - deltaA2)/math.pi,0.5)
         
         
-        f = 1.35 # estimated value
+        f = 1.35 # estimated value, probably somewhere between 1.35 and 1.65
         
         self.Ro_1 = np.power((self.Ao_1)/math.pi,0.5)/f
         self.Ro_2 = np.power((self.Ao_2)/math.pi,0.5)/f
