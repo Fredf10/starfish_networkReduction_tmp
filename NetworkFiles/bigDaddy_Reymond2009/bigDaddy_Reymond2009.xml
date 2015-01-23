@@ -4,7 +4,7 @@
     <description>None</description>
     <totalTime unit="s">4.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+	<timeSaveEnd unit="s">4.0</timeSaveEnd>
 	<maxMemory unit="MB">500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.45</CFL>

@@ -1198,7 +1198,7 @@ class Windkessel3(BoundaryConditionType2):
 		self.Z0 = None  # vesselimpedance at first step
 		self.RcNum = None
 			
-		self.venousPressure = 0  # 7.*133.
+		self.venousPressure = [0]  # 7.*133.
 		self.returnFunction = None
 		self.omegaNew = np.empty((2))
 		self.dQInOut = np.empty((2))

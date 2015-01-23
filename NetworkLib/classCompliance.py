@@ -68,7 +68,7 @@ class Compliance(object):
 		'''
 		return self.C0preCalculated[node]	
 	
-	def updateDataDict(self, complianceData):
+	def update(self, complianceData):
 		'''
 		updates the compliance data using a dictionary in from of 
 		complianceData = {'variableName': value}
@@ -94,7 +94,7 @@ class Exponential(Compliance):
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
 		'''
-		self.updateDataDict(complianceDataDict)
+		self.update(complianceDataDict)
 		self.betaExponential = np.ones(len(self.As))*self.betaExponential 
 		self.C0preCalculated = self.C(self.Ps)
 	
@@ -129,7 +129,7 @@ class Laplace(Compliance):
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
 		'''
-		self.updateDataDict(complianceDataDict)
+		self.update(complianceDataDict)
 		self.betaLaplace     = np.ones(len(self.As))*self.betaLaplace 
 		self.C0preCalculated = self.C(self.Ps)
 	
@@ -164,7 +164,7 @@ class Laplace2(Laplace):
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
 		'''
-		self.updateDataDict(complianceDataDict)
+		self.update(complianceDataDict)
 		self.betaLaplace = (np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
 		self.C0preCalculated = self.C(self.Ps)
 		
@@ -183,7 +183,7 @@ class Hayashi(Compliance):
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
 		'''
-		self.updateDataDict(complianceDataDict)
+		self.update(complianceDataDict)
 		self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
 		self.C0preCalculated = self.C(self.Ps)
 	
@@ -225,7 +225,7 @@ class Reymond(Compliance):
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
 		'''
-		self.updateDataDict(complianceDataDict)
+		self.update(complianceDataDict)
 		self.Cs              = self.As*self.distensibility 
 		self.C0preCalculated = self.C(self.Ps)
 			

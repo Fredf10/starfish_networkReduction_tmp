@@ -197,7 +197,7 @@ def enterFilename(filename, endString,recentFilenames = None):
     return filenameT
     
 def tempSave(vascularNetwork):
-    FILE = open('.tempData.pickle',"w")
+    FILE = open('.tempData.xml',"w")
     vascularNetwork.quiet = True
     # store pickle
     vascularNetwork.prepareToSave()
@@ -206,11 +206,11 @@ def tempSave(vascularNetwork):
     
 def tempLoad():
     try:
-        FILE = open('.tempData.pickle',"rb")
+        FILE = open('.tempData.xml',"rb")
         vascularNetwork = cPickle.load(FILE)
         FILE.close()    
     except:
-        print "WARNING vnc-classes.py - could nof find tempData.pickle"
+        print "WARNING vnc-classes.py - could nof find tempData.xml"
     vascularNetwork.evaluateConnections()
     vascularNetwork.quiet = True
     
