@@ -109,6 +109,7 @@ def main():
     
     gc.collect()
     
+    
     if vizOutput == "2D":
         string = ' '.join(['python',cur+'/Visualisation/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber)])                
         subprocess.Popen(string, shell=True)

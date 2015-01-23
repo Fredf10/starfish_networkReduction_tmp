@@ -1,5 +1,8 @@
  
 import sys, os
+from reportlab.lib.validators import isNumber
+from duplicity.tarfile import TUREAD
+# from UtilityLib.saveSimulationDataToCSV import vesselId
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../NetworkLib')
@@ -36,6 +39,9 @@ class VascularNetwork(object):
         self.memoryArraySizeTime = None  # memory array size for the time arrays
         self.solutionDataFile = None  # file name of the solution data
         
+        # keep track of time points loaded in memory
+        self.tsol =None
+        
         # running options
         self.cycleMode = False
         
@@ -45,6 +51,7 @@ class VascularNetwork(object):
         self.dt = None  # time step of the simulation determined by the solver
         self.nTsteps = None  # number of timesteps of the simulation case determined by the solver
         self.simulationTime = None  # array with simulation Time
+        
                 
         # self.motion         = {'keyframe': [0, 0.1, 1.0],
         #                        'X1'     : [0, 45, 90]}
@@ -69,7 +76,7 @@ class VascularNetwork(object):
         # self.solvingSchemeField       = 'MacCormack' # MacCormack
         self.solvingSchemeConnections = 'Linear'  # 'Linear'
                 
-        # initialisation controls
+        # initialization controls
         self.initialsationMethod = 'Auto'  # 'Auto', 'MeanFlow', 'MeanPressure', 'ConstantPressure'
         self.initMeanFlow = 0.0  # initial mean flow value (at inflow point)
         self.initMeanPressure = 0.0  # initial pressure value (at inflow point)
@@ -114,9 +121,9 @@ class VascularNetwork(object):
     def addVessel(self, vesselId=None, dataDict=False):
         '''
         adds vessel to the Network
-    	if no id, a random id is choosen
-    	if no DataDict, no values are assigned
-    	'''
+        if no id, a random id is choosen
+        if no DataDict, no values are assigned
+        '''
         # set id to 1 + highest id of existing vessels
         if vesselId == None: 
             try: vesselId = max(self.vessels.keys()) + 1
@@ -173,11 +180,11 @@ class VascularNetwork(object):
                       'vesselData': {}}
 
             'vascularNetworkData'  := dict with all vascularNetwork variables to update
-			'globalFluid'          := dict with all global fluid properties
-			'globalFluidPolyChaos' := dict with all global fluid polynomial chaos values
-			'communicators'        := netCommunicators}
+            'globalFluid'          := dict with all global fluid properties
+            'globalFluidPolyChaos' := dict with all global fluid polynomial chaos values
+            'communicators'        := netCommunicators}
             
-			'vesselData Dict'      := { vessel.id : DataDict}
+            'vesselData Dict'      := { vessel.id : DataDict}
         '''
         
         for dictName in ['vascularNetworkData']:
@@ -206,7 +213,7 @@ class VascularNetwork(object):
     def showNetwork(self):
         '''
         writes Network properties (without vesselData) to console
-	    '''
+        '''
         print "-------------------"
         print " vascularNetwork ", self.name, "\n"
         for variable, value in self.__dict__.iteritems():
@@ -378,8 +385,10 @@ class VascularNetwork(object):
         # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
         estimatedMemorySolutionDataSpace = 0
         for vessel in self.vessels.itervalues():
-             estimatedMemorySolutionDataSpace += vessel.N * 8 * 3  # byte
+            estimatedMemorySolutionDataSpace += vessel.N * 8 * 3  # byte
+        
         self.memoryArraySizeTime = int(np.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))       
+        # Don't allocate more memory than needed
         if self.memoryArraySizeTime > (self.nTsteps + 1):
             self.memoryArraySizeTime = self.nTsteps + 1
                 
@@ -417,7 +426,7 @@ class VascularNetwork(object):
         headUpTilt = False
         # # head up tilt
         if headUpTilt == True:
-            tSteps4 = int(nTsteps / 6.0)
+            tSteps4 = int(self.nTsteps / 6.0)
             start = self.vessels[1].angleXMother
             end = start - 80 * np.pi / 180
             startAngle = np.ones(tSteps4 * 2.0) * start
@@ -485,20 +494,19 @@ class VascularNetwork(object):
 #         try: simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
 #         except: simulationTime = self.simulationTime
 #         
-#         solutionData['vascularNetwork'] = { 'simulationTime': simulationTime,
+#         solutionData['vascularNetwork'] = { 'simulationTime': ,
 #                                             'dt'            : self.dt,
 #                                             'nTsteps'       : self.nTsteps }
         
         
         
-    def loadSolutionData(self):
+    def linkSolutionData(self):
         '''
         This function prepares the solution data when the network is loaded
-        and saves it in the corresponding vessel instance
+        assigning the appropriate information to allow the user to call 
+        classVascularNetwork::loadSolutionDataRange to get specific values 
+        loaded into memory.
         
-        this includes as well postprocessing methods for
-        - wave speed
-        - mean velocity
         '''
         
         
@@ -510,7 +518,8 @@ class VascularNetwork(object):
         pathSolutionDataFilename = ''.join([solutionDirectory, '/', self.name, '_SolutionData_', self.dataNumber, '.hdf5'])
         if not os.path.exists(solutionDirectory):
             os.makedirs(solutionDirectory)  
-        
+
+        # TODO, what if this fails? do we know?
         self.solutionDataFile = h5py.File(pathSolutionDataFilename, "r")
         
         vesselId = None
@@ -525,12 +534,116 @@ class VascularNetwork(object):
                     # try:
                     # link data
                     self.vessels[vesselId].linkSolutionData(group)
-                    # load in memeory
-                    self.vessels[vesselId].loadDataInMemory()
                     # except: 
                         # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                 # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
+     
         
+        self.initialize()
+        # vessel postprocessing # should be moved where it is used
+        # for vessel in self.vessels.itervalues():
+        #    vessel.postProcessing()
+        
+               
+    def _checkAccessInputs(self,t1,t2, mindt):
+        
+        # Check if the time span is valid
+        startTime = self.simulationTime[0];
+        endTime = self.simulationTime[-1]
+        
+        
+        # Assume inputs are valid, otherwise flag invalid inputs
+        inputsAreValid = True
+        if t1>t2 :
+            print 'ERROR:Invalid time range t1=', t1, '> t2=', t2
+            inputsAreValid = False
+                 
+        if t1 < startTime :
+            print 'ERROR:Invalid start time t1=', t1, 'before beginning of saved data t=', startTime
+            inputsAreValid = False
+        
+        if t2 > endTime:
+            print 'ERROR:Invalid end time t2=', t2, 'after end of saved data t=', endTime
+            inputsAreValid = False
+            
+        if isNumber(mindt) and mindt > endTime - startTime:
+            inputsAreValid = False
+            print 'ERROR: Invalid minimum time step ', mindt , ' larger than solution time span.'
+         
+        if self.dt > t2-t1:
+            inputsAreValid = False
+            print 'ERROR: Invalid time range t2-t1=', t2-t1, 'is smaller than the solution time step dt'
+          
+        return inputsAreValid
+        
+    def loadSolutionDataRange(self, vesselIds, tspan=None, mindt=None, 
+                                  values={"loadAll": False,
+                                  "loadPressure":True,
+                                  "loadFlow":True, 
+                                  "loadArea":True, 
+                                  "loadWaveSpeed":False, 
+                                  "loadMeanVelocity":False}):
+        '''
+        loads the solution data of the vessels specified into memory for the times 
+            specified and drops any other previously loaded data.
+        Inputs:
+            vesselIds - a list of vessel Ids to load
+            tspan=[t1,t2] - a time range to load into memory t2 must be greater than t1.
+                if tspan=None, all times are loaded
+            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll', 
+                'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All' 
+                is in the list all quantities are loaded. Inputs are case insensitive.
+            mindt := the minimum spacing in time between successively loaded points if 
+                none is specified, the solution time step is used.
+        Effects and Usage:
+            loads the specified values into memory such that they may be accessed as
+            vascularNetwork.vessels[vesselId].Pressure, etc, returning a matrix of 
+            solution values corresponding to the time points in vascularNetwork.tsol.
+            Accessing vessels and values not set to be loaded will produce errors.
+        '''
+        # Update loaded data tracking if inputs are valid
+        # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
+        
+        
+        if values.get('loadAll',False):
+            values['loadPressure'] = True
+            values['loadArea'] = True
+            values['loadFlow'] = True
+            values['loadWaveSpeed'] = True
+            values['loadMeanVelocity'] = True
+        elif values.get('loadWaveSpeed',False):
+            values['loadPressure'] = True
+            values['loadArea'] = True
+        elif values.get('loadMeanVelocity',False):
+            values['loadPressure'] = True
+            values['loadFlow'] = True
+            
+        if tspan is not None:
+            t1 = tspan[0]
+            t2 = tspan[1]
+        else:
+            t1 = self.simulationTime[0]
+            t2 = self.simulationTime[-1]
+        
+        
+        if self._checkAccessInputs(t1, t2, mindt):
+            nSelectedBegin, nSelectedEnd =self.getFileAccessIndices(t1, t2)
+            
+            if isNumber(mindt):
+                nTStepSpaces = int(np.ceil(mindt / self.dt))
+            else:
+                nTStepSpaces = 1
+                
+            self.tsol = self.simulationTime[nSelectedBegin:nSelectedEnd:nTStepSpaces]
+            # Update selected vessels
+            for vesselId in vesselIds:
+                self.vessels[vesselId].loadSolutionRange(values,nSelectedBegin, nSelectedEnd, nTStepSpaces)
+            
+        else:
+            print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
+            exit()
+              
+#         #Debug Plotting
 #         import matplotlib.pyplot as plt
 #         plt.subplot(311)
 #         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]/133.32)
@@ -542,12 +655,16 @@ class VascularNetwork(object):
 #         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1000.**2.)
 #         plt.ylabel('Area')
 #         plt.show()
-#         
+#                  
+    
+        #return STATUS
+    def getFileAccessIndices(self,t1,t2):
+        startTime = self.simulationTime[0]
+        nSelectedBegin = int(np.floor((t1 - startTime) / self.dt))
+        nSelectedEnd = int(np.ceil((t2 - startTime) / self.dt))+1
+        return nSelectedBegin, nSelectedEnd
         
-        self.initialize()
-        # vessel postprocessing # should be moved where it is used
-        for vessel in self.vessels.itervalues():
-            vessel.postProcessing()
+        
         
         
     def findRootVessel(self):

@@ -725,7 +725,7 @@ class Visualisation3D(Visualisation3DGUI):
         if self.networkName and self.dataNumber:
             # load vascular network
             vascularNetwork = moduleXML.loadNetworkFromXML(filename = self.networkName, dataNumber = self.dataNumber)
-            vascularNetwork.loadSolutionData()
+            vascularNetwork.linkSolutionData()
             self.vascularNetwork = vascularNetwork    
         
     def createVessel3D(self):
@@ -1071,8 +1071,7 @@ class Vessel3D(Vessel):
         
         self.initialize({})
         self.quiet = True
-        
-       
+                
         # new variables
         self.areaFactor     = areaFactor
         self.wallMovement   = wallMovement

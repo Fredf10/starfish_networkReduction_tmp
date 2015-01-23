@@ -54,13 +54,17 @@ class FlowSolver(object):
         self.communicators = {}
               
         # Baroreceptor model
+        # this needs to be configured by the xml specification, as it breaks the other networks if
+        # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
-        baro = True
+        # Set this to False for checkins unless the test cases work with it.
+        baro = False 
         if baro == True:
             self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
             #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
         vein = False
         self.venousPool = 0
+        #
         
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
         self.numericalObjects = []
@@ -96,7 +100,7 @@ class FlowSolver(object):
         # rigidAreas True: A = A0 False: A = A(P)
         self.rigidAreas = self.vascularNetwork.rigidAreas
         
-#         # Define the output of A, dependend on the characteristic system 0.1
+#         # Define the output of A, depending on the characteristic system 0.1
 #         if self.rigidArea == '02':
 #             self.AFunction = self.AFunctionSys0
 #         elif self.rigidArea == '2': 

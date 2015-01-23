@@ -237,9 +237,9 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         buttonLimits.connect("toggled", self.on_changeLimits)
         buttonLimits.set_size_request(120, 30)
 
-        buttonLables = gtk.ToggleButton("update lables")
-        buttonLables.connect("toggled", self.on_changeLables)
-        buttonLables.set_size_request(120, 30)
+        buttonLabels = gtk.ToggleButton("update labels")
+        buttonLabels.connect("toggled", self.on_changeLabels)
+        buttonLabels.set_size_request(120, 30)
         
         self.buttonLines = gtk.ToggleButton("update lines")
         self.buttonLines.connect("toggled", self.on_changeLines)
@@ -276,7 +276,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
                 
         # Checkbutton series
         hboxLegend.pack_start(self.cBlegend)
-        hboxLegend.pack_start(buttonLables)
+        hboxLegend.pack_start(buttonLabels)
         hboxLegend.pack_start(self.buttonDescription)
         
         # hboxLegend.pack_start(cBmedical)
@@ -332,7 +332,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
     def on_changedLegend(self,widget):
         pass
     
-    def on_changeLables(self,widget):
+    def on_changeLabels(self,widget):
         pass
     
     def on_changeLines(self,widget):
@@ -363,10 +363,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.points = {}
         
         self.legend       = None
-        self.lablesWindow = None
-        self.lables       = {}
-        self.lablesInit   = {}
-        self.lablesTypes  = {}
+        self.labelsWindow = None
+        self.labels       = {}
+        self.labelsInit   = {}
+        self.labelsTypes  = {}
         
         self.descriptions = None
         
@@ -484,12 +484,12 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     
                     currentName = ' '.join([str(caseId),axis,linestyle])
                     if axis == 'axis1':
-                        self.lables[currentName]     = [self.selectedCaseNames[caseId]]
-                        self.lablesInit[currentName] = [self.selectedCaseNames[caseId]]
+                        self.labels[currentName]     = [self.selectedCaseNames[caseId]]
+                        self.labelsInit[currentName] = [self.selectedCaseNames[caseId]]
                     else:
-                        self.lables[currentName]     = ['']
-                        self.lablesInit[currentName] = ['']
-                    self.lablesTypes[currentName]    = ['str'] 
+                        self.labels[currentName]     = ['']
+                        self.labelsInit[currentName] = ['']
+                    self.labelsTypes[currentName]    = ['str'] 
                     self.deltas[currentName]         = [0.025]
                     self.deltasInit[currentName]     = [0.025]
                     
@@ -534,7 +534,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.deltas['external axis1 -'] = [0.025]
             self.deltas['external axis2 -'] = [0.025]
                                     
-    def clearPlotWindow(self, lines = True, points = True, lables = False):
+    def clearPlotWindow(self, lines = True, points = True, labels = False):
         '''
         set all line data to single point at (-1, 0) out of the view field
         '''
@@ -552,10 +552,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                         for point in self.points[caseId][axis].itervalues():
                             point.set_data([-1], [0])
                     except: pass
-                if lables:
+                if labels:
                     for linestyle in lineDict.iterkeys():
                         currentName = ' '.join([str(caseId),axis,linestyle])
-                        self.lables[currentName] = '' 
+                        self.labels[currentName] = '' 
                                    
         self.canvas.figure = self.fig
         self.fig.set_canvas(self.canvas)
@@ -595,40 +595,40 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 
     def updateLegend(self):
         '''
-        Stores the lables of the lines in the legend
+        Stores the labels of the lines in the legend
         '''
         handles = []
-        lables  = []
+        labels  = []
         for axis in self.axis.itervalues():
             ha,la = axis.get_legend_handles_labels()
             for currentAxis,currentLine in zip(ha,la):
-                lable = self.lables[currentLine][0]
-                if lable != '':
-                    lables.append(lable)
+                label = self.labels[currentLine][0]
+                if label != '':
+                    labels.append(label)
                     handles.append(currentAxis)
         try:  
             self.legend.set_visible(False)
             self.legend.remove()   
         except: pass
-        self.legend = self.fig.legend(handles,lables, loc=3, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
+        self.legend = self.fig.legend(handles,labels, loc=3, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
         
     def updateDescriptions(self):
         '''
         Stores the descriptions of the cases in the legend
         '''
         handles = []
-        lables  = []
+        labels  = []
         for caseId,vascularNetwork in enumerate(self.selectedNetworks):
             currentColor = self.lines[caseId]['axis1']['-'].get_color()
             feakLine = Rectangle((-1, -1.005), -1.005, -1.005, fc=currentColor, fill=True, edgecolor='none', linewidth=0)
             handles.append(feakLine)
-            lables.append(vascularNetwork.description)
+            labels.append(vascularNetwork.description)
         try:  
             self.descriptions.set_visible(False)
             self.descriptions.remove()   
         except: pass
                 
-        self.descriptions = self.fig.legend(handles,lables, loc=4, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
+        self.descriptions = self.fig.legend(handles,labels, loc=4, borderaxespad=0., frameon = False, fontsize = self.fontSizeLabel/4.*3.)
         
     def updateLineProperties(self):
         '''
@@ -652,7 +652,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         create line plot with P in the first axis and Q the second axis
         '''
         gridNode = self.sliderValue
-        # 1. set axis lable
+        # 1. set axis label
         self.axis['axis1'].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
         self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
@@ -663,7 +663,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 try:
                     yData00 = vascularNetwork.vessels[vesselId].Psol[:, [gridNode]] / 133.32
                     ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
-                    xData = vascularNetwork.simulationTime
+                    xData = vascularNetwork.tsol
                                
                     print 
                                
@@ -716,7 +716,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                   
     def updateLinesPQsplitLin(self):
         gridNode = self.sliderValue
-        # 1. set axis lable
+        # 1. set axis label
         self.axis['axis1'].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
         self.axis['axis1Twin'].set_ylabel('Contribution ' + self.unitPtext, fontsize=self.fontSizeLabel)
         self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
@@ -750,7 +750,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
                     
-                    xData = vascularNetwork.simulationTime
+                    xData = vascularNetwork.tsol
                     
                     self.lines[i]['axis1']['-'].set_data(xData,     yData00)
                     self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
@@ -810,7 +810,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         
     def updateLinesPQsplitSubMean(self):
         gridNode = self.sliderValue
-        # 1. set axis lable
+        # 1. set axis label
         self.axis['axis1'].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
         self.axis['axis1Twin'].set_ylabel('')
         self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
@@ -843,7 +843,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
                     
-                    xData = vascularNetwork.simulationTime
+                    xData = vascularNetwork.tsol
                     
                     self.lines[i]['axis1']['-'].set_data(xData,     yData00)
                     self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
@@ -905,7 +905,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
     
     def updateLinesWaveCFL(self):
         gridNode = self.sliderValue
-        # 1. set axis lable
+        # 1. set axis label
         self.axis['axis1'].set_ylabel('Wave Speed $m/s$', fontsize=self.fontSizeLabel)
         self.axis['axis2'].set_ylabel('CFL $-$' + self.unitFtext, fontsize=self.fontSizeLabel)
         
@@ -919,7 +919,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     dz = vascularNetwork.vessels[vesselId].dz
                     ydata10 = yData00 * vascularNetwork.dt / sum(dz) * len(dz)
                     
-                    xData = vascularNetwork.simulationTime
+                    xData = vascularNetwork.tsol
                     
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
@@ -959,7 +959,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         
     def updateLinesAreaComp(self):
         gridNode = self.sliderValue
-        # 1. set axis lable
+        # 1. set axis label
         self.axis['axis1'].set_ylabel('Area $mm^2$', fontsize=self.fontSizeLabel)
         self.axis['axis2'].set_ylabel('Compliance $mm^2/mmHg$', fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
@@ -972,7 +972,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Psol = vascularNetwork.vessels[vesselId].Psol   
                     ydata10 = vascularNetwork.vessels[vesselId].C(Psol)[:, gridNode] * 1000 * 1000 / 133.32 
                     
-                    xData = vascularNetwork.simulationTime
+                    xData = vascularNetwork.tsol
                     
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
@@ -1067,7 +1067,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                   max([self.limits[limit][1], np.max(sol)])]  
             # time
             limit = 'Time'
-            sol = vascularNetwork.simulationTime
+            sol = vascularNetwork.tsol
             self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
                                   max(self.limits[limit][1], np.max(sol))]
             # space
@@ -1195,10 +1195,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         
         elif cbIndex == 1:
             self.axisX = 'Space'
-            NodeValue = str(self.selectedNetworks[0].simulationTime[self.sliderValue][0])
+            NodeValue = str(self.selectedNetworks[0].tsol[self.sliderValue])
             self.nodeLabel.set_text(' '.join(['Time ', str(NodeValue)[:6]]))
             self.buttonRenderMovie.set_sensitive(True)
-            self.scale.set_range(0, len(self.selectedNetworks[0].simulationTime) - 1)   
+            self.scale.set_range(0, len(self.selectedNetworks[0].tsol) - 1)   
             
         self.updatePlotWindow()
         
@@ -1210,7 +1210,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         if self.axisX == 'Time':
             self.nodeLabel.set_text('Node ' + str(self.sliderValue))
         elif self.axisX == 'Space':
-            NodeValue = str(self.selectedNetworks[0].simulationTime[self.sliderValue][0])
+            NodeValue = str(self.selectedNetworks[0].tsol[self.sliderValue])
             self.nodeLabel.set_text(' '.join(['Time ', str(NodeValue)[:6]]))
         
         self.updatePlotWindow()
@@ -1275,15 +1275,15 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         '''
         self.updatePlotWindow()
             
-    def on_changeLables(self, widget):
+    def on_changeLabels(self, widget):
         '''
         create window to change plot limits
         '''
         if widget.get_active():
-            self.lablesWindow = Visualisation2DPlotWindowAdjustValues(self,'lables',self.lables,self.lablesInit,self.lablesTypes)    
+            self.labelsWindow = Visualisation2DPlotWindowAdjustValues(self,'labels',self.labels,self.labelsInit,self.labelsTypes)    
         else:
-            self.lablesWindow.destroy()
-            self.lablesWindow = None
+            self.labelsWindow.destroy()
+            self.labelsWindow = None
         
         self.updatePlotWindow()
         
@@ -1372,7 +1372,7 @@ class Visualisation2DMainCase(object):
                         
     def updateNetworkComboBox(self, networkCases, networkInfo):
         '''
-        update the comboBox entriesCombo if available network names 
+        update the comboBox entriesCombo if availabel network names 
         have changed
         '''
         self.networkCases = networkCases
@@ -1567,6 +1567,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         selectedVesselIds = []
         selectedCases = []
         selectedCaseNames = []
+        loadVesselIDdict ={} 
         for case in self.cases:
             currentNetwork = case.currentNetwork
             currentVesselId = case.currentVesselId
@@ -1575,11 +1576,19 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                     currentVesselId = int(currentVesselId.split('-')[0])                    
                     # check if it is not already in cases
                     add = True
+                    addKeyToLoadDict = True
                     if len(selectedCases) > 0:
                         for case in selectedCases:
-                            if currentNetwork == case[0] and currentVesselId == case[1]:
-                                add = False
+                            if currentNetwork == case[0]:
+                                addKeyToLoadDict = False
+                                if currentVesselId == case[1]:
+                                    add = False
+                                    
+                    if addKeyToLoadDict == True:
+                        loadVesselIDdict[currentNetwork] = []
+                    
                     if add == True:
+                        loadVesselIDdict[currentNetwork].append(currentVesselId)
                         selectedNetworks.append(self.networks[currentNetwork])
                         selectedVesselIds.append(currentVesselId)
                         selectedCases.append([currentNetwork,currentVesselId])
@@ -1589,9 +1598,13 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         selectedExternalData = None
         if self.buttonEnableExternalData.get_active() == True:
             selectedExternalData = self.externalData
-                                    
+        print selectedNetworks,selectedVesselIds,selectedCases
         # # open plot window        
         if selectedNetworks != []:
+            for networkID in loadVesselIDdict.iterkeys():
+                vesselIds = loadVesselIDdict[networkID]
+                self.networks[networkID].loadSolutionDataRange(vesselIds, values={"loadAll": True})
+            
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
     def loadVascularNetwork(self, networkName, dataNumber):
@@ -1602,12 +1615,12 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         '''
         # load vascular network
         vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber)
-        vascularNetwork.loadSolutionData()
+        vascularNetwork.linkSolutionData()
         # # save it and refresh GUi setup
         networkSolutionName = '_'.join([networkName, dataNumber])  
         # # add data name and corresponding network
         self.networks[networkSolutionName] = vascularNetwork
-        # # names of the solution data sets available sorted keys of the stuff above
+        # # names of the solution data sets availabel sorted keys of the stuff above
         self.networkCases.append(networkSolutionName)
         # # get vessel names
         vesselNames = []

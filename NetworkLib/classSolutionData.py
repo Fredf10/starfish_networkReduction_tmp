@@ -1,5 +1,6 @@
 import h5py
 import numpy as np
+from __builtin__ import False
 
 class SolutionDataVessel(object):
     '''
@@ -19,16 +20,21 @@ class SolutionDataVessel(object):
         
         self.save = True
         self.memoryArraySizeTime = None
+        self.nSaveBegin = None
+        self.nSaveEnd = None
         
+        # loading options initialized to Inf/-Inf for > and < checks on access
+        self.nLoadedBegin = np.Inf
+        self.nTStepSpaces= 1
+        self.nLoadedEnd = -np.Inf 
+               
         self.dsetGroup = None
         
         self.dsetP = None
         self.dsetQ = None
         self.dsetA = None
         
-        self.nSaveBegin = None
-        self.nSaveEnd = None
-                
+               
     def allocateMemory(self, memoryArraySizeTime, dsetGroup, nSaveBegin, nSaveEnd, nTsteps, numberOfGridPoints):
         '''
         allocates memory for the solution data to store data of a simulation
@@ -87,8 +93,37 @@ class SolutionDataVessel(object):
         '''
         self.P = self.dsetP[:]
         self.Q = self.dsetQ[:]
-        self.A = self.dsetA[:]        
+        self.A = self.dsetA[:] 
+               
+    def loadSolutionRange(self, values, nSelectedBegin, nSelectedEnd, nTStepSpaces):    
+        '''
+        load solution data
         
+        Input:
+        
+            
+            values := a dictionary of boolean values loadPressure,loadFlow,loadArea,loadWaveSpeed,loadMeanVelocity
+            nSelectedBegin := beginning index in the saved solutiondata requested
+            nSelectedEnd   := ending index in the saved solutiondata requested 
+            nTStepSpaces   := the number of steps to increment between successive returned
+                 values (i.e. 1 means return all values in the range)
+        
+        '''
+        del self.P, self.Q, self.A
+        self.P = None
+        self.Q = None
+        self.A = None
+        
+        # TODO Implement h5py direct_read method to improve speed
+        if values.get('loadPressure',False):
+            self.P = self.dsetP[nSelectedBegin:nSelectedEnd:nTStepSpaces] 
+        if values.get('loadFlow',False):
+            self.Q = self.dsetQ[nSelectedBegin:nSelectedEnd:nTStepSpaces]    
+        if values.get('loadArea',False):
+            self.A = self.dsetA[nSelectedBegin:nSelectedEnd:nTStepSpaces] 
+            
+
+   
     def flushMemory(self, chunkCount, offset):
         '''
         save a data from the memory chunk in the dset's of the hdf5 file

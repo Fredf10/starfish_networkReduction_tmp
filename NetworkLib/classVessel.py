@@ -111,6 +111,7 @@ class Vessel(object):
         ## Solution Data
         self.save         = True
         self.solutionData = SolutionDataVessel()    # solutionData Object
+                
         # pointers to solutionData objects
         self.Psol         = None  # pressure
         self.Qsol         = None  # flow 
@@ -143,7 +144,8 @@ class Vessel(object):
 #         
 #         self.myInterval = None
 #         self.rhoInterval = None 
-                
+
+              
     def initialize(self, globalFluid):
         '''
         Initialisation of the vessel.
@@ -252,10 +254,9 @@ class Vessel(object):
                                          nSaveEnd,
                                          nTsteps,
                                          self.N)      
-        # backlink solution variables
-        self.Psol = self.solutionData.P
-        self.Asol = self.solutionData.A
-        self.Qsol = self.solutionData.Q
+        
+        self.updateSolutionPointers() 
+        
         # set initial values
         try:
             p0,p1 = initialValues['Pressure']
@@ -287,17 +288,41 @@ class Vessel(object):
         self.solutionData = SolutionDataVessel()
         self.solutionData.linkDataSets(dsetGroup)
         
+    def loadSolutionRange(self, values, nSelectedBegin, nSelectedEnd, nTStepSpaces):    
+        '''
+        load solution for a given time range into memory, skipping the specified 
+        number of time steps between successive values
+        
+        Input:
+            values := a dictionary of boolean values loadPressure,loadFlow,loadArea,loadWaveSpeed,loadMeanVelocity
+            nSelectedBegin := beginning index in the saved solutiondata requested
+            nSelectedEnd   := ending index in the saved solutiondata requested 
+            nTStepSpaces   := the number of steps to increment between successive returned
+                 values (i.e. 1 means return all values in the range)
+        
+        '''
+        self.solutionData.loadSolutionRange(values, nSelectedBegin, nSelectedEnd, nTStepSpaces)
+        self.updateSolutionPointers() 
+        
+        if values['loadWaveSpeed']:
+            self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
+        if values['loadMeanVelocity']:
+            self.vsol = self.Qsol/self.Asol
+        
+
+    def updateSolutionPointers(self):
+        # backlink solution variables
+        self.Psol = self.solutionData.P
+        self.Asol = self.solutionData.A
+        self.Qsol = self.solutionData.Q
+
     def loadDataInMemory(self):
         '''
         Loads everything into the memory which is saved in the dataset-files
         '''
         # load data
         self.solutionData.loadDataInMemory()
-        
-        # backlink solution variables
-        self.Psol = self.solutionData.P
-        self.Asol = self.solutionData.A
-        self.Qsol = self.solutionData.Q 
+        self.updateSolutionPointers() 
         
     def flushMemory(self, chunkCount, offset):
         self.solutionData.flushMemory(chunkCount, offset)
@@ -318,16 +343,6 @@ class Vessel(object):
             if (Compliance < 0).any() : errorMessage = errorMessage.join(["\n    Compliance < 0 !!!"]) 
             raise NameError(errorMessage)
             exit()
-    
-    def postProcessing(self):
-        '''
-        Post processing methode
-        calulate wave speed vector from solution data for pressure and flow
-        calcuate mean flow from the solution data of flow and area
-        '''
-        
-        self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
-        self.vsol = self.Qsol/self.Asol
         
     def Impedance(self,Pressure):
         '''
