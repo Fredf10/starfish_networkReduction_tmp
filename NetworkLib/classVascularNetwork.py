@@ -32,8 +32,8 @@ class VascularNetwork(object):
         
         # saving options
         self.timeSaveBegin = 0.0  # time when to start saving
-        self.timeSaveEnd = 1.0  # time when to end saving
-        self.maxMemory = 0.500  # maximum memory in MB 
+        self.timeSaveEnd = 5.0  # time when to end saving
+        self.maxMemory = 20  # maximum memory in MB 
         self.saveInitialisationPhase = False  # bool to enable saving of the initPhase
                 
         self.memoryArraySizeTime = None  # memory array size for the time arrays
