@@ -22,10 +22,8 @@ sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
 
 import pprint 
-from copy import copy as copy 
-
+from copy import copy as copy
 import gc
-
 
 class FlowSolver(object):
 
@@ -66,6 +64,7 @@ class FlowSolver(object):
             self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
            
              #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+             
         vein = False
         self.venousPool = 0
         #
@@ -489,32 +488,25 @@ class FlowSolver(object):
                 for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
                     
                     if bcId == self.vascularNetwork.root:
+                        
                         for bc in bcs:
                             if bc.type == 1:
                                 baroData['boundaryCondition'] = bc
                             
                             elif bc.type == 2:
                                 baroData['boundaryConditionII'] = bc
-                                print "FS524"
-                                print bc2
-                            
+        
                             else:
                                 print "ERROR FS 525: Wrong type of boundary condition"   
                 
                     elif bcId != self.vascularNetwork.root:
+                        #print "FS 499"
                         for bc in bcs:
                             if bc.type == 2: # type 2 BC, outflow or Varying Elastance heart
-                                #bc2[bcId] = bc
-                                if bc.position == -1:
-                                    print "FS535"
-                                    print bc
-                                    bc2out[bcId] = bc
-                                    terminalBoundaries = terminalBoundaries + 1
-                                    
-                                else: pass
+                                bc2out[bcId] = bc
+                                terminalBoundaries = terminalBoundaries + 1
+                
                 baroData['boundaryConditionIIout'] = bc2out
-                print"FS537"
-                print bc2out
                                                                        
             except: pass
             
