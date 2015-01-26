@@ -303,9 +303,19 @@ class CarotidBaroreceptor(Baroreceptor):
         
         # update with dictionary
         self.update(BaroDict)
+        
+        self.Res0 = {}
+        self.ResTot0 = 0.0
+        
+        for key in self.boundaryConditionIIout:
+            self.Res0[key] = self.boundaryConditionIIout[key].Rtotal
+            self.ResTot0 = self.ResTot0 + 1/self.boundaryConditionIIout[key].Rtotal
+            #print "BR 313"
+            #print self.ResTot0 + 1/self.boundaryConditionIIout[key].Rtotal
                 
-        print "BR286"
-        print self.boundaryConditionII
+            
+        self.ResTot0 = 1.0/self.ResTot0   
+        
         
         #######################################
         """
@@ -488,34 +498,49 @@ class CarotidBaroreceptor(Baroreceptor):
         """
         update Boundary condition of type 2
         TPR and Emax for Varying Elastance heart model
+        loop through all boundary conditions of type 2 and update the resistance at every timestep
+        --> the single resistances are updated with respect to their initial value dRtot/Rtot0 = dRi/Ri0
+        update the heart properties at completion of the beat
         """
-        # loop through all boundary conditions of type 2 and update the resistance at every timestep
-        # update the heart properties at completion of the beat
         
-        deltaWK_resistance = self.delta_TPR[n+1]*self.terminalBoundaries # estimation of the change of the single Windkessel models
+        deltaWK_resistance = 0 # the change in TPR
+        
+        if n == 0:
+            deltaWK_resistance = 0
+            
+        elif n == 1:
+            deltaWK_resistance = 0
+            
+        else:
+            deltaWK_resistance = self.delta_TPR[n+1] - self.delta_TPR[1] # estimation of the change of the single Windkessel models
+        
+        
         for key in self.boundaryConditionIIout:    
             if self.boundaryConditionIIout[key].name == 'Windkessel-3Elements':    
-                self.boundaryConditionIIout[key].Rtotal = self.boundaryConditionIIout[key].Rtotal + deltaWK_resistance
-                    
+                self.boundaryConditionIIout[key].Rtotal = self.boundaryConditionIIout[key].Rtotal + deltaWK_resistance/self.ResTot0*self.Res0[key]
+            
+            
+            ## these might have to be corrected, but they are not used in this configuration        
             elif self.boundaryConditionIIout[key].name == 'Resistance':
                 self.boundaryConditionIIout[key].Rc = self.boundaryConditionIIout[key].Rc + deltaWK_resistance
                     
             elif self.boundaryConditionIIout[key].name == 'Windkessel-2Elements':    
                 self.boundaryConditionIIout[key].Rc = self.boundaryConditionIIout[key].Rc + deltaWK_resistance
-                    
+        
+                   
         if self.boundaryConditionII != 0:
             if self.boundaryConditionII.newCycle == True:
-                self.boundaryConditionII.Emax = self.boundaryConditionII.Emax + self.delta_Emax[n+1]
-                print "BR488"
-                print n
-                print self.boundaryConditionII.Emax
+                self.boundaryConditionII.Emax = self.boundaryConditionII.Emax + self.delta_Emax[n+1]-self.delta_Emax[1]
+
+
+
 
     def updateVenousSide(self,n):
          """
          to update the Venous unstretched Volume
          """
          
-         self.VenousPool.Vusv = self.Vusv0 + self.delta_Vusv[n]
+         self.VenousPool.Vusv = self.Vusv0 + self.delta_Vusv[n]-self.deltaVusv[1]
                
      
     def UrsinoBRmodel(self,n,n_mem):
