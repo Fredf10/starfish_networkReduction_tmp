@@ -1,0 +1,571 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<bigDaddy_Reymond2009.xml id="xxx" version="4.1">
+  <simulationContext>
+    <description>None</description>
+    <totalTime unit="s">5.0</totalTime>
+    <CFL>0.45</CFL>
+    <timeSaveBegin unit="s">0.0</timeSaveBegin>
+    <timeSaveEnd unit="s">5.0</timeSaveEnd>
+    <maxMemory unit="MB">100</maxMemory>
+    <saveInitialisationPhase>True</saveInitialisationPhase>
+    <gravitationalField>False</gravitationalField>
+    <gravityConstant unit="m s-2">-9.81</gravityConstant>
+    <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
+    <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
+  </simulationContext>
+  <solverCalibration>
+    <rigidAreas>False</rigidAreas>
+    <simplifyEigenvalues>False</simplifyEigenvalues>
+    <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
+    <automaticGridAdaptation>True</automaticGridAdaptation>
+  </solverCalibration>
+  <initialisationControls>
+    <initialsationMethod>ConstantPressure</initialsationMethod>
+    <initMeanFlow unit="m3 s-1">1e-06</initMeanFlow>
+    <initMeanPressure unit="Pa">10600.0</initMeanPressure>
+    <estimateWindkesselCompliance>System</estimateWindkesselCompliance>
+    <compPercentageWK3>0.2</compPercentageWK3>
+    <compPercentageTree>0.8</compPercentageTree>
+    <compTotalSys unit="m3 Pa-1">4.895587352e-08</compTotalSys>
+  </initialisationControls>
+  <globalFluid>
+    <my unit="Pa s">0.004</my>
+    <rho unit="kg m-3">1050.0</rho>
+    <gamma>2.0</gamma>
+  </globalFluid>
+  <communicators/>
+  <boundaryConditions>
+    <boundaryCondition vesselId="1">
+      <VaryingElastanceSimple>
+        <T unit = 's'>1</T>
+        <Emax unit = 'mmHg ml-1'>2.31</Emax>
+        <Emin unit = 'mmHg ml-1'>0.06</Emin>
+        <Tpeak unit = 's'>0.43</Tpeak>
+        <V0 unit = 'ml'>20</V0>
+        <K>0</K>
+      </VaryingElastanceSimple>
+    </boundaryCondition>
+    <boundaryCondition vesselId="12">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">7.5088e9</Rtotal>
+        <C unit="m3 Pa-1">2.454e-10</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="13">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">1.6108e10</Rtotal>
+        <C unit="m3 Pa-1">1.161e-10</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="16">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">7.9891e9</Rtotal>
+        <C unit="m3 Pa-1">2.310e-10</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="17">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">1.4919e10</Rtotal>
+        <C unit="m3 Pa-1">1.251e-10</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="27">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">1.75520e8</Rtotal>
+        <C unit="m3 Pa-1">9.9950e-9</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="7">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">4.61260e9</Rtotal>
+        <C unit="m3 Pa-1">3.9630e-10</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="21">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">None</Rc>
+        <Rtotal unit="Pa s m-3">4.98320e9</Rtotal>
+        <C unit="m3 Pa-1">3.6730e-10</C>
+        <Z unit="Pa s m-3">VesselImpedance</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+  </boundaryConditions>
+  <vessels>
+    <vessel Id="1" name="Ascending aorta">
+      <topology>
+        <leftDaughter>3</leftDaughter>
+        <rightDaughter>2</rightDaughter>
+        <angleYMother unit="deg">90.0</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.04</length>
+        <radiusProximal unit="m">0.0147</radiusProximal>
+        <radiusDistal unit="m">0.0144</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">3.663003663</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">3.663003663 3.663003663</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="2" name="Aortic arch A">
+      <topology>
+        <leftDaughter>15</leftDaughter>
+        <rightDaughter>14</rightDaughter>
+        <angleYMother unit="rad">-0.959931088597</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.02</length>
+        <radiusProximal unit="m">0.01255</radiusProximal>
+        <radiusDistal unit="m">0.012</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">4.0816326531</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">4.0816326531 4.0816326531</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="3" name="Brachiocephalic">
+      <topology>
+        <leftDaughter>4</leftDaughter>
+        <rightDaughter>5</rightDaughter>
+        <angleYMother unit="rad">0.785398163397</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.034</length>
+        <radiusProximal unit="m">0.0101</radiusProximal>
+        <radiusDistal unit="m">0.009</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">4.7393364929</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">4.7393364929 4.7393364929</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="4" name="Subclavian A Right">
+      <topology>
+        <leftDaughter>7</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">0.698131700798</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.034</length>
+        <radiusProximal unit="m">0.00575</radiusProximal>
+        <radiusDistal unit="m">0.0045</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">6.8965517241</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">6.8965517241 6.8965517241</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="5" name="Common carotid Right">
+      <topology>
+        <leftDaughter>13</leftDaughter>
+        <rightDaughter>12</rightDaughter>
+        <angleYMother unit="rad">-0.698131700798</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.094</length>
+        <radiusProximal unit="m">0.00675</radiusProximal>
+        <radiusDistal unit="m">0.0035</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">6.8259385666</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">6.8259385666 6.8259385666</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="7" name="Subclavian B, axillary, brachial Right">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">1.2217304764</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.422</length>
+        <radiusProximal unit="m">0.00405</radiusProximal>
+        <radiusDistal unit="m">0.00235</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">9.1324200913</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">9.1324200913 9.1324200913</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="12" name="Internal carotid Right">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">-0.0872664625997</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.178</length>
+        <radiusProximal unit="m">0.00285</radiusProximal>
+        <radiusDistal unit="m">0.00215</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">10.582010582</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">10.582010582 10.582010582</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="13" name="External carotid 1 Right">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">0.436332312999</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.041</length>
+        <radiusProximal unit="m">0.0025</radiusProximal>
+        <radiusDistal unit="m">0.00225</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">10.9289617486</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">10.9289617486 10.9289617486</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="14" name="Aortic arch B">
+      <topology>
+        <leftDaughter>19</leftDaughter>
+        <rightDaughter>18</rightDaughter>
+        <angleYMother unit="rad">-1.2217304764</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.039</length>
+        <radiusProximal unit="m">0.0107</radiusProximal>
+        <radiusDistal unit="m">0.0104</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">4.4642857143</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">4.4642857143 4.4642857143</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="15" name="Common carotid Left">
+      <topology>
+        <leftDaughter>16</leftDaughter>
+        <rightDaughter>17</rightDaughter>
+        <angleYMother unit="rad">0.872664625997</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.139</length>
+        <radiusProximal unit="m">0.006</radiusProximal>
+        <radiusDistal unit="m">0.003</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">7.4626865672</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">7.4626865672 7.4626865672</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="16" name="Internal carotid Left">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">0.0872664625997</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.178</length>
+        <radiusProximal unit="m">0.00265</radiusProximal>
+        <radiusDistal unit="m">0.00205</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">10.989010989</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">10.989010989 10.989010989</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="17" name="External carotid 1 Left">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">-0.436332312999</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.041</length>
+        <radiusProximal unit="m">0.00235</radiusProximal>
+        <radiusDistal unit="m">0.00215</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">11.2994350282</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">11.2994350282 11.2994350282</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="18" name="Thoracic aorta A">
+      <topology>
+        <leftDaughter>27</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">-0.785398163397</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.052</length>
+        <radiusProximal unit="m">0.01</radiusProximal>
+        <radiusDistal unit="m">0.00945</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">4.6948356808</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">4.6948356808 4.6948356808</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="19" name="Subclavian A Left">
+      <topology>
+        <leftDaughter>21</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">0.523598775598</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.034</length>
+        <radiusProximal unit="m">0.0055</radiusProximal>
+        <radiusDistal unit="m">0.00425</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">7.1174377224</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">7.1174377224 7.1174377224</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="21" name="Subclavian B, axillary, brachial Left">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">-1.0471975512</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.422</length>
+        <radiusProximal unit="m">0.00405</radiusProximal>
+        <radiusDistal unit="m">0.00235</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">9.1324200913</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">9.1324200913 9.1324200913</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="27" name="Thoracic aorta B">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">-0.523598775598</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.104</length>
+        <radiusProximal unit="m">0.00825</radiusProximal>
+        <radiusDistal unit="m">0.00645</radiusDistal>
+        <N>5.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Hayashi</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">None</As>
+        <betaHayashi unit="Pa">5.5555555556</betaHayashi>
+        <betaHayashi-polyChaos unit="Pa">5.5555555556 5.5555555556</betaHayashi-polyChaos>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-06</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>None</gamma>
+      </fluid>
+    </vessel>
+  </vessels>
+</bigDaddy_Reymond2009.xml>
