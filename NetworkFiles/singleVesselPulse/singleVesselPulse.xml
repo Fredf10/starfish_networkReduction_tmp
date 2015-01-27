@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<singleVessel.xml id="xxx" version="4.1">
+  <simulationContext>
+    <description>None</description>
+    <totalTime unit="s">0.2</totalTime>
+    <CFL>0.122</CFL>
+    <gravitationalField>False</gravitationalField>
+    <gravityConstant unit="m s-2">-9.81</gravityConstant>
+    <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
+    <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
+    <timeSaveBegin unit="s">0</timeSaveBegin>
+    <timeSaveEnd unit="s">0.2</timeSaveEnd>
+    <maxMemory unit="MB">500</maxMemory>
+    <saveInitialisationPhase unit="None">False</saveInitialisationPhase>
+  </simulationContext>
+  <solverCalibration>
+    <rigidAreas>False</rigidAreas>
+    <simplifyEigenvalues>False</simplifyEigenvalues>
+    <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
+    <automaticGridAdaptation>True</automaticGridAdaptation>
+  </solverCalibration>
+  <initialisationControls>
+    <initialsationMethod>ConstantPressure</initialsationMethod>
+    <initMeanFlow unit="m3 s-1">0</initMeanFlow>
+    <initMeanPressure unit="mmHg">0</initMeanPressure>
+    <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
+    <compPercentageWK3>False</compPercentageWK3>
+    <compPercentageTree>False</compPercentageTree>
+    <compTotalSys unit="m3 Pa-1">False</compTotalSys>
+  </initialisationControls>
+  <globalFluid>
+    <my unit="Pa s">1e-12</my>
+    <rho unit="kg m-3">1050.0</rho>
+    <gamma>9</gamma>
+  </globalFluid>
+  <communicators/>1e-05
+  <boundaryConditions>
+    <boundaryCondition vesselId="0">
+      <ExpFunc>
+        <amp unit="m3 s-1">1</amp>
+        <ampConst unit="m3 s-1">0.0</ampConst>
+        <Npulse>1</Npulse>
+        <Tpulse unit="s">0</Tpulse>
+        <freq unit="s-1">1</freq>
+        <Tspace unit="s">0.0</Tspace>1
+        <runtimeEvaluation>False</runtimeEvaluation>
+        <prescribe>total</prescribe>
+      </ExpFunc>
+      <_ReflectionCoefficient>
+        <Rt >0</Rt>
+      </_ReflectionCoefficient>
+    </boundaryCondition>
+  </boundaryConditions>
+  <vessels>
+    <vessel Id="0" name="parentVessel">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">0.0</angleYMother>
+      </topology>/home/Fredrik
+      <geometry>
+        <geometryType>uniform</geometryType>
+        <length unit="m">1</length>
+        <radiusProximal unit="m">0.01</radiusProximal>
+        <radiusDistal unit="m">0.01</radiusDistal>
+        <N>200.0</N>
+      </geometry>
+      <compliance>
+        <complianceType>Laplace</complianceType>
+        <constantCompliance>True</constantCompliance>
+        <externalPressure unit="Pa">-1333</externalPressure>
+        <betaLaplace unit="Pa m-1">4.6339e6</betaLaplace>
+        <Ps unit="Pa">-1333</Ps>
+        <As unit="m2">3.0600e-4</As>
+        <wallThickness unit="m">0.0015</wallThickness>
+        <youngModulus unit="m2">400000.0</youngModulus>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">1e-12</my>
+        <rho unit="kg m-3">1050.0</rho>
+        <gamma>9.0</gamma>
+      </fluid>
+    </vessel>
+  </vessels>
+</singleVessel.xml>
