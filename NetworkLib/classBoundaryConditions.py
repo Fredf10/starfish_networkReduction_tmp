@@ -2175,49 +2175,49 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 		self.aortaP[n] = Pn
 # 		self.DtFlow[n]=(Qn-Qnold)/dt
 		ventrPn = self.pressure[n]
-		if self.cycleNumber == 3:
-			self.T = 0.7
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 3:
+		#	self.T = 0.7
+		#	self.Tpeak = 0.43 * self.T
 		
-		if self.cycleNumber == 6:
-			self.T = 1
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 6:
+		#	self.T = 1
+		#	self.Tpeak = 0.43 * self.T
 		
-		if self.cycleNumber == 10:
-			self.T = 0.8
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 10:
+		#	self.T = 0.8
+		#	self.Tpeak = 0.43 * self.T
 			
-		if self.cycleNumber == 11:
-			self.T = 0.7
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 11:
+		#	self.T = 0.7
+		#	self.Tpeak = 0.43 * self.T
 		
-		if self.cycleNumber == 12:
-			self.T = 0.6
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 12:
+		#	self.T = 0.6
+		#	self.Tpeak = 0.43 * self.T
 			
-		if self.cycleNumber == 14:
-			self.T = 0.5
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 14:
+		#	self.T = 0.5
+		#	self.Tpeak = 0.43 * self.T
 		
-		if self.cycleNumber == 18:
-			self.T = 0.6
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 18:
+		#	self.T = 0.6
+		#	self.Tpeak = 0.43 * self.T
 			
-		if self.cycleNumber == 19:
-			self.T = 0.7
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 19:
+		#	self.T = 0.7
+		#	self.Tpeak = 0.43 * self.T
 		
-		if self.cycleNumber == 20:
-			self.T = 0.8
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 20:
+		#	self.T = 0.8
+		#	self.Tpeak = 0.43 * self.T
 			
-		if self.cycleNumber == 21:
-			self.T = 0.9
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 21:
+		#	self.T = 0.9
+		#	self.Tpeak = 0.43 * self.T
 		
-		if self.cycleNumber == 22:
-			self.T = 1
-			self.Tpeak = 0.43 * self.T
+		#if self.cycleNumber == 22:
+		#	self.T = 1
+		#	self.Tpeak = 0.43 * self.T
 		
 
 
