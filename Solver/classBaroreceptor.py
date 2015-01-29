@@ -327,7 +327,7 @@ class CarotidBaroreceptor(Baroreceptor):
         
         # model parameters afferent part of the Ursino model - Ursino 1999
         
-        self.pn = 92*133.32 #12266. adjusted from 92mmHg, 85 was found in literature
+        self.pn = 92*133.32#92*133.32 #12266. adjusted from 92mmHg, 85 was found in literature
         self.ka = 1567.
         self.fmin = 2.51
         self.tau_z= 6.37
@@ -339,7 +339,7 @@ class CarotidBaroreceptor(Baroreceptor):
         self.fe_inf = 2.10
         self.fe_0 = 16.11 #4.12
         self.ke = 0.0675
-        self.fe_min = 3.5 #4 #3.16 #2.66
+        self.fe_min = 3.3 #3.5 #4 #3.16 #2.66
         
         # model parameters for the TPR effector part of the Ursino model  - Ursino 1999
         
