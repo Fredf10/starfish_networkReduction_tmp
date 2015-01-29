@@ -56,14 +56,14 @@ class FlowSolver(object):
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = False 
+        baro = False
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
-            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[12,16], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
            
-             #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':1,'vesselIdRight':2,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
         vein = False
         self.venousPool = 0
@@ -566,6 +566,7 @@ class FlowSolver(object):
         VPdict['currentTimeStep'] = self.currentTimeStep
         VPdict['currentMemoryIndex'] = self.currentMemoryIndex
         VPdict['dt'] = self.dt
+        VPdict['nTsteps'] = self.nTsteps
         VPdict['boundarys'] = self.boundarys
         
         self.venousPool = venousPool(VPdict) # call to the constructor of venousPool       
@@ -905,14 +906,18 @@ class FlowSolver(object):
             print "FS726: self.vascularNetwork.boundaryConditions[1][0].volume"
             
             import matplotlib.pyplot as plt
-            f, axarr =plt.subplots(3)
-            axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
-            axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
-            axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
-            axarr[0].set_title("Pressure in LV and aorta")
-            axarr[1].set_title("Volume flow")
-            axarr[2].set_title("Volume in LV")
-            plt.show(f)
+            #plt.plot(self.venousPool.Vvector)
+            #plt.show()
+            
+            
+            #f, axarr =plt.subplots(3)
+            #axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
+            #axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
+            #axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
+            #axarr[0].set_title("Pressure in LV and aorta")
+            #axarr[1].set_title("Volume flow")
+            #axarr[2].set_title("Volume in LV")
+            #plt.show(f)
 #             f, axarr =plt.subplots(5)
 #             axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
 #             axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
