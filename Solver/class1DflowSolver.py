@@ -682,7 +682,7 @@ class FlowSolver(object):
         '''
         #print '====================================='
         print '___________Time variables ___________'
-        print '%-20s %2.1f' % ('totaltime (sec)',self.totalTime)
+        print '%-20s %2.3f' % ('totaltime (sec)',self.totalTime)
         print '%-20s %2.3f' % ('dt (ms)',self.dt*1.0E3)
         print '%-20s %4d' % ('nTsteps',self.nTsteps)
         print '___________Div variables ____________'
