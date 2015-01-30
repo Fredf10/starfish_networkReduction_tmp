@@ -404,7 +404,7 @@ class Expfunc(BoundaryConditionType1):
 		creates in a periodic sinus-squared signal
 	"""
 	def function1(self, t, t0, pulsNum):
-		return 0.000001*np.exp(-1000*pow((t-0.05),2))
+		return 0.000001*np.exp(-10000*pow((t-0.05),2))
 	
 	
 class PhysiologicalFunction(BoundaryConditionType1):
