@@ -36,7 +36,7 @@ print dataSetNumber
 ##  open data file choosed above
 try:
     print " Try to open network {} with data number {}".format(networkName, dataSetNumber)
-    vascularNetwork = loadSolutionDataFile(networkName, dataSetNumber)
+    vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber)  
 except:
     print "Error could not open solution data with data number {} of network {}".format(dataSetNumber,networkName)
     exit()
@@ -47,6 +47,9 @@ except:
 vesselId = 1
 n = 5 #gridnode
 filename = "reymondVessel1.csv"
+
+## load data into memory:
+##vascularNetwork.laodData 
 
 Psol = vascularNetwork.vessels[vesselId].Psol[:,[n]]
 Qsol = vascularNetwork.vessels[vesselId].Qsol[:,[n]]
