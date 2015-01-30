@@ -374,9 +374,9 @@ variablesDict = {## class Vascular Network
                  'wallThickness'     : {'type':'float',  'unitSI': 'm',    'strCases': None, 'multiVar': False},
                  'youngModulus'      : {'type':'float',  'unitSI': 'm2',   'strCases': None, 'multiVar': False},
                  'beta'              : {'type':'float',  'unitSI': 'Pa',   'strCases': None, 'multiVar': False},
-                 'betaLaplace'       : {'type':'float',  'unitSI': 'Pa',   'strCases': None, 'multiVar': False},
-                 'betaExponential'   : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
-                 'betaHayashi'       : {'type':'float',  'unitSI': 'Pa',     'strCases': None, 'multiVar': False},
+                 'betaLaplace'       : {'type':'float',  'unitSI': 'Pa m-1',   'strCases': None, 'multiVar': False},
+                 'betaExponential'   : {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'betaHayashi'       : {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'distensibility'    : {'type':'float',  'unitSI': 'Pa-1', 'strCases': None, 'multiVar': False},
                  # fluid 
                  'applyGlobalFluid'  : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},

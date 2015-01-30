@@ -17,7 +17,7 @@ import numpy as np
 from pprint import pprint as pp
 
 __author__ = "Vinzenz Gregor Eck"
-__version__ = "0.3"
+__version__ = "0.3_dev"
 
 
 ### file to help user post processing
