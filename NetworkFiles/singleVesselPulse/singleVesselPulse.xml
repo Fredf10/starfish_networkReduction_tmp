@@ -2,15 +2,15 @@
 <singleVessel.xml id="xxx" version="4.1">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">0.2</totalTime>
+    <totalTime unit="s">0.3</totalTime>
     <CFL>0.122</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
     <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
     <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
     <timeSaveBegin unit="s">0</timeSaveBegin>
-    <timeSaveEnd unit="s">0.2</timeSaveEnd>
-    <maxMemory unit="MB">500</maxMemory>
+    <timeSaveEnd unit="s">0.3</timeSaveEnd>
+    <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase unit="None">False</saveInitialisationPhase>
   </simulationContext>
   <solverCalibration>
@@ -22,7 +22,7 @@
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0</initMeanFlow>
-    <initMeanPressure unit="mmHg">0</initMeanPressure>
+    <initMeanPressure unit="Pa">0</initMeanPressure>
     <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
     <compPercentageWK3>False</compPercentageWK3>
     <compPercentageTree>False</compPercentageTree>
@@ -36,16 +36,16 @@
   <communicators/>1e-05
   <boundaryConditions>
     <boundaryCondition vesselId="0">
-      <ExpFunc>
-        <amp unit="m3 s-1">1</amp>
+      <Flow-Sinus2>
+        <amp unit="m3 s-1">2</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
-        <Npulse>1</Npulse>
+        <Npulse>2</Npulse>
         <Tpulse unit="s">0</Tpulse>
         <freq unit="s-1">1</freq>
         <Tspace unit="s">0.0</Tspace>1
         <runtimeEvaluation>False</runtimeEvaluation>
         <prescribe>total</prescribe>
-      </ExpFunc>
+      </Flow-Sinus2>
       <_ReflectionCoefficient>
         <Rt >0</Rt>
       </_ReflectionCoefficient>
@@ -60,18 +60,18 @@
       </topology>/home/Fredrik
       <geometry>
         <geometryType>uniform</geometryType>
-        <length unit="m">1</length>
+        <length unit="m">2.5</length>
         <radiusProximal unit="m">0.01</radiusProximal>
         <radiusDistal unit="m">0.01</radiusDistal>
-        <N>200.0</N>
+        <N>1001.0</N>
       </geometry>
       <compliance>
         <complianceType>Laplace</complianceType>
         <constantCompliance>True</constantCompliance>
-        <externalPressure unit="Pa">-1333</externalPressure>
-        <betaLaplace unit="Pa m-1">4.6339e6</betaLaplace>
-        <Ps unit="Pa">-1333</Ps>
-        <As unit="m2">3.0600e-4</As>
+        <externalPressure unit="Pa">0</externalPressure>
+        <betaLaplace unit="Pa m-1">4.5135e6</betaLaplace>
+        <Ps unit="Pa">0</Ps>
+        <As unit="m2">3.1416e-4</As>
         <wallThickness unit="m">0.0015</wallThickness>
         <youngModulus unit="m2">400000.0</youngModulus>
       </compliance>
