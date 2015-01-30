@@ -1056,15 +1056,15 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             # pressure
             limit = 'P'
             Psol = vascularNetwork.vessels[vesselId].Psol 
-            sol = Psol / 133.32
-            self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
-                                  max([self.limits[limit][1], np.max(sol)])]
+            # sol = Psol / 133.32
+            self.limits[limit] = [min([self.limits[limit][0], np.min(Psol)/133.32]),
+                                  max([self.limits[limit][1], np.max(Psol)/133.32])]
             # flow
             limit = 'Q'
             Qsol = vascularNetwork.vessels[vesselId].Qsol 
-            sol = Qsol * 1.e6
-            self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
-                                  max([self.limits[limit][1], np.max(sol)])]  
+            #sol = Qsol * 1.e6
+            self.limits[limit] = [min([self.limits[limit][0], np.min(Qsol)*1.e6]),
+                                  max([self.limits[limit][1], np.max(Qsol)*1.e6])]  
             # time
             limit = 'Time'
             sol = vascularNetwork.tsol
@@ -1088,9 +1088,9 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             # area
             limit = 'A'
             Asol = vascularNetwork.vessels[vesselId].Asol 
-            sol = Asol * 1000 * 1000
-            self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
-                                  max([self.limits[limit][1], np.max(sol)])]
+            # sol = Asol * 1000 * 1000
+            self.limits[limit] = [min([self.limits[limit][0], np.min(Asol)*1.e6]),
+                                  max([self.limits[limit][1], np.max(Asol)*1.e6])]
             # compliance
             limit = 'C'
             sol = vascularNetwork.vessels[vesselId].C(Psol) * 1000 * 1000 / 133.32
@@ -1101,29 +1101,29 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             sol = vascularNetwork.vessels[vesselId].N - 1
             self.limits[limit] = [0, max([self.limits[limit][1], np.max(sol)])]
             # pressure / flow,  forward backward
-            for n in xrange(int(vascularNetwork.vessels[vesselId].N)):
+            for n in [0,-1]:#xrange(int(vascularNetwork.vessels[vesselId].N)):
                 pf,pb,qf,qb =  proc.linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
-                
+                 
                 limit = 'Pf'
                 sol = pf/133.32
                 self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
                                       max([self.limits[limit][1], np.max(sol)])]
-                
+                 
                 limit = 'Pb'
                 sol = pb/133.32
                 self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
                                       max([self.limits[limit][1], np.max(sol)])]
-                
+                 
                 limit = 'Qf'
                 sol = qf*1.e6
                 self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
                                       max([self.limits[limit][1], np.max(sol)])]
-                
+                 
                 limit = 'Qb'
                 sol = qb*1.e6
                 self.limits[limit] = [min([self.limits[limit][0], np.min(sol)]),
                                       max([self.limits[limit][1], np.max(sol)])]
-                
+                 
                 limit = 'Pfb'
                 self.limits[limit] = [min([self.limits[limit][0],
                                            np.min(pf/133.32),
@@ -1131,7 +1131,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                       max([self.limits[limit][1],
                                            np.max(pf/133.32),
                                            np.max(pb/133.32)])]
-                
+                 
                 limit = 'Qfb'
                 self.limits[limit] = [min([self.limits[limit][0],
                                            np.min(qf*1.e6),
@@ -1139,7 +1139,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                       max([self.limits[limit][1],
                                            np.max(qf*1.e6),
                                            np.max(qb*1.e6)])]
-            
+             
                 limit = 'PfbLev'
                 self.limits[limit] = [min([self.limits[limit][0],
                                            np.min((Psol-Psol[0]) / 133.32),
@@ -1149,7 +1149,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                            np.max((Psol-Psol[0]) / 133.32),
                                            np.max(pf/133.32),
                                            np.max(pb/133.32)])]
-                
+                 
                 limit = 'QfbLev'
                 self.limits[limit] = [min([self.limits[limit][0],
                                            np.min((Qsol-Qsol[0]) * 1.e6),
@@ -1159,7 +1159,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                            np.max((Qsol-Qsol[0]) * 1.e6),
                                            np.max(qf*1.e6),
                                            np.max(qb*1.e6)])]
-                        
+                         
             if self.selectedExternalData != None:
                 try:
                     # pressure
@@ -1562,6 +1562,8 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         '''
         Open new plot window to plot information of all selected vessels of the selected cases  
         '''
+        
+        print 'on_clickedPlots() Parsing Networks to Load\n'
         # # check out selected networks and ids
         selectedNetworks = []
         selectedVesselIds = []
@@ -1572,6 +1574,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
             currentNetwork = case.currentNetwork
             currentVesselId = case.currentVesselId
             if currentNetwork != "choose simulation case":
+                print 'Parsing Networks to Load'
                 if currentVesselId:
                     currentVesselId = int(currentVesselId.split('-')[0])                    
                     # check if it is not already in cases
@@ -1585,6 +1588,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                                     add = False
                                     
                     if addKeyToLoadDict == True:
+                        print 'Adding Network', currentNetwork,' to loading list\n'
                         loadVesselIDdict[currentNetwork] = []
                     
                     if add == True:
