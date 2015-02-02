@@ -95,6 +95,7 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           '_Flow-PhysiologicalFunction'       :'PhysiologicalFunction',
                           '_Flow-Sinus'                       :'Sinus',
                           '_Flow-Sinus2'                      :'Sinus2',
+                          '_ExpFunc'                          :'ExpFunc',
                           '_Flow-RampMean'                    :'RampMean',
                           '_Flow-Fourier'                     :'Fourier',
                           '_Flow-PhysiologicalData'           :'PhysiologicalData',
