@@ -394,14 +394,14 @@ class Sinus2(BoundaryConditionType1):
 		creates in a periodic sinus-squared signal
 	"""
 	def function1(self, t, t0, pulsNum):
-		return self.amp * pow(np.sin(np.pi * self.freq * (t - t0)), 2.0)
+		return 0.000001*np.exp(-10000*pow((t-0.05),2))
 
 
-class Expfunc(BoundaryConditionType1):
+class ExpFunc(BoundaryConditionType1):
 	"""	
 	Boundary profile - type 1
 	
-		creates in a periodic sinus-squared signal
+		creates an exponentialfunction according to Comparison1Dscheme
 	"""
 	def function1(self, t, t0, pulsNum):
 		return 0.000001*np.exp(-10000*pow((t-0.05),2))
