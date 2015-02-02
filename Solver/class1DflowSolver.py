@@ -13,10 +13,11 @@ from classBoundarys import Boundary
 from classSystemEquations import *
 from classConnections import *
 from classFields import *
-from classCommunicators import *
+#from classCommunicators import *
 from classBaroreceptor import *
 from classVenousPool import *
 from classDataHandler import DataHandler
+from classTimer import *
 
 sys.path.append(cur+'/UtilityLib/')
 from processing import memoryUsagePsutil
@@ -50,22 +51,27 @@ class FlowSolver(object):
         self.connections  = {}                
         # the communicator objects of the vascularNetwork {communicatorID : <instance>::classCommunicator}
         self.communicators = {}
+        
+        self.timers = {}
+        timers = False
+        if timers == True:
+            self.timers = {'0':{'type':'valsalva','Tstart': 5, 'Tend': 7, 'deltaP':-300*133.32}}
               
         # Baroreceptor model
         # this needs to be configured by the xml specification, as it breaks the other networks if
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = False
+        baro = True
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
-            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[12,16], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
            
             #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
-        vein = False
+        vein = True
         self.venousPool = 0
         #
         
@@ -134,6 +140,7 @@ class FlowSolver(object):
             self.initializeVenousPool()
         
         self.initializeBaroreceptors()
+        self.initializeTimers()
         self.initializeNumericalObjectList()
         if quiet==False:
             self.initOutput() # feedback
@@ -569,7 +576,30 @@ class FlowSolver(object):
         VPdict['nTsteps'] = self.nTsteps
         VPdict['boundarys'] = self.boundarys
         
-        self.venousPool = venousPool(VPdict) # call to the constructor of venousPool       
+        self.venousPool = venousPool(VPdict) # call to the constructor of venousPool
+        
+    
+    def initializeTimers(self):
+        
+        '''
+        method used to initialize Timer objects
+        '''
+        for TimerId, TimerData in self.timers.iteritems():
+            
+            TimerData['currentTimeStep']         = self.currentTimeStep
+            TimerData['currentMemoryIndex']      = self.currentMemoryIndex
+            TimerData['dt']                      = self.dt
+            TimerData['nTsteps']                 = self.nTsteps
+            
+            
+            if TimerData['type'] == 'valsalva':
+                
+                TimerData['VesselsToModify']     = self.vessels
+                self.timers[TimerId] = Valsalva(TimerData)
+                
+            else: pass
+    
+    
             
     
     def initializeCommunicators(self):
@@ -662,6 +692,9 @@ class FlowSolver(object):
         for baroreceptor in self.baroreceptors.itervalues():
             self.numericalObjects.append(baroreceptor)
             
+        for timer in self.timers.itervalues():
+            self.numericalObjects.append(timer)
+                   
         if self.venousPool != 0:
             self.numericalObjects.append(self.venousPool)
         else: pass
@@ -906,6 +939,10 @@ class FlowSolver(object):
             print "FS726: self.vascularNetwork.boundaryConditions[1][0].volume"
             
             import matplotlib.pyplot as plt
+            
+            plt.plot(self.baroreceptors['0'].MStrain)
+            plt.show()
+            
             #plt.plot(self.venousPool.Vvector)
             #plt.show()
             
@@ -966,16 +1003,22 @@ class FlowSolver(object):
 #             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].mitral.state)
 #             plt.show()
         except: pass
+            
+        
                 
         try:
-            #print "FS792: print self.baroreceptors['0'].data['MStrain']"
+            print "FS 1010 mean strain"
+            print  np.mean(self.baroreceptors['0'].MStrain[7300:9080])
+            print np.amax(self.baroreceptors['0'].MStrain[7300:9080])
+            print np.amin(self.baroreceptors['0'].MStrain[7300:9080])
             #print self.baroreceptors['0'].data['MStrain']
 #            import matplotlib.pyplot as plt
 #            plt.plot(self.baroreceptors['0'].data['HR'])
-            plt.plot(self.baroreceptors['0'].data['MStrain'])
-            plt.show()
+            pass
             
         except: pass
+            
+            
         
         
         del self.numericalObjects
