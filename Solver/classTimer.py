@@ -99,4 +99,38 @@ class Hemorrhage(TimerBaseClass):
         e.g. outflow terminal with resistance that is set to a small value or a sink term in the 
         system equations
         """
+        
+        self.Rhemo = 0
+        self.boundaryCondition = 0
+        
+        self.update(TimeDict)
+        
+        self.Rinitial = self.boundaryCondition.Rc
+        
+        self.start = int(self.Tstart/self.dt) # time step where Hemorrhage starts
+        self.end = int(self.Tend/self.dt) # time step where hemorrhage ends
+        
+        
+    def __call__(self):
+        
+        """
+        call function for Hemorrhagic shock, puts a certain Resistance value to zero at a given time point
+        """
+        
+        # put resistance to a small level --> hemorrhage
+        if self.currentTimeStep == self.start:
+            
+            self.boundaryCondition.Rc = self.Rhemo
+            
+        # put resistance back to initial value --> end of hemorrhage    
+        if self.currentTimeStep == self.end:
+            
+            self.boundaryCondition.Rc = self.Rinitial
+            
+        
+        
+            
+        
+        
+        
     
