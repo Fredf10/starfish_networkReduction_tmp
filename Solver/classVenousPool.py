@@ -40,7 +40,7 @@ class venousPool(object):
         
         self.pressureGain = 1.0/0.228 # pressure gain between CVP and LAP - Bell paper
         
-        self.Vusv = 2378.0e-6 # initial states for Vus, CVP and LAP
+        self.Vusv = 3037.0e-6 # initial states for Vus, CVP and LAP
         self.P = self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
         self.P_LA = self.pressureGain*self.P
         
