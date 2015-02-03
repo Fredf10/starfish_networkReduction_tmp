@@ -423,15 +423,15 @@ class VascularNetwork(object):
         
         # define motion
         motionDict = {}
-        headUpTilt = False
+        headUpTilt = True
         # # head up tilt
         if headUpTilt == True:
-            tSteps4 = int(self.nTsteps / 6.0)
+            tSteps4 = int(self.nTsteps / 40.0)
             start = self.vessels[1].angleXMother
             end = start - 80 * np.pi / 180
-            startAngle = np.ones(tSteps4 * 2.0) * start
-            endAngle = np.ones(tSteps4) * end
-            tiltAngle = np.linspace(start, end, self.nTsteps - 3 * tSteps4)
+            startAngle = np.ones(tSteps4 * 25.0) * start
+            endAngle = np.ones(13.0*tSteps4) * end
+            tiltAngle = np.linspace(start, end, self.nTsteps - 38. * tSteps4)
              
             angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
                      
