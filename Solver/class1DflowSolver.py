@@ -62,14 +62,14 @@ class FlowSolver(object):
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = True
+        baro = False
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
-            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
+            #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
            
-            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
         vein = True
         self.venousPool = 0
@@ -940,8 +940,35 @@ class FlowSolver(object):
             
             import matplotlib.pyplot as plt
             
-            plt.plot(self.baroreceptors['0'].MStrain)
-            plt.show()
+            fig1 = plt.figure(1)
+            plt.plot(self.baroreceptors['0'].PtildLeft)
+            fig1.show()
+            
+            fig2 = plt.figure(2)
+            plt.plot(self.baroreceptors['0'].F_cs)
+            plt.plot(self.baroreceptors['0'].F_efferent)
+            fig2.show()
+            
+            fig3 = plt.figure(3)
+            plt.plot(self.baroreceptors['0'].delta_TPR)
+            fig3.show()
+            
+            fig4 = plt.figure(4)
+            plt.plot(self.baroreceptors['0'].delta_Emax)
+            fig4.show()
+            
+            fig5 = plt.figure(5)
+            plt.plot(self.baroreceptors['0'].delta_Vusv)
+            fig5.show()
+            
+            fig6 = plt.figure(6)
+            plt.plot(self.baroreceptors['0'].delta_T)
+            fig6.show()
+            
+            raw_input()
+            
+            #plt.plot(self.baroreceptors['0'].MStrain)
+            #plt.show()
             
             #plt.plot(self.venousPool.Vvector)
             #plt.show()
