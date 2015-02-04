@@ -55,21 +55,21 @@ class FlowSolver(object):
         self.timers = {}
         timers = False
         if timers == True:
-            self.timers = {'0':{'type':'valsalva','Tstart': 5, 'Tend': 7, 'deltaP':-300*133.32}}
+            self.timers = {'0':{'type':'valsalva','Tstart': 5, 'Tend': 7, 'deltaP':-300*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
               
         # Baroreceptor model
         # this needs to be configured by the xml specification, as it breaks the other networks if
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = False
+        baro = True
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
-            #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
+            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
            
-            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
         vein = True
         self.venousPool = 0
@@ -594,7 +594,13 @@ class FlowSolver(object):
             
             if TimerData['type'] == 'valsalva':
                 
-                TimerData['VesselsToModify']     = self.vessels
+                TimerData['VesselsToModify']     = {}
+                
+                for i in TimerData['vesselID']:
+                    
+                    TimerData['VesselsToModify'][i] = self.vessels[i]
+                
+                
                 self.timers[TimerId] = Valsalva(TimerData)
                 
             else: pass
