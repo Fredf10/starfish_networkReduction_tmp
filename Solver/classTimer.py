@@ -100,12 +100,11 @@ class Hemorrhage(TimerBaseClass):
         system equations
         """
         
-        self.Rhemo = 0
-        self.boundaryCondition = 0
+        self.sinkTerm = 0
+        self.vesselWithSink = 0
         
         self.update(TimeDict)
         
-        self.Rinitial = self.boundaryCondition.Rc
         
         self.start = int(self.Tstart/self.dt) # time step where Hemorrhage starts
         self.end = int(self.Tend/self.dt) # time step where hemorrhage ends
@@ -120,12 +119,14 @@ class Hemorrhage(TimerBaseClass):
         # put resistance to a small level --> hemorrhage
         if self.currentTimeStep == self.start:
             
-            self.boundaryCondition.Rc = self.Rhemo
+            # introduce sink term for chosen vessel in the systemequations
+            pass
             
         # put resistance back to initial value --> end of hemorrhage    
         if self.currentTimeStep == self.end:
             
-            self.boundaryCondition.Rc = self.Rinitial
+            # put sink term to zero again
+            pass
             
         
         
