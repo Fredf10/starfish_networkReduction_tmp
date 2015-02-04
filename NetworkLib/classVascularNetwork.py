@@ -423,7 +423,7 @@ class VascularNetwork(object):
         
         # define motion
         motionDict = {}
-        headUpTilt = True
+        headUpTilt = False
         # # head up tilt
         if headUpTilt == True:
             tSteps4 = int(self.nTsteps / 40.0)
