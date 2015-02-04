@@ -40,7 +40,7 @@ class venousPool(object):
         
         self.pressureGain = 1.0/0.228 # pressure gain between CVP and LAP - Bell paper
         
-        self.Vusv = 3037.0e-6 # initial states for Vus, CVP and LAP
+        self.Vusv = 2335.46e-6 #3037.0e-6 # initial states for Vus, CVP and LAP
         self.P = self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
         self.P_LA = self.pressureGain*self.P
         
@@ -134,16 +134,7 @@ class venousPool(object):
                     if self.boundarys[key][x].type == 'Windkessel-3Elements':
                         if n < (np.size(self.boundarys[key][x].bcType2[0].venousPressure)-1):
                             self.boundarys[key][x].bcType2[0].venousPressure[n+1] = self.boundarys[key][x].bcType2[0].venousPressure[n+1]-self.boundarys[key][x].bcType2[0].venousPressure[0]+self.P
-                            #print "VP126 venous pressure"
-                            #print self.boundarys[key][x].bcType2[0].venousPressure[n]
-                            #print self.V
-                            #print self.P
-                            #print self.P_LA
-                            #print self.Vusv
-                            #print self.Qin
-                            #print self.Qout
                     
-                        
                     if self.boundarys[key][x].type == 'Resistance':
                         self.boundarys[key][x].bcType2[0].venousPressure[n+1] = self.boundarys[key][x].bcType2[0].venousPressure[n+1]-self.boundarys[key][x].bcType2[0].venousPressure[0]+self.P
                 
