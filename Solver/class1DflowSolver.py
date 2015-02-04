@@ -62,7 +62,7 @@ class FlowSolver(object):
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = True
+        baro = False
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
@@ -71,7 +71,7 @@ class FlowSolver(object):
            
             #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
-        vein = True
+        vein = False
         self.venousPool = 0
         #
         
