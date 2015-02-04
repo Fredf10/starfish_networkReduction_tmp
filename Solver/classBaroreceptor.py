@@ -354,7 +354,7 @@ class CarotidBaroreceptor(Baroreceptor):
         self.DR = 2.0 # 
         self.R0 = 0.61*133.32e6 #
         
-        self.ratio = 1.099887574 # 
+        
         
         # model parameters for the EmaxLV effector part of the Ursino model  - Ursino 1999
         
@@ -373,18 +373,27 @@ class CarotidBaroreceptor(Baroreceptor):
         
         # model parameters for the Vusv effector part of the Ursino model  - Ursino 1999
         
-        self.cVusv = -125e-6 #62.5e-6
+        self.cVusv = -625.0e-6#-125e-6 
         self.tauVusv = 20.0
         self.DVusv = 3.0
         self.Vusv0 = 3213e-6
         
+        # initial values for affected quantities
+        
+        self.dTPRin = 5.85e7 #5.939e7 #5.85e7
+        self.dTin = -0.1114 #-0.11259 #-0.1114
+        self.dEmaxin = 87.65e6 #88.96815e6 #87.65e6
+        self.dVusvin = -877.54e-6 #-875.0e-6
+        self.Ptildin = 10600. #11680.0 #10600.
+        
+        self.ratio = (1.53792e8)/(self.R0 + self.dTPRin) #1.099887574 
         
         # states of the Ursino model
         self.PtildLeft = np.zeros(self.nTsteps+1)
-        self.PtildLeft[0] = 10600
+        self.PtildLeft[0] = self.Ptildin
         
         self.PtildRight = np.zeros(self.nTsteps+1)
-        self.PtildRight[0] = 10600
+        self.PtildRight[0] = self.Ptildin
         
         self.F_cs_left = np.zeros(self.nTsteps+1)
         self.F_cs_right = np.zeros(self.nTsteps+1)
@@ -392,10 +401,10 @@ class CarotidBaroreceptor(Baroreceptor):
         self.F_cs = np.zeros(self.nTsteps+1)
         self.F_efferent = np.zeros(self.nTsteps+1)
         
-        self.delta_TPR = np.ones(self.nTsteps+1)*5.85e7
-        self.delta_Emax = np.ones(self.nTsteps+1)*87.65e6
-        self.delta_Vusv = np.ones(self.nTsteps+1)*-172e-6
-        self.delta_T = np.ones(self.nTsteps+1)*-0.1114
+        self.delta_TPR = np.ones(self.nTsteps+1)*self.dTPRin
+        self.delta_Emax = np.ones(self.nTsteps+1)*self.dEmaxin
+        self.delta_Vusv = np.ones(self.nTsteps+1)*self.dVusvin
+        self.delta_T = np.ones(self.nTsteps+1)*self.dTin
         
     #############################################################################
     
@@ -457,7 +466,7 @@ class CarotidBaroreceptor(Baroreceptor):
         vR = 0.0
         
         if n <= delay:
-            vR = 5.85e7
+            vR = self.dTPRin
             
         elif n > delay:
             deltaF = self.F_efferent[n+1-delay] - self.fe_min
@@ -480,7 +489,7 @@ class CarotidBaroreceptor(Baroreceptor):
         vE = 0
         
         if n <= delay:
-            vE = 87.65e6
+            vE = self.dEmaxin
             
         elif n > delay:
             
@@ -504,7 +513,7 @@ class CarotidBaroreceptor(Baroreceptor):
         vT = 0
         
         if n <= delay:
-            vT = -0.1114
+            vT = self.dTin
             
         elif n > delay:
             
@@ -528,7 +537,7 @@ class CarotidBaroreceptor(Baroreceptor):
         vVusv = 0.0
         
         if n <= delay:
-            vVusv = -172.0e-6
+            vVusv = self.dVusvin
             
         elif n > delay:
             deltaF = self.F_efferent[n+1-delay] - self.fe_min
@@ -575,10 +584,10 @@ class CarotidBaroreceptor(Baroreceptor):
                 
             ## these might have to be corrected, but they are not used in this configuration        
             elif self.boundaryConditionIIout[key].name == 'Resistance':
-                self.boundaryConditionIIout[key].Rc = self.boundaryConditionIIout[key].Rc + deltaWK_resistance
+                self.boundaryConditionIIout[key].Rc = (newTotalResistance)/self.ResTot0*self.Res0[key]
                    
             elif self.boundaryConditionIIout[key].name == 'Windkessel-2Elements':    
-                self.boundaryConditionIIout[key].Rc = self.boundaryConditionIIout[key].Rc + deltaWK_resistance
+                self.boundaryConditionIIout[key].Rc = (newTotalResistance)/self.ResTot0*self.Res0[key]
             
                    
         if self.boundaryConditionII != 0:
