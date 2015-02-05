@@ -47,10 +47,16 @@ vascularNetworkElements = ['simulationContext',
 ##########################################################################################
 ## Baroreceptor objects
 
-baroreceptorCellML = ['baroId','vesselId']
+#baroreceptorCellML = ['baroId','vesselId']
+#baroreceptorReference = {'BaroreceptorCellML' : baroreceptorCellML}
 
-baroreceptorReference = {'BaroreceptorCellML' : baroreceptorCellML}
 
+AorticBaroreceptor = ['cellMLBaroreceptorModel','vesselId','receptorType', 'modelName']
+CarotidBaroreceptor = ['cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','receptorType', 'modelName']
+
+baroreceptorReference = {'AorticBaroreceptor' : AorticBaroreceptor,
+                         'CarotidBaroreceptor': CarotidBaroreceptor
+                         }
 
 
 ##########################################################################################
