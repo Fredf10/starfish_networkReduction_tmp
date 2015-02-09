@@ -1,7 +1,4 @@
 import numpy as np 
-#from numpy.linalg import solve
-#from scipy.optimize import fsolve
-#from numpy.linalg import inv
 
 import copy
 
@@ -118,6 +115,8 @@ class Baroreceptor(object):
             if self.boundaryConditionII.newCycle == True:
                 self.boundaryConditionII.T = self.algebraic[-1][self.cellMLoutputID]
                 self.boundaryConditionII.Tpeak = 0.43*self.boundaryConditionII.T
+                self.newCycles = np.append(self.newCycles,self.currentTimeStep)
+                
                 print "BR122"
                 print self.boundaryConditionII.T
         else: 
@@ -164,6 +163,21 @@ class AorticBaroreceptor(Baroreceptor):
         self.MStrain = 0
         self.T = 0
         
+        if self.modelName == 'bugenhagenAorticBR':
+            self.n = np.ones(self.nTsteps+1)*self.algebraic[0][3]
+            self.Tsym = np.ones(self.nTsteps+1)*self.algebraic[0][7]
+            self.Tparasym = np.ones(self.nTsteps+1)*self.algebraic[0][8]
+            self.c_nor = np.ones(self.nTsteps+1)*self.states[0][3]
+            self.c_ach = np.ones(self.nTsteps+1)*self.states[0][4]
+        
+        
+        elif self.modelName == 'pettersenAorticBR':
+            self.n = np.ones(self.nTsteps+1)*self.algebraic[0][5]
+            self.Tsym = np.ones(self.nTsteps+1)*self.algebraic[0][9]
+            self.Tparasym = np.ones(self.nTsteps+1)*self.algebraic[0][10]
+            self.c_nor = np.ones(self.nTsteps+1)*self.states[0][2]
+            self.c_ach = np.ones(self.nTsteps+1)*self.states[0][3]
+        
         
         # initial Compliance information for estimation of unstretched radius
         #self.initialCompliance1 = 0
@@ -171,6 +185,8 @@ class AorticBaroreceptor(Baroreceptor):
         
         # update with dictionary
         self.update(BaroDict)
+        
+        self.newCycles = np.zeros(1)
         
         self.Ao_1 = self.Area1[0] 
         self.Ao_2 = self.Area2[0]
@@ -244,8 +260,7 @@ class AorticBaroreceptor(Baroreceptor):
             self.Strain[n+1]  = epsilon
             self.MStrain[n+1] = epsMean
             
-        
-        
+            
         # use CellML model to calculate new period, the method calcAndupdatePeriodcellML
         # does this on a beat-to-beat basis
         if self.cellMLBaroreceptorModel == True:
@@ -262,14 +277,30 @@ class AorticBaroreceptor(Baroreceptor):
             # update the current period
             if self.cellMLoutputArray == 'algebraic':
                 
-                if n < self.nTsteps-1:
-                    self.T[n+1] = self.algebraic[-1][self.cellMLoutputID]
+                self.T[n+1] = self.algebraic[-1][self.cellMLoutputID]
+            
             
             elif self.cellMLoutputArray == 'states':
                 
-                if n < self.nTsteps-1:
-                    self.T[n+1] = self.states[-1][self.cellMLoutputID]    
-        
+                self.T[n+1] = self.states[-1][self.cellMLoutputID]
+            
+            
+            ### for Bugenhagen###
+            self.n[n+1] = self.algebraic[-1][3]
+            self.Tsym[n+1] = self.algebraic[-1][7]
+            self.Tparasym[n+1] = self.algebraic[-1][8]
+            self.c_nor[n+1] = self.states[-1][3]
+            self.c_ach[n+1] = self.states[-1][4]
+            
+            
+            ### for Pettersen###
+            #self.n[n+1] = self.algebraic[-1][5]
+            #self.Tsym[n+1] = self.algebraic[-1][9]
+            #self.Tparasym[n+1] = self.algebraic[-1][10]
+            #self.c_nor[n+1] = self.states[-1][2]
+            #self.c_ach[n+1] = self.states[-1][3]
+            
+            
         else: pass
             #print 'Error: currently no hardcoded models for the Aortic BR available'
             
@@ -291,35 +322,28 @@ class CarotidBaroreceptor(Baroreceptor):
         self.terminalBoundaries = 0
         self.VenousPool = 0
         
-        # the boundary conditions of type 1 and type 2
-        #self.boundaryCondition = 0
-        #self.boundaryConditionII = 0
-        #self.boundaryConditionIIout = {}
-        
         self.pressureLeft = 0
         self.pressureRight = 0
-        self.LeftAfferentSignal = 0
-        self.RightAfferentSignal = 0
-        self.AfferentSignal = 0
-        self.EfferentSignal = 0
-        self.AffectedValue = 0
         
         
         # update with dictionary
         self.update(BaroDict)
         
-        self.Res0 = {}
-        self.ResTot0 = 0.0
+        
+        ### total resistance
+        self.Res0 = {} # Windkssel resistances of all boundaries --> for updating the resistances
+        self.ResTot0 = 0.0 # total resistance of the windkessels
         
         for key in self.boundaryConditionIIout:
             self.Res0[key] = self.boundaryConditionIIout[key].Rtotal
             self.ResTot0 = self.ResTot0 + 1/self.boundaryConditionIIout[key].Rtotal
-            #print "BR 313"
-            #print self.ResTot0 + 1/self.boundaryConditionIIout[key].Rtotal
                 
             
+        # total resisitance of the Windkessels    
         self.ResTot0 = 1.0/self.ResTot0
         
+        
+        ### for update of period in type 1 boundary condition
         self.oldUpdateTime = 0
         if self.boundaryCondition != 0:
             self.newUpdateTime = round(self.boundaryCondition.Tperiod/self.dt)
@@ -331,7 +355,7 @@ class CarotidBaroreceptor(Baroreceptor):
         """
         #######################################
         
-        # model parameters afferent part of the Ursino model - Ursino 1999
+        ### model parameters afferent part of the Ursino model - Ursino 1999
         
         self.pn = 135*133.32#92*133.32 #12266. adjusted from 92mmHg, 85 was found in literature
         self.ka = 1567.
@@ -378,7 +402,8 @@ class CarotidBaroreceptor(Baroreceptor):
         self.DVusv = 3.0
         self.Vusv0 = 3213e-6
         
-        # initial values for affected quantities
+        
+        ### initial values for affected quantities
         
         self.dTPRin = 5.85e7 #5.939e7 #5.85e7
         self.dTin = -0.1114 #-0.11259 #-0.1114
@@ -388,7 +413,8 @@ class CarotidBaroreceptor(Baroreceptor):
         
         self.ratio = (1.53792e8)/(self.R0 + self.dTPRin) #1.099887574 
         
-        # states of the Ursino model
+        ### states of the Ursino model###
+        # afferent
         self.PtildLeft = np.zeros(self.nTsteps+1)
         self.PtildLeft[0] = self.Ptildin
         
@@ -398,13 +424,25 @@ class CarotidBaroreceptor(Baroreceptor):
         self.F_cs_left = np.zeros(self.nTsteps+1)
         self.F_cs_right = np.zeros(self.nTsteps+1)
         
-        self.F_cs = np.zeros(self.nTsteps+1)
+        self.F_cs = np.zeros(self.nTsteps+1) # mean value of afferent firing (mean of left and right carotid sinus)
+        
+        
+        # efferent
         self.F_efferent = np.zeros(self.nTsteps+1)
         
+        
+        # effectors
         self.delta_TPR = np.ones(self.nTsteps+1)*self.dTPRin
         self.delta_Emax = np.ones(self.nTsteps+1)*self.dEmaxin
         self.delta_Vusv = np.ones(self.nTsteps+1)*self.dVusvin
         self.delta_T = np.ones(self.nTsteps+1)*self.dTin
+        
+        
+        ### quantities in the left ventricle --> to extract for postprocessing
+        self.newCycles = np.zeros(1)
+        self.Pheart = np.zeros(self.nTsteps+1)
+        self.Vheart = np.zeros(self.nTsteps+1)
+        
         
     #############################################################################
     
@@ -413,7 +451,6 @@ class CarotidBaroreceptor(Baroreceptor):
     - Afferent
     - Efferent
     - Effector
-    
     """
     
     def UrsinoAfferent(self,n,n_mem):
@@ -432,9 +469,6 @@ class CarotidBaroreceptor(Baroreceptor):
             dpRight = 0.
             
         else:
-            
-            dpLeft =  0.
-            dpRight = 0.
             
             dpLeft = (pLeft - np.mean(self.pressureLeft[n_mem-1]))/self.dt
             dpRight = (pRight - np.mean(self.pressureRight[n_mem-1]))/self.dt
@@ -555,6 +589,8 @@ class CarotidBaroreceptor(Baroreceptor):
     def updateBC1(self,n):
         """
         update period in BC of type 1 at inflow boundaries
+        uses the method updatedPeriodRuntime of the BoundaryCondition class
+        uses newUpdateTime
         """
         
         if n == (round(self.newUpdateTime-2)):
@@ -582,28 +618,37 @@ class CarotidBaroreceptor(Baroreceptor):
             if self.boundaryConditionIIout[key].name == 'Windkessel-3Elements':
                 self.boundaryConditionIIout[key].Rtotal = (newTotalResistance)/self.ResTot0*self.Res0[key]  
                 
-            ## these might have to be corrected, but they are not used in this configuration        
+            ## for Resistance outlets      
             elif self.boundaryConditionIIout[key].name == 'Resistance':
                 self.boundaryConditionIIout[key].Rc = (newTotalResistance)/self.ResTot0*self.Res0[key]
-                   
+                
+            ## for WK 2 outlets       
             elif self.boundaryConditionIIout[key].name == 'Windkessel-2Elements':    
                 self.boundaryConditionIIout[key].Rc = (newTotalResistance)/self.ResTot0*self.Res0[key]
             
-                   
+        ## update inlet BC's of type 2 --> Varying Elastance heart           
         if self.boundaryConditionII != 0:
             if self.boundaryConditionII.newCycle == True:
                 self.boundaryConditionII.Emax = self.E0 + self.delta_Emax[n+1]
                 self.boundaryConditionII.T = self.T0 + self.delta_T[n+1]
+                self.newCycles = np.append(self.newCycles,n)
+                self.Pheart[n] = self.boundaryConditionII.pressure[n]
+                self.Vheart[n] = self.boundaryConditionII.volume[n]
                 
-                print "BR538"
-                print self.boundaryConditionII.Emax
-                print self.boundaryConditionII.T
-
+                #print "BR538"
+                #print self.boundaryConditionII.Emax
+                #print self.boundaryConditionII.T
+            
+            else:
+                self.Pheart[n] = self.boundaryConditionII.pressure[n]
+                self.Vheart[n] = self.boundaryConditionII.volume[n]
+                
 
     def updateVenousSide(self,n):
          """
          to update the Venous unstretched Volume
          """
+         ### first update when the delay in the effector of Vusv is complete
          if self.currentTimeStep*self.dt > self.DVusv:
              self.VenousPool.Vusv = self.Vusv0 + self.delta_Vusv[n]
      
@@ -611,20 +656,28 @@ class CarotidBaroreceptor(Baroreceptor):
         """
         Calculate Baroreflex as described by Ursino_1999
         Effected quantities are TPR, Emax of the left heart, Vusv
+        Update the affected quantities in their classes
         """
           
-        self.UrsinoAfferent(n,n_mem)
-        self.UrsinoEfferent(n)
-        self.UrsinoResistanceEffector(n)
+        self.UrsinoAfferent(n,n_mem) # calculate the afferent signals
+        self.UrsinoEfferent(n) # calculate the efferent signal
+        
+        self.UrsinoResistanceEffector(n) # the different effector parts
         self.UrsinoEmaxLVEffector(n) 
         self.UrsinoVusvEffector(n)
         self.UrsinoTEffector(n)
+        
         #self.updateBC1(n)
-        self.updateBC2(n)
-        self.updateVenousSide(n)
+        self.updateBC2(n) # update BC type 2
+        self.updateVenousSide(n) # update the venous side with Vusv
 
      
     def __call__(self):
+        
+        """
+        call function
+        takes the Baroreceptor model (Ursino_1999) and evaluates it
+        """
         
         n = self.currentTimeStep[0]
         n_mem = self.currentMemoryIndex[0]
@@ -632,11 +685,11 @@ class CarotidBaroreceptor(Baroreceptor):
         if self.modelName == 'Ursino':
             
             self.UrsinoBRmodel(n,n_mem)
-            print "BR646"
-            print self.F_efferent[n]
-            print self.delta_TPR[n]
-            print self.delta_T[n]
-            print self.delta_Emax[n]
-            print self.delta_Vusv[n]
+            #print "BR646"
+            #print self.F_efferent[n]
+            #print self.delta_TPR[n]
+            #print self.delta_T[n]
+            #print self.delta_Emax[n]
+            #print self.delta_Vusv[n]
 
     
