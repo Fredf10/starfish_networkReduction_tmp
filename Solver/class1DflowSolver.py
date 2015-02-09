@@ -56,14 +56,14 @@ class FlowSolver(object):
         self.timers = {}
         timers = False
         if timers == True:
-            self.timers = {'0':{'type':'valsalva','Tstart': 5, 'Tend': 7, 'deltaP':-300*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
+            self.timers = {'0':{'type':'valsalva','Tstart': 1.0, 'Tend': 10, 'deltaP':90.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
               
         # Baroreceptor model
         # this needs to be configured by the xml specification, as it breaks the other networks if
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = True
+        baro = False
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
@@ -72,7 +72,7 @@ class FlowSolver(object):
            
             #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
-        vein = True
+        vein = False
         self.venousPool = 0
         #
         
