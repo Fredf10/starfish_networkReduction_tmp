@@ -50,11 +50,9 @@ class Valsalva(TimerBaseClass):
         self.newexternalPressure = 0 # array for the new external pressure values
         self.calculateNewExternalPressure() # calculate the new external pressure values
         
-        
-        import matplotlib.pyplot as plt
-        
-        plt.plot(self.newexternalPressure)
-        plt.show()
+        #import matplotlib.pyplot as plt
+        #plt.plot(self.newexternalPressure)
+        #plt.show()
         
                                                           
     def calculateNewExternalPressure(self):
