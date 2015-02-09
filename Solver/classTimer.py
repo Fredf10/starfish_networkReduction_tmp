@@ -50,11 +50,7 @@ class Valsalva(TimerBaseClass):
         self.newexternalPressure = 0 # array for the new external pressure values
         self.calculateNewExternalPressure() # calculate the new external pressure values
         
-        #import matplotlib.pyplot as plt
-        #plt.plot(self.newexternalPressure)
-        #plt.show()
-        
-                                                          
+                                                              
     def calculateNewExternalPressure(self):
         """
         calculate the new external pressures given the time where the Valsalva maneuver starts and where it ends and the pressure change
@@ -63,10 +59,15 @@ class Valsalva(TimerBaseClass):
         start = int(self.Tstart/self.dt) # time step where pressure ramp starts 
         end = int(self.Tend/self.dt) # time step where pressure ramp ends
         
-        startPressure = self.InitialexternalPressure * np.ones(start) # pressure at the beginning
-        endPressure = (self.InitialexternalPressure+self.deltaP)*np.ones(self.nTsteps+1-end) # pressure after Valsalva
+        #startPressure = self.InitialexternalPressure * np.ones(start) # pressure at the beginning
+        #endPressure = (self.InitialexternalPressure+self.deltaP)*np.ones(self.nTsteps+1-end) # pressure after Valsalva
+        #changingPressure = np.linspace(0,self.deltaP,num = end-start) # pressure values during ramp
+        #changingPressure = changingPressure + self.InitialexternalPressure*np.ones(end-start)
         
-        changingPressure = np.linspace(0,self.deltaP,num = end-start) # pressure values during ramp
+        startPressure = self.InitialexternalPressure * np.ones(start) # pressure at the beginning
+        changingPressure = np.ones(end-start)*self.deltaP
+        endPressure = self.InitialexternalPressure*np.ones(self.nTsteps+1-end)
+        
         self.newexternalPressure = np.append(startPressure,np.append(changingPressure,endPressure)) # concatenate arrays to have the whole pressue history in one array
         
     
