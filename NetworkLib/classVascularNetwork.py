@@ -528,6 +528,16 @@ class VascularNetwork(object):
                 self.dt = group.attrs['dt']
                 self.nTsteps = group.attrs['nTsteps']
                 self.simulationTime = group['Time'][:]
+                
+            elif groupName == 'Baroreflex':
+                pass
+            
+            elif groupName == 'Heart':
+                pass
+            
+            elif groupName == 'Vein':
+                pass
+            
             else:
                 # try: 
                     vesselId = int(groupName.split(' - ')[-1])
