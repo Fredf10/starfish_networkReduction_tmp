@@ -92,7 +92,6 @@ class venousPool(object):
                         
         self.Qout = Qout
         
-        
     
     def updateVenousPool(self):
         """
