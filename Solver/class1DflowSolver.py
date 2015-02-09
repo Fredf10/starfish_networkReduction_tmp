@@ -25,6 +25,7 @@ from processing import memoryUsagePsutil
 import pprint 
 from copy import copy as copy
 import gc
+import h5py
 
 class FlowSolver(object):
 
@@ -62,16 +63,16 @@ class FlowSolver(object):
         # you assume these static IDs will be present for all simulations.
         self.baroreceptors = {}
         # Set this to False for checkins unless the test cases work with it.
-        baro = False
+        baro = True
         if baro == True:
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
-            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
            
             #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
              
-        vein = False
+        vein = True
         self.venousPool = 0
         #
         
@@ -533,9 +534,9 @@ class FlowSolver(object):
                 baroData['Area2'] = A2
                 baroData['Pressure1'] = P1
                 baroData['Pressure2'] = P2
-                baroData['Strain'] = np.zeros([self.nTsteps,np.shape(A1)[1]+np.shape(A2)[1]])
-                baroData['MStrain'] = np.zeros(self.nTsteps)
-                baroData['T']       = np.zeros(self.nTsteps)
+                baroData['Strain'] = np.zeros([self.nTsteps + 1,np.shape(A1)[1]+np.shape(A2)[1]])
+                baroData['MStrain'] = np.zeros(self.nTsteps + 1)
+                baroData['T']       = np.zeros(self.nTsteps + 1)
                 
                 #baroData['initialCompliance1'] = self.vessels[baroData['vesselId'][0]].compliance
                 #baroData['initialCompliance2'] = self.vessels[baroData['vesselId'][1]].compliance
@@ -549,12 +550,6 @@ class FlowSolver(object):
                 
                 baroData['pressureLeft']   = self.vessels[baroData['vesselIdLeft']].Psol
                 baroData['pressureRight']  = self.vessels[baroData['vesselIdRight']].Psol
-                baroData['LeftAfferentSignal'] = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
-                baroData['RightAfferentSignal']= np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
-                baroData['AfferentSignal'] = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
-                baroData['EfferentSignal'] = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
-                baroData['AffectedValue']  = np.zeros(np.shape(self.vessels[baroData['vesselIdLeft']].Psol))
-
                 baroData['terminalBoundaries'] = terminalBoundaries # number of terminal boundaries used to calculate delta_R for each WK at the distal end of a network
                 baroData['VenousPool'] = self.venousPool # venous pool object for the update of Vusv
                 
@@ -881,6 +876,9 @@ class FlowSolver(object):
         print "\nSystem solved!"
         
         
+        
+        
+        
         if self.quiet == False:
             
             print '\n====================================='
@@ -938,48 +936,74 @@ class FlowSolver(object):
         print "totaltime is", self.totalTime
         Tim=np.linspace(0,self.totalTime,self.nTsteps)
         print "nTsteps is", self.nTsteps
-
+        
+        
         try:
+            """
+            Saving the Baroreceptor data and additional quantities to the solution data file.
+            """
+            
+            Carotid = False # if Carotid Baroreceptor is used
+            Aortic = True # if Aortic Baroreceptor is used
+            
+            dsetGroupBaroreflex = self.vascularNetwork.solutionDataFile.create_group('Baroreflex')
+            dsetGroupHeart = self.vascularNetwork.solutionDataFile.create_group('Heart')
+            dsetGroupVein = self.vascularNetwork.solutionDataFile.create_group('Vein')
             
             
-            print "FS726: self.vascularNetwork.boundaryConditions[1][0].volume"
+            if Carotid == True:
+                """
+                save solution for carotid baroreceptor type
+                """
+                
+                ### quantities of the Baroreflex loop
+                dset_F_cs = dsetGroupBaroreflex.create_dataset("F_cs",data = self.baroreceptors['0'].F_cs)
+                dset_F_efferent = dsetGroupBaroreflex.create_dataset("F_efferent", data = self.baroreceptors['0'].F_efferent)
+                dset_deltaTPR = dsetGroupBaroreflex.create_dataset("delta_TPR", data = self.baroreceptors['0'].delta_TPR)
+                dset_deltaT = dsetGroupBaroreflex.create_dataset("delta_T",  data = self.baroreceptors['0'].delta_T)
+                dset_deltaEmax = dsetGroupBaroreflex.create_dataset("delta_Emax", data = self.baroreceptors['0'].delta_Emax)
+                dset_deltaVusv = dsetGroupBaroreflex.create_dataset("delta_Vusv", data =  self.baroreceptors['0'].delta_Vusv)
+                
+                ### quantities of the left heart
+                dset_V_lv = dsetGroupHeart.create_dataset("V_lv", data = self.baroreceptors['0'].Vheart)
+                dset_P_lv = dsetGroupHeart.create_dataset("P_lv", data = self.baroreceptors['0'].Pheart)
+                dset_NewCycle = dsetGroupHeart.create_dataset("NewCycle",data = self.baroreceptors['0'].newCycles)
+                
+                ### quantities of the Venous pool
+                dsetVveinous = dsetGroupVein.create_dataset("V_vein", data = self.venousPool.Vvector)
+                dsetCVP = dsetGroupVein.create_dataset("CVP", data = self.venousPool.Pvector)
+                dsetLAP = dsetGroupVein.create_dataset("LAP", data = self.venousPool.P_LAvector)
+                
+        
+        
+            if Aortic == True:
+                """
+                save solution for aortic baroreceptor type
+                """
+                
+                ### quantities of the Baroreflex loop
+                dset_T = dsetGroupBaroreflex.create_dataset("T",data = self.baroreceptors['0'].T)
+                dset_n = dsetGroupBaroreflex.create_dataset("n", data = self.baroreceptors['0'].n)
+                dset_Tsym = dsetGroupBaroreflex.create_dataset("Tsym", data = self.baroreceptors['0'].Tsym )
+                dset_Tparasym = dsetGroupBaroreflex.create_dataset("Tparasym", data = self.baroreceptors['0'].Tparasym )
+                dset_c_nor = dsetGroupBaroreflex.create_dataset("c_nor", data = self.baroreceptors['0'].c_nor)
+                dset_c_ach = dsetGroupBaroreflex.create_dataset("c_ach", data = self.baroreceptors['0'].c_ach)
+                
+                ### new Cycle starts
+                dsetNewCycle = dsetGroupHeart.create_dataset("NewCycle",data = self.baroreceptors['0'].newCycles )
+                
+                ### quantities of the venous pool
+                dsetVveinous = dsetGroupVein.create_dataset("V_vein", data = self.venousPool.Vvector)
+                dsetCVP = dsetGroupVein.create_dataset("CVP", data = self.venousPool.Pvector)
+                dsetLAP = dsetGroupVein.create_dataset("LAP", data = self.venousPool.P_LAvector)
+        
+        
+        except: 
             
-            import matplotlib.pyplot as plt
-            
-            fig1 = plt.figure(1)
-            plt.plot(self.baroreceptors['0'].PtildLeft)
-            fig1.show()
-            
-            fig2 = plt.figure(2)
-            plt.plot(self.baroreceptors['0'].F_cs)
-            plt.plot(self.baroreceptors['0'].F_efferent)
-            fig2.show()
-            
-            fig3 = plt.figure(3)
-            plt.plot(self.baroreceptors['0'].delta_TPR)
-            fig3.show()
-            
-            fig4 = plt.figure(4)
-            plt.plot(self.baroreceptors['0'].delta_Emax)
-            fig4.show()
-            
-            fig5 = plt.figure(5)
-            plt.plot(self.baroreceptors['0'].delta_Vusv)
-            fig5.show()
-            
-            fig6 = plt.figure(6)
-            plt.plot(self.baroreceptors['0'].delta_T)
-            fig6.show()
-            
-            raw_input()
-            
-            #plt.plot(self.baroreceptors['0'].MStrain)
-            #plt.show()
-            
-            #plt.plot(self.venousPool.Vvector)
-            #plt.show()
-            
-            
+            print "FS 1033: No Baroreceptor data to save to the solution data file!"
+        
+        
+        
             #f, axarr =plt.subplots(3)
             #axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
             #axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
@@ -1035,24 +1059,7 @@ class FlowSolver(object):
 #             plt.show()
 #             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].mitral.state)
 #             plt.show()
-        except: pass
-            
-        
-                
-        try:
-            print "FS 1010 mean strain"
-            print  np.mean(self.baroreceptors['0'].MStrain[7300:9080])
-            print np.amax(self.baroreceptors['0'].MStrain[7300:9080])
-            print np.amin(self.baroreceptors['0'].MStrain[7300:9080])
-            #print self.baroreceptors['0'].data['MStrain']
-#            import matplotlib.pyplot as plt
-#            plt.plot(self.baroreceptors['0'].data['HR'])
-            pass
-            
-        except: pass
-            
-            
-        
+
         
         del self.numericalObjects
         del self.fields
