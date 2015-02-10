@@ -363,9 +363,9 @@ if __name__ == "__main__":
     
     
     (states, constants) = initConsts()
-    timeArray = linspace(0, 10, 500) #second value determined by flow simulation time step? number of intervals determined by timestep for ODE/DAE solving?
-    strain = 0.0100000+0.00500000*sin(timeArray)
-    timeArray2 = linspace(0,0.02,2)
+    timeArray = linspace(0, 1, 2500)
+    strain = 0.3419557616+0.0671788693*sin((78.9000/60.0000*6.28)*timeArray)
+    timeArray2 = linspace(0,0.0004,2)
     p[34] = strain[0]
     print p[34]
     voi, states, algebraic = solver2(timeArray2,states,constants)
@@ -388,11 +388,5 @@ if __name__ == "__main__":
     plt.plot(timeArray, HR)
     #plt.plot(timeArray, strain)
     plt.show()
-    
-
-        
-    
-    #t, y, algebraic = solve_model()
-    #plot_model(t, y, algebraic)
 
 
