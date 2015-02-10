@@ -56,7 +56,7 @@ class FlowSolver(object):
         self.timers = {}
         timers = False
         if timers == True:
-            self.timers = {'0':{'type':'valsalva','Tstart': 1.0, 'Tend': 10, 'deltaP':90.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
+            self.timers = {'0':{'type':'valsalva','Tstart': 10.0, 'Tend': 20.0, 'deltaP':-300.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
               
         # Baroreceptor model
         # this needs to be configured by the xml specification, as it breaks the other networks if
