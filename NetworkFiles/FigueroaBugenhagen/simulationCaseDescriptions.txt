@@ -1,0 +1,13 @@
+DataNumber   Description 
+  100        40 seconds, Muller -100mmHg step, 10s to 20s, noBR, with Veins  
+  108        40 seconds, Muller -30mmHg step, 10s to 20s  
+  110        40 seconds, Muller -10mmHg step, 10s to 20s  
+  109        40 seconds, Muller -10mmHg step, 10s to 20s, noBR, with Veins  
+  107        40 seconds, Muller -30mmHg step, 10s to 20s, noBR, with Veins  
+  102        40 seconds, Muller -100mmHg step, 10s to 20s, noBR, no Veins  
+  103        40 seconds, Muller -300mmHg step, 10s to 20s, noBR, with Veins  
+  104        40 seconds, Muller -300mmHg step, 10s to 20s, with BR, with Veins  
+  105        32 seconds, Muller -300mmHg ramp, 10s to 12s, no BR, with Veins 
+  106        32 seconds, Muller -300mmHg ramp, 10s to 12s, with BR, with Veins 
+  112        32 seconds, Muller -30mmHg ramp, 10s to 12s, with BR, with Veins 
+  111        32 seconds, Muller -30mmHg ramp, 10s to 12s, no BR, with Veins 
