@@ -286,19 +286,19 @@ class AorticBaroreceptor(Baroreceptor):
             
             
             ### for Bugenhagen###
-            self.n[n+1] = self.algebraic[-1][3]
-            self.Tsym[n+1] = self.algebraic[-1][7]
-            self.Tparasym[n+1] = self.algebraic[-1][8]
-            self.c_nor[n+1] = self.states[-1][3]
-            self.c_ach[n+1] = self.states[-1][4]
+            #self.n[n+1] = self.algebraic[-1][3]
+            #self.Tsym[n+1] = self.algebraic[-1][7]
+            #self.Tparasym[n+1] = self.algebraic[-1][8]
+            #self.c_nor[n+1] = self.states[-1][3]
+            #self.c_ach[n+1] = self.states[-1][4]
             
             
             ### for Pettersen###
-            #self.n[n+1] = self.algebraic[-1][5]
-            #self.Tsym[n+1] = self.algebraic[-1][9]
-            #self.Tparasym[n+1] = self.algebraic[-1][10]
-            #self.c_nor[n+1] = self.states[-1][2]
-            #self.c_ach[n+1] = self.states[-1][3]
+            self.n[n+1] = self.algebraic[-1][5]
+            self.Tsym[n+1] = self.algebraic[-1][9]
+            self.Tparasym[n+1] = self.algebraic[-1][10]
+            self.c_nor[n+1] = self.states[-1][2]
+            self.c_ach[n+1] = self.states[-1][3]
             
             
         else: pass
