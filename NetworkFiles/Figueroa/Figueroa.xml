@@ -2,13 +2,13 @@
 <bigDaddy_Reymond2009.xml id="xxx" version="4.1">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">5.0</totalTime>
+    <totalTime unit="s">2.0</totalTime>
     <CFL>0.45</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">5.0</timeSaveEnd>
-    <maxMemory unit="MB">100</maxMemory>
+    <timeSaveEnd unit="s">2.0</timeSaveEnd>
+    <maxMemory unit="MB">3000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
-    <gravitationalField>False</gravitationalField>
+    <gravitationalField>True</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
     <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
     <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
@@ -22,11 +22,11 @@
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
     <initMeanFlow unit="m3 s-1">1e-06</initMeanFlow>
-    <initMeanPressure unit="Pa">10600.0</initMeanPressure>
-    <estimateWindkesselCompliance>System</estimateWindkesselCompliance>
+    <initMeanPressure unit="Pa">130.5*133.32</initMeanPressure>
+    <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
     <compPercentageWK3>0.2</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
-    <compTotalSys unit="m3 Pa-1">4.895587352e-08</compTotalSys>
+    <compTotalSys unit="m3 Pa-1">1.5e-08</compTotalSys>
   </initialisationControls>
   <globalFluid>
     <my unit="Pa s">0.004</my>
@@ -37,11 +37,11 @@
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>
-        <T unit = 's'>1</T>
-        <Emax unit = 'mmHg ml-1'>2.31</Emax>
+        <T unit = 's'>0.4686</T>
+        <Emax unit = 'mmHg ml-1'>3.049429067</Emax>2.31
         <Emin unit = 'mmHg ml-1'>0.06</Emin>
-        <Tpeak unit = 's'>0.43</Tpeak>
-        <V0 unit = 'ml'>20</V0>
+        <Tpeak unit = 's'>0.201498</Tpeak>
+        <V0 unit = 'ml'>16.66</V0>20
         <K>0</K>
       </VaryingElastanceSimple>
     </boundaryCondition>
@@ -50,7 +50,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">7.5088e9</Rtotal>
         <C unit="m3 Pa-1">2.454e-10</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">VesselImpedance</Z>7.868e8
       </Windkessel-3Elements>
     </boundaryCondition>
     <boundaryCondition vesselId="13">
@@ -58,7 +58,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">1.6108e10</Rtotal>
         <C unit="m3 Pa-1">1.161e-10</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">VesselImpedance</Z>1.898e8
       </Windkessel-3Elements>
     </boundaryCondition>
     <boundaryCondition vesselId="16">
@@ -66,7 +66,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">7.9891e9</Rtotal>
         <C unit="m3 Pa-1">2.310e-10</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">VesselImpedance</Z>8.481e8
       </Windkessel-3Elements>
     </boundaryCondition>
     <boundaryCondition vesselId="17">
@@ -74,7 +74,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">1.4919e10</Rtotal>
         <C unit="m3 Pa-1">1.251e-10</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">VesselImpedance</Z>1.739e9
       </Windkessel-3Elements>
     </boundaryCondition>
     <boundaryCondition vesselId="27">
@@ -82,7 +82,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">1.75520e8</Rtotal>
         <C unit="m3 Pa-1">9.9950e-9</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">1.05e7</Z>
       </Windkessel-3Elements>
     </boundaryCondition>
     <boundaryCondition vesselId="7">
@@ -90,7 +90,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">4.61260e9</Rtotal>
         <C unit="m3 Pa-1">3.9630e-10</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">VesselImpedance</Z>4.506e8
       </Windkessel-3Elements>
     </boundaryCondition>
     <boundaryCondition vesselId="21">
@@ -98,7 +98,7 @@
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">4.98320e9</Rtotal>
         <C unit="m3 Pa-1">3.6730e-10</C>
-        <Z unit="Pa s m-3">VesselImpedance</Z>
+        <Z unit="Pa s m-3">VesselImpedance</Z>4.922e8
       </Windkessel-3Elements>
     </boundaryCondition>
   </boundaryConditions>
