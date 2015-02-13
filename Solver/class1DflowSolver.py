@@ -13,7 +13,7 @@ from classBoundarys import Boundary
 from classSystemEquations import *
 from classConnections import *
 from classFields import *
-#from classCommunicators import *
+from classCommunicators import *
 from classBaroreceptor import *
 from classVenousPool import *
 from classDataHandler import DataHandler
@@ -56,7 +56,7 @@ class FlowSolver(object):
         self.timers = {}
         timers = False
         if timers == True:
-            self.timers = {'0':{'type':'valsalva','Tstart': 10.0, 'Tend': 20.0, 'deltaP':-300.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
+            self.timers = {'0':{'type':'valsalva','Tstart': 1.0, 'Tend': 2.0,'deltaP':+40.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
               
         # Baroreceptor model
         # this needs to be configured by the xml specification, as it breaks the other networks if
@@ -68,10 +68,9 @@ class FlowSolver(object):
             print "\n WARNING doing baroreseptor!"
             print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
-            self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'pettersenAorticBR'}}
-           
-            #self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
-             
+            #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            
         vein = False
         self.venousPool = 0
         #
@@ -944,7 +943,7 @@ class FlowSolver(object):
             """
             
             Carotid = False # if Carotid Baroreceptor is used
-            Aortic = True # if Aortic Baroreceptor is used
+            Aortic = False # if Aortic Baroreceptor is used
             
             dsetGroupBaroreflex = self.vascularNetwork.solutionDataFile.create_group('Baroreflex')
             dsetGroupHeart = self.vascularNetwork.solutionDataFile.create_group('Heart')

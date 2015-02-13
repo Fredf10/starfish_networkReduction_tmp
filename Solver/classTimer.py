@@ -42,7 +42,7 @@ class Valsalva(TimerBaseClass):
         TimerBaseClass.__init__(self)
         
         self.VesselsToModify = 0 # Vessels on which the external pressure is changed
-        self.deltaP = -300*133.32 # pressure difference
+        self.deltaP = -30*133.32 # pressure difference
         self.InitialexternalPressure = 0 # the initial external pressure
         
         self.update(TimerDict) # updated method
