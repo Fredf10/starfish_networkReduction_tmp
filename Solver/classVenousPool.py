@@ -56,7 +56,7 @@ class venousPool(object):
             
     def estimateInflow(self):
         """
-        calculate the inflow to the venous side, from terminal boundary conditions
+        calculate the inflow to the venous side, from terminal boundaries
         """
         n = self.currentTimeStep[0]
         Qin = 0
