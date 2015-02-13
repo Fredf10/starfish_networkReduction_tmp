@@ -703,12 +703,10 @@ class CarotidBaroreceptor(Baroreceptor):
         
         if self.modelName == 'Ursino':
             
-#             self.UrsinoBRmodel(n,n_mem)
+            self.UrsinoBRmodel(n,n_mem)
 #             print "BR646"
 #             print self.F_efferent[n]
 #             print self.delta_TPR[n]
 #             print self.delta_T[n]
 #             print self.delta_Emax[n]
 #             print self.delta_Vusv[n]
-
-    
