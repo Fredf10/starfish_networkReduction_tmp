@@ -1,4 +1,3 @@
- 
 import sys, os
 from reportlab.lib.validators import isNumber
 from duplicity.tarfile import TUREAD
@@ -32,7 +31,7 @@ class VascularNetwork(object):
         
         # saving options
         self.timeSaveBegin = 0.0  # time when to start saving
-        self.timeSaveEnd = 5.0  # time when to end saving
+        self.timeSaveEnd = 2.0  # time when to end saving
         self.maxMemory = 20  # maximum memory in MB 
         self.saveInitialisationPhase = False  # bool to enable saving of the initPhase
                 
@@ -428,9 +427,9 @@ class VascularNetwork(object):
         if headUpTilt == True:
             tSteps4 = int(self.nTsteps / 40.0)
             start = self.vessels[1].angleXMother
-            end = start - 80 * np.pi / 180
-            startAngle = np.ones(tSteps4 * 25.0) * start
-            endAngle = np.ones(13.0*tSteps4) * end
+            end = start - 70 * np.pi / 180
+            startAngle = np.ones(tSteps4 * 20.0) * start
+            endAngle = np.ones(18.0*tSteps4) * end
             tiltAngle = np.linspace(start, end, self.nTsteps - 38. * tSteps4)
              
             angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
