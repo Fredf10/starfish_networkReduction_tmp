@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleBifurcation.xml id="1.0" version="4.0">
+<singleBifurcation.xml id="1.0" version="4.1">
   <simulationContext>
+   <description>Noe</description>
     <totalTime unit="s">2.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+	<timeSaveEnd unit="s">2.0</timeSaveEnd>
 	<maxMemory unit="MB">500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
@@ -47,7 +48,7 @@
       <Flow-Sinus2>
         <amp unit="m3 s-1">0.0002</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
-        <Npulse>25.0</Npulse>
+        <Npulse>2.</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
         <freq unit="s-1">2.0</freq>
         <Tspace unit="s">0.5</Tspace>
@@ -57,7 +58,7 @@
     </boundaryCondition>
     <boundaryCondition vesselId="1">
       <ReflectionCoefficient>
-      	<Rt>0.5</Rt>
+      	<Rt>0.0</Rt>
       </ReflectionCoefficient>
           </boundaryCondition>
     <boundaryCondition vesselId="2">
