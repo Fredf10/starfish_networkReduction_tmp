@@ -394,7 +394,7 @@ class Sinus2(BoundaryConditionType1):
 		creates in a periodic sinus-squared signal
 	"""
 	def function1(self, t, t0, pulsNum):
-		return 0.000001*np.exp(-10000*pow((t-0.05),2))
+		return self.amp * (np.sin(2 * np.pi * self.freq * (t - t0))**2)
 
 
 class ExpFunc(BoundaryConditionType1):
