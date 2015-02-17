@@ -384,9 +384,6 @@ class VascularNetwork(object):
                 self.nSaveBegin = 0
             else:
                 self.nSaveBegin += self.nTstepsInitPhase
-        
-        
-        print "self.nSaveBegin",self.nSaveBegin, "nSaveEnd", self.nSaveEnd 
         self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1   
         self.nDCurrent = 1
         
@@ -414,7 +411,7 @@ class VascularNetwork(object):
                 dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetA = dsetGroup.create_dataset("Area", (self.savedArraySize,nGridPoints), dtype='float64')
-                if self.nSaveBegin ==0:
+                if self.nSaveBegin==0:
                     dsetP[0] = vessel.Psol[0]
                     dsetQ[0] = vessel.Qsol[0]
                     dsetA[0] = vessel.Asol[0]
@@ -436,7 +433,7 @@ class VascularNetwork(object):
                                    'nTstepsInitPhase': self.nTstepsInitPhase})
                     
         # # initialize gravity and 3d positions over time
-        # create motion decription out of motion dict of vascularNetwork
+        # create motion description out of motion dict of vascularNetwork
         # self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,Tsteps-1)
         
         # define motion
@@ -465,7 +462,7 @@ class VascularNetwork(object):
         self.initializeVenousGravityPressureTime(self.nTsteps)
             
                
-    def FlushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
+    def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
         
         memoryArraySize = self.memoryArraySizeTime;
         offset = (memoryArraySize - 1) * chunkCount

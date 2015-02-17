@@ -44,11 +44,11 @@ class DataHandler(object):
             
             ## after the memory is filled
             # initiate flush of memoryArrays
-            self.network.FlushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
+            self.network.flushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
             self.chunkCount += 1
             self.memoryOffset[0] = (self.network.memoryArraySizeTime - 1) * self.chunkCount
 
         elif currentTimeStep == self.nTsteps - 1:
             ## if the simulation is finished but memory not filled
             # initiate flush of memoryArrays
-            self.network.FlushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
+            self.network.flushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
