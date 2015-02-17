@@ -35,6 +35,11 @@ class VascularNetwork(object):
         self.maxMemory = 20  # maximum memory in MB 
         self.saveInitialisationPhase = False  # bool to enable saving of the initPhase
                 
+        self.vesselsToSave = {}
+        self.nSaveBegin = None
+        self.nSaveEnd  = None
+        self.savedArraySize = None
+        self.nDCurrent = None
         self.memoryArraySizeTime = None  # memory array size for the time arrays
         self.solutionDataFile = None  # file name of the solution data
         
@@ -314,10 +319,10 @@ class VascularNetwork(object):
                     except: print "WARNING: VascularNetwork.initialize(): could not set blood density for aortic valve!"
         
         
-        # # initialze 3d positions of the vascularNetwork
+        # # initialize 3d positions of the vascularNetwork
         self.calculate3DpositionsAndGravity(nSet=0) 
         
-        # ## initialise for simulation
+        # ## initialize for simulation
         if initializeForSimulation == True:
               
             # # initialize venous pressure and checks central venous pressure
@@ -326,7 +331,7 @@ class VascularNetwork(object):
             # # print 3D positions
             if self.quiet == False: self.print3D()
                          
-            # calculate the cumultative network resistances and vessel resistances of the network
+            # calculate the cumulative network resistances and vessel resistances of the network
             if self.initialsationMethod != 'ConstantPressure':
                 self.calculateNetworkResistance()    
                 
@@ -336,7 +341,7 @@ class VascularNetwork(object):
             # show wave speed of network
             if self.quiet == False: self.showWaveSpeedOfNetwork()
             
-            # omptimize tree relfection coefficients BADDDDD
+            # optimize tree reflection coefficients BADDDDD
             if self.optimizeTree: self.optimizeTreeRefelctionCoefficients()
             
             if self.quiet == False: self.showReflectionCoefficientsConnectionInitialValues()
@@ -349,7 +354,7 @@ class VascularNetwork(object):
         '''
         Method to initialize the network for a simulation.
         Creates hdf5 File and groups for the vessels
-        Envoces memory allocation.
+        Enforces memory allocation.
         Set initial values for the simulations.
         '''
                 
@@ -372,7 +377,6 @@ class VascularNetwork(object):
         
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
-        
         # set save counter to the correct parts
         if self.initialisationPhaseExist:
             self.nSaveEnd += self.nTstepsInitPhase
@@ -380,6 +384,11 @@ class VascularNetwork(object):
                 self.nSaveBegin = 0
             else:
                 self.nSaveBegin += self.nTstepsInitPhase
+        
+        
+        print "self.nSaveBegin",self.nSaveBegin, "nSaveEnd", self.nSaveEnd 
+        self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1   
+        self.nDCurrent = 1
         
         # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
         estimatedMemorySolutionDataSpace = 0
@@ -393,15 +402,25 @@ class VascularNetwork(object):
                 
         # initialize for simulation
         for vesselId, vessel in self.vessels.iteritems():
-            # create a new group in the data file
-            dsetGroup = self.solutionDataFile.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
                                            self.memoryArraySizeTime,
-                                           dsetGroup,
-                                           self.nSaveBegin,
-                                           self.nSaveEnd,
                                            self.nTsteps)       
+        # Put a reference to the dsetGroup into the saving dictionary if needed
+            if vessel.save == True:
+                # create a new group in the data file
+                dsetGroup = self.solutionDataFile.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
+                nGridPoints =  vessel.N
+                dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
+                dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
+                dsetA = dsetGroup.create_dataset("Area", (self.savedArraySize,nGridPoints), dtype='float64')
+                if self.nSaveBegin ==0:
+                    dsetP[0] = vessel.Psol[0]
+                    dsetQ[0] = vessel.Qsol[0]
+                    dsetA[0] = vessel.Asol[0]
+                    
+                self.vesselsToSave[vesselId] =  dsetGroup      
+
         
         # # initialize varying elastance model
         # # initialize boundary condition type 1: initial phase
@@ -445,6 +464,58 @@ class VascularNetwork(object):
         # # calculate venous pressure for windkessel
         self.initializeVenousGravityPressureTime(self.nTsteps)
             
+               
+    def FlushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
+        
+        memoryArraySize = self.memoryArraySizeTime;
+        offset = (memoryArraySize - 1) * chunkCount
+        print "chunkCount", chunkCount
+        # indices mapping beginning and end of memory to the absolute number time steps in solution
+        nCB = offset+1
+        nCE = offset+memoryArraySize-1 # nCE == currentTimeStep+1
+        
+        print "self.nDCurrent",self.nDCurrent
+        # check if we need to save
+        saving = not(nCE < self.nSaveBegin or nCB > self.nSaveEnd) # not(not saving)
+        
+        if saving:
+            ## memory indices
+            nMB = 1
+            if (self.nSaveBegin-nCB)>0:
+                nMB = 1+(self.nSaveBegin-nCB)
+            
+            #determine length to write
+            # assume we write out through the end of memory
+            lengthToWrite = self.memoryArraySizeTime - nMB 
+                
+            nME = memoryArraySize
+            # correct this if save index is less than the current time step
+            if (self.nSaveEnd-nCE)<0:
+                # set the indx to end saving
+                nME -= (nCE - self.nSaveEnd)
+                lengthToWrite -= (nCE - self.nSaveEnd) # -(-nME) as nME is negative
+
+            nDB = self.nDCurrent
+            nDE = self.nDCurrent+lengthToWrite
+                                        
+            self.nDCurrent += lengthToWrite
+            
+        # For vessels in the saving dictionary 
+        for key,value in self.vesselsToSave.iteritems():
+            # access each variable to save.
+            # TODO: Is there a better way to define these in the vessel class
+            vessel = self.vessels[key]
+            
+            if saving:
+                value["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
+                value["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
+                value["Area"][nDB:nDE] = vessel.Asol[nMB:nME]
+                
+            # roll the end of the buffer
+            vessel.Psol[0] = vessel.Psol[-1]
+            vessel.Qsol[0] = vessel.Qsol[-1]
+            vessel.Asol[0] = vessel.Asol[-1]
+        
                     
     def saveSolutionData(self):
         '''
@@ -538,11 +609,10 @@ class VascularNetwork(object):
                 pass
             
             else:
-                # try: 
-                    vesselId = int(groupName.split(' - ')[-1])
-                    # try:
-                    # link data
-                    self.vessels[vesselId].linkSolutionData(group)
+                vesselId = int(groupName.split(' - ')[-1])
+                # try:
+                # link data
+                self.vesselsToSave[vesselId] = group
                     # except: 
                         # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                 # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
@@ -646,7 +716,12 @@ class VascularNetwork(object):
             self.tsol = self.simulationTime[nSelectedBegin:nSelectedEnd:nTStepSpaces]
             # Update selected vessels
             for vesselId in vesselIds:
-                self.vessels[vesselId].loadSolutionRange(values,nSelectedBegin, nSelectedEnd, nTStepSpaces)
+                if vesselId in self.vesselsToSave:
+                    self.vessels[vesselId].loadSolutionRange(values, self.vesselsToSave[vesselId], 
+                                 nSelectedBegin, nSelectedEnd, nTStepSpaces)
+                else:
+                    print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
+                    
             
         else:
             print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
@@ -667,7 +742,15 @@ class VascularNetwork(object):
 #                  
     
         #return STATUS
+        
     def getFileAccessIndices(self,t1,t2):
+        '''
+        Helper method to convert times to indices in the saved data.
+        Input:
+        t1,t2 the beginning and ending times to access
+        Output:
+        nSelectedBegin, nSelectedEnd - the indices corresponding to t1 and t2 in the file
+        '''
         startTime = self.simulationTime[0]
         nSelectedBegin = int(np.floor((t1 - startTime) / self.dt))
         nSelectedEnd = int(np.ceil((t2 - startTime) / self.dt))+1

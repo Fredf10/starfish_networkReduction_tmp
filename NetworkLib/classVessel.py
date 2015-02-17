@@ -4,11 +4,9 @@ import sys, os
 from math import pi, cos, sin
 import numpy as np
 
-## needs to be imported as modules
+## TODO: needsto be imported as modules
 from moduleGrids import *
 from classCompliance import *
-##
-from classSolutionData import SolutionDataVessel
 
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../'+'/UtilityLib')
@@ -44,7 +42,7 @@ class Vessel(object):
         self.angleZMother       = 0                 # rotation angle in rad around z-axis relative to mother vessel
                 
         ## geometry properties
-        self.geometryType       = 'uniform'         # geommetry type: 'Uni', 'Cone', 'Cons'
+        self.geometryType       = 'uniform'         # #TODO: fix this geometry type: 'uniform', 'Cone', 'Cons'
         self.radiusProximal     = 0.01              # radius at vessel begin // in hole Vessel if radiusB = 0
         self.radiusDistal       = 0.01              # radius at vessel end
         self.length             = 0.1               # length of the vessel
@@ -57,14 +55,14 @@ class Vessel(object):
         self.Ps                 = 0.                # pressure at state S
         self.As                 = None              # Area state S input from XML if None it is calculate from given radius
         
-        self.wallThickness      = None              # wallthickness
+        self.wallThickness      = None              # wall thickness
         self.youngModulus       = None              # youngModulus
         self.distensibility     = None              # arterial distensibility for Reymond compliance model
         self.betaExponential    = None              # material Parameter of Exponential compliance model
         self.betaHayashi        = 1.                # material Parameter of Hayashi compliance model
         self.betaLaplace        = None              # material Parameter of Laplace compliance model
         
-        # FLUID properties 
+        # FLUID properties TODO: annotate units
         self.applyGlobalFluid   = True              # bool: apply global fluid properties or the ones stored in vessel XML
         self.my                 = 1.e-6             # blood viscosity
         self.rho                = 1050.             # blood density
@@ -108,10 +106,9 @@ class Vessel(object):
         self.womersleyNumber    = None              # Womersley number
         
         
-        ## Solution Data
+        ## flag to indicate vessel data should be saved
         self.save         = True
-        self.solutionData = SolutionDataVessel()    # solutionData Object
-                
+        
         # pointers to solutionData objects
         self.Psol         = None  # pressure
         self.Qsol         = None  # flow 
@@ -123,28 +120,6 @@ class Vessel(object):
         self.quiet = False
         Vessel.number += 1
         
-        
-        ### old variables of xml version 3.0 very outdated to be deleted soon
-#         self.geom = None                                        # geommetry type: 'Uni', 'Cone', 'Cons'
-#         self.lengthInterval = None
-#         self.radiusA = None                                  
-#         self.radiusAInterval = None
-#         self.radiusB = None                                     # radius at vessel end
-#         self.radiusBInterval = None
-#         self.NInterval = None                              
-#         
-#         self.Pfunc = None                                      # pressure function: 'True', 'False
-#         self.wallThicknessInterval = None
-#         self.youngModulusInterval= None
-#         self.betaInterval = None
-#         
-#         self.betaVector = None
-#         
-#         self.beta               = None              # beta value from XML-file
-#         
-#         self.myInterval = None
-#         self.rhoInterval = None 
-
               
     def initialize(self, globalFluid):
         '''
@@ -235,27 +210,18 @@ class Vessel(object):
         #set hooks waveSpeed function
         if self.c == None: self.c = self.waveSpeed  
         
-    def initializeForSimulation(self,initialValues, memoryArraySize, dsetGroup, nSaveBegin, nSaveEnd, nTsteps):
+    def initializeForSimulation(self,initialValues, memoryArraySizeTime, nTsteps):
         '''
         Initialize the solution data and allocates memory for it
         
         Input:
-            memoryArraySize := size of one array in memory
-            dsetGroup       := data set group in the hdf5 file
-            nSaveBegin      := time index when to start saving
-            nSaveEnd        := time index when to stop saving
+            memoryArraySize := number of time points of one array in memory
             '''
-        # calculate solution for the area based on pressure
-        self.solutionData = SolutionDataVessel()
-        
-        self.solutionData.allocateMemory(memoryArraySize,
-                                         dsetGroup,
-                                         nSaveBegin,
-                                         nSaveEnd,
-                                         nTsteps,
-                                         self.N)      
-        
-        self.updateSolutionPointers() 
+        numberOfGridPoints = self.N
+        # allocate memory for solution
+        self.Psol = np.ones((memoryArraySizeTime,numberOfGridPoints))
+        self.Qsol = np.zeros((memoryArraySizeTime,numberOfGridPoints))
+        self.Asol = np.zeros((memoryArraySizeTime,numberOfGridPoints))
         
         # set initial values
         try:
@@ -268,8 +234,6 @@ class Vessel(object):
             pass
         
         self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
-        # save initial values
-        self.solutionData.saveInitialState()
         
         # init 
         self.positionStart    = np.zeros((nTsteps,3))
@@ -278,17 +242,8 @@ class Vessel(object):
         self.netGravity       = np.zeros((nTsteps,1))
     
     
-    def linkSolutionData(self,dsetGroup):
-        '''
-        Initilalize solution data after loading a file
         
-        Input:
-            dsetGroup       := data set group in the hdf5 file
-        '''
-        self.solutionData = SolutionDataVessel()
-        self.solutionData.linkDataSets(dsetGroup)
-        
-    def loadSolutionRange(self, values, nSelectedBegin, nSelectedEnd, nTStepSpaces):    
+    def loadSolutionRange(self, values, dsetGroup, nSelectedBegin, nSelectedEnd, nTStepSpaces):    
         '''
         load solution for a given time range into memory, skipping the specified 
         number of time steps between successive values
@@ -301,31 +256,25 @@ class Vessel(object):
                  values (i.e. 1 means return all values in the range)
         
         '''
-        self.solutionData.loadSolutionRange(values, nSelectedBegin, nSelectedEnd, nTStepSpaces)
-        self.updateSolutionPointers() 
         
-        if values['loadWaveSpeed']:
-            self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
-        if values['loadMeanVelocity']:
-            self.vsol = self.Qsol/self.Asol
+        if dsetGroup['Pressure'].shape[1] == self.N:
+            del self.Psol, self.Qsol, self.Asol
+            
+            # TODO Implement h5py direct_read method to improve speed
+            if values.get('loadPressure',False):
+                self.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
+            if values.get('loadFlow',False):
+                self.Qsol = dsetGroup['Flow'][nSelectedBegin:nSelectedEnd:nTStepSpaces]    
+            if values.get('loadArea',False):
+                self.Asol = dsetGroup['Area'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
+            if values['loadWaveSpeed']:
+                self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
+            if values['loadMeanVelocity']:
+                self.vsol = self.Qsol/self.Asol
+        else:
+            print "classVessel::loadSolutionRange  Error: dset dimensions do not match vessel grid nodes."
+            exit()
         
-
-    def updateSolutionPointers(self):
-        # backlink solution variables
-        self.Psol = self.solutionData.P
-        self.Asol = self.solutionData.A
-        self.Qsol = self.solutionData.Q
-
-    def loadDataInMemory(self):
-        '''
-        Loads everything into the memory which is saved in the dataset-files
-        '''
-        # load data
-        self.solutionData.loadDataInMemory()
-        self.updateSolutionPointers() 
-        
-    def flushMemory(self, chunkCount, offset):
-        self.solutionData.flushMemory(chunkCount, offset)
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
         '''

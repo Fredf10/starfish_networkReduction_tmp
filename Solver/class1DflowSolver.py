@@ -701,7 +701,7 @@ class FlowSolver(object):
             
         dataHandler = DataHandler(self.currentTimeStep,
                                   self.nTsteps,
-                                  self.vessels,
+                                  self.vascularNetwork,
                                   self.currentMemoryIndex,
                                   self.vascularNetwork.memoryArraySizeTime)
         
