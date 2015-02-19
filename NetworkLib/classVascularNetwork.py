@@ -411,6 +411,7 @@ class VascularNetwork(object):
                 dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetA = dsetGroup.create_dataset("Area", (self.savedArraySize,nGridPoints), dtype='float64')
+     
                 if self.nSaveBegin==0:
                     dsetP[0] = vessel.Psol[0]
                     dsetQ[0] = vessel.Qsol[0]
@@ -460,7 +461,20 @@ class VascularNetwork(object):
             
         # # calculate venous pressure for windkessel
         self.initializeVenousGravityPressureTime(self.nTsteps)
+        
+        
+        ##
+        for vesselId, vessel in self.vessels.iteritems():
+            dsetGroup = self.vesselsToSave[vesselId]
+            dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
+            dsetRot = dsetGroup.create_dataset("RotationToGlobal", (self.savedArraySize,3,3), dtype='float64')
+            dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
             
+            # TODO: Verify that numpy's index range protocal... it seems to cutoff the final value in the range selected.
+            dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1]
+            dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1]
+            del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
+            dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
                
     def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
         
@@ -634,7 +648,10 @@ class VascularNetwork(object):
                                   "loadFlow":True, 
                                   "loadArea":True, 
                                   "loadWaveSpeed":False, 
-                                  "loadMeanVelocity":False}):
+                                  "loadMeanVelocity":False,
+                                  "loadGravity":False,
+                                  "loadPostion":False,
+                                  "loadRotation":False}):
         '''
         loads the solution data of the vessels specified into memory for the times 
             specified and drops any other previously loaded data.
@@ -663,6 +680,9 @@ class VascularNetwork(object):
             values['loadFlow'] = True
             values['loadWaveSpeed'] = True
             values['loadMeanVelocity'] = True
+            values['loadGravity'] = True
+            values['loadPosition'] = True
+            values['loadRotation'] = True
         elif values.get('loadWaveSpeed',False):
             values['loadPressure'] = True
             values['loadArea'] = True
@@ -706,6 +726,12 @@ class VascularNetwork(object):
                             vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
                         if values['loadMeanVelocity']:
                             vessel.vsol = vessel.Qsol/vessel.Asol
+                        if values['loadGravity']:
+                            vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                        if values['loadRotation']:   
+                            vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                        if values['loadPosition']:
+                            vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
                 else:
                     print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
                     

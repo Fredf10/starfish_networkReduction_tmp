@@ -235,11 +235,11 @@ class Vessel(object):
         
         self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
         
-        # init 
-        self.positionStart    = np.zeros((nTsteps,3))
-        self.positionEnd      = np.zeros((nTsteps,3))
-        self.rotToGlobalSys   = np.zeros((nTsteps,3,3))
-        self.netGravity       = np.zeros((nTsteps,1))
+        # init these should have a value for each time point not each time step
+        self.positionStart    = np.zeros((nTsteps+1,3))
+        self.positionEnd      = np.zeros((nTsteps+1,3))
+        self.rotToGlobalSys   = np.zeros((nTsteps+1,3,3))
+        self.netGravity       = np.zeros((nTsteps+1,1))
         
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
