@@ -240,40 +240,6 @@ class Vessel(object):
         self.positionEnd      = np.zeros((nTsteps,3))
         self.rotToGlobalSys   = np.zeros((nTsteps,3,3))
         self.netGravity       = np.zeros((nTsteps,1))
-    
-    
-        
-    def loadSolutionRange(self, values, dsetGroup, nSelectedBegin, nSelectedEnd, nTStepSpaces):    
-        '''
-        load solution for a given time range into memory, skipping the specified 
-        number of time steps between successive values
-        
-        Input:
-            values := a dictionary of boolean values loadPressure,loadFlow,loadArea,loadWaveSpeed,loadMeanVelocity
-            nSelectedBegin := beginning index in the saved solutiondata requested
-            nSelectedEnd   := ending index in the saved solutiondata requested 
-            nTStepSpaces   := the number of steps to increment between successive returned
-                 values (i.e. 1 means return all values in the range)
-        
-        '''
-        
-        if dsetGroup['Pressure'].shape[1] == self.N:
-            del self.Psol, self.Qsol, self.Asol
-            
-            # TODO Implement h5py direct_read method to improve speed
-            if values.get('loadPressure',False):
-                self.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
-            if values.get('loadFlow',False):
-                self.Qsol = dsetGroup['Flow'][nSelectedBegin:nSelectedEnd:nTStepSpaces]    
-            if values.get('loadArea',False):
-                self.Asol = dsetGroup['Area'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
-            if values['loadWaveSpeed']:
-                self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
-            if values['loadMeanVelocity']:
-                self.vsol = self.Qsol/self.Asol
-        else:
-            print "classVessel::loadSolutionRange  Error: dset dimensions do not match vessel grid nodes."
-            exit()
         
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):

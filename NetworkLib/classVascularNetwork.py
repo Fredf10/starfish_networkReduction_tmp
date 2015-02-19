@@ -466,12 +466,10 @@ class VascularNetwork(object):
         
         memoryArraySize = self.memoryArraySizeTime;
         offset = (memoryArraySize - 1) * chunkCount
-        print "chunkCount", chunkCount
         # indices mapping beginning and end of memory to the absolute number time steps in solution
         nCB = offset+1
         nCE = offset+memoryArraySize-1 # nCE == currentTimeStep+1
-        
-        print "self.nDCurrent",self.nDCurrent
+    
         # check if we need to save
         saving = not(nCE < self.nSaveBegin or nCB > self.nSaveEnd) # not(not saving)
         
@@ -498,15 +496,15 @@ class VascularNetwork(object):
             self.nDCurrent += lengthToWrite
             
         # For vessels in the saving dictionary 
-        for key,value in self.vesselsToSave.iteritems():
+        for vesselId,dsetGroup in self.vesselsToSave.iteritems():
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
-            vessel = self.vessels[key]
+            vessel = self.vessels[vesselId]
             
             if saving:
-                value["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
-                value["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
-                value["Area"][nDB:nDE] = vessel.Asol[nMB:nME]
+                dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
+                dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
+                dsetGroup["Area"][nDB:nDE] = vessel.Asol[nMB:nME]
                 
             # roll the end of the buffer
             vessel.Psol[0] = vessel.Psol[-1]
@@ -545,26 +543,7 @@ class VascularNetwork(object):
         
         self.solutionDataFile.close()
         
-####        old version
-#
-#         solutionData = {'vessels':{}, 'vascularNetwork' : {}}
-#         # hash solition data
-#         for vesselId,vessel in self.vessels.iteritems():
-#             solutionData['vessels'][vesselId]   = {'Psol': vessel.Psol,
-#                                                    'Qsol': vessel.Qsol,
-#                                                    'Asol': vessel.Asol,
-#                                                    'rotToGlobalSys':vessel.rotToGlobalSys,
-#                                                    'positionStart' :vessel.positionStart,
-#                                                    'netGravity'    :vessel.netGravity}
-#             
-#         
-#         try: simulationTime = np.linspace(0, self.dt*self.nTsteps, self.nTsteps).reshape(self.nTsteps,1)
-#         except: simulationTime = self.simulationTime
-#         
-#         solutionData['vascularNetwork'] = { 'simulationTime': ,
-#                                             'dt'            : self.dt,
-#                                             'nTsteps'       : self.nTsteps }
-        
+    
         
         
     def linkSolutionData(self):
@@ -616,9 +595,6 @@ class VascularNetwork(object):
      
         
         self.initialize()
-        # vessel postprocessing # should be moved where it is used
-        # for vessel in self.vessels.itervalues():
-        #    vessel.postProcessing()
         
                
     def _checkAccessInputs(self,t1,t2, mindt):
@@ -714,8 +690,22 @@ class VascularNetwork(object):
             # Update selected vessels
             for vesselId in vesselIds:
                 if vesselId in self.vesselsToSave:
-                    self.vessels[vesselId].loadSolutionRange(values, self.vesselsToSave[vesselId], 
-                                 nSelectedBegin, nSelectedEnd, nTStepSpaces)
+                    vessel = self.vessels[vesselId]
+                    dsetGroup = self.vesselsToSave[vesselId]
+                    if dsetGroup['Pressure'].shape[1] == vessel.N:
+                        del vessel.Psol, vessel.Qsol, vessel.Asol
+                        
+                        # TODO Implement h5py direct_read method to improve speed
+                        if values.get('loadPressure',False):
+                            vessel.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
+                        if values.get('loadFlow',False):
+                            vessel.Qsol = dsetGroup['Flow'][nSelectedBegin:nSelectedEnd:nTStepSpaces]    
+                        if values.get('loadArea',False):
+                            vessel.Asol = dsetGroup['Area'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
+                        if values['loadWaveSpeed']:
+                            vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
+                        if values['loadMeanVelocity']:
+                            vessel.vsol = vessel.Qsol/vessel.Asol
                 else:
                     print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
                     
@@ -723,22 +713,8 @@ class VascularNetwork(object):
         else:
             print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
             exit()
-              
-#         #Debug Plotting
-#         import matplotlib.pyplot as plt
-#         plt.subplot(311)
-#         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]/133.32)
-#         plt.ylabel('Pressure')
-#         plt.subplot(312)
-#         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1.e6)
-#         plt.ylabel('Flow')
-#         plt.subplot(313)
-#         plt.plot(self.simulationTime, self.vessels[1].Psol[:,0]*1000.**2.)
-#         plt.ylabel('Area')
-#         plt.show()
-#                  
-    
-        #return STATUS
+
+
         
     def getFileAccessIndices(self,t1,t2):
         '''
