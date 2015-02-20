@@ -258,6 +258,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         cbType.append_text('Plot P,Q with wave split - mean values')
         cbType.append_text('Plot CFL, wave speed')
         cbType.append_text('Plot Area, Compliance')
+        cbType.append_text('Plot netGravity')
         cbType.set_active(0) 
         cbType.connect("changed", self.on_changePlotType)
         
@@ -664,9 +665,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData00 = vascularNetwork.vessels[vesselId].Psol[:, [gridNode]] / 133.32
                     ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
                     xData = vascularNetwork.tsol
-                               
-                    print 
-                               
+                                                           
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
         
@@ -1001,14 +1000,69 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 except:
                     self.lines[i]['axis1']['-'].set_data([-1], [0])
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
-        
+                           
         self.axis['axis1'].set_ylim(self.limits['A'])
         self.axis['axis2'].set_ylim(self.limits['C'])
         
-    def updateGravity(self):
+    def updateLinesGravity(self):
         '''
         creates a plot of gravity in the first sub plot
+        the second is free 
         '''
+        
+        gridNode = self.sliderValue
+        # 1. set axis label
+        self.axis['axis1'].set_ylabel('Gravity $m s^{-2}$', fontsize=self.fontSizeLabel)
+        self.axis['axis2'].set_ylabel('', fontsize=self.fontSizeLabel)
+        # 2. update lines for P and Q over time for grid node 0
+                
+        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+            
+            if self.axisX == 'Time':               
+                try:
+                    yData00 = vascularNetwork.vessels[vesselId].netGravity[:]
+                    if len(yData00)!= 1:
+                        print "WARNING 2dVisualisation.updateLinesGravity(): either no motion or no correct solution data"
+                    #ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
+                    xData = vascularNetwork.tsol
+                                                             
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    #self.lines[i]['axis2']['-'].set_data(xData, ydata10)
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+        
+                    self.axis['axis1'].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlim(self.limits['Time'])
+                    
+                except:
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+                                
+            elif self.axisX == "Space":
+                try:
+                    yData00 = vascularNetwork.vessels[vesselId].netGravity[:]
+                    #ydata10 = vascularNetwork.vessels[vesselId].Qsol[gridNode] * 1e6 
+                    xData = np.linspace(0, vascularNetwork.vessels[vesselId].length, len(yData00)) * 100.
+                         
+                    self.lines[i]['axis1']['-'].set_data(xData, yData00)
+                    #self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+                                             
+                    self.axis['axis1'].set_xlim(self.limits['Space'])
+                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlim(self.limits['Space'])             
+                    
+                except:
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+  
+#                 if self.selectedExternalData != None:
+#                     self.lines['external']['axis1']['-'].set_data([-1], [0])
+#                     self.lines['external']['axis2']['-'].set_data([-1], [0])
+        
+        self.axis['axis1'].set_ylim(self.limits['G'])
+        #self.axis['axis2'].set_ylim(self.limits['Q'])
+        
         
     def updatePoints(self):
         '''
@@ -1049,7 +1103,8 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                        'CFL':       [ 0, 1.1],
                        'A':         [1e50, -1e50],
                        'C':         [1e50, -1e50],
-                       'gridNodes': [0, -1e50]}
+                       'gridNodes': [0, -1e50],
+                       'G':         [-0.25, 0.25]}
         
         for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)),
                                                 self.selectedNetworks, self.selectedVesselIds):        
@@ -1100,6 +1155,15 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             limit = 'gridNodes'
             sol = vascularNetwork.vessels[vesselId].N - 1
             self.limits[limit] = [0, max([self.limits[limit][1], np.max(sol)])]
+            
+            # pressure
+            limit = 'G'
+            try: 
+                netG = vascularNetwork.vessels[vesselId].netGravity 
+                self.limits[limit] = [min([self.limits[limit][0], np.min(netG)]),
+                                      max([self.limits[limit][1], np.max(netG)])]
+            except: pass
+                        
             # pressure / flow,  forward backward
             for n in [0,-1]:#xrange(int(vascularNetwork.vessels[vesselId].N)):
                 pf,pb,qf,qb =  proc.linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
@@ -1231,6 +1295,8 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.plot = self.updateLinesWaveCFL
         elif cbIndex == 4:
             self.plot = self.updateLinesAreaComp
+        elif cbIndex == 5:
+            self.plot = self.updateLinesGravity
         self.plot()
         
     def on_changedPlotMinMax(self, widget):
@@ -1562,8 +1628,6 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         '''
         Open new plot window to plot information of all selected vessels of the selected cases  
         '''
-        
-        print 'on_clickedPlots() Parsing Networks to Load\n'
         # # check out selected networks and ids
         selectedNetworks = []
         selectedVesselIds = []
@@ -1574,7 +1638,6 @@ class Visualisation2DMain(Visualisation2DMainGUI):
             currentNetwork = case.currentNetwork
             currentVesselId = case.currentVesselId
             if currentNetwork != "choose simulation case":
-                print 'Parsing Networks to Load'
                 if currentVesselId:
                     currentVesselId = int(currentVesselId.split('-')[0])                    
                     # check if it is not already in cases
@@ -1588,7 +1651,6 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                                     add = False
                                     
                     if addKeyToLoadDict == True:
-                        print 'Adding Network', currentNetwork,' to loading list\n'
                         loadVesselIDdict[currentNetwork] = []
                     
                     if add == True:
@@ -1603,7 +1665,6 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         if self.buttonEnableExternalData.get_active() == True:
             selectedExternalData = self.externalData
             
-        print selectedNetworks,selectedVesselIds,selectedCases
         # # open plot window        
         if selectedNetworks != []:
             for networkID in loadVesselIDdict.iterkeys():

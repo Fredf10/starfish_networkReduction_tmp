@@ -724,10 +724,10 @@ class Visualisation3D(Visualisation3DGUI):
         '''
         if self.networkName and self.dataNumber:
             # load vascular network
-            vascularNetwork = moduleXML.loadNetworkFromXML(filename = self.networkName, dataNumber = self.dataNumber)
-            vascularNetwork.linkSolutionData()
-            self.vascularNetwork = vascularNetwork    
-            # load solution data
+            self.vascularNetwork = moduleXML.loadNetworkFromXML(filename = self.networkName, dataNumber = self.dataNumber)
+            # link solution data from file
+            self.vascularNetwork.linkSolutionData()   
+            # load solution data from file
             self.vascularNetwork.loadSolutionDataRange(values={"loadAll": True})
         
     def createVessel3D(self):
@@ -766,7 +766,7 @@ class Visualisation3D(Visualisation3DGUI):
         
         # restart simulation if end reached
         if self.timeStepCurrent >= self.timeStepStop:
-            print self.timeStepCurrent+self.timeStepIncrement
+            #print self.timeStepCurrent+self.timeStepIncrement
             self.timeStepCurrent = self.timeStepStart
             if self.oneCycle: self.recordMovie()
             
@@ -1075,6 +1075,8 @@ class Vessel3D(Vessel):
         self.quiet = True
                 
         # new variables
+        self.networkMovement = False # bool which states if the network is moving over time
+        
         self.areaFactor     = areaFactor
         self.wallMovement   = wallMovement
         
@@ -1138,7 +1140,7 @@ class Vessel3D(Vessel):
         
     def createInitial3dVertice(self):            
         '''
-        
+        Function which creates the initial 3d positions of the vertices
         '''
         # creates verices
         nPointsPerCircle = self.nPointsPerCircle
@@ -1169,6 +1171,9 @@ class Vessel3D(Vessel):
         vertices = np.dot(vertices,self.rotToGlobalSys[0])
         ## move to proper position and ravel array
         vertices = (vertices+ self.positionStart[0].T)
+        # check for movment of the network
+        if len(self.positionStart) > 1:
+            self.networkMovement = True
         
         self.verticesInitial = np.copy(vertices)
         
@@ -1282,10 +1287,15 @@ class Vessel3D(Vessel):
         rrepeated = np.repeat(r,nPointsPerCircle).ravel()
         radiusArray = np.array([rrepeated,rrepeated,np.ones(nPointsPerCircle*N)]).T # needed for update
         vertices = self.cosSinZarray*radiusArray # needed for update
+        
+        movementIndex = 0
+        if self.networkMovement: 
+            movementIndex = timeStepCurrent
+            
         ## rotate with rotation matrix to global system
-        vertices = np.dot(vertices,self.rotToGlobalSys[timeStepCurrent])
+        vertices = np.dot(vertices,self.rotToGlobalSys[movementIndex])
         ## move to proper position and ravel array
-        vertices = (vertices+ self.positionStart[timeStepCurrent].T)
+        vertices = (vertices+ self.positionStart[movementIndex].T)
         # update vertices
         self.vertexList.vertices = vertices.ravel()
                 

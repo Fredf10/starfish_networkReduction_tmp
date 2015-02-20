@@ -731,11 +731,14 @@ class VascularNetwork(object):
                         if values['loadMeanVelocity']:
                             vessel.vsol = vessel.Qsol/vessel.Asol
                         if values['loadGravity']:
-                            vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if values['loadRotation']:   
-                            vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                            try: vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                            except: print "WARNING vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file"
+                        if values['loadRotation']:
+                            try: vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                            except: print "WARNING vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file"
                         if values['loadPosition']:
-                            vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                            try: vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+                            except: print "WARNING vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file"
                 else:
                     print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
                     

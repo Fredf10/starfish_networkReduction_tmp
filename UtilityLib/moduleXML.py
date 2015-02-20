@@ -298,8 +298,6 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
         folderPath = ''.join([networkPath,networkDirectory,solutionDataFileDirectory])
     else:
         folderPath = networkPath
-    
-    
       
     if not os.path.exists(folderPath):
         print 'ERROR: moduleXML.loadNetworkFromXML(): directory and file does not exists'
