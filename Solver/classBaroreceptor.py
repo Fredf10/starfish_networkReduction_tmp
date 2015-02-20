@@ -122,9 +122,6 @@ class Baroreceptor(object):
                 
         else: 
             print "BR line 124: not a varying elastance heart"
-                 
-         
-         
             
     def update(self,baroDict):
             '''

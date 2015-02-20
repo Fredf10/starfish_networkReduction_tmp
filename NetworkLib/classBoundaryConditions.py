@@ -1284,7 +1284,7 @@ class Windkessel3(BoundaryConditionType2):
 		if self.Rc == None:
 			Rc = self.Rtotal - Z
 			# # Rc not time-varying activate this line:
-			# self.Rc = Rc
+#			self.Rc = Rc
 			# #
 		
 		C = self.C

@@ -177,16 +177,20 @@ class Link():
         if sumQError > self.maxQError:
             self.maxQError  = sumQError
         #print self.name, ' Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
-        
+        if sumQError > 1.e-5:
+            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print sumQError
+            exit()
+            
         # Linear presssure equation
         sumPError = abs(abs(P1_new)-abs(P2_new))/abs(P1_new)
         if sumPError > 0.0: 
             self.sumPErrorCount = self.sumPErrorCount+1
         if sumPError > self.maxPError:
             self.maxPError  = sumPError
-        if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumQError
+        if sumPError > 1.e-5:
+            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print sumPError
             exit()
                                                
         ## Non linear pressure equation

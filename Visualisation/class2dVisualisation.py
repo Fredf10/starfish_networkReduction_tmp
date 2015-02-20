@@ -343,7 +343,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
     
 class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
     def __init__(self, selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames):
-                
+                        
         self.plot = lambda :''
                 
         # # variables for the slider
@@ -1602,13 +1602,13 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         selectedExternalData = None
         if self.buttonEnableExternalData.get_active() == True:
             selectedExternalData = self.externalData
+            
         print selectedNetworks,selectedVesselIds,selectedCases
         # # open plot window        
         if selectedNetworks != []:
             for networkID in loadVesselIDdict.iterkeys():
                 vesselIds = loadVesselIDdict[networkID]
                 self.networks[networkID].loadSolutionDataRange(vesselIds, values={"loadAll": True})
-            
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
     def loadVascularNetwork(self, networkName, dataNumber):
