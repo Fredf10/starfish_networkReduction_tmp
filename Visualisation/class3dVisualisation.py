@@ -727,6 +727,8 @@ class Visualisation3D(Visualisation3DGUI):
             vascularNetwork = moduleXML.loadNetworkFromXML(filename = self.networkName, dataNumber = self.dataNumber)
             vascularNetwork.linkSolutionData()
             self.vascularNetwork = vascularNetwork    
+            # load solution data
+            self.vascularNetwork.loadSolutionDataRange(values={"loadAll": True})
         
     def createVessel3D(self):
 

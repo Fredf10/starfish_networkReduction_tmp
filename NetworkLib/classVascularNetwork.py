@@ -642,7 +642,7 @@ class VascularNetwork(object):
           
         return inputsAreValid
         
-    def loadSolutionDataRange(self, vesselIds, tspan=None, mindt=None, 
+    def loadSolutionDataRange(self, vesselIds = None, tspan=None, mindt=None, 
                                   values={"loadAll": False,
                                   "loadPressure":True,
                                   "loadFlow":True, 
@@ -657,6 +657,7 @@ class VascularNetwork(object):
             specified and drops any other previously loaded data.
         Inputs:
             vesselIds - a list of vessel Ids to load
+                if vesselIds = None, data of all vessels is loaded
             tspan=[t1,t2] - a time range to load into memory t2 must be greater than t1.
                 if tspan=None, all times are loaded
             values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll', 
@@ -707,6 +708,9 @@ class VascularNetwork(object):
                 nTStepSpaces = 1
                 
             self.tsol = self.simulationTime[nSelectedBegin:nSelectedEnd:nTStepSpaces]
+            # check if all vessels should be loaded
+            if vesselIds == None: vesselIds = self.vessels.keys()
+            
             # Update selected vessels
             for vesselId in vesselIds:
                 if vesselId in self.vesselsToSave:
