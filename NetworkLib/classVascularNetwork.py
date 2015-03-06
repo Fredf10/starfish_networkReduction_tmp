@@ -9,6 +9,9 @@ sys.path.append(cur + '/../NetworkLib')
 from classVessel import Vessel
 from classBoundaryConditions import *
 
+sys.path.append(cur + '/../UtilityLib')
+import moduleFilePathHandler as mFPH
+
 import numpy as np
 from math import pi, cos, sin
 import pprint
@@ -357,13 +360,9 @@ class VascularNetwork(object):
         Enforces memory allocation.
         Set initial values for the simulations.
         '''
-                
-        # ## to be moved to a path handler
-        solutionDirectory = ''.join([cur, '/..', '/NetworkFiles/', self.name, '/SolutionData'])
-        pathSolutionDataFilename = ''.join([solutionDirectory, '/', self.name, '_SolutionData_', self.dataNumber, '.hdf5'])
-        if not os.path.exists(solutionDirectory):
-            os.makedirs(solutionDirectory)  
-        
+            
+        # create solution file
+        pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
         self.solutionDataFile = h5py.File(pathSolutionDataFilename, "w")
         
         # initialize saving indices
@@ -536,7 +535,7 @@ class VascularNetwork(object):
         globalData.attrs['dt'] = self.dt
         globalData.attrs['nTsteps'] = self.nTsteps
         globalData.attrs['nTstepsInitPhase'] = self.nTstepsInitPhase
-        
+        globalData.attrs['simulationDescription'] = self.description        
         
         savedArraySize = self.nSaveEnd - self.nSaveBegin + 1
         dsetTime = globalData.create_dataset('Time', (savedArraySize,), dtype='float64')
@@ -568,17 +567,7 @@ class VascularNetwork(object):
         loaded into memory.
         
         '''
-        
-        
-        # # verify if path is existing with modulepickle function
-        # parseDirectoryForSimulationCases(networkName)
-        
-        # ## to be moved to a path handler
-        solutionDirectory = ''.join([cur, '/..', '/NetworkFiles/', self.name, '/SolutionData'])
-        pathSolutionDataFilename = ''.join([solutionDirectory, '/', self.name, '_SolutionData_', self.dataNumber, '.hdf5'])
-        if not os.path.exists(solutionDirectory):
-            os.makedirs(solutionDirectory)  
-
+        pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'read')
         # TODO, what if this fails? do we know?
         self.solutionDataFile = h5py.File(pathSolutionDataFilename, "r")
         
@@ -710,7 +699,6 @@ class VascularNetwork(object):
             self.tsol = self.simulationTime[nSelectedBegin:nSelectedEnd:nTStepSpaces]
             # check if all vessels should be loaded
             if vesselIds == None: vesselIds = self.vessels.keys()
-            
             # Update selected vessels
             for vesselId in vesselIds:
                 if vesselId in self.vesselsToSave:
@@ -761,9 +749,7 @@ class VascularNetwork(object):
         nSelectedBegin = int(np.floor((t1 - startTime) / self.dt))
         nSelectedEnd = int(np.ceil((t2 - startTime) / self.dt))+1
         return nSelectedBegin, nSelectedEnd
-        
-        
-        
+              
         
     def findRootVessel(self):
         '''
@@ -1627,9 +1613,9 @@ class VascularNetwork(object):
         Initializing netGravity of the vessels.
         '''
         if nSet != None:
-            nTsteps = 2
+            nTsteps = 0
             
-        for n in xrange(nTsteps):
+        for n in xrange(nTsteps+1):
         
             if nSet != None: n = nSet
         
@@ -1664,8 +1650,8 @@ class VascularNetwork(object):
         
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
-            relativeVenousPressure = np.empty(nTsteps)
-            for n in xrange(nTsteps):
+            relativeVenousPressure = np.empty(nTsteps+1)
+            for n in xrange(nTsteps+1):
                            
                 relativeVP = self.centralVenousPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
                 

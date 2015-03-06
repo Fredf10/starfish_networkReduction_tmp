@@ -21,17 +21,11 @@ from class1DflowSolver import FlowSolver
 
 sys.path.append(cur+'/UtilityLib')
 import moduleXML 
-
 import moduleStartUp #import parseOptions
-import modulePickle
-
-sys.path.append(cur+'/Visualisation')
-from class3dVisualisation import Visualisation3D
+import moduleFilePathHandler as mFPH
 
 import pprint
 import matplotlib.pyplot as plt
-
-import cPickle
 
 import gc
 
@@ -44,7 +38,7 @@ def main():
     print '#     STARFiSh_v0.3_development     #'
     print '====================================='
     
-    optionsDict = moduleStartUp.parseOptions(['f','n','d','s','v','r'])
+    optionsDict = moduleStartUp.parseOptions(['f','n','d','s','v','r','w'])
     
     networkName           = optionsDict['networkName']
     save                  = optionsDict['save']
@@ -63,16 +57,21 @@ def main():
     print '%-20s %s' % ('Resimulate', resimulate)
     print '%-20s %s' % ('Visualisationmode', vizOutput)
     
+    ## check if template
+    if '_template' in networkName:
+        networkName = mFPH.createWorkingCopyOfTemplateNetwork(networkName)
+    
     # load network from the path!
     if resimulate == False:
-        vascularNetwork = moduleXML.loadNetworkFromXML(filename=filename)
+        vascularNetwork = moduleXML.loadNetworkFromXML(networkName) # moved to vascularNetowrk constror
     else:
         # resimulate network
-        vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber)        
+        vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber = dataNumber)        
         if simulationDescription == '':
             simulationDescription = vascularNetwork.description
-    
+        
     if vascularNetwork == None: exit()
+    
     
     vascularNetwork.update({'description':simulationDescription,
                             'dataNumber' :dataNumber})
@@ -98,14 +97,14 @@ def main():
     print 'Solving:        {} min {} sec'.format(minutesSolve,secsSolve)
     print '====================================='
     
-    #modulePickle.saveSolutionDataFile(vascularNetwork,dataNumber)
     vascularNetwork.saveSolutionData()
-    moduleXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber)
+    moduleXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
+    
     
     del flowSolver
     gc.collect()
     
-    modulePickle.updateSimulationDescriptions(networkName, dataNumber, simulationDescription)
+    mFPH.updateSimulationDescriptions(networkName, dataNumber, simulationDescription)
     
     gc.collect()
     

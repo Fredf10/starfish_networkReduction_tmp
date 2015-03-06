@@ -11,21 +11,20 @@ from classBoundaryConditions import *
 from constants import newestNetworkXml as nxml
 from constants import variablesDict
 
-from moduleXML import loadVariablesConversion
+import moduleXML
+import moduleFilePathHandler as mFPH
 
-
-def writeVesselDataToCSV(vessels,delimiter=';',filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     '''
+    Functions writes vessel data to *.csv file inclusive polynomial chaos definitions
+    
+    input:
+        networkName <string>
+        vessels     <dict>    := vessels dict of class vascularNetwork {vesselId : vesselInstance} 
+        delimiter   <string>  (default = ';')
     
     '''
-    if filename == None:
-        print "ERROR: moduleCSV.writeVesselDataToCSV(): no filename passed to csv-writer!"
-        return
         
-    networkDirectory = filename.split('.')[0]
-    if not os.path.exists(str(networkPath+networkDirectory)):
-        os.makedirs(str(networkPath+networkDirectory))
-    
     # find all tags needed
     polyChaosTags = {}
     for vessel in vessels.itervalues():
@@ -48,7 +47,9 @@ def writeVesselDataToCSV(vessels,delimiter=';',filename = None, networkPath = st
                 if tag in polyChaosTags.keys():
                     for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
     
-    writer = csv.DictWriter(open(networkPath+networkDirectory+'/'+filename,'wb'),tags,delimiter=delimiter)
+    ## openFile and create writer
+    vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'write')
+    writer = csv.DictWriter(open(vesselCSVFile,'wb'),tags,delimiter=delimiter)
     
     # write first row == tags
     firstRow = {}
@@ -83,22 +84,23 @@ def writeVesselDataToCSV(vessels,delimiter=';',filename = None, networkPath = st
         data.append(vesselDict)
     writer.writerows(data)
 
-def readVesselDataFromCSV(filename= None,delimiter=';',networkPath = str(cur+"/../NetworkFiles/")):
+def readVesselDataFromCSV(networkName, delimiter=';'):
     '''
+    Functions loads vessel data from *.csv file inclusive polynomial chaos definitions
     
+    input:
+        networkName 
+        delimiter   (default = ';')
+    
+    return:
+            dict := {'vesselData': vesselData} which is used by vascular network to
+                    update its vessel data with the function vascularNetwork.updateNetwork(dataDict)
     '''
-    if filename == None:
-        print "ERROR: moduleCSV.readVesselDataFromCSV(): no filename passed to csv-writer!"
-        return {}
-               
-    networkDirectory = filename.split('.')[0]
-    if not os.path.exists(str(networkPath+networkDirectory)):
-        print ""
-        print 'ERROR: moduleCSV.readVesselDataFromCSV(): file not in the correct directory / directory does not exists'
-        return {}
+        
+    vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
     # load data    
-    reader = csv.DictReader(open(networkPath+networkDirectory+'/'+filename,'rb'),delimiter=delimiter)
+    reader = csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
     # hash data with in dictionary and separate units
     columUnits = {}
     vesselData = {}
@@ -121,7 +123,7 @@ def readVesselDataFromCSV(filename= None,delimiter=';',networkPath = str(cur+"/.
                 # check for polyChaos variables
                 if '-pC' not in variable:
                     # convert variables to corret unit and type
-                    data[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
+                    data[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
                 else:
                     variable,number = variable.split('-pC')
                     if variable not in polyChaos.keys():
@@ -133,7 +135,7 @@ def readVesselDataFromCSV(filename= None,delimiter=';',networkPath = str(cur+"/.
         # convert polynomial chaos variables to corret unit and type
         for variable,variableValueStr in polyChaos.iteritems():
             variableUnit = columUnits[variable].split('#',1)
-            polyChaos[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
+            polyChaos[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
         data['polyChaos'] = polyChaos
         for variable in data.iterkeys():
             if '-pC' in variable: variablesToDiscard.append([Id,variable])
@@ -146,18 +148,17 @@ def readVesselDataFromCSV(filename= None,delimiter=';',networkPath = str(cur+"/.
 
 
 
-def writeBCToCSV(boundaryConditionDict,boundaryConditionPolyChaos,delimiter=';',filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos, delimiter=';'):
     '''
+    Functions writes boundaryCondition data to *.csv file inclusive polynomial chaos definitions
+    
+    input:
+        networkName <string>
+        boundaryConditionDict      <dict>  := boundaryConditionDict dict of class VascularNetwork {vesselId : boundaryConditionInstance} 
+        boundaryConditionPolyChaos <dict>  := boundaryConditionPolyChaos dict of class VascularNetwork 
+        delimiter   <string>  (default = ';')
     
     '''
-    if filename == None:
-        print "ERROR: moduleCSV.writeBCToCSV(): no filename passed to csv-writer!"
-        return {}
-    
-    networkDirectory = filename.split('BC')[0]
-    if not os.path.exists(str(networkPath+networkDirectory)):
-        os.makedirs(str(networkPath+networkDirectory))
-        
     # find all polychaos tags
     polyChaosTags = {}
     for id,bcPolyChaosList in boundaryConditionPolyChaos.iteritems():
@@ -190,7 +191,9 @@ def writeBCToCSV(boundaryConditionDict,boundaryConditionPolyChaos,delimiter=';',
     tagsBCType1.extend(tagsBCType2)
     tags = tagsBCType1
     
-    writer = csv.DictWriter(open(networkPath+networkDirectory+'/'+filename,'wb'),tags,delimiter=delimiter)
+    boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'write')
+    writer = csv.DictWriter(open(boundaryCSVFile,'wb'),tags,delimiter=delimiter)
+    
     # write Tag row
     firstRow = {}
     for item in tags:
@@ -230,22 +233,23 @@ def writeBCToCSV(boundaryConditionDict,boundaryConditionPolyChaos,delimiter=';',
             writer.writerow(dataRow) 
     
     
-def readBCFromCSV(delimiter=';',filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+def readBCFromCSV(networkName, delimiter=';'):
+    '''
+    Functions loads boundaryCondition data from *.csv file inclusive polynomial chaos definitions
+    
+    input:
+        networkName <string>
+        delimiter   <string>  (default = ';')
+    
+    return:
+        boundaryConditionDict      <dict>  := boundaryConditionDict dict of class VascularNetwork 
+                                              {vesselId : boundaryConditionInstance} 
+        boundaryConditionPolyChaos <dict>  := boundaryConditionPolyChaos dict of class VascularNetwork 
+ 
     '''
     
-    
-    '''
-    if filename == None:
-        print "ERROR: moduleCSV.readBCFromCSV() no filename passed to csv-writer!"
-        return {}
-        
-    networkDirectory = filename.split('BC')[0]
-    
-    if os.path.isfile(networkPath+networkDirectory+'/'+filename) == False:
-        print "ERROR: moduleCSV.readBCFromCSV() file does not exists!"
-        return {}
-    
-    reader = csv.DictReader(open(networkPath+networkDirectory+'/'+filename,'rb'),delimiter=delimiter)
+    boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
+    reader = csv.DictReader(open(boundaryCSVFile,'rb'),delimiter=delimiter)
     
     # hash data with in dictionary and separate units
     columUnits = {}
@@ -273,7 +277,12 @@ def readBCFromCSV(delimiter=';',filename = None, networkPath = str(cur+"/../Netw
                 if variable == 'filePathName':
                     path = ''.join([networkDirectory,'/'])
                     if path not in variableValueStr:  variableValueStr = variableValueStr.join([path,''])
-                boundaryDataDict[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
+                print variableValueStr
+                if variableValueStr != '':
+                    try:
+                        boundaryDataDict[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
+                    except:
+                        pass
             if '-pC' in variable and variableValueStr != '':
                 polyChaos['name'] = boundaryType
                 variable,number = variable.split('-pC')
@@ -285,7 +294,7 @@ def readBCFromCSV(delimiter=';',filename = None, networkPath = str(cur+"/../Netw
             for variable,variableValueStr in polyChaos.iteritems():
                 try:
                     variableUnit = columUnits[variable].split('#',1)
-                    polyChaos[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
+                    polyChaos[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
                 except: pass          
             if Id not in boundaryConditionPolyChaos.keys(): 
                 boundaryConditionPolyChaos[Id] =[polyChaos]
@@ -296,5 +305,5 @@ def readBCFromCSV(delimiter=';',filename = None, networkPath = str(cur+"/../Netw
         if Id not in BCconditionData.keys(): BCconditionData[Id] = [boundaryInstance]
         else: BCconditionData[Id].append(boundaryInstance)
     
-    return BCconditionData,boundaryConditionPolyChaos
+    return BCconditionData, boundaryConditionPolyChaos
   

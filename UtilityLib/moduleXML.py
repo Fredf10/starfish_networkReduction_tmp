@@ -19,6 +19,8 @@ from classBoundaryConditions import *
 from constants import variablesDict 
 from constants import unitsDictSI as unitsDict
 from constants import newestNetworkXmlVersion
+import moduleFilePathHandler as mFPH
+
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
 #from constants import unitsDictMed as unitsDict
@@ -45,34 +47,18 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
         xmlElement.text = str(variableValues)
 
 
-def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
     '''
     This function creates an XML file and writes all variable data of a vascularNetwork into it (except solution)
     The forma of the XML and all variable data are defined in constants.py
     '''
         
-    #print filename
-    if filename == None:
-        filename = vascularNetwork.getVariableValue('name')
+    networkName = vascularNetwork.getVariableValue('name')
         
-    if dataNumber is not 'xxx':
-        filename = filename.split('.')[0]
-        networkDirectory = filename
-        filename = ''.join([filename,'_SolutionData_',dataNumber,'.xml'])
-    else: 
-        networkDirectory = filename.split('.')[0]
-    
-    if networkDirectory not in networkPath.split('/'):
-        folderPath = ''.join([networkPath,networkDirectory,'/SolutionData/'])
-        if not os.path.exists(folderPath):
-            os.makedirs(folderPath)  
-    else:
-        folderPath = networkPath
-    
-    networkXmlFile = ''.join([folderPath,'/',filename])
+    networkXmlFile =  mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'write')
         
     try:
-        root = etree.Element(filename, id = dataNumber, version = newestNetworkXmlVersion)
+        root = etree.Element(networkName, id = dataNumber, version = newestNetworkXmlVersion)
     except:
         print " Error: path / file does not exist"
         return
@@ -271,7 +257,7 @@ def loadingErrorMessageVariableError(variableName, element, elementName):
     exit()
       
    
-def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cur+"/../NetworkFiles/")):
+def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
     '''
     Function laods network from XML-file
     
@@ -280,36 +266,17 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
     currentVersions = ['4.0','4.1']
     
     # read from file
-    if filename == None:
-        print 'ERROR: moduleXML.loadNetworkFromXML() : load XML - no filename passed'
+    if networkName == None:
+        print 'ERROR: moduleXML.loadNetworkFromXML() : load XML - no networkName passed'
         return None
     
-    networkDirectory = filename.split('.')[0]
-    solutionDataFileDirectory = ''
-        
-    if dataNumber is not 'xxx':        
-        filename = ''.join([filename.split('.')[0],'_SolutionData_',dataNumber,'.xml'])
-        solutionDataFileDirectory = '/SolutionData/'
-        
-    if '.xml' not in filename:
-        filename = ''.join([filename,'.xml'])  
-        
-    if networkDirectory not in networkPath.split('/'):
-        folderPath = ''.join([networkPath,networkDirectory,solutionDataFileDirectory])
-    else:
-        folderPath = networkPath
-      
-    if not os.path.exists(folderPath):
-        print 'ERROR: moduleXML.loadNetworkFromXML(): directory and file does not exists'
-        return None
-    
-    networkXmlFile = ''.join([folderPath,'/',filename])
+    networkXmlFile = mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'read', exception = exception)
     
     # create vascularNetwork instance
     vascularNetwork = VascularNetwork()
     # set name
-    vascularNetwork.update({'name':networkDirectory,
-                            'dataNumber' : dataNumber})
+    vascularNetwork.update({'name': networkName,
+                            'dataNumber':dataNumber})
     
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
@@ -383,7 +350,7 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
                                 except: pass
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
-                                    path = ''.join([networkDirectory,'/'])
+                                    path = ''.join(['networkDirectory','/'])
                                     if path not in variableValueStr:  variableValueStr = variableValueStr.join([path,''])
                                     boundaryDataDict['filePathName'] = variableValueStr
                                     
@@ -539,6 +506,10 @@ def loadNetworkFromXML(filename = None, dataNumber = "xxx", networkPath = str(cu
                 vascularNetwork.update(vascularNetworkData)
         
     return vascularNetwork
+
+
+###----------------------------------------------------------------------------------------
+### Polynomial chaos
 
 def savePolyChaosXML(vPCconfiguration, filename = None, networkPath = str(cur+"/../NetworkFiles/")):
     '''
@@ -700,8 +671,7 @@ def savePolyChaosXML(vPCconfiguration, filename = None, networkPath = str(cur+"/
     print " ... file saved"
   
   
-###----------------------------------------------------------------------------------------
-### Polynomial chaos
+
 # Conversion
 def unitConversion(unitsDict,value,unit):
     try: 

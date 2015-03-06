@@ -1461,6 +1461,14 @@ class DotWidget(gtk.DrawingArea):
         self.presstime = None
         self.highlight = None
 
+        ### added by Vinzenz Eck for compatibility with vnc
+        self.vascularNetwork = None
+        
+    ### added by Vinzenz Eck for compatibility with vnc
+    def set_vascularNetwork(self,vascularNetwork):
+        print "xdot1469", vascularNetwork
+        self.vascularNetwork = vascularNetwork
+
     def set_filter(self, filter):
         self.filter = filter
 
@@ -1723,97 +1731,101 @@ class DotWidget(gtk.DrawingArea):
                     
                     #######################################################################################3
                     ''' 
-                    Additional function for vnc_2.0 (vascular network creator 2.0)
+                    Additional function for vnc_2.1 (vascular network creator 2.0)
                     
                     Plot information of an object if clicked in a nice list
                     added by Vinzenz Eck
                     vinzenz@eck-mail.eu
                     '''
-                    from vnc_classes import tempLoad
-                    vascularNetwork = tempLoad()
                     
-                    itemType = jump.item.__class__.__name__
-                    shapesTemp = jump.item.shapes
+                    if self.vascularNetwork != None:
                     
-                    for shapeTemp in shapesTemp:
-                        if  shapeTemp.__class__.__name__ == 'TextShape':
-                            if itemType == 'Edge':
-                                vesselId = shapeTemp.t.split(' ')[0]
-                                print 'xdot 1741 shapeTemp.t',vesselId
-                                
-                                try:
-                                    vesselId = int(vesselId)
-                                    vascularNetwork.vessels[vesselId].printToConsole()
-                                except:
-                                    print "ERROR: vnx: xdot.on_area_button_release(): Click on Edge:\n  Vessel Id not defined properly!"
+                        itemType = jump.item.__class__.__name__
+                        shapesTemp = jump.item.shapes
                         
-                                print ""
-                                print "vnc 2.0 - menu"
-                                print ""
-                                print " [a] - add vessel to network"
-                                print " [d] - delete vessel in network"
-                                print " [n] - new network"
-                                print " [b] - set boundary conditions"
-                                print " [l] - load network"
-                                print " [s] - save network"
-                                print " [u] - update XML from CSV file"
-                                print " [g] - print network graph"
-                                print " [f] - print network informations"
-                                print " [q] - quit"
-                                print ""      
-                        
-                        if  shapeTemp.__class__.__name__ == 'PolygonShape':     
-                            if itemType == 'Node':
-                                     
-                                for edge in self.graph.edges:
-                                    if edge.src == jump.item:
-                                        bcNode = edge.dst
-                                        
-                                    elif edge.dst == jump.item:
-                                        bcNode = edge.src
-                                        
-                                for shapeTemp in bcNode.shapes:
-                                    if  shapeTemp.__class__.__name__ == 'TextShape':
-                                        startEndNodeID = shapeTemp.t
-                                try:
-                                    startEndNodeID = int(startEndNodeID)
-                                    for vessel in vascularNetwork.vessels.itervalues():
-                                        if vessel.endNode == startEndNodeID or vessel.startNode == startEndNodeID: 
-                                            print ''
-                                            print ''
-                                            print '----------------------- '
-                                            print '  Boundary Condition(s)'
-                                            print ''
-                                            if vessel.Id in vascularNetwork.boundaryConditions:
-                                                bcArray = vascularNetwork.boundaryConditions[vessel.Id]
-                                                
-                                                for bc in bcArray:
-                                                    print bc.name
-                                                    pp(bc.__dict__)    
-                                                
-                                            else:
-                                                print '?'
-                                            print ''
-                                            print ""
-                                            print "vnc 2.0 - menu"
-                                            print ""
-                                            print " [a] - add vessel to network"
-                                            print " [d] - delete vessel in network"
-                                            print " [n] - new network"
-                                            print " [b] - set boundary conditions"
-                                            print " [l] - load network"
-                                            print " [s] - save network"
-                                            print " [u] - update XML form CSV file"
-                                            print " [g] - print network graph"
-                                            print " [f] - print network informations"
-                                            print " [q] - quit"
-                                            print ""   
-                                        
-                                        
-                                except:
-                                    print "ERROR: vnx: xdot.on_area_button_release(): Click on Node:\n   Vessel Id not defined properly!"
-                                        
-                                   
+                        for shapeTemp in shapesTemp:
+                            if  shapeTemp.__class__.__name__ == 'TextShape':
+                                if itemType == 'Edge':
+                                    vesselId = shapeTemp.t.split(' ')[0]
+                                                                        
+                                    try:
+                                        vesselId = int(vesselId)
+                                        self.vascularNetwork.vessels[vesselId].printToConsole()
+                                    except:
+                                        print "ERROR: vnx: xdot.on_area_button_release(): Click on Edge:\n  Vessel Id not defined properly!"
+                            
+                                    print "\n"
+                                    print '====================================='
+                                    print '#    VascularNetworkCreator_v2.1    #'
+                                    print '====================================='
+                                    print " [a] - add vessel to network"
+                                    print " [d] - delete vessel in network"
+                                    print " [n] - new network"
+                                    print " [b] - set boundary conditions"
+                                    print " [f] - set global fluid properties"
+                                    print " [l] - load network"
+                                    print " [s] - save network"
+                                    print " [u] - update XML from CSV file(s)"
+                                    print " [g] - print network graph"
+                                    print " [p] - print network informations"
+                                    print " [q] - quit"
+                                    print ""    
+                            
+                            if  shapeTemp.__class__.__name__ == 'PolygonShape':     
+                                if itemType == 'Node':
+                                         
+                                    for edge in self.graph.edges:
+                                        if edge.src == jump.item:
+                                            bcNode = edge.dst
+                                            
+                                        elif edge.dst == jump.item:
+                                            bcNode = edge.src
+                                            
+                                    for shapeTemp in bcNode.shapes:
+                                        if  shapeTemp.__class__.__name__ == 'TextShape':
+                                            startEndNodeID = shapeTemp.t
+                                    try:
+                                        startEndNodeID = int(startEndNodeID)
+                                        for vessel in self.vascularNetwork.vessels.itervalues():
+                                            if vessel.endNode == startEndNodeID or vessel.startNode == startEndNodeID: 
+                                                print ''
+                                                print ''
+                                                print '----------------------- '
+                                                print '  Boundary Condition(s)'
+                                                print ''
+                                                if vessel.Id in self.vascularNetwork.boundaryConditions:
+                                                    bcArray = self.vascularNetwork.boundaryConditions[vessel.Id]
+                                                    
+                                                    for bc in bcArray:
+                                                        print bc.name
+                                                        pp(bc.__dict__)
+                                                        print   
+                                                    
+                                                else:
+                                                    print '?'
+                                                print ''
+                                                print ""
+                                                print '====================================='
+                                                print '#    VascularNetworkCreator_v2.1    #'
+                                                print '====================================='
+                                                print " [a] - add vessel to network"
+                                                print " [d] - delete vessel in network"
+                                                print " [n] - new network"
+                                                print " [b] - set boundary conditions"
+                                                print " [f] - set global fluid properties"
+                                                print " [l] - load network"
+                                                print " [s] - save network"
+                                                print " [u] - update XML from CSV file(s)"
+                                                print " [g] - print network graph"
+                                                print " [p] - print network informations"
+                                                print " [q] - quit"
+                                                print ""
+                                            
+                                            
+                                    except:
+                                        print "ERROR: vnx: xdot.on_area_button_release(): Click on Node:\n   Vessel Id not defined properly!"
+                                            
+                                       
 
                     #######################################################################################3
                     
@@ -1895,6 +1907,9 @@ class DotWindow(gtk.Window):
         window.add(vbox)
 
         self.widget = DotWidget()
+        
+        ## added by Vinzenz Eck for compliance to STARFiSh
+        self.set_vascularNetwork = self.widget.set_vascularNetwork
 
         # Create a UIManager instance
         uimanager = self.uimanager = gtk.UIManager()

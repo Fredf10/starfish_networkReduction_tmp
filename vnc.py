@@ -8,7 +8,6 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 # syspaths and functions for vascular1DFlow_v0.2
 sys.path.append(cur+'/UtilityLib')
 sys.path.append(cur+'/NetworkLib')
-sys.path.append(cur+'/UtilityLib')
 sys.path.append(cur+'/VncLib')
 from classVascularNetwork import VascularNetwork 
 from classBoundaryConditions import *
@@ -20,13 +19,15 @@ from moduleCSV import writeVesselDataToCSV
 from moduleCSV import writeBCToCSV 
 from moduleCSV import readBCFromCSV
 
-import networkXml041 as nxml
+import moduleFilePathHandler as mFPH
+
+from constants import newestNetworkXml as nxml
 
 ### import units of all variables in the SI system
 from constants import variableUnitsSI as variableUnits
 from constants import unitsDictSI as unitsDict
 
-from modulePickle import loadSolutionDataFile
+#from modulePickle import loadSolutionDataFile
 from moduleStartUp import chooseSolutionDataCase
 
 ### import units of all variales in the Medical System
@@ -37,7 +38,8 @@ import pydot
 import xdot
 import gtk
 
-from vnc_classes import *
+from classGraph import Graph
+from classGraph import MyDotWindow
 
 import cPickle
 import pprint as pprint
@@ -45,7 +47,90 @@ import numpy as np
 import thread
 from copy import deepcopy
 
+
+def enterNetworkName(networkName, recentNetworkNames = None):
+    '''
+    function to evaluate networkName input of user
+    
+    input:
+          networkName <string>      := current existing networkName
+          recentNetworkNames <list> := list of resent used networkNames
+    
+    return:
+         networkNameUserInput <string> := if user input == None : networkName passed to function
+                                          if user input == number correspoding to recentNetworkNames: 
+                                                           the correspinding networkName
+                                          if user input == newNetworkName: newNetworkName
+    '''
+    print "     current networkName: ",networkName
+    networkNameUserInput = str(raw_input("     enter/change networkName (only! ENTER to use current networkName):\n     "))
+    
+    if networkNameUserInput == "":
+        if networkName != None:
+            networkNameUserInput = networkName
+        else:
+            networkNameUserInput = None
+            
+    if networkNameUserInput != None:       
+        if networkNameUserInput in [str(int(i)) for i in range(0,9)] and len(networkNameUserInput)==1 and recentNetworkNames!= None:
+            number = int(networkNameUserInput)
+            if len(recentNetworkNames)>= number:
+                networkNameUserInput = recentNetworkNames[number-1]
+                        
+    return networkNameUserInput
+    
+
+def findAllDaughters(vascularNetwork, motherVesselID):
+    '''
+    evaluates all daughters of the vessel with the passed motherVesselID
+    
+    input:
+        vascularNetwork <classVascularNetwork Instance>
+        motherVesselID <int>
+        
+    return daughters <list> := list with all daughter ids
+    '''
+    daughters = []
+    viz = []
+    root = motherVesselID
+    if vascularNetwork.vessels[root].leftDaughter != None:
+        viz.append(root)
+    # loop through tree until all daughters are added to the graph
+    while len(viz) != 0:
+        # get the mother vessel (already added) and add its daughters
+        motherVessel = viz.pop(0)
+        # find left daughter
+        leftDaughter = vascularNetwork.vessels[motherVessel].leftDaughter
+        # add left daughter
+        daughters.append(leftDaughter)
+        # check if leftDaughter has also daughters 
+        if vascularNetwork.vessels[leftDaughter].leftDaughter != None:
+            viz.append(leftDaughter)
+        # find right daughter
+        if vascularNetwork.vessels[motherVessel].rightDaughter != None:
+            rightDaughter = vascularNetwork.vessels[motherVessel].rightDaughter
+            # add right daughter
+            daughters.append(rightDaughter)
+            # check if rightDaughter has also daughters
+            if vascularNetwork.vessels[rightDaughter].leftDaughter != None:
+                viz.append(rightDaughter)
+    return daughters
+    
+
 def main():
+    '''
+    vnc main function
+    
+    menu and all options in one big function
+    
+    need refactoring:
+        transformed into class 
+        splitted in single member functions
+        thus give possibility to make gui
+        xdot on click should call function in class vncMain
+        vascularNetwork should never be deleted ?!
+        modules need to be imported as modules !!
+    '''
     # set graphs directory
     graphPath = str(cur+'/NetworkFiles/')
     
@@ -63,7 +148,7 @@ def main():
     
     # create vascularNetwork instance
     vascularNetwork = VascularNetwork()
-    filename = None
+    networkName = None
     k = None
     while menuInput != "q":
         menuInput = ""
@@ -83,7 +168,7 @@ def main():
         print " [p] - print network informations"
         print " [q] - quit"
         print ""
-        print '  current network: ', filename
+        print '  current network: ', networkName
         while  menuInput not in ("l","b","q","a","s","g","f","d","u",'n','p'):
             menuInput = raw_input("what to do? ")
         
@@ -375,7 +460,7 @@ def main():
                         print "      set values for the BC condition: ", bcType
                         print "          enter 'b' for the first value to skip this procedure"
                         question = True
-                        for arg in nxml.bcTags[bcType]:
+                        for arg in nxml.boundaryConditionElements[bcType]:
                             if question == True: 
                                 currValue = raw_input (str("            set value for "+str(arg)+' '))
                                 if currValue == 'b': question=False
@@ -446,8 +531,8 @@ def main():
                     elif subMenuInput == '4' and vascularNetwork.root != []:
                         print "     load  boundary conditions from CSV"
                         print ""
-                        filename = enterFilename(filename,'')
-                        boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(filename = ''.join([filename,'BC','.csv']))
+                        networkName = enterNetworkName(networkName)
+                        boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(networkName)
                         vascularNetwork.update({'boundaryConditions':boundaryConditions,
                                                 'boundaryConditionPolyChaos':boundaryConditionPolyChaos})
                         
@@ -456,11 +541,11 @@ def main():
                     elif subMenuInput == '5' and vascularNetwork.root != []:
                         print "     write boundary conditions to CSV"
                         print ""
-                        filename = enterFilename(filename,'')
+                        networkName = enterNetworkName(networkName)
                         boundaryConditions = vascularNetwork.getVariableValue('boundaryConditions')
                         boundaryConditionPolyChaos = deepcopy(vascularNetwork.getVariableValue('boundaryConditionPolyChaos'))
-                        writeBCToCSV(boundaryConditions,boundaryConditionPolyChaos,filename = ''.join([filename,'BC','.csv']))         
-                        
+                        writeBCToCSV(networkName, boundaryConditions, boundaryConditionPolyChaos)    
+                                                
                     elif subMenuInput == 'b':
                         break
         
@@ -524,102 +609,150 @@ def main():
             
         elif menuInput == "l":
             try:
-                FILE = open('.recentFilenames.pickle',"rb")
-                # store pickle
-                recentFilenames = cPickle.load(FILE)
-                FILE.close()
+                vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'read'),'rb')
+                recentNetworkNames = cPickle.load(vncRescentNetworksFile)
+                vncRescentNetworksFile.close()
             except:
-                recentFilenames = []
+                recentNetworkNames = []
                 
             subMenuInput = ''
             print ""
             print "    sub menu: load data"
             print ""
             print "     [1] - load network from XML"
-            print "     [2] - load vessel data from CSV"
-            print "     [3] - load vessel data and boundary conditions from CSV"
-            print "     [4] - load network from SolutionData"
+            print "     [2] - load template network"
+            print "     [3] - load vessel data from CSV"
+            print "     [4] - load vessel data and boundary conditions from CSV"
+            print "     [5] - load network from SolutionData"
             print "     [b] - back to the main menu"
             print ""
             while  subMenuInput not in ["1","2","3","b"]:
                 subMenuInput = raw_input("what to do? ")
-            
-                print ""
-                print "         resent used networks"
-                i = 1
-                for name in recentFilenames:
-                    print "          [",i,'] - ',name
-                    i = 1+i
-                print ""
+                
+                if subMenuInput != '2':
+                    print ""
+                    print "         resent used networks"
+                    i = 1
+                    for name in recentNetworkNames:
+                        print "          [",i,'] - ',name
+                        i = 1+i
+                    print ""
+                
                 if subMenuInput == '1':
-                    print "     load from XML"
+                    print "     load from XML\n"
                     
-                    filename = enterFilename(filename,'.xml',recentFilenames = recentFilenames)
-                    if filename == None:break
+                    networkName = enterNetworkName(networkName,recentNetworkNames = recentNetworkNames)
+                    if networkName == None:break
+                    
                     # delete the old network
                     del vascularNetwork
                     #load the new network
-                    vascularNetwork = loadNetworkFromXML(filename= filename)
-                    if vascularNetwork == None:
+                    try:
+                        vascularNetwork = loadNetworkFromXML(networkName)
+                    except:
                         mainGraph.update_graph(None, window)
                         vascularNetwork = VascularNetwork()
-                        filename = None
+                        print "\n  could not load network, it does not exist! \n"
+                        if networkName in recentNetworkNames:
+                            recentNetworkNames.remove(networkName)
+                        networkName = None
+                        vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
+                        # store pickle
+                        cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                        vncRescentNetworksFile.close()
                         break
                     mainGraph.update_graph(vascularNetwork, window)
-                    filename, value = filename.split(".",1)
                     break
                 
                 elif subMenuInput == '2':
-                    print "     load vessel data from CSV - non existing vessels are added automatically"
-                    print ""
-                    filename = enterFilename(filename,'.csv',recentFilenames = recentFilenames)
-                    if filename == None:break
-                    vascularNetwork.updateNetwork(readVesselDataFromCSV(filename=filename))
+                    print "\n     load template network:\n"
                     
+                    # network templates
+                    templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
+                    
+                    dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
+                    for index,dirName in enumerate(dirNamesTemplate):
+                        print "        [ {:3} ] - {}".format(index,dirName)
+                    print ""
+                    indexChoosen = None
+                    while  indexChoosen not in [str(i) for i in xrange(len(dirNamesTemplate))]:
+                         indexChoosen = raw_input("     Insert index of network: ")
+                                                   
+                    templateNetworkName = dirNamesTemplate[int(indexChoosen)]
+                    #load the new network
+                    
+                    del vascularNetwork
+                    # delete the old network
+                    try:
+                        vascularNetwork = loadNetworkFromXML(templateNetworkName)
+                        vascularNetwork.name = None
+                        networkName = None
+                    except:
+                        mainGraph.update_graph(None, window)
+                        vascularNetwork = VascularNetwork()
+                        print "\n  could not load network, it does not exist! \n"
+                        if networkName in recentNetworkNames:
+                            recentNetworkNames.remove(networkName)
+                        networkName = None
+                        vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
+                        # store pickle
+                        cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                        vncRescentNetworksFile.close()
+                        break
                     mainGraph.update_graph(vascularNetwork, window)
-                    filename, value = filename.split(".",1)
                     break
                 
                 elif subMenuInput == '3':
-                    print "     load vessel data and boundary conditions from CSV"
-                    filename = enterFilename(filename,'.csv',recentFilenames = recentFilenames)
-                    if filename == None:break
-                    vascularNetwork.updateNetwork(readVesselDataFromCSV(filename=filename))
+                    print "     load vessel data from CSV - non existing vessels are added automatically"
+                    print ""
+                    networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
+                    if networkName == None:break
+                    
+                    vascularNetwork.updateNetwork(readVesselDataFromCSV(networkName))
+                    
                     mainGraph.update_graph(vascularNetwork, window)
+                    break
+                
+                elif subMenuInput == '4':
+                    print "     load vessel data and boundary conditions from CSV"
+                    networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
+                    if networkName == None:break
                     
-                    
-                    filename, value = filename.split(".",1)
-                    boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(filename = ''.join([filename,'BC','.csv']))
+                    vascularNetwork.updateNetwork(readVesselDataFromCSV(networkName))
+                    boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(networkName)
                     vascularNetwork.update({'boundaryConditions':boundaryConditions,
                                             'boundaryConditionPolyChaos':boundaryConditionPolyChaos})
                     
                     mainGraph.update_graph(vascularNetwork, window)
                     break
                 
-                elif subMenuInput == '4':
+                elif subMenuInput == '5':
                     print "     load network from SolutionData"
                     try:
-                        networkName,dataSetNumber = chooseSolutionDataCase()
-                        vascularNetwork = loadSolutionDataFile(networkName, dataSetNumber)
+                        networkName,dataNumber = chooseSolutionDataCase()
+                        
+                        vascularNetwork = loadNetworkFromXML(networkName,dataNumber = dataNumber)
+                        vascularNetwork.name = None
+                        networkName = None
                         mainGraph.update_graph(vascularNetwork, window)
-                        filename, value = filename.split(".",1)
+                                                    
                     except: print "\n ERROR occured could not open requested network, file does not exist or is out dated"
                     break
                 
                 elif subMenuInput == 'b':
                     break
             
-            if filename != None:    
-                if filename not in recentFilenames: recentFilenames.insert(0,filename)
+            if networkName != None:    
+                if networkName not in recentNetworkNames: recentNetworkNames.insert(0,networkName)
                 else: 
-                    recentFilenames.remove(filename)
-                    recentFilenames.insert(0,filename)
-                if len(recentFilenames) > 9: recentFilenames.pop(-1)
+                    recentNetworkNames.remove(networkName)
+                    recentNetworkNames.insert(0,networkName)
+                if len(recentNetworkNames) > 9: recentNetworkNames.pop(-1)
                             
-                FILE = open('.recentFilenames.pickle',"w")
+                vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
                 # store pickle
-                cPickle.dump(recentFilenames, FILE, protocol=2)
-                FILE.close()
+                cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                vncRescentNetworksFile.close()
             
         elif menuInput == "s":
             subMenuInput = ''
@@ -629,7 +762,7 @@ def main():
             print "     [1] - write to XML"
             print "     [2] - write vessel data to CSV"
             print "     [3] - write vessel data and boundary conditions to CSV"
-            print "     [4] - write graph to .png and .dot files"
+            print "     [4] - write graph to .png"
             print "     [b] - back to the main menu"
             print ""
             while subMenuInput not in ["1","2","3","b"]:
@@ -637,71 +770,86 @@ def main():
                      
                 if subMenuInput == '1':
                     print "     write to XML"
-                    filename = enterFilename(filename,'.xml')
-                    if filename == None:break
-                    writeNetworkToXML(vascularNetwork,filename = filename)
-                    filename, value = filename.split(".",1)
+                    networkName = enterNetworkName(networkName)
+                    vascularNetwork.name = networkName
+                    if networkName == None:break
+                    writeNetworkToXML(vascularNetwork)
                     break
                     
                 elif subMenuInput == '2':
                     print "     write vessel data to CSV"
-                    filename = enterFilename(filename,'.csv') 
-                    if filename == None:break
-                    writeVesselDataToCSV(vessels = vascularNetwork.vessels, filename = filename)
-                    filename, value = filename.split(".",1)
+                    networkName = enterNetworkName(networkName) 
+                    if networkName == None:break
+                    writeVesselDataToCSV(networkName, vascularNetwork.vessels)
                     break
                 
                 elif subMenuInput == '3':
                     print "     write vessel data and boundary conditions to CSV"
-                    filename = enterFilename(filename,'.csv') 
-                    if filename == None:break
-                    writeVesselDataToCSV(vessels = vascularNetwork.vessels, filename = filename)
-                    filename, value = filename.split(".",1)
+                    networkName = enterNetworkName(networkName) 
+                    if networkName == None:break
                     boundaryConditions = vascularNetwork.getVariableValue('boundaryConditions')
                     boundaryConditionPolyChaos = deepcopy(vascularNetwork.getVariableValue('boundaryConditionPolyChaos'))
-                    writeBCToCSV(boundaryConditions,boundaryConditionPolyChaos,filename = ''.join([filename,'BC','.csv']))  
+                    # write data
+                    writeVesselDataToCSV(networkName, vascularNetwork.vessels)
+                    writeBCToCSV(networkName, boundaryConditions,boundaryConditionPolyChaos)  
                     break
                 
                 elif subMenuInput == '4':
-                    print "     write graph to .png and .dot files"
-                    pictureName = str(raw_input("     enter pictureName (only!):"))
-                    if pictureName == "":
-                        pictureName = 'pydotTest'
-                    mainGraph.graph.write(graphPath+filename+'/'+pictureName+'.dot')
-                    mainGraph.graph.write_png(graphPath+filename+'/'+pictureName+'.png')
+                    print "     write graph to .png"
+                    vncNetworkGraphFile = mFPH.getFilePath('vncNetworkGraphFile', networkName, 'xxx', 'write')
+                    #mainGraph.graph.write(graphPath+networkName+'/'+pictureName+'.dot')
+                    mainGraph.graph.write_png(vncNetworkGraphFile)
                     break
                     
                 if subMenuInput == 'b':
                     break
         
         elif menuInput == "u":
+            try:
+                vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'read'),'rb')
+                recentNetworkNames = cPickle.load(vncRescentNetworksFile)
+                vncRescentNetworksFile.close()
+            except:
+                recentNetworkNames = []
+                        
             subMenuInput = ''
             print ""
             print "    sub menu: update XML from CSV"
             print ""
             print "     load from XML"
-            
-            filename = enterFilename(filename,'.xml')
-            if filename == None:break
+            print ""
+            print "         resent used networks"
+            i = 1
+            for name in recentNetworkNames:
+                print "          [",i,'] - ',name
+                i = 1+i
+            print ""
+            networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
+            if networkName == None:break
             # delete the old network
             del vascularNetwork
             #load the new network
-            vascularNetwork = loadNetworkFromXML(filename= filename)
-            if vascularNetwork == None:
+            try:
+                vascularNetwork = loadNetworkFromXML(networkName)
+            except:
                 vascularNetwork = VascularNetwork()
+                print "\n  could not load network, it does not exist! \n"
+                if networkName in recentNetworkNames:
+                    recentNetworkNames.remove(networkName)
+                networkName = None
+                vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
+                # store pickle
+                cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                vncRescentNetworksFile.close()
                 break
             
             mainGraph.update_graph(vascularNetwork, window)
-            
-            filename, value = filename.split(".",1)
-            
             print "     load vessel data from CSV - non existing vessels are added automatically"
-            filenameCSV = ''.join([filename,'.csv'])
-            vascularNetwork.updateNetwork(readVesselDataFromCSV(filename=filenameCSV))
+            vascularNetwork.updateNetwork(readVesselDataFromCSV(networkName))
             print "     load boundaryData from csv as well? press [u]" 
             subMenuInput = raw_input("yes [u]? ")
             if subMenuInput == 'u':
-                boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(filename = ''.join([filename,'BC','.csv']))
+                boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(networkName)
                 vascularNetwork.update({'boundaryConditions':boundaryConditions,
                                         'boundaryConditionPolyChaos':boundaryConditionPolyChaos})          
             
@@ -709,8 +857,8 @@ def main():
             except:mainGraph.update_graph(None, window)
             
             print "     write to XML"
-            filenameXML = ''.join([filename,'.xml'])
-            writeNetworkToXML(vascularNetwork,filename = filenameXML)
+            vascularNetwork.name = networkName
+            writeNetworkToXML(vascularNetwork)
             
             
     print "bye bye .."

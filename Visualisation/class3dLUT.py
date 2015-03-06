@@ -5,8 +5,6 @@ sys.path.append(cur+'/../UtilityLib')
 
 from moduleXML import loadNetworkFromXML 
 from moduleStartUp import parseOptions
-from modulePickle import loadSolutionDataFile
-from modulePickle import loadExternalDataSet
 
 from processing import linearWaveSplitting
 from processing import nonLinearWaveSplitting

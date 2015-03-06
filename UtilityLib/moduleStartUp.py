@@ -15,7 +15,7 @@ import inspect
 from pprint import pprint as pp
 
 from moduleXML import savePolyChaosXML
-
+import moduleFilePathHandler as mFPH
 
 
 from optparse import OptionParser
@@ -33,7 +33,8 @@ def parseOptions(activeOptions, visualisationOnly = False):
             'r' : resimulated case
             's' : save
             'v' : visualisation type
-            'c' : connect visualisations       
+            'c' : connect visualisations     
+            'w' : set working directory  
     
             visualisationOnly := bool if True proposal of visualisation cases are made if non is given
             
@@ -41,7 +42,7 @@ def parseOptions(activeOptions, visualisationOnly = False):
     
     Usage e.g., :
     
-        optionsDict = parseOptions(['f','n','d','s','v','r'])
+        optionsDict = parseOptions(['f','n','d','s','v','r','w'])
         
         networkName           = optionsDict['networkName']
         save                  = optionsDict['save']
@@ -53,28 +54,32 @@ def parseOptions(activeOptions, visualisationOnly = False):
     
     parser = OptionParser()
     
-    for activeOpotion in activeOptions:
-        if activeOpotion == 'f':
+    for activeOption in activeOptions:
+        if activeOption == 'f':
             parser.add_option("-f", "--file", dest='networkName',
                               help = "open file with given network name")
-        elif activeOpotion == 'n':
+        elif activeOption == 'n':
                 parser.add_option("-n", "--dataNumber", dest='dataNumber',
                                   help = "number of the solution data (last number in filename), default = 999, max 999;")
-        elif activeOpotion == 's':
+        elif activeOption == 's':
             parser.add_option("-s", "--save", action="store_true", dest="save", 
                               help = "if set solution data is saved")
-        elif activeOpotion == 'd':
+        elif activeOption == 'd':
                 parser.add_option('-d', '--description', dest='description',
                                   help = "simulation case description; NB: no space subported")
-        elif activeOpotion == 'v':
+        elif activeOption == 'v':
                 parser.add_option('-v', '--vizBool', dest='vizBool',
                                   help = "choose visualisation mode, 0: no visualisation, 1: 2d and 3d, 2: 2d plots, 3: 3d visualisation default = 1")
-        elif activeOpotion == 'c':       
+        elif activeOption == 'c':       
                 parser.add_option("-c", "--connect", action="store_true",  dest='connect',
                                   help="connect to 3dViz (True) or not (False); currently not working")
-        elif activeOpotion == 'r':
+        elif activeOption == 'r':
             parser.add_option("-r", "--resimulate", action="store_true", dest="resimulate", 
                               help = "resimulate case with same network saved in datanumber file, 0 = False, 1 = True")
+            
+        elif activeOption == 'w':
+            parser.add_option("-w", "--workingDirectory", dest="workingDirectory", 
+                              help = "set the absolute path of your working Directory where you the networkfiles are stored")
 
     (options, args) = parser.parse_args()
     optionsDict = options.__dict__
@@ -128,10 +133,26 @@ def parseOptions(activeOptions, visualisationOnly = False):
         elif option == 'resimulate':
             if optionArgument != None:
                     resimulate = optionArgument
-                            
+        elif option == 'workingDirectory':
+            if optionArgument != None:
+                print "Setting new working directory"
+                if os.path.isdir(optionArgument):
+                    mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
+                    print "   working directory set!"
+                else:
+                    print "  working directory does not exist! try to create folder"
+                    try:
+                        os.mkdir(optionArgument)
+                        mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
+                        print "   created working directory folder sucessfully"
+                        print "   working directory set!"
+                    except:
+                        print "  WARNING: moduleStartUp.parseOptions() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
+                exit()
+                    
     # catch up non given but necessary options
     if networkName == None and visualisationOnly == False:
-        networkName = chooseNetworkName()
+        networkName = chooseNetwork()
     if visualisationOnly == True and (dataSetNumber == None or networkName == None): 
             print "\n  No networkName passed, choose between all available networks:"
             print "  (NB: use -f networkName to define a specific file you want to open) \n"
@@ -151,17 +172,30 @@ def parseOptions(activeOptions, visualisationOnly = False):
             'resimulate'            : resimulate}
 
 
-def chooseNetworkName():
+def chooseNetwork():
     '''
     console Interface to choose a VascularNetwork for simulation / vascularPolynomial Chaos
     '''
-    path = ''.join([cur,'/../','NetworkFiles/'])
-    dirNames = os.listdir(path)
-    i=0
-    for dirName in dirNames:
-        print "   [",dirNames.index(dirName),'] - ',dirName
-        i=i+1
-    filenameT = str(raw_input("\n  Choose simulation case you want to open according to its number: "))
+    # network templates
+    templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
+    dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
+    
+    nTemplates = len(dirNamesTemplate)
+    
+    # working directory
+    workingDirectoryPath = mFPH.getDirectory('workingDirectory','','','read')
+    dirWorkingDirectory = [d for d in os.listdir(workingDirectoryPath) if '.' not in  d]
+    
+    dirNames = dirNamesTemplate+dirWorkingDirectory
+    
+    print "\n Template Networks: \n"
+    for dirName in dirNamesTemplate:
+        print "   [ {:3} ] - {}".format(dirNames.index(dirName),dirName)
+    print "\n WorkingDirectory Networks: \n"
+    for dirName in dirWorkingDirectory:
+        print "   [ {:3} ] - {}".format(dirNames.index(dirName),dirName)
+        
+    filenameT = str(raw_input("\n  Choose network you want to open according to its number: "))
     try:
         filenameT = int(filenameT)
     except:
@@ -223,6 +257,61 @@ def defineSimulationDescription():
     return simulationDescription
     
     
+def chooseSolutionDataCase():
+    '''
+    console Interface to choose a vascular1DFlow simualtion case for e.g. Visualisation
+    Output:
+        networkName <string>
+        dataNumber  <string>
+    '''
+    workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
+    networkCases = [d for d in os.listdir(workingDirectory) if '.' not in  d]
+        
+    enumerationIndex = 0
+    fileNameDataNumber = []
+    
+    for networkName in networkCases:
+        simulationCaseDict = mFPH.getSimulationCaseDescriptions(networkName )#, exception = 'No')
+        networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',networkName,'xxx','read')
+        
+        if simulationCaseDict != None:
+            first = True
+            for root, dirs, files in os.walk(networkDirectory):
+                for file in files:
+                    if ".hdf5" in file and "polyChaos" not in file:
+                        if first: 
+                            print "\n        {}".format(networkName)
+                            first = False
+                        file = file.split('.')[0]
+                        dataNumber = file.split('_SolutionData_')[-1]
+                        
+                        if len(dataNumber) == 3:
+                            if dataNumber not in simulationCaseDict:
+                                 description =  "'{}' not listed in simulation descriptions of network '{}'.".format(dataNumber,networkName)
+                                 # update descriptions
+                            else:
+                                description = simulationCaseDict[dataNumber]
+                            print "[ {:3} ]     {} : {}".format(enumerationIndex, dataNumber, description)
+                            fileNameDataNumber.append([networkName,dataNumber])
+                            enumerationIndex = enumerationIndex+1
+                        
+                       
+    inputInt = str(raw_input("  Choose simulation case you want to open according to its number: "))
+    try:
+        inputInt = int(inputInt)
+        networkName = fileNameDataNumber[inputInt][0]
+        dataNumber = fileNameDataNumber[inputInt][1]
+    except:
+        if inputInt > len(fileNameDataNumber):
+            print " given number to high, system exit"
+            
+        else:    
+            print "no integer given, system exit"
+        exit()
+    
+    return networkName,dataNumber
+
+
 def chooseVPCconfigFile(networkName):
     '''
     console Interface to choose a vascularPolynomialChaos Config File
@@ -278,47 +367,5 @@ def chooseVPCconfigFile(networkName):
             exit()
         
     return networkName,dataNumber   
-
-def chooseSolutionDataCase():
-    '''
-    console Interface to choose a vascular1DFlow simualtion case for e.g. Visualisation
-    Output:
-        networkName <string>
-        dataNumber  <string>
-        
-    '''
-    path = ''.join([cur,'/../','NetworkFiles/'])
-    index = 0
-    fileNameDataNumber = []
-    for dirName, dirNames, fileNames in os.walk(path):
-        # print path to all filenames.
-        for fileName in fileNames:
-            if ".hdf5" in fileName and "polyChaos" not in fileName and "pure" not in fileName:
-                fileName = fileName.split('.')[0]
-                splitName = fileName.split('_SolutionData_')
-                fileName = splitName[0]
-                dataNumber = splitName[-1] 
-                if len(dataNumber) == 3:
-                    print "   [",str(index).rjust(2),'] - ', fileName.ljust(25) ,' : ','DataSet ',dataNumber
-                    fileNameDataNumber.append([fileName,dataNumber])
-                    index = index+1
-    print ""
-    inputInt = str(raw_input("  Choose simulation case you want to open according to its number: "))
-    try:
-        inputInt = int(inputInt)
-        networkName = fileNameDataNumber[inputInt][0]
-        dataNumbers = fileNameDataNumber[inputInt][1]
-    except:
-        if inputInt > len(fileNameDataNumber):
-            print " given number to high, system exit"
-            
-        else:    
-            print "no integer given, system exit"
-        exit()
-    
-    return networkName,dataNumbers
-
-
-
     
     

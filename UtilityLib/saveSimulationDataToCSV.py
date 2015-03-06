@@ -36,7 +36,8 @@ print dataSetNumber
 ##  open data file choosed above
 try:
     print " Try to open network {} with data number {}".format(networkName, dataSetNumber)
-    vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber)  
+    vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber) 
+    vascularNetwork.linkSolutionData() 
 except:
     print "Error could not open solution data with data number {} of network {}".format(dataSetNumber,networkName)
     exit()

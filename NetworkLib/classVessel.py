@@ -357,7 +357,7 @@ class Vessel(object):
             
         # 3. calulate pos end
         self.positionEnd[n][2] = self.length
-        self.positionEnd[n] = (np.dot(self.positionEnd[n],rotToGlobalSys) + positionEndMother)
+        self.positionEnd[n] = np.dot(self.positionEnd[n],rotToGlobalSys) + positionEndMother
         
         gravityVector = np.array([0,0,self.gravityConstant])
         netGravity = np.dot(gravityVector,rotToGlobalSys)[2] 

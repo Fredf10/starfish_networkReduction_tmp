@@ -20,10 +20,8 @@ sys.path.append(cur + '/../UtilityLib')
 import processing as proc
 #from processing import nonLinearWaveSplitting
 
-from moduleStartUp import parseOptions
-
-from modulePickle import loadSolutionDataFile
-from modulePickle import loadExternalDataSet
+import moduleStartUp
+import moduleFilePathHandler as mFPH
 import moduleXML
 
 
@@ -1679,7 +1677,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         The network is added to the existing ones if is not existing
         '''
         # load vascular network
-        vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber)
+        vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber = dataNumber)
         vascularNetwork.linkSolutionData()
         # # save it and refresh GUi setup
         networkSolutionName = '_'.join([networkName, dataNumber])  
@@ -1756,7 +1754,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         
         try:
             fileName = filenames[0]
-            self.externalData = loadExternalDataSet(fileName)
+            self.externalData = mFPH.loadExternalDataSet(fileName)
             self.extDataDescription.set_text(self.externalData['Description'])
         except: 
             pass
@@ -1764,11 +1762,11 @@ class Visualisation2DMain(Visualisation2DMainGUI):
 
 if __name__ == '__main__':
                
-    optionsDict = parseOptions(['f', 'n', 'c'], visualisationOnly=True)
+    optionsDict = moduleStartUp.parseOptions(['f', 'n', 'c'], visualisationOnly=True)
     
     networkName = optionsDict['networkName']
     dataNumber = optionsDict['dataNumber']
     connect = optionsDict['connect']
-             
+
     Visualisation2DMain(networkName=networkName, dataNumber=dataNumber, connect=connect)
     gtk.main()

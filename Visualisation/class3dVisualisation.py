@@ -7,8 +7,7 @@ import subprocess
 
 import moduleXML
 from moduleStartUp import parseOptions
-from modulePickle import loadSolutionDataFile
-from modulePickle import loadExternalDataSet
+import moduleFilePathHandler as mFPH
 
 from processing import linearWaveSplitting
 from processing import nonLinearWaveSplitting
@@ -112,7 +111,7 @@ class Visualisation3DGUI(pyglet.window.Window):
         self.dalpha = (pi*5.)/180.
         
         
-        self.cameraEyesInit   = np.array([4.,0.,0.])
+        self.cameraEyesInit   = np.array([8.,8.,8.])
         self.cameraLookAtInit = np.array([0.,0.,0.])
         self.cameraEyes = np.copy(self.cameraEyesInit)
         self.cameraLookAt = np.copy(self.cameraLookAtInit)
@@ -656,15 +655,15 @@ class Visualisation3D(Visualisation3DGUI):
         self.oneCycle = False
         
         self.templateMovDataDirectory = ''.join([cur,'/.movieTemplateData'])
-        self.movieSaveDirectory = ''.join([cur+'/Movies'])
-        try: os.mkdir(self.movieSaveDirectory)
-        except: pass
+        
+        self.movieSaveDirectory = mFPH.getDirectory('movieDirectory', networkName, dataNumber, 'write')
+        
         self.movieNumber    = 0
         self.movieFileType  = '.mp4'
         
         ## create screen shot
         self.screenShotNumber        = 0 
-        self.screenShotDataDirectory = ''.join([cur,'/screenShots'])
+        self.screenShotDataDirectory = mFPH.getDirectory('screenshotDirectory', networkName, dataNumber, 'write')
                 
         self.initialzeVisualisation()
       
@@ -724,7 +723,7 @@ class Visualisation3D(Visualisation3DGUI):
         '''
         if self.networkName and self.dataNumber:
             # load vascular network
-            self.vascularNetwork = moduleXML.loadNetworkFromXML(filename = self.networkName, dataNumber = self.dataNumber)
+            self.vascularNetwork = moduleXML.loadNetworkFromXML(self.networkName, dataNumber = self.dataNumber)
             # link solution data from file
             self.vascularNetwork.linkSolutionData()   
             # load solution data from file
@@ -815,8 +814,8 @@ class Visualisation3D(Visualisation3DGUI):
             self.recordMovieData = False
             self.createMovie()
             filelist = [ f for f in os.listdir(self.templateMovDataDirectory) if  f.endswith(".png")]
-            #for f in filelist:
-                #os.remove(''.join([self.templateMovDataDirectory,'/',f]))
+            for f in filelist:
+                os.remove(''.join([self.templateMovDataDirectory,'/',f]))
         
             self.oneCycle = False
         
