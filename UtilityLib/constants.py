@@ -6,8 +6,8 @@ import numpy as np
 '''
 network xml version definition
 '''
-newestNetworkXmlVersion = '4.1'
-import networkXml041 as newestNetworkXml 
+newestNetworkXmlVersion = '4.2'
+import networkXml042 as newestNetworkXml 
 ##########################################################################################
 #----------------------------------------------------------------------------------------# 
 #convert unit to SI system
@@ -382,10 +382,15 @@ variablesDict = {## class Vascular Network
                  'applyGlobalFluid'  : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
                  # baroreceptors
                  'baroId'            : {'type':'int',  'unitSI': None,     'strCases': None, 'multiVar': False},
+                 ### random variables
+                 'distributionType': {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'a'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
+                 'b'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  }
 
 ##########################################################################################
 ## Vascular Polynomial Chaos
+
 
 polynomialChaosDistributions = ['Uniform','Normal']
 
@@ -403,8 +408,8 @@ vPCconfigurationTemplate ={ 'createDistributions' : True,
                             'sampleMethod'     : 'M',
                             'linearWaveSplit'  : True,
                             'velocityProfileCoefficient' : 2.0,
-                            'polynomsToCalculate' : [[0,0], [0,2]],
-                            'names' : ['A' ,'B'],
+                            'locationsToEvaluate' : [[0,0], [0,2]],
+                            'locationNames' : ['A' ,'B'],
                             'delta'  :{'A': 
                                         {'Pressure' :1.0,'Flow':1.0e-8,
                                         'Pressure_f':1.0,'Flow_f':1.0e-8,

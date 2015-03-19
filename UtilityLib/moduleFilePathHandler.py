@@ -39,7 +39,9 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
         'configFile',
         'simulationDescriptionFile',
         'vncRescentNetworksFile',
-        'vncNetworkGraphFile'
+        'vncNetworkGraphFile,
+        'vpcConfigXmlFile'
+        'vpcNetworkXmlFile'
     
     networkName:
     
@@ -66,11 +68,21 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                          'configFile',
                          'simulationDescriptionFile',
                          'vncRescentNetworksFile',
-                         'vncNetworkGraphFile']
+                         'vncNetworkGraphFile',
+                         'vpcConfigXmlFile',
+                         'vpcNetworkXmlFile']
     
     if fileType not in existingFileTypes:
         raise ValueError("ERROR: getFilePath, requested file type {}\
                           is not in existingFileTypess {}".format(fileType, existingFileTypes))
+    
+    if '_template' in networkName:
+        if fileType == 'networkXmlFile':
+            fileType = 'networkXmlFileTemplate'
+    if '_vpc' in networkName:
+        if fileType == 'networkXmlFile':
+            fileType = 'vpcNetworkXmlFile'
+            networkName = networkName.split('_vpc')[0]
     
     # file names
     filenames = {
@@ -84,12 +96,11 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                  'simulationDescriptionFile' : ''.join(['simulationCaseDescriptions.txt']),
                  'vncRescentNetworksFile'    : '.recentNetworkNames.pickle',
                  'vncNetworkGraphFile'       : ''.join([networkName,'.png']),
+                 ## vascularPolynomialChaos
+                 'vpcConfigXmlFile'          : ''.join([networkName,'_vpcConfig_',dataNumber,'.xml']),
+                 'vpcNetworkXmlFile'         : ''.join([networkName,'_vpc_',dataNumber,'.xml'])
                  }    
-    
-    if '_template' in networkName:
-        if fileType == 'networkXmlFile':
-            fileType = 'networkXmlFileTemplate'
-    
+                
     ## if fileType=networkXmlFile check if master (dn = XXX) or simulated is meant
     if fileType == 'networkXmlFile':
         if dataNumber == 'xxx':
@@ -145,7 +156,9 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         'movieDirectory',
         'simulationDescriptionFileDirectory',
         'vncRescentNetworksFileDirectory',
-        'vncNetworkGraphFileDirectory'
+        'vncNetworkGraphFileDirectory',
+        'vpcConfigXmlFileDirectory',
+        'vpcNetworkXmlFileDirectory',
     
     networkName:
     
@@ -177,7 +190,9 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'movieDirectory',
                               'simulationDescriptionFileDirectory',
                               'vncRescentNetworksFileDirectory',
-                              'vncNetworkGraphFileDirectory'} 
+                              'vncNetworkGraphFileDirectory',
+                              'vpcConfigXmlFileDirectory',
+                              'vpcNetworkXmlFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
@@ -196,6 +211,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     solutionFileDirectory           = ''.join([networkXmlFileDirectory,'/SolutionData_',str(dataNumber)])
     movieDirectory              = ''.join([solutionFileDirectory,'/Movies'])
     screenshotDirectory         = ''.join([solutionFileDirectory,'/Screenshots'])
+    polynomialChaosCaseDirectory = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
     ## look up tables
     # directories
     directories = {
@@ -207,11 +223,16 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'networkXmlFileXXXDirectory'         : networkXmlFileDirectory,
                    'networkXmlFileSimDirectory'         : solutionFileDirectory,
                    'solutionFileDirectory'              : solutionFileDirectory,
+                   'simulationDescriptionFileDirectory' : networkXmlFileDirectory,
+                   # 3d viz
                    'screenshotDirectory'                : screenshotDirectory,
                    'movieDirectory'                     : movieDirectory,
-                   'simulationDescriptionFileDirectory' : networkXmlFileDirectory,
+                   # vnc
                    'vncRescentNetworksFileDirectory'    : workingDirectory,
-                   'vncNetworkGraphFileDirectory'       : networkXmlFileDirectory
+                   'vncNetworkGraphFileDirectory'       : networkXmlFileDirectory,
+                   # vascular polynomial chaos
+                   'vpcConfigXmlFileDirectory'          : polynomialChaosCaseDirectory,
+                   'vpcNetworkXmlFileDirectory'         : polynomialChaosCaseDirectory
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

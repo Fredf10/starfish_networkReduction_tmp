@@ -1,3 +1,4 @@
+from classRandomVariableVector import RandomVariableVector
 
 try:
     from lxml import etree
@@ -46,6 +47,27 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
     else:
         xmlElement.text = str(variableValues)
 
+def writeRandomVariableElement(subElement, variable, randomVariableVector,randomVariableNameLocation):
+    '''
+    writes a random variable in xml file
+    
+    input: 
+        subElement := mother xml element where the randomVariableElement should be added
+        variable   := name of the deterministic random variable
+        randomVariableVector := reference to the randomVariableVector of the case
+        randomVariableNameLocation := specific location of the randomVariable in the vascular network    
+    '''
+    ## import current network xml description as nxmlW(rite) to avoid version clash
+    from constants import newestNetworkXml as nxmlW
+    
+    subsubElement = etree.SubElement(subElement, "-".join([variable,'randomVariable']))
+    for randomVariableElement in nxmlW.randomVariableElements:
+        subsubsubElement = etree.SubElement(subsubElement, randomVariableElement) 
+        writeXMLsetUnit(subsubsubElement,randomVariableElement)
+        randomVariableIndex = randomVariableVector.mapOfRandomVectors[randomVariableNameLocation]
+        value = randomVariableVector(randomVariableIndex).getVariableValue(randomVariableElement)
+        writeXMLsaveValues(subsubsubElement,randomVariableElement,value)  
+
 
 def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
     '''
@@ -68,6 +90,10 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
         
     xmlFile = etree.ElementTree(root)
     
+    ### polynomial chaos distributionstuff
+    randomVariableVector = vascularNetwork.randomVariableVector
+    existingRandomVariables = randomVariableVector.mapOfRandomVectors.keys()
+    
     for xmlElementName in nxmlW.xmlElements:
         xmlFileElement = etree.SubElement(root, xmlElementName)
         xmlElement = nxmlW.xmlElementsReference[xmlElementName]
@@ -75,24 +101,19 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
         if xmlElementName == 'boundaryConditions':
             for vesselId,boundaryConditions in vascularNetwork.boundaryConditions.iteritems():
                 subElement = etree.SubElement(xmlFileElement, 'boundaryCondition', vesselId = str(vesselId))
-                try: polyChaosList = vascularNetwork.boundaryConditionPolyChaos[vesselId]
-                except: pass
                 # loop saved condition instances
                 for boundaryCondition in boundaryConditions:
                     boundaryType = boundaryCondition.getVariableValue('name')
-                    typeElement = etree.SubElement(subElement, boundaryType)
-                    try: polyChaosDict = [polyDict for polyDict in polyChaosList if polyDict['name'] == boundaryType][0]
-                    except: polyChaosDict = {}
+                    subsubElement = etree.SubElement(subElement, boundaryType)
                     # loop variables of the instance to be saved in xml
                     for variable in nxmlW.boundaryConditionElements[boundaryType]:
-                        variableElement = etree.SubElement(typeElement, variable)
+                        variableElement = etree.SubElement(subsubElement, variable)
                         writeXMLsetUnit(variableElement,variable)
                         writeXMLsaveValues(variableElement,variable,boundaryCondition.getVariableValue(variable))  
-                        if variable in polyChaosDict.keys():
-                            subElementIntervalValues = polyChaosDict[variable]
-                            intervalElement = etree.SubElement(typeElement, "-".join([variable,'polyChaos']))
-                            writeXMLsetUnit(intervalElement,variable)
-                            writeXMLsaveValues(intervalElement,variable,subElementIntervalValues,polychaos = True)  
+                        # polynomial chaos
+                        randomVariableNameLocation = '_'.join(['boundaryCondition',boundaryType,str(vesselId),variable])
+                        if randomVariableNameLocation in existingRandomVariables:
+                            writeRandomVariableElement(subsubElement, variable, randomVariableVector, randomVariableNameLocation)
                             
         elif xmlElementName == 'vessels':
             for vessel in vascularNetwork.vessels.itervalues():
@@ -116,12 +137,11 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
                         writeXMLsetUnit(subsubElement,variable)
                         writeXMLsaveValues(subsubElement,variable,variableValues)  
                         # check for polychaos data of vessel
-                        try: 
-                            subElementIntervalValues = vessel.polyChaos[variable]
-                            intervalElement = etree.SubElement(subElement, "-".join([variable,'polyChaos']))
-                            writeXMLsetUnit(intervalElement,variable)
-                            writeXMLsaveValues(intervalElement,variable,subElementIntervalValues,polychaos = True) 
-                        except : pass
+                        # polynomial chaos
+                        randomVariableNameLocation = '_'.join(['vessel',str(vessel.Id),variable])
+                        if randomVariableNameLocation in existingRandomVariables:
+                            writeRandomVariableElement(subElement, variable, randomVariableVector, randomVariableNameLocation)
+                            
         
         elif xmlElementName == 'communicators':
             for comId,comData in vascularNetwork.communicators.iteritems():
@@ -150,19 +170,19 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
                 else: 
                     variableValues = vascularNetwork.getVariableValue(variable)
                 writeXMLsaveValues(subElement,variable,variableValues)  
-                # check for interaval data of global fluid
-                try: 
-                    subElementIntervalValues = vascularNetwork.globalFluidPolyChaos[variable]
-                    intervalElement = etree.SubElement(xmlFileElement, "-".join([variable,'polyChaos']))
-                    writeXMLsetUnit(intervalElement,variable)
-                    intervalElement.text = ' '.join(str(i) for i in subElementIntervalValues)
-                except : pass   
+                ## check for interaval data of global fluid TODO: reimplement polyomial chaos for global fluid
+#                 try: 
+#                     subElementIntervalValues = vascularNetwork.globalFluidPolyChaos[variable]
+#                     intervalElement = etree.SubElement(xmlFileElement, "-".join([variable,'polyChaos']))
+#                     writeXMLsetUnit(intervalElement,variable)
+#                     intervalElement.text = ' '.join(str(i) for i in subElementIntervalValues)
+#                 except : pass   
                                 
     
     xmlFile.write(networkXmlFile,encoding='iso-8859-1',pretty_print = True)
     
 
-def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'unitSI', polychaos = False):
+def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'unitSI'):
     '''
     checks the element.text string and
     evaluates it corresponding to the definition
@@ -178,11 +198,10 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
     convertError = []
     variableTypes = variablesDict[variable]['type']
     # check if variable is a multiple variable (means list of variables)
-    if variablesDict[variable]['multiVar'] or polychaos == True:
+    if variablesDict[variable]['multiVar']:
         variableValueStrings = variableValueStr.split(' ')
         multiVariable = True
         variableValues = []
-        if polychaos == True: variableTypes = ' '.join(['str',variablesDict[variable]['type']])    
     else:
         variableValueStrings = [variableValueStr]
     
@@ -221,9 +240,7 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                     convertError.append('bool') 
                 
             elif variableType in ['str']:
-                if polychaos: 
-                    if variableValueString in polynomialChaosDistributions: variableValue = variableValueString
-                elif variableValueString in variablesDict[variable]['strCases']: variableValue = variableValueString
+                if variableValueString in variablesDict[variable]['strCases']: variableValue = variableValueString
                 elif variablesDict[variable]['strCases'][0] == 'anything': variableValue = variableValueString
                 else: convertError.append(''.join(['str == ',str(variablesDict[variable]['strCases'])]))
             
@@ -255,15 +272,39 @@ def loadingErrorMessageVariableError(variableName, element, elementName):
           variable "{}" of {} {} is not defined.
           (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
     exit()
-      
+   
+def loadRandomVariableElement(xmlElement,xmlElementReferences,variableName,randomVariableVector, randomVariableLocation):
+    '''
+    Function to load random variable xml element
+    
+    input:
+        xmlElement
+        xmlElementReferences
+        variableName := name of the random variable
+        randomVariableVector
+        randomVariableLocation    
+    '''    
+    dictionary = {'variableName' : variableName}
+    for variable in xmlElementReferences:
+        try: element = xmlElement.findall(''.join(['.//',variable]))[0]
+        except: loadingErrorMessageVariableError(variable, 'randomVariable', variableName)
+        # get variable value                        
+        try: variableValueStr = element.text
+        except: loadingErrorMessageValueError(variable, 'randomVariable', variableName)
+        # get unit 
+        try: variableUnit = element.attrib['unit']
+        except: variableUnit = None 
+        # save converted XML-value
+        dictionary[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
+    randomVariableVector.addRandomVariable(randomVariableLocation, dictionary)
    
 def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
     '''
     Function laods network from XML-file
     
-    version of XML files supported: 4.0, 4.1
+    version of XML files supported: 4.0, 4.1, 4.2
     '''
-    currentVersions = ['4.0','4.1']
+    currentVersions = ['4.0','4.1','4.2']
     
     # read from file
     if networkName == None:
@@ -277,6 +318,8 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
     # set name
     vascularNetwork.update({'name': networkName,
                             'dataNumber':dataNumber})
+    ## create random vector
+    randomVariableVector = RandomVariableVector()
     
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
@@ -298,10 +341,12 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
         from constants import newestNetworkXml as nxml
     elif xmlFileVersion == '4.0':
         import networkXml040 as nxml  
+    elif xmlFileVersion == '4.1':
+        import networkXml041 as nxml  
     
     if xmlFileVersion != newestNetworkXmlVersion:
         print " WARNING the version of the network xml file you try to load is outdated it may occure some problems!"
-    
+       
     for xmlElementName in nxml.xmlElements:
         for xmlElement in root.findall(''.join([".//",xmlElementName])):
                       
@@ -312,7 +357,6 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                     except: loadingErrorMessageVariableError('vesselId', 'one boundaryCondition', '')
                        
                     boundaryInstances = []
-                    boundaryIntervals = []
                     # loop through possible communicator class types
                     for boundaryType in nxml.xmlElementsReference[xmlElementName]:
                         # find all bcs of this type
@@ -320,7 +364,6 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                             boundaryInstance = eval(nxml.bcTagsClassReferences[boundaryType])()
                             boundaryDataDict = {}
                             boundaryDataDict['name'] = boundaryType
-                            boundaryIntervalDataDict = {}
                             # loop through all variables of this type, convert and save values of these
                             for variable in nxml.xmlElementsReference[xmlElementName][boundaryType]: 
                                 # find normal variables
@@ -334,20 +377,19 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                                 except: variableUnit = None 
                                 # save converted XML-value
                                 boundaryDataDict[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
-                                # find polynomial chaos variable
-                                try:                                                       
-                                    # find polychaos variables
-                                    element = bcElements.findall(''.join(['.//',variable,'-polyChaos']))[0]
-                                    # get variable value                        
-                                    try: variableValueStr = element.text
-                                    except: loadingErrorMessageValueError(variable, 'boundaryCondition', boundaryType)
-                                    # get unit
-                                    try: variableUnit = element.attrib['unit']
-                                    except: variableUnit = None 
-                                    # save converted XML-value                      
-                                    boundaryIntervalDataDict[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
-                                    boundaryIntervalDataDict['name'] = boundaryType  
-                                except: pass
+                                
+                                # find polynomial chaos variable  
+                                randomVariableName = ''.join([variable,'-randomVariable'])
+                                elementRandomVariable = bcElements.findall(''.join(['.//',randomVariableName]))
+                                if len(elementRandomVariable) == 1:  
+                                    randomVariableNameLocation = '_'.join(['boundaryCondition',boundaryType,str(vesselId),variable])
+                                    xmlElementReferences = nxml.randomVariableElements
+                                    loadRandomVariableElement(elementRandomVariable[0],
+                                                              xmlElementReferences,
+                                                              variable,
+                                                              randomVariableVector,
+                                                              randomVariableNameLocation)
+                                
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
                                     path = ''.join(['networkDirectory','/'])
@@ -356,29 +398,23 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                                     
                             boundaryInstance.update(boundaryDataDict)
                             boundaryInstances.append(boundaryInstance)             
-                            if boundaryIntervalDataDict != {}:
-                                boundaryIntervals.append(boundaryIntervalDataDict)
                                 
                     # apply read data to vascularNetwork
                     if vesselId not in vascularNetwork.boundaryConditions.keys():
                         vascularNetwork.boundaryConditions[vesselId] = boundaryInstances
                     else:
                         vascularNetwork.boundaryConditions[vesselId].extend(boundaryInstances)
-                    if boundaryIntervals != []: 
-                        vascularNetwork.boundaryConditionPolyChaos[vesselId] = boundaryIntervals
                         
             elif xmlElementName == 'vessels':
                 for vesselXMLnode in xmlElement.findall(''.join(['.//','vessel'])):
                     vesselData = {}
-                    vesselPolychaosData = {}
                     # load vessel attributes
                     for attribute in nxml.vesselAttributes:
                         try: vesselData[attribute] = loadVariablesConversion(attribute, vesselXMLnode.attrib[attribute], '')
                         except: 
                             try:    loadingErrorMessageVariableError(attribute, 'vessel', vesselData['Id'])
                             except: loadingErrorMessageVariableError(attribute, 'one vessel', '')
-                        
-                        
+                                            
                     for vesselElement in nxml.xmlElementsReference[xmlElementName]: 
                         # check if compliance and adjust variables
                         if vesselElement == 'compliance':
@@ -400,20 +436,19 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                             except: variableUnit = None 
                             # save converted XML-value
                             vesselData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
+                            
                             # find polynomial chaos variable
-                            try:                        
-                                # find polychaos variables
-                                element = vesselXMLnode.findall(''.join(['.//',variable,'-polyChaos']))[0]
-                                # get variable value                        
-                                try: variableValueStr = element.text
-                                except: loadingErrorMessageValueError(variable, 'vessel', vesselData['Id'])
-                                # get unit
-                                try: variableUnit = element.attrib['unit']
-                                except: variableUnit = None 
-                                # save converted XML-value                      
-                                vesselPolychaosData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
-                            except: pass
-                        vesselData['polyChaos'] = vesselPolychaosData
+                            randomVariableName = ''.join([variable,'-randomVariable'])
+                            elementRandomVariable = vesselXMLnode.findall(''.join(['.//',randomVariableName]))
+                            if len(elementRandomVariable) == 1:  
+                                randomVariableNameLocation = '_'.join(['vessel',str(vesselData['Id']),variable])
+                                xmlElementReferences = nxml.randomVariableElements
+                                loadRandomVariableElement(elementRandomVariable[0],
+                                                          xmlElementReferences,
+                                                          variable,
+                                                          randomVariableVector,
+                                                          randomVariableNameLocation)
+                                
                     vascularNetwork.updateNetwork({'vesselData':{vesselData['Id']:vesselData}})
             
             elif xmlElementName == 'communicators':
@@ -460,7 +495,8 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
             elif xmlElementName == 'globalFluid':
                     
                 globalFluidData = {}
-                globalFluidPolychaosData = {}
+                ## TODO: reimplement global fluid polynomial chaos
+                ##globalFluidPolychaosData = {}
                 
                 for variable in nxml.xmlElementsReference[xmlElementName]: 
                     # find normal variables
@@ -475,20 +511,21 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                     # save converted XML-value
                     globalFluidData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit) 
                     
-                    # find polynomial chaos variable
-                    try:                        
-                        # find polychaos variables
-                        element = xmlElement.findall(''.join(['.//',variable,'-polyChaos']))[0]
-                        # get variable value                        
-                        try: variableValueStr = element.text
-                        except: loadingErrorMessageValueError(variable, 'global fluid', '')
-                        # get unit
-                        try: variableUnit = element.attrib['unit']
-                        except: variableUnit = None 
-                        # save converted XML-value                      
-                        globalFluidPolychaosData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
-                    except: pass
-                vascularNetwork.updateNetwork({'globalFluid':globalFluidData,'globalFluidPolyChaos':globalFluidPolychaosData})
+                    ## TODO: reimplement global fluid polynomial chaos
+#                     # find polynomial chaos variable
+#                     try:                        
+#                         # find polychaos variables
+#                         element = xmlElement.findall(''.join(['.//',variable,'-polyChaos']))[0]
+#                         # get variable value                        
+#                         try: variableValueStr = element.text
+#                         except: loadingErrorMessageValueError(variable, 'global fluid', '')
+#                         # get unit
+#                         try: variableUnit = element.attrib['unit']
+#                         except: variableUnit = None 
+#                         # save converted XML-value                      
+#                         globalFluidPolychaosData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
+#                     except: pass
+                vascularNetwork.updateNetwork({'globalFluid':globalFluidData}) ##,'globalFluidPolyChaos':globalFluidPolychaosData})
                     
             elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork
                 vascularNetworkData = {}
@@ -505,44 +542,38 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                     vascularNetworkData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                 vascularNetwork.update(vascularNetworkData)
         
+    
+    vascularNetwork.randomVariableVector = randomVariableVector
+    print "xml547",randomVariableVector()
+    print "xml548", vascularNetwork.randomVariableVector()
+    
     return vascularNetwork
 
 
 ###----------------------------------------------------------------------------------------
 ### Polynomial chaos
 
-def savePolyChaosXML(vPCconfiguration, filename = None, networkPath = str(cur+"/../NetworkFiles/")):
+def savePolyChaosXML(networkName, dataNumber, vPCconfiguration = None):
     '''
     Function to write a xml file with vascularPolynomialChaos Configurations
     '''
+    from constants import variableUnitsSI as variableUnits
+    from constants import vPCconfigurationTemplate
     
-    if '_template' in filename:
-        vPCconfiguration = vPCconfigurationTemplate
-        filename = filename.rsplit('_template')[0]
+    vpcConfigXmlFile =  mFPH.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
     
-    if '.xml' not in filename:
-        filename = ''.join([filename,'.xml']) 
-    
-    networkDirectory = filename.split('_vpcConfig_')[0]
-    if not os.path.exists(str(networkPath+networkDirectory)):
-        os.makedirs(str(networkPath+networkDirectory))  
-    
-    pathAndFileName = ''.join([networkPath,networkDirectory,'/',filename])
-
-    try:
-        root = etree.Element(filename, id= "1.0", version="1.0")
-    except:
-        print " Error: path / file does not exist"
-        return
-    
-    
+    root = etree.Element(networkName, id= dataNumber, version="1.0")
+        
     xmlFile = etree.ElementTree(root)
+    
+    if vPCconfiguration == None:
+        vPCconfiguration = vPCconfigurationTemplate
+    
     #----------------------------------------------------------------------------------------# 
     ### Write Control Variables
     controlVariables = etree.SubElement(root, "controlVariables")
     
     preProcessing = etree.SubElement(controlVariables, "preProcessing")
-    
     
     createOrthoPoly = etree.SubElement(preProcessing, "createDistributions")
     createOrthoPoly.text = str(vPCconfiguration['createDistributions'])
@@ -628,11 +659,11 @@ def savePolyChaosXML(vPCconfiguration, filename = None, networkPath = str(cur+"/
     evaluationPoints = etree.SubElement(root, "evaluationPoints")
     
     evalPointCount = 0
-    for idNodeTuple in vPCconfiguration['polynomsToCalculate']:
+    for idNodeTuple in vPCconfiguration['locationsToEvaluate']:
         try:
-            name = str(vPCconfiguration['names'][evalPointCount])
+            name = str(vPCconfiguration['locationNames'][evalPointCount])
         except: "Error: no name for id,node {} tuple defined".format(idNodeTuple)
-        evaluationPoint = etree.SubElement(evaluationPoints, "evaluationPoint",  id = str(idNodeTuple[0]), name = str(name), gridNode = str(idNodeTuple[1]))        
+        evaluationPoint = etree.SubElement(evaluationPoints, "evaluationPoint",  vesselId = str(idNodeTuple[0]), name = str(name), gridNode = str(idNodeTuple[1]))        
         try:
             deltas = etree.SubElement(evaluationPoint, "deltasMinMaxFunction")
             deltaPressure = etree.SubElement(deltas, "Pressure", unit = variableUnits['Pressure'])
@@ -667,8 +698,8 @@ def savePolyChaosXML(vPCconfiguration, filename = None, networkPath = str(cur+"/
         except: "Error: in deltas for id,node {} tuple defined".format(idNodeTuple)
         evalPointCount = evalPointCount+1
 
-    xmlFile.write(pathAndFileName,encoding='iso-8859-1',pretty_print = True)
-    print " ... file saved"
+    xmlFile.write(vpcConfigXmlFile,encoding='iso-8859-1',pretty_print = True)
+    print " ... vpcConfig template saved"
   
   
 
@@ -687,26 +718,20 @@ def unitConversion(unitsDict,value,unit):
     return value
   
     
-def loadPolyChaosXML(filename = None, networkPath = str(cur+"/../NetworkFiles/")):
-    
-    
+def loadPolyChaosXML(networkName, dataNumber):
     ### import units of all variables in the SI system outdated used of only few functions -> to be changed
     ## just used for polynomial chaos config.
     from constants import variableUnitsSI as variableUnits
     from constants import vPCconfigurationTemplate
-    
-    if '.xml' not in filename:
-        filename = ''.join([filename,'.xml'])
+        
+    vpcConfigXmlFile =  mFPH.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
     
     vPCconfiguration =  {}
-    
-    networkDirectory = filename.split('_vpcConfig_')[0]
-    pathAndFileName = ''.join([networkPath,networkDirectory,'/',filename])
     
     # load the data!
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
-        tree = etree.parse(pathAndFileName, parser)
+        tree = etree.parse(vpcConfigXmlFile, parser)
     except (etree.ParseError, ImportError) as e:
         if isinstance(e, etree.ParseError):
             print " Error in XML file on line: "
@@ -758,7 +783,6 @@ def loadPolyChaosXML(filename = None, networkPath = str(cur+"/../NetworkFiles/")
             if data.tag == 'velocityProfileCoefficient':
                 if data.text != 'None' and data.text !=  None: 
                     vPCconfiguration['velocityProfileCoefficient'] = float(data.text)
-                    print "asd"
 
     #---------------------------------------------------------------------------------------#
     ### POSTPROCESSING: PLOTTING
@@ -801,7 +825,7 @@ def loadPolyChaosXML(filename = None, networkPath = str(cur+"/../NetworkFiles/")
     for evaluationPoint in root.findall(".//evaluationPoint"):
         evaluationPointsDict = evaluationPoint.attrib
         names.append(evaluationPointsDict['name'])
-        polynomsToCalculate.append([int(evaluationPointsDict['id']),int(evaluationPointsDict['gridNode'])])
+        polynomsToCalculate.append([int(evaluationPointsDict['vesselId']),int(evaluationPointsDict['gridNode'])])
         
         deltaDict = {}
         peaksToEvaluateDict = {}
@@ -818,8 +842,8 @@ def loadPolyChaosXML(filename = None, networkPath = str(cur+"/../NetworkFiles/")
         delta[evaluationPointsDict['name']] = deltaDict
         peaksToEvaluate[evaluationPointsDict['name']] = peaksToEvaluateDict
         
-    vPCconfiguration['polynomsToCalculate'] = polynomsToCalculate
-    vPCconfiguration['names'] = names
+    vPCconfiguration['locationsToEvaluate'] = polynomsToCalculate
+    vPCconfiguration['locationNames'] = names
     vPCconfiguration['delta'] = delta
     vPCconfiguration['peaksToEvaluate'] = peaksToEvaluate
                 

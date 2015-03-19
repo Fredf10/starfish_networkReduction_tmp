@@ -12,6 +12,9 @@ from classBoundaryConditions import *
 sys.path.append(cur + '/../UtilityLib')
 import moduleFilePathHandler as mFPH
 
+sys.path.append(cur + '/../VascularPolynomialChaosLib')
+from classRandomVariableVector import RandomVariableVector
+
 import numpy as np
 from math import pi, cos, sin
 import pprint
@@ -105,7 +108,6 @@ class VascularNetwork(object):
         self.boundaryConditionPolyChaos = {}
                 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
-        self.globalFluidPolyChaos = {}
         
         self.baroreceptors = {}  # dictionarz with baroreceptors
         
@@ -122,8 +124,28 @@ class VascularNetwork(object):
         self.Cends = {}  # Dictionary with the area compliances of all terminating vessels (at ends)
         self.totalTerminalAreaCompliance = None  # the sum of all Cends
         self.TotalVolumeComplianceTree = None  # total volume compliance of all vessels
-            
-    
+        
+#         ### random variables TODO: move out of here to global class        
+        self.randomVariableVector = RandomVariableVector()
+#         a = 0
+#         if a:
+#             name1 = "vessel_1_betaLaplace"
+#             data1 = {'distributionType' : 'Uniform',
+#                 'a'                : 2,  
+#                 'b'                : 12,
+#                 'variableName'     : 'betaLaplace',
+#                 'updateMethod'     : None}
+#             
+#             name2 = "boundaryCondition_Flow-Sinus2_0_amp"
+#             data2 = {'distributionType' : 'Uniform',
+#                     'a'                : 2,  
+#                     'b'                : 12,
+#                     'variableName'     : 'amp',
+#                     'updateMethod'     : None}
+#             self.randomVariableVector.addRandomVariable(name1, data1)
+#             self.randomVariableVector.addRandomVariable(name2, data2)
+        
+        
     # all classes concerning vessel
     def addVessel(self, vesselId=None, dataDict=False):
         '''
@@ -188,7 +210,6 @@ class VascularNetwork(object):
 
             'vascularNetworkData'  := dict with all vascularNetwork variables to update
             'globalFluid'          := dict with all global fluid properties
-            'globalFluidPolyChaos' := dict with all global fluid polynomial chaos values
             'communicators'        := netCommunicators}
             
             'vesselData Dict'      := { vessel.id : DataDict}
@@ -198,7 +219,7 @@ class VascularNetwork(object):
             try: self.update(updateDict[dictName])
             except: pass
             
-        for dictName in ['globalFluid', 'globalFluidPolyChaos', 'communicators', 'baroreceptors']:
+        for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
             try: self.getVariableValue(dictName).update(updateDict[dictName])
             except: pass
                         
@@ -208,7 +229,7 @@ class VascularNetwork(object):
                     self.vessels[vesselId].update(vesselData)
                 except:
                     self.addVessel(vesselId, vesselData)    
-                
+          
     def showVessels(self):
         '''
         writes the Vesseldata for each vessel to console (calls printToConsole() from each vessel)
@@ -753,7 +774,7 @@ class VascularNetwork(object):
         
     def findRootVessel(self):
         '''
-        Finds the root of a network, i.e. the vessel with no daughters
+        Finds the root of a network, i.e. the vessel which is not a daughter of any vessel
         Evaluates a startRank for the evaulation of the network
         '''
         daughters = []
@@ -768,7 +789,7 @@ class VascularNetwork(object):
                         approximatedBif += 1
                 except: pass
             except: pass
-        
+                
         # find startRank by approximation of numbers of generations
         approxGen = len(set(daughters)) - 2 * approximatedBif + int(np.sqrt(approximatedBif))
         self.startRank = 2.0 ** (approxGen - 1)

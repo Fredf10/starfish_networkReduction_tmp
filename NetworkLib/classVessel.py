@@ -27,8 +27,8 @@ class Vessel(object):
         ### Input properties
         
         ## attributes
-        self.Id     = Id                              # id of the vessel
-        self.name   = name                            # name of the vessel
+        self.Id     = Id                            # id of the vessel
+        self.name   = name                          # name of the vessel
         
         ## topology properties
         self.startNode          = None              # node id of starting node  
@@ -69,8 +69,7 @@ class Vessel(object):
         self.gamma              = 2.0              # velocity profile gamma correction                              
         
         # vascular Polynomial chaos data dictionary with uncertainty variables
-        self.polyChaos          = {}                # dict with uncertain variables { 'variableName': [dist coeff coeff]}
-        
+ 
         ### Calculated properties
         # positions in space 
         # realtive to global system

@@ -9,18 +9,18 @@
 # created by Vinzenz Eck // vinzenz.g.eck@ntnu.no
 ##
 
-import os
+import os,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 import inspect
 from pprint import pprint as pp
 
-from moduleXML import savePolyChaosXML
+import moduleXML 
 import moduleFilePathHandler as mFPH
 
 
 from optparse import OptionParser
 
-def parseOptions(activeOptions, visualisationOnly = False):
+def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialChaos = False):
     '''
     parse options for the code
     
@@ -151,14 +151,23 @@ def parseOptions(activeOptions, visualisationOnly = False):
                 exit()
                     
     # catch up non given but necessary options
-    if networkName == None and visualisationOnly == False:
-        networkName = chooseNetwork()
-    if visualisationOnly == True and (dataSetNumber == None or networkName == None): 
+    ## simulation and visualisation
+    if visualisationOnly == False and vascularPolynomialChaos == False:
+        if networkName == None:
+            networkName = chooseNetwork()
+        if simulationDescription == None:
+            simulationDescription = defineSimulationDescription()
+    ## visualisation only
+    if visualisationOnly == True and (dataSetNumber == None or networkName == None) and vascularPolynomialChaos == False: 
             print "\n  No networkName passed, choose between all available networks:"
             print "  (NB: use -f networkName to define a specific file you want to open) \n"
             networkName,dataNumber = chooseSolutionDataCase()
-    if simulationDescription == None and visualisationOnly == False:
-        simulationDescription = defineSimulationDescription()
+    ## polynomial chaos
+    if vascularPolynomialChaos == True:
+        if networkName == None:
+            networkName = chooseNetwork(showTemplates = False)
+        if dataSetNumber == None:
+            dataNumber = chooseVPCconfigFile(networkName)
         
     del parser
     
@@ -172,15 +181,21 @@ def parseOptions(activeOptions, visualisationOnly = False):
             'resimulate'            : resimulate}
 
 
-def chooseNetwork():
+def chooseNetwork(showTemplates = True):
     '''
     console Interface to choose a VascularNetwork for simulation / vascularPolynomial Chaos
     '''
-    # network templates
-    templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
-    dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
+    dirNamesTemplate = []
+    if showTemplates:
+        # network templates
+        templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
+        dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
+        
+        nTemplates = len(dirNamesTemplate)
     
-    nTemplates = len(dirNamesTemplate)
+        print "\n Template Networks: \n"
+        for dirName in dirNamesTemplate:
+            print "   [ {:3} ] - {}".format(dirNamesTemplate.index(dirName),dirName)
     
     # working directory
     workingDirectoryPath = mFPH.getDirectory('workingDirectory','','','read')
@@ -188,9 +203,7 @@ def chooseNetwork():
     
     dirNames = dirNamesTemplate+dirWorkingDirectory
     
-    print "\n Template Networks: \n"
-    for dirName in dirNamesTemplate:
-        print "   [ {:3} ] - {}".format(dirNames.index(dirName),dirName)
+    
     print "\n WorkingDirectory Networks: \n"
     for dirName in dirWorkingDirectory:
         print "   [ {:3} ] - {}".format(dirNames.index(dirName),dirName)
@@ -210,7 +223,7 @@ def chooseNetwork():
     print '====================================='
     return networkName
 
-def evaluateDataNumber(dataNumberString):
+def evaluateDataNumber(dataNumberString, exception = "Error"):
     '''
     Function to evaluate DataNumbers given as a string
     Max lenght of dataNumber = 3
@@ -234,15 +247,29 @@ def evaluateDataNumber(dataNumberString):
                 if len(dataNum) < 4:
                     dataSetNumber.append(dataNum.zfill(3))
                 else:
-                    print 'ERROR: Datanumer to high! system exit'
-                    exit()
+                    if exception == "Error":
+                        raise ValueError('moduleStartUp.evaluateDataNumber. Datanumer {} to high! system exit'.format(dataSetNumber))
+                        exit()
+                    elif exception == 'Warning':
+                        print 'moduleStartUp.evaluateDataNumber. Datanumer {} to high'.format(dataSetNumber)
+                        return False,False
+                    else:
+                        raise Exception
+                    
             dataNumber = dataSetNumber[0]
         else:
             dataSetNumber = [dataNumber.zfill(3)]
             dataNumber = dataNumber.zfill(3)
             if len(dataNumber) > 3:
-                print "ERROR: dataNumber is to high! system exit"
-                exit()      
+                if exception == "Error":
+                    raise ValueError('moduleStartUp.evaluateDataNumber. Datanumer {} to high! system exit'.format(dataSetNumber))
+                    exit()
+                elif exception == 'Warning':
+                    print 'moduleStartUp.evaluateDataNumber. Datanumer {} to high'.format(dataSetNumber)
+                    return False,False
+                else:
+                    raise Exception   
+                
     return dataNumber,dataSetNumber
   
   
@@ -321,51 +348,55 @@ def chooseVPCconfigFile(networkName):
     Output:
         networkName,dataNumber of the Config File (networkName should be the same)
     '''
-    path = ''.join([cur,'/../','NetworkFiles/',networkName,'/'])
-    allFilenames = os.listdir(path)
+    workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
+    networkDirectory = '/'.join([workingDirectory,networkName])
+    
+    filesNetworkDir = os.listdir(networkDirectory)
     filenames = []
-    for filename in allFilenames:
-        if ".xml" in filename and "vpcConfig" in filename:
-            filenames.append(filename)
+    
+    for fileNetworkDir in filesNetworkDir:
+        # check if polychaos directory:
+        if 'vascularPolynomialChaos' in fileNetworkDir:
+            allFilenames = os.listdir('/'.join([workingDirectory,networkName,fileNetworkDir]))
+            for filename in allFilenames:
+                if ".xml" in filename and "vpcConfig" in filename:
+                    filenames.append(filename)
+            
+    print "\n  No dataNumber for Config-File passed, choose between all available Config Files:"
+    print "  (NB: use -n dataNumber to define a specific Config-file you want to open)\n"
+    print "   [   0 ] - Create new template Config-File"
+    #print "   [ 1 ] - Create template Config-File and run vascularPolynomialChaos."
+    index = 1
     if filenames != []:
-        print "\n  No dataNumber for Config-File passed, choose between all available Config Files:"
-        print "  (NB: use -n dataNumber to define a specific Config-file you want to open)\n"
-        print '   [ 0 ] - Create template Config-File and exit'
-        print '   [ 1 ] - Create template Config-File and run vascularPolynomialChaos'
-        index = 2
-        for filename in filenames:
-                print "   [",str(index),'] -',filename
-                index = index+1
-        filenameT = str(raw_input("\n  Choose Config-File you want to open according to its number: "))
-        try:
-            filenameT = int(filenameT)
-        except:
-            print "no integer given, system exit"
-        if filenameT == 0 or filenameT == 1:
-            dataNumber = '999'
-            vpcConfigFilenameTemplate = '_'.join([networkName,'vpcConfig',dataNumber,'template'])
-            savePolyChaosXML({},vpcConfigFilenameTemplate)
-            if filenameT == 0: exit()
-        else:
-            networkName = filenames[filenameT-2]
-            dataNumber = networkName.split('.')[0].split('_')[2]
-            networkName = filenames[filenameT-2].split('_')[0]
-    else:
-        print "\n  For this network no vascularPolynomialChaos Config-Files is available!!"
-        createTemplate = str(raw_input("  Do you want to create template file? (n=exit) y/n: "))
-        if createTemplate == "y":
-            dataNumber = '999'
-            vpcConfigFilenameTemplate = '_'.join([networkName,'vpcConfig',dataNumber,'template'])
-            savePolyChaosXML({},vpcConfigFilenameTemplate)
-            print ""
-            runPolyChaos = str(raw_input("  Do you want to run vascularPolynomialChaos now? (n=exit) y/n: "))
-            if runPolyChaos != 'y':
-                print "  .. exiting!"
-                exit()
-        else: 
-            print "  .. exiting!"
-            exit()
+        for i,filename in enumerate(filenames):
+                print "   [ {:3} ]     {}".format(i+1, filename)
+        index = 1+len(filenames)
+    print index, range(index)
+    
+    userInput = 'a'
+    while userInput not in [str(i) for i in xrange(index)]:
+        userInput = str(raw_input("\n  Choose Option or Config-File you want to open according to its number: "))
+    try:
+        userInput = int(userInput)
+    except:
+        print "no integer given, system exit"
+    if userInput == 0 :#or userInput == 1:
         
-    return networkName,dataNumber   
+        userInputDataNumber = 'xxxx'
+        dataNumber = False
+        while dataNumber == False:
+            userInputDataNumber = str(raw_input("\n  Insert dataNumber for polynomial Chaos case (overwrites if existing): "))
+            dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
+        # save polychaos config file
+        moduleXML.savePolyChaosXML(networkName,dataNumber)
+        # copy network file
+        toCopyFile = mFPH. getFilePath('networkXmlFile', networkName, 'xxx','write')
+        destinationFile = mFPH. getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
+        shutil.copy(toCopyFile, destinationFile)
+    else:
+        networkName = filenames[userInput-2]
+        dataNumber = networkName.split('.')[0].split('_')[2]
+        
+    return dataNumber   
     
     
