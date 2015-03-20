@@ -105,7 +105,6 @@ class VascularNetwork(object):
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
                 
         self.boundaryConditions = {}
-        self.boundaryConditionPolyChaos = {}
                 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
         

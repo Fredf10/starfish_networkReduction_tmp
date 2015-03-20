@@ -647,6 +647,8 @@ def main():
                     
                     # delete the old network
                     del vascularNetwork
+                    
+                    vascularNetwork = loadNetworkFromXML(networkName)
                     #load the new network
                     try:
                         vascularNetwork = loadNetworkFromXML(networkName)

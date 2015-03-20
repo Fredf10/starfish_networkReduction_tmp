@@ -14,22 +14,23 @@ class RandomInputManager(object):
         self.randomInputVector = [] # randomInput which have a external distribution assosiated
         
         
-    def addRandomInput(self,randomInputLocation, randomInputDict):
+    def addRandomInput(self,randomInputDict):
         '''
         Function which adds a random variable to randomInputs
         '''
+        randomInputLocation = randomInputDict['location']
         
         if randomInputLocation not in self.map.keys():
             randomInput = RandomInput()
             randomInputId = len(self.randomInputs)
             
             randomInputDict['randomInputId'] = randomInputId
-            randomInputDict['location'] = randomInputLocation
             randomInput.update(randomInputDict)
             
             self.randomInputs.append(randomInput)
             self.map[randomInputLocation] = randomInputId
-        
+        else:
+            print "Random input with location {} is already defined!".format(randomInputLocation)
                     
     def __call__(self, index = None):
         '''
@@ -42,6 +43,54 @@ class RandomInputManager(object):
                 return self.randomInputs[index]
             except:
                 return []
+            
+    def linkRandomInputUpdateFunctions(self, vascularNetwork):
+        '''
+        link update functions and create randomInputvector
+        
+        input vascularNetwork 
+        '''
+        
+        randomInputMap = {}
+        for randomInput in self.randomInputs:
+            if randomInput.type == 'parametricRandomInput':
+                # check distribution
+                dist = randomInput.distributionType 
+                if dist in ['Normal','Uniform']:
+                    loc = randomInput.location.split('_')
+                    objType = loc[0]
+                    #boundaryCondition_ReflectionCoefficient_2_Rt
+                    if objType == "boundaryCondition":
+                        for bc in vascularNetwork.boundaryConditions[int(loc[2])]:
+                            if bc.getVariableValue('name') == loc[1]:
+                                randomInput.updateMethods = {randomInput.variableName[0]:
+                                                             bc.update}
+                
+                    elif objType == "vessel":
+                        #vessel_0_radiusDistal
+                        randomInput.updateMethods = {randomInput.variableName[0]:
+                                                     vascularNetwork.vessels[int(loc[1])].update}
+                    else: break
+                    
+                    if randomInput.updateMethods == {}: break
+                    # append random input to random input vector
+                    self.randomInputVector.append(randomInput)
+                else:
+                    if dist not in randomInputMap:
+                        randomInputMap[dist] = {randomInput.randomInputId : randomInput.passRealisationToAssosiatedObj}
+                    else:
+                        randomInputMap[dist][randomInput.randomInputId] = randomInput.passRealisationToAssosiatedObj
+        
+        for dist,updateMethods in randomInputMap.iteritems():
+            # find random input with dist:
+            for randomInputLocation in self.map.keys():
+                if dist in randomInputLocation:
+                    print dist
+                    generalRandomInput = self(self.map[randomInputLocation])
+                    generalRandomInput.updateMethods = updateMethods
+                    generalRandomInput.variableName = updateMethods.keys()
+                    self.randomInputVector.append(generalRandomInput)
+                    
         
     def printOutInfo(self):
         '''
@@ -50,7 +99,13 @@ class RandomInputManager(object):
         
         print "\n Defined Random Inputs\n"
         
-        print '{:3} | {:20} | {:20} | {}'.format("Id","variableName","location","distribution")
+        print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")
         print "---------------------------------------------------------- \n"
         for randomInput in self.randomInputs:
+            randomInput.printOutInfo()
+            
+        print "\n Defined Random Variables\n"
+        print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")
+        print "---------------------------------------------------------- \n"
+        for randomInput in self.randomInputVector:
             randomInput.printOutInfo()

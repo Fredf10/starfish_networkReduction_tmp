@@ -203,8 +203,8 @@ vesselElements = ['topology',
 ###########################################################################################
 ## Random variables
 randomInputDistributionElements = ['distributionType',
-                          'a',
-                          'b']
+                                   'a',
+                                   'b']
 
 randomInputCorrelationElements = []
 
@@ -213,6 +213,8 @@ randomInputsReference = {'distribution':randomInputDistributionElements,
 
 randomInputsElements = ['distribution',
                         'correlation']
+
+generalRandomInputsAttributes = ['name']
 
 ##########################################################################################
 ## XML file elements
@@ -224,6 +226,7 @@ xmlElements  = [ 'simulationContext',
                  'baroreceptors',
                  'communicators',
                  'boundaryConditions',
+                 'generalRandomInputs',
                  'vessels' ]
 
 xmlElementsReference = {'simulationContext'     : simulationContextElements,
@@ -233,5 +236,6 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'globalFluid'           : globalFluidElements,
                         'baroreceptors'         : baroreceptorReference,
                         'communicators'         : communicatorReference,
+                        'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
 
