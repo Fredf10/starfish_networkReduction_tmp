@@ -329,6 +329,7 @@ def main():
         elif menuInput == "p":
             vascularNetwork.showVessels()
             vascularNetwork.showNetwork()
+            vascularNetwork.randomInputManager.printOutInfo()
                         
         elif menuInput == "g":
             print mainGraph.getGraph()

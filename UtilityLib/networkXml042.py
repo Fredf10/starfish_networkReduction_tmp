@@ -202,9 +202,17 @@ vesselElements = ['topology',
 
 ###########################################################################################
 ## Random variables
-randomVariableElements = ['distributionType',
+randomInputDistributionElements = ['distributionType',
                           'a',
                           'b']
+
+randomInputCorrelationElements = []
+
+randomInputsReference = {'distribution':randomInputDistributionElements,
+                         'correlation' :randomInputCorrelationElements}
+
+randomInputsElements = ['distribution',
+                        'correlation']
 
 ##########################################################################################
 ## XML file elements

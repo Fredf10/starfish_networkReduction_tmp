@@ -13,7 +13,7 @@ sys.path.append(cur + '/../UtilityLib')
 import moduleFilePathHandler as mFPH
 
 sys.path.append(cur + '/../VascularPolynomialChaosLib')
-from classRandomVariableVector import RandomVariableVector
+from classRandomInputManager import RandomInputManager
 
 import numpy as np
 from math import pi, cos, sin
@@ -126,25 +126,7 @@ class VascularNetwork(object):
         self.TotalVolumeComplianceTree = None  # total volume compliance of all vessels
         
 #         ### random variables TODO: move out of here to global class        
-        self.randomVariableVector = RandomVariableVector()
-#         a = 0
-#         if a:
-#             name1 = "vessel_1_betaLaplace"
-#             data1 = {'distributionType' : 'Uniform',
-#                 'a'                : 2,  
-#                 'b'                : 12,
-#                 'variableName'     : 'betaLaplace',
-#                 'updateMethod'     : None}
-#             
-#             name2 = "boundaryCondition_Flow-Sinus2_0_amp"
-#             data2 = {'distributionType' : 'Uniform',
-#                     'a'                : 2,  
-#                     'b'                : 12,
-#                     'variableName'     : 'amp',
-#                     'updateMethod'     : None}
-#             self.randomVariableVector.addRandomVariable(name1, data1)
-#             self.randomVariableVector.addRandomVariable(name2, data2)
-        
+        self.randomInputManager = None        
         
     # all classes concerning vessel
     def addVessel(self, vesselId=None, dataDict=False):

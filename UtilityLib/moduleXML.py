@@ -1,4 +1,3 @@
-from classRandomVariableVector import RandomVariableVector
 
 try:
     from lxml import etree
@@ -21,6 +20,9 @@ from constants import variablesDict
 from constants import unitsDictSI as unitsDict
 from constants import newestNetworkXmlVersion
 import moduleFilePathHandler as mFPH
+
+sys.path.append(cur + '/../VascularPolynomialChaosLib')
+from classRandomInputManager import RandomInputManager
 
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
@@ -47,26 +49,26 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
     else:
         xmlElement.text = str(variableValues)
 
-def writeRandomVariableElement(subElement, variable, randomVariableVector,randomVariableNameLocation):
+def writeRandomInputElement(subElement, variable, randomInputManager,randomInputLocation):
     '''
     writes a random variable in xml file
     
     input: 
-        subElement := mother xml element where the randomVariableElement should be added
+        subElement := mother xml element where the randomInputElement should be added
         variable   := name of the deterministic random variable
-        randomVariableVector := reference to the randomVariableVector of the case
-        randomVariableNameLocation := specific location of the randomVariable in the vascular network    
+        randomInputManager := reference to the randomInputManager of the case
+        randomInputNameLocation := specific location of the randomInput in the vascular network    
     '''
     ## import current network xml description as nxmlW(rite) to avoid version clash
     from constants import newestNetworkXml as nxmlW
     
-    subsubElement = etree.SubElement(subElement, "-".join([variable,'randomVariable']))
-    for randomVariableElement in nxmlW.randomVariableElements:
-        subsubsubElement = etree.SubElement(subsubElement, randomVariableElement) 
-        writeXMLsetUnit(subsubsubElement,randomVariableElement)
-        randomVariableIndex = randomVariableVector.mapOfRandomVectors[randomVariableNameLocation]
-        value = randomVariableVector(randomVariableIndex).getVariableValue(randomVariableElement)
-        writeXMLsaveValues(subsubsubElement,randomVariableElement,value)  
+    subsubElement = etree.SubElement(subElement, "-".join([variable,'randomInput']))
+    for randomInputElement in nxmlW.randomInputDistributionElements:
+        subsubsubElement = etree.SubElement(subsubElement, randomInputElement) 
+        writeXMLsetUnit(subsubsubElement,randomInputElement)
+        randomInputIndex = randomInputManager.map[randomInputLocation]
+        value = randomInputManager(randomInputIndex).getVariableValue(randomInputElement)
+        writeXMLsaveValues(subsubsubElement,randomInputElement,value)  
 
 
 def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
@@ -91,8 +93,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
     xmlFile = etree.ElementTree(root)
     
     ### polynomial chaos distributionstuff
-    randomVariableVector = vascularNetwork.randomVariableVector
-    existingRandomVariables = randomVariableVector.mapOfRandomVectors.keys()
+    randomInputManager = vascularNetwork.randomInputManager
     
     for xmlElementName in nxmlW.xmlElements:
         xmlFileElement = etree.SubElement(root, xmlElementName)
@@ -111,9 +112,9 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
                         writeXMLsetUnit(variableElement,variable)
                         writeXMLsaveValues(variableElement,variable,boundaryCondition.getVariableValue(variable))  
                         # polynomial chaos
-                        randomVariableNameLocation = '_'.join(['boundaryCondition',boundaryType,str(vesselId),variable])
-                        if randomVariableNameLocation in existingRandomVariables:
-                            writeRandomVariableElement(subsubElement, variable, randomVariableVector, randomVariableNameLocation)
+                        randomInputLocation = '_'.join(['boundaryCondition',boundaryType,str(vesselId)])
+                        if randomInputLocation in randomInputManager.map:
+                            writeRandomInputElement(subsubElement, variable, randomInputManager, randomInputLocation)
                             
         elif xmlElementName == 'vessels':
             for vessel in vascularNetwork.vessels.itervalues():
@@ -138,9 +139,9 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
                         writeXMLsaveValues(subsubElement,variable,variableValues)  
                         # check for polychaos data of vessel
                         # polynomial chaos
-                        randomVariableNameLocation = '_'.join(['vessel',str(vessel.Id),variable])
-                        if randomVariableNameLocation in existingRandomVariables:
-                            writeRandomVariableElement(subElement, variable, randomVariableVector, randomVariableNameLocation)
+                        randomInputLocation = '_'.join(['vessel',str(vessel.Id)])
+                        if randomInputLocation in randomInputManager.map:
+                            writeRandomInputElement(subElement, variable, randomInputManager, randomInputLocation)
                             
         
         elif xmlElementName == 'communicators':
@@ -190,8 +191,6 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
     
     return converted evaluated value of variable
     '''
-    
-    polynomialChaosDistributions = ['Uniform','Normal'] # need to be moved and changed to networkXML files
     
     multiVariable = False
     variableValue = 'notConvertable'
@@ -273,7 +272,7 @@ def loadingErrorMessageVariableError(variableName, element, elementName):
           (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
     exit()
    
-def loadRandomVariableElement(xmlElement,xmlElementReferences,variableName,randomVariableVector, randomVariableLocation):
+def loadRandomInputElement(xmlElement,xmlElementReferences,variableName,randomInputManager, randomInputLocation):
     '''
     Function to load random variable xml element
     
@@ -281,22 +280,24 @@ def loadRandomVariableElement(xmlElement,xmlElementReferences,variableName,rando
         xmlElement
         xmlElementReferences
         variableName := name of the random variable
-        randomVariableVector
-        randomVariableLocation    
+        randomInputManager
+        randomInputLocation    
     '''    
-    dictionary = {'variableName' : variableName}
+    dictionary = {'variableName' : variableName,
+                  'location'     : randomInputLocation}
+    
     for variable in xmlElementReferences:
         try: element = xmlElement.findall(''.join(['.//',variable]))[0]
-        except: loadingErrorMessageVariableError(variable, 'randomVariable', variableName)
+        except: loadingErrorMessageVariableError(variable, 'randomInput', variableName)
         # get variable value                        
         try: variableValueStr = element.text
-        except: loadingErrorMessageValueError(variable, 'randomVariable', variableName)
+        except: loadingErrorMessageValueError(variable, 'randomInput', variableName)
         # get unit 
         try: variableUnit = element.attrib['unit']
         except: variableUnit = None 
         # save converted XML-value
         dictionary[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
-    randomVariableVector.addRandomVariable(randomVariableLocation, dictionary)
+    randomInputManager.addRandomInput(randomInputLocation, dictionary)
    
 def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
     '''
@@ -319,7 +320,9 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
     vascularNetwork.update({'name': networkName,
                             'dataNumber':dataNumber})
     ## create random vector
-    randomVariableVector = RandomVariableVector()
+    randomInputManager = RandomInputManager()
+    vascularNetwork.randomInputManager = randomInputManager
+    
     
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
@@ -379,16 +382,17 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                                 boundaryDataDict[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                                 
                                 # find polynomial chaos variable  
-                                randomVariableName = ''.join([variable,'-randomVariable'])
-                                elementRandomVariable = bcElements.findall(''.join(['.//',randomVariableName]))
-                                if len(elementRandomVariable) == 1:  
-                                    randomVariableNameLocation = '_'.join(['boundaryCondition',boundaryType,str(vesselId),variable])
-                                    xmlElementReferences = nxml.randomVariableElements
-                                    loadRandomVariableElement(elementRandomVariable[0],
+                                randomInputName = ''.join([variable,'-randomInput'])
+                                elementRandomInput = bcElements.findall(''.join(['.//',randomInputName]))
+                                if len(elementRandomInput) == 1:  
+                                    randomInputLocation = '_'.join(['boundaryCondition',boundaryType,str(vesselId)])
+                                    xmlElementReferences = nxml.randomInputDistributionElements
+                                    loadRandomInputElement(elementRandomInput[0],
                                                               xmlElementReferences,
                                                               variable,
-                                                              randomVariableVector,
-                                                              randomVariableNameLocation)
+                                                              randomInputManager,
+                                                              randomInputLocation
+                                                              )
                                 
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
@@ -438,19 +442,20 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                             vesselData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                             
                             # find polynomial chaos variable
-                            randomVariableName = ''.join([variable,'-randomVariable'])
-                            elementRandomVariable = vesselXMLnode.findall(''.join(['.//',randomVariableName]))
-                            if len(elementRandomVariable) == 1:  
-                                randomVariableNameLocation = '_'.join(['vessel',str(vesselData['Id']),variable])
-                                xmlElementReferences = nxml.randomVariableElements
-                                loadRandomVariableElement(elementRandomVariable[0],
+                            randomInputName = ''.join([variable,'-randomInput'])
+                            elementRandomInput = vesselXMLnode.findall(''.join(['.//',randomInputName]))
+                            if len(elementRandomInput) == 1:  
+                                randomInputLocation = '_'.join(['vessel',str(vesselData['Id'])])
+                                xmlElementReferences = nxml.randomInputDistributionElements
+                                loadRandomInputElement(elementRandomInput[0],
                                                           xmlElementReferences,
                                                           variable,
-                                                          randomVariableVector,
-                                                          randomVariableNameLocation)
+                                                          randomInputManager,
+                                                          randomInputLocation)
                                 
                     vascularNetwork.updateNetwork({'vesselData':{vesselData['Id']:vesselData}})
-            
+                    
+                    
             elif xmlElementName == 'communicators':
                 # loop through possible communicator class types
                 for comunicatorType in nxml.xmlElementsReference[xmlElementName]:
@@ -541,12 +546,7 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
                     # save converted XML-value
                     vascularNetworkData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                 vascularNetwork.update(vascularNetworkData)
-        
-    
-    vascularNetwork.randomVariableVector = randomVariableVector
-    print "xml547",randomVariableVector()
-    print "xml548", vascularNetwork.randomVariableVector()
-    
+                   
     return vascularNetwork
 
 
