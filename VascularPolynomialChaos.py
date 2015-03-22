@@ -7,11 +7,11 @@
 ##
 
 import sys,os
-cur = os.path.dirname( os.path.realpath( __file__ ) )
+cur = os.path.dirname(os.path.realpath('__file__'))
 
 sys.path.append('/'.join([cur,'VascularPolynomialChaosLib']))
 from classVpcConfiguration import VpcConfiguration
-from classVpcDistribution import VpcDistribution
+from classDistributionManager import DistributionManager
 
 sys.path.append('/'.join([cur,'UtilityLib']))
 import moduleStartUp as mSU
@@ -59,18 +59,23 @@ def vascularPolyChaos():
     vpcConfiguration = VpcConfiguration(networkName,dataNumber)
     # 1.2 load vascular network file polynomial chaos
     vascularNetwork = moduleXML.loadNetworkFromXML(''.join([networkName,'_vpc']), dataNumber)
-    
-    # 2. create distributions
-    vpcDistributions = VpcDistribution()
-    # create distributions defined in vascularNetwork or try to load
-    if vpcConfiguration.createDistributions == True:
-        vpcDistributions.createDistributions(vascularNetwork)
-    else:
-        vpcDistributions.loadDistributions()
+    # 1.3 print distributions
+    vascularNetwork.randomInputManager.printOutInfo()
         
+    # 2. create distributions    
+    distributionManager = DistributionManager(vascularNetwork.randomInputManager.randomInputVector)
+    distributionManager.createRandomVariables()
+            
     # 3. add correlation if existent
     
     # 4. create samples
+    
+    # test sampling
+    print vascularNetwork.vessels[1].betaHayashi
+    sample = [10.,4.]
+    distributionManager.passRealisation(sample)
+    print vascularNetwork.vessels[1].betaHayashi
+    
         
     # 5. create Orthogonal polynomials
     
@@ -78,8 +83,7 @@ def vascularPolyChaos():
     
     # 7. postprocess evaluated data, peak finding etc
     
-    # 8. calculate polynomial chaos expansion
-    
+    # 8. calculate polynomial chaos expansion    
     # 9. uncertainty quantfication, sensitivity analysis
 
 

@@ -1,3 +1,4 @@
+from yum.update_md import UpdateMetadata
 
 
 
@@ -19,7 +20,7 @@ class RandomInput(object):
         self.a                = 0 # 
         self.b                = 0 #
         ##
-        self.updateMethods     = {} 
+        self.updateMethods    = {} 
         
         if dataDict != None:
             self.update(dataDict)
@@ -45,16 +46,18 @@ class RandomInput(object):
         input:
             sample:  <float> 'sample' drawn from random vector 
         '''
+        print "try to pass realisation",self.location
+        sample_i = None      
         # if input comes from other random Input
         if isinstance(input,dict):
             sample_i = input[self.randomInputId]
-        elif isinstance(input,None):        
+        elif isinstance(input,float):        
             # if input comes from distribution handler
             sample_i = input
-        
+            
         if sample_i != None:
             realisation = self.evaluateRealisationFromSample(sample_i)
-            if self.updateMethod != None:
+            if self.updateMethods != {}:
                 for variableIdentifier,updateMethod in self.updateMethods.iteritems():
                     print "update {} with value {}".format(variableIdentifier,realisation)
                     updateMethod({variableIdentifier : realisation})
@@ -70,7 +73,7 @@ class RandomInput(object):
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
             except:
-                print "ERROR RandomVariable.updateData (randomInputId {}) Wrong key: {}, could not update varibale".format(self.randomInputId, key)
+                print "ERROR RandomInput.updateData (randomInputId {}) Wrong key: {}, could not update varibale".format(self.randomInputId, key)
 
     def getVariableValue(self, variableName):
         '''
@@ -96,6 +99,4 @@ class RandomInput(object):
                 print '{:3} | {:20} | {:21} | {:3} + {:3} {} '.format(self.randomInputId,self.variableName,loc, self.a, self.b, dist)
             else:
                 print '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
-        print
-        
-            
+        print ""

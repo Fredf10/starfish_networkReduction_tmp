@@ -10,7 +10,7 @@
 import time 
 import sys,os
 # set the path relative to THIS file not the executing file!
-cur = os.path.dirname( os.path.realpath( __file__ ) )
+cur = os.path.dirname( os.path.realpath('__file__') )
 #sys.path.append(cur+'/Solver')
 
 sys.path.append(cur+'/NetworkLib')

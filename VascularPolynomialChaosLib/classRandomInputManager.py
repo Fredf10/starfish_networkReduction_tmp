@@ -56,23 +56,22 @@ class RandomInputManager(object):
             if randomInput.type == 'parametricRandomInput':
                 # check distribution
                 dist = randomInput.distributionType 
-                if dist in ['Normal','Uniform']:
-                    loc = randomInput.location.split('_')
-                    objType = loc[0]
-                    #boundaryCondition_ReflectionCoefficient_2_Rt
-                    if objType == "boundaryCondition":
-                        for bc in vascularNetwork.boundaryConditions[int(loc[2])]:
-                            if bc.getVariableValue('name') == loc[1]:
-                                randomInput.updateMethods = {randomInput.variableName[0]:
-                                                             bc.update}
+                loc = randomInput.location.split('_')
+                objType = loc[0]
                 
-                    elif objType == "vessel":
-                        #vessel_0_radiusDistal
-                        randomInput.updateMethods = {randomInput.variableName[0]:
-                                                     vascularNetwork.vessels[int(loc[1])].update}
-                    else: break
-                    
-                    if randomInput.updateMethods == {}: break
+                if objType == "boundaryCondition":
+                    for bc in vascularNetwork.boundaryConditions[int(loc[2])]:
+                        if bc.getVariableValue('name') == loc[1]:
+                            randomInput.updateMethods = {randomInput.variableName[0]:
+                                                         bc.update}
+            
+                elif objType == "vessel":
+                    randomInput.updateMethods = {randomInput.variableName[0]:
+                                                 vascularNetwork.vessels[int(loc[1])].update}
+                else: break
+                if randomInput.updateMethods == {}: break
+                
+                if dist in ['Normal','Uniform']:
                     # append random input to random input vector
                     self.randomInputVector.append(randomInput)
                 else:
@@ -85,18 +84,28 @@ class RandomInputManager(object):
             # find random input with dist:
             for randomInputLocation in self.map.keys():
                 if dist in randomInputLocation:
-                    print dist
                     generalRandomInput = self(self.map[randomInputLocation])
                     generalRandomInput.updateMethods = updateMethods
                     generalRandomInput.variableName = updateMethods.keys()
                     self.randomInputVector.append(generalRandomInput)
-                    
+         
+    def update(self, dataDict):
+        '''
+        updates the data using a dictionary in from of 
+        dataDict = {'variableName': value}
+        '''
+        for key,value in dataDict.iteritems():
+            try:
+                self.__getattribute__(key)
+                self.__setattr__(key,value)
+            except:
+                print "ERROR RandomInputManager.updateData Wrong key: {}, could not update varibale".format( key)
+           
         
     def printOutInfo(self):
         '''
         Function to print out random variable informations
         '''
-        
         print "\n Defined Random Inputs\n"
         
         print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")

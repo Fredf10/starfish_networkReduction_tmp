@@ -132,6 +132,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                 print "WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath)
                 return None
             elif exception == "No":
+                print "raise no exception"
                 return None
             else:
                 raise ValueError("ERROR: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))
@@ -345,9 +346,9 @@ def updateSimulationDescriptions(networkName, currentDataNumber, currentDescript
         2. write information into file
     '''
     # open File
-    simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'read')#, exception = 'No')
+    #simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'read')#, exception = 'No')
     try:
-        simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'read')#, exception = 'No')
+        simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'read', exception = 'No')
         simCaseDescFile = open(simCaseDescFilePath, 'r')
     except:
         simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'write')#, exception = 'No')

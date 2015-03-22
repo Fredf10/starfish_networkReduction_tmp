@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys,os
-cur = os.path.dirname( os.path.realpath( __file__ ) )
-
+cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append('/'.join([cur,'..','UtilityLib']))
+
+print '/'.join([cur,'..','UtilityLib'])
+
 import moduleXML
 
 class VpcConfiguration(object):
