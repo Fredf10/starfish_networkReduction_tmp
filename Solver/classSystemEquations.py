@@ -102,11 +102,11 @@ class System(object):
 #             
         dlt = self.dlt
         
-        m12 = (1. / C)[1:-1]
-        m21 = (C * (c**2 - dlt * v**2))[1:-1] # vinz expression #||# (A/self.rho)[1:-1] # paul expression  # (C*(c**2-self.dlt*v**2))[1:-1] # vinz expression
-        m22 = (2 * dlt * v)[1:-1]  #vinz expression #||# self.dlt #paul expression #(2*self.dlt*v)[1:-1]
+        m12 = (1. / C)
+        m21 = (C * (c**2 - dlt * v**2)) # vinz expression #||# (A/self.rho)[1:-1] # paul expression  # (C*(c**2-self.dlt*v**2))[1:-1] # vinz expression
+        m22 = (2 * dlt * v)  #vinz expression #||# self.dlt #paul expression #(2*self.dlt*v)[1:-1]
         # set up B matrix
-        b2 = (-2.0 / self.rho * pi * v * (self.gamma+2) * self.my + A * self.netGravity[n])[1:-1] #Correction with net gravity force
+        b2 = (-2.0 / self.rho * pi * v * (self.gamma+2) * self.my + A * self.netGravity[n]) #Correction with net gravity force
         
         ## set up LAMBDA, L and R matrices
         #self.updateLARL(P,Q,A,Ct=C,ct=c)

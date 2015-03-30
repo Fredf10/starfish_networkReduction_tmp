@@ -61,6 +61,7 @@ class Field(object):
         self.Q_pre[0]   = Q[0]
         self.Q_pre[-1]  = Q[-1] 
         self.A_pre[0]   = A[0]
+        
         self.A_pre[-1]  = A[-1]
         
         #''' Predictor Step '''            
@@ -72,18 +73,18 @@ class Field(object):
         Q_pre = self.Q_pre 
         A_pre = self.A_pre
           
-        dzPre = self.dz[1::]
+        dzPre = self.dz
         dzCor = self.dz[0:-1]
         
-        # calculate derivatives forward 
-        dPdz  = (P[2::] - P[1:-1])/dzPre
-        dQdz  = (Q[2::] - Q[1:-1])/dzPre
+        # calculate derivatives forward # predict bc-predictor value at P[0] etc.
+        dPdz  = (P[1::] - P[0:-1])/dzPre
+        dQdz  = (Q[1::] - Q[0:-1])/dzPre
         dQ2A  = pow(Q,2.)/A
-        dQ2dz = (dQ2A[2::] - dQ2A[1:-1])/dzPre
+        dQ2dz = (dQ2A[1::] - dQ2A[0:-1])/dzPre
         
         # solve vessel
-        P_pre[1:-1] = (P[1:-1] - (m12*dQdz)*dt)
-        Q_pre[1:-1] = (Q[1:-1] - (m21*dPdz + m22*dQ2dz - b2 )*dt)
+        P_pre[0:-1] = (P[0:-1] - (m12[0:-1]*dQdz)*dt)
+        Q_pre[0:-1] = (Q[0:-1] - (m21[0:-1]*dPdz + m22[0:-1]*dQ2dz - b2[0:-1] )*dt)
          
         # check pressure solution
         if (P_pre < 0).any():
@@ -95,7 +96,7 @@ class Field(object):
         if self.rigidArea == True:
             A_pre = A
         else:
-            A_pre[1:-1] = self.AFunction(P_pre)[1:-1]        
+            A_pre[0:-1] = self.AFunction(P_pre)[0:-1]        
                                           
         #'''Corrector Step'''    
         # update matrices  
@@ -108,8 +109,8 @@ class Field(object):
         dQ2dz = (dQ2A[1:-1] - dQ2A[0:-2])/dzCor
                  
         #solve vessel
-        self.P[n+1][1:-1] = (P[1:-1] + P_pre[1:-1] - (m12*dQdz)*dt)/2.0
-        self.Q[n+1][1:-1] = (Q[1:-1] + Q_pre[1:-1] - (m21*dPdz + m22*dQ2dz - b2 )*dt )/2.0
+        self.P[n+1][1:-1] = (P[1:-1] + P_pre[1:-1] - (m12[1:-1]*dQdz)*dt)/2.0
+        self.Q[n+1][1:-1] = (Q[1:-1] + Q_pre[1:-1] - (m21[1:-1]*dPdz + m22[1:-1]*dQ2dz - b2[1:-1])*dt )/2.0
          
         # check pressure solution
         if (self.P[n+1] < 0).any():
