@@ -4,10 +4,8 @@
 import sys,os
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append('/'.join([cur,'..','UtilityLib']))
-
-print '/'.join([cur,'..','UtilityLib'])
-
 import moduleXML
+import moduleFilePathHandlerVPC as mFPH_VPC
 
 class VpcConfiguration(object):
     '''
@@ -200,7 +198,10 @@ class VpcConfiguration(object):
          
          
         #--Updating: data from file------------------------------------------------------------------------------------#
-        self.update(moduleXML.loadPolyChaosXML(networkName, dataNumber))
+        
+        vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
+    
+        self.update(moduleXML.loadPolyChaosXML(vpcConfigXmlFile))
         
         
         

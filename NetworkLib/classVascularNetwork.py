@@ -36,6 +36,7 @@ class VascularNetwork(object):
         self.quiet = quiet  # bool to suppress output
         
         # saving options
+        self.pathSolutionDataFilename = None
         self.timeSaveBegin = 0.0  # time when to start saving
         self.timeSaveEnd = 2.0  # time when to end saving
         self.maxMemory = 20  # maximum memory in MB 
@@ -364,8 +365,9 @@ class VascularNetwork(object):
         '''
             
         # create solution file
-        pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
-        self.solutionDataFile = h5py.File(pathSolutionDataFilename, "w")
+        if self.pathSolutionDataFilename == None:
+            self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
+        self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
         
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:

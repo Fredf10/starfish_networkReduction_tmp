@@ -9,7 +9,7 @@
 # created by Vinzenz Eck // vinzenz.g.eck@ntnu.no
 ##
 
-import os,shutil
+import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 import inspect
 from pprint import pprint as pp
@@ -17,6 +17,8 @@ from pprint import pprint as pp
 import moduleXML 
 import moduleFilePathHandler as mFPH
 
+sys.path.append([cur,'/../VascularPolynomialChaosLib/'])
+import moduleFilePathHandlerVPC as mFPH_VPC
 
 from optparse import OptionParser
 
@@ -128,7 +130,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         # -c connect
         elif option == 'connect':
             if optionArgument != None:
-               connect = optionArgument
+                connect = optionArgument
         # -r resimulate
         elif option == 'resimulate':
             if optionArgument != None:
@@ -314,8 +316,8 @@ def chooseSolutionDataCase():
                         
                         if len(dataNumber) == 3:
                             if dataNumber not in simulationCaseDict:
-                                 description =  "'{}' not listed in simulation descriptions of network '{}'.".format(dataNumber,networkName)
-                                 # update descriptions
+                                description =  "'{}' not listed in simulation descriptions of network '{}'.".format(dataNumber,networkName)
+                                # update descriptions
                             else:
                                 description = simulationCaseDict[dataNumber]
                             print "[ {:3} ]     {} : {}".format(enumerationIndex, dataNumber, description)
@@ -388,10 +390,11 @@ def chooseVPCconfigFile(networkName):
             userInputDataNumber = str(raw_input("\n  Insert dataNumber for polynomial Chaos case (overwrites if existing): "))
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         # save polychaos config file
-        moduleXML.savePolyChaosXML(networkName,dataNumber)
+        vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
+        moduleXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber)
         # copy network file
-        toCopyFile = mFPH. getFilePath('networkXmlFile', networkName, 'xxx','write')
-        destinationFile = mFPH. getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
+        toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
+        destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
     else:
         networkName = filenames[userInput-2]

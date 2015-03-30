@@ -26,7 +26,13 @@ from copy import copy as copy
 from pprint import pprint as pp
 
 
-def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
+def getFilePath(fileType,
+                networkName,
+                dataNumber,
+                mode,
+                exception = 'Error',
+                gPCEmethod = 'None',
+                gPCEorder = 'None'):
     '''
     Function return a requested file path, if this file exists
     
@@ -39,9 +45,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
         'configFile',
         'simulationDescriptionFile',
         'vncRescentNetworksFile',
-        'vncNetworkGraphFile,
-        'vpcConfigXmlFile'
-        'vpcNetworkXmlFile'
+        'vncNetworkGraphFile
     
     networkName:
     
@@ -68,9 +72,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                          'configFile',
                          'simulationDescriptionFile',
                          'vncRescentNetworksFile',
-                         'vncNetworkGraphFile',
-                         'vpcConfigXmlFile',
-                         'vpcNetworkXmlFile']
+                         'vncNetworkGraphFile']
     
     if fileType not in existingFileTypes:
         raise ValueError("ERROR: getFilePath, requested file type {}\
@@ -79,10 +81,6 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     if '_template' in networkName:
         if fileType == 'networkXmlFile':
             fileType = 'networkXmlFileTemplate'
-    if '_vpc' in networkName:
-        if fileType == 'networkXmlFile':
-            fileType = 'vpcNetworkXmlFile'
-            networkName = networkName.split('_vpc')[0]
     
     # file names
     filenames = {
@@ -96,9 +94,6 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                  'simulationDescriptionFile' : ''.join(['simulationCaseDescriptions.txt']),
                  'vncRescentNetworksFile'    : '.recentNetworkNames.pickle',
                  'vncNetworkGraphFile'       : ''.join([networkName,'.png']),
-                 ## vascularPolynomialChaos
-                 'vpcConfigXmlFile'          : ''.join([networkName,'_vpcConfig_',dataNumber,'.xml']),
-                 'vpcNetworkXmlFile'         : ''.join([networkName,'_vpc_',dataNumber,'.xml'])
                  }    
                 
     ## if fileType=networkXmlFile check if master (dn = XXX) or simulated is meant
@@ -139,7 +134,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
               
     return requestedFilePath
     
-def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error'):
+def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', gPCEmethod = 'None', gPCEorder = 'None'):
     '''
     Function returns a requested directory path, if this directory does not exists
     it is created.
@@ -157,9 +152,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         'movieDirectory',
         'simulationDescriptionFileDirectory',
         'vncRescentNetworksFileDirectory',
-        'vncNetworkGraphFileDirectory',
-        'vpcConfigXmlFileDirectory',
-        'vpcNetworkXmlFileDirectory',
+        'vncNetworkGraphFileDirectory'
+        
     
     networkName:
     
@@ -191,9 +185,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'movieDirectory',
                               'simulationDescriptionFileDirectory',
                               'vncRescentNetworksFileDirectory',
-                              'vncNetworkGraphFileDirectory',
-                              'vpcConfigXmlFileDirectory',
-                              'vpcNetworkXmlFileDirectory'} 
+                              'vncNetworkGraphFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
@@ -212,7 +204,9 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     solutionFileDirectory           = ''.join([networkXmlFileDirectory,'/SolutionData_',str(dataNumber)])
     movieDirectory              = ''.join([solutionFileDirectory,'/Movies'])
     screenshotDirectory         = ''.join([solutionFileDirectory,'/Screenshots'])
-    polynomialChaosCaseDirectory = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
+    vpcCaseDirectory = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
+    vpcOrderMethodDirectory = ''.join([vpcCaseDirectory,'/','polyChaos_solution_',dataNumber,'_order_',str(gPCEorder).zfill(2),'_method_',gPCEmethod,'/'])
+    
     ## look up tables
     # directories
     directories = {
@@ -230,10 +224,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'movieDirectory'                     : movieDirectory,
                    # vnc
                    'vncRescentNetworksFileDirectory'    : workingDirectory,
-                   'vncNetworkGraphFileDirectory'       : networkXmlFileDirectory,
-                   # vascular polynomial chaos
-                   'vpcConfigXmlFileDirectory'          : polynomialChaosCaseDirectory,
-                   'vpcNetworkXmlFileDirectory'         : polynomialChaosCaseDirectory
+                   'vncNetworkGraphFileDirectory'       : networkXmlFileDirectory
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])
@@ -435,14 +426,6 @@ def loadExternalDataSet(fileName):
     return externalData
 
 
-if __name__ == '__main__':
-
-    print getFileAndPaths('configFile', "networkName", '485', 'read')
-    print getFileAndPaths('networkXmlFile', "haiojaHsd", 'xxx', 'read', exception = 'Warning')
-    print getFileAndPaths('networkXmlFile', "haiojaHsd", '124','write')
-    print getFileAndPaths('solutionFile', "haiojaHsd", '124', 'write')
-    print getFileAndPaths('networkXmlFileTemplate', "haiojaHsd", '124', 'write')
-    
 
 ## Old unneeded functions replaced by functions in classVascularNetwork due to new data handling
 

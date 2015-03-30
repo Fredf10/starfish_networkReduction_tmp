@@ -79,15 +79,17 @@ def writeRandomInputElement(subElement, variable, randomInputManager,randomInput
         writeXMLsaveValues(subsubsubElement,randomInputElement,value)  
 
 
-def writeNetworkToXML(vascularNetwork, dataNumber = "xxx"):
+def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None):
     '''
     This function creates an XML file and writes all variable data of a vascularNetwork into it (except solution)
     The forma of the XML and all variable data are defined in constants.py
     '''
         
+    print vascularNetwork
     networkName = vascularNetwork.getVariableValue('name')
         
-    networkXmlFile =  mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'write')
+    if networkXmlFile == None:
+        networkXmlFile =  mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'write')
         
     try:
         root = etree.Element(networkName, id = dataNumber, version = newestNetworkXmlVersion)
@@ -323,7 +325,7 @@ def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, rand
         dataDict[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
     randomInputManager.addRandomInput(dataDict)
    
-def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
+def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', networkXmlFile = None, pathSolutionDataFilename = None):
     '''
     Function laods network from XML-file
     
@@ -336,18 +338,19 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
         print 'ERROR: moduleXML.loadNetworkFromXML() : load XML - no networkName passed'
         return None
     
-    networkXmlFile = mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'read', exception = exception)
+    if networkXmlFile == None:
+        networkXmlFile = mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'read', exception = exception)
     
     # create vascularNetwork instance
     vascularNetwork = VascularNetwork()
     # set name
     vascularNetwork.update({'name': networkName,
-                            'dataNumber':dataNumber})
+                            'dataNumber':dataNumber,
+                            'pathSolutionDataFilename': pathSolutionDataFilename})
     ## create random vector
     randomInputManager = RandomInputManager()
     vascularNetwork.randomInputManager = randomInputManager
-    
-    
+        
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
         tree = etree.parse(''.join([networkXmlFile]), parser)
@@ -589,15 +592,13 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error'):
 ###----------------------------------------------------------------------------------------
 ### Polynomial chaos
 
-def savePolyChaosXML(networkName, dataNumber, vPCconfiguration = None):
+def savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber, vPCconfiguration = None):
     '''
     Function to write a xml file with vascularPolynomialChaos Configurations
     '''
     from constants import variableUnitsSI as variableUnits
     from constants import vPCconfigurationTemplate
-    
-    vpcConfigXmlFile =  mFPH.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-    
+        
     root = etree.Element(networkName, id= dataNumber, version="1.0")
         
     xmlFile = etree.ElementTree(root)
@@ -754,13 +755,11 @@ def unitConversion(unitsDict,value,unit):
     return value
   
     
-def loadPolyChaosXML(networkName, dataNumber):
+def loadPolyChaosXML(vpcConfigXmlFile):
     ### import units of all variables in the SI system outdated used of only few functions -> to be changed
     ## just used for polynomial chaos config.
     from constants import variableUnitsSI as variableUnits
     from constants import vPCconfigurationTemplate
-        
-    vpcConfigXmlFile =  mFPH.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
     
     vPCconfiguration =  {}
     
