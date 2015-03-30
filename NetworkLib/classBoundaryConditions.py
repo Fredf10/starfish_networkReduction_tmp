@@ -278,78 +278,83 @@ class BoundaryConditionType1(BoundaryCondition):
 		except:
 			return ampT * self.duMatrix	
 		
-	def findMeanFlowAndMeanTime(self, givenMeanFlow=None, quiet=False):
+	def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
 		'''
 		This function calculates the mean flow of the signal self.MeanFlow
-		and the first occurence time of the mean flow self.TmeanFlow
+		and the first occurence evaluatedTime of the mean flow self.TmeanFlow
 		'''
-		# find meanFlow
+		#find meanFlow
 		self.initialize({})
 		
 		period = self.Tperiod
-		totalTime = period + self.Tpulse
-		dt = 0.001
-		nTsteps = int(np.round(totalTime / dt, 0))
-		nTstepsStart = int(np.round(self.Tpulse / dt, 0))
-		integral = 0.0
-		bcFunction = np.zeros(nTsteps - nTstepsStart - 1)
-		time = np.zeros(nTsteps - nTstepsStart - 1)
+		totalTime = period+self.Tpulse
 		
-		for n in xrange(nTstepsStart, nTsteps - 1):
-			flow = self.calculateOneStep(n, dt)
-			integral = integral + (flow + self.calculateOneStep(n + 1, dt)) / 2.0
-			bcFunction[n - nTstepsStart] = flow[1]
-			time[n - nTstepsStart] = (n - nTstepsStart) * dt
+		MeanFlow = 123221.00
+		dt = 1e-5 #0.1ms
+		tolerance = 5.e-10
+		
+		notConverged = True
+		while notConverged == True:
+			nTsteps = int(np.round(totalTime/dt, 0))
+			nTstepsStart = int(np.round(self.Tpulse/dt, 0))
+			evaluatedFlow = np.zeros(nTsteps-nTstepsStart-1)
+			evaluatedTime = np.zeros(nTsteps-nTstepsStart-1)
 			
+			for n in xrange(nTstepsStart,nTsteps-1):
+				flow = self.calculateOneStep(n,dt)
+				evaluatedFlow[n-nTstepsStart] = flow[1]
+				evaluatedTime[n-nTstepsStart]= (n-nTstepsStart)*dt
+				
+			evaluatedMeanFlow = np.mean(evaluatedFlow)
+			#print dt, evaluatedMeanFlow ,	MeanFlow-evaluatedMeanFlow, nTsteps-nTstepsStart
+			if evaluatedMeanFlow < min(evaluatedFlow) or evaluatedMeanFlow > max(evaluatedFlow):
+				print "Meanflow is wrong"
+				exit()
+			if abs(MeanFlow-evaluatedMeanFlow) < tolerance:
+				notConverged = False
+			dt = dt/2.
+			MeanFlow = evaluatedMeanFlow
+		
 		if givenMeanFlow == None:
-			self.MeanPressure = (integral * dt / period)[0]
-			self.MeanFlow = (integral * dt / period)[1]
+			self.MeanFlow = evaluatedMeanFlow
 		else:
 			self.MeanFlow = givenMeanFlow
-			difference = abs(givenMeanFlow - (integral * dt / period)[1])
+			difference = abs(givenMeanFlow - evaluatedMeanFlow)
 			if quiet == False:
 				print '''\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
 	            (evaluated with integral over one period). 
-	            The difference is {} ml s-1 \n'''.format(givenMeanFlow * 1.e6, (integral * dt / period)[1] * 1.e6, difference * 1.e6) 
-						
-		# # finde meanFlow time
-		from scipy import interpolate as interpolate
-		numberIntPoints = 1000000
-		inflowFunction = interpolate.interp1d(time, bcFunction)
-		newTime = np.linspace(0, time[-1], numberIntPoints)
-		newValues = inflowFunction(newTime)
+	            The difference is {} ml s-1 \n'''.format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6,difference*1.e6)
+	
 		self.TmeanFlow = 0
-		for n in np.linspace(0, numberIntPoints - 1, numberIntPoints): 
-			ti = newTime[n]
-			qi = newValues[n]
-			if abs(self.MeanFlow - qi) <= 1.e-5:
-				notFound = True
-				while notFound == True:
-					self.TmeanFlow = ti
-					n = n + 1
-					if n == numberIntPoints - 1: break
-					if abs(self.MeanFlow - newValues[n + 1]) > abs(self.MeanFlow - newValues[n]):
-						self.TmeanFlow = newTime[n]
+		self.initPhaseTimeSpan = 0
+		# find mean flow time	
+		if givenMeanFlow != 0 or evaluatedFlow[0] != 0:
+			for n in np.linspace(0,len(evaluatedFlow)-1,len(evaluatedFlow)): 
+				tn = evaluatedTime[n]
+				qn = evaluatedFlow[n]
+				if n < len(evaluatedFlow)-1:
+					## someting for the end
+					qn1 = evaluatedFlow[n+1]
+					tn1 = evaluatedTime[n+1]
+					if (qn-self.MeanFlow)*(qn1-self.MeanFlow) < 0:
+						qm = self.MeanFlow
+						linearInt = tn+(qm-qn)/(qn1-qn)*(tn1-tn)
+						self.TmeanFlow = linearInt
 						break
-				break
-		
-		print "cBC 350 totalTime", totalTime
-		print "cBC 350 period: ", period
-		print "cBC 350 initPhase timespan: ", period - self.TmeanFlow
-				
-		self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
+				else:
+					print "WARNING no corresponding time found to set mean flow {}, simulation is initialized with no time shift".format(self.MeanFlow*1.e6)
+					
+		if self.TmeanFlow != 0:
+			self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
+		self.initialize({})
 		
 		if quiet == False:
 			print '====================================='
 			print '___BC _Type1: mean flow evaluation___'
-			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str((integral * dt / period * 1e6)[1]).ljust(5))
+			print 'meanFlow evaluated (ml/s)  {:.6}'.format(str(evaluatedMeanFlow*1.e6).ljust(5))
 			print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
 			print 'initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5))
-			print 'total volume/period (ml)   {:.6}'.format(str(integral[1] * dt * 1e6).ljust(5))
-		
-		
-		# if self.TmeanFlow != 0.0: self.Tpulse = 0.0
-		self.initialize({})
+			print 'total volume/period (ml)   {:.6}'.format(str(np.sum(evaluatedFlow)).ljust(5))
 		
 		return  self.MeanFlow, self.initPhaseTimeSpan
 		

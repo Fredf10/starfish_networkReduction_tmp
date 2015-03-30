@@ -1162,15 +1162,18 @@ class VascularNetwork(object):
         elif self.initialsationMethod == 'ConstantPressure':
             
             constantPressure = self.initMeanPressure
-#             try:
-#                 constantPressure = self.initMeanPressure
-#                 if self.boundaryConditions[root][0].name not in ['VaryingElastanceHeart', 'VaryingElastanceSimple','ExpFunc']:
-#                     self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
-#                 self.initialisationPhaseExist = False 
-#                     
-#             except:
-#                 print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
-#                 exit()
+            try:
+                constantPressure = self.initMeanPressure
+                if self.boundaryConditions[root][0].name not in ['VaryingElastanceHeart', 'VaryingElastanceSimple','ExpFunc']:
+                    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
+                
+                self.initialisationPhaseExist = False 
+                if self.initPhaseTimeSpan > 0:
+                    self.initialisationPhaseExist = True 
+                     
+            except:
+                print "Error: classVascularNetwork: Unable to evaluate time shift to 0 at inflow point"
+                exit()
             #############################Inititalisation Method constant pressure #############
             initialValues[root] = {}
             initialValues[root]['Pressure'] = [constantPressure, constantPressure]

@@ -58,7 +58,7 @@ class DistributionManager(object):
         for randomInput in self.randomInputVector:
             distType = randomInput.distributionType
             if distType in evalDistDict.keys():
-                marginalDistribution = eval(distType,{"__builtins__":None},evalDistDict)()
+                marginalDistribution = evalDistDict[distType]() #eval(distType,{"__builtins__":None},evalDistDict)()
                 self.marginalDistributions.append(marginalDistribution)
             #self.jointDistribution = cp.J(self.jointDistribution, marginalDistribution)
         

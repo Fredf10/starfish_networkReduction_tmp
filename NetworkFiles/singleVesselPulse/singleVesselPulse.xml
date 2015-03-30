@@ -15,8 +15,8 @@
   </simulationContext>
   <solverCalibration>
     <rigidAreas>False</rigidAreas>
-    <simplifyEigenvalues>False</simplifyEigenvalues>
-    <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
+    <simplifyEigenvalues>True</simplifyEigenvalues>
+    <riemannInvariantUnitBase>Flow</riemannInvariantUnitBase>
     <automaticGridAdaptation>True</automaticGridAdaptation>
   </solverCalibration>
   <initialisationControls>
@@ -36,10 +36,16 @@
   <communicators/>1e-05
   <boundaryConditions>
     <boundaryCondition vesselId="0">
-      <ExpFunc>
+      <Flow-Sinus2>
+        <amp unit="m3 s-1">0</amp>
+        <ampConst unit="m3 s-1">0.0</ampConst>
+        <Npulse>2</Npulse>
+        <Tpulse unit="s">0</Tpulse>
+        <freq unit="s-1">1</freq>
+        <Tspace unit="s">0.0</Tspace>
         <runtimeEvaluation>False</runtimeEvaluation>
         <prescribe>total</prescribe>
-      </ExpFunc>
+      </Flow-Sinus2>
       <_ReflectionCoefficient>
         <Rt >0</Rt>
       </_ReflectionCoefficient>

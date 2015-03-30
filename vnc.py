@@ -3,7 +3,7 @@
 
 import sys,os
 # set the path relative to THIS file not the executing file!
-cur = os.path.dirname( os.path.realpath( __file__ ) )
+cur = os.path.dirname( os.path.realpath('__file__') )
 
 # syspaths and functions for vascular1DFlow_v0.2
 sys.path.append(cur+'/UtilityLib')

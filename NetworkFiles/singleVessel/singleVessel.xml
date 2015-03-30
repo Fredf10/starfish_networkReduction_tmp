@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleVessel.xml id="xxx" version="4.1">
+<singleAorta.xml id="xxx" version="4.1">
   <simulationContext>
-    <description>None</description>
-    <totalTime unit="s">6.0</totalTime>
+    <description>my STARFiSh simulation</description>
+    <totalTime unit="s">8.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
 	<timeSaveEnd unit="s">1.0</timeSaveEnd>
-	<maxMemory unit="MB">500</maxMemory>
+	<maxMemory unit="MB">0.500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
@@ -20,42 +20,57 @@
     <automaticGridAdaptation>True</automaticGridAdaptation>
   </solverCalibration>
   <initialisationControls>
-    <initialsationMethod>Auto</initialsationMethod>
+    <initialsationMethod>ConstantPressure</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0.000125</initMeanFlow>
-    <initMeanPressure unit="Pa">16665.0</initMeanPressure>
+    <initMeanPressure unit="mmHg">187.1</initMeanPressure>
     <estimateWindkesselCompliance>Tree</estimateWindkesselCompliance>
     <compPercentageWK3>0.8</compPercentageWK3>
-    <compPercentageTree>0.2</compPercentageTree>
+    <compPercentageTree>0.8</compPercentageTree>
     <compTotalSys unit="m3 Pa-1">4.895587352e-08</compTotalSys>
   </initialisationControls>
   <globalFluid>
-    <my unit="Pa s">1e-05</my>
-    <rho unit="kg m-3">1060.0</rho>
+    <my unit="Pa s">0.004</my>
+    <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-  <communicators/>
+  <baroreceptors>
+  	<BaroreceptorCellML>
+  		<vesselId>1</vesselId>
+  		<baroId>1</baroId>
+  	</BaroreceptorCellML>  		
+  </baroreceptors>
+  <communicators>
+  	<CommunicatorRealTimeViz>
+  		<comType>CommunicatorRealTimeViz</comType>
+  		<comId>1</comId>
+  		<vesselId>1</vesselId>
+  		<node>0</node>
+  		<dn>20</dn>
+  		<quantitiesToPlot>Pressure Flow</quantitiesToPlot>
+  	</CommunicatorRealTimeViz>  		
+  </communicators>
   <boundaryConditions>
-    <boundaryCondition vesselId="0">
+    <boundaryCondition vesselId="1"> 
       <Flow-Sinus2>
-        <amp unit="m3 s-1">0.0005</amp>
+        <amp unit="ml s-1">400.0</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
-        <Npulse>10.0</Npulse>
+        <Npulse>75.0</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
-        <freq unit="s-1">2.0</freq>
-        <Tspace unit="s">0.595</Tspace>
+        <freq unit="s-1">5./3</freq>
+        <Tspace unit="s">0.2</Tspace>
         <runtimeEvaluation>False</runtimeEvaluation>
         <prescribe>influx</prescribe>
-      </Flow-Sinus2>
+      </Flow-Sinus2>      
       <_Windkessel-3Elements>
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal unit="Pa s m-3">133000000.0</Rtotal>
-        <C unit="m3 Pa-1">4.48609357e-08</C>
+        <C unit="m3 Pa-1">3.52355288029e-08</C>
         <Z unit="Pa s m-3">VesselImpedance</Z>
       </_Windkessel-3Elements>
     </boundaryCondition>
   </boundaryConditions>
   <vessels>
-    <vessel Id="0" name="parentVessel">
+    <vessel Id="1" name="Ascending aorta 1">
       <topology>
         <leftDaughter>None</leftDaughter>
         <rightDaughter>None</rightDaughter>
@@ -63,26 +78,26 @@
       </topology>
       <geometry>
         <geometryType>uniform</geometryType>
-        <length unit="m">0.2</length>
-        <radiusProximal unit="m">0.0147</radiusProximal>
-        <radiusDistal unit="m">0.01</radiusDistal>
-        <N>20.0</N>
+        <length unit="m">0.5</length>
+        <radiusProximal unit="m">0.0294</radiusProximal>
+        <radiusProxmial-polyChaos>Uniform 0.2 10.</radiusProxmial-polyChaos>
+        <radiusDistal unit="m">0.0288</radiusDistal>
+        <N>50.0</N>
       </geometry>
       <compliance>
-        <complianceType>Laplace2</complianceType>
+        <complianceType>Hayashi</complianceType>
         <constantCompliance>False</constantCompliance>
         <externalPressure unit="Pa">0.0</externalPressure>
-        <Ps unit="Pa">1333.2</Ps>
-        <As unit="m2">None</As>
-        <wallThickness unit="m">0.00163</wallThickness>
-        <youngModulus unit="m2">400000.0</youngModulus>
+        <Ps unit="Pa">13332.0</Ps>
+        <As unit="m2">0.00271546702606</As>
+        <betaHayashi>1.8315018315</betaHayashi>
       </compliance>
       <fluid>
         <applyGlobalFluid>True</applyGlobalFluid>
         <my unit="Pa s">1e-06</my>
         <rho unit="kg m-3">1050.0</rho>
-        <gamma>2.0</gamma>
+        <gamma>None</gamma>
       </fluid>
     </vessel>
   </vessels>
-</singleVessel.xml>
+</singleAorta.xml>

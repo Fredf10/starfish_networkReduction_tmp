@@ -876,9 +876,8 @@ class FlowSolver(object):
         
         
         
-        
-        
-        if self.quiet == False:
+        BVcheck = False
+        if BVcheck == True:
             
             print '\n====================================='
             print '___Blood volume - consistency check___'
@@ -910,7 +909,7 @@ class FlowSolver(object):
                     print '{:<12}     {:6.2f}    {:4.2f}'.format(boundary.name,
                                                                  abs(boundary.BloodVolumen[0])*1.e6, 
                                                                  abs(boundary.BloodVolumen[1])*1.e6 ) 
-                                                             #abs(abs(boundary.BloodVolumen[0])*1.e6 - abs(boundary.BloodVolumen[1])*1.e6))
+                    #abs(abs(boundary.BloodVolumen[0])*1.e6 - abs(boundary.BloodVolumen[1])*1.e6))
                     #print '   {} '.format(boundary.type)
                     totalIn  += abs(boundary.BloodVolumen[0])*1.e6
                     totalOut += abs(boundary.BloodVolumen[1])*1.e6
@@ -930,12 +929,6 @@ class FlowSolver(object):
             
         ### garbage collection
         gc.collect()
-        
-        
-        print "totaltime is", self.totalTime
-        Tim=np.linspace(0,self.totalTime,self.nTsteps)
-        print "nTsteps is", self.nTsteps
-        
         
         try:
             """

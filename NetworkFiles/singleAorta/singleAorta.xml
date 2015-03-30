@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleAorta.xml id="999" version="4.1">
+<singleAorta.xml id="xxx" version="4.1">
   <simulationContext>
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">8.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
 	<timeSaveEnd unit="s">1.0</timeSaveEnd>
-	<maxMemory unit="MB">500</maxMemory>
+	<maxMemory unit="MB">0.500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
@@ -98,7 +98,7 @@
         <externalPressure unit="Pa">0.0</externalPressure>
         <Ps unit="Pa">13332.0</Ps>
         <As unit="m2">0.00271546702606</As>
-        <betaHayashi unit="Pa">1.8315018315</betaHayashi>
+        <betaHayashi>1.8315018315</betaHayashi>
       </compliance>
       <fluid>
         <applyGlobalFluid>True</applyGlobalFluid>
