@@ -84,8 +84,6 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
     This function creates an XML file and writes all variable data of a vascularNetwork into it (except solution)
     The forma of the XML and all variable data are defined in constants.py
     '''
-        
-    print vascularNetwork
     networkName = vascularNetwork.getVariableValue('name')
         
     if networkXmlFile == None:
@@ -243,7 +241,7 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                     except: pass 
                     
                 if variableType == 'int': 
-                    try: variableValue = int(variableValueString)
+                    try: variableValue = int(variableValue)
                     except: convertError.append('int') 
                     
             elif variableType == 'bool': 

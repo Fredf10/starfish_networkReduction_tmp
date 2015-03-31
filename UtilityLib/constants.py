@@ -364,7 +364,7 @@ variablesDict = {## class Vascular Network
                  'length'            : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
                  'radiusProximal'    : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
                  'radiusDistal'      : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
-                 'N'                 : {'type':'float',  'unitSI': None,    'strCases': None, 'multiVar': False},
+                 'N'                 : {'type':'int',    'unitSI': None,    'strCases': None, 'multiVar': False},
                  # compliances
                  'complianceType'    : {'type':'str',    'unitSI': None,   'strCases': ['Laplace', 'Laplace2', 'Exponential', 'Hayashi', 'Reymond'], 'multiVar': False},
                  'constantCompliance': {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
