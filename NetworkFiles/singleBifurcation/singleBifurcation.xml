@@ -1,13 +1,12 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleBifurcation.xml id="1.0" version="4.1">
+<singleBifurcation.xml id="1.0" version="4.0">
   <simulationContext>
-   <description>Noe</description>
-    <totalTime unit="s">2.0</totalTime>
+    <totalTime unit="s">5.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
 	<timeSaveEnd unit="s">2.0</timeSaveEnd>
 	<maxMemory unit="MB">500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
-    <CFL>0.8</CFL>
+    <CFL>0.9</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
     <centralVenousPressure unit="mmHg">0.0</centralVenousPressure>
@@ -29,7 +28,7 @@
     <compTotalSys unit="m3 Pa-1">4.895587352e-08</compTotalSys>
   </initialisationControls>
   <globalFluid>
-    <my unit="Pa s">0.00004</my>
+    <my unit="Pa s">1.e-6</my>
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
@@ -46,9 +45,9 @@
   <boundaryConditions>
     <boundaryCondition vesselId="0">
       <Flow-Sinus2>
-        <amp unit="m3 s-1">0.0002</amp>
+        <amp unit="ml s-1">500</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
-        <Npulse>2.</Npulse>
+        <Npulse>25.0</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
         <freq unit="s-1">2.0</freq>
         <Tspace unit="s">0.5</Tspace>
