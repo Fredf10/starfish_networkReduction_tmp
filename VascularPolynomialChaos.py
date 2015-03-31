@@ -110,8 +110,13 @@ def vascularPolyChaos():
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             batchFileList.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])
         
-        mBSM.runBatchSingleProcess(batchFileList)
-            
+        #mBSM.runBatchAsSingleProcess(batchFileList, quiet = True)
+        mBSM.runBatchAsMultiprocessing(batchFileList, 14, quiet = True)
+        mBSM.runBatchAsMultiprocessing(batchFileList, 16, quiet = True)
+        mBSM.runBatchAsMultiprocessing(batchFileList, 18, quiet = True)
+        mBSM.runBatchAsMultiprocessing(batchFileList, 20, quiet = True)
+        #mBSM.runBatchAsMultiprocessing(batchFileList, 10, quiet = True)
+        #mBSM.runBatchAsMultiprocessing(batchFileList, 12, quiet = True)
         # 6. postprocess evaluated data, peak finding etc
         
         # 7. create Orthogonal polynomials

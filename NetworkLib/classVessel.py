@@ -232,7 +232,11 @@ class Vessel(object):
             print "Error: cV could not use initial values from network"
             pass
         
+        
         self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
+        print self.As
+        print self.Asol[0]
+        exit()
         
         # init these should have a value for each time point not each time step
         self.positionStart    = np.zeros((nTsteps+1,3))
