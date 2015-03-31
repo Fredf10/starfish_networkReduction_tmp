@@ -1,7 +1,8 @@
 
+import moduleFilePathHandlerVPC as mFPH_VPC
 
 import chaospy as cp
-
+import h5py
 
 
 class DistributionManager(object):
@@ -18,6 +19,7 @@ class DistributionManager(object):
         self.samplesSize     = 0
         self.sampleMethod   = None
         
+        
     def passRealisation(self, sampleIndex):
         '''
         Function to pass samples of the random variables to
@@ -25,7 +27,11 @@ class DistributionManager(object):
         '''
         sample = self.samples[sampleIndex]
         if len(sample) == len(self.randomInputVector):
+            print "\nSample number {}".format(sampleIndex)
+            print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","realisation")
+            print "--------------------------------------------------------------------"          
             for randomInput,sample_i in zip(self.randomInputVector,sample):
+                print "random variable {} with realisation {}".format(randomInput.randomInputId,sample_i)
                 randomInput.passRealisationToAssosiatedObj(sample_i)
     
     def update(self, dataDict):
@@ -40,35 +46,44 @@ class DistributionManager(object):
             except:
                 print "ERROR DistributionManager.updateData Wrong key: {}, could not update varibale".format(self.randomInputId, key)
     
-    def loadSamples(self):
+    def loadSamples(self, networkName, dataNumber, gPCEmethod, gPCEorder):
         '''
+        load the current sample to disc so it is available for postprocessing or
+        sequencielle working process
+        for generation gPCE the sample nodes corresponding to the data are needed.
+        '''
+        vpcSampleFile = mFPH_VPC.getFilePath('vpcSampleFile', networkName, dataNumber, mode = "read", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
+        f = h5py.File(vpcSampleFile,'r')
+        dset = f['sampleSpace']
+        self.samples = dset[:]
+        self.samplesSize    = dset.attrs.get('samplesSize')
+        self.sampleMethod   = dset.attrs.get('sampleMethod')
+        self.expansionOrder = dset.attrs.get('expansionOrder')
+        f.close()
+        # check if data is accordingly to the case
+        if self.sampleMethod != gPCEmethod:
+            raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'sampleMethod',self.sampleMethod,gPCEmethod))
+        if self.expansionOrder != gPCEorder:
+            raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'expansionOrder',self.expansionOrder,gPCEorder))
+        if self.samplesSize != len(self.samples):
+            raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'samplesSize',self.samplesSize,len(self.samples)))
+      
+      
+    def saveSamples(self, networkName, dataNumber, gPCEmethod, gPCEorder):
+        '''
+        save the current sample to disc so it is available for postprocessing or
+        sequencielle working process
+        for generation gPCE the sample nodes corresponding to the data are needed.
+        '''
+        vpcSampleFile = mFPH_VPC.getFilePath('vpcSampleFile', networkName, dataNumber, mode = "write", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
+        f = h5py.File(vpcSampleFile,'w')
+        dset = f.create_dataset("sampleSpace", data=self.samples)
+        dset.attrs.create('samplesSize', data=self.samplesSize)
+        dset.attrs.create('sampleMethod', data=self.sampleMethod)
+        dset.attrs.create('expansionOrder', data=self.expansionOrder)
+        f.flush()
+        f.close()
         
-        '''
-        print "loadSampleSpace not jet implemented"
-#         print "number of simulations",len(samples)
-#         #save file
-#         saveFile = open(sampleFile,"wb")       
-#         cPickle.dump(samples,saveFile,protocol=2)
-#         saveFile.close()
-#         print ".. done"
-#     
-    def saveSamples(self):
-        '''
-        
-        '''
-        print "saveSampleSpace not jet implemented"
-#         try:
-#             print " load samples space "
-#             loadFile = open(sampleFile,"rb")
-#             # load pickle
-#             samples = cPickle.load(loadFile)
-#             loadFile.close()
-#             print ".. done"
-#         except:
-#             print 'File does not exits:'
-#             print sampleFile
-#             exit()
-              
     ## methods created by the toolbox-child class implementation
     def createRandomVariables(self):
         '''
@@ -118,7 +133,7 @@ class DistributionManagerChaospy(DistributionManager):
         self.distributionDimension = len(self.jointDistribution)
     
         
-    def createSamples(self, sampleMethod, sampleSize = 1, expansionOrder = None):
+    def createSamples(self,networkName, dataNumber, sampleMethod, sampleSize = 1, expansionOrder = None):
         '''
         create samples for the defined distribution for given samplesSize and sampleMethod
         using the chaospy toolbox
@@ -163,3 +178,5 @@ class DistributionManagerChaospy(DistributionManager):
         if self.distributionDimension == 1:
             self.samples = self.samples.reshape(self.samplesSize,1)
                 
+        self.saveSamples(networkName, dataNumber, gPCEmethod = sampleMethod, gPCEorder = expansionOrder)
+        

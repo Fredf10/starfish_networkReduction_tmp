@@ -763,7 +763,7 @@ class FlowSolver(object):
         imposing the boundary conditions based on Riemann Invariants and then solving the vessels, 
         conncetions, bifucations with a predictor-corrector step method
         '''
-        print "Solving system ..."
+        if self.quiet == False: print "Solving system ..."
         
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -872,9 +872,7 @@ class FlowSolver(object):
 #                 return self.P, self.Q, self.A, rootBC.pressure, rootBC.volume, rootBC.mitralQ, \
 #                      aortic.state, aortic.B, aortic.L, mitral.state, mitral.B, mitral.L
         
-        print "\nSystem solved!"
-        
-        
+        if self.quiet == False: print "\nSystem solved!"
         
         BVcheck = False
         if BVcheck == True:

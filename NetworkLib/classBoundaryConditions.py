@@ -329,7 +329,7 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.initPhaseTimeSpan = 0
 		# find mean flow time	
 		if givenMeanFlow != 0 or evaluatedFlow[0] != 0:
-			for n in np.linspace(0,len(evaluatedFlow)-1,len(evaluatedFlow)): 
+			for n in xrange(len(evaluatedFlow)): 
 				tn = evaluatedTime[n]
 				qn = evaluatedFlow[n]
 				if n < len(evaluatedFlow)-1:

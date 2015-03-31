@@ -1457,9 +1457,10 @@ class VascularNetwork(object):
             # print
         
     def showReflectionCoefficientsConnectionInitialValues(self): 
-        print '====================================='
-        print '________Reflection Coefficients______'
-        print ' LM RM LD RD   Reflection coefficient'
+        if self.quiet == False:
+            print '====================================='
+            print '________Reflection Coefficients______'
+            print ' LM RM LD RD   Reflection coefficient'
         # # add rest of the vessels by traversing the connections
         for leftMother, rightMother, leftDaughter, rightDaughter  in self.treeTraverseConnections:  
                 p0, p1 = self.initialValues[leftMother]['Pressure']

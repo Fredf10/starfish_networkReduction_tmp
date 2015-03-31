@@ -109,12 +109,12 @@ class RandomInputManager(object):
         print "\n Defined Random Inputs\n"
         
         print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")
-        print "---------------------------------------------------------- \n"
+        print "-------------------------------------------------------------------- \n"
         for randomInput in self.randomInputs:
             randomInput.printOutInfo()
             
         print "\n Defined Random Variables\n"
         print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")
-        print "---------------------------------------------------------- \n"
+        print "-------------------------------------------------------------------- \n"
         for randomInput in self.randomInputVector:
             randomInput.printOutInfo()

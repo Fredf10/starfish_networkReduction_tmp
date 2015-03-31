@@ -46,7 +46,6 @@ class RandomInput(object):
         input:
             sample:  <float> 'sample' drawn from random vector 
         '''
-        print "try to pass realisation",self.location
         sample_i = None      
         # if input comes from other random Input
         if isinstance(input,dict):
@@ -58,8 +57,13 @@ class RandomInput(object):
         if sample_i != None:
             realisation = self.evaluateRealisationFromSample(sample_i)
             if self.updateMethods != {}:
-                for variableIdentifier,updateMethod in self.updateMethods.iteritems():
-                    print "update {} with value {}".format(variableIdentifier,realisation)
+                for i,loc in enumerate(self.location.split('_')):
+                    if i == 0:
+                        print '{:3} | {:20} | {:21} | {:.4} '.format(self.randomInputId,self.variableName,loc, realisation)
+                    else:
+                        print '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
+                print  
+                for variableIdentifier,updateMethod in self.updateMethods.iteritems():                    
                     updateMethod({variableIdentifier : realisation})
     
     

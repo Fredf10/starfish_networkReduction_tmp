@@ -19,6 +19,7 @@ sys.path.append('/'.join([cur,'VascularPolynomialChaosLib']))
 from classVpcConfiguration import VpcConfiguration
 from classDistributionManager import DistributionManagerChaospy
 import moduleFilePathHandlerVPC as mFPH_VPC
+import moduleBatchSimulationManager as mBSM
 
 sys.path.append('/'.join([cur,'UtilityLib']))
 import moduleStartUp as mSU
@@ -84,9 +85,9 @@ def vascularPolyChaos():
     for polynomialOrder in vpcConfiguration.polynomialOrders:
         # 4. create samples
         if vpcConfiguration.createSample == True:      
-            distributionManager.createSamples(vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
+            distributionManager.createSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
         else:
-            distributionManager.loadSamples()
+            distributionManager.loadSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
             
         # 5. evaluate model / on local machine or on server
         # 5.1 save/create xml files
@@ -98,22 +99,18 @@ def vascularPolyChaos():
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=sampleIndex)
             moduleXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
         
-        # 5.2 run evaluations
+        # 5.2 create batch job list for evaluations to run
         startIndex = 0
         endIndex = int(distributionManager.samplesSize)
+        batchFileList = []
         for simulationIndex in np.arange(startIndex,endIndex):
             vpcNetworkXmlEvaluationFile = mFPH_VPC.getFilePath('vpcEvaluationNetworkXmlFile', networkName, dataNumber, 'read',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-            moduleXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
-            vascularNetworkTemp = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
-            vascularNetworkTemp.quiet = True
-            flowSolver = FlowSolver(vascularNetworkTemp)
-            flowSolver.solve()
-            vascularNetwork.saveSolutionData()
-            del flowSolver
-            gc.collect()
+            batchFileList.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])
+        
+        mBSM.runBatchSingleProcess(batchFileList)
             
         # 6. postprocess evaluated data, peak finding etc
         
