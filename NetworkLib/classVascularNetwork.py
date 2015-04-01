@@ -658,31 +658,43 @@ class VascularNetwork(object):
         '''
         tspan = [np.min(tvals),np.max(tvals)]
         mindt=None
-         
-        self.loadSolutionDataRange(vesselId, tspan, mindt, variables) 
+
+        if "ForwardPressure" in variables or "BackwardPressure" in variables or "ForwardFlow" in variables or  "BackwardFlow" in variables:
+            variables.append('linearWavesplit')
+        
+        self.loadSolutionDataRange([vesselId], tspan, mindt, variables) 
         
         data_dict = {}
         # Create Interpolating Function
-        # interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels,kind='linear',copy=True)
+        # interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels,kind='linear',copy=False)
         if 'Pressure' in variables:
-            data_dict['Pressure'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.Psol,kind='linear',copy=True)
+            interpfct= interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].Psol,kind='linear',copy=False)
+            data_dict['Pressure'] = interpfct(tvals,xvals)
         if 'Flow' in variables:
-            data_dict['Flow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.Qsol,kind='linear',copy=True)
+            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].Qsol,kind='linear',copy=False)
+            data_dict['Flow'] = interpfct(tvals,xvals)
         if  'Area' in variables:
-            data_dict['Area'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.Asol,kind='linear',copy=True)
+            interpfct= interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].Asol,kind='linear',copy=False)
+            data_dict['Area'] = interpfct(tvals,xvals) 
         if 'WaveSpeed' in variables:
-            data_dict['WaveSpeed'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.csol,kind='linear',copy=True)
+            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].csol,kind='linear',copy=False)
+            data_dict['WaveSpeed'] = interpfct(tvals,xvals) 
         if 'MeanVelocity' in variables:
-            data_dict['MeanVelocity'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.vsol,kind='linear',copy=True)
+            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].vsol,kind='linear',copy=False)
+            data_dict['MeanVelocity'] = interpfct(tvals,xvals) 
         if 'ForwardPressure' in variables:
-            data_dict['ForwardPressure']  = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.PsolF,kind='linear',copy=True) 
+            interpfct  = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].PsolF,kind='linear',copy=False) 
+            data_dict['ForwardPressure'] = interpfct(tvals,xvals) 
         if 'BackwardPressure' in variables:
-            data_dict['BackwardPressure'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.PsolB,kind='linear',copy=True)
+            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].PsolB,kind='linear',copy=False) 
+            data_dict['BackwardPressure'] = interpfct(tvals,xvals) 
         if 'ForwardFlow' in variables:
-            data_dict['ForwardFlow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.QsolF,kind='linear',copy=True)
+            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].QsolF,kind='linear',copy=False)
+            data_dict['ForwardFlow']  = interpfct(tvals,xvals) 
         if 'BackwardFlow' in variables:
-            data_dict['BackwardFlow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.QsolB,kind='linear',copy=True)
-    
+            data_dict['BackwardFlow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].QsolB,kind='linear',copy=False)
+            data_dict['BackwardFlow'] = interpfct(tvals,xvals) 
+        return data_dict
     
     def loadSolutionDataRange(self, vesselIds = None, tspan=None, mindt=None, 
                                   values=["All",
@@ -725,13 +737,16 @@ class VascularNetwork(object):
                         "Area", 
                         "WaveSpeed", 
                         "MeanVelocity",
+                        "linearWavesplit",
                         "Gravity",
                         "Position",
                         "Rotation"])
         elif 'WaveSpeed' in values:
             values.update(['Pressure', 'Area'])
         elif 'MeanVelocity' in values:
-            values.update(['Pressure','loadFlow'])
+            values.update(['Pressure','Flow'])
+        elif "linearWavesplit" in values:
+            values.update(['Pressure','Flow','Area',"WaveSpeed","MeanVelocity"])
             
         if tspan is not None:
             t1 = tspan[0]
@@ -768,9 +783,13 @@ class VascularNetwork(object):
                         if  'Area' in values:
                             vessel.Asol = dsetGroup['Area'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
                         if 'WaveSpeed' in values:
-                            vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
+                            #vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
+                            vessel.postProcessing(['WaveSpeed'])
                         if 'MeanVelocity' in values:
-                            vessel.vsol = vessel.Qsol/vessel.Asol
+                            #vessel.vsol = vessel.Qsol/vessel.Asol
+                            vessel.postProcessing(["MeanVelocity"])
+                        if "linearWavesplit" in values:
+                            vessel.postProcessing(["linearWavesplit"])
                         if 'Gravity' in values:
                             try: vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
                             except: print "WARNING vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file"
