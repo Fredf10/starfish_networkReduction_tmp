@@ -560,8 +560,6 @@ class VascularNetwork(object):
         
         self.solutionDataFile.close()
         
-    
-        
         
     def linkSolutionData(self):
         '''
@@ -571,9 +569,11 @@ class VascularNetwork(object):
         loaded into memory.
         
         '''
-        pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'read')
+        
+        if self.pathSolutionDataFilename == None:
+            self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'read')
         # TODO, what if this fails? do we know?
-        self.solutionDataFile = h5py.File(pathSolutionDataFilename, "r")
+        self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "r")
         
         vesselId = None
         for groupName, group in self.solutionDataFile.iteritems():            
@@ -599,8 +599,6 @@ class VascularNetwork(object):
                     # except: 
                         # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                 # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
-     
-        
         self.initialize()
         
                

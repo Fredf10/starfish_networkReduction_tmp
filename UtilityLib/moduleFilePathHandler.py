@@ -26,13 +26,7 @@ from copy import copy as copy
 from pprint import pprint as pp
 
 
-def getFilePath(fileType,
-                networkName,
-                dataNumber,
-                mode,
-                exception = 'Error',
-                gPCEmethod = 'None',
-                gPCEorder = 'None'):
+def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     '''
     Function return a requested file path, if this file exists
     
@@ -134,7 +128,7 @@ def getFilePath(fileType,
               
     return requestedFilePath
     
-def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', gPCEmethod = 'None', gPCEorder = 'None'):
+def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error'):
     '''
     Function returns a requested directory path, if this directory does not exists
     it is created.
@@ -204,9 +198,6 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     solutionFileDirectory           = ''.join([networkXmlFileDirectory,'/SolutionData_',str(dataNumber)])
     movieDirectory              = ''.join([solutionFileDirectory,'/Movies'])
     screenshotDirectory         = ''.join([solutionFileDirectory,'/Screenshots'])
-    vpcCaseDirectory = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
-    vpcOrderMethodDirectory = ''.join([vpcCaseDirectory,'/','polyChaos_solution_',dataNumber,'_order_',str(gPCEorder).zfill(2),'_method_',gPCEmethod,'/'])
-    
     ## look up tables
     # directories
     directories = {

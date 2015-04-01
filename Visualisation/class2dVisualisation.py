@@ -1670,14 +1670,14 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                 self.networks[networkID].loadSolutionDataRange(vesselIds, values={"loadAll": True})
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
-    def loadVascularNetwork(self, networkName, dataNumber):
+    def loadVascularNetwork(self, networkName, dataNumber, networkXmlFile = None, pathSolutionDataFilename = None):
         '''
         This function actually loads the vascular networks with the given names and ids
             networkName
         The network is added to the existing ones if is not existing
         '''
         # load vascular network
-        vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber = dataNumber)
+        vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber = dataNumber, networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
         vascularNetwork.linkSolutionData()
         # # save it and refresh GUi setup
         networkSolutionName = '_'.join([networkName, dataNumber])  
@@ -1707,12 +1707,26 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         filenames = self.LoadDialog(fileFilter)
         
         for filename in filenames:
-            networkName = filename.split('/')[-1].split('_SolutionData_')[0]
-            dataNumber = filename.split('/')[-1].split('_SolutionData_')[1].split('.')[0]
-            if '_'.join([networkName, dataNumber]) not in self.networkCases:
-                self.loadVascularNetwork(networkName, dataNumber)
-        
-                            
+            if '_SolutionData_' in filename: # normal network cases
+                networkName = filename.split('/')[-1].split('_SolutionData_')[0]
+                dataNumber = filename.split('/')[-1].split('_SolutionData_')[1].split('.')[0]
+                if '_'.join([networkName, dataNumber]) not in self.networkCases:
+                    self.loadVascularNetwork(networkName, dataNumber)
+            elif '_evaluation_' in filename:# polynomial chaos cases
+                print filename
+                networkFileName = ''.join([filename.split('/')[-1].split('.')[0],'.xml'])
+                networkName = filename.split('/')[-1].split('_evaluation_')[0]
+                evaluationNumber = filename.split('/')[-1].split('_evaluation_')[1].split('.')[0]
+                networkXmlFile = ''.join(['/'.join(filename.split('/')[0:-2]),'/evaluationNetworkFiles/',networkFileName])
+                
+                print networkFileName
+                print networkName
+                print evaluationNumber
+                print networkXmlFile
+                if '_'.join([networkName, evaluationNumber]) not in self.networkCases:
+                    self.loadVascularNetwork(networkName, evaluationNumber,networkXmlFile,filename)
+                
+                          
     def LoadDialog(self, fileFilter):
         '''
         Dialog window function: 
@@ -1728,7 +1742,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                                       gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         dialog.set_default_response(gtk.RESPONSE_OK)
         
-        directory = ''.join([cur, '/../NetworkFiles/'])
+        directory = mFPH.getDirectory('workingDirectory', '', '', mode= 'read')
         dialog.set_current_folder(directory)
         
         dialog.set_select_multiple(True)
