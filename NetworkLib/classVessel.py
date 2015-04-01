@@ -240,6 +240,23 @@ class Vessel(object):
         self.rotToGlobalSys   = np.zeros((nTsteps+1,3,3))
         self.netGravity       = np.zeros((nTsteps+1,1))
         
+    #### Functions for to calculate depenend solution variables (also used for simulations)
+     
+    def postProcessing(self, variablesToProcess):
+        '''
+        
+        Input:
+            variablesToProcess <list>: [ <str>, ...] variables to process
+            
+        '''
+        for variableToProcess in variablesToProcess:
+            if variableToProcess == "WaveSpeed":
+                self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
+            elif variableToProcess == "MeanVelocity":
+                self.vsol = self.Qsol/self.Asol   
+            elif variableToProcess == "lineraWavesplit":
+                self.linearWaveSplitting()
+              
      
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
         '''
@@ -270,8 +287,7 @@ class Vessel(object):
         c = self.waveSpeed(Area, Compliance)
         return 1.0/(c*Compliance) 
     
-    
-    def linearWaveSplittingAllGridPoints(self):
+    def linearWaveSplitting(self):
         '''
         calculates the linear wave splitting for the hole vessel
         '''
@@ -284,15 +300,47 @@ class Vessel(object):
         self.QsolB = np.zeros_like(self.Psol)
         
         for gridNode in xrange(int(self.N)):
-            pf,pb,qf,qb =  self.linearWaveSplitting(self.Psol[:,[gridNode]],
-                                                    self.Qsol[:,[gridNode]],
-                                                    self.Asol[:,[gridNode]],
-                                                    self.csol[:,[gridNode]])
+            pf,pb,qf,qb =  self.linearWaveSplittingGridNode(gridNode)
             self.PsolF[1::,[gridNode]] = pf.reshape(numberOfTimeSteps-1,1)
             self.PsolB[1::,[gridNode]] = pb.reshape(numberOfTimeSteps-1,1)
             self.QsolF[1::,[gridNode]] = qf.reshape(numberOfTimeSteps-1,1)
             self.QsolB[1::,[gridNode]] = qb.reshape(numberOfTimeSteps-1,1)
     
+    def linearWaveSplittingGridNode(self,gridNode):
+        '''
+        calculates the linear wave splitting for a given grid node 
+        
+        return
+            PsolF <np.array>
+            PsolB <np.array>
+            QsolF <np.array>
+            QsolB <np.array>
+        '''
+        
+        ## calculate Zo and recast// delete last element
+        Zo = self.rho*self.csol[:,[gridNode]]/self.Asol[:,[gridNode]]
+        Zo = np.ones_like(Zo)*np.mean(Zo)
+         
+        ##calculateing dP and dQ
+        dP = self.Psol[:,[gridNode]][1::] - self.Psol[:,[gridNode]][0:-1]      
+        dQ = self.Qsol[:,[gridNode]][1::] - self.Qsol[:,[gridNode]][0:-1] 
+        
+        dP_div_Z = self.Psol[:,[gridNode]][1::]/Zo[1::] - self.Psol[:,[gridNode]][0:-1]/Zo[0:-1]
+        dQ_multi_Z = self.Qsol[:,[gridNode]][1::]*Zo[1::] - self.Qsol[:,[gridNode]][0:-1]*Zo[0:-1]
+        
+        ## calculate dp_f, dp_b and dQ_f, dq_b     
+        dp_f = (dP + dQ_multi_Z)/2.0 
+        dp_b = (dP - dQ_multi_Z)/2.0
+        dQ_f = (dQ + dP_div_Z)/2.0 
+        dQ_b = (dQ - dP_div_Z)/2.0 
+        
+        pf = np.cumsum(dp_f)
+        pb = np.cumsum(dp_b)
+        qf = np.cumsum(dQ_f)
+        qb = np.cumsum(dQ_b)   
+    
+        return pf,pb,qf,qb
+        
     def linearWaveSplittingGivenArray(self,pressureArray,flowArray,areaArray,waveSpeedArray):
         '''
         calculates the linear wave splitting for a given P,Q,A,c (np.arrays) and rho (float) 
@@ -316,12 +364,12 @@ class Vessel(object):
         dQ_f = (dQ + dP_div_Z)/2.0 
         dQ_b = (dQ - dP_div_Z)/2.0 
         
-        p_f = np.cumsum(dp_f)
-        p_b = np.cumsum(dp_b)
-        q_f = np.cumsum(dQ_f)
-        q_b = np.cumsum(dQ_b)  
-        
-        return p_f, p_b, q_f, q_b
+        pf = np.cumsum(dp_f)
+        pb = np.cumsum(dp_b)
+        qf = np.cumsum(dQ_f)
+        qb = np.cumsum(dQ_b)   
+    
+        return pf,pb,qf,qb
     
     def update(self, Dict):
         '''
