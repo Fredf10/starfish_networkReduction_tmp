@@ -668,32 +668,32 @@ class VascularNetwork(object):
         # Create Interpolating Function
         # interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels,kind='linear',copy=False)
         if 'Pressure' in variables:
-            interpfct= interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].Psol,kind='linear',copy=False)
-            data_dict['Pressure'] = interpfct(tvals,xvals)
+            interpfct= interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].Psol,kind='linear',copy=False)
+            data_dict['Pressure'] = interpfct(xvals,tvals)
         if 'Flow' in variables:
-            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].Qsol,kind='linear',copy=False)
-            data_dict['Flow'] = interpfct(tvals,xvals)
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].Qsol,kind='linear',copy=False)
+            data_dict['Flow'] = interpfct(xvals,tvals)
         if  'Area' in variables:
-            interpfct= interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].Asol,kind='linear',copy=False)
-            data_dict['Area'] = interpfct(tvals,xvals) 
+            interpfct= interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].Asol,kind='linear',copy=False)
+            data_dict['Area'] = interpfct(xvals,tvals) 
         if 'WaveSpeed' in variables:
-            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].csol,kind='linear',copy=False)
-            data_dict['WaveSpeed'] = interpfct(tvals,xvals) 
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].csol,kind='linear',copy=False)
+            data_dict['WaveSpeed'] = interpfct(xvals,tvals) 
         if 'MeanVelocity' in variables:
-            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].vsol,kind='linear',copy=False)
-            data_dict['MeanVelocity'] = interpfct(tvals,xvals) 
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].vsol,kind='linear',copy=False)
+            data_dict['MeanVelocity'] = interpfct(xvals,tvals) 
         if 'ForwardPressure' in variables:
-            interpfct  = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].PsolF,kind='linear',copy=False) 
-            data_dict['ForwardPressure'] = interpfct(tvals,xvals) 
+            interpfct  = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].PsolF,kind='linear',copy=False) 
+            data_dict['ForwardPressure'] = interpfct(xvals,tvals) 
         if 'BackwardPressure' in variables:
-            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].PsolB,kind='linear',copy=False) 
-            data_dict['BackwardPressure'] = interpfct(tvals,xvals) 
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].PsolB,kind='linear',copy=False) 
+            data_dict['BackwardPressure'] = interpfct(xvals,tvals) 
         if 'ForwardFlow' in variables:
-            interpfct = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].QsolF,kind='linear',copy=False)
-            data_dict['ForwardFlow']  = interpfct(tvals,xvals) 
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].QsolF,kind='linear',copy=False)
+            data_dict['ForwardFlow']  = interpfct(xvals,tvals) 
         if 'BackwardFlow' in variables:
-            data_dict['BackwardFlow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels[vesselId].QsolB,kind='linear',copy=False)
-            data_dict['BackwardFlow'] = interpfct(tvals,xvals) 
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].QsolB,kind='linear',copy=False)
+            data_dict['BackwardFlow'] = interpfct(xvals,tvals) 
         return data_dict
     
     def loadSolutionDataRange(self, vesselIds = None, tspan=None, mindt=None, 
