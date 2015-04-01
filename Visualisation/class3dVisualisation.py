@@ -1110,7 +1110,7 @@ class Vessel3D(Vessel):
         self.PsolB = np.zeros_like(self.Psol)
         self.QsolF = np.zeros_like(self.Psol)
         self.QsolB = np.zeros_like(self.Psol)
-        
+               
         for n in xrange(int(self.N)):
             pf,pb,qf,qb =  linearWaveSplitting(self.Psol[:,[n]],self.Qsol[:,[n]],self.Asol[:,[n]],self.csol[:,[n]],self.rho)
             self.PsolF[1::,[n]] = pf.reshape(numberOfTimeSteps-1,1)

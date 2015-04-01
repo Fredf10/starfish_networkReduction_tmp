@@ -58,7 +58,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                          'vpcSampleFile',
                          'vpcEvaluationNetworkXmlFile',
                          'vpcEvaluationSolutionDataFile',
-                         'vpcProcessedSolutionDataFile']
+                         'vpcProcessedSolutionDataFile',
+                         'evaluationLogFile']
     
     if fileType not in existingFileTypes:
         raise ValueError("ERROR: getFilePath, requested file type {}\
@@ -71,7 +72,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                  'vpcSampleFile'                : ''.join(['samples.hdf5']),
                  'vpcEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
                  'vpcEvaluationSolutionDataFile': ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.hdf5']),
-                 'vpcProcessedSolutionDataFile' : ''.join([networkName,'_processed_',str(evaluationNumber).zfill(7),'.hdf5'])
+                 'vpcProcessedSolutionDataFile' : ''.join([networkName,'_processed_',str(evaluationNumber).zfill(7),'.hdf5']),
+                 'evaluationLogFile'            : ''.join(['evaluationLogFile.txt'])
                  }    
         
     ## find requested file name
@@ -145,7 +147,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vpcNetworkXmlFileDirectory',
                               'vpcEvaluationNetworkXmlFileDirectory',
                               'vpcEvaluationSolutionDataFileDirectory',
-                              'vpcSampleFileDirectory'} 
+                              'vpcSampleFileDirectory',
+                              'evaluationLogFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
@@ -170,6 +173,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'vpcEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
                    'vpcEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
                    'vpcProcessedSolutionDataFileDirectory' : vpcEvaluationDirectory,
+                   'evaluationLogFileDirectory'            : vpcOrderMethodDirectory,
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

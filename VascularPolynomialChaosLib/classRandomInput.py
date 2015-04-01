@@ -21,6 +21,7 @@ class RandomInput(object):
         self.b                = 0 #
         ##
         self.updateMethods    = {} 
+        self.updateLog        = [] # list to save the passed realisations
         
         if dataDict != None:
             self.update(dataDict)
@@ -52,8 +53,7 @@ class RandomInput(object):
             sample_i = input[self.randomInputId]
         elif isinstance(input,float):        
             # if input comes from distribution handler
-            sample_i = input
-            
+            sample_i = input        
         if sample_i != None:
             realisation = self.evaluateRealisationFromSample(sample_i)
             if self.updateMethods != {}:
@@ -65,6 +65,7 @@ class RandomInput(object):
                 print  
                 for variableIdentifier,updateMethod in self.updateMethods.iteritems():                    
                     updateMethod({variableIdentifier : realisation})
+                self.updateLog.append(realisation)
     
     
     def update(self, dataDict):
@@ -89,7 +90,7 @@ class RandomInput(object):
         except: 
             print "ERROR RandomVariable.getVariable() : RandomVariable has no variable {}".format(variableName)
                 
-    def printOutInfo(self):
+    def generateInfo(self):
         '''
         Function to print random input information to console
         '''
@@ -97,10 +98,16 @@ class RandomInput(object):
             dist = self.printOutDistributions[self.distributionType]
         else:
             dist = self.distributionType
-            
+        
+        randomInputInfo = []
         for i,loc in enumerate(self.location.split('_')):
             if i == 0:
-                print '{:3} | {:20} | {:21} | {:3} + {:3} {} '.format(self.randomInputId,self.variableName,loc, self.a, self.b, dist)
+                info = '{:3} | {:20} | {:21} | {:3} + {:3} {} '.format(self.randomInputId,self.variableName,loc, self.a, self.b, dist)
             else:
-                print '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
-        print ""
+                info = '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
+            randomInputInfo.append(info)
+        randomInputInfo.append('\n')
+        return randomInputInfo
+        
+        
+        

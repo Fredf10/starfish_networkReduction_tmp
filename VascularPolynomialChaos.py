@@ -98,7 +98,11 @@ def vascularPolyChaos():
             vpcNetworkXmlEvaluationFile = mFPH_VPC.getFilePath('vpcEvaluationNetworkXmlFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=sampleIndex)
             moduleXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
+        #save log file of the passed realisations
+        vascularNetwork.randomInputManager.saveRealisationLog(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         
+        exit()
+                
         # 5.2 create batch job list for evaluations to run
         startIndex = 0
         endIndex = int(distributionManager.samplesSize)

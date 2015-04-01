@@ -14,10 +14,10 @@ class DistributionManager(object):
         self.jointDistribution     = None
         self.distributionDimension = None
         # samples
-        self.expansionOrder = 0
+        self.expansionOrder  = 0
         self.samples         = None
         self.samplesSize     = 0
-        self.sampleMethod   = None
+        self.sampleMethod    = None
         
         
     def passRealisation(self, sampleIndex):

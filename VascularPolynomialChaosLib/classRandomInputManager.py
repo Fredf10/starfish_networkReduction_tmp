@@ -1,7 +1,10 @@
 
 
 from classRandomInput import RandomInput
+import numpy as np
+import moduleFilePathHandlerVPC as mFPH_VPC
 
+import itertools
 
 class RandomInputManager(object):
     '''
@@ -101,20 +104,50 @@ class RandomInputManager(object):
             except:
                 print "ERROR RandomInputManager.updateData Wrong key: {}, could not update varibale".format( key)
            
+    def saveRealisationLog(self, networkName, dataNumber, gPCEmethod, gPCEorder):
+        '''
+        method to save a log file with the realisations passed for each sample iteration
+        '''
+        
+        logData = np.array([randomInput.updateLog for randomInput in self.randomInputs]).transpose()
+        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
+        
+        logfile = open(evaluationLogFile, "wb")
+        logfile.write(''.join(['Stochastic simulation ',str(networkName),' DataNumber ',dataNumber,'\n','\n']))
+        logfile.write(''.join(['gPCEorder :',str(gPCEorder),'  gPCEmethod: ',gPCEmethod,'  number of evaluations: ',str(len(logData)),'\n','\n']))
+        
+        for info in self.generateInfo():
+            logfile.write(''.join([info,'\n']))
+        randomInputIds = [randomInput.randomInputId for randomInput in self.randomInputs]
+        logfile.write(''.join(['\n{:<10}'.format(''), '{:20}'.format('RandomVariableId'),'\n','\n']))
+        logfile.write(''.join(['{:<10}'.format('EvalNr'), ''.join(['{:20}'.format(j) for j in ['{:<5}'.format(k) for k in randomInputIds]]),'\n',]))     
+        for i,logLine in enumerate(logData):
+            logfile.write(''.join(['{:<10}'.format(i), ''.join(['{:20}'.format(j) for j in ['{:<.5}'.format(k) for k in logLine]]),'\n']))
+        
         
     def printOutInfo(self):
         '''
         Function to print out random variable informations
         '''
-        print "\n Defined Random Inputs\n"
-        
-        print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")
-        print "-------------------------------------------------------------------- \n"
-        for randomInput in self.randomInputs:
-            randomInput.printOutInfo()
+        for info in self.generateInfo():
+            print info
             
-        print "\n Defined Random Variables\n"
-        print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution")
-        print "-------------------------------------------------------------------- \n"
-        for randomInput in self.randomInputVector:
-            randomInput.printOutInfo()
+    def generateInfo(self):
+        '''
+        Function which generates info of the random inputs
+        and returns it in a list
+        '''
+        randomInputManagerInfo = []
+        randomInputManagerInfo.append("\n Defined Random Inputs\n")
+        randomInputManagerInfo.append( '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution"))
+        randomInputManagerInfo.append( "-------------------------------------------------------------------- \n")
+        randomInputInfos = list(itertools.chain.from_iterable([randomInput.generateInfo() for randomInput in self.randomInputs]))
+        for info in randomInputInfos:
+            randomInputManagerInfo.append( info)
+        randomInputManagerInfo.append( "\n Defined Random Variables\n")
+        randomInputManagerInfo.append( '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution"))
+        randomInputManagerInfo.append( "-------------------------------------------------------------------- \n")
+        randomInputInfos = list(itertools.chain.from_iterable([randomInput.generateInfo() for randomInput in self.randomInputs]))
+        for info in randomInputInfos:
+            randomInputManagerInfo.append(info)
+        return randomInputManagerInfo
