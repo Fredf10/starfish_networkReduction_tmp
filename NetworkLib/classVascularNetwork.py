@@ -1,6 +1,5 @@
 import sys, os
 from reportlab.lib.validators import isNumber
-from UtilityLib.saveSimulationDataToCSV import vesselId
 #from duplicity.tarfile import TUREAD
 # from UtilityLib.saveSimulationDataToCSV import vesselId
 # set the path relative to THIS file not the executing file!
