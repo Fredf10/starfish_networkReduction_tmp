@@ -1,5 +1,6 @@
 import sys, os
 from reportlab.lib.validators import isNumber
+from UtilityLib.saveSimulationDataToCSV import vesselId
 #from duplicity.tarfile import TUREAD
 # from UtilityLib.saveSimulationDataToCSV import vesselId
 # set the path relative to THIS file not the executing file!
@@ -16,6 +17,7 @@ sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from classRandomInputManager import RandomInputManager
 
 import numpy as np
+from scipy import interpolate
 from math import pi, cos, sin
 import pprint
 
@@ -632,17 +634,67 @@ class VascularNetwork(object):
             print 'ERROR: Invalid time range t2-t1=', t2-t1, 'is smaller than the solution time step dt'
           
         return inputsAreValid
+    
+    
+    def getSolutionData(self,vesselId, variables, tvals, xvals):
+        '''
+        Get interpolated solution data
+        Inputs:
+        vesselId - the vessel from which the data is wanted
+        variables - a list of strings with desired variables
+            "Pressure",
+            "Flow", 
+            "Area", 
+            "WaveSpeed", 
+            "MeanVelocity",
+            "ForwardFlow",
+            "BackwardFlow",
+            "ForwardPressure",
+            "BackwardPressure"
+        tvals - a numpy array (or python list) of times at which the values are desired
+        xvals - a numpy array (or python list) of positions at which the values are desired
         
+        Returns: A dictionary with keys corresponding to the input variables, and values are
+            numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals) 
+        '''
+        tspan = [np.min(tvals),np.max(tvals)]
+        mindt=None
+         
+        self.loadSolutionDataRange(vesselId, tspan, mindt, variables) 
+        
+        data_dict = {}
+        # Create Interpolating Function
+        # interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels,kind='linear',copy=True)
+        if 'Pressure' in variables:
+            data_dict['Pressure'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.Psol,kind='linear',copy=True)
+        if 'Flow' in variables:
+            data_dict['Flow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.Qsol,kind='linear',copy=True)
+        if  'Area' in variables:
+            data_dict['Area'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.Asol,kind='linear',copy=True)
+        if 'WaveSpeed' in variables:
+            data_dict['WaveSpeed'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.csol,kind='linear',copy=True)
+        if 'MeanVelocity' in variables:
+            data_dict['MeanVelocity'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.vsol,kind='linear',copy=True)
+        if 'ForwardPressure' in variables:
+            data_dict['ForwardPressure']  = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.PsolF,kind='linear',copy=True) 
+        if 'BackwardPressure' in variables:
+            data_dict['BackwardPressure'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.PsolB,kind='linear',copy=True)
+        if 'ForwardFlow' in variables:
+            data_dict['ForwardFlow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.QsolF,kind='linear',copy=True)
+        if 'BackwardFlow' in variables:
+            data_dict['BackwardFlow'] = interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels.QsolB,kind='linear',copy=True)
+    
+    
     def loadSolutionDataRange(self, vesselIds = None, tspan=None, mindt=None, 
-                                  values={"loadAll": False,
-                                  "loadPressure":True,
-                                  "loadFlow":True, 
-                                  "loadArea":True, 
-                                  "loadWaveSpeed":False, 
-                                  "loadMeanVelocity":False,
-                                  "loadGravity":False,
-                                  "loadPostion":False,
-                                  "loadRotation":False}):
+                                  values=["All",
+                                  "Pressure",
+                                  "Flow", 
+                                  "Area", 
+                                  "WaveSpeed", 
+                                  "MeanVelocity",
+                                  "Gravity",
+                                  "Position",
+                                  "Rotation"]):
         '''
         loads the solution data of the vessels specified into memory for the times 
             specified and drops any other previously loaded data.
@@ -665,22 +717,22 @@ class VascularNetwork(object):
         # Update loaded data tracking if inputs are valid
         # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
         
-        
-        if values.get('loadAll',False):
-            values['loadPressure'] = True
-            values['loadArea'] = True
-            values['loadFlow'] = True
-            values['loadWaveSpeed'] = True
-            values['loadMeanVelocity'] = True
-            values['loadGravity'] = True
-            values['loadPosition'] = True
-            values['loadRotation'] = True
-        elif values.get('loadWaveSpeed',False):
-            values['loadPressure'] = True
-            values['loadArea'] = True
-        elif values.get('loadMeanVelocity',False):
-            values['loadPressure'] = True
-            values['loadFlow'] = True
+       
+        values = set(values) 
+        if 'All' in values:
+            values.update(["All",
+                        "Pressure",
+                        "Flow", 
+                        "Area", 
+                        "WaveSpeed", 
+                        "MeanVelocity",
+                        "Gravity",
+                        "Position",
+                        "Rotation"])
+        elif 'WaveSpeed' in values:
+            values.update(['Pressure', 'Area'])
+        elif 'MeanVelocity' in values:
+            values.update(['Pressure','loadFlow'])
             
         if tspan is not None:
             t1 = tspan[0]
@@ -710,23 +762,23 @@ class VascularNetwork(object):
                         del vessel.Psol, vessel.Qsol, vessel.Asol
                         
                         # TODO Implement h5py direct_read method to improve speed
-                        if values.get('loadPressure',False):
+                        if 'Pressure' in values: 
                             vessel.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
-                        if values.get('loadFlow',False):
+                        if 'Flow' in values:
                             vessel.Qsol = dsetGroup['Flow'][nSelectedBegin:nSelectedEnd:nTStepSpaces]    
-                        if values.get('loadArea',False):
+                        if  'Area' in values:
                             vessel.Asol = dsetGroup['Area'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
-                        if values['loadWaveSpeed']:
+                        if 'WaveSpeed' in values:
                             vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
-                        if values['loadMeanVelocity']:
+                        if 'MeanVelocity' in values:
                             vessel.vsol = vessel.Qsol/vessel.Asol
-                        if values['loadGravity']:
+                        if 'Gravity' in values:
                             try: vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
                             except: print "WARNING vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file"
-                        if values['loadRotation']:
+                        if 'Rotation' in values:
                             try: vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
                             except: print "WARNING vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file"
-                        if values['loadPosition']:
+                        if 'Position' in values:
                             try: vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
                             except: print "WARNING vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file"
                 else:

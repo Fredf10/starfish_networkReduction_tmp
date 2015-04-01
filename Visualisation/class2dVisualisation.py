@@ -1667,7 +1667,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         if selectedNetworks != []:
             for networkID in loadVesselIDdict.iterkeys():
                 vesselIds = loadVesselIDdict[networkID]
-                self.networks[networkID].loadSolutionDataRange(vesselIds, values={"loadAll": True})
+                self.networks[networkID].loadSolutionDataRange(vesselIds, values=["All"])
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
     def loadVascularNetwork(self, networkName, dataNumber, networkXmlFile = None, pathSolutionDataFilename = None):

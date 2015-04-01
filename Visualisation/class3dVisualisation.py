@@ -727,7 +727,7 @@ class Visualisation3D(Visualisation3DGUI):
             # link solution data from file
             self.vascularNetwork.linkSolutionData()   
             # load solution data from file
-            self.vascularNetwork.loadSolutionDataRange(values={"loadAll": True})
+            self.vascularNetwork.loadSolutionDataRange(values=["All"])
         
     def createVessel3D(self):
 

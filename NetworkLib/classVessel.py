@@ -254,7 +254,7 @@ class Vessel(object):
                 self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
             elif variableToProcess == "MeanVelocity":
                 self.vsol = self.Qsol/self.Asol   
-            elif variableToProcess == "lineraWavesplit":
+            elif variableToProcess == "linearWavesplit":
                 self.linearWaveSplitting()
               
      
