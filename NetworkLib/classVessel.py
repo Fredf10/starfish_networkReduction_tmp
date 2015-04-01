@@ -271,7 +271,7 @@ class Vessel(object):
         return 1.0/(c*Compliance) 
     
     
-    def linearWaveSplitting(self):
+    def linearWaveSplittingAllGridPoints(self):
         '''
         calculates the linear wave splitting for the hole vessel
         '''
@@ -284,33 +284,31 @@ class Vessel(object):
         self.QsolB = np.zeros_like(self.Psol)
         
         for gridNode in xrange(int(self.N)):
-            pf,pb,qf,qb =  self.linearWaveSplittingGridNode(gridNode)
+            pf,pb,qf,qb =  self.linearWaveSplitting(self.Psol[:,[gridNode]],
+                                                    self.Qsol[:,[gridNode]],
+                                                    self.Asol[:,[gridNode]],
+                                                    self.csol[:,[gridNode]])
             self.PsolF[1::,[gridNode]] = pf.reshape(numberOfTimeSteps-1,1)
             self.PsolB[1::,[gridNode]] = pb.reshape(numberOfTimeSteps-1,1)
             self.QsolF[1::,[gridNode]] = qf.reshape(numberOfTimeSteps-1,1)
             self.QsolB[1::,[gridNode]] = qb.reshape(numberOfTimeSteps-1,1)
     
-    def linearWaveSplittingGridNode(self,gridNode):
+    def linearWaveSplittingGivenArray(self,pressureArray,flowArray,areaArray,waveSpeedArray):
         '''
-        calculates the linear wave splitting for a given grid node 
-        
-        return
-            PsolF <np.array>
-            PsolB <np.array>
-            QsolF <np.array>
-            QsolB <np.array>
+        calculates the linear wave splitting for a given P,Q,A,c (np.arrays) and rho (float) 
+        return values are: P_forward, P_backward, Q_forward, Q_backward 
         '''
         
         ## calculate Zo and recast// delete last element
-        Zo = self.rho*self.csol[:,[gridNode]]/self.Asol[:,[gridNode]]
+        Zo = self.rho*waveSpeedArray/areaArray
         Zo = np.ones_like(Zo)*np.mean(Zo)
-         
-        ##calculateing dP and dQ
-        dP = self.Psol[:,[gridNode]][1::] - self.Psol[:,[gridNode]][0:-1]      
-        dQ = self.Qsol[:,[gridNode]][1::] - self.Qsol[:,[gridNode]][0:-1] 
         
-        dP_div_Z = self.Psol[:,[gridNode]][1::]/Zo[1::] - self.Psol[:,[gridNode]][0:-1]/Zo[0:-1]
-        dQ_multi_Z = self.Qsol[:,[gridNode]][1::]*Zo[1::] - self.Qsol[:,[gridNode]][0:-1]*Zo[0:-1]
+        ##calculateing dP and dQ
+        dP = pressureArray[1::] - pressureArray[0:-1]      
+        dQ = flowArray[1::] - flowArray[0:-1] 
+        
+        dP_div_Z = pressureArray[1::]/Zo[1::] - pressureArray[0:-1]/Zo[0:-1]
+        dQ_multi_Z = flowArray[1::]*Zo[1::] - flowArray[0:-1]*Zo[0:-1]
         
         ## calculate dp_f, dp_b and dQ_f, dq_b     
         dp_f = (dP + dQ_multi_Z)/2.0 
@@ -318,12 +316,12 @@ class Vessel(object):
         dQ_f = (dQ + dP_div_Z)/2.0 
         dQ_b = (dQ - dP_div_Z)/2.0 
         
-        pf = np.cumsum(dp_f)
-        pb = np.cumsum(dp_b)
-        qf = np.cumsum(dQ_f)
-        qb = np.cumsum(dQ_b)   
-    
-        return pf,pb,qf,qb
+        p_f = np.cumsum(dp_f)
+        p_b = np.cumsum(dp_b)
+        q_f = np.cumsum(dQ_f)
+        q_b = np.cumsum(dQ_b)  
+        
+        return p_f, p_b, q_f, q_b
     
     def update(self, Dict):
         '''
