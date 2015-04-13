@@ -134,17 +134,17 @@ class Laplace(Compliance):
 		self.C0preCalculated = self.C(self.Ps)
 	
 	def A(self, P):
-		P = P-self.externalPressure
+		P = P-self.externalPressure-self.Ps
 		return (P/self.betaLaplace + np.sqrt(self.As))** 2.
 	def C(self, P):
-		P = P-self.externalPressure
+		P = P-self.externalPressure-self.Ps
 		return (2.*(P / self.betaLaplace + np.sqrt(self.As))) / self.betaLaplace
 	
 	def A_Node(self, P, node):
-		P = P[node]-self.externalPressure
+		P = P[node]-self.externalPressure-self.Ps
 		return (P / self.betaLaplace[node] + np.sqrt(self.As[node]))**2.
 	def C_Node(self, P, node):
-		P = P[node]-self.externalPressure
+		P = P[node]-self.externalPressure-self.Ps
 		return (2.*(P / self.betaLaplace[node] + np.sqrt(self.As[node]))) / self.betaLaplace[node]
 
 class Laplace2(Laplace):
@@ -165,7 +165,7 @@ class Laplace2(Laplace):
 		and calculate set the marterial parameters
 		'''
 		self.update(complianceDataDict)
-		self.betaLaplace = (np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
+		self.betaLaplace = (4./3.)*(np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
 		self.C0preCalculated = self.C(self.Ps)
 		
 		

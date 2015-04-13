@@ -461,7 +461,49 @@ class AoBifInflow(BoundaryConditionType1):
 
 		return (7.9853e-06+2.6617e-05*np.sin(2*np.pi*t/self.T+0.29498)+2.3616e-05*np.sin(4*np.pi*t/self.T-1.1403)-1.9016e-05*np.sin(6*np.pi*t/self.T+0.40435)-8.5899e-06*np.sin(8*np.pi*t/self.T-1.1892)-2.436e-06*np.sin(10*np.pi*t/self.T-1.4918)+1.4905e-06*np.sin(12*np.pi*t/self.T+1.0536)+1.3581e-06*np.sin(14*np.pi*t/self.T-0.47666)-6.3031e-07*np.sin(16*np.pi*t/self.T+0.93768)-4.5335e-07*np.sin(18*np.pi*t/self.T-0.79472)-4.5184e-07*np.sin(20*np.pi*t/self.T-1.4095)-5.6583e-07*np.sin(22*np.pi*t/self.T-1.3629)+4.9522e-07*np.sin(24*np.pi*t/self.T+0.52495)+1.3049e-07*np.sin(26*np.pi*t/self.T-0.97261)-4.1072e-08*np.sin(28*np.pi*t/self.T-0.15685)-2.4182e-07*np.sin(30*np.pi*t/self.T-1.4052)-6.6217e-08*np.sin(32*np.pi*t/self.T-1.3785)-1.5511e-07*np.sin(34*np.pi*t/self.T-1.2927)+2.2149e-07*np.sin(36*np.pi*t/self.T+0.68178)+6.7621e-08*np.sin(38*np.pi*t/self.T-0.98825)+1.0973e-07*np.sin(40*np.pi*t/self.T+1.4327)-2.5559e-08*np.sin(42*np.pi*t/self.T-1.2372)-3.5079e-08*np.sin(44*np.pi*t/self.T+0.2328))
 			
-			
+
+class ExperimentalInflow(BoundaryConditionType1):
+	"""
+	Creates the inflow used in Benchmark experimental test used in section 3.5 in Comparison1Dscheme 
+	"""
+	def __init__(self):
+		
+		BoundaryConditionType1.__init__(self)
+				
+		# # additional variables for this function
+		self.T = 0.827
+	
+	def function1(self, t, t0, pulsNum):
+
+		return (3.1199+7.7982*np.sin(2*np.pi*t/self.T+0.5769)+4.1228*np.sin(4*np.pi*t/self.T-0.8738)-1.0611*np.sin(6*np.pi*t/self.T+0.7240)+0.7605*np.sin(8*np.pi*t/self.T-0.6387)-0.9148*np.sin(10*np.pi*t/self.T+1.1598)+0.4924*np.sin(12*np.pi*t/self.T-1.0905)-0.5580*np.sin(14*np.pi*t/self.T+1.042)+0.3280*np.sin(16*np.pi*t/self.T-0.5570)-0.3941*np.sin(18*np.pi*t/self.T+1.2685)+0.2833*np.sin(20*np.pi*t/self.T+0.6702)+0.2272*np.sin(22*np.pi*t/self.T-1.4983)+0.2249*np.sin(24*np.pi*t/self.T+0.9924)+0.2589*np.sin(26*np.pi*t/self.T-1.5616)-0.1460*np.sin(28*np.pi*t/self.T-1.3106)+0.2141*np.sin(30*np.pi*t/self.T-1.1306)-0.1253*np.sin(32*np.pi*t/self.T+0.1552)+0.1321*np.sin(34*np.pi*t/self.T-1.5595)-0.1399*np.sin(36*np.pi*t/self.T+0.4223)-0.0324*np.sin(38*np.pi*t/self.T+0.7811)-0.1211*np.sin(40*np.pi*t/self.T+1.0729))/1000./60.
+
+class Adan55InflowFromfile(BoundaryConditionType1):
+	"""
+	Creates the inflow used in Benchmark experimental test used in section 3.5 in Comparison1Dscheme 
+	"""
+	def __init__(self):
+		
+		BoundaryConditionType1.__init__(self)
+		mypath= '/home/Fredrik/fredrik/Master/Comparios1D/AoBif/Matlab/'
+		Flowarray=np.array([])
+		Timearray=np.array([])
+		# # additional variables for this function
+		with open('/home/Fredrik/Code/NetworkFiles/Adan55/Adan55Inflow.csv') as csvfile:
+			reader = csv.reader(csvfile)
+			for rows in reader:
+				Timearray=np.append(Timearray,[float(rows[0])])
+				Flowarray=np.append(Flowarray,[float(rows[1])])
+		self.Timearray=Timearray
+		self.Flowarray=Flowarray*1e-6
+		self.T=1
+	
+	def function1(self, t, t0, pulsNum):
+		t=t-self.T*pulsNum
+		Q=np.interp(t,self.Timearray,self.Flowarray)
+		#print "t, Q: ",t,", ",Q
+		#print "pulsNum: ", pulsNum
+		return Q
+				
 class PhysiologicalFunction(BoundaryConditionType1):
 	"""	
 	Boundary profile - type 1
