@@ -9,7 +9,7 @@ import time
 
 from copy import copy as copy 
 
-class Field(object):
+class Field():
     
     def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea, solvingSchemeField = 'MacCormack_Matrix'):
         '''
@@ -43,11 +43,12 @@ class Field(object):
         self.step = "predictor"
         
         if solvingSchemeField == 'MacCormack_Matrix':
-            self.__call__ = self.MacCormack_Matrix
+            self.__call__ = self.MacCormackMatrix
+            print "selfsolvingSchemeField.__call__"
         else:
             raise ValueError('Fredrik wirites this :) ')
         
-    def MacCormack_Matrix(self):
+    def MacCormackMatrix(self):
         '''
         Mac Cormack Predictor-Corrector
         '''
