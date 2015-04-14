@@ -18,27 +18,36 @@ class VpcConfiguration(object):
         try to:
         update variables from vpcConfig-file (networkName,dataNumber)
         '''
+        ## TODO: delete old members:
+        self.createDistributions = False
+        self.runSimulations = False
+        
         ### network name and datanumber
         self.networkName = networkName
         self.dataNumber  = dataNumber
         
-        ### 0. set up polychaos variables
-        self.createDistributions = False  #(TRUE == create and save, FALSE == load existing)
-        ##  0.1 orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
-        self.createOrthoPoly  = False
+        #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
         self.createSample     = False
         
         ### 1.step genrealized polynomial chaos evaluations + data storing
-        self.runSimulations   = False
+        self.createEvaluationXmlFiles = False
         
-        ### 2.step Construct generalized polynomial chaos expansion and  pre process data
-        self.calculateGPCE    = False
-        #control variables
-        # 2.1 is the data already preprocessed?
+        self.simulateEvaluations    = False
+        self.local                  = True #TODO
+        self.multiprocessing        = True
+        self.numberOfProcessors     = 12
+        self.evaluationNumbers      = []
+        
+        # 2.1 pre process data for all locations of interest
         self.preProcessData   = True
         # 2.2 create plots for min max points
         self.plotMinMaxPoints = True
+        
+        ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
+        self.createOrthoPoly  = False
+        ### step Construct generalized polynomial chaos expansion and  pre process data
+        self.calculateGPCE    = False
             
         ### 3.step post processing - sensitivity analysis
         self.postProcessing  = True
@@ -76,7 +85,7 @@ class VpcConfiguration(object):
         # 
         #  
         
-        
+                
         #----CHOICE OF INVESTIGATION POINTS FOR WHICH THE POLYNOMIAL CHAOS IS CALCULATED-----------#
 
         
@@ -215,5 +224,5 @@ class VpcConfiguration(object):
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
             except:
-                print "ERROR VpcConfiguration.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key)
+                print "ERROR VpcConfiguration.updateData - Wrong key: {}, could not update varibale".format(key)
     

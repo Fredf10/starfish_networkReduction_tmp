@@ -599,6 +599,7 @@ class VascularNetwork(object):
                     # except: 
                         # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                 # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
+        
         self.initialize()
         
                

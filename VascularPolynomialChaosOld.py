@@ -233,7 +233,7 @@ def main():
                             {'extremaPressure':[0],'extremaFlow':[0],
                             'extremaPressure_f':[0],'extremaFlow_f':[0],
                             'extremaPressure_b':[],'extremaFlow_b':[]}  }
-        
+        ########################################################################################## 
         #--POSTPROCESSING: PLOTTING-------------------------------------------------------------------------------------#
         ### 
         
@@ -271,7 +271,6 @@ def main():
         plotPeaksMeanSTDBoxPlotsSingle = False
     
     
-    ##########################################################################################  
     #---Additional hidden fine tuning parameters---
     # set start and end value for the time-line, if plotxTimeEnd = 'totalTime' simulation-endtime is taken
     totalTime = 'vascularNetwork.totalTime'

@@ -30,6 +30,7 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     timeStartBatch = time.time()
     print '====================================='
     print '------Single Process Batch Job-------'
+    print 'numberOfEval.:   {}'.format(len(batchDataList))
     for batchData in batchDataList:
         minutesSolve,secsSolve = runSingleBatchSimulation(batchData)
         if quiet == False:
@@ -61,6 +62,7 @@ def runSingleBatchSimulation(batchData):
     timeSolverSolve = time.clock()-timeStart
     minutesSolve = int(timeSolverSolve/60.)
     secsSolve = timeSolverSolve-minutesSolve*60.
+    print minutesSolve,secsSolve
     return minutesSolve,secsSolve
 
 def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
@@ -77,6 +79,7 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     print '====================================='
     print '------Multiprocessing Batch Job------'
     print 'numberWorkers:   {}'.format(numberWorkers)
+    print 'numberOfEval.:   {}'.format(len(batchDataList))
     pool = multiprocessing.Pool(numberWorkers)
     results = pool.map(runSingleBatchSimulation,batchDataList)
     pool.close() 
