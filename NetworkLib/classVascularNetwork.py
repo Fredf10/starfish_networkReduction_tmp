@@ -389,7 +389,7 @@ class VascularNetwork(object):
             else:
                 self.nSaveBegin += self.nTstepsInitPhase
         self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1   
-        self.nDCurrent = 1
+        self.nDCurrent = 0
         
         # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
         estimatedMemorySolutionDataSpace = 0
@@ -420,6 +420,7 @@ class VascularNetwork(object):
                     dsetP[0] = vessel.Psol[0]
                     dsetQ[0] = vessel.Qsol[0]
                     dsetA[0] = vessel.Asol[0]
+                    self.nDCurrent = 1
                     
                 self.vesselsToSave[vesselId] =  dsetGroup      
 
@@ -518,12 +519,10 @@ class VascularNetwork(object):
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
             vessel = self.vessels[vesselId]
-            
             if saving:
                 dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
                 dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
                 dsetGroup["Area"][nDB:nDE] = vessel.Asol[nMB:nME]
-                
             # roll the end of the buffer
             vessel.Psol[0] = vessel.Psol[-1]
             vessel.Qsol[0] = vessel.Qsol[-1]
@@ -746,7 +745,7 @@ class VascularNetwork(object):
         elif 'MeanVelocity' in values:
             values.update(['Pressure','Flow'])
         elif "linearWavesplit" in values:
-            values.update(['Pressure','Flow','Area',"WaveSpeed","MeanVelocity"])
+            values.update(['Pressure','Flow','Area',"WaveSpeed"])
             
         if tspan is not None:
             t1 = tspan[0]

@@ -256,8 +256,7 @@ class Vessel(object):
                 self.vsol = self.Qsol/self.Asol   
             elif variableToProcess == "linearWavesplit":
                 self.linearWaveSplitting()
-              
-     
+                   
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
         '''
         Input:

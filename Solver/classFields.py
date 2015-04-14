@@ -11,7 +11,7 @@ from copy import copy as copy
 
 class Field(object):
     
-    def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea):
+    def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea, solvingSchemeField = 'MacCormack_Matrix'):
         '''
         Constructor of Field object
         
@@ -21,6 +21,7 @@ class Field(object):
         
         self.name = ' '.join(['Field',str(vessel.Id)])
         
+        self.vessel = vessel
         #System and Vessel Variables
         self.dz = vessel.dz
         self.dt = dt
@@ -41,9 +42,14 @@ class Field(object):
         
         self.step = "predictor"
         
-    def __call__(self):
+        if solvingSchemeField == 'MacCormack_Matrix':
+            self.__call__ = self.MacCormack_Matrix
+        else:
+            raise ValueError('Fredrik wirites this :) ')
+        
+    def MacCormack_Matrix(self):
         '''
-        Mack Kormac Predictor-Corrector
+        Mac Cormack Predictor-Corrector
         '''
         # solve vessel objects
         dt = self.dt
