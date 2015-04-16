@@ -28,7 +28,7 @@ class LocationOfInterest(object):
                 break
         
         for quantity in quantitiesOfInterestToCreate:
-            self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity)
+            self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity,locationName)
         
     def loadSolutionData(self, vascularNetwork, simulationTime, sampleSize, sampleIndex):
         '''

@@ -34,7 +34,7 @@ class VpcConfiguration(object):
         self.createEvaluationXmlFiles = False
         
         self.simulateEvaluations    = False
-        self.local                  = True #TODO
+        self.local                  = True #TODO: add functions for server
         self.multiprocessing        = True
         self.numberOfProcessors     = 12
         self.evaluationNumbers      = []
@@ -43,6 +43,7 @@ class VpcConfiguration(object):
         self.preProcessData   = True
         # 2.2 create plots for min max points
         self.plotMinMaxPoints = True
+        
         
         ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
         self.createOrthoPoly  = False

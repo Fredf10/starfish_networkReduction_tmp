@@ -18,7 +18,8 @@ class DistributionManager(object):
         self.samples         = None
         self.samplesSize     = 0
         self.sampleMethod    = None
-        
+        # orthogonalPolynomials
+        self.orthogonalPolynomials = None
         
     def passRealisation(self, sampleIndex):
         '''
@@ -98,8 +99,6 @@ class DistributionManager(object):
         
         '''
         pass
-    
-    
                      
 class DistributionManagerChaospy(DistributionManager):
     
@@ -179,4 +178,17 @@ class DistributionManagerChaospy(DistributionManager):
             self.samples = self.samples.reshape(self.samplesSize,1)
                 
         self.saveSamples(networkName, dataNumber, gPCEmethod = sampleMethod, gPCEorder = expansionOrder)
+        
+    def calculateOrthogonalPolynomials(self):
+        '''
+        Method to calculate orthogonal polynomials
+        
+        TODO: saving/loading og orthogonalPolynomials
+        '''
+        self.orthogonalPolynomials = cp.orth_ttr(self.expansionOrder,self.jointDistribution)
+        
+        #self.orthogonalPolynomils = pc.orth_gs(self.expansionOrder,self.jointDistribution)
+        #self.orthogonalPolynomils = pc.orth_chol(self.expansionOrder,self.jointDistribution)
+        #self.orthogonalPolynomils = pc.orth_svd(self.expansionOrder,self.jointDistribution)
+         
         

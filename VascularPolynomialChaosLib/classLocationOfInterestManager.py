@@ -22,6 +22,18 @@ class LocationOfInterestManager(object):
         
         self.locationOfInterests.append(LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVals))    
             
+    def loadQuantitiyOfInterestData(self):
+        '''
+        
+        '''
+        print "loadQuantitiyOfInterestData() not implemented yet"
+        
+    def saveQuantitiyOfInterestData(self):
+        '''
+        
+        '''
+        print "saveQuantitiyOfInterestData() not implemented yet" 
+            
     def preprocessSolutionData(self,evaluationCaseFiles):
         '''
         load all samples and pass data to locations of interest
@@ -58,16 +70,19 @@ class LocationOfInterestManager(object):
             for locationOfInterest in self.locationOfInterests:
                 locationOfInterest.loadSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
                         
-     
-    def loadQuantitiyOfInterestData(self):
+    def calculatePolynomialChaosExpansions(self,orthogonalPolynomials, samples):
         '''
         
         '''
-        print "loadQuantitiyOfInterestData() not implemented yet"
-        
-    def saveQuantitiyOfInterestData(self):
+        for locationOfInterest in self.locationOfInterests:
+            for quantity in locationOfInterest.quantitiesOfInterestToProcess:
+                locationOfInterest.quantitiesOfInterest[quantity].calculatePolynomialChaosExpansions(orthogonalPolynomials, samples)
+                
+    
+    def calculateStatistics(self):
         '''
         
         '''
-        print "saveQuantitiyOfInterestData() not implemented yet"   
+        pass
+      
                         

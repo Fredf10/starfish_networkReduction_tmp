@@ -136,89 +136,17 @@ def vascularPolyChaos():
             ## process the data of interest
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
         
-        # 7. create Orthogonal polynomials
-        # ( TRUE == create and save, FALSE == load existing)#
-#         if createOrthoPoly == True:
-#             if not os.path.exists(polynomPathOrtho):
-#                 os.makedirs(polynomPathOrtho)
-#             
-#             print " create and save orthogonal polynoms "
-#             #create orthogonal polynom  
-#             #orthoPoly = pc.orth_gs(order,distributions)
-#             orthoPoly = pc.orth_ttr(order,distributions)
-#             #orthoPoly = pc.orth_ttr(order,distributions)
-#             #orthoPoly = pc.orth_chol(order,distributions)
-#             #orthoPoly = pc.orth_svd(order,distributions)
-#             
-#             #save file
-#             saveFile = open(orthoFile,"wb")       
-#             cPickle.dump(orthoPoly,saveFile,protocol=2)
-#             saveFile.close()
-#             print ".. done"
-#         else:
-#             try:
-#                 print " load orthogonal polynoms "
-#                 loadFile = open(orthoFile,"rb")
-#                 # load pickle
-#                 orthoPoly = cPickle.load(loadFile)
-#                 loadFile.close()
-#                 print ".. done"
-#             except:
-#                 print 'File does not exits:'
-#                 print orthoFile
-#                 exit()
-#def calculatePolynomialChaosExpansion(self):
+        #check if polynomial chaos
         
-                # 8. calculate polynomial chaos expansion    
-#         print "    starting the polychaos polynomial calculation from polychaos simulation result!!"
-#                 startTime = time.clock()
-#                 
-#                 polynomsT = []
-#                 count = 0
-#                 for sol in solutionInterpolated:
-#                     print "      Polynomial calculation for point ", names[count]     
-#                     count = count+1
-#                     polyDict = {}
-#                     
-#                     for tag,data in sol.iteritems():
-#                         # polynoms for the total pressure signal
-#                         print "        polynoms for ",str(tag)
-#                         if 'extrema' not in tag:
-#                             
-#                             polynomial = pc.fitter_lr(orthoPoly, sample.T, data)     
-#                             polyDict[tag]= polynomial
-#                             
-#                         else:
-#                             print sample.shape
-#                             
-#                             #print orthoPoly.dim
-#                             #print orthoPoly.shape
-#                             
-#                             #print sample.ravel().shape
-#                             #print len(data[0])
-#                             polynomialTime = pc.fitter_lr(orthoPoly, sample.T, data[0])    
-#                             polynomialAmp  = pc.fitter_lr(orthoPoly, sample.T, data[1])    
-#                             
-#                             extremaDict = {'Time':polynomialTime,'Amp':polynomialAmp}
-#                             polyDict[tag]= extremaDict
-#                             
-#                     endTime = time.clock()
-#                     polynomsT.append(polyDict)
-#                     
-#                 print "    It took %1.2f seconds to create the polynoms with order %d\n" % (endTime-startTime,order)
-#                 
-#                 if not os.path.exists(polynomPath):
-#                     os.makedirs(polynomPath)    
-#                 
-#                 #save the polynom
-#                 #create file with the network name in solution path directory
-#                 FILE = open(polynomFile,"w")
-#                 # store pickle and close file
-#                 cPickle.dump(polynomsT,FILE,protocol=2)
-#                 FILE.close()
-#                 polynoms = [polynomsT]
+        # 7. create Orthogonal polynomials
+        distributionManager.calculateOrthogonalPolynomials()
+        
+        # 8. calculate polynomial chaos expansion    
+        locationOfInterestManager.calculatePolynomialChaosExpansions(distributionManager.orthogonalPolynomials, distributionManager.samples)
+        
         # 9. uncertainty quantfication, sensitivity analysis
-
-
+        locationOfInterestManager.calculateStatistics()
+        
+        # 10. plotting of variables
 if __name__ == '__main__':
     vascularPolyChaos()
