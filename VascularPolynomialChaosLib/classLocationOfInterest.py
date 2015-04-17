@@ -10,7 +10,7 @@ class LocationOfInterest(object):
     '''
     
     '''
-    def __init__(self,locationName, quantitiesOfInterestToProcess, xval):
+    def __init__(self,locationName, quantitiesOfInterestToProcess, xval, confidenceAlpha):
         
         self.locationName = locationName
         self.xval = xval #position in x 
@@ -28,9 +28,9 @@ class LocationOfInterest(object):
                 break
         
         for quantity in quantitiesOfInterestToCreate:
-            self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity,locationName)
+            self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity,locationName, confidenceAlpha)
         
-    def loadSolutionData(self, vascularNetwork, simulationTime, sampleSize, sampleIndex):
+    def preprocessSolutionData(self, vascularNetwork, simulationTime, sampleSize, sampleIndex):
         '''
         
         '''

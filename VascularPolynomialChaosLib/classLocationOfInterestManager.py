@@ -18,9 +18,9 @@ class LocationOfInterestManager(object):
         self.locationOfInterests = []
         self.sampleSize = sampleSize
         
-    def addLocationOfInterest(self,locationName, quantitiesOfInterestToProcess, xVals):
+    def addLocationOfInterest(self,locationName, quantitiesOfInterestToProcess, xVals, confidenceAlpha):
         
-        self.locationOfInterests.append(LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVals))    
+        self.locationOfInterests.append(LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVals, confidenceAlpha))    
             
     def loadQuantitiyOfInterestData(self):
         '''
@@ -32,7 +32,7 @@ class LocationOfInterestManager(object):
         '''
         
         '''
-        print "saveQuantitiyOfInterestData() not implemented yet" 
+        
             
     def preprocessSolutionData(self,evaluationCaseFiles):
         '''
@@ -68,21 +68,25 @@ class LocationOfInterestManager(object):
             vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationOfInterests:
-                locationOfInterest.loadSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
+                locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
                         
-    def calculatePolynomialChaosExpansions(self,orthogonalPolynomials, samples):
+    def calculateStatisticsPolynomialChaos(self,orthogonalPolynomials, samples, distributions):
         '''
-        
+        Calculate statisitcs for each quantity of interest at each location of interest based
+        on the generalized polynomial chaos expansion.
         '''
         for locationOfInterest in self.locationOfInterests:
             for quantity in locationOfInterest.quantitiesOfInterestToProcess:
-                locationOfInterest.quantitiesOfInterest[quantity].calculatePolynomialChaosExpansions(orthogonalPolynomials, samples)
+                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(orthogonalPolynomials, samples, distributions)
                 
     
-    def calculateStatistics(self):
+    def calculateStatisticsMonteCarlo(self):
         '''
-        
+        Calculate statisitcs for each quantity of interest at each location of interest based
+        on a Monte Carlo simulation
         '''
         pass
-      
+        for locationOfInterest in self.locationOfInterests:
+            for quantity in locationOfInterest.quantitiesOfInterestToProcess:
+                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsMonteCarlo()
                         

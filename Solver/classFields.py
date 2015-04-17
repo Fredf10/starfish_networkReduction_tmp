@@ -45,7 +45,6 @@ class Field():
         
         if solvingSchemeField == 'MacCormack_Matrix':
             self.__call__ = self.MacCormackMatrix
-            print "selfsolvingSchemeField.__call__"
         else:
             raise ValueError('Fredrik wirites this :) ')
         

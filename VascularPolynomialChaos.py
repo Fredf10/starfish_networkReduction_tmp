@@ -121,31 +121,33 @@ def vascularPolyChaos():
                 else:
                     mBSM.runBatchAsMultiprocessing(batchFileList, vpcConfiguration.numberOfProcessors , quiet = True)
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
-        # 6. process quantity of interest
         
-        ## defined query location and quantities to process
+        # 6. process quantity of interest
+        ## TODO: defined query location and quantities to process
         quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure']
         queryLocation = 'vessel_1'
         xVals = 0.25
+        confidenceAlpha = 5
         # create locationOfInterestManager
         locationOfInterestManager = LocationOfInterestManager(distributionManager.samplesSize)
         # add location of interest
-        locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals)
+        locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
         
         if vpcConfiguration.preProcessData == True:
             ## process the data of interest
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
         
-        #check if polynomial chaos
-        
+        # if polynomial chaos
         # 7. create Orthogonal polynomials
         distributionManager.calculateOrthogonalPolynomials()
+        # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
+        locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager.orthogonalPolynomials,
+                                                                     distributionManager.samples,
+                                                                     distributionManager.jointDistribution)
         
-        # 8. calculate polynomial chaos expansion    
-        locationOfInterestManager.calculatePolynomialChaosExpansions(distributionManager.orthogonalPolynomials, distributionManager.samples)
-        
-        # 9. uncertainty quantfication, sensitivity analysis
-        locationOfInterestManager.calculateStatistics()
+        ## if monte carlo
+        # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
+        locationOfInterestManager.calculateStatisticsMonteCarlo()
         
         # 10. plotting of variables
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ class QuantityOfInterest(object):
     '''
     
     '''
-    def __init__(self,quantityName, locationName):
+    def __init__(self,quantityName, locationName, confidenceAlpha):
         
         self.locationName = locationName
         self.quantityName = quantityName
@@ -18,13 +18,16 @@ class QuantityOfInterest(object):
         self.expectedValue       = None
         self.variance            = None
         
-        self.conficenceIntervals = None
-        self.confidenceAlpha     = 0.8
+        self.conditionalExpectedValue = None
+        self.conditionalVariance      = None
         
-        self.partialSensitivities = None
-        self.totalSensitivities   = None
+        self.conficenceInterval  = None
+        self.confidenceAlpha     = confidenceAlpha
         
-    def calculatePolynomialChaosExpansions(self, orthogonalPolynomials, samples):
+        self.firstOrderSensitivities = None
+        self.totalSensitivities      = None
+        
+    def calculateStatisticsPolynomialChaos(self, orthogonalPolynomials, samples, distributions):
         '''
         Function which calculates the gPCExpansion for the given data
         '''
@@ -32,38 +35,35 @@ class QuantityOfInterest(object):
             print "    starting the polychaos polynomial calculation from polychaos simulation result!!"
             print self.locationName,'--',self.quantityName
             
+            # polynomial chaos expansion
             self.gPCExpansion = cp.fit_regression(orthogonalPolynomials, samples.T, self.data) 
                      
-#                     for tag,data in sol.iteritems():
-#                         # polynoms for the total pressure signal
-#                         print "        polynoms for ",str(tag)
-#                         if 'extrema' not in tag:
-#                              
-#                             polynomial = pc.fitter_lr(orthoPoly, sample.T, data)     
-#                             polyDict[tag]= polynomial
-#                              
-#                         else:
-#                             print sample.shape
-#                              
-#                             #print orthoPoly.dim
-#                             #print orthoPoly.shape
-#                              
-#                             #print sample.ravel().shape
-#                             #print len(data[0])
-#                             polynomialTime = pc.fitter_lr(orthoPoly, sample.T, data[0])    
-#                             polynomialAmp  = pc.fitter_lr(orthoPoly, sample.T, data[1])    
-#                              
-#                             extremaDict = {'Time':polynomialTime,'Amp':polynomialAmp}
-#                             polyDict[tag]= extremaDict
-#                              
-#                     endTime = time.clock()
-#                     polynomsT.append(polyDict)
-                     
-        
+            # statistics
+            self.expectedValue       = cp.E(self.gPCExpansion, distributions)
+            self.variance            = cp.Var(self.gPCExpansion, distributions)
+            self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributions)
+            
+            distributionDimension = len(distributions)
+            if distributionDimension > 1:
+                self.conditionalExpectedValue = []
+                self.conditionalVariance      = []
+                # conditional mean and variance
+                for rvIndex in xrange():
+                    currDistMean = cp.E(distributions)
+                    currDistMean[rvIndex] = np.nan
+                    # reduce polynomials
+                    currPolynomTime = self.gPCExpansion(*currDistMean)
+                    self.conditionalExpectedValue.append(cp.E(currPolynomTime,distributions))
+                    self.conditionalVariance.append(cp.Var(currPolynomTime,distributions))    
+            
+                # sensitivity indices
+                self.firstOrderSensitivities = cp.Sens_m(self.gPCExpansion,distributions)
+                self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributions)
+                         
         else:
-            raise ValueError('QuantityOfInterest {}-{} cannot calculate gPCExpansion as there is no data defined'.format(self.locationName,self.quantityName))
+            raise ValueError('QuantityOfInterest {}-{} cannot calculate gPCExpansion and statistics as there is no data defined'.format(self.locationName,self.quantityName))
         
-    def calculateStatistics(self,distributions):
+    def calculateStatisticsMonteCarlo(self):
         '''
         Function to calculate statistics
         '''

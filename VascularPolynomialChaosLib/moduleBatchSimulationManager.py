@@ -62,7 +62,6 @@ def runSingleBatchSimulation(batchData):
     timeSolverSolve = time.clock()-timeStart
     minutesSolve = int(timeSolverSolve/60.)
     secsSolve = timeSolverSolve-minutesSolve*60.
-    print minutesSolve,secsSolve
     return minutesSolve,secsSolve
 
 def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
