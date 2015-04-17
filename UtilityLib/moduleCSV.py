@@ -25,7 +25,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     
     '''
         
-    # find all tags needed
+    # find all tags needed # TODO: read write polynomial chaos variables
     polyChaosTags = {}
     for vessel in vessels.itervalues():
         pcTags = vessel.getVariableValue('polyChaos').keys()
@@ -111,6 +111,8 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
             Id = int(Id)
             vesselData[Id] = row
         
+    # TODO: read write polynomial chaos variables
+    
     variablesToDiscard = []
     for Id,data in vesselData.iteritems():
         polyChaos = {}
@@ -160,6 +162,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     
     '''
     # find all polychaos tags
+    # TODO: read write polynomial chaos variables
     polyChaosTags = {}
     for id,bcPolyChaosList in boundaryConditionPolyChaos.iteritems():
         for bcPolyChaosDict in bcPolyChaosList:
@@ -262,7 +265,7 @@ def readBCFromCSV(networkName, delimiter=';'):
     BCconditionData = {}
     for bcData in boundaryData:
         Id = int(bcData['Id'])
-        
+        # TODO: read write polynomial chaos variables
         # create class instance
         boundaryType = bcData['boundaryType']
         try: boundaryInstance = eval(nxml.bcTagsClassReferences[boundaryType])()
@@ -275,7 +278,7 @@ def readBCFromCSV(networkName, delimiter=';'):
                 except: variableUnit = None 
                 # save converted XML-value
                 if variable == 'filePathName':
-                    path = ''.join([networkDirectory,'/'])
+                    path = ''.join([boundaryCSVFile])
                     if path not in variableValueStr:  variableValueStr = variableValueStr.join([path,''])
                 print variableValueStr
                 if variableValueStr != '':

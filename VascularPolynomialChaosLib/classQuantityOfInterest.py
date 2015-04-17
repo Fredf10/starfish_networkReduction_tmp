@@ -42,6 +42,7 @@ class QuantityOfInterest(object):
             self.expectedValue       = cp.E(self.gPCExpansion, distributions)
             self.variance            = cp.Var(self.gPCExpansion, distributions)
             self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributions)
+            self.conficenceInterval =  self.conficenceInterval.reshape(2,len(self.expectedValue))
             
             distributionDimension = len(distributions)
             if distributionDimension > 1:
@@ -68,5 +69,45 @@ class QuantityOfInterest(object):
         Function to calculate statistics
         '''
         pass
+                
+    def saveQuantitiyOfInterestData(self, quantitiyGroup):
+        '''
+        Method to save data and statistics to file
+        '''
+        quantitiyGroup.create_dataset("data", data=self.data)
+        #quantitiyGroup.create_dataset("gPCExpansion", data=self.gPCExpansion)
+        variablesToSave = ["expectedValue",
+                           "variance",
+                           "conficenceInterval",
+                           "conditionalExpectedValue",
+                           "conditionalVariance",
+                           "firstOrderSensitivities",
+                           "totalSensitivities"]
         
+        for variableName in variablesToSave:
+            variableValue = self.getVariableValue(variableName)
+            if variableValue != None: 
+                quantitiyGroup.create_dataset(variableName, data=variableValue)
+                    
+    def getVariableValue(self, variableName):
+        '''
+        Returns value of variable with name : variableName
+        States Error if not such variable
+        '''
+        try:
+            return self.__getattribute__(variableName)
+        except: 
+            print "ERROR QuantityOfInterest.getVariable() : QuantityOfInterest has no variable {}".format(variableName)
+        
+    def update(self, data):
+        '''
+        updates the QuantityOfInterest data using a dictionary in form of 
+        QuantityOfInterest = {'variableName': value}
+        '''
+        for key, value in data.iteritems():
+            try:
+                self.__getattribute__(key)
+                self.__setattr__(key, value)
+            except: 
+                print 'WARNING QuantityOfInterest.update(): wrong key: %s, could not update QuantityOfInterest' % key   
         

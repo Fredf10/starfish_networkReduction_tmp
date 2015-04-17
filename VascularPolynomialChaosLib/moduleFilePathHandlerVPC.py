@@ -59,7 +59,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                          'vpcEvaluationNetworkXmlFile',
                          'vpcEvaluationSolutionDataFile',
                          'vpcProcessedSolutionDataFile',
-                         'evaluationLogFile']
+                         'evaluationLogFile',
+                         'vpcSolutionDataFile']
     
     if fileType not in existingFileTypes:
         raise ValueError("ERROR: getFilePath, requested file type {}\
@@ -72,8 +73,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                  'vpcSampleFile'                : ''.join(['samples.hdf5']),
                  'vpcEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
                  'vpcEvaluationSolutionDataFile': ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.hdf5']),
-                 'vpcProcessedSolutionDataFile' : ''.join([networkName,'_processed_',str(evaluationNumber).zfill(7),'.hdf5']),
-                 'evaluationLogFile'            : ''.join(['evaluationLogFile.txt'])
+                 'evaluationLogFile'            : ''.join(['evaluationLogFile.txt']),
+                 'vpcSolutionDataFile'          : ''.join([networkName,'_vpc-SolutionData_',dataNumber,'.hdf5'])
                  }    
         
     ## find requested file name
@@ -148,20 +149,20 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vpcEvaluationNetworkXmlFileDirectory',
                               'vpcEvaluationSolutionDataFileDirectory',
                               'vpcSampleFileDirectory',
-                              'evaluationLogFileDirectory'} 
+                              'evaluationLogFileDirectory',
+                              'vpcSolutionDataFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
                           is not in existingDirectoryTypes{}".format(directoryType, existingDirectoryTypes))
     ##definitions
-    starfishHomeDirectory   = ''.join([cur,'/..'])
-    workingDirectory        = mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory']
-    networkXmlFileDirectory = ''.join([workingDirectory,'/',networkName])
-    vpcCaseDirectory        = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
+    starfishHomeDirectory      = ''.join([cur,'/..'])
+    workingDirectory           = mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory']
+    networkXmlFileDirectory    = ''.join([workingDirectory,'/',networkName])
+    vpcCaseDirectory           = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
     vpcOrderMethodDirectory    = ''.join([vpcCaseDirectory,'/','method_',gPCEmethod,'_order_',str(gPCEorder).zfill(2)])
     vpcEvaluationNetDirectory  = ''.join([vpcOrderMethodDirectory,'/evaluationNetworkFiles'])
     vpcEvaluationSolDirectory  = ''.join([vpcOrderMethodDirectory,'/evaluationSolutionData'])
-    vpcEvaluationDirectory     = ''.join([vpcOrderMethodDirectory,'/processedSolutionData'])
     ## look up tables
     # directories
     directories = {
@@ -172,8 +173,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'vpcSampleFileDirectory'                : vpcOrderMethodDirectory,
                    'vpcEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
                    'vpcEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
-                   'vpcProcessedSolutionDataFileDirectory' : vpcEvaluationDirectory,
                    'evaluationLogFileDirectory'            : vpcOrderMethodDirectory,
+                   'vpcSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

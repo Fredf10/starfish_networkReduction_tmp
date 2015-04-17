@@ -5,10 +5,14 @@ import sys,os
 cur = os.path.dirname(os.path.realpath('__file__'))
 
 from classLocationOfInterest import LocationOfInterest
+import moduleFilePathHandlerVPC as mFPH_VPC
 
 sys.path.append(''.join([cur,'/../UtilityLib']))
 import moduleXML
+
 import numpy as np
+import h5py
+
 class LocationOfInterestManager(object):
     '''
     
@@ -28,11 +32,17 @@ class LocationOfInterestManager(object):
         '''
         print "loadQuantitiyOfInterestData() not implemented yet"
         
-    def saveQuantitiyOfInterestData(self):
+    def saveQuantitiyOfInterestData(self,networkName,dataNumber,gPCEmethod,gPCEorder):
         '''
         
         '''
-        
+        vpcQuantityOfInterestFile = mFPH_VPC.getFilePath('vpcSolutionDataFile', networkName, dataNumber, mode = "write", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
+        saveFile = h5py.File(vpcQuantityOfInterestFile,'w')
+        for locationOfInterest in self.locationOfInterests:        
+            # add information of each quantity in each location
+            locationOfInterest.saveQuantitiyOfInterestData(saveFile)
+        saveFile.flush()
+        saveFile.close()
             
     def preprocessSolutionData(self,evaluationCaseFiles):
         '''

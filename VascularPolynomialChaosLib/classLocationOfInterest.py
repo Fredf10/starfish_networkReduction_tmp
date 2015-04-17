@@ -16,6 +16,7 @@ class LocationOfInterest(object):
         self.xval = xval #position in x 
         self.quantitiesOfInterestToProcess = quantitiesOfInterestToProcess
         self.quantitiesOfInterest = {}
+        self.confidenceAlpha = confidenceAlpha
                 
         # check if vessel and add missing qoi to the list if needed
         
@@ -48,3 +49,22 @@ class LocationOfInterest(object):
         else:
             ## TODO: add more locations as necessary baroreceptor etc.
             print "class LoacationOfInterest: location {} is not supported yet".format(self.locationName)
+            
+    def saveQuantitiyOfInterestData(self, saveFile):
+        '''
+        method to save the data of the location and all quantities of interest to file
+        '''
+        locationGroup = saveFile.create_group(self.locationName)
+        locationGroup.attrs.create('quantitiesOfInterestToProcess', data=self.quantitiesOfInterestToProcess)
+        locationGroup.attrs.create('xval', data=self.xval)
+        locationGroup.attrs.create('confidenceAlpha', data=self.confidenceAlpha)
+        
+        for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
+                quantitiyGroup = locationGroup.create_group(quantitiyName)
+                quantityObject.saveQuantitiyOfInterestData(quantitiyGroup)
+                
+    def loadQuantitiyOfInterestData(self, saveFile):
+        '''
+        
+        '''
+        

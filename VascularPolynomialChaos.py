@@ -144,6 +144,7 @@ def vascularPolyChaos():
         locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager.orthogonalPolynomials,
                                                                      distributionManager.samples,
                                                                      distributionManager.jointDistribution)
+        locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         
         ## if monte carlo
         # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
