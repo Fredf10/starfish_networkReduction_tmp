@@ -59,19 +59,15 @@ class FlowSolver(object):
             self.timers = {'0':{'type':'valsalva','Tstart': 1.0, 'Tend': 2.0,'deltaP':-40.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
               
         # Baroreceptor model
-        # this needs to be configured by the xml specification, as it breaks the other networks if
-        # you assume these static IDs will be present for all simulations.
-        self.baroreceptors = {}
-        # Set this to False for checkins unless the test cases work with it.
-        baro = False
-        if baro == True:
+        self.baroreceptors = self.vascularNetwork.baroreceptors
+        
+	if self.baroreceptors:
+	    baro = True
             print "\n WARNING doing baroreseptor!"
-            print " self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}"
             print "\n"
             #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
             self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
-            
-        vein = False
+        vein = baro or False
         self.venousPool = 0
         #
         
@@ -524,10 +520,10 @@ class FlowSolver(object):
                        
             if baroData['receptorType'] == 'AorticBR':
                 
-                A1 = self.vessels[baroData['vesselId'][0]].Asol
-                A2 = self.vessels[baroData['vesselId'][1]].Asol
-                P1 = self.vessels[baroData['vesselId'][0]].Psol
-                P2 = self.vessels[baroData['vesselId'][1]].Psol
+                A1 = self.vessels[baroData['vesselIds'][0]].Asol
+                A2 = self.vessels[baroData['vesselIds'][1]].Asol
+                P1 = self.vessels[baroData['vesselIds'][0]].Psol
+                P2 = self.vessels[baroData['vesselIds'][1]].Psol
                 
                 baroData['Area1'] = A1
                 baroData['Area2'] = A2
@@ -537,8 +533,8 @@ class FlowSolver(object):
                 baroData['MStrain'] = np.zeros(self.nTsteps + 1)
                 baroData['T']       = np.zeros(self.nTsteps + 1)
                 
-                #baroData['initialCompliance1'] = self.vessels[baroData['vesselId'][0]].compliance
-                #baroData['initialCompliance2'] = self.vessels[baroData['vesselId'][1]].compliance
+                #baroData['initialCompliance1'] = self.vessels[baroData['vesselIds'][0]].compliance
+                #baroData['initialCompliance2'] = self.vessels[baroData['vesselIds'][1]].compliance
                 
                 self.baroreceptors[baroId] = AorticBaroreceptor(baroData) # call the constructor
                 

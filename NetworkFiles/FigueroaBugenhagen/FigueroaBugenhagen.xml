@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<FigueroaBugenhagen.xml id="xxx" version="4.1">
+<FigueroaBugenhagen.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
     <totalTime unit="s">32.0</totalTime>
@@ -34,6 +34,26 @@
     <gamma>2.0</gamma>
   </globalFluid>
   <communicators/>
+  <baroreceptors>
+    <AorticBaroreceptor>
+      <baroType>AorticBaroreceptor</baroType>
+      <cellMLBaroreceptorModel>True</cellMLBaroreceptorModel>
+      <baroId>0</baroId>
+      <modelName>bugenhagenAorticBR</modelName>
+      <receptorType>AorticBR</receptorType>
+      <vesselIds>2 14</vesselIds>
+     </AorticBaroreceptor>
+     <CarotidBaroreceptor>
+      <baroType>CarotidBaroreceptor</baroType>
+      <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+      <baroId>0</baroId>
+      <modelName>Ursino</modelName>
+      <receptorType>CarotidBR</receptorType>
+      <vesselIdLeft>12</vesselIdLeft>
+      <vesselIdRight>16</vesselIdRight>
+     </CarotidBaroreceptor>
+  </baroreceptors>
+
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>

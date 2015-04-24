@@ -384,6 +384,13 @@ variablesDict = {## class Vascular Network
                  'applyGlobalFluid'  : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
                  # baroreceptors
                  'baroId'            : {'type':'int',  'unitSI': None,     'strCases': None, 'multiVar': False},
+                 'cellMLBaroreceptorModel'    : {'type':'bool',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'baroType'          : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'receptorType'      : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'modelName'         : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'vesselIds'          : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': True},
+                 'vesselIdLeft'          : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
+                 'vesselIdRight'          : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  ### random variables
                  'distributionType': {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'a'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},

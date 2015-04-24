@@ -480,7 +480,8 @@ class VascularNetwork(object):
             dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1]
             del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
-               
+        
+        print self.baroreceptors
     def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
         
         memoryArraySize = self.memoryArraySizeTime;
