@@ -35,14 +35,6 @@
   </globalFluid>
   <communicators/>
   <baroreceptors>
-    <AorticBaroreceptor>
-      <baroType>AorticBaroreceptor</baroType>
-      <cellMLBaroreceptorModel>True</cellMLBaroreceptorModel>
-      <baroId>0</baroId>
-      <modelName>bugenhagenAorticBR</modelName>
-      <receptorType>AorticBR</receptorType>
-      <vesselIds>2 14</vesselIds>
-     </AorticBaroreceptor>
      <CarotidBaroreceptor>
       <baroType>CarotidBaroreceptor</baroType>
       <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>

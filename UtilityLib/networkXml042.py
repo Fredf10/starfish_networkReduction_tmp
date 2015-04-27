@@ -55,7 +55,8 @@ AorticBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIds','receptorTy
 CarotidBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','receptorType', 'modelName']
 
 baroreceptorReference = {'AorticBaroreceptor' : AorticBaroreceptor,
-                         'CarotidBaroreceptor': CarotidBaroreceptor
+                         #'CarotidBaroreceptor': CarotidBaroreceptor
+                         'CarotidBR': CarotidBaroreceptor
                          }
 
 

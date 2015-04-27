@@ -29,7 +29,8 @@ class Baroreceptor(object):
         self.nTsteps = 0
         self.receptorType = ''
         self.modelName = ''
-        
+	self.baroId = None
+
         # Model from CellML or hardcoded
         self.cellMLBaroreceptorModel = False
         self.cellMLimport = '' # for the import of the CellML file
@@ -134,7 +135,23 @@ class Baroreceptor(object):
                     self.__setattr__(key,value)
                 except: 
                     print 'ERROR baroreceptor.update(): wrong key: %s, could not set up baroreceptor' %key
-
+    
+    def getVariableValue(self,variableName):
+        '''
+        Returns value of variable with name : variableName
+        States Error if not such variable
+        '''
+        try:
+            return self.__getattribute__(variableName)
+        except: 
+            print "ERROR CarotidBaroreceptor.getVariable() : CarotidBaroreceptor has no variable {}".format(variableName)
+                       
+    def getVariableDict(self):
+        '''
+        Returns a deep copy of the class variable dict
+        '''
+        return self.__dict__
+ 
          
 class AorticBaroreceptor(Baroreceptor):
     

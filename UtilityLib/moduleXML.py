@@ -162,13 +162,20 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                     writeXMLsaveValues(subsubElement,variable,comData[variable])  
                     
         elif xmlElementName == 'baroreceptors':
-            for baroId,baroData in vascularNetwork.baroreceptors.iteritems():
-                baroType = baroData['baroType']
-                subElement = etree.SubElement(xmlFileElement, baroType)
-                for variable in nxmlW.baroreceptorReference[baroData['baroType']]:
+            for baroId, baro in vascularNetwork.baroreceptors.iteritems():
+		receptorType = baro.getVariableValue('receptorType')
+                
+		#baroSubElement = etree.SubElement(xmlFileElement,'baroreceptors')
+		# receptorType = baroData['receptorType']
+		# for baroElement in xmlElement:
+		#     subElement = etree.SubElement(baroSubElement, baroElement)
+		#     for variable in nxmlW.baroreceptorReference[receptorType]
+		
+                subElement = etree.SubElement(xmlFileElement, receptorType)
+		for variable in nxmlW.baroreceptorReference[receptorType]: # baroData['receptorType']]:
                     subsubElement = etree.SubElement(subElement, variable)
                     writeXMLsetUnit(subsubElement,variable)
-                    writeXMLsaveValues(subsubElement,variable,baroData[variable])  
+                    writeXMLsaveValues(subsubElement,variable,baro.getVariableValue(variable))  
                     
         elif xmlElementName == 'generalRandomInputs':
             for randomInput in randomInputManager():
@@ -522,11 +529,7 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                             baroreceptorData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                             if variable == 'baroId': baroId = baroreceptorData[variable]
                         
-			baroreceptorData['baroType'] = baroreceptorType
-			print 'baroElements',baroElements
-			print 'baroType', baroreceptorType
-			print 'baroData', baroreceptorData
-                        print 'baroId', baroId 
+			baroreceptorData['receptorType'] = baroreceptorType
 			vascularNetwork.updateNetwork({'baroreceptors':{baroId:baroreceptorData}})
                         
             elif xmlElementName == 'globalFluid':

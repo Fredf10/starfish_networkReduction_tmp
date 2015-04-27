@@ -56,7 +56,7 @@ class FlowSolver(object):
         self.timers = {}
         timers = False
         if timers == True:
-            self.timers = {'0':{'type':'valsalva','Tstart': 1.0, 'Tend': 2.0,'deltaP':-40.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
+            self.timers = {0:{'type':'valsalva','Tstart': 1.0, 'Tend': 2.0,'deltaP':-40.0*133.32, 'vesselID': [1,2,3,4,7,14,18,19,21,27]}}
               
         # Baroreceptor model
         self.baroreceptors = self.vascularNetwork.baroreceptors
@@ -65,8 +65,9 @@ class FlowSolver(object):
 	    baro = True
             print "\n WARNING doing baroreseptor!"
             print "\n"
-            #self.baroreceptors = {'0': {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
-            self.baroreceptors = {'0':{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
+            #print self.baroreceptors[0] 
+	    #self.baroreceptors = {0: {'cellMLBaroreceptorModel': True, 'vesselId':[2,14], 'receptorType':'AorticBR', 'modelName':'bugenhagenAorticBR'}}
+	    #self.baroreceptors = {0:{'receptorType':'CarotidBR','vesselIdLeft':12,'vesselIdRight':16,'cellMLBaroreceptorModel': False, 'modelName': 'Ursino'}}
         vein = baro or False
         self.venousPool = 0
         #
@@ -549,7 +550,7 @@ class FlowSolver(object):
                 baroData['VenousPool'] = self.venousPool # venous pool object for the update of Vusv
                 
                 self.baroreceptors[baroId] = CarotidBaroreceptor(baroData) # call the constructor
-                
+                print self.baroreceptors[baroId] 
             else:
                 print 'Error: invalid Baroreceptor type'
     
@@ -733,9 +734,9 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors))
         print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTsteps)               
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
-        #print self.communicators['0']
-        #print np.shape(self.communicators['0'].data['Strain'])
-        #print np.shape(self.communicators['0'].data['MStrain'])
+        #print self.communicators[0]
+        #print np.shape(self.communicators[0].data['Strain'])
+        #print np.shape(self.communicators[0].data['MStrain'])
         print '===================================== \n'
         
             
@@ -772,7 +773,11 @@ class FlowSolver(object):
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
-                    numericalObject()
+		    try:
+		        numericalObject()
+		    except:
+			print numericalObject
+			numericalObject()
                 
         ## to be concentrated with original cycle mode !!
         else:
@@ -943,17 +948,17 @@ class FlowSolver(object):
                 """
                 
                 ### quantities of the Baroreflex loop
-                dset_F_cs = dsetGroupBaroreflex.create_dataset("F_cs",data = self.baroreceptors['0'].F_cs)
-                dset_F_efferent = dsetGroupBaroreflex.create_dataset("F_efferent", data = self.baroreceptors['0'].F_efferent)
-                dset_deltaTPR = dsetGroupBaroreflex.create_dataset("delta_TPR", data = self.baroreceptors['0'].delta_TPR)
-                dset_deltaT = dsetGroupBaroreflex.create_dataset("delta_T",  data = self.baroreceptors['0'].delta_T)
-                dset_deltaEmax = dsetGroupBaroreflex.create_dataset("delta_Emax", data = self.baroreceptors['0'].delta_Emax)
-                dset_deltaVusv = dsetGroupBaroreflex.create_dataset("delta_Vusv", data =  self.baroreceptors['0'].delta_Vusv)
+                dset_F_cs = dsetGroupBaroreflex.create_dataset("F_cs",data = self.baroreceptors[0].F_cs)
+                dset_F_efferent = dsetGroupBaroreflex.create_dataset("F_efferent", data = self.baroreceptors[0].F_efferent)
+                dset_deltaTPR = dsetGroupBaroreflex.create_dataset("delta_TPR", data = self.baroreceptors[0].delta_TPR)
+                dset_deltaT = dsetGroupBaroreflex.create_dataset("delta_T",  data = self.baroreceptors[0].delta_T)
+                dset_deltaEmax = dsetGroupBaroreflex.create_dataset("delta_Emax", data = self.baroreceptors[0].delta_Emax)
+                dset_deltaVusv = dsetGroupBaroreflex.create_dataset("delta_Vusv", data =  self.baroreceptors[0].delta_Vusv)
                 
                 ### quantities of the left heart
-                dset_V_lv = dsetGroupHeart.create_dataset("V_lv", data = self.baroreceptors['0'].Vheart)
-                dset_P_lv = dsetGroupHeart.create_dataset("P_lv", data = self.baroreceptors['0'].Pheart)
-                dset_NewCycle = dsetGroupHeart.create_dataset("NewCycle",data = self.baroreceptors['0'].newCycles)
+                dset_V_lv = dsetGroupHeart.create_dataset("V_lv", data = self.baroreceptors[0].Vheart)
+                dset_P_lv = dsetGroupHeart.create_dataset("P_lv", data = self.baroreceptors[0].Pheart)
+                dset_NewCycle = dsetGroupHeart.create_dataset("NewCycle",data = self.baroreceptors[0].newCycles)
                 
                 ### quantities of the Venous pool
                 dsetVveinous = dsetGroupVein.create_dataset("V_vein", data = self.venousPool.Vvector)
@@ -968,15 +973,15 @@ class FlowSolver(object):
                 """
                 
                 ### quantities of the Baroreflex loop
-                dset_T = dsetGroupBaroreflex.create_dataset("T",data = self.baroreceptors['0'].T)
-                dset_n = dsetGroupBaroreflex.create_dataset("n", data = self.baroreceptors['0'].n)
-                dset_Tsym = dsetGroupBaroreflex.create_dataset("Tsym", data = self.baroreceptors['0'].Tsym )
-                dset_Tparasym = dsetGroupBaroreflex.create_dataset("Tparasym", data = self.baroreceptors['0'].Tparasym )
-                dset_c_nor = dsetGroupBaroreflex.create_dataset("c_nor", data = self.baroreceptors['0'].c_nor)
-                dset_c_ach = dsetGroupBaroreflex.create_dataset("c_ach", data = self.baroreceptors['0'].c_ach)
+                dset_T = dsetGroupBaroreflex.create_dataset("T",data = self.baroreceptors[0].T)
+                dset_n = dsetGroupBaroreflex.create_dataset("n", data = self.baroreceptors[0].n)
+                dset_Tsym = dsetGroupBaroreflex.create_dataset("Tsym", data = self.baroreceptors[0].Tsym )
+                dset_Tparasym = dsetGroupBaroreflex.create_dataset("Tparasym", data = self.baroreceptors[0].Tparasym )
+                dset_c_nor = dsetGroupBaroreflex.create_dataset("c_nor", data = self.baroreceptors[0].c_nor)
+                dset_c_ach = dsetGroupBaroreflex.create_dataset("c_ach", data = self.baroreceptors[0].c_ach)
                 
                 ### new Cycle starts
-                dsetNewCycle = dsetGroupHeart.create_dataset("NewCycle",data = self.baroreceptors['0'].newCycles )
+                dsetNewCycle = dsetGroupHeart.create_dataset("NewCycle",data = self.baroreceptors[0].newCycles )
                 
                 ### quantities of the venous pool
                 dsetVveinous = dsetGroupVein.create_dataset("V_vein", data = self.venousPool.Vvector)
