@@ -42,11 +42,115 @@ class Field():
         
         self.step = "predictor"
         
+        #solvingSchemeField = 'MacCormack_Flux'
         
         if solvingSchemeField == 'MacCormack_Matrix':
             self.__call__ = self.MacCormackMatrix
+            print "Classfields49: using Matrix based formulation in field calculation"
+        elif solvingSchemeField == 'MacCormack_Flux':
+            print "Classfields51: using Flux based formulation in field calculation"
+            self.__call__ = self.MacCormackFlux
         else:
             raise ValueError('Fredrik wirites this :) ')
+        
+    def F(self,u,A,C,Aconst,Cconst):
+    
+        """Flux based on conservative form of governing mass and momentum equations"""
+        gamma = self.vessel.gamma
+        alpha = 1 #(gamma+2.0)/(gamma+1.0) #1
+        flux=np.zeros_like(u)
+        p=u[0,:]
+        q=u[1,:]
+        rho = self.vessel.rho
+        flux[0,:] = q/Cconst
+        flux[1,:] = Aconst*p/rho + alpha*q**2/A
+        return flux 
+    
+    
+    def MacCormackFlux(self):
+        
+        dt = self.dt
+        #dz = self.dz[0] #currently only equidistant spacing is implemented and thus dz can be taken as float instead of vector
+        
+        # the current position in solution memory
+        n = self.currentMemoryIndex[0]
+        
+        P = self.P[n]
+        Q = self.Q[n]
+        A = self.A[n]
+        C = self.vessel.C(P)
+
+                
+        #dt = self.dt
+        dx = self.dz[0] #currently only equidistant spacing is implemented and thus dz can be taken as float instead of vector
+        
+        # the current position in solution memory
+        #n = self.currentMemoryIndex[0]
+        #print "using Flux based formulation in field calculation"
+        #if n== 1:
+            #print "using Flux based formulation in field calculation"
+#             P = self.P[n]
+#             Q = self.Q[n]
+#             A = self.A[n]
+        #C = self.vessel.C(P)
+        
+        rho = self.vessel.rho
+        gamma = self.vessel.gamma
+        alpha = (gamma+2.0)/(gamma+1.0) #flux corrector term associated with nonlinear integration  of velocityprofile in convective term (flat profile yields alpha=1, pousouille yields alpha =4/3)
+        my = self.vessel.my
+        
+        u = np.zeros((2,len(P))) #matrix for storing pressure and flow to caalculate fluxes
+        up = np.zeros((2,len(P))) # predictor values for pressure and flow
+        u[0,:] = P
+        u[1,:] = Q
+        up=u.copy()
+        
+        Utemp1=u[1,:-1]/A[:-1]
+        Aconst1 = A[:-1]
+        Cconst1 = C[:-1]
+        A1 = A[1:]
+        A2 = A[:-1]
+        C1 = C[1:]
+        C2 = C[:-1]
+        up[:,:-1] = u[:,:-1] - dt*(self.F(u[:,1:],A1,C1,Aconst1,Cconst1)-self.F(u[:,:-1],A2,C2,Aconst1,Cconst1))/dx 
+        up[1,:-1] = up[1,:-1]-dt*2*(gamma+2)*my*Utemp1*np.pi/rho
+        
+        if self.rigidArea == True:
+            A_p = A
+            C_p = C
+        else:
+            A_p = self.vessel.A(up[0,:])
+            C_p = self.vessel.C(up[0,:])
+        
+        A_p1 = A_p[1:]
+        A_p2 = A_p[:-1]
+        C_p1 = C_p[1:]
+        C_p2 = C_p[:-1]
+        Utemp2=up[1,1:]/A_p1
+        Aconst2 = A_p[1:]
+        Cconst2 = C_p[1:]
+        u[:,1:] = .5*(u[:,1:]+up[:,1:] -  dt/dx*(self.F(up[:,1:],A_p1,C_p1,Aconst2,Cconst2)-self.F(up[:,:-1],A_p2,C_p2,Aconst2,Cconst2)))
+        u[1,1:] = u[1,1:]-0.5*dt*2*(gamma+2)*my*Utemp2*np.pi/rho
+        
+        Pnewinterior = u[0,:]
+        Qnewinterior = u[1,:]
+        
+        if self.rigidArea == True:
+            Anewinterior = A
+        else:
+            Anewinterior = self.vessel.A(Pnewinterior)
+        
+        Pnewinterior = Pnewinterior[1:-1]
+        Qnewinterior = Qnewinterior[1:-1]
+        Anewinterior=Anewinterior[1:-1]
+        
+        self.P[n+1][1:-1] = Pnewinterior
+        self.Q[n+1][1:-1] = Qnewinterior
+        self.A[n+1][1:-1] = Anewinterior
+        if (self.P[n+1] < 0).any():
+            print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print self.P[n+1]
+            exit()   
         
     def MacCormackMatrix(self):
         '''
@@ -54,7 +158,7 @@ class Field():
         '''
         # solve vessel objects
         dt = self.dt
-        
+        print "using Matrix based formulation in field calculation"
         # the current position in solution memory
         n = self.currentMemoryIndex[0]
         
