@@ -51,7 +51,7 @@ class Field():
             print "Classfields51: using Flux based formulation in field calculation"
             self.__call__ = self.MacCormackFlux
         else:
-            raise ValueError('Fredrik wirites this :) ')
+            raise ValueError('Classfields51: error, scheme for solving field not correct')
         
     def F(self,u,A,C,Aconst,Cconst):
     
