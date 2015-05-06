@@ -1,12 +1,15 @@
 import sys, os
 from reportlab.lib.validators import isNumber
+
 #from duplicity.tarfile import TUREAD
 # from UtilityLib.saveSimulationDataToCSV import vesselId
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../NetworkLib')
+sys.path.append(cur+'/../Solver')
 
 from classVessel import Vessel
+from classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
 from classBoundaryConditions import *
 
 sys.path.append(cur + '/../UtilityLib')
@@ -158,7 +161,30 @@ class VascularNetwork(object):
             del self.vessels[inputId]
         except:
             print "ERROR vascularNetwork.deleteVessel(): vessel with Id {} does not exist! Could not remove vessel".format(inputId)
-     
+    
+    def addBaroreceptor(self, baroId=None, dataDict=False):
+        '''
+        adds vessel to the Network
+        if no id, a random id is choosen
+        if no DataDict, no values are assigned
+        '''
+        # set id to 1 + highest id of existing vessels
+        if baroId == None: 
+            try: baroId = max(self.baroreceptors.keys()) + 1
+            except: baroId = 0
+            
+        # check Id
+        if baroId not in self.baroreceptors:
+#             baro = Baroreceptor(Id=baroId , name=('baroreceptor_' + str(baroId)))  # create baroreceptor with given variables
+#             if dataDict:
+#                 baro.update(dataDict)  # set baroreceptorData if available
+            if dataDict['receptorType'] == 'AorticBaroreceptor':
+                self.baroreceptors[baroId] = AorticBaroreceptor(dataDict)
+            elif dataDict['receptorType'] == 'CarotidBR':
+                self.baroreceptors[baroId] = CarotidBaroreceptor(dataDict)
+        else:  
+            print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
+ 
     def update(self, vascularNetworkData):
         '''
         updates the vascularNetwork data using a dictionary in form of 
@@ -189,20 +215,22 @@ class VascularNetwork(object):
                       'globalFluid': {},
                       'globalFluidPolyChaos': {},
                       'communicators': {},
-                      'vesselData': {}}
+                      'vesselData': {},
+                      'baroreceptors': {}}
 
             'vascularNetworkData'  := dict with all vascularNetwork variables to update
             'globalFluid'          := dict with all global fluid properties
             'communicators'        := netCommunicators}
-            
-            'vesselData Dict'      := { vessel.id : DataDict}
+            'vesselData'      := { vessel.id : DataDict}
+            'baroreceptors'      := { baroreceptor.id : DataDict}
         '''
         
         for dictName in ['vascularNetworkData']:
             try: self.update(updateDict[dictName])
             except: pass
             
-        for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
+#         for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
+        for dictName in ['globalFluid', 'communicators']: 
             try: self.getVariableValue(dictName).update(updateDict[dictName])
             except: pass
                         
@@ -212,6 +240,13 @@ class VascularNetwork(object):
                     self.vessels[vesselId].update(vesselData)
                 except:
                     self.addVessel(vesselId, vesselData)    
+                     
+        if 'baroreceptors' in updateDict:
+            for baroId, baroData in (updateDict['baroreceptors']).iteritems():
+                try:
+                    self.baroreceptors[baroId].update(baroData)
+                except:
+                    self.addBaroreceptor(baroId, baroData)    
           
     def showVessels(self):
         '''
@@ -370,6 +405,8 @@ class VascularNetwork(object):
             self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
         self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
         
+        self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
+        
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
             print "ERROR: VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime], exit()"
@@ -410,7 +447,7 @@ class VascularNetwork(object):
         # Put a reference to the dsetGroup into the saving dictionary if needed
             if vessel.save == True:
                 # create a new group in the data file
-                dsetGroup = self.solutionDataFile.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
+                dsetGroup = self.vesselDataGroup.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
                 nGridPoints =  vessel.N
                 dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
@@ -482,7 +519,25 @@ class VascularNetwork(object):
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
         
         print self.baroreceptors
+        
+        
+        
     def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
+        """
+        saving utility function to determine if solution data needs to be sent to the outputfile,
+        and to calculate the correct indices between solution memory and the data output file.
+        """
+        
+        """
+        Explanation of index variables
+        nCB,nCE where the beginning and end of the current solution data in memory would lie
+         in a full time history of the solution.
+        nMB,nME what indices of the current memory mark the beginning and end of what should be saved 
+         nME is a slice index, i.e. position + 1
+        nSB,nSE where the beginning and end of the current data to save would lie in the whole of the
+         simulation. nSE is a slice index, i.e. position + 1
+        nDB,nDE where does the current selection of data belong in the whole of the saved data
+        """
         
         memoryArraySize = self.memoryArraySizeTime;
         offset = (memoryArraySize - 1) * chunkCount
@@ -496,18 +551,22 @@ class VascularNetwork(object):
         if saving:
             ## memory indices
             nMB = 1
+            nSB = nCB
             if (self.nSaveBegin-nCB)>0:
                 nMB = 1+(self.nSaveBegin-nCB)
+                nSB = self.nSaveBegin
             
             #determine length to write
             # assume we write out through the end of memory
             lengthToWrite = self.memoryArraySizeTime - nMB 
                 
             nME = memoryArraySize
+            nSE = nCE + 1
             # correct this if save index is less than the current time step
             if (self.nSaveEnd-nCE)<0:
-                # set the indx to end saving
+                # set the index to end saving
                 nME -= (nCE - self.nSaveEnd)
+                nSE -= (nCE - self.nSaveEnd)
                 lengthToWrite -= (nCE - self.nSaveEnd) # -(-nME) as nME is negative
 
             nDB = self.nDCurrent
@@ -528,6 +587,9 @@ class VascularNetwork(object):
             vessel.Psol[0] = vessel.Psol[-1]
             vessel.Qsol[0] = vessel.Qsol[-1]
             vessel.Asol[0] = vessel.Asol[-1]
+            
+        for baro in self.baroreceptors.itervalues():
+            baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
         
                     
     def saveSolutionData(self):
@@ -570,7 +632,7 @@ class VascularNetwork(object):
         loaded into memory.
         
         '''
-        
+
         if self.pathSolutionDataFilename == None:
             self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'read')
         # TODO, what if this fails? do we know?
@@ -584,7 +646,8 @@ class VascularNetwork(object):
                 self.simulationTime = group['Time'][:]
                 
             elif groupName == 'Baroreflex':
-                pass
+                # This works perfectly as long as the variables are the same in the group as in the class __init__
+                self.baroreceptors[0].update(group)
             
             elif groupName == 'Heart':
                 pass
@@ -592,14 +655,17 @@ class VascularNetwork(object):
             elif groupName == 'Vein':
                 pass
             
+            elif groupName == 'vessels' or '-' in groupName: # '-' is loads older hdf5 data files
+                for subGroupName, subGroup in group.iteritems():
+                    vesselId = int(subGroupName.split(' - ')[-1])
+                    # try:
+                    # link data
+                    self.vesselsToSave[vesselId] = subGroup
+                        # except: 
+                            # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
+                    # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
             else:
-                vesselId = int(groupName.split(' - ')[-1])
-                # try:
-                # link data
-                self.vesselsToSave[vesselId] = group
-                    # except: 
-                        # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
-                # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
+                print "classVascularNetwork::linkSolutionData() Unable to identify data group", groupName
         
         self.initialize()
         

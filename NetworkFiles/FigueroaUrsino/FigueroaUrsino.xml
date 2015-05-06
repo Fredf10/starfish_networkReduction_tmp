@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<FigueroaUrsino.xml id="xxx" version="4.1">
+<FigueroaUrsino.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">40.0</totalTime>
+    <totalTime unit="s">2.0</totalTime>
     <CFL>0.45</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">40.0</timeSaveEnd>
+    <timeSaveEnd unit="s">2.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
@@ -34,6 +34,16 @@
     <gamma>2.0</gamma>
   </globalFluid>
   <communicators/>
+    <baroreceptors>
+     <CarotidBR>
+      <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+      <baroId>0</baroId>
+      <modelName>Ursino</modelName>
+      <receptorType>CarotidBR</receptorType>
+      <vesselIdLeft>12</vesselIdLeft>
+      <vesselIdRight>16</vesselIdRight>
+     </CarotidBR>
+  </baroreceptors>
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>

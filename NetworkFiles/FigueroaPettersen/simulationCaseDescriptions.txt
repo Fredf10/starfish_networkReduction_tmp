@@ -1,5 +1,0 @@
-DataNumber   Description 
-  105        32 seconds, Muller -300mmHg ramp, 10s to 12s, no BR, with Veins 
-  106        32 seconds, Muller -300mmHg ramp, 10s to 12s, with BR, with Veins 
-  103        32 seconds, Muller -300mmHg step, 10s to 12s, no BR, with Veins 
-  104        32 seconds, Muller -300mmHg step, 10s to 12s, with BR, with Veins 

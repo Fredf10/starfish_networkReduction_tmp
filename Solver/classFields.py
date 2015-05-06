@@ -5,9 +5,6 @@ sys.path.append(cur+'/NetworkLib')
 
 import numpy as np
 
-import time
-
-from copy import copy as copy 
 
 class Field():
     
@@ -158,7 +155,10 @@ class Field():
         '''
         # solve vessel objects
         dt = self.dt
-        print "using Matrix based formulation in field calculation"
+        
+        # Any need to print this out?
+        # print "using Matrix based formulation in field calculation"
+        
         # the current position in solution memory
         n = self.currentMemoryIndex[0]
         

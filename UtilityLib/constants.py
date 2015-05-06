@@ -385,7 +385,6 @@ variablesDict = {## class Vascular Network
                  # baroreceptors
                  'baroId'            : {'type':'int',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  'cellMLBaroreceptorModel'    : {'type':'bool',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
-                 'baroType'          : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'receptorType'      : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'modelName'         : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'vesselIds'          : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': True},

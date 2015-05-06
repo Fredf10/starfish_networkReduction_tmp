@@ -134,7 +134,7 @@ class Vessel(object):
                     self.__setattr__(key,value)
             except:
                 if key != 'venousPressure':
-                    print "ERROR: classVessel.initialize(): Fluid initialisation could not update varibale {} of vessel {}!".format(key,self.Id)
+                    print "ERROR: classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id)
         
         # initialize gird
         try:

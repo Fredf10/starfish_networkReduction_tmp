@@ -2,10 +2,10 @@
 <FigueroaBugenhagen.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">32.0</totalTime>
+    <totalTime unit="s">2.0</totalTime>
     <CFL>0.45</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">32.0</timeSaveEnd>
+    <timeSaveEnd unit="s">2.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
@@ -35,15 +35,13 @@
   </globalFluid>
   <communicators/>
   <baroreceptors>
-     <CarotidBaroreceptor>
-      <baroType>CarotidBaroreceptor</baroType>
-      <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+     <AorticBaroreceptor>
+      <cellMLBaroreceptorModel>True</cellMLBaroreceptorModel>
       <baroId>0</baroId>
-      <modelName>Ursino</modelName>
-      <receptorType>CarotidBR</receptorType>
-      <vesselIdLeft>12</vesselIdLeft>
-      <vesselIdRight>16</vesselIdRight>
-     </CarotidBaroreceptor>
+      <modelName>bugenhagenAorticBR</modelName>
+      <receptorType>AorticBaroreceptor</receptorType>
+      <vesselIds>2 14</vesselIds>
+     </AorticBaroreceptor>
   </baroreceptors>
 
   <boundaryConditions>

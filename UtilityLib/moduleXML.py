@@ -219,7 +219,8 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
     variableTypes = variablesDict[variable]['type']
     # check if variable is a multiple variable (means list of variables)
     if variablesDict[variable]['multiVar']:
-        variableValueStrings = variableValueStr.split(' ')
+        # TODO: Check with Vinz if there's a reason to use ' ', as sep=None seems better
+        variableValueStrings = variableValueStr.split() #variableValueStr.split(' ')
         multiVariable = True
         variableValues = []
     else:
@@ -529,8 +530,8 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                             baroreceptorData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                             if variable == 'baroId': baroId = baroreceptorData[variable]
                         
-			baroreceptorData['receptorType'] = baroreceptorType
-			vascularNetwork.updateNetwork({'baroreceptors':{baroId:baroreceptorData}})
+                        baroreceptorData['receptorType'] = baroreceptorType
+                        vascularNetwork.updateNetwork({'baroreceptors':{baroId:baroreceptorData}})
                         
             elif xmlElementName == 'globalFluid':
                     
