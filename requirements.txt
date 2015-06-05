@@ -3,6 +3,6 @@ numpy>=1.8.2
 PyOpenGL>=3.1.0b2
 pyglet>=1.1
 pydot>=1.0.2
-psutil>=1.0.1
 pycallgraph>=0.5.1
 h5py>=2.4
+psutil>=2.2.1

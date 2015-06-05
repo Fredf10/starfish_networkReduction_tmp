@@ -49,7 +49,7 @@ class QuantityOfInterest(object):
                 self.conditionalExpectedValue = []
                 self.conditionalVariance      = []
                 # conditional mean and variance
-                for rvIndex in xrange():
+                for rvIndex in xrange(distributionDimension):
                     currDistMean = cp.E(distributions)
                     currDistMean[rvIndex] = np.nan
                     # reduce polynomials
