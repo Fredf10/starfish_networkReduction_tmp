@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>VascularPolynomialChaosOld module &mdash; STARFiSh 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="STARFiSh 0.1.0 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> STARFiSh
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="Main.html">Main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualize.html">Visualize module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vnc.html">vnc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systemCheck.html">systemCheck module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NetworkLib.html">NetworkLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.ODESolver">NetworkLib.ODESolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classBoundaryConditions">NetworkLib.classBoundaryConditions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classCompliance">NetworkLib.classCompliance module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVascularNetwork">NetworkLib.classVascularNetwork module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVessel">NetworkLib.classVessel module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.moduleGrids">NetworkLib.moduleGrids module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.physiologicalData">NetworkLib.physiologicalData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.class1DflowSolver">Solver.class1DflowSolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBaroreceptor">Solver.classBaroreceptor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBoundarys">Solver.classBoundarys module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classCommunicators">Solver.classCommunicators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classConnections">Solver.classConnections module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classDataHandler">Solver.classDataHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classFields">Solver.classFields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classSystemEquations">Solver.classSystemEquations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classTimer">Solver.classTimer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classVenousPool">Solver.classVenousPool module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="UtilityLib.html">UtilityLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.constants">UtilityLib.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleCSV">UtilityLib.moduleCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleFilePathHandler">UtilityLib.moduleFilePathHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleStartUp">UtilityLib.moduleStartUp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleXML">UtilityLib.moduleXML module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml040">UtilityLib.networkXml040 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml041">UtilityLib.networkXml041 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml042">UtilityLib.networkXml042 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.processing">UtilityLib.processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#utilitylib-savesimulationdatatocsv-module">UtilityLib.saveSimulationDataToCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VascularPolynomialChaosLib.html">VascularPolynomialChaosLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classdistributionmanager-module">VascularPolynomialChaosLib.classDistributionManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterest-module">VascularPolynomialChaosLib.classLocationOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterestmanager-module">VascularPolynomialChaosLib.classLocationOfInterestManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classquantityofinterest-module">VascularPolynomialChaosLib.classQuantityOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInput">VascularPolynomialChaosLib.classRandomInput module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInputManager">VascularPolynomialChaosLib.classRandomInputManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classVpcConfiguration">VascularPolynomialChaosLib.classVpcConfiguration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleBatchSimulationManager">VascularPolynomialChaosLib.moduleBatchSimulationManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC">VascularPolynomialChaosLib.moduleFilePathHandlerVPC module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Visualisation.html">Visualisation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class2dVisualisation">Visualisation.class2dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#visualisation-class2dvisualisationold-module">Visualisation.class2dVisualisationOld module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dControlGUI">Visualisation.class3dControlGUI module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dLUT">Visualisation.class3dLUT module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dVisualisation">Visualisation.class3dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.classRealTimeVisualisation">Visualisation.classRealTimeVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VncLib.html">VncLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.classGraph">VncLib.classGraph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.xdot">VncLib.xdot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">STARFiSh</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>VascularPolynomialChaosOld module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/VascularPolynomialChaosOld.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="vascularpolynomialchaosold-module">
+<h1>VascularPolynomialChaosOld module<a class="headerlink" href="#vascularpolynomialchaosold-module" title="Permalink to this headline">¶</a></h1>
+</div>
+
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, NTNU.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

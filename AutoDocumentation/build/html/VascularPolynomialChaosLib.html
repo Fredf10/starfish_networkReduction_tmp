@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>VascularPolynomialChaosLib package &mdash; STARFiSh 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="STARFiSh 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Visualisation package" href="Visualisation.html"/>
+        <link rel="prev" title="UtilityLib package" href="UtilityLib.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> STARFiSh
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Main.html">Main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualize.html">Visualize module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vnc.html">vnc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systemCheck.html">systemCheck module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NetworkLib.html">NetworkLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.ODESolver">NetworkLib.ODESolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classBoundaryConditions">NetworkLib.classBoundaryConditions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classCompliance">NetworkLib.classCompliance module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVascularNetwork">NetworkLib.classVascularNetwork module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVessel">NetworkLib.classVessel module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.moduleGrids">NetworkLib.moduleGrids module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.physiologicalData">NetworkLib.physiologicalData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.class1DflowSolver">Solver.class1DflowSolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBaroreceptor">Solver.classBaroreceptor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBoundarys">Solver.classBoundarys module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classCommunicators">Solver.classCommunicators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classConnections">Solver.classConnections module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classDataHandler">Solver.classDataHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classFields">Solver.classFields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classSystemEquations">Solver.classSystemEquations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classTimer">Solver.classTimer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classVenousPool">Solver.classVenousPool module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="UtilityLib.html">UtilityLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.constants">UtilityLib.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleCSV">UtilityLib.moduleCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleFilePathHandler">UtilityLib.moduleFilePathHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleStartUp">UtilityLib.moduleStartUp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleXML">UtilityLib.moduleXML module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml040">UtilityLib.networkXml040 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml041">UtilityLib.networkXml041 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml042">UtilityLib.networkXml042 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.processing">UtilityLib.processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#utilitylib-savesimulationdatatocsv-module">UtilityLib.saveSimulationDataToCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">VascularPolynomialChaosLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vascularpolynomialchaoslib-classdistributionmanager-module">VascularPolynomialChaosLib.classDistributionManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vascularpolynomialchaoslib-classlocationofinterest-module">VascularPolynomialChaosLib.classLocationOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vascularpolynomialchaoslib-classlocationofinterestmanager-module">VascularPolynomialChaosLib.classLocationOfInterestManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vascularpolynomialchaoslib-classquantityofinterest-module">VascularPolynomialChaosLib.classQuantityOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VascularPolynomialChaosLib.classRandomInput">VascularPolynomialChaosLib.classRandomInput module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VascularPolynomialChaosLib.classRandomInputManager">VascularPolynomialChaosLib.classRandomInputManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VascularPolynomialChaosLib.classVpcConfiguration">VascularPolynomialChaosLib.classVpcConfiguration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VascularPolynomialChaosLib.moduleBatchSimulationManager">VascularPolynomialChaosLib.moduleBatchSimulationManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC">VascularPolynomialChaosLib.moduleFilePathHandlerVPC module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VascularPolynomialChaosLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Visualisation.html">Visualisation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class2dVisualisation">Visualisation.class2dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#visualisation-class2dvisualisationold-module">Visualisation.class2dVisualisationOld module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dControlGUI">Visualisation.class3dControlGUI module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dLUT">Visualisation.class3dLUT module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dVisualisation">Visualisation.class3dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.classRealTimeVisualisation">Visualisation.classRealTimeVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VncLib.html">VncLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.classGraph">VncLib.classGraph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.xdot">VncLib.xdot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">STARFiSh</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>VascularPolynomialChaosLib package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/VascularPolynomialChaosLib.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="vascularpolynomialchaoslib-package">
+<h1>VascularPolynomialChaosLib package<a class="headerlink" href="#vascularpolynomialchaoslib-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="vascularpolynomialchaoslib-classdistributionmanager-module">
+<h2>VascularPolynomialChaosLib.classDistributionManager module<a class="headerlink" href="#vascularpolynomialchaoslib-classdistributionmanager-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="vascularpolynomialchaoslib-classlocationofinterest-module">
+<h2>VascularPolynomialChaosLib.classLocationOfInterest module<a class="headerlink" href="#vascularpolynomialchaoslib-classlocationofinterest-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="vascularpolynomialchaoslib-classlocationofinterestmanager-module">
+<h2>VascularPolynomialChaosLib.classLocationOfInterestManager module<a class="headerlink" href="#vascularpolynomialchaoslib-classlocationofinterestmanager-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="vascularpolynomialchaoslib-classquantityofinterest-module">
+<h2>VascularPolynomialChaosLib.classQuantityOfInterest module<a class="headerlink" href="#vascularpolynomialchaoslib-classquantityofinterest-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-VascularPolynomialChaosLib.classRandomInput">
+<span id="vascularpolynomialchaoslib-classrandominput-module"></span><h2>VascularPolynomialChaosLib.classRandomInput module<a class="headerlink" href="#module-VascularPolynomialChaosLib.classRandomInput" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="VascularPolynomialChaosLib.classRandomInput.RandomInput">
+<em class="property">class </em><code class="descclassname">VascularPolynomialChaosLib.classRandomInput.</code><code class="descname">RandomInput</code><span class="sig-paren">(</span><em>dataDict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInput.RandomInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>class decription of a random input of STARFiSh</p>
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInput.RandomInput.evaluateRealisationFromSample">
+<code class="descname">evaluateRealisationFromSample</code><span class="sig-paren">(</span><em>sample_i</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInput.RandomInput.evaluateRealisationFromSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the realisation of the random variable defined as
+realisation =  a + b sample_i</p>
+<p>where the sample_i comes from the governing distribution: eg. Uniform, Normal or another RandomInput</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInput.RandomInput.generateInfo">
+<code class="descname">generateInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInput.RandomInput.generateInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to print random input information to console</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInput.RandomInput.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>variableName</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInput.RandomInput.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns value of variable with name : variableName
+States Error if not such variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInput.RandomInput.passRealisationToAssosiatedObj">
+<code class="descname">passRealisationToAssosiatedObj</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInput.RandomInput.passRealisationToAssosiatedObj" title="Permalink to this definition">¶</a></dt>
+<dd><p>methods update connected deterministic variable value from given
+&#8216;sample&#8217; drawn from random vector</p>
+<dl class="docutils">
+<dt>input:</dt>
+<dd>sample:  &lt;float&gt; &#8216;sample&#8217; drawn from random vector</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInput.RandomInput.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>dataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInput.RandomInput.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the data using a dictionary in from of 
+dataDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-VascularPolynomialChaosLib.classRandomInputManager">
+<span id="vascularpolynomialchaoslib-classrandominputmanager-module"></span><h2>VascularPolynomialChaosLib.classRandomInputManager module<a class="headerlink" href="#module-VascularPolynomialChaosLib.classRandomInputManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager">
+<em class="property">class </em><code class="descclassname">VascularPolynomialChaosLib.classRandomInputManager.</code><code class="descname">RandomInputManager</code><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.addRandomInput">
+<code class="descname">addRandomInput</code><span class="sig-paren">(</span><em>randomInputDict</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.addRandomInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which adds a random variable to randomInputs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.generateInfo">
+<code class="descname">generateInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.generateInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which generates info of the random inputs
+and returns it in a list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.linkRandomInputUpdateFunctions">
+<code class="descname">linkRandomInputUpdateFunctions</code><span class="sig-paren">(</span><em>vascularNetwork</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.linkRandomInputUpdateFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>link update functions and create randomInputvector</p>
+<p>input vascularNetwork</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.printOutInfo">
+<code class="descname">printOutInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.printOutInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to print out random variable informations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.saveRealisationLog">
+<code class="descname">saveRealisationLog</code><span class="sig-paren">(</span><em>networkName</em>, <em>dataNumber</em>, <em>gPCEmethod</em>, <em>gPCEorder</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.saveRealisationLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to save a log file with the realisations passed for each sample iteration</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>dataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classRandomInputManager.RandomInputManager.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the data using a dictionary in from of 
+dataDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-VascularPolynomialChaosLib.classVpcConfiguration">
+<span id="vascularpolynomialchaoslib-classvpcconfiguration-module"></span><h2>VascularPolynomialChaosLib.classVpcConfiguration module<a class="headerlink" href="#module-VascularPolynomialChaosLib.classVpcConfiguration" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="VascularPolynomialChaosLib.classVpcConfiguration.VpcConfiguration">
+<em class="property">class </em><code class="descclassname">VascularPolynomialChaosLib.classVpcConfiguration.</code><code class="descname">VpcConfiguration</code><span class="sig-paren">(</span><em>networkName</em>, <em>dataNumber</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classVpcConfiguration.VpcConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Configuration class of a vascular polynomial chaos class</p>
+<dl class="method">
+<dt id="VascularPolynomialChaosLib.classVpcConfiguration.VpcConfiguration.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>Dict</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.classVpcConfiguration.VpcConfiguration.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the class data using a dictionary in from of 
+dataDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-VascularPolynomialChaosLib.moduleBatchSimulationManager">
+<span id="vascularpolynomialchaoslib-modulebatchsimulationmanager-module"></span><h2>VascularPolynomialChaosLib.moduleBatchSimulationManager module<a class="headerlink" href="#module-VascularPolynomialChaosLib.moduleBatchSimulationManager" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="VascularPolynomialChaosLib.moduleBatchSimulationManager.runBatchAsMultiprocessing">
+<code class="descclassname">VascularPolynomialChaosLib.moduleBatchSimulationManager.</code><code class="descname">runBatchAsMultiprocessing</code><span class="sig-paren">(</span><em>batchDataList</em>, <em>numberWorkers=None</em>, <em>quiet=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.moduleBatchSimulationManager.runBatchAsMultiprocessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a set of simulations on one core without multiprocessing</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd><dl class="first last docutils">
+<dt>batchDataList &lt;list&gt; := with data for each batch job [batchData1, batchData .. ]</dt>
+<dd>batchData &lt;list&gt; := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="VascularPolynomialChaosLib.moduleBatchSimulationManager.runBatchAsSingleProcess">
+<code class="descclassname">VascularPolynomialChaosLib.moduleBatchSimulationManager.</code><code class="descname">runBatchAsSingleProcess</code><span class="sig-paren">(</span><em>batchDataList</em>, <em>quiet=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.moduleBatchSimulationManager.runBatchAsSingleProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a set of simulations on one core without multiprocessing</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd><dl class="first last docutils">
+<dt>batchDataList &lt;list&gt; := with data for each batch job [batchData1, batchData .. ]</dt>
+<dd>batchData &lt;list&gt; := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="VascularPolynomialChaosLib.moduleBatchSimulationManager.runSingleBatchSimulation">
+<code class="descclassname">VascularPolynomialChaosLib.moduleBatchSimulationManager.</code><code class="descname">runSingleBatchSimulation</code><span class="sig-paren">(</span><em>batchData</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.moduleBatchSimulationManager.runSingleBatchSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which runs a single simulation the defined with batchData</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>batchData &lt;list&gt; := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC">
+<span id="vascularpolynomialchaoslib-modulefilepathhandlervpc-module"></span><h2>VascularPolynomialChaosLib.moduleFilePathHandlerVPC module<a class="headerlink" href="#module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="VascularPolynomialChaosLib.moduleFilePathHandlerVPC.getDirectory">
+<code class="descclassname">VascularPolynomialChaosLib.moduleFilePathHandlerVPC.</code><code class="descname">getDirectory</code><span class="sig-paren">(</span><em>directoryType</em>, <em>networkName</em>, <em>dataNumber</em>, <em>mode</em>, <em>exception='Error'</em>, <em>gPCEmethod='None'</em>, <em>gPCEorder='None'</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.moduleFilePathHandlerVPC.getDirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function returns a requested directory path, if this directory does not exists
+it is created.</p>
+<dl class="docutils">
+<dt>directoryType:</dt>
+<dd>&#8216;workingDirectory&#8217;,
+&#8216;vpcConfigXmlFileDirectory&#8217;,
+&#8216;vpcNetworkXmlFileDirectory&#8217;,</dd>
+</dl>
+<p>networkName:</p>
+<blockquote>
+<div>name of the network file</div></blockquote>
+<p>dataNumber:</p>
+<blockquote>
+<div>data number of solution file or xml file</div></blockquote>
+<p>mode:</p>
+<blockquote>
+<div>read or write</div></blockquote>
+<p>exception: (for read mode)</p>
+<blockquote>
+<div>Error (default): raise error and exit if file is not exiting
+Warning: just raise Warning and return with error string</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="VascularPolynomialChaosLib.moduleFilePathHandlerVPC.getFilePath">
+<code class="descclassname">VascularPolynomialChaosLib.moduleFilePathHandlerVPC.</code><code class="descname">getFilePath</code><span class="sig-paren">(</span><em>fileType</em>, <em>networkName</em>, <em>dataNumber</em>, <em>mode</em>, <em>gPCEmethod='None'</em>, <em>gPCEorder='None'</em>, <em>evaluationNumber='None'</em>, <em>exception='Error'</em><span class="sig-paren">)</span><a class="headerlink" href="#VascularPolynomialChaosLib.moduleFilePathHandlerVPC.getFilePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function return a requested file path, if this file exists</p>
+<dl class="docutils">
+<dt>fileType:</dt>
+<dd>&#8216;vpcConfigXmlFile&#8217;,
+&#8216;vpcNetworkXmlFile&#8217;,
+&#8216;vpcNetworkXmlEvaluationFile&#8217;</dd>
+</dl>
+<p>networkName:</p>
+<blockquote>
+<div>name of the network file</div></blockquote>
+<p>dataNumber:</p>
+<blockquote>
+<div>data number of solution file or xml file</div></blockquote>
+<p>mode:</p>
+<blockquote>
+<div>read or write</div></blockquote>
+<p>exception: (for read mode)</p>
+<blockquote>
+<div>Error (default): raise error and exit if file is not exiting
+Warning: just raise Warning and return with error string</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-VascularPolynomialChaosLib">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-VascularPolynomialChaosLib" title="Permalink to this headline">¶</a></h2>
+<p>This is the library for vascular polynomial chaos</p>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Visualisation.html" class="btn btn-neutral float-right" title="Visualisation package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="UtilityLib.html" class="btn btn-neutral" title="UtilityLib package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, NTNU.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

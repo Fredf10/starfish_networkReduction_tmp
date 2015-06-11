@@ -1,0 +1,1944 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>NetworkLib package &mdash; STARFiSh 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="STARFiSh 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Solver package" href="Solver.html"/>
+        <link rel="prev" title="systemCheck module" href="systemCheck.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> STARFiSh
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Main.html">Main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualize.html">Visualize module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vnc.html">vnc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systemCheck.html">systemCheck module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">NetworkLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.ODESolver">NetworkLib.ODESolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.classBoundaryConditions">NetworkLib.classBoundaryConditions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.classCompliance">NetworkLib.classCompliance module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.classVascularNetwork">NetworkLib.classVascularNetwork module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.classVessel">NetworkLib.classVessel module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.moduleGrids">NetworkLib.moduleGrids module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib.physiologicalData">NetworkLib.physiologicalData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NetworkLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.class1DflowSolver">Solver.class1DflowSolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBaroreceptor">Solver.classBaroreceptor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBoundarys">Solver.classBoundarys module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classCommunicators">Solver.classCommunicators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classConnections">Solver.classConnections module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classDataHandler">Solver.classDataHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classFields">Solver.classFields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classSystemEquations">Solver.classSystemEquations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classTimer">Solver.classTimer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classVenousPool">Solver.classVenousPool module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="UtilityLib.html">UtilityLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.constants">UtilityLib.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleCSV">UtilityLib.moduleCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleFilePathHandler">UtilityLib.moduleFilePathHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleStartUp">UtilityLib.moduleStartUp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleXML">UtilityLib.moduleXML module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml040">UtilityLib.networkXml040 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml041">UtilityLib.networkXml041 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml042">UtilityLib.networkXml042 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.processing">UtilityLib.processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#utilitylib-savesimulationdatatocsv-module">UtilityLib.saveSimulationDataToCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VascularPolynomialChaosLib.html">VascularPolynomialChaosLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classdistributionmanager-module">VascularPolynomialChaosLib.classDistributionManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterest-module">VascularPolynomialChaosLib.classLocationOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterestmanager-module">VascularPolynomialChaosLib.classLocationOfInterestManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classquantityofinterest-module">VascularPolynomialChaosLib.classQuantityOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInput">VascularPolynomialChaosLib.classRandomInput module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInputManager">VascularPolynomialChaosLib.classRandomInputManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classVpcConfiguration">VascularPolynomialChaosLib.classVpcConfiguration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleBatchSimulationManager">VascularPolynomialChaosLib.moduleBatchSimulationManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC">VascularPolynomialChaosLib.moduleFilePathHandlerVPC module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Visualisation.html">Visualisation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class2dVisualisation">Visualisation.class2dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#visualisation-class2dvisualisationold-module">Visualisation.class2dVisualisationOld module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dControlGUI">Visualisation.class3dControlGUI module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dLUT">Visualisation.class3dLUT module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dVisualisation">Visualisation.class3dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.classRealTimeVisualisation">Visualisation.classRealTimeVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VncLib.html">VncLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.classGraph">VncLib.classGraph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.xdot">VncLib.xdot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">STARFiSh</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>NetworkLib package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/NetworkLib.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="networklib-package">
+<h1>NetworkLib package<a class="headerlink" href="#networklib-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-NetworkLib.ODESolver">
+<span id="networklib-odesolver-module"></span><h2>NetworkLib.ODESolver module<a class="headerlink" href="#module-NetworkLib.ODESolver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="NetworkLib.ODESolver.BackwardEuler">
+<em class="property">class </em><code class="descclassname">NetworkLib.ODESolver.</code><code class="descname">BackwardEuler</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.BackwardEuler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.ODESolver.ODESolver" title="NetworkLib.ODESolver.ODESolver"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.ODESolver.ODESolver</span></code></a></p>
+<p>Backward Euler solver for scalar ODEs.</p>
+<dl class="method">
+<dt id="NetworkLib.ODESolver.BackwardEuler.advance">
+<code class="descname">advance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.BackwardEuler.advance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.ODESolver.Derivative">
+<em class="property">class </em><code class="descclassname">NetworkLib.ODESolver.</code><code class="descname">Derivative</code><span class="sig-paren">(</span><em>f</em>, <em>h=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.Derivative" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.ODESolver.ForwardEuler">
+<em class="property">class </em><code class="descclassname">NetworkLib.ODESolver.</code><code class="descname">ForwardEuler</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.ForwardEuler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.ODESolver.ODESolver" title="NetworkLib.ODESolver.ODESolver"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.ODESolver.ODESolver</span></code></a></p>
+<dl class="method">
+<dt id="NetworkLib.ODESolver.ForwardEuler.advance">
+<code class="descname">advance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.ForwardEuler.advance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.ODESolver.ODESolver">
+<em class="property">class </em><code class="descclassname">NetworkLib.ODESolver.</code><code class="descname">ODESolver</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.ODESolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Superclass for numerical methods solving scalar and vector ODEs</p>
+<blockquote>
+<div>du/dt = f(u, t)</div></blockquote>
+<p>Attributes:
+t: array of time values
+u: array of solution values (at time points t)
+k: step number of the most recently computed solution
+f: callable object implementing f(u, t)</p>
+<dl class="method">
+<dt id="NetworkLib.ODESolver.ODESolver.advance">
+<code class="descname">advance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.ODESolver.advance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance solution one time step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.ODESolver.ODESolver.set_initial_condition">
+<code class="descname">set_initial_condition</code><span class="sig-paren">(</span><em>U0</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.ODESolver.set_initial_condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.ODESolver.ODESolver.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>time_points</em>, <em>terminate=None</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.ODESolver.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute solution u for t values in the list/array
+time_points, as long as terminate(u,t,step_no) is False.
+terminate(u,t,step_no) is a user-given function
+returning True or False. By default, a terminate
+function which always returns False is used.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.ODESolver.RungeKutta4">
+<em class="property">class </em><code class="descclassname">NetworkLib.ODESolver.</code><code class="descname">RungeKutta4</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.RungeKutta4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.ODESolver.ODESolver" title="NetworkLib.ODESolver.ODESolver"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.ODESolver.ODESolver</span></code></a></p>
+<dl class="method">
+<dt id="NetworkLib.ODESolver.RungeKutta4.advance">
+<code class="descname">advance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.RungeKutta4.advance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="NetworkLib.ODESolver.test_exact_numerical_solution">
+<code class="descclassname">NetworkLib.ODESolver.</code><code class="descname">test_exact_numerical_solution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.ODESolver.test_exact_numerical_solution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib.classBoundaryConditions">
+<span id="networklib-classboundaryconditions-module"></span><h2>NetworkLib.classBoundaryConditions module<a class="headerlink" href="#module-NetworkLib.classBoundaryConditions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Adan55InflowFromfile">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Adan55InflowFromfile</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Adan55InflowFromfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Creates the inflow used in Benchmark experimental test used in section 3.5 in Comparison1Dscheme</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Adan55InflowFromfile.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Adan55InflowFromfile.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.AoBifInflow">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">AoBifInflow</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.AoBifInflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Creates the inflow used in test Of Single Aorta used in section 3.4 in Comparison1Dscheme</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.AoBifInflow.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.AoBifInflow.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.AortaInflow">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">AortaInflow</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.AortaInflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Creates the inflow used in test Of Single Aorta used in section 3.3 in Comparison1Dscheme</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.AortaInflow.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.AortaInflow.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">BoundaryCondition</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base-class for all boundary conditions</p>
+<dl class="attribute">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.conditionQuantity">
+<code class="descname">conditionQuantity</code><em class="property"> = None</em><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.conditionQuantity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>variableName</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns value of variable with name : variableName
+States Error if not such variable</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.name">
+<code class="descname">name</code><em class="property"> = None</em><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.position">
+<code class="descname">position</code><em class="property"> = None</em><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.prescribeTotalValues">
+<code class="descname">prescribeTotalValues</code><em class="property"> = False</em><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.prescribeTotalValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.setPosition">
+<code class="descname">setPosition</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.setPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the position of the boundaryCondition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryCondition.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>bcDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryCondition.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the updateBoundaryDict data using a dictionary in form of 
+bcDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">BoundaryConditionType1</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryCondition" title="NetworkLib.classBoundaryConditions.BoundaryCondition"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryCondition</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div><p>creates frame for a periodic signal</p>
+<p>signal type can be quantified with function1 / function2 
+which are a function of (t)</p>
+<p>call function input (n,dt)
+gives amplitude value for pressure/flow back
+for the function delta g</p>
+</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.calculateDu">
+<code class="descname">calculateDu</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.calculateDu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function calculates the du for a given time step and dt
+return: du</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.calculateDuVector">
+<code class="descname">calculateDuVector</code><span class="sig-paren">(</span><em>nTsteps</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.calculateDuVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function calculates the duVector for a given number of time steps Tsteps and dt
+return: self.duVector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.calculateOneStep">
+<code class="descname">calculateOneStep</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em>, <em>initPhase=False</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.calculateOneStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the amplitude value for one time step n and dt</p>
+<p>return: array([ampP,ampQ])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.findMeanFlowAndMeanTime">
+<code class="descname">findMeanFlowAndMeanTime</code><span class="sig-paren">(</span><em>givenMeanFlow=None</em>, <em>quiet=False</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.findMeanFlowAndMeanTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculates the mean flow of the signal self.MeanFlow
+and the first occurence evaluatedTime of the mean flow self.TmeanFlow</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.function1" title="Permalink to this definition">¶</a></dt>
+<dd><p>amplitude function caracterized by signal type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.function2">
+<code class="descname">function2</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.function2" title="Permalink to this definition">¶</a></dt>
+<dd><p>amplitude function caracterized by signal type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>bcDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>updates - the updateBoundaryDict data using a dictionary in from of </dt>
+<dd><blockquote class="first">
+<div>bcDict = {&#8216;variableName&#8217;: value}</div></blockquote>
+<ul class="last simple">
+<li>time period of one pulse</li>
+<li>pulseTimes</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType1.updatePeriodRuntime">
+<code class="descname">updatePeriodRuntime</code><span class="sig-paren">(</span><em>TperiodNew</em>, <em>updateTime</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1.updatePeriodRuntime" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function updates the freq, Tspace and pulsTime for new given Tperiod</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType2">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">BoundaryConditionType2</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryCondition" title="NetworkLib.classBoundaryConditions.BoundaryCondition"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryCondition</span></code></a></p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.BoundaryConditionType2.setPosition">
+<code class="descname">setPosition</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2.setPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the position of the boundaryCondition
+and determines the return function
+based on the position of the bC (0,-1)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.CCAInflow">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">CCAInflow</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.CCAInflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Creates the inflow used in test Of Common Carotid artery section 3.2 in Comparison1Dscheme</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.CCAInflow.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.CCAInflow.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.ExpFunc">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">ExpFunc</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ExpFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>creates an exponentialfunction according to section 3.1 Comparison1Dscheme</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ExpFunc.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ExpFunc.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.ExperimentalInflow">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">ExperimentalInflow</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ExperimentalInflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Creates the inflow used in Benchmark experimental test used in section 3.5 in Comparison1Dscheme</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ExperimentalInflow.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ExperimentalInflow.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.FlowFromFile">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">FlowFromFile</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.FlowFromFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div><p>creates signal based on data values stored in <a href="#id1"><span class="problematic" id="id2">*</span></a>.csv file
+saved in network directory</p>
+<p>csv delimiter ;
+first line of the colums must be t and Q respectively: 
+t;Q
+..; ..</p>
+<p>expected units: t [s]; Q[m3 / s]</p>
+</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.FlowFromFile.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.FlowFromFile.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.FlowFromFile.loadFile">
+<code class="descname">loadFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.FlowFromFile.loadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Fourier">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Fourier</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Fourier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>creates fourier signal similar to the flow of the heart</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Fourier.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Fourier.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.L_network">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">L_network</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.L_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>L-network</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>return:
+the domega-vector with (<a href="#id3"><span class="problematic" id="id4">domega_</span></a> , _domega) based on the input values and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.L_network.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domega_</em>, <em>du</em>, <em>R</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.L_network.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.L_network.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>_domega_</em>, <em>du</em>, <em>R</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.L_network.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.PhysiologicalData">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">PhysiologicalData</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PhysiologicalData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>creates signal based on measured physiological values
+(source unknown: values in NetworkLib/physiologicalData.py)</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PhysiologicalData.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PhysiologicalData.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.PhysiologicalFunction">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">PhysiologicalFunction</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PhysiologicalFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div><p>creates a similar heart-outflow signal as found in
+Stergiopulos et al. 1992</p>
+<p>set together from 4 continous functions sin2,sin2,cos,sin2
+to lead to a continous function</p>
+</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PhysiologicalFunction.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PhysiologicalFunction.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedInflux">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">PrescribedInflux</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedInflux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>calculates omega if influx of pressure or flow is prescribed with a type1 condition</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id5"><span class="problematic" id="id6">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedInflux.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>duPrescribed</em>, <em>L</em>, <em>R</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedInflux.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedInflux.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>duPrescribed</em>, <em>L</em>, <em>R</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedInflux.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedTotalFlow">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">PrescribedTotalFlow</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedTotalFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>calculates omega if total flow is prescribed with a type1 condition</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id7"><span class="problematic" id="id8">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedTotalFlow.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>duPrescribed</em>, <em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedTotalFlow.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedTotalFlow.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>duPrescribed</em>, <em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedTotalFlow.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedTotalPressure">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">PrescribedTotalPressure</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedTotalPressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>calculates omega if total pressure is prescribed with a type1 condition</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id9"><span class="problematic" id="id10">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedTotalPressure.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>duPrescribed</em>, <em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedTotalPressure.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.PrescribedTotalPressure.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>duPrescribed</em>, <em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.PrescribedTotalPressure.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.RampMean">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">RampMean</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.RampMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>ramps to a mean amplitude self.amp starting from self.ampConst</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.RampMean.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.RampMean.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.RampMean.function2">
+<code class="descname">function2</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.RampMean.function2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficient">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">ReflectionCoefficient</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>Terminal reflection 
+only in combination with prescribed influx condition (Type1) or alone</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id11"><span class="problematic" id="id12">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficient.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>duPrescribed</em>, <em>L</em>, <em>R</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficient.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficient.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>duPrescribed</em>, <em>L</em>, <em>R</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficient.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">ReflectionCoefficientTimeVarying</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>Terminal reflection 
+only in combination with prescribed influx condition (Type1) or alone</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id13"><span class="problematic" id="id14">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.calcRt">
+<code class="descname">calcRt</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.calcRt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>duPrescribed</em>, <em>L</em>, <em>R</em>, <em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>duPrescribed</em>, <em>L</em>, <em>R</em>, <em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>bcDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.ReflectionCoefficientTimeVarying.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the updateBoundaryDict data using a dictionary in from of 
+bcDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Resistance">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Resistance</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Resistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>signle Resistance element</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id15"><span class="problematic" id="id16">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Resistance.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>R</em>, <em>Z1</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Resistance.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Resistance.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>R</em>, <em>Z1</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Resistance.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Sinus">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Sinus</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Sinus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>creates in a periodic sinus signal</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Sinus.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Sinus.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Sinus2">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Sinus2</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Sinus2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>creates in a periodic sinus-squared signal</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Sinus2.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Sinus2.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Valve">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Valve</code><span class="sig-paren">(</span><em>M_st</em>, <em>M_rg</em>, <em>delta_p_open</em>, <em>delta_p_close</em>, <em>K_v_open</em>, <em>K_v_close</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve" title="Permalink to this definition">¶</a></dt>
+<dd><p>A valve model meant to be used with the varying elastance boundary condition. Two instances of the class are then made representing the mitral and 
+aortic valves. The valve instance has a variable state, which is updated every timestep using the updateValveState method and is then able to return
+updated values of the coefficients B and L, used by the varying elastance solver.</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.A_max">
+<code class="descname">A_max</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.A_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.A_min">
+<code class="descname">A_min</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.A_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.LdivideB">
+<code class="descname">LdivideB</code><span class="sig-paren">(</span><em>A</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.LdivideB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.computeB">
+<code class="descname">computeB</code><span class="sig-paren">(</span><em>A</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.computeB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the turbulent resistance coefficient B, used in computing the pressure difference across the valve</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.computeL">
+<code class="descname">computeL</code><span class="sig-paren">(</span><em>A</em>, <em>n</em>, <em>B</em>, <em>state</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.computeL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the inertance coefficient L,  used in computing the pressure difference across the valve</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.effectiveOrificeArea">
+<code class="descname">effectiveOrificeArea</code><span class="sig-paren">(</span><em>A</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.effectiveOrificeArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the effective orifice area (A_eff) by interpolating between maximum and minimum area.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.initializeSolutions">
+<code class="descname">initializeSolutions</code><span class="sig-paren">(</span><em>Tsteps</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.initializeSolutions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called by the initializeSolutionVectors method in the VaryingElastance-instance to initialize the vector containing the state variable,
+the state variable is stored so that it can be used in visualization to show the opening and closing of the valve</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Valve.updateValveState">
+<code class="descname">updateValveState</code><span class="sig-paren">(</span><em>delta_p</em>, <em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Valve.updateValveState" title="Permalink to this definition">¶</a></dt>
+<dd><p>The opening state at timestep n+1 is computed by explicit numerical solution of the opening and closing rate equations (Mynard)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">VaryingElastance</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
+(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).</p>
+<p>The general shape of the elastance function is given by three shape parameters. Various conditions of heart contractility are then created by scaling this 
+function using the parameters:
+T - Heart period
+Emax - Maximum elastance
+Emin - Minimum elastance
+Tpeak - Time to peak elastance</p>
+<p>The equation also requires the two constants:
+V0 - Volume axis intercept
+K - Source resistance</p>
+<p>NB! The source resistance (K) was introduced to the implementation as an experiment. It modifies the elastance curve depending on ventricular outflow,
+so that it becomes dependent on the afterload of the heart. Introducing the source resistance did produce a load dependence 
+(shown by curved isochrones in p-v loops), however the results are in no way to be trusted since the modified varying elastance equation was not intended
+to be used together with the specific varying elastance curve shape used here (Stergiopulos). A proper implementation of the source resistance 
+requires a different curve shape. The parameter K is therefore set to zero by default, but it should perhaps be removed from the code altogether??</p>
+<p>Currently only the return method &#8220;def funcPos0&#8221; has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
+It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.E">
+<code class="descname">E</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.E" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
+according to Tpeak, T, Emax and Emin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.K">
+<code class="descname">K</code><em class="property"> = None</em><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shape parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domega</em>, <em>R</em>, <em>n</em>, <em>dt</em>, <em>Pn</em>, <em>Qn</em>, <em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>_domega</em>, <em>R</em>, <em>L</em>, <em>n</em>, <em>dt</em>, <em>P</em>, <em>Q</em>, <em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.getCycleTime">
+<code class="descname">getCycleTime</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.getCycleTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.initializeSolutionVectors">
+<code class="descname">initializeSolutionVectors</code><span class="sig-paren">(</span><em>Tsteps</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.initializeSolutionVectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state</p>
+<p>NB! This method is not called from the class constructor, but is called externally by the initializeSolutionMatrices method in the solver,
+this is a bit messy, but was the easiest way to do it since the BC is initiated before the number of time steps is known.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.initializeValves">
+<code class="descname">initializeValves</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.initializeValves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mitral valve parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.newtonSolver">
+<code class="descname">newtonSolver</code><span class="sig-paren">(</span><em>x0</em>, <em>args</em>, <em>partialSystem='both open'</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.newtonSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the partial or full equation system of the varying elastance model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.solverInverseJacobian">
+<code class="descname">solverInverseJacobian</code><span class="sig-paren">(</span><em>x_partial</em>, <em>dt</em>, <em>mitrLdivB</em>, <em>mitrB</em>, <em>LdivB</em>, <em>L</em>, <em>mitrL</em>, <em>B</em>, <em>mitrQn1</em>, <em>mitrQn</em>, <em>ventrPn</em>, <em>venoP</em>, <em>E</em>, <em>Vn</em>, <em>Qn</em>, <em>Qn1</em>, <em>r11</em>, <em>r12</em>, <em>r21</em>, <em>r22</em>, <em>Pn</em>, <em>_domega</em>, <em>n_q</em>, <em>n_p</em>, <em>B_ref</em>, <em>partialSystem=array([0</em>, <em>1</em>, <em>2])</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.solverInverseJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the inverse Jacobian of the system. The components a1, a2, a3, a4, a5 and a6 are declared using strings, and evaluated using eval()
+only when needed. (Not sure how smart this is). Reduces lines of code, but is probably slower.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.solverResiduals">
+<code class="descname">solverResiduals</code><span class="sig-paren">(</span><em>x_partial</em>, <em>dt</em>, <em>mitrLdivB</em>, <em>mitrB</em>, <em>LdivB</em>, <em>L</em>, <em>mitrL</em>, <em>B</em>, <em>mitrQn1</em>, <em>mitrQn</em>, <em>ventrPn</em>, <em>atrP</em>, <em>E</em>, <em>Vn</em>, <em>Qn</em>, <em>Qn1</em>, <em>r11</em>, <em>r12</em>, <em>r21</em>, <em>r22</em>, <em>Pn</em>, <em>_domega</em>, <em>n_q</em>, <em>n_p</em>, <em>B_ref</em>, <em>partialSystem=array([0</em>, <em>1</em>, <em>2])</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.solverResiduals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes  are the resisduals of the functions f1,f2 and f3, they are defined as functions that are only called when they are needed. The
+argument partialSystem determines which of the residuals are computed and returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.startNewCycleIfCriteriaIsMet">
+<code class="descname">startNewCycleIfCriteriaIsMet</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.startNewCycleIfCriteriaIsMet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastance.updateValves">
+<code class="descname">updateValves</code><span class="sig-paren">(</span><em>P</em>, <em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastance.updateValves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">VaryingElastanceSimple</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
+(as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).</p>
+<p>The general shape of the elastance function is given by three shape parameters. Various conditions of heart contractility are then created by scaling this 
+function using the parameters:
+T - Heart period
+Emax - Maximum elastance
+Emin - Minimum elastance
+Tpeak - Time to peak elastance</p>
+<p>The equation also requires the two constants:
+V0 - Volume axis intercept
+K - Source resistance</p>
+<p>NB! The source resistance (K) was introduced to the implementation as an experiment. It modifies the elastance curve depending on ventricular outflow,
+so that it bself.mitral = None # mitral valve</p>
+<blockquote>
+<div>self.aortic = None # aortic valve
+self.initializeValves() # intialize valvesecomes dependent on the afterload of the heart. Introducing the source resistance did produce a load dependence</div></blockquote>
+<p>(shown by curved isochrones in p-v loops), however the results are in no way to be trusted since the modified varying elastance equation was not intended
+to be used together with the specific varying elastance curve shape used here (Stergiopulos). A proper implementation of the source resistance 
+requires a different curve shape. The parameter K is therefore set to zero by default, but it should perhaps be removed from the code altogether??</p>
+<p>Currently only the return method &#8220;def funcPos0&#8221; has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
+It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.E">
+<code class="descname">E</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.E" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
+according to Tpeak, T, Emax and Emin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.Rv">
+<code class="descname">Rv</code><em class="property"> = None</em><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.Rv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shape parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domega</em>, <em>R</em>, <em>n</em>, <em>dt</em>, <em>Pn</em>, <em>Qn</em>, <em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>_domega</em>, <em>R</em>, <em>L</em>, <em>n</em>, <em>dt</em>, <em>P</em>, <em>Q</em>, <em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.getCycleTime">
+<code class="descname">getCycleTime</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.getCycleTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.initializeSolutionVectors">
+<code class="descname">initializeSolutionVectors</code><span class="sig-paren">(</span><em>Tsteps</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.initializeSolutionVectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state</p>
+<p>NB! This method is not called from the class constructor, but is called externally by the initializeSolutionMatrices method in the solver,
+this is a bit messy, but was the easiest way to do it since the BC is initiated before the number of time steps is known.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.VaryingElastanceSimple.startNewCycleIfCriteriaIsMet">
+<code class="descname">startNewCycleIfCriteriaIsMet</code><span class="sig-paren">(</span><em>n</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.VaryingElastanceSimple.startNewCycleIfCriteriaIsMet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Windkessel2">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Windkessel2</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Windkessel2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>2 Element Windkessel</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id17"><span class="problematic" id="id18">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Windkessel2.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>R</em>, <em>dt</em>, <em>P</em>, <em>Q</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Windkessel2.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Windkessel2.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>R</em>, <em>dt</em>, <em>P</em>, <em>Q</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Windkessel2.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.Windkessel3">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">Windkessel3</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Windkessel3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType2" title="NetworkLib.classBoundaryConditions.BoundaryConditionType2"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType2</span></code></a></p>
+<p>Boundary profile - type 2</p>
+<p>3 Element Windkessel</p>
+<dl class="docutils">
+<dt>call function input:</dt>
+<dd>_domega_,dO,du,R,L,n,dt</dd>
+</dl>
+<p>returns the domega-vector with (<a href="#id19"><span class="problematic" id="id20">domega_</span></a> , _domega) based on the input values
+and its returnFunction</p>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Windkessel3.funcPos0">
+<code class="descname">funcPos0</code><span class="sig-paren">(</span><em>_domegaField</em>, <em>R</em>, <em>dt</em>, <em>P</em>, <em>Q</em>, <em>Z1</em>, <em>Z2</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Windkessel3.funcPos0" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position 0 at the start
+of the vessel</p>
+<p>Old version
+venousPressure = P</p>
+<p>r21,r22 = R[1][0],R[1][1]
+<a href="#id21"><span class="problematic" id="id22">dw_</span></a>,_dw = dO[self.position][0],dO[self.position][1]</p>
+<p>if self.R1 == None: self.R1 = -1./r22
+if self.Rc == None: self.Rc = self.RT - self.R1 
+tau = 2.*self.Rc*self.C
+taudt = tau/dt
+denom = taudt + 1. + r21*(self.R1*taudt + self.Rc + self.R1)
+<a href="#id23"><span class="problematic" id="id24">domega_</span></a> = ((1.+r21*self.R1)*taudt*dw_ + (1.+r22*self.R1)*taudt*_dw + (-1.-taudt-r22*(self.R1*taudt + self.Rc + self.R1))*_domega_ + P0)/denom</p>
+<p>Old Version: does not take hole R matrix into account
+r21,r22 = R[1][0],R[1][1]</p>
+<p>Z = self.Z 
+if self.Z == &#8216;VesselImpedance&#8217;:# and self.firstRun == False:</p>
+<blockquote>
+<div>Z = Z1 #+Z2
+#self.Z = Z
+#self.firstRun = True</div></blockquote>
+<p>Rc = self.Rc
+if self.Rc == None:</p>
+<blockquote>
+<div>Rc = self.Rtotal - Z
+## Rc not time-varying activate this line:
+#self.Rc = Rc</div></blockquote>
+<p>C = self.C</p>
+<p>taudt = 2*Rc*C/dt</p>
+<p>a = taudt + 1
+b = (taudt +1)*Z + Rc
+c = 2*Q*(Rc + Z) - 2*(P-self.venousPressure)</p>
+<p><a href="#id25"><span class="problematic" id="id26">domega_</span></a> = -((a + b*r21)*_domega_ - c)/(a + b*r22)</p>
+<p>self.omegaNew[0] = <a href="#id27"><span class="problematic" id="id28">domega_</span></a>
+self.omegaNew[1] = _domega_
+return self.omegaNew</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.Windkessel3.funcPos1">
+<code class="descname">funcPos1</code><span class="sig-paren">(</span><em>domegaField_</em>, <em>R</em>, <em>dt</em>, <em>P</em>, <em>Q</em>, <em>Z1</em>, <em>Z2</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.Windkessel3.funcPos1" title="Permalink to this definition">¶</a></dt>
+<dd><p>return function for position -1 at the end
+of the vessel  (newer version from Knut Petter ??? )</p>
+<p>Knut Petter: Yes this is a newer version based on the &#8220;half-step central difference&#8221;-scheme (shown for WK2 in my master thesis, but not WK3)
+I am also putting the old version back into the comments so the two can be compared.</p>
+<p>Old Version:
+P0 = du[0] #/2.take this out is old ##??</p>
+<p>r21,r22 = R[1][0],R[1][1]
+<a href="#id29"><span class="problematic" id="id30">dw_</span></a>,_dw = dO[self.position][0],dO[self.position][1]</p>
+<p>if self.R1 == None: self.R1 = 1./r21
+if self.Rc == None: self.Rc = self.RT - self.R1 
+tau = 2*self.Rc*self.C
+taudt = tau/dt  
+denom =  taudt + 1. - r22*(self.R1*taudt + self.Rc + self.R1)
+_domega = ((1.-r21*self.R1)*taudt*dw_ + (1.-r22*self.R1)*taudt*_dw + (-1.-taudt+r21*(self.R1*taudt + self.Rc + self.R1))*_domega_ + P0)/denom
+return np.array([_domega_ , _domega])</p>
+<p>Old Version Not taking total R-matrix into account:
+taudt = 2*Rc*C/dt</p>
+<p>a = taudt + 1
+b = (taudt +1)*Z + Rc
+c = 2*Q*(Rc + Z) - 2*(P-self.venousPressure)</p>
+<p>_domega = -((a + b*r21)*domega_ - c)/(a + b*r22)</p>
+<p>self.omegaNew[0] = <a href="#id31"><span class="problematic" id="id32">domega_</span></a>
+self.omegaNew[1] = _domega
+return self.omegaNew</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classBoundaryConditions.expVelocity">
+<em class="property">class </em><code class="descclassname">NetworkLib.classBoundaryConditions.</code><code class="descname">expVelocity</code><a class="headerlink" href="#NetworkLib.classBoundaryConditions.expVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classBoundaryConditions.BoundaryConditionType1" title="NetworkLib.classBoundaryConditions.BoundaryConditionType1"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classBoundaryConditions.BoundaryConditionType1</span></code></a></p>
+<p>Boundary profile - type 1</p>
+<blockquote>
+<div>creates a single gaussian peak signal as found
+in D.Xiu and S.P.Sherwin 2007</div></blockquote>
+<dl class="method">
+<dt id="NetworkLib.classBoundaryConditions.expVelocity.function1">
+<code class="descname">function1</code><span class="sig-paren">(</span><em>t</em>, <em>t0</em>, <em>pulsNum</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classBoundaryConditions.expVelocity.function1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib.classCompliance">
+<span id="networklib-classcompliance-module"></span><h2>NetworkLib.classCompliance module<a class="headerlink" href="#module-NetworkLib.classCompliance" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="NetworkLib.classCompliance.Compliance">
+<em class="property">class </em><code class="descclassname">NetworkLib.classCompliance.</code><code class="descname">Compliance</code><span class="sig-paren">(</span><em>rho</em>, <em>As</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base-Class for the Compliance-models</p>
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.A">
+<code class="descname">A</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.A" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which calculates the area from given pressure
+Input:  Pressure
+Output: Area</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.A_Node">
+<code class="descname">A_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.A_Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which calculates the area from given pressure
+at certain node of the vessel
+Input:  Pressure, node
+Output: Area</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.C">
+<code class="descname">C</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.C" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which calculates the compliance from given pressure
+Input:  Pressure
+Output: Compliance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.C0">
+<code class="descname">C0</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.C0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which calculates the compliance from given reference pressure
+Input:  Pressure ( not used just for consistency needed)
+Output: pre calculated constant Compliance C0vector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.C0_Node">
+<code class="descname">C0_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.C0_Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which calculates the compliance from given reference pressure
+at certain node of the vessel
+Input:  Pressure ( not used just for consistency needed), node
+Output: pre calculated constant Compliance C0vector[node]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.C_Node">
+<code class="descname">C_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.C_Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which calculates the compliance from given pressure
+at certain node of the vessel
+Input:  Pressure, node
+Output: Compliance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Compliance.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>complianceData</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Compliance.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the compliance data using a dictionary in from of 
+complianceData = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classCompliance.Exponential">
+<em class="property">class </em><code class="descclassname">NetworkLib.classCompliance.</code><code class="descname">Exponential</code><span class="sig-paren">(</span><em>rho</em>, <em>As</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Exponential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classCompliance.Compliance" title="NetworkLib.classCompliance.Compliance"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classCompliance.Compliance</span></code></a></p>
+<p>Exponential Compliance Model</p>
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Exponential.A">
+<code class="descname">A</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Exponential.A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Exponential.A_Node">
+<code class="descname">A_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Exponential.A_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Exponential.C">
+<code class="descname">C</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Exponential.C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Exponential.C_Node">
+<code class="descname">C_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Exponential.C_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Exponential.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>complianceDataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Exponential.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilalize compliance class with type specific variables
+and calculate set the marterial parameters</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classCompliance.Hayashi">
+<em class="property">class </em><code class="descclassname">NetworkLib.classCompliance.</code><code class="descname">Hayashi</code><span class="sig-paren">(</span><em>rho</em>, <em>As</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Hayashi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classCompliance.Compliance" title="NetworkLib.classCompliance.Compliance"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classCompliance.Compliance</span></code></a></p>
+<p>Compliance model found in Hayashi et al. 1993</p>
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Hayashi.A">
+<code class="descname">A</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Hayashi.A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Hayashi.A_Node">
+<code class="descname">A_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Hayashi.A_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Hayashi.C">
+<code class="descname">C</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Hayashi.C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Hayashi.C_Node">
+<code class="descname">C_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Hayashi.C_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Hayashi.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>complianceDataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Hayashi.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilalize compliance class with type specific variables
+and calculate set the marterial parameters</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classCompliance.Laplace">
+<em class="property">class </em><code class="descclassname">NetworkLib.classCompliance.</code><code class="descname">Laplace</code><span class="sig-paren">(</span><em>rho</em>, <em>As</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classCompliance.Compliance" title="NetworkLib.classCompliance.Compliance"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classCompliance.Compliance</span></code></a></p>
+<p>Laplace Compliance Model actually Hookean Model</p>
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Laplace.A">
+<code class="descname">A</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace.A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Laplace.A_Node">
+<code class="descname">A_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace.A_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Laplace.C">
+<code class="descname">C</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace.C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Laplace.C_Node">
+<code class="descname">C_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace.C_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Laplace.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>complianceDataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilalize compliance class with type specific variables
+and calculate set the marterial parameters</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classCompliance.Laplace2">
+<em class="property">class </em><code class="descclassname">NetworkLib.classCompliance.</code><code class="descname">Laplace2</code><span class="sig-paren">(</span><em>rho</em>, <em>As</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classCompliance.Laplace" title="NetworkLib.classCompliance.Laplace"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classCompliance.Laplace</span></code></a></p>
+<p>Laplace Compliance Model actually Hookean Model
+same model equations as Laplace, but it calculates the marterial parameter from 
+youngs modulus and wallThickness</p>
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Laplace2.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>complianceDataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Laplace2.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilalize compliance class with type specific variables
+and calculate set the marterial parameters</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="NetworkLib.classCompliance.Reymond">
+<em class="property">class </em><code class="descclassname">NetworkLib.classCompliance.</code><code class="descname">Reymond</code><span class="sig-paren">(</span><em>rho</em>, <em>As</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Reymond" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#NetworkLib.classCompliance.Compliance" title="NetworkLib.classCompliance.Compliance"><code class="xref py py-class docutils literal"><span class="pre">NetworkLib.classCompliance.Compliance</span></code></a></p>
+<p>Compliance model found in Reymond et al. 2009</p>
+<p>special parameter:</p>
+<p>Cs   : compliance at reference pressure of compliance model</p>
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Reymond.A">
+<code class="descname">A</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Reymond.A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Reymond.A_Node">
+<code class="descname">A_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Reymond.A_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Reymond.C">
+<code class="descname">C</code><span class="sig-paren">(</span><em>P</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Reymond.C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Reymond.C_Node">
+<code class="descname">C_Node</code><span class="sig-paren">(</span><em>P</em>, <em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Reymond.C_Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classCompliance.Reymond.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>complianceDataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classCompliance.Reymond.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilalize compliance class with type specific variables
+and calculate set the marterial parameters</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib.classVascularNetwork">
+<span id="networklib-classvascularnetwork-module"></span><h2>NetworkLib.classVascularNetwork module<a class="headerlink" href="#module-NetworkLib.classVascularNetwork" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork">
+<em class="property">class </em><code class="descclassname">NetworkLib.classVascularNetwork.</code><code class="descname">VascularNetwork</code><span class="sig-paren">(</span><em>quiet=False</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class representing a vascular Network
+The vascular network consits out of vessels defined in classVessel::Vessel()
+Additional Topologie, BoundaryConditions and the SimulationContext are saved.</p>
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.addBaroreceptor">
+<code class="descname">addBaroreceptor</code><span class="sig-paren">(</span><em>baroId=None</em>, <em>dataDict=False</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.addBaroreceptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds vessel to the Network
+if no id, a random id is choosen
+if no DataDict, no values are assigned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.addVessel">
+<code class="descname">addVessel</code><span class="sig-paren">(</span><em>vesselId=None</em>, <em>dataDict=False</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.addVessel" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds vessel to the Network
+if no id, a random id is choosen
+if no DataDict, no values are assigned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.applyMothersToVessel">
+<code class="descname">applyMothersToVessel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.applyMothersToVessel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Functions traverses the self.treeTraverseConnections and saves the id of the
+left and right mother of the vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.calculate3DpositionsAndGravity">
+<code class="descname">calculate3DpositionsAndGravity</code><span class="sig-paren">(</span><em>nTsteps=None</em>, <em>nSet=None</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.calculate3DpositionsAndGravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializing the position and rotation of each vessel in 3D space
+Initializing netGravity of the vessels.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.calculateInitialValues">
+<code class="descname">calculateInitialValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.calculateInitialValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function travers the network tree and calculates the 
+esitimates the initial flow and pressure values for each vessel in the Network
+based on the meanflow/pressure value at the root node using the cumultative resistance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.calculateNetworkResistance">
+<code class="descname">calculateNetworkResistance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.calculateNetworkResistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function travers the network tree and calculates the 
+cumultative system resistances Rcum for each vessel in the Network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.calculateReflectionCoefficientConnection">
+<code class="descname">calculateReflectionCoefficientConnection</code><span class="sig-paren">(</span><em>mothers</em>, <em>daughters</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.calculateReflectionCoefficientConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function calculates reflection coefficient of a vessel connection</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>motherVessels   = [ [Id mother1, pressure mother1] ...  ]
+daughterVessels = [ [Id daughter1, pressure daughter1] ...  ]</dd>
+</dl>
+<p>Return: reflectionCoefficient</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.checkDaughterDefinition">
+<code class="descname">checkDaughterDefinition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.checkDaughterDefinition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to check if all daughters are defined in the correct way, i.e. if a vessel has only 1 daughter 
+it should be defined as a leftDaughter, if it is defined as a rightDaughter, this method will rename it!
+additional check if there is a vessel with this id, if not remove daughter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.deleteVessel">
+<code class="descname">deleteVessel</code><span class="sig-paren">(</span><em>inputId</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.deleteVessel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove vessel from network and delete it</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.evaluateConnections">
+<code class="descname">evaluateConnections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.evaluateConnections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to evaluate all connections:</p>
+<ul class="simple">
+<li>check for right daughter definition (call)</li>
+<li>find root of the network (call)</li>
+<li>evalualte all connections link, bifurcation, anastomosis</li>
+<li>apply mothers to all vessels (call)</li>
+</ul>
+<p>Method traverses tree with defined daughters,
+- finds mothers and connections</p>
+<p>-&gt; creates treeTraverseList breadth first traversing list
+-&gt; creates treeTraverseConnections list of connections [ [LeftMother, rightMother, leftDaughter, rightDaughter], ..]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.evaluateWindkesselCompliance">
+<code class="descname">evaluateWindkesselCompliance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.evaluateWindkesselCompliance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.findRootVessel">
+<code class="descname">findRootVessel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.findRootVessel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the root of a network, i.e. the vessel which is not a daughter of any vessel
+Evaluates a startRank for the evaulation of the network</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.findStartAndEndNodes">
+<code class="descname">findStartAndEndNodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.findStartAndEndNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function traverses self.treeTraverseConnections and creates start- and
+end-nodes for all vessels in the network</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.flushSolutionMemory">
+<code class="descname">flushSolutionMemory</code><span class="sig-paren">(</span><em>currentTimeStep</em>, <em>currentMemoryIndex</em>, <em>chunkCount</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.flushSolutionMemory" title="Permalink to this definition">¶</a></dt>
+<dd><p>saving utility function to determine if solution data needs to be sent to the outputfile,
+and to calculate the correct indices between solution memory and the data output file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.getFileAccessIndices">
+<code class="descname">getFileAccessIndices</code><span class="sig-paren">(</span><em>t1</em>, <em>t2</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.getFileAccessIndices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method to convert times to indices in the saved data.
+Input:
+t1,t2 the beginning and ending times to access
+Output:
+nSelectedBegin, nSelectedEnd - the indices corresponding to t1 and t2 in the file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.getSolutionData">
+<code class="descname">getSolutionData</code><span class="sig-paren">(</span><em>vesselId</em>, <em>variables</em>, <em>tvals</em>, <em>xvals</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.getSolutionData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get interpolated solution data
+Inputs:
+vesselId - the vessel from which the data is wanted
+variables - a list of strings with desired variables</p>
+<blockquote>
+<div>&#8220;Pressure&#8221;,
+&#8220;Flow&#8221;, 
+&#8220;Area&#8221;, 
+&#8220;WaveSpeed&#8221;, 
+&#8220;MeanVelocity&#8221;,
+&#8220;ForwardFlow&#8221;,
+&#8220;BackwardFlow&#8221;,
+&#8220;ForwardPressure&#8221;,
+&#8220;BackwardPressure&#8221;</div></blockquote>
+<p>tvals - a numpy array (or python list) of times at which the values are desired
+xvals - a numpy array (or python list) of positions at which the values are desired</p>
+<dl class="docutils">
+<dt>Returns: A dictionary with keys corresponding to the input variables, and values are</dt>
+<dd>numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>variableName</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns value of variable with name : variableName
+States Error if not such variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>initializeForSimulation=False</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes vascular network: the compliance of the vessels and the position of the call function of boundary type 2
+Check if boundaryConditions and globalFluid properties are defined in a rigth manner;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.initializeGravityHydrostaticPressure">
+<code class="descname">initializeGravityHydrostaticPressure</code><span class="sig-paren">(</span><em>initialValues</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.initializeGravityHydrostaticPressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Traverse the tree and initialize the nodes with the steady state hydrostatic pressure distribution</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.initializeNetworkForSimulation">
+<code class="descname">initializeNetworkForSimulation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.initializeNetworkForSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to initialize the network for a simulation.
+Creates hdf5 File and groups for the vessels
+Enforces memory allocation.
+Set initial values for the simulations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.initializeVenousGravityPressure">
+<code class="descname">initializeVenousGravityPressure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.initializeVenousGravityPressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and initialze the venous pressure depending on gravity for the 2 and 3 element windkessel models</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.initializeVenousGravityPressureTime">
+<code class="descname">initializeVenousGravityPressureTime</code><span class="sig-paren">(</span><em>nTsteps</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.initializeVenousGravityPressureTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and initialze the venous pressure depending on gravity for the 2 and 3 element windkessel models</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.linkSolutionData">
+<code class="descname">linkSolutionData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.linkSolutionData" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function prepares the solution data when the network is loaded
+assigning the appropriate information to allow the user to call 
+classVascularNetwork::loadSolutionDataRange to get specific values 
+loaded into memory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.loadSolutionDataRange">
+<code class="descname">loadSolutionDataRange</code><span class="sig-paren">(</span><em>vesselIds=None, tspan=None, mindt=None, values=['All', 'Pressure', 'Flow', 'Area', 'WaveSpeed', 'MeanVelocity', 'Gravity', 'Position', 'Rotation']</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.loadSolutionDataRange" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>loads the solution data of the vessels specified into memory for the times </dt>
+<dd>specified and drops any other previously loaded data.</dd>
+<dt>Inputs:</dt>
+<dd><dl class="first last docutils">
+<dt>vesselIds - a list of vessel Ids to load</dt>
+<dd>if vesselIds = None, data of all vessels is loaded</dd>
+<dt>tspan=[t1,t2] - a time range to load into memory t2 must be greater than t1.</dt>
+<dd>if tspan=None, all times are loaded</dd>
+<dt>values = a dictionary specifying which quantities to load entries keys are booleans and may be &#8216;loadAll&#8217;, </dt>
+<dd>&#8216;loadPressure&#8217;, &#8216;loadArea&#8217;, &#8216;loadFlow&#8217;, &#8216;loadWaveSpeed&#8217;, and &#8216;loadMeanVelocity&#8217;. If &#8216;All&#8217; 
+is in the list all quantities are loaded. Inputs are case insensitive.</dd>
+<dt>mindt := the minimum spacing in time between successively loaded points if </dt>
+<dd>none is specified, the solution time step is used.</dd>
+</dl>
+</dd>
+<dt>Effects and Usage:</dt>
+<dd>loads the specified values into memory such that they may be accessed as
+vascularNetwork.vessels[vesselId].Pressure, etc, returning a matrix of 
+solution values corresponding to the time points in vascularNetwork.tsol.
+Accessing vessels and values not set to be loaded will produce errors.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.optimizeTreeRefelctionCoefficients">
+<code class="descname">optimizeTreeRefelctionCoefficients</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.optimizeTreeRefelctionCoefficients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the optimal reflection coeffiecients for the network</p>
+<p>addapted from article Reymond et al.2009
+(very poor and instable method)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.print3D">
+<code class="descname">print3D</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.print3D" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.saveSolutionData">
+<code class="descname">saveSolutionData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.saveSolutionData" title="Permalink to this definition">¶</a></dt>
+<dd><p># solution of the system over time 
+# {vesselID: { &#8216;Psol&#8217; : [ [solution at N nodes]&lt;-one array for each timePoint , ...  ], ..  }</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.showNetwork">
+<code class="descname">showNetwork</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.showNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>writes Network properties (without vesselData) to console</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.showReflectionCoefficientsConnectionInitialValues">
+<code class="descname">showReflectionCoefficientsConnectionInitialValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.showReflectionCoefficientsConnectionInitialValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.showVessels">
+<code class="descname">showVessels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.showVessels" title="Permalink to this definition">¶</a></dt>
+<dd><p>writes the Vesseldata for each vessel to console (calls printToConsole() from each vessel)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.showWaveSpeedOfNetwork">
+<code class="descname">showWaveSpeedOfNetwork</code><span class="sig-paren">(</span><em>Pressure=None</em>, <em>Flow=None</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.showWaveSpeedOfNetwork" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>vascularNetworkData</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the vascularNetwork data using a dictionary in form of 
+vascularNetworkData = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVascularNetwork.VascularNetwork.updateNetwork">
+<code class="descname">updateNetwork</code><span class="sig-paren">(</span><em>updateDict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVascularNetwork.VascularNetwork.updateNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update vascular Network with an Dictionary: updateDict</p>
+<dl class="docutils">
+<dt>updateDict = {&#8216;vascularNetworkData&#8217;: {},</dt>
+<dd><blockquote class="first">
+<div>&#8216;globalFluid&#8217;: {},
+&#8216;globalFluidPolyChaos&#8217;: {},
+&#8216;communicators&#8217;: {},
+&#8216;vesselData&#8217;: {},
+&#8216;baroreceptors&#8217;: {}}</div></blockquote>
+<p class="last">&#8216;vascularNetworkData&#8217;  := dict with all vascularNetwork variables to update
+&#8216;globalFluid&#8217;          := dict with all global fluid properties
+&#8216;communicators&#8217;        := netCommunicators}
+&#8216;vesselData&#8217;      := { vessel.id : DataDict}
+&#8216;baroreceptors&#8217;      := { baroreceptor.id : DataDict}</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib.classVessel">
+<span id="networklib-classvessel-module"></span><h2>NetworkLib.classVessel module<a class="headerlink" href="#module-NetworkLib.classVessel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="NetworkLib.classVessel.Vessel">
+<em class="property">class </em><code class="descclassname">NetworkLib.classVessel.</code><code class="descname">Vessel</code><span class="sig-paren">(</span><em>Id=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class representing a vessel in a vascular Network</p>
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.Impedance">
+<code class="descname">Impedance</code><span class="sig-paren">(</span><em>Pressure</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.Impedance" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd>Pressure array for the hole grid</dd>
+<dt>Output:</dt>
+<dd>Impedance : 1.0/(c*C))</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.caculatePositionAndGravity">
+<code class="descname">caculatePositionAndGravity</code><span class="sig-paren">(</span><em>n</em>, <em>positionEndMother</em>, <em>rotToGlobalSysMother</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.caculatePositionAndGravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the position and gravity for given time point n and inserts these
+in the corresponding vectos</p>
+<p>Initializing net gravity on the vessels.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.getVariableDict">
+<code class="descname">getVariableDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.getVariableDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a deep copy of the class variable dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>variableName</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns value of variable with name : variableName
+States Error if not such variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>globalFluid</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialisation of the vessel.
+This method calculates and set up, the compliance, gird, fluid and resistance of the Vessel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.initializeForSimulation">
+<code class="descname">initializeForSimulation</code><span class="sig-paren">(</span><em>initialValues</em>, <em>memoryArraySizeTime</em>, <em>nTsteps</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.initializeForSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the solution data and allocates memory for it</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>memoryArraySize := number of time points of one array in memory</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.linearWaveSplitting">
+<code class="descname">linearWaveSplitting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.linearWaveSplitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the linear wave splitting for the hole vessel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.linearWaveSplittingGivenArray">
+<code class="descname">linearWaveSplittingGivenArray</code><span class="sig-paren">(</span><em>pressureArray</em>, <em>flowArray</em>, <em>areaArray</em>, <em>waveSpeedArray</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.linearWaveSplittingGivenArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the linear wave splitting for a given P,Q,A,c (np.arrays) and rho (float) 
+return values are: P_forward, P_backward, Q_forward, Q_backward</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.linearWaveSplittingGridNode">
+<code class="descname">linearWaveSplittingGridNode</code><span class="sig-paren">(</span><em>gridNode</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.linearWaveSplittingGridNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the linear wave splitting for a given grid node</p>
+<dl class="docutils">
+<dt>return</dt>
+<dd>PsolF &lt;np.array&gt;
+PsolB &lt;np.array&gt;
+QsolF &lt;np.array&gt;
+QsolB &lt;np.array&gt;</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classVessel.Vessel.number">
+<code class="descname">number</code><em class="property"> = 0</em><a class="headerlink" href="#NetworkLib.classVessel.Vessel.number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.postProcessing">
+<code class="descname">postProcessing</code><span class="sig-paren">(</span><em>variablesToProcess</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.postProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd>variablesToProcess &lt;list&gt;: [ &lt;str&gt;, ...] variables to process</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.printToConsole">
+<code class="descname">printToConsole</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.printToConsole" title="Permalink to this definition">¶</a></dt>
+<dd><p>writes all variables and their values to the console</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="NetworkLib.classVessel.Vessel.quiet">
+<code class="descname">quiet</code><em class="property"> = False</em><a class="headerlink" href="#NetworkLib.classVessel.Vessel.quiet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>Dict</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.update" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>updates the vessel data using a dictionary in from of </dt>
+<dd>dataDict = {&#8216;variableName&#8217;: value}</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="NetworkLib.classVessel.Vessel.waveSpeed">
+<code class="descname">waveSpeed</code><span class="sig-paren">(</span><em>Area</em>, <em>Compliance</em>, <em>sqrt=&lt;ufunc 'sqrt'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.classVessel.Vessel.waveSpeed" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd>Area: Area array or float at one ID
+Compliance: Compliance array or float at one ID 
+NOTE: it does not check if len(Area) == len(Compliance)</dd>
+<dt>Output:</dt>
+<dd>waveSpeed : sqrt(A/(rho*C))</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib.moduleGrids">
+<span id="networklib-modulegrids-module"></span><h2>NetworkLib.moduleGrids module<a class="headerlink" href="#module-NetworkLib.moduleGrids" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="NetworkLib.moduleGrids.cone">
+<code class="descclassname">NetworkLib.moduleGrids.</code><code class="descname">cone</code><span class="sig-paren">(</span><em>length</em>, <em>radiusA</em>, <em>radiusB</em>, <em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.moduleGrids.cone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate a Cone grid 
+with a radiusA at the proximal end and radiusB at the distal end</p>
+<p>Input:  vessel-length, radiusA, radiusB, number of Gridpoints
+Output:  z  = gridpoint-array</p>
+<blockquote>
+<div>dz = spacing array
+A0 = area-array with given radius</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="NetworkLib.moduleGrids.constriction">
+<code class="descclassname">NetworkLib.moduleGrids.</code><code class="descname">constriction</code><span class="sig-paren">(</span><em>length</em>, <em>radiusA</em>, <em>radiusB</em>, <em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.moduleGrids.constriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate a constricted grid 
+with a radiusA as proximal and distal radius and radiusB
+as constriction radius; the constriction is calculated via a cos-function</p>
+<p>Input:  vessel-length, radiusA, radiusB, number of Gridpoints
+Output:  z  = gridpoint-array</p>
+<blockquote>
+<div>dz = spacing array
+A0 = area-array with given radius</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="NetworkLib.moduleGrids.uniform">
+<code class="descclassname">NetworkLib.moduleGrids.</code><code class="descname">uniform</code><span class="sig-paren">(</span><em>length</em>, <em>radiusA</em>, <em>radiusB</em>, <em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.moduleGrids.uniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate a Uniform grid 
+with a single radius over the hole vessel length</p>
+<p>Input:  vessel-length, radiusA, radiusB, number of Gridpoints
+Output:  z  = gridpoint-array</p>
+<blockquote>
+<div>dz = spacing array
+A0 = area-array with given radius</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib.physiologicalData">
+<span id="networklib-physiologicaldata-module"></span><h2>NetworkLib.physiologicalData module<a class="headerlink" href="#module-NetworkLib.physiologicalData" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="NetworkLib.physiologicalData.aorticFlowPressure">
+<em class="property">class </em><code class="descclassname">NetworkLib.physiologicalData.</code><code class="descname">aorticFlowPressure</code><span class="sig-paren">(</span><em>dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#NetworkLib.physiologicalData.aorticFlowPressure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-NetworkLib">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-NetworkLib" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Solver.html" class="btn btn-neutral float-right" title="Solver package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="systemCheck.html" class="btn btn-neutral" title="systemCheck module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, NTNU.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

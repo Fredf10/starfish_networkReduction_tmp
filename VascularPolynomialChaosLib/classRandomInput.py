@@ -1,4 +1,4 @@
-from yum.update_md import UpdateMetadata
+#from yum.update_md import UpdateMetadata
 
 
 

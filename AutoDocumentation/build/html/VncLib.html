@@ -1,0 +1,1339 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>VncLib package &mdash; STARFiSh 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="STARFiSh 0.1.0 documentation" href="index.html"/>
+        <link rel="prev" title="Visualisation package" href="Visualisation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> STARFiSh
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Main.html">Main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualize.html">Visualize module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vnc.html">vnc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systemCheck.html">systemCheck module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NetworkLib.html">NetworkLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.ODESolver">NetworkLib.ODESolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classBoundaryConditions">NetworkLib.classBoundaryConditions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classCompliance">NetworkLib.classCompliance module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVascularNetwork">NetworkLib.classVascularNetwork module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVessel">NetworkLib.classVessel module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.moduleGrids">NetworkLib.moduleGrids module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.physiologicalData">NetworkLib.physiologicalData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.class1DflowSolver">Solver.class1DflowSolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBaroreceptor">Solver.classBaroreceptor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classBoundarys">Solver.classBoundarys module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classCommunicators">Solver.classCommunicators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classConnections">Solver.classConnections module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classDataHandler">Solver.classDataHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classFields">Solver.classFields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classSystemEquations">Solver.classSystemEquations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classTimer">Solver.classTimer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver.classVenousPool">Solver.classVenousPool module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solver.html#module-Solver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="UtilityLib.html">UtilityLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.constants">UtilityLib.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleCSV">UtilityLib.moduleCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleFilePathHandler">UtilityLib.moduleFilePathHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleStartUp">UtilityLib.moduleStartUp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleXML">UtilityLib.moduleXML module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml040">UtilityLib.networkXml040 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml041">UtilityLib.networkXml041 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml042">UtilityLib.networkXml042 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.processing">UtilityLib.processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#utilitylib-savesimulationdatatocsv-module">UtilityLib.saveSimulationDataToCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VascularPolynomialChaosLib.html">VascularPolynomialChaosLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classdistributionmanager-module">VascularPolynomialChaosLib.classDistributionManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterest-module">VascularPolynomialChaosLib.classLocationOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterestmanager-module">VascularPolynomialChaosLib.classLocationOfInterestManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classquantityofinterest-module">VascularPolynomialChaosLib.classQuantityOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInput">VascularPolynomialChaosLib.classRandomInput module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInputManager">VascularPolynomialChaosLib.classRandomInputManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classVpcConfiguration">VascularPolynomialChaosLib.classVpcConfiguration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleBatchSimulationManager">VascularPolynomialChaosLib.moduleBatchSimulationManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC">VascularPolynomialChaosLib.moduleFilePathHandlerVPC module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Visualisation.html">Visualisation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class2dVisualisation">Visualisation.class2dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#visualisation-class2dvisualisationold-module">Visualisation.class2dVisualisationOld module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dControlGUI">Visualisation.class3dControlGUI module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dLUT">Visualisation.class3dLUT module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dVisualisation">Visualisation.class3dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.classRealTimeVisualisation">Visualisation.classRealTimeVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">VncLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VncLib.classGraph">VncLib.classGraph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VncLib.xdot">VncLib.xdot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-VncLib">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">STARFiSh</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>VncLib package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/VncLib.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="vnclib-package">
+<h1>VncLib package<a class="headerlink" href="#vnclib-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-VncLib.classGraph">
+<span id="vnclib-classgraph-module"></span><h2>VncLib.classGraph module<a class="headerlink" href="#module-VncLib.classGraph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="VncLib.classGraph.Graph">
+<em class="property">class </em><code class="descclassname">VncLib.classGraph.</code><code class="descname">Graph</code><a class="headerlink" href="#VncLib.classGraph.Graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="VncLib.classGraph.Graph.addNodeToGraph">
+<code class="descname">addNodeToGraph</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.classGraph.Graph.addNodeToGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.classGraph.Graph.addVesselToGraph">
+<code class="descname">addVesselToGraph</code><span class="sig-paren">(</span><em>name</em>, <em>startNode</em>, <em>endNode</em>, <em>typeOfDaughter</em>, <em>visible</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.classGraph.Graph.addVesselToGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.classGraph.Graph.add_bc">
+<code class="descname">add_bc</code><span class="sig-paren">(</span><em>networkNode</em>, <em>bcNode</em>, <em>name</em>, <em>rootCON=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.classGraph.Graph.add_bc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.classGraph.Graph.getGraph">
+<code class="descname">getGraph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.classGraph.Graph.getGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.classGraph.Graph.resetGraph">
+<code class="descname">resetGraph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.classGraph.Graph.resetGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.classGraph.Graph.update_graph">
+<code class="descname">update_graph</code><span class="sig-paren">(</span><em>vascularNetwork</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.classGraph.Graph.update_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.classGraph.MyDotWindow">
+<em class="property">class </em><code class="descclassname">VncLib.classGraph.</code><code class="descname">MyDotWindow</code><a class="headerlink" href="#VncLib.classGraph.MyDotWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.DotWindow" title="VncLib.xdot.DotWindow"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.DotWindow</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-VncLib.xdot">
+<span id="vnclib-xdot-module"></span><h2>VncLib.xdot module<a class="headerlink" href="#module-VncLib.xdot" title="Permalink to this headline">¶</a></h2>
+<p>Visualize dot graphs via the xdot format.</p>
+<dl class="class">
+<dt id="VncLib.xdot.Animation">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Animation</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Animation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="VncLib.xdot.Animation.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Animation.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Animation.step">
+<code class="descname">step</code><em class="property"> = 0.03</em><a class="headerlink" href="#VncLib.xdot.Animation.step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Animation.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Animation.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Animation.tick">
+<code class="descname">tick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Animation.tick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.BezierShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">BezierShape</code><span class="sig-paren">(</span><em>pen</em>, <em>points</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.BezierShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.BezierShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.BezierShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.CompoundShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">CompoundShape</code><span class="sig-paren">(</span><em>shapes</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.CompoundShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.CompoundShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.CompoundShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.DotLexer">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">DotLexer</code><span class="sig-paren">(</span><em>buf=None</em>, <em>pos=0</em>, <em>filename=None</em>, <em>fp=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotLexer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Lexer" title="VncLib.xdot.Lexer"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Lexer</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.DotLexer.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>type</em>, <em>text</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotLexer.filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotLexer.scanner">
+<code class="descname">scanner</code><em class="property"> = &lt;VncLib.xdot.DotScanner instance&gt;</em><a class="headerlink" href="#VncLib.xdot.DotLexer.scanner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.DotParser">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">DotParser</code><span class="sig-paren">(</span><em>lexer</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Parser" title="VncLib.xdot.Parser"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Parser</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.handle_edge">
+<code class="descname">handle_edge</code><span class="sig-paren">(</span><em>src_id</em>, <em>dst_id</em>, <em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.handle_edge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.handle_graph">
+<code class="descname">handle_graph</code><span class="sig-paren">(</span><em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.handle_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.handle_node">
+<code class="descname">handle_node</code><span class="sig-paren">(</span><em>id</em>, <em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.handle_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_attr">
+<code class="descname">parse_attr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_attr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_attrs">
+<code class="descname">parse_attrs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_attrs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_graph">
+<code class="descname">parse_graph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_id">
+<code class="descname">parse_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_node_id">
+<code class="descname">parse_node_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_node_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_stmt">
+<code class="descname">parse_stmt</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_stmt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotParser.parse_subgraph">
+<code class="descname">parse_subgraph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotParser.parse_subgraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.DotScanner">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">DotScanner</code><a class="headerlink" href="#VncLib.xdot.DotScanner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Scanner" title="VncLib.xdot.Scanner"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Scanner</span></code></a></p>
+<dl class="attribute">
+<dt id="VncLib.xdot.DotScanner.ignorecase">
+<code class="descname">ignorecase</code><em class="property"> = True</em><a class="headerlink" href="#VncLib.xdot.DotScanner.ignorecase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotScanner.literals">
+<code class="descname">literals</code><em class="property"> = {'node': 16, 'subgraph': 18, 'digraph': 15, 'graph': 14, 'strict': 13, 'edge': 17}</em><a class="headerlink" href="#VncLib.xdot.DotScanner.literals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotScanner.symbols">
+<code class="descname">symbols</code><em class="property"> = {'=': 11, ';': 10, '}': 7, '[': 4, ':': 9, ']': 5, '{': 6, '+': 12, ',': 8}</em><a class="headerlink" href="#VncLib.xdot.DotScanner.symbols" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotScanner.tokens">
+<code class="descname">tokens</code><em class="property"> = [(-2, '[ \\t\\f\\r\\n\\v]+|//[^\\r\\n]*|/\\*.*?\\*/|#[^\\r\\n]*', False), (0, '[a-zA-Z_\\x80-\\xff][a-zA-Z0-9_\\x80-\\xff]*', True), (0, '-?(?:\\.[0-9]+|[0-9]+(?:\\.[0-9]*)?)', False), (1, '&quot;[^&quot;\\\\]*(?:\\\\.[^&quot;\\\\]*)*&quot;', False), (2, '&lt;[^&lt;&gt;]*(?:&lt;[^&lt;&gt;]*&gt;[^&lt;&gt;]*)*&gt;', False), (3, '-[&gt;-]', False)]</em><a class="headerlink" href="#VncLib.xdot.DotScanner.tokens" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.DotWidget">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">DotWidget</code><a class="headerlink" href="#VncLib.xdot.DotWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">gtk.DrawingArea</span></code></p>
+<p>PyGTK widget that draws dot graphs.</p>
+<dl class="attribute">
+<dt id="VncLib.xdot.DotWidget.POS_INCREMENT">
+<code class="descname">POS_INCREMENT</code><em class="property"> = 100</em><a class="headerlink" href="#VncLib.xdot.DotWidget.POS_INCREMENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotWidget.ZOOM_INCREMENT">
+<code class="descname">ZOOM_INCREMENT</code><em class="property"> = 1.25</em><a class="headerlink" href="#VncLib.xdot.DotWidget.ZOOM_INCREMENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotWidget.ZOOM_TO_FIT_MARGIN">
+<code class="descname">ZOOM_TO_FIT_MARGIN</code><em class="property"> = 12</em><a class="headerlink" href="#VncLib.xdot.DotWidget.ZOOM_TO_FIT_MARGIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.animate_to">
+<code class="descname">animate_to</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.animate_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.do_expose_event">
+<code class="descname">do_expose_event</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.do_expose_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotWidget.filter">
+<code class="descname">filter</code><em class="property"> = 'dot'</em><a class="headerlink" href="#VncLib.xdot.DotWidget.filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.get_current_pos">
+<code class="descname">get_current_pos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.get_current_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.get_drag_action">
+<code class="descname">get_drag_action</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.get_drag_action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.get_jump">
+<code class="descname">get_jump</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.get_jump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.get_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.is_click">
+<code class="descname">is_click</code><span class="sig-paren">(</span><em>event</em>, <em>click_fuzz=4</em>, <em>click_timeout=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.is_click" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_area_button_press">
+<code class="descname">on_area_button_press</code><span class="sig-paren">(</span><em>area</em>, <em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_area_button_press" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_area_button_release">
+<code class="descname">on_area_button_release</code><span class="sig-paren">(</span><em>area</em>, <em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_area_button_release" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_area_motion_notify">
+<code class="descname">on_area_motion_notify</code><span class="sig-paren">(</span><em>area</em>, <em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_area_motion_notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_area_scroll_event">
+<code class="descname">on_area_scroll_event</code><span class="sig-paren">(</span><em>area</em>, <em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_area_scroll_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_area_size_allocate">
+<code class="descname">on_area_size_allocate</code><span class="sig-paren">(</span><em>area</em>, <em>allocation</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_area_size_allocate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_key_press_event">
+<code class="descname">on_key_press_event</code><span class="sig-paren">(</span><em>widget</em>, <em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_key_press_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_zoom_100">
+<code class="descname">on_zoom_100</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_zoom_100" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_zoom_fit">
+<code class="descname">on_zoom_fit</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_zoom_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_zoom_in">
+<code class="descname">on_zoom_in</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_zoom_in" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.on_zoom_out">
+<code class="descname">on_zoom_out</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.on_zoom_out" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.reload">
+<code class="descname">reload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.reload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.run_filter">
+<code class="descname">run_filter</code><span class="sig-paren">(</span><em>dotcode</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.run_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.set_current_pos">
+<code class="descname">set_current_pos</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.set_current_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.set_dotcode">
+<code class="descname">set_dotcode</code><span class="sig-paren">(</span><em>dotcode</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.set_dotcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.set_filter">
+<code class="descname">set_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.set_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.set_highlight">
+<code class="descname">set_highlight</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.set_highlight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.set_vascularNetwork">
+<code class="descname">set_vascularNetwork</code><span class="sig-paren">(</span><em>vascularNetwork</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.set_vascularNetwork" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.set_xdotcode">
+<code class="descname">set_xdotcode</code><span class="sig-paren">(</span><em>xdotcode</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.set_xdotcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.window2graph">
+<code class="descname">window2graph</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.window2graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.zoom_image">
+<code class="descname">zoom_image</code><span class="sig-paren">(</span><em>zoom_ratio</em>, <em>center=False</em>, <em>pos=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.zoom_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.zoom_to_area">
+<code class="descname">zoom_to_area</code><span class="sig-paren">(</span><em>x1</em>, <em>y1</em>, <em>x2</em>, <em>y2</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.zoom_to_area" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWidget.zoom_to_fit">
+<code class="descname">zoom_to_fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWidget.zoom_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.DotWindow">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">DotWindow</code><a class="headerlink" href="#VncLib.xdot.DotWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">gtk.Window</span></code></p>
+<dl class="attribute">
+<dt id="VncLib.xdot.DotWindow.base_title">
+<code class="descname">base_title</code><em class="property"> = 'Dot Viewer'</em><a class="headerlink" href="#VncLib.xdot.DotWindow.base_title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.on_open">
+<code class="descname">on_open</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.on_open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.on_reload">
+<code class="descname">on_reload</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.on_reload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.open_file">
+<code class="descname">open_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.open_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.set_dotcode">
+<code class="descname">set_dotcode</code><span class="sig-paren">(</span><em>dotcode</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.set_dotcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.set_filter">
+<code class="descname">set_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.set_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.set_xdotcode">
+<code class="descname">set_xdotcode</code><span class="sig-paren">(</span><em>xdotcode</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.set_xdotcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.DotWindow.ui">
+<code class="descname">ui</code><em class="property"> = '\n    &lt;ui&gt;\n        &lt;toolbar name=&quot;ToolBar&quot;&gt;\n            &lt;toolitem action=&quot;Open&quot;/&gt;\n            &lt;toolitem action=&quot;Reload&quot;/&gt;\n            &lt;separator/&gt;\n            &lt;toolitem action=&quot;ZoomIn&quot;/&gt;\n            &lt;toolitem action=&quot;ZoomOut&quot;/&gt;\n            &lt;toolitem action=&quot;ZoomFit&quot;/&gt;\n            &lt;toolitem action=&quot;Zoom100&quot;/&gt;\n        &lt;/toolbar&gt;\n    &lt;/ui&gt;\n    '</em><a class="headerlink" href="#VncLib.xdot.DotWindow.ui" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DotWindow.update_title">
+<code class="descname">update_title</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DotWindow.update_title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.DragAction">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">DragAction</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.abort">
+<code class="descname">abort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.abort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.drag">
+<code class="descname">drag</code><span class="sig-paren">(</span><em>deltax</em>, <em>deltay</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.drag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.on_button_press">
+<code class="descname">on_button_press</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.on_button_press" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.on_button_release">
+<code class="descname">on_button_release</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.on_button_release" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.on_motion_notify">
+<code class="descname">on_motion_notify</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.on_motion_notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.DragAction.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.DragAction.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Edge">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Edge</code><span class="sig-paren">(</span><em>src</em>, <em>dst</em>, <em>points</em>, <em>shapes</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Element" title="VncLib.xdot.Element"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Element</span></code></a></p>
+<dl class="attribute">
+<dt id="VncLib.xdot.Edge.RADIUS">
+<code class="descname">RADIUS</code><em class="property"> = 10</em><a class="headerlink" href="#VncLib.xdot.Edge.RADIUS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Edge.get_jump">
+<code class="descname">get_jump</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Edge.get_jump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Edge.points">
+<code class="descname">points</code><em class="property"> = None</em><a class="headerlink" href="#VncLib.xdot.Edge.points" title="Permalink to this definition">¶</a></dt>
+<dd><p>added by vinzenz eck // <a class="reference external" href="mailto:vinzenz&#37;&#52;&#48;eck-mail&#46;eu">vinzenz<span>&#64;</span>eck-mail<span>&#46;</span>eu</a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Element">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Element</code><span class="sig-paren">(</span><em>shapes</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.CompoundShape" title="VncLib.xdot.CompoundShape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.CompoundShape</span></code></a></p>
+<p>Base class for graph nodes and edges.</p>
+<dl class="method">
+<dt id="VncLib.xdot.Element.get_jump">
+<code class="descname">get_jump</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Element.get_jump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Element.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Element.get_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.EllipseShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">EllipseShape</code><span class="sig-paren">(</span><em>pen</em>, <em>x0</em>, <em>y0</em>, <em>w</em>, <em>h</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.EllipseShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.EllipseShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.EllipseShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Graph">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Graph</code><span class="sig-paren">(</span><em>width=1</em>, <em>height=1</em>, <em>shapes=()</em>, <em>nodes=()</em>, <em>edges=()</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.Graph.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight_items=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Graph.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Graph.get_jump">
+<code class="descname">get_jump</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Graph.get_jump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Graph.get_size">
+<code class="descname">get_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Graph.get_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Graph.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Graph.get_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.ImageShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">ImageShape</code><span class="sig-paren">(</span><em>pen</em>, <em>x0</em>, <em>y0</em>, <em>w</em>, <em>h</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ImageShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.ImageShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ImageShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Jump">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Jump</code><span class="sig-paren">(</span><em>item</em>, <em>x</em>, <em>y</em>, <em>highlight=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Lexer">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Lexer</code><span class="sig-paren">(</span><em>buf=None</em>, <em>pos=0</em>, <em>filename=None</em>, <em>fp=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Lexer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="VncLib.xdot.Lexer.consume">
+<code class="descname">consume</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Lexer.consume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Lexer.newline_re">
+<code class="descname">newline_re</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#VncLib.xdot.Lexer.newline_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Lexer.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Lexer.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Lexer.scanner">
+<code class="descname">scanner</code><em class="property"> = None</em><a class="headerlink" href="#VncLib.xdot.Lexer.scanner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Lexer.tabsize">
+<code class="descname">tabsize</code><em class="property"> = 8</em><a class="headerlink" href="#VncLib.xdot.Lexer.tabsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.LineShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">LineShape</code><span class="sig-paren">(</span><em>pen</em>, <em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.LineShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.LineShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.LineShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.LinearAnimation">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">LinearAnimation</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.LinearAnimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Animation" title="VncLib.xdot.Animation"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Animation</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.LinearAnimation.animate">
+<code class="descname">animate</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.LinearAnimation.animate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.LinearAnimation.duration">
+<code class="descname">duration</code><em class="property"> = 0.6</em><a class="headerlink" href="#VncLib.xdot.LinearAnimation.duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.LinearAnimation.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.LinearAnimation.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.LinearAnimation.tick">
+<code class="descname">tick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.LinearAnimation.tick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.MoveToAnimation">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">MoveToAnimation</code><span class="sig-paren">(</span><em>dot_widget</em>, <em>target_x</em>, <em>target_y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.MoveToAnimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.LinearAnimation" title="VncLib.xdot.LinearAnimation"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.LinearAnimation</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.MoveToAnimation.animate">
+<code class="descname">animate</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.MoveToAnimation.animate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.NoAnimation">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">NoAnimation</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.NoAnimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Animation" title="VncLib.xdot.Animation"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Animation</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.NoAnimation.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.NoAnimation.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.NoAnimation.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.NoAnimation.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Node">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Node</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>w</em>, <em>h</em>, <em>shapes</em>, <em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Element" title="VncLib.xdot.Element"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Element</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.Node.get_jump">
+<code class="descname">get_jump</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Node.get_jump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Node.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Node.get_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Node.is_inside">
+<code class="descname">is_inside</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Node.is_inside" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Node.url">
+<code class="descname">url</code><em class="property"> = None</em><a class="headerlink" href="#VncLib.xdot.Node.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>added by vinzenz eck // <a class="reference external" href="mailto:vinzenz&#37;&#52;&#48;eck-mail&#46;eu">vinzenz<span>&#64;</span>eck-mail<span>&#46;</span>eu</a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.NullAction">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">NullAction</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.NullAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.DragAction" title="VncLib.xdot.DragAction"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.DragAction</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.NullAction.on_motion_notify">
+<code class="descname">on_motion_notify</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.NullAction.on_motion_notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.PanAction">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">PanAction</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PanAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.DragAction" title="VncLib.xdot.DragAction"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.DragAction</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.PanAction.abort">
+<code class="descname">abort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PanAction.abort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.PanAction.drag">
+<code class="descname">drag</code><span class="sig-paren">(</span><em>deltax</em>, <em>deltay</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PanAction.drag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.PanAction.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PanAction.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.PanAction.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PanAction.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="VncLib.xdot.ParseError">
+<em class="property">exception </em><code class="descclassname">VncLib.xdot.</code><code class="descname">ParseError</code><span class="sig-paren">(</span><em>msg=None</em>, <em>filename=None</em>, <em>line=None</em>, <em>col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ParseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Parser">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Parser</code><span class="sig-paren">(</span><em>lexer</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Parser" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="VncLib.xdot.Parser.consume">
+<code class="descname">consume</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Parser.consume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Parser.match">
+<code class="descname">match</code><span class="sig-paren">(</span><em>type</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Parser.match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Parser.skip">
+<code class="descname">skip</code><span class="sig-paren">(</span><em>type</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Parser.skip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Pen">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Pen</code><a class="headerlink" href="#VncLib.xdot.Pen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store pen attributes.</p>
+<dl class="method">
+<dt id="VncLib.xdot.Pen.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Pen.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of this pen.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Pen.highlighted">
+<code class="descname">highlighted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Pen.highlighted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.PolygonShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">PolygonShape</code><span class="sig-paren">(</span><em>pen</em>, <em>points</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PolygonShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.PolygonShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.PolygonShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Scanner">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Scanner</code><a class="headerlink" href="#VncLib.xdot.Scanner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stateless scanner.</p>
+<dl class="attribute">
+<dt id="VncLib.xdot.Scanner.ignorecase">
+<code class="descname">ignorecase</code><em class="property"> = False</em><a class="headerlink" href="#VncLib.xdot.Scanner.ignorecase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Scanner.literals">
+<code class="descname">literals</code><em class="property"> = {}</em><a class="headerlink" href="#VncLib.xdot.Scanner.literals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Scanner.next">
+<code class="descname">next</code><span class="sig-paren">(</span><em>buf</em>, <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Scanner.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Scanner.symbols">
+<code class="descname">symbols</code><em class="property"> = {}</em><a class="headerlink" href="#VncLib.xdot.Scanner.symbols" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.Scanner.tokens">
+<code class="descname">tokens</code><em class="property"> = []</em><a class="headerlink" href="#VncLib.xdot.Scanner.tokens" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Shape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Shape</code><a class="headerlink" href="#VncLib.xdot.Shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract base class for all the drawing shapes.</p>
+<dl class="method">
+<dt id="VncLib.xdot.Shape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Shape.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw this shape with the given cairo context</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.Shape.select_pen">
+<code class="descname">select_pen</code><span class="sig-paren">(</span><em>highlight</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Shape.select_pen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.TextShape">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">TextShape</code><span class="sig-paren">(</span><em>pen</em>, <em>x</em>, <em>y</em>, <em>j</em>, <em>w</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.TextShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.Shape" title="VncLib.xdot.Shape"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.Shape</span></code></a></p>
+<dl class="attribute">
+<dt id="VncLib.xdot.TextShape.CENTER">
+<code class="descname">CENTER</code><em class="property"> = 0</em><a class="headerlink" href="#VncLib.xdot.TextShape.CENTER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.TextShape.LEFT">
+<code class="descname">LEFT</code><em class="property"> = -1</em><a class="headerlink" href="#VncLib.xdot.TextShape.LEFT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VncLib.xdot.TextShape.RIGHT">
+<code class="descname">RIGHT</code><em class="property"> = 1</em><a class="headerlink" href="#VncLib.xdot.TextShape.RIGHT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.TextShape.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em>, <em>highlight=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.TextShape.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Token">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Token</code><span class="sig-paren">(</span><em>type</em>, <em>text</em>, <em>line</em>, <em>col</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.Url">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">Url</code><span class="sig-paren">(</span><em>item</em>, <em>url</em>, <em>highlight=None</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.Url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.XDotAttrParser">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">XDotAttrParser</code><span class="sig-paren">(</span><em>parser</em>, <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parser for xdot drawing attributes.
+See also:
+- <a class="reference external" href="http://www.graphviz.org/doc/info/output.html#d:xdot">http://www.graphviz.org/doc/info/output.html#d:xdot</a></p>
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_bezier">
+<code class="descname">handle_bezier</code><span class="sig-paren">(</span><em>points</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_bezier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_color">
+<code class="descname">handle_color</code><span class="sig-paren">(</span><em>color</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_ellipse">
+<code class="descname">handle_ellipse</code><span class="sig-paren">(</span><em>x0</em>, <em>y0</em>, <em>w</em>, <em>h</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_ellipse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_font">
+<code class="descname">handle_font</code><span class="sig-paren">(</span><em>size</em>, <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_font" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_image">
+<code class="descname">handle_image</code><span class="sig-paren">(</span><em>x0</em>, <em>y0</em>, <em>w</em>, <em>h</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_line">
+<code class="descname">handle_line</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_linestyle">
+<code class="descname">handle_linestyle</code><span class="sig-paren">(</span><em>style</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_linestyle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_linewidth">
+<code class="descname">handle_linewidth</code><span class="sig-paren">(</span><em>linewidth</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_linewidth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_polygon">
+<code class="descname">handle_polygon</code><span class="sig-paren">(</span><em>points</em>, <em>filled=False</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_polygon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.handle_text">
+<code class="descname">handle_text</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>j</em>, <em>w</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.handle_text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.lookup_color">
+<code class="descname">lookup_color</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.lookup_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_code">
+<code class="descname">read_code</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_color">
+<code class="descname">read_color</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_float">
+<code class="descname">read_float</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_float" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_number">
+<code class="descname">read_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_point">
+<code class="descname">read_point</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_polygon">
+<code class="descname">read_polygon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_polygon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.read_text">
+<code class="descname">read_text</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.read_text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotAttrParser.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotAttrParser.transform" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.XDotParser">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">XDotParser</code><span class="sig-paren">(</span><em>xdotcode</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.DotParser" title="VncLib.xdot.DotParser"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.DotParser</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.handle_edge">
+<code class="descname">handle_edge</code><span class="sig-paren">(</span><em>src_id</em>, <em>dst_id</em>, <em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.handle_edge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.handle_graph">
+<code class="descname">handle_graph</code><span class="sig-paren">(</span><em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.handle_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.handle_node">
+<code class="descname">handle_node</code><span class="sig-paren">(</span><em>id</em>, <em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.handle_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.parse_edge_pos">
+<code class="descname">parse_edge_pos</code><span class="sig-paren">(</span><em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.parse_edge_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.parse_node_pos">
+<code class="descname">parse_node_pos</code><span class="sig-paren">(</span><em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.parse_node_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.XDotParser.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.XDotParser.transform" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.ZoomAction">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">ZoomAction</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.DragAction" title="VncLib.xdot.DragAction"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.DragAction</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.ZoomAction.drag">
+<code class="descname">drag</code><span class="sig-paren">(</span><em>deltax</em>, <em>deltay</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAction.drag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.ZoomAction.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAction.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.ZoomAreaAction">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">ZoomAreaAction</code><span class="sig-paren">(</span><em>dot_widget</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAreaAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.DragAction" title="VncLib.xdot.DragAction"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.DragAction</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.ZoomAreaAction.abort">
+<code class="descname">abort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAreaAction.abort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.ZoomAreaAction.drag">
+<code class="descname">drag</code><span class="sig-paren">(</span><em>deltax</em>, <em>deltay</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAreaAction.drag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.ZoomAreaAction.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>cr</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAreaAction.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VncLib.xdot.ZoomAreaAction.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomAreaAction.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VncLib.xdot.ZoomToAnimation">
+<em class="property">class </em><code class="descclassname">VncLib.xdot.</code><code class="descname">ZoomToAnimation</code><span class="sig-paren">(</span><em>dot_widget</em>, <em>target_x</em>, <em>target_y</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomToAnimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#VncLib.xdot.MoveToAnimation" title="VncLib.xdot.MoveToAnimation"><code class="xref py py-class docutils literal"><span class="pre">VncLib.xdot.MoveToAnimation</span></code></a></p>
+<dl class="method">
+<dt id="VncLib.xdot.ZoomToAnimation.animate">
+<code class="descname">animate</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.ZoomToAnimation.animate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="VncLib.xdot.main">
+<code class="descclassname">VncLib.xdot.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VncLib.xdot.square_distance">
+<code class="descclassname">VncLib.xdot.</code><code class="descname">square_distance</code><span class="sig-paren">(</span><em>x1</em>, <em>y1</em>, <em>x2</em>, <em>y2</em><span class="sig-paren">)</span><a class="headerlink" href="#VncLib.xdot.square_distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-VncLib">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-VncLib" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="Visualisation.html" class="btn btn-neutral" title="Visualisation package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, NTNU.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,977 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Solver package &mdash; STARFiSh 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="STARFiSh 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="UtilityLib package" href="UtilityLib.html"/>
+        <link rel="prev" title="NetworkLib package" href="NetworkLib.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> STARFiSh
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Main.html">Main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualize.html">Visualize module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vnc.html">vnc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systemCheck.html">systemCheck module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NetworkLib.html">NetworkLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.ODESolver">NetworkLib.ODESolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classBoundaryConditions">NetworkLib.classBoundaryConditions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classCompliance">NetworkLib.classCompliance module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVascularNetwork">NetworkLib.classVascularNetwork module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.classVessel">NetworkLib.classVessel module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.moduleGrids">NetworkLib.moduleGrids module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib.physiologicalData">NetworkLib.physiologicalData module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NetworkLib.html#module-NetworkLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Solver package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.class1DflowSolver">Solver.class1DflowSolver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classBaroreceptor">Solver.classBaroreceptor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classBoundarys">Solver.classBoundarys module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classCommunicators">Solver.classCommunicators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classConnections">Solver.classConnections module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classDataHandler">Solver.classDataHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classFields">Solver.classFields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classSystemEquations">Solver.classSystemEquations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classTimer">Solver.classTimer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver.classVenousPool">Solver.classVenousPool module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-Solver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="UtilityLib.html">UtilityLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.constants">UtilityLib.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleCSV">UtilityLib.moduleCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleFilePathHandler">UtilityLib.moduleFilePathHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleStartUp">UtilityLib.moduleStartUp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.moduleXML">UtilityLib.moduleXML module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml040">UtilityLib.networkXml040 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml041">UtilityLib.networkXml041 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.networkXml042">UtilityLib.networkXml042 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib.processing">UtilityLib.processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#utilitylib-savesimulationdatatocsv-module">UtilityLib.saveSimulationDataToCSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UtilityLib.html#module-UtilityLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VascularPolynomialChaosLib.html">VascularPolynomialChaosLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classdistributionmanager-module">VascularPolynomialChaosLib.classDistributionManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterest-module">VascularPolynomialChaosLib.classLocationOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classlocationofinterestmanager-module">VascularPolynomialChaosLib.classLocationOfInterestManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#vascularpolynomialchaoslib-classquantityofinterest-module">VascularPolynomialChaosLib.classQuantityOfInterest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInput">VascularPolynomialChaosLib.classRandomInput module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classRandomInputManager">VascularPolynomialChaosLib.classRandomInputManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.classVpcConfiguration">VascularPolynomialChaosLib.classVpcConfiguration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleBatchSimulationManager">VascularPolynomialChaosLib.moduleBatchSimulationManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib.moduleFilePathHandlerVPC">VascularPolynomialChaosLib.moduleFilePathHandlerVPC module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VascularPolynomialChaosLib.html#module-VascularPolynomialChaosLib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Visualisation.html">Visualisation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class2dVisualisation">Visualisation.class2dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#visualisation-class2dvisualisationold-module">Visualisation.class2dVisualisationOld module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dControlGUI">Visualisation.class3dControlGUI module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dLUT">Visualisation.class3dLUT module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.class3dVisualisation">Visualisation.class3dVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation.classRealTimeVisualisation">Visualisation.classRealTimeVisualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Visualisation.html#module-Visualisation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="VncLib.html">VncLib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.classGraph">VncLib.classGraph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib.xdot">VncLib.xdot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VncLib.html#module-VncLib">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">STARFiSh</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Solver package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/Solver.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="solver-package">
+<h1>Solver package<a class="headerlink" href="#solver-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-Solver.class1DflowSolver">
+<span id="solver-class1dflowsolver-module"></span><h2>Solver.class1DflowSolver module<a class="headerlink" href="#module-Solver.class1DflowSolver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.class1DflowSolver.FlowSolver">
+<em class="property">class </em><code class="descclassname">Solver.class1DflowSolver.</code><code class="descname">FlowSolver</code><span class="sig-paren">(</span><em>vascularNetwork</em>, <em>quiet=False</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.MacCormack_Field">
+<code class="descname">MacCormack_Field</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.MacCormack_Field" title="Permalink to this definition">¶</a></dt>
+<dd><p>MacCormack solver method with forward-euler time steping,
+Using either Characteristic system 0 or 1 as defined in the XML-file.</p>
+<p>This method is solving the system by looping through the defined network
+imposing the boundary conditions based on Riemann Invariants and then solving the vessels, 
+conncetions, bifucations with a predictor-corrector step method</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.calcTimeStep">
+<code class="descname">calcTimeStep</code><span class="sig-paren">(</span><em>dz</em>, <em>c</em>, <em>CFL</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.calcTimeStep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initOutput">
+<code class="descname">initOutput</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize solution matrices</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeBaroreceptors">
+<code class="descname">initializeBaroreceptors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeBaroreceptors" title="Permalink to this definition">¶</a></dt>
+<dd><p>method used to initialize Baroreceptor (baroreflex) objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeBoundarys">
+<code class="descname">initializeBoundarys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeBoundarys" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize boundarys</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeCommunicators">
+<code class="descname">initializeCommunicators</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeCommunicators" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeConnections">
+<code class="descname">initializeConnections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeConnections" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize Connections of the network
+by traversing the network tree</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeFields">
+<code class="descname">initializeFields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates field numerical objects for each vessel in the network</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeNumericalObjectList">
+<code class="descname">initializeNumericalObjectList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeNumericalObjectList" title="Permalink to this definition">¶</a></dt>
+<dd><p>## fill numObjectList (self.currentTimeStepumericalObjects) traversing the treeList 
+# 1. add root boundary
+# 2  add vessels
+# 3  add connection or distal boundary condition
+# 4. repeat 2,3 for the hole tree 
+# 5. add communicators
+# 6. add blocking Wait if multiprocessing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeSolutionMatrices">
+<code class="descname">initializeSolutionMatrices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeSolutionMatrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize solution matrices &#8211;&gt; moved to vascularNetwork</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeSystemEquations">
+<code class="descname">initializeSystemEquations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeSystemEquations" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize system Equations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeTimeVariables">
+<code class="descname">initializeTimeVariables</code><span class="sig-paren">(</span><em>quiet</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeTimeVariables" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize time variable dt and Tstep</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeTimers">
+<code class="descname">initializeTimers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeTimers" title="Permalink to this definition">¶</a></dt>
+<dd><p>method used to initialize Timer objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.class1DflowSolver.FlowSolver.initializeVenousPool">
+<code class="descname">initializeVenousPool</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.class1DflowSolver.FlowSolver.initializeVenousPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>method for the initialization of a &#8220;venous pool&#8221;</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classBaroreceptor">
+<span id="solver-classbaroreceptor-module"></span><h2>Solver.classBaroreceptor module<a class="headerlink" href="#module-Solver.classBaroreceptor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classBaroreceptor.AorticBaroreceptor">
+<em class="property">class </em><code class="descclassname">Solver.classBaroreceptor.</code><code class="descname">AorticBaroreceptor</code><span class="sig-paren">(</span><em>BaroDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.AorticBaroreceptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Solver.classBaroreceptor.Baroreceptor" title="Solver.classBaroreceptor.Baroreceptor"><code class="xref py py-class docutils literal"><span class="pre">Solver.classBaroreceptor.Baroreceptor</span></code></a></p>
+<p>for models of the AorticBaroreceptors
+Aortic Baroreceptor models with strain input and period of the heart cycle as output</p>
+<dl class="method">
+<dt id="Solver.classBaroreceptor.AorticBaroreceptor.estimateUnstretchedRadius">
+<code class="descname">estimateUnstretchedRadius</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.AorticBaroreceptor.estimateUnstretchedRadius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to estimate the unstretched radius of the Vessels of the Aortic Arch for the calculation of strain.
+Takes information about compliance and initial vessel geometry.
+Takes the initial compliance and assumes it as constant, uses the initial Area to calculate 
+the Area at zero pressure, where the vessel is in its unstressed state, so that the true
+strain can be calculated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.AorticBaroreceptor.flushSolutionData">
+<code class="descname">flushSolutionData</code><span class="sig-paren">(</span><em>saving</em>, <em>nDB</em>, <em>nDE</em>, <em>nSB</em>, <em>nSE</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.AorticBaroreceptor.flushSolutionData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.AorticBaroreceptor.initializeForSimulation">
+<code class="descname">initializeForSimulation</code><span class="sig-paren">(</span><em>flowSolver</em>, <em>vascularNetwork</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.AorticBaroreceptor.initializeForSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures class members for simulation, using data from the network 
+which may not have been available at construction.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classBaroreceptor.Baroreceptor">
+<em class="property">class </em><code class="descclassname">Solver.classBaroreceptor.</code><code class="descname">Baroreceptor</code><span class="sig-paren">(</span><em>BaroDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Mother class for all baroreceptor models</p>
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.calcAndupdatePeriodTypeIIcellML">
+<code class="descname">calcAndupdatePeriodTypeIIcellML</code><span class="sig-paren">(</span><em>strain</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.calcAndupdatePeriodTypeIIcellML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate new period of BC type 2 - Varying Elastance Heart (only implemented in the simple heart)
+Calls self.solveCellML()
+is used by self.__call__()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.calcAndupdatePeriodTypeIcellML">
+<code class="descname">calcAndupdatePeriodTypeIcellML</code><span class="sig-paren">(</span><em>n</em>, <em>strain</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.calcAndupdatePeriodTypeIcellML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate new period for BC of type 1
+Calls self.solveCellML()
+is used by self.__call__()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.getVariableDict">
+<code class="descname">getVariableDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.getVariableDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a deep copy of the class variable dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>variableName</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns value of variable with name : variableName
+States Error if not such variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.initializeForSimulation">
+<code class="descname">initializeForSimulation</code><span class="sig-paren">(</span><em>flowSolver</em>, <em>vascularNetwork</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.initializeForSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures class members for simulation, using data from the network 
+which may not have been available at construction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.solveCellML">
+<code class="descname">solveCellML</code><span class="sig-paren">(</span><em>strain</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.solveCellML" title="Permalink to this definition">¶</a></dt>
+<dd><p>solve CellML model, with the solver2 method that has been added to the CellML export</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.Baroreceptor.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>baroDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.Baroreceptor.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the Baroreceptor using a dictionary in form of 
+baroDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor">
+<em class="property">class </em><code class="descclassname">Solver.classBaroreceptor.</code><code class="descname">CarotidBaroreceptor</code><span class="sig-paren">(</span><em>BaroDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Solver.classBaroreceptor.Baroreceptor" title="Solver.classBaroreceptor.Baroreceptor"><code class="xref py py-class docutils literal"><span class="pre">Solver.classBaroreceptor.Baroreceptor</span></code></a></p>
+<p>for models of the Carotid Baroreceptors</p>
+<dl class="attribute">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.ResTot0">
+<code class="descname">ResTot0</code><em class="property"> = None</em><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.ResTot0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters for the Ursino model of the carotid baroreflex</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoAfferent">
+<code class="descname">UrsinoAfferent</code><span class="sig-paren">(</span><em>n</em>, <em>n_mem</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoAfferent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Afferent part of the Baroreceptor model as defined by Ursino 1999
+The firing rate of the left and right carotid sinus are averaged to give a global firing rate
+the firing rate of the carotid sinus will be processed by the efferent part</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoBRmodel">
+<code class="descname">UrsinoBRmodel</code><span class="sig-paren">(</span><em>n</em>, <em>n_mem</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoBRmodel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Baroreflex as described by Ursino_1999
+Effected quantities are TPR, Emax of the left heart, Vusv
+Update the affected quantities in their classes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoEfferent">
+<code class="descname">UrsinoEfferent</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoEfferent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Efferent part of the Baroreceptor model as defined by Ursino 1999
+Calculation of Efferent firing rate resp. sympathetic activity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoEmaxLVEffector">
+<code class="descname">UrsinoEmaxLVEffector</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoEmaxLVEffector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Effector of maximal contractility of left ventricle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoResistanceEffector">
+<code class="descname">UrsinoResistanceEffector</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoResistanceEffector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Effector part for TPR of the Baroreceptor model as defined by Ursino 1999
+Calculation of effect of efferent firing rate (sympathetic activity) on system quantity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoTEffector">
+<code class="descname">UrsinoTEffector</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoTEffector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Effector of maximal contractility of left ventricle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoVusvEffector">
+<code class="descname">UrsinoVusvEffector</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.UrsinoVusvEffector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Effector for venous unstressed volume</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.flushSolutionData">
+<code class="descname">flushSolutionData</code><span class="sig-paren">(</span><em>saving</em>, <em>nDB</em>, <em>nDE</em>, <em>nSB</em>, <em>nSE</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.flushSolutionData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.initializeForSimulation">
+<code class="descname">initializeForSimulation</code><span class="sig-paren">(</span><em>flowSolver</em>, <em>vascularNetwork</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.initializeForSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures class members for simulation, using data from the network 
+which may not have been available at construction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.updateBC1">
+<code class="descname">updateBC1</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.updateBC1" title="Permalink to this definition">¶</a></dt>
+<dd><p>update period in BC of type 1 at inflow boundaries
+uses the method updatedPeriodRuntime of the BoundaryCondition class
+uses newUpdateTime</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.updateBC2">
+<code class="descname">updateBC2</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.updateBC2" title="Permalink to this definition">¶</a></dt>
+<dd><p>update Boundary condition of type 2
+TPR and Emax for Varying Elastance heart model
+loop through all boundary conditions of type 2 and update the resistance at every timestep
+&#8211;&gt; the single resistances are updated with respect to their initial value dRtot/Rtot0 = dRi/Ri0
+update the heart properties at completion of the beat</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBaroreceptor.CarotidBaroreceptor.updateVenousSide">
+<code class="descname">updateVenousSide</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBaroreceptor.CarotidBaroreceptor.updateVenousSide" title="Permalink to this definition">¶</a></dt>
+<dd><p>to update the Venous unstretched Volume</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classBoundarys">
+<span id="solver-classboundarys-module"></span><h2>Solver.classBoundarys module<a class="headerlink" href="#module-Solver.classBoundarys" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classBoundarys.Boundary">
+<em class="property">class </em><code class="descclassname">Solver.classBoundarys.</code><code class="descname">Boundary</code><span class="sig-paren">(</span><em>vessel</em>, <em>boundaryConditions</em>, <em>rigidArea</em>, <em>dt</em>, <em>currentMemoryIndex</em>, <em>currentTimeStep</em>, <em>nTsteps</em>, <em>systemEquation</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBoundarys.Boundary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="Solver.classBoundarys.Boundary.duEvaluateVector">
+<code class="descname">duEvaluateVector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBoundarys.Boundary.duEvaluateVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pre-Calculate the BoundaryConditions duVector of Type1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBoundarys.Boundary.duFunctionMulti">
+<code class="descname">duFunctionMulti</code><span class="sig-paren">(</span><em>currentTimeStep</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBoundarys.Boundary.duFunctionMulti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the summized du-vector with the values of all given
+type1 boundaryConditions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBoundarys.Boundary.duFunctionRuntime">
+<code class="descname">duFunctionRuntime</code><span class="sig-paren">(</span><em>currentTimeStep</em>, <em>dt</em>, <em>Z1</em>, <em>Z2</em>, <em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBoundarys.Boundary.duFunctionRuntime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBoundarys.Boundary.duFunctionSingle">
+<code class="descname">duFunctionSingle</code><span class="sig-paren">(</span><em>currentTimeStep</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBoundarys.Boundary.duFunctionSingle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the du-vector with the values of the given
+type1 boundaryCondition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classBoundarys.Boundary.duFunctionZero">
+<code class="descname">duFunctionZero</code><span class="sig-paren">(</span><em>currentTimeStep</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classBoundarys.Boundary.duFunctionZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the du-vector = [0,0] if no type1 boundaryConditions are given</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classCommunicators">
+<span id="solver-classcommunicators-module"></span><h2>Solver.classCommunicators module<a class="headerlink" href="#module-Solver.classCommunicators" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classCommunicators.CommunicatorBaroreceptor">
+<em class="property">class </em><code class="descclassname">Solver.classCommunicators.</code><code class="descname">CommunicatorBaroreceptor</code><span class="sig-paren">(</span><em>comDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaroreceptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Solver.classCommunicators.CommunicatorBaseClass" title="Solver.classCommunicators.CommunicatorBaseClass"><code class="xref py py-class docutils literal"><span class="pre">Solver.classCommunicators.CommunicatorBaseClass</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass">
+<em class="property">class </em><code class="descclassname">Solver.classCommunicators.</code><code class="descname">CommunicatorBaseClass</code><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base-class for all boundary conditions</p>
+<dl class="docutils">
+<dt>including variables:</dt>
+<dd>communicatorId
+filename
+blockingWait</dd>
+<dt>including functions:</dt>
+<dd>update
+readCommunicatorFile
+writeCommunicatorFile</dd>
+</dl>
+<dl class="attribute">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass.blockingWait">
+<code class="descname">blockingWait</code><em class="property"> = False</em><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass.blockingWait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass.communicatorId">
+<code class="descname">communicatorId</code><em class="property"> = 0</em><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass.communicatorId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass.filename">
+<code class="descname">filename</code><em class="property"> = None</em><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass.readCommunicatorFile">
+<code class="descname">readCommunicatorFile</code><span class="sig-paren">(</span><em>samplingTime=0.001</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass.readCommunicatorFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads a data string out of a file with given filename</p>
+<dl class="docutils">
+<dt>input:    filename &lt;string&gt;</dt>
+<dd>blockingWaitRead &lt;bool&gt;
+timeWait = 0.5 sec &lt;float&gt; time function waits between reading
+maxTime  = 1.0 ??  &lt;float&gt; max time until connection is stopped</dd>
+</dl>
+<p>return: dataString, None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>comDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the updateCommunicatorDict data using a dictionary in form of 
+comDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classCommunicators.CommunicatorBaseClass.writeCommunicatorFile">
+<code class="descname">writeCommunicatorFile</code><span class="sig-paren">(</span><em>dataString</em>, <em>samplingTime=0.0001</em>, <em>maxTime=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorBaseClass.writeCommunicatorFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads a data string out of a file with given filename</p>
+<p>input:    dataString &lt;string&gt;</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classCommunicators.CommunicatorRealTimeViz">
+<em class="property">class </em><code class="descclassname">Solver.classCommunicators.</code><code class="descname">CommunicatorRealTimeViz</code><span class="sig-paren">(</span><em>comDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorRealTimeViz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Solver.classCommunicators.CommunicatorBaseClass" title="Solver.classCommunicators.CommunicatorBaseClass"><code class="xref py py-class docutils literal"><span class="pre">Solver.classCommunicators.CommunicatorBaseClass</span></code></a></p>
+<dl class="method">
+<dt id="Solver.classCommunicators.CommunicatorRealTimeViz.startRealTimeVisualisation">
+<code class="descname">startRealTimeVisualisation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorRealTimeViz.startRealTimeVisualisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function starts the realtime visualisation in a subprocess</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classCommunicators.CommunicatorRealTimeViz.stopRealtimeViz">
+<code class="descname">stopRealtimeViz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorRealTimeViz.stopRealtimeViz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stops realTimeVisualisation.update method
+called after simulation, if this is called the graphs can not be updated again</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classCommunicators.CommunicatorRealTimeViz.terminateRealtimeViz">
+<code class="descname">terminateRealtimeViz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classCommunicators.CommunicatorRealTimeViz.terminateRealtimeViz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Terminates subprocess realTimeVisualisation</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classConnections">
+<span id="solver-classconnections-module"></span><h2>Solver.classConnections module<a class="headerlink" href="#module-Solver.classConnections" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classConnections.Anastomosis">
+<em class="property">class </em><code class="descclassname">Solver.classConnections.</code><code class="descname">Anastomosis</code><span class="sig-paren">(</span><em>leftMother</em>, <em>leftMotherSys</em>, <em>rightMother</em>, <em>rightMotherSys</em>, <em>daughter</em>, <em>daughterSys</em>, <em>currentMemoryIndex</em>, <em>dt</em>, <em>rigidAreas</em>, <em>solvingScheme</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Anastomosis" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="Solver.classConnections.Anastomosis.callLinear">
+<code class="descname">callLinear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Anastomosis.callLinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call function for vessel-vessel connection</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classConnections.Bifurcation">
+<em class="property">class </em><code class="descclassname">Solver.classConnections.</code><code class="descname">Bifurcation</code><span class="sig-paren">(</span><em>mother</em>, <em>motherSys</em>, <em>leftDaughter</em>, <em>leftDaughterSys</em>, <em>rightDaughter</em>, <em>rightDaughterSys</em>, <em>currentMemoryIndex</em>, <em>dt</em>, <em>rigidAreas</em>, <em>solvingScheme</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Bifurcation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="Solver.classConnections.Bifurcation.callLinear">
+<code class="descname">callLinear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Bifurcation.callLinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call function for vessel-vessel connection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classConnections.Bifurcation.callNonLinear">
+<code class="descname">callNonLinear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Bifurcation.callNonLinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call function for vessel-vessel connection</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classConnections.Link">
+<em class="property">class </em><code class="descclassname">Solver.classConnections.</code><code class="descname">Link</code><span class="sig-paren">(</span><em>mother</em>, <em>motherSys</em>, <em>daughter</em>, <em>daughterSys</em>, <em>currentMemoryIndex</em>, <em>dt</em>, <em>rigidAreas</em>, <em>solvingScheme</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link object represends the connection between two vessels</p>
+<dl class="method">
+<dt id="Solver.classConnections.Link.callLinear">
+<code class="descname">callLinear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Link.callLinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call function for vessel-vessel connection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classConnections.Link.callNonLinear">
+<code class="descname">callNonLinear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classConnections.Link.callNonLinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call function for vessel-vessel connection</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classDataHandler">
+<span id="solver-classdatahandler-module"></span><h2>Solver.classDataHandler module<a class="headerlink" href="#module-Solver.classDataHandler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classDataHandler.DataHandler">
+<em class="property">class </em><code class="descclassname">Solver.classDataHandler.</code><code class="descname">DataHandler</code><span class="sig-paren">(</span><em>currentTimeStep</em>, <em>nTsteps</em>, <em>network</em>, <em>currentMemoryIndex</em>, <em>memoryArraySize</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classDataHandler.DataHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classFields">
+<span id="solver-classfields-module"></span><h2>Solver.classFields module<a class="headerlink" href="#module-Solver.classFields" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classFields.Field">
+<em class="property">class </em><code class="descclassname">Solver.classFields.</code><code class="descname">Field</code><span class="sig-paren">(</span><em>vessel</em>, <em>currentMemoryIndex</em>, <em>dt</em>, <em>systemEquation</em>, <em>rigidArea</em>, <em>solvingSchemeField='MacCormack_Matrix'</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classFields.Field" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="Solver.classFields.Field.F">
+<code class="descname">F</code><span class="sig-paren">(</span><em>u</em>, <em>A</em>, <em>C</em>, <em>Aconst</em>, <em>Cconst</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classFields.Field.F" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flux based on conservative form of governing mass and momentum equations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classFields.Field.MacCormackFlux">
+<code class="descname">MacCormackFlux</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classFields.Field.MacCormackFlux" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Solver.classFields.Field.MacCormackMatrix">
+<code class="descname">MacCormackMatrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classFields.Field.MacCormackMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mac Cormack Predictor-Corrector</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classSystemEquations">
+<span id="solver-classsystemequations-module"></span><h2>Solver.classSystemEquations module<a class="headerlink" href="#module-Solver.classSystemEquations" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classSystemEquations.System">
+<em class="property">class </em><code class="descclassname">Solver.classSystemEquations.</code><code class="descname">System</code><span class="sig-paren">(</span><em>vessel</em>, <em>simplifyEigenvalues</em>, <em>riemannInvariantUnitBase</em>, <em>currentTimeStep</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classSystemEquations.System" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="Solver.classSystemEquations.System.updateLARLSys0InvariantFlow">
+<code class="descname">updateLARLSys0InvariantFlow</code><span class="sig-paren">(</span><em>P</em>, <em>Q</em>, <em>A</em>, <em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classSystemEquations.System.updateLARLSys0InvariantFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update LAMBDA,R,L,Z of the system equations</p>
+<dl class="docutils">
+<dt>Special terms:</dt>
+<dd><dl class="first last docutils">
+<dt>sys0 <span class="classifier-delimiter">:</span> <span class="classifier">uses simplified eigenvalues lambda = c (wave speed) </span></dt>
+<dd>as result Z1=Z2=Zc</dd>
+<dt>invariantFlow:  calculates R,L using riemannInvariants based on unit FLow</dt>
+<dd>as in Paper of Paul Roger Leinan but with R2*(-1) correction to
+have additive invariants for pressure</dd>
+</dl>
+</dd>
+<dt>Input:</dt>
+<dd>P                 &lt;np.array&gt; : current pressure values of the vessel
+Q                 &lt;np.array&gt; : current flow values of the vessel
+A                 &lt;np.array&gt; : current area values of the vessel
+idArray = [0,-1]  &lt;list&gt;     : define which boundary should be updated (default = both)
+update  = &#8216;all&#8217;   &lt;string&gt;   : set to &#8216;L&#8217; if only L and not R should be updated
+Ct = None         &lt;np.array&gt; : Compliance C if avialiable otherwise it will be calculated
+ct = None         &lt;np.array&gt; : waveSpeed  c if avialiable otherwise it will be calculated</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classSystemEquations.System.updateLARLSys0InvariantPressure">
+<code class="descname">updateLARLSys0InvariantPressure</code><span class="sig-paren">(</span><em>P</em>, <em>Q</em>, <em>A</em>, <em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classSystemEquations.System.updateLARLSys0InvariantPressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update LAMBDA,R,L,Z of the system equations</p>
+<dl class="docutils">
+<dt>Special terms:</dt>
+<dd><dl class="first last docutils">
+<dt>sys0 <span class="classifier-delimiter">:</span> <span class="classifier">uses simplified eigenvalues lambda = c (wave speed)</span></dt>
+<dd>as result Z1=Z2=Zc</dd>
+<dt>invariantFlow:  calculates R,L using riemannInvariants based on unit Pressure</dt>
+<dd>as derieved by Leif Rune Hellevik</dd>
+</dl>
+</dd>
+<dt>Input:</dt>
+<dd>P                 &lt;np.array&gt; : current pressure values of the vessel
+Q                 &lt;np.array&gt; : current flow values of the vessel
+A                 &lt;np.array&gt; : current area values of the vessel
+idArray = [0,-1]  &lt;list&gt;     : define which boundary should be updated (default = both)
+update  = &#8216;all&#8217;   &lt;string&gt;   : set to &#8216;L&#8217; if only L and not R should be updated
+Ct = None         &lt;np.array&gt; : Compliance C if avialiable otherwise it will be calculated
+ct = None         &lt;np.array&gt; : waveSpeed  c if avialiable otherwise it will be calculated</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classSystemEquations.System.updateLARLSys1InvariantFlow">
+<code class="descname">updateLARLSys1InvariantFlow</code><span class="sig-paren">(</span><em>P</em>, <em>Q</em>, <em>A</em>, <em>position</em>, <em>sqrt=&lt;ufunc 'sqrt'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classSystemEquations.System.updateLARLSys1InvariantFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update LAMBDA,R,L,Z of the system equations</p>
+<dl class="docutils">
+<dt>Special terms:</dt>
+<dd><p class="first">sys1 :          uses correct eigenvalues lambda1/2 = dlt*v +- sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+invariantFlow:  calculates R,L using riemannInvariants based on unit FLow</p>
+<blockquote class="last">
+<div>as in Paper of Paul Roger Leinan but with R2*(-1) correction to
+have additive invariants for pressure</div></blockquote>
+</dd>
+<dt>Input:</dt>
+<dd>P                 &lt;np.array&gt; : current pressure values of the vessel
+Q                 &lt;np.array&gt; : current flow values of the vessel
+A                 &lt;np.array&gt; : current area values of the vessel
+idArray = [0,-1]  &lt;list&gt;     : define which boundary should be updated (default = both)
+update  = &#8216;all&#8217;   &lt;string&gt;   : set to &#8216;L&#8217; if only L and not R should be updated
+Ct = None         &lt;np.array&gt; : Compliance C if avialiable otherwise it will be calculated
+ct = None         &lt;np.array&gt; : waveSpeed  c if avialiable otherwise it will be calculated</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classSystemEquations.System.updateLARLSys1InvariantPressure">
+<code class="descname">updateLARLSys1InvariantPressure</code><span class="sig-paren">(</span><em>P</em>, <em>Q</em>, <em>A</em>, <em>position</em>, <em>sqrt=&lt;ufunc 'sqrt'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classSystemEquations.System.updateLARLSys1InvariantPressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update LAMBDA,R,L,Z of the system equations</p>
+<dl class="docutils">
+<dt>Special terms:</dt>
+<dd><p class="first">sys1 :          uses correct eigenvalues lambda1/2 = dlt*v +- sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+invariantFlow:  calculates R,L using riemannInvariants based on unit Pressure</p>
+<blockquote class="last">
+<div>as derieved by Leif Rune Hellevik</div></blockquote>
+</dd>
+<dt>Input:</dt>
+<dd>P                 &lt;np.array&gt; : current pressure values of the vessel
+Q                 &lt;np.array&gt; : current flow values of the vessel
+A                 &lt;np.array&gt; : current area values of the vessel
+idArray = [0,-1]  &lt;list&gt;     : define which boundary should be updated (default = both)
+update  = &#8216;all&#8217;   &lt;string&gt;   : set to &#8216;L&#8217; if only L and not R should be updated
+Ct = None         &lt;np.array&gt; : Compliance C if avialiable otherwise it will be calculated
+ct = None         &lt;np.array&gt; : waveSpeed  c if avialiable otherwise it will be calculated</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classSystemEquations.System.updateSystem">
+<code class="descname">updateSystem</code><span class="sig-paren">(</span><em>P</em>, <em>Q</em>, <em>A</em>, <em>pi=3.141592653589793</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classSystemEquations.System.updateSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update all the system-equation and matrices</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>P &lt;np.array&gt; : current pressure values of the vessel
+Q &lt;np.array&gt; : current flow values of the vessel
+A &lt;np.array&gt; : current area values of the vessel</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classTimer">
+<span id="solver-classtimer-module"></span><h2>Solver.classTimer module<a class="headerlink" href="#module-Solver.classTimer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classTimer.Hemorrhage">
+<em class="property">class </em><code class="descclassname">Solver.classTimer.</code><code class="descname">Hemorrhage</code><a class="headerlink" href="#Solver.classTimer.Hemorrhage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Solver.classTimer.TimerBaseClass" title="Solver.classTimer.TimerBaseClass"><code class="xref py py-class docutils literal"><span class="pre">Solver.classTimer.TimerBaseClass</span></code></a></p>
+<p>class to implement a hemorrhagic event (blood loss)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classTimer.TimerBaseClass">
+<em class="property">class </em><code class="descclassname">Solver.classTimer.</code><code class="descname">TimerBaseClass</code><a class="headerlink" href="#Solver.classTimer.TimerBaseClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for a timer object.
+intended to implement &#8220;timed&#8221; events in the simulation, e.g. Valsalva maneuver, Hemorrhage, motion,...</p>
+<dl class="method">
+<dt id="Solver.classTimer.TimerBaseClass.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>TimeDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classTimer.TimerBaseClass.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the data using a dictionary in form of 
+TimeDict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Solver.classTimer.Valsalva">
+<em class="property">class </em><code class="descclassname">Solver.classTimer.</code><code class="descname">Valsalva</code><span class="sig-paren">(</span><em>TimerDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classTimer.Valsalva" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Solver.classTimer.TimerBaseClass" title="Solver.classTimer.TimerBaseClass"><code class="xref py py-class docutils literal"><span class="pre">Solver.classTimer.TimerBaseClass</span></code></a></p>
+<p>definition of a Valsalva maneuver, a clinical test during which the intrathoracic pressure is changed</p>
+<dl class="method">
+<dt id="Solver.classTimer.Valsalva.calculateNewExternalPressure">
+<code class="descname">calculateNewExternalPressure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classTimer.Valsalva.calculateNewExternalPressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the new external pressures given the time where the Valsalva maneuver starts and where it ends and the pressure change
+the function will be linear (like a pressure ramp)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver.classVenousPool">
+<span id="solver-classvenouspool-module"></span><h2>Solver.classVenousPool module<a class="headerlink" href="#module-Solver.classVenousPool" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Solver.classVenousPool.venousPool">
+<em class="property">class </em><code class="descclassname">Solver.classVenousPool.</code><code class="descname">venousPool</code><span class="sig-paren">(</span><em>dataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classVenousPool.venousPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Very simple model of the venous side, considering the veins as one big compliant reservoir,
+and assuming a pure pressure gain between CVP and LAP
+The Baroreflex regulates the unstretched volume of the venous side, through which the CVP and ultimately
+the LAP are changed</p>
+<p>self.V is the blood volume in the veins
+self.Vusv: unstretched Volume of Veins
+self.P0: constant
+self.k: constant
+self.pressureGain: pressure gain from CVP to LAP &#8211;&gt; a pure gain is used, value according to Bell
+self.P: CVP
+self.P_LA: pressure in left atrium (LAP)
+self.Qin: inflow
+self.Qout: outflow</p>
+<dl class="method">
+<dt id="Solver.classVenousPool.venousPool.estimateInflow">
+<code class="descname">estimateInflow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classVenousPool.venousPool.estimateInflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the inflow to the venous side, from terminal boundaries</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classVenousPool.venousPool.estimateOutflow">
+<code class="descname">estimateOutflow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classVenousPool.venousPool.estimateOutflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate outflow</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classVenousPool.venousPool.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>dataDict</em><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classVenousPool.venousPool.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the data
+Dict = {&#8216;variableName&#8217;: value}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classVenousPool.venousPool.updateBoundaryConditions">
+<code class="descname">updateBoundaryConditions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classVenousPool.venousPool.updateBoundaryConditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>update all the boundary conditions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Solver.classVenousPool.venousPool.updateVenousPool">
+<code class="descname">updateVenousPool</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Solver.classVenousPool.venousPool.updateVenousPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the state of the venous pool (volume and pressure)
+the model is from Ursino_1999</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Solver">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Solver" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="UtilityLib.html" class="btn btn-neutral float-right" title="UtilityLib package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="NetworkLib.html" class="btn btn-neutral" title="NetworkLib package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, NTNU.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
