@@ -10,8 +10,10 @@ import pprint
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/NetworkLib')
-from classBoundaryConditions import *
+sys.path.append(cur+'/../')
+
+#sys.path.append(cur+'/NetworkLib')
+from NetworkLib.classBoundaryConditions import *
 
 
 class Boundary():

@@ -13,6 +13,7 @@ if [ -f /etc/debian_version ]; then
     apt-get -y install python-matplotlib
     apt-get -y install graphviz
     apt.get -y install libhdf5-dev
+#   apt-get -y install python-networkx #prerequisite for chaospy
 
 elif [ -f /etc/redhat-release ]; then
     # TODO add code for Red Hat and CentOS here

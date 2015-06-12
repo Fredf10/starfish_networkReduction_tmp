@@ -17,24 +17,24 @@ import cPickle
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 
-sys.path.append(cur+'/NetworkLib')
-from classVascularNetwork import VascularNetwork
+#sys.path.append(cur+'/NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork
 
 sys.path.append(cur+'/UtilityLib')
-from moduleXML import loadNetworkFromXML
-from moduleXML import writeNetworkToXML
-from moduleXML import savePolyChaosXML
-from moduleXML import loadPolyChaosXML
-from processing import linearWaveSplitting
-from processing import nonLinearWaveSplitting
-from processing import minMaxFunction
-from processing import calculateWaveShoulderPoint
-from processing import calculateWaveShoulderPointTangent
-from moduleStartUp import parseOptions
-from moduleStartUp import chooseVPCconfigFile
+from UtilityLib.moduleXML import loadNetworkFromXML
+from UtilityLib.moduleXML import writeNetworkToXML
+from UtilityLib.moduleXML import savePolyChaosXML
+from UtilityLib.moduleXML import loadPolyChaosXML
+from UtilityLib.processing import linearWaveSplitting
+from UtilityLib.processing import nonLinearWaveSplitting
+from UtilityLib.processing import minMaxFunction
+from UtilityLib.processing import calculateWaveShoulderPoint
+from UtilityLib.processing import calculateWaveShoulderPointTangent
+from UtilityLib.moduleStartUp import parseOptions
+from UtilityLib.moduleStartUp import chooseVPCconfigFile
 
-sys.path.append(cur+'/Solver')
-from class1DflowSolver import FlowSolver
+#sys.path.append(cur+'/Solver')
+from Solver.class1DflowSolver import FlowSolver
 
 import matplotlib.pyplot as plt   
 import numpy as np

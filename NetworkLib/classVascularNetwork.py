@@ -5,18 +5,20 @@ from reportlab.lib.validators import isNumber
 # from UtilityLib.saveSimulationDataToCSV import vesselId
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(cur + '/../NetworkLib')
-sys.path.append(cur+'/../Solver')
+sys.path.append(cur + '/../')
+
+#sys.path.append(cur + '/../NetworkLib')
+#sys.path.append(cur+'/../Solver')
 
 from classVessel import Vessel
-from classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
+from Solver.classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
 from classBoundaryConditions import *
 
-sys.path.append(cur + '/../UtilityLib')
-import moduleFilePathHandler as mFPH
+#sys.path.append(cur + '/../UtilityLib')
+import UtilityLib.moduleFilePathHandler as mFPH
 
-sys.path.append(cur + '/../VascularPolynomialChaosLib')
-from classRandomInputManager import RandomInputManager
+#sys.path.append(cur + '/../VascularPolynomialChaosLib')
+from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 
 import numpy as np
 from scipy import interpolate

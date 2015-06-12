@@ -11,7 +11,7 @@ This is the program STARFiSh, developed by NTNU, which aims to offer a user frie
 Contents:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    Main
    Visualize

@@ -4,9 +4,10 @@ from numpy import sqrt,pi
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(''.join([cur,'/../']))
 
-sys.path.append(''.join([cur,'/../NetworkLib/']))
-from classBoundaryConditions import *
+#sys.path.append(''.join([cur,'/../NetworkLib/']))
+from NetworkLib.classBoundaryConditions import *
 
 from constants import newestNetworkXml as nxml
 from constants import variablesDict

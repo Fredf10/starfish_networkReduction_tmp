@@ -6,40 +6,40 @@ import sys,os
 cur = os.path.dirname( os.path.realpath('__file__') )
 
 # syspaths and functions for vascular1DFlow_v0.2
-sys.path.append(cur+'/UtilityLib')
-sys.path.append(cur+'/NetworkLib')
-sys.path.append(cur+'/VncLib')
-from classVascularNetwork import VascularNetwork 
-from classBoundaryConditions import *
-from moduleXML import writeNetworkToXML 
-from moduleXML import loadNetworkFromXML 
+#sys.path.append(cur+'/UtilityLib')
+#sys.path.append(cur+'/NetworkLib')
+#sys.path.append(cur+'/VncLib')
+from NetworkLib.classVascularNetwork import VascularNetwork 
+from NetworkLib.classBoundaryConditions import *
+from UtilityLib.moduleXML import writeNetworkToXML 
+from UtilityLib.moduleXML import loadNetworkFromXML 
 
-from moduleCSV import readVesselDataFromCSV 
-from moduleCSV import writeVesselDataToCSV 
-from moduleCSV import writeBCToCSV 
-from moduleCSV import readBCFromCSV
+from UtilityLib.moduleCSV import readVesselDataFromCSV 
+from UtilityLib.moduleCSV import writeVesselDataToCSV 
+from UtilityLib.moduleCSV import writeBCToCSV 
+from UtilityLib.moduleCSV import readBCFromCSV
 
-import moduleFilePathHandler as mFPH
+import UtilityLib.moduleFilePathHandler as mFPH
 
-from constants import newestNetworkXml as nxml
+from UtilityLib.constants import newestNetworkXml as nxml
 
 ### import units of all variables in the SI system
-from constants import variableUnitsSI as variableUnits
-from constants import unitsDictSI as unitsDict
+from UtilityLib.constants import variableUnitsSI as variableUnits
+from UtilityLib.constants import unitsDictSI as unitsDict
 
 #from modulePickle import loadSolutionDataFile
-from moduleStartUp import chooseSolutionDataCase
+from UtilityLib.moduleStartUp import chooseSolutionDataCase
 
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
 #from constants import unitsDictMed as unitsDict
 
 import pydot
-import xdot
+from VncLib import xdot
 import gtk
 
-from classGraph import Graph
-from classGraph import MyDotWindow
+from VncLib.classGraph import Graph
+from VncLib.classGraph import MyDotWindow
 
 import cPickle
 import pprint as pprint

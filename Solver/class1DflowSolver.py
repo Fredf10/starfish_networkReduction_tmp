@@ -1,12 +1,15 @@
-import numpy as np
-
 import sys,os
-from classBoundaryConditions import VaryingElastance, Valve
-from classVascularNetwork import VascularNetwork
+import numpy as np
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/NetworkLib')
+sys.path.append(''.join([cur,'/../']))
+
+
+#sys.path.append(cur+'/NetworkLib')
+from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
+from NetworkLib.classVascularNetwork import VascularNetwork
+
 
 from classBoundarys import Boundary
 
@@ -19,8 +22,8 @@ from classVenousPool import *
 from classDataHandler import DataHandler
 from classTimer import *
 
-sys.path.append(cur+'/UtilityLib/')
-from processing import memoryUsagePsutil
+#sys.path.append(cur+'/UtilityLib/')
+from UtilityLib.processing import memoryUsagePsutil
  
 import gc
 # import h5py

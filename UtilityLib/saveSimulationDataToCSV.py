@@ -1,14 +1,15 @@
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
 
-sys.path.append(cur+'/../UtilityLib')
-from moduleXML import loadNetworkFromXML 
-from moduleStartUp import parseOptions
-from modulePickle import loadSolutionDataFile
+#sys.path.append(cur+'/../UtilityLib')
+from UtilityLib.moduleXML import loadNetworkFromXML 
+from UtilityLib.moduleStartUp import parseOptions
+from UtilityLib.modulePickle import loadSolutionDataFile
 
 
-sys.path.append(cur+'/../NetworkLib')
-from classVascularNetwork import VascularNetwork 
+#sys.path.append(cur+'/../NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork 
 
 from optparse import OptionParser
 import cPickle

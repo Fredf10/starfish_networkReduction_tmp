@@ -9,9 +9,9 @@ from moduleGrids import *
 from classCompliance import *
 
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/../'+'/UtilityLib')
+sys.path.append(cur+'/../')
 
-from constants import newestNetworkXml as nxml
+from UtilityLib.constants import newestNetworkXml as nxml
 
 class Vessel(object):
     '''

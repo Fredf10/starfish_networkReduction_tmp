@@ -13,19 +13,20 @@ from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as Navig
 
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
 
-sys.path.append(cur+'/../UtilityLib')
-from moduleXML import loadNetworkFromXML 
-from processing import linearWaveSplitting
-from processing import nonLinearWaveSplitting
-from processing import minMaxFunction
-from moduleStartUp import parseOptions
-from modulePickle import loadSolutionDataFile
-from modulePickle import loadExternalDataSet
+#sys.path.append(cur+'/../UtilityLib')
+from UtilityLib.moduleXML import loadNetworkFromXML 
+from UtilityLib.processing import linearWaveSplitting
+from UtilityLib.processing import nonLinearWaveSplitting
+from UtilityLib.processing import minMaxFunction
+from UtilityLib.moduleStartUp import parseOptions
+from UtilityLib.modulePickle import loadSolutionDataFile
+from UtilityLib.modulePickle import loadExternalDataSet
 
 
-sys.path.append(cur+'/../NetworkLib')
-from classVascularNetwork import VascularNetwork 
+#sys.path.append(cur+'/../NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork 
 
 from matplotlib.font_manager import FontProperties
 

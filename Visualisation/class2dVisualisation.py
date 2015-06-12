@@ -15,14 +15,15 @@ from matplotlib.patches import Rectangle
 
 import sys, os
 cur = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(cur + '/../')
 
-sys.path.append(cur + '/../UtilityLib')
-import processing as proc
+#sys.path.append(cur + '/../UtilityLib')
+import UtilityLib.processing as proc
 #from processing import nonLinearWaveSplitting
 
-import moduleStartUp
-import moduleFilePathHandler as mFPH
-import moduleXML
+from UtilityLib import moduleStartUp
+from UtilityLib import moduleFilePathHandler as mFPH
+from UtilityLib import moduleXML
 
 
 import numpy as np

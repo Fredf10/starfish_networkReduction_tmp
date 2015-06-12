@@ -11,18 +11,19 @@ import os,sys
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/../'+'/NetworkLib')
+sys.path.append(''.join([cur,'/../']))
+#sys.path.append(cur+'/../'+'/NetworkLib')
 
-from classVascularNetwork import VascularNetwork
-from classBoundaryConditions import *
+from NetworkLib.classVascularNetwork import VascularNetwork
+from NetworkLib.classBoundaryConditions import *
 
 from constants import variablesDict 
 from constants import unitsDictSI as unitsDict
 from constants import newestNetworkXmlVersion
 import moduleFilePathHandler as mFPH
 
-sys.path.append(cur + '/../VascularPolynomialChaosLib')
-from classRandomInputManager import RandomInputManager
+#sys.path.append(cur + '/../VascularPolynomialChaosLib')
+from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits

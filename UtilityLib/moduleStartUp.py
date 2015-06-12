@@ -11,14 +11,16 @@
 
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(''.join([cur,'/../']))
+
 import inspect
 from pprint import pprint as pp
 
 import moduleXML 
 import moduleFilePathHandler as mFPH
 
-sys.path.append([cur,'/../VascularPolynomialChaosLib/'])
-import moduleFilePathHandlerVPC as mFPH_VPC
+#sys.path.append([cur,'/../VascularPolynomialChaosLib/'])
+import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 
 from optparse import OptionParser
 

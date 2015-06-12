@@ -1,4 +1,4 @@
-from classBoundaryConditions import *
+from NetworkLib.classBoundaryConditions import *
 import numpy as np
 import math
 

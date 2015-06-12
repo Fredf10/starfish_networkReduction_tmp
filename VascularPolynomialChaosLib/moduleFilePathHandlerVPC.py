@@ -16,14 +16,15 @@
 import cPickle
 import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
 
 from copy import copy as copy 
 
 from pprint import pprint as pp
 
 
-sys.path.append([cur,'/../UtilityLib/'])
-import moduleFilePathHandler as mFPH
+#sys.path.append([cur,'/../UtilityLib/'])
+import UtilityLib.moduleFilePathHandler as mFPH
 
 
 

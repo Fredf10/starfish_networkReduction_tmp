@@ -9,22 +9,22 @@
 import sys,os
 cur = os.path.dirname(os.path.realpath('__file__'))
 
-sys.path.append(cur+'/NetworkLib')
-from classVascularNetwork import VascularNetwork
+#sys.path.append(cur+'/NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork
 
-sys.path.append('/'.join([cur,'Solver']))
-from class1DflowSolver import FlowSolver
+#sys.path.append('/'.join([cur,'Solver']))
+from Solver.class1DflowSolver import FlowSolver
 
-sys.path.append('/'.join([cur,'VascularPolynomialChaosLib']))
-from classVpcConfiguration import VpcConfiguration
-from classDistributionManager import DistributionManagerChaospy
-import moduleFilePathHandlerVPC as mFPH_VPC
-import moduleBatchSimulationManager as mBSM
-from classLocationOfInterestManager import LocationOfInterestManager
+#sys.path.append('/'.join([cur,'VascularPolynomialChaosLib']))
+from VascularPolynomialChaosLib.classVpcConfiguration import VpcConfiguration
+from VascularPolynomialChaosLib.classDistributionManager import DistributionManagerChaospy
+from VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
+from VascularPolynomialChaosLib import moduleBatchSimulationManager as mBSM
+from VascularPolynomialChaosLib.classLocationOfInterestManager import LocationOfInterestManager
 
-sys.path.append('/'.join([cur,'UtilityLib']))
-import moduleStartUp as mSU
-import moduleXML
+#sys.path.append('/'.join([cur,'UtilityLib']))
+import UtilityLib.moduleStartUp as mSU
+from UtilityLib import moduleXML
 
 import chaospy as cp
 import pprint

@@ -13,16 +13,16 @@ import sys,os
 cur = os.path.dirname( os.path.realpath('__file__') )
 #sys.path.append(cur+'/Solver')
 
-sys.path.append(cur+'/NetworkLib')
-from classVascularNetwork import VascularNetwork
+#sys.path.append(cur+'/NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork
 
-sys.path.append(cur+'/Solver')
-from class1DflowSolver import FlowSolver
+#sys.path.append(cur+'/Solver')
+from Solver.class1DflowSolver import FlowSolver
 
-sys.path.append(cur+'/UtilityLib')
-import moduleXML 
-import moduleStartUp #import parseOptions
-import moduleFilePathHandler as mFPH
+#sys.path.append(cur+'/UtilityLib')
+from UtilityLib import moduleXML 
+from UtilityLib import moduleStartUp #import parseOptions
+from UtilityLib import moduleFilePathHandler as mFPH
 
 import pprint
 import matplotlib.pyplot as plt

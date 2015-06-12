@@ -1,21 +1,22 @@
 import sys,os,io
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
 
-sys.path.append(cur+'/../UtilityLib')
+#sys.path.append(cur+'/../UtilityLib')
 
 import subprocess
 
-import moduleXML
-from moduleStartUp import parseOptions
-import moduleFilePathHandler as mFPH
+from UtilityLib import moduleXML
+from UtilityLib.moduleStartUp import parseOptions
+from UtilityLib import moduleFilePathHandler as mFPH
 
-from processing import linearWaveSplitting
-from processing import nonLinearWaveSplitting
-from processing import minMaxFunction
+from UtilityLib.processing import linearWaveSplitting
+from UtilityLib.processing import nonLinearWaveSplitting
+from UtilityLib.processing import minMaxFunction
 
-sys.path.append(cur+'/../NetworkLib')
-from classVascularNetwork import VascularNetwork 
-from classVessel import Vessel 
+#sys.path.append(cur+'/../NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork 
+from NetworkLib.classVessel import Vessel 
 
 from class3dLUT import WindowLUT
 from class3dLUT import LUT

@@ -9,9 +9,10 @@ import numpy
 import sys,os,time
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/../Visualisation')
+sys.path.append(cur+'/../')
+#sys.path.append(cur+'/../Visualisation')
 
-from classRealTimeVisualisation import realTimeVisualisation
+from Visualisation.classRealTimeVisualisation import realTimeVisualisation
 
 class CommunicatorBaseClass(object):
     '''

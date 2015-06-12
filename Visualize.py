@@ -5,8 +5,8 @@ from optparse import OptionParser
 import os,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 
-sys.path.append(cur+'/UtilityLib')
-from moduleStartUp import parseOptions
+#sys.path.append(cur+'/UtilityLib')
+from UtilityLib.moduleStartUp import parseOptions
 
 
 

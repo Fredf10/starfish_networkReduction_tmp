@@ -1,18 +1,19 @@
 import sys,os,io
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
 
-sys.path.append(cur+'/../UtilityLib')
+#sys.path.append(cur+'/../UtilityLib')
 
-from moduleXML import loadNetworkFromXML 
-from moduleStartUp import parseOptions
+from UtilityLib.moduleXML import loadNetworkFromXML 
+from UtilityLib.moduleStartUp import parseOptions
 
-from processing import linearWaveSplitting
-from processing import nonLinearWaveSplitting
-from processing import minMaxFunction
+from UtilityLib.processing import linearWaveSplitting
+from UtilityLib.processing import nonLinearWaveSplitting
+from UtilityLib.processing import minMaxFunction
 
-sys.path.append(cur+'/../NetworkLib')
-from classVascularNetwork import VascularNetwork 
-from classVessel import Vessel 
+#sys.path.append(cur+'/../NetworkLib')
+from NetworkLib.classVascularNetwork import VascularNetwork 
+from NetworkLib.classVessel import Vessel 
 
 import numpy as np
 from math  import *
