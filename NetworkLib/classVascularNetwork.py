@@ -8,10 +8,10 @@ cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
 
 #sys.path.append(cur + '/../NetworkLib')
-#sys.path.append(cur+'/../Solver')
+#sys.path.append(cur+'/../SolverLib')
 
 from classVessel import Vessel
-from Solver.classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
+from SolverLib.classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
 from classBoundaryConditions import *
 
 #sys.path.append(cur + '/../UtilityLib')

@@ -17,7 +17,7 @@ cur = os.path.dirname( os.path.realpath('__file__') )
 from NetworkLib.classVascularNetwork import VascularNetwork
 
 #sys.path.append(cur+'/Solver')
-from Solver.class1DflowSolver import FlowSolver
+from SolverLib.class1DflowSolver import FlowSolver
 
 #sys.path.append(cur+'/UtilityLib')
 from UtilityLib import moduleXML 

@@ -12,8 +12,8 @@ cur = os.path.dirname(os.path.realpath('__file__'))
 #sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classVascularNetwork import VascularNetwork
 
-#sys.path.append('/'.join([cur,'Solver']))
-from Solver.class1DflowSolver import FlowSolver
+#sys.path.append('/'.join([cur,'SolverLib']))
+from SolverLib.class1DflowSolver import FlowSolver
 
 #sys.path.append('/'.join([cur,'VascularPolynomialChaosLib']))
 from VascularPolynomialChaosLib.classVpcConfiguration import VpcConfiguration
