@@ -1,10 +1,11 @@
+#Warning: this file hard-links to ../VisualisationLib/classRealTimeVisualisation.py in the function startRealTimeVisualisation.
+
 import numpy as np 
 
 import pprint
 import subprocess
 import math
 import numpy
-
 
 import sys,os,time
 # set the path relative to THIS file not the executing file!
