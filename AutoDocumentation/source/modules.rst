@@ -6,12 +6,12 @@
 
    Main
    NetworkLib
-   Solver
+   SolverLib
    UtilityLib
    VascularPolynomialChaos
    VascularPolynomialChaosLib
    VascularPolynomialChaosOld
-   Visualisation
+   VisualisationLib
    Visualize
    VncLib
    systemCheck

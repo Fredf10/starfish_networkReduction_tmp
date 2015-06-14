@@ -18,10 +18,10 @@ Contents:
    vnc
    systemCheck 
    NetworkLib
-   Solver
+   SolverLib
    UtilityLib
    VascularPolynomialChaosLib
-   Visualisation
+   VisualisationLib
    VncLib
 
 

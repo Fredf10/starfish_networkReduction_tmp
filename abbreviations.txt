@@ -1,0 +1,39 @@
+Library:	Filename:					Short: 		Long:
+
+NetworkLib	classVascularNetwork		cVNw		cVascNw
+NetworkLib	classBoundaryConditions		cBC			cBndCond
+NetworkLib 	classVessel					cVes		cVes
+
+SolverLib	classBoundarys				cBnd		cBnd
+SolverLib	class1DFlowSolver			c1DFS		c1DFlowSolv
+SolverLib	classBaroreceptor			cBar		cBarRecp
+
+UtilityLib	moduleCSV					mCSV		mCSV
+UtilityLib	moduleXML					mXML		mXML
+UtilityLib	processing 					mProc		mProc
+UtilityLib	saveSimulationDataToCSV		mSD2CSV		mSaveSimData2CSV
+UtilityLib	moduleStartUp				mStrt		mStartUp
+UtilityLib	moduleFilePathHandler		mFPH		mFPH
+
+VPCLib = VascularPolynomialChaosLib
+
+VPCLib		classDistributionManager	cDM			cDistMng
+VPCLib		classLocationOfInterest		cLOI		cLocOfIntr
+VPCLib		----- | | -------  Manager	cLOIM		cLocOfIntrMng
+VPCLib		classQuantityOfInterest		cQOI		cQntOfIntr
+VPCLib		classRandomInput			cRndIn		cRandInput
+VPCLib		classRandomInputManager		cRndInM		cRandInputMng
+VPCLib		classVpcConfiguration 		cVPC_Conf	cVPC_Conf
+VPCLib		moduleBatchSimulatorManager	mBSM		mBatchSimMng
+VPCLib		moduleFilePathHandlerVPC	mFPH_VPC	mFPH_VPC
+
+VisLib = VisualisationLib
+
+VisLib		class2dVisualisation 		c2D_V		c2D_Vis
+VisLib		class2dVisualisationOld		c2D_V_old	c2D_Vis_old
+VisLib		class3dControlGUI			c3D_CGUI	c3D_CtrlGUI
+VisLib		class3dLUT					c3D_LUT		c3D_LUT
+VisLib		class3dVisualisation		c3D_V		c3D_Vis
+VisLib		classRealTimeVisualisation	cRT_V		cRealTime_Vis
+
+
