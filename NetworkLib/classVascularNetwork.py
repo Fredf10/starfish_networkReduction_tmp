@@ -9,7 +9,7 @@ sys.path.append(cur + '/../NetworkLib')
 sys.path.append(cur+'/../Solver')
 
 from classVessel import Vessel
-from classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
+from classBaroreceptor import bugenhagenAorticBaroreceptor, CarotidBaroreceptor
 from classBoundaryConditions import *
 
 sys.path.append(cur + '/../UtilityLib')
@@ -178,8 +178,8 @@ class VascularNetwork(object):
 #             baro = Baroreceptor(Id=baroId , name=('baroreceptor_' + str(baroId)))  # create baroreceptor with given variables
 #             if dataDict:
 #                 baro.update(dataDict)  # set baroreceptorData if available
-            if dataDict['receptorType'] == 'AorticBaroreceptor':
-                self.baroreceptors[baroId] = AorticBaroreceptor(dataDict)
+            if dataDict['receptorType'] == 'bugenhagenAorticBaroreceptor':
+                self.baroreceptors[baroId] = bugenhagenAorticBaroreceptor(dataDict)
             elif dataDict['receptorType'] == 'CarotidBR':
                 self.baroreceptors[baroId] = CarotidBaroreceptor(dataDict)
         else:  

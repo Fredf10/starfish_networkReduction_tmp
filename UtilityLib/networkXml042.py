@@ -54,7 +54,13 @@ vascularNetworkElements = ['simulationContext',
 AorticBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIds','receptorType', 'modelName']
 CarotidBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','receptorType', 'modelName']
 
-baroreceptorReference = {'AorticBaroreceptor' : AorticBaroreceptor,
+# Hacky inheritance :-)
+bugenhagenAorticBaroreceptor = AorticBaroreceptor + ['bgh']
+pettersenPars = ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax']
+pettersenAorticBR = AorticBaroreceptor + pettersenPars
+
+baroreceptorReference = {'bugenhagenAorticBaroreceptor' : bugenhagenAorticBaroreceptor,
+                         'pettersenAorticBaroreceptor' : pettersenAorticBR,
                          #'CarotidBaroreceptor': CarotidBaroreceptor
                          'CarotidBR': CarotidBaroreceptor
                          }

@@ -16,7 +16,6 @@ class Baroreceptor(object):
     def __init__(self, BaroDict):
         '''
         Baroreceptor model initialisation
-        
         '''
         ## Solver related variables
         #System and Vessel Variables
@@ -29,6 +28,7 @@ class Baroreceptor(object):
         self.receptorType = ''
         self.modelName = ''
         self.baroId = None
+        self.modelData = None
 
         # Model from CellML or hardcoded
         self.cellMLBaroreceptorModel = False
@@ -64,14 +64,22 @@ class Baroreceptor(object):
          
            
             # initialize the model (constant parameters and initial values of states) 
-            (iniStates, self.constants) = baroreceptorCellML.initConsts()
+            (iniStates, constants) = baroreceptorCellML.initConsts()
+            self.updateConstants(constants)
+            
             timeArray = np.linspace(0,self.dt,2)
             self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
              
                
         else:
             print "No CellML Baroreceptor Model provided!"
-            
+
+    def updateConstants(self,constants):
+        """
+        Method for extending to specfic child classes to allow modification of cellML parameters and constants
+        """
+        self.constants = constants
+                    
     def initializeForSimulation(self,flowSolver, vascularNetwork): 
         """
         Configures class members for simulation, using data from the network 
@@ -226,11 +234,10 @@ class Baroreceptor(object):
             
          
 class AorticBaroreceptor(Baroreceptor):
-    
-    '''
+    """
     for models of the AorticBaroreceptors
     Aortic Baroreceptor models with strain input and period of the heart cycle as output
-    '''
+    """
     
     def __init__(self,BaroDict):
         """
@@ -427,28 +434,95 @@ class AorticBaroreceptor(Baroreceptor):
             elif self.cellMLoutputArray == 'states':
                 
                 self.T[n+1] = self.states[-1][self.cellMLoutputID]
-            
-            
-            # for saving BR quantities to solution data (saving in FlowSolver):
-            if self.modelName == 'bugenhagenAorticBR':
-                self.n[n+1] = self.algebraic[-1][3]
-                self.Tsym[n+1] = self.algebraic[-1][7]
-                self.Tparasym[n+1] = self.algebraic[-1][8]
-                self.c_nor[n+1] = self.states[-1][3]
-                self.c_ach[n+1] = self.states[-1][4]
-                
-            elif self.modelName == 'pettersenAorticBR':
-                self.n[n+1] = self.algebraic[-1][5]
-                self.Tsym[n+1] = self.algebraic[-1][9]
-                self.Tparasym[n+1] = self.algebraic[-1][10]
-                self.c_nor[n+1] = self.states[-1][2]
-                self.c_ach[n+1] = self.states[-1][3]
-            
-            
-        else: 
-            pass
+
         
 
+class bugenhagenAorticBaroreceptor(AorticBaroreceptor):
+    '''
+    for models of the AorticBaroreceptors
+    Aortic Baroreceptor models with strain input and period of the heart cycle as output
+    '''
+    
+    def __init__(self,BaroDict):
+        """
+        constructor method of an AorticBaroreceptor object
+        """
+        # intialize with mother class constructor
+        AorticBaroreceptor.__init__(self,BaroDict)
+        self.bgh = None
+    
+        self.update(BaroDict)
+        
+    def __call__(self):
+        '''
+        Implements bugenhagen specific actions for the numerical object call
+        '''
+        
+        AorticBaroreceptor.__call__(self)
+        
+        n = self.currentTimeStep[0]
+        n_mem = self.currentMemoryIndex[0]
+        self.n[n+1] = self.algebraic[-1][3]
+        self.Tsym[n+1] = self.algebraic[-1][7]
+        self.Tparasym[n+1] = self.algebraic[-1][8]
+        self.c_nor[n+1] = self.states[-1][3]
+        self.c_ach[n+1] = self.states[-1][4]
+        
+
+class pettersenAorticBaroreceptor(AorticBaroreceptor):
+    '''
+    for models of the AorticBaroreceptors
+    Aortic Baroreceptor models with strain input and period of the heart cycle as output
+    '''
+    
+    def __init__(self,BaroDict):
+        """
+        constructor method of an AorticBaroreceptor object
+        """
+        # intialize with mother class constructor
+        AorticBaroreceptor.__init__(self,BaroDict)
+        self.L0 = None
+        self.n0 = None
+        self.g = None
+        self.tau1 = None
+        self.tau2 = None
+        self.Gp = None
+        self.Gs = None
+        self.delta_HR_smax = None
+        self.delta_HR_pmax = None
+    
+        self.update(BaroDict)
+    
+    def updateConstants(self, constants):
+        """
+        Assign paramter values to those used by the cellML solver
+        """
+        self.constants = constants
+        # Pettersen
+        self.constants[30] = self.delta_HR_smax
+        self.constants[31] = self.delta_HR_pmax 
+        self.constants[24] = self.L0
+        self.constants[25] = self.n0
+        self.constants[26] = self.g
+        self.constants[22] = self.tau1
+        self.constants[23] = self.tau2
+        self.constants[6]  = self.Gp
+        self.constants[5]  = self.Gs
+        
+    def __call__(self):
+        """
+        Implements pettersen specific actions for the numerical object call
+        """      
+        AorticBaroreceptor.__call__(self)
+        
+        n = self.currentTimeStep[0]
+        n_mem = self.currentMemoryIndex[0]
+        
+        self.n[n+1] = self.algebraic[-1][5]
+        self.Tsym[n+1] = self.algebraic[-1][9]
+        self.Tparasym[n+1] = self.algebraic[-1][10]
+        self.c_nor[n+1] = self.states[-1][2]
+        self.c_ach[n+1] = self.states[-1][3]
 
 class CarotidBaroreceptor(Baroreceptor):
     '''
