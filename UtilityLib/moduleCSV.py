@@ -15,6 +15,12 @@ from constants import variablesDict
 import moduleXML
 import moduleFilePathHandler as mFPH
 
+"""
+This is moduleCSV, should be imported as mCSV
+
+Some other information about the module 
+"""
+
 def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     '''
     Functions writes vessel data to *.csv file inclusive polynomial chaos definitions
@@ -239,17 +245,19 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     
 def readBCFromCSV(networkName, delimiter=';'):
     '''
-    Functions loads boundaryCondition data from *.csv file inclusive polynomial chaos definitions
-    
-    input:
-        networkName <string>
-        delimiter   <string>  (default = ';')
-    
-    return:
-        boundaryConditionDict      <dict>  := boundaryConditionDict dict of class VascularNetwork 
-                                              {vesselId : boundaryConditionInstance} 
-        boundaryConditionPolyChaos <dict>  := boundaryConditionPolyChaos dict of class VascularNetwork 
- 
+    Functions loads boundaryCondition data from \*.csv file inclusive polynomial chaos definitions
+
+    Args:
+        networkName (str): The name of the network
+        delimiter (str): Delimiter (default = ';')
+
+    Returns:
+        VascularNetwork.boundaryConditionDict 
+            A description of the VascNw.BCD instance returned
+        
+        VascularNetwork.boundaryConditionPolyChaos
+            A description of the VascNw.BCPC instance returned
+       
     '''
     
     boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
