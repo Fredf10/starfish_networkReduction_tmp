@@ -1,0 +1,33 @@
+# This file specifies files which git won't care about unless explicitly told to
+
+# For Mac users
+.DS_Store
+
+# For TexPad users
+.texpadtmp/
+
+# For everybody ignore intermediate compilation files
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.idx
+*.ind
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# For latexmk users
+*.fdb_latexmk
+*.fls
+# Ignore Eclipse config files
+.pydev*
+.project
+
+#Ignore STARFish Config file and LOGs
+STARFiSh.config
+LOG*
+
+# Ignore compiled python in the root directory
+*.pyc
