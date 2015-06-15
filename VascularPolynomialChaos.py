@@ -122,6 +122,8 @@ def vascularPolyChaos():
                     mBSM.runBatchAsMultiprocessing(batchFileList, vpcConfiguration.numberOfProcessors , quiet = True)
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
         
+        print "starting Post processing - stopping here"
+        exit()
         # 6. process quantity of interest
         ## TODO: defined query location and quantities to process
         quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
@@ -148,7 +150,7 @@ def vascularPolyChaos():
         
         ## if monte carlo
         # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
-        locationOfInterestManager.calculateStatisticsMonteCarlo()
+        #locationOfInterestManager.calculateStatisticsMonteCarlo()
         
         # 10. plotting of variables
 if __name__ == '__main__':
