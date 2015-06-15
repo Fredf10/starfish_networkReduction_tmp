@@ -391,6 +391,7 @@ variablesDict = {## class Vascular Network
                  'vesselIdLeft'      : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  'vesselIdRight'     : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  ## Pettersen pars
+                 'modelName' : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'L0': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'n0': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
                  'g': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},

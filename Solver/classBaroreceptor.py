@@ -25,10 +25,13 @@ class Baroreceptor(object):
         self.nTsteps = 0
         
         # Configuration and solution data variables
-        self.receptorType = ''
+        self.receptorType = 'pettersenAorticBaroreceptor'
         self.modelName = ''
         self.baroId = None
         self.modelData = None
+        
+        ## pleas delete me class name 
+        self.classType = 'pettersenAorticBaroreceptor'
 
         # Model from CellML or hardcoded
         self.cellMLBaroreceptorModel = False
@@ -499,6 +502,7 @@ class pettersenAorticBaroreceptor(AorticBaroreceptor):
         """
         self.constants = constants
         # Pettersen
+        self.constants[30] = self.delta_HR_smax
         self.constants[30] = self.delta_HR_smax
         self.constants[31] = self.delta_HR_pmax 
         self.constants[24] = self.L0

@@ -56,14 +56,33 @@ CarotidBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vessel
 
 # Hacky inheritance :-)
 bugenhagenAorticBaroreceptor = AorticBaroreceptor + ['bgh']
-pettersenPars = ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax']
-pettersenAorticBR = AorticBaroreceptor + pettersenPars
+pettersenPars                = ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax']
+pettersenAorticBR            = AorticBaroreceptor + pettersenPars
+
+baroreceptorModelReference = {}
+
 
 baroreceptorReference = {'bugenhagenAorticBaroreceptor' : bugenhagenAorticBaroreceptor,
                          'pettersenAorticBaroreceptor' : pettersenAorticBR,
                          #'CarotidBaroreceptor': CarotidBaroreceptor
                          'CarotidBR': CarotidBaroreceptor
                          }
+
+#### new 
+
+baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
+
+baroreceptorModelElements = {'bugenhagenAorticBaroreceptor' : ['bgh'],
+                             'pettersenAorticBaroreceptor'  : ['modelName','L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax'],
+                             #'CarotidBaroreceptor': CarotidBaroreceptor
+                             #'CarotidBR'                    : CarotidBaroreceptor
+                             }
+
+baroreceptorElementReference = {'topology':baroreceptorTopologyElements,
+                                'model':   baroreceptorModelElements}
+
+baroreceptorElements = ['topology',
+                        'model']
 
 
 ##########################################################################################
@@ -262,7 +281,7 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'initialisationControls': initialisationControlsElements,
                         'boundaryConditions'    : boundaryConditionElements,
                         'globalFluid'           : globalFluidElements,
-                        'baroreceptors'         : baroreceptorReference,
+                        'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference,
                         'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }

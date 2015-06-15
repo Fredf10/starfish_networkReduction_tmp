@@ -9,8 +9,10 @@ sys.path.append(cur + '/../NetworkLib')
 sys.path.append(cur+'/../Solver')
 
 from classVessel import Vessel
-from classBaroreceptor import bugenhagenAorticBaroreceptor, CarotidBaroreceptor
+#from classBaroreceptor import bugenhagenAorticBaroreceptor, CarotidBaroreceptor
 from classBoundaryConditions import *
+
+import classBaroreceptor
 
 sys.path.append(cur + '/../UtilityLib')
 import moduleFilePathHandler as mFPH
@@ -172,19 +174,16 @@ class VascularNetwork(object):
         if baroId == None: 
             try: baroId = max(self.baroreceptors.keys()) + 1
             except: baroId = 0
-            
+             
         # check Id
         if baroId not in self.baroreceptors:
-#             baro = Baroreceptor(Id=baroId , name=('baroreceptor_' + str(baroId)))  # create baroreceptor with given variables
-#             if dataDict:
-#                 baro.update(dataDict)  # set baroreceptorData if available
-            if dataDict['receptorType'] == 'bugenhagenAorticBaroreceptor':
-                self.baroreceptors[baroId] = bugenhagenAorticBaroreceptor(dataDict)
-            elif dataDict['receptorType'] == 'CarotidBR':
-                self.baroreceptors[baroId] = CarotidBaroreceptor(dataDict)
+            baroType = dataDict['classType']
+            instance = getattr(classBaroreceptor, baroType)(dataDict)
+            self.baroreceptors[baroId] = instance
+            
         else:  
             print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
- 
+  
     def update(self, vascularNetworkData):
         '''
         updates the vascularNetwork data using a dictionary in form of 
@@ -221,8 +220,8 @@ class VascularNetwork(object):
             'vascularNetworkData'  := dict with all vascularNetwork variables to update
             'globalFluid'          := dict with all global fluid properties
             'communicators'        := netCommunicators}
-            'vesselData'      := { vessel.id : DataDict}
-            'baroreceptors'      := { baroreceptor.id : DataDict}
+            'vesselData'           := { vessel.id : DataDict}
+            'baroreceptors'        := { baroreceptor.id : DataDict}
         '''
         
         for dictName in ['vascularNetworkData']:
@@ -246,8 +245,9 @@ class VascularNetwork(object):
                 try:
                     self.baroreceptors[baroId].update(baroData)
                 except:
-                    self.addBaroreceptor(baroId, baroData)    
-          
+                    self.addBaroreceptor(baroId, baroData)
+            print self.baroreceptors
+                      
     def showVessels(self):
         '''
         writes the Vesseldata for each vessel to console (calls printToConsole() from each vessel)
