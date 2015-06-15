@@ -36,24 +36,34 @@
   <communicators/>
   
   <baroreceptors>
-     <pettersenAorticBaroreceptor>
-      <cellMLBaroreceptorModel>True</cellMLBaroreceptorModel>
-      <baroId>0</baroId>
-      <modelName>pettersenAorticBR</modelName>
-      <receptorType>pettersenAorticBaroreceptor</receptorType>
-      <vesselIds>2 14</vesselIds>      
-      <modelData modelName='pettersenAorticBR'>
-	<L0>0.52</L0>
-	<n0 unit='sec-1'>63.5</n0>
-	<g unit='sec-1'>87.5</g>
-	<tau1 unit = 'sec-1'>0.1</tau1>
-	<tau2 unit = 'sec-1'>0.5</tau2>
-	<Gp>0.492</Gp>
-	<Gs>0.178</Gs>
-	<delta_HR_smax unit = 'min-1'>87</delta_HR_smax>
-	<delta_HR_pmax unit = 'min-1'>57</delta_HR_pmax>
-      </modelData>
-     </pettersenAorticBaroreceptor>
+    <baroreceptor Id="1">
+      <topology>
+        <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+        <vesselIds>2 14</vesselIds>
+      </topology>
+      <model type="pettersenAorticBaroreceptor">
+        <modelName>pettersenAorticBR</modelName>
+        <L0>0.52</L0>
+        <n0 unit="sec-1">63.5</n0>
+        <n0-randomInput>
+          <distributionType>Normal</distributionType>
+          <a>2.0</a>
+          <b>12.0</b>
+        </n0-randomInput>
+        <g unit="sec-1">87.5</g>
+        <tau1 unit="sec-1">0.1</tau1>
+        <tau2 unit="sec-1">0.5</tau2>
+        <Gp>0.492</Gp>
+        <Gs>0.178</Gs>
+        <Gs-randomInput>
+          <distributionType>Normal</distributionType>
+          <a>2.0</a>
+          <b>12.0</b>
+        </Gs-randomInput>
+        <delta_HR_smax unit="min-1">0.0241666666667</delta_HR_smax>
+        <delta_HR_pmax unit="min-1">0.0158333333333</delta_HR_pmax>
+      </model>
+    </baroreceptor>
   </baroreceptors>
   
   <boundaryConditions>
