@@ -1,3 +1,5 @@
+#Warning: this file hard-links to ../VisualisationLib/classRealTimeVisualisation.py in the function startRealTimeVisualisation.
+
 import numpy as np 
 
 import pprint
@@ -5,14 +7,13 @@ import subprocess
 import math
 import numpy
 
-
 import sys,os,time
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 #sys.path.append(cur+'/../Visualisation')
 
-from Visualisation.classRealTimeVisualisation import realTimeVisualisation
+from VisualisationLib.classRealTimeVisualisation import realTimeVisualisation
 
 class CommunicatorBaseClass(object):
     '''
@@ -139,7 +140,7 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         This function starts the realtime visualisation in a subprocess
         '''
         # start the visualisation
-        visualisationProcess = ' '.join(['python',cur+'/../Visualisation/classRealTimeVisualisation.py',
+        visualisationProcess = ' '.join(['python',cur+'/../VisualisationLib/classRealTimeVisualisation.py',
                                          '-f',str(self.filenameWrite),
                                          '-t',str(self.dt*self.dn),
                                          '-q','-'.join(self.quantitiesToPlot),
