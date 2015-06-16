@@ -30,8 +30,9 @@ Using Sphinx with some extensions, docstrings in the code
 will be used to autogenerate documentation. To generate it, 
 enter the AutoDocumentation folder and run "make html". If 
 you've altered modules, run "make clean" first. If you've 
-altered module names, folders, or top level modules, run 
-"sh fullclean.sh" and edit /sources/index.rst accordingly.
+altered module names, folders, or top level modules, edit 
+AutoDocumentation/sources/index.rst accordingly, and then 
+run "sh fullclean.sh".
 
 We will use a slightly modified Google standard 
 for writing docstrings. (return is different)
@@ -41,8 +42,8 @@ def foo(input1, input2):
 	describe function here
 	
 	Args:
-		input1 (type): descrption of input1
-		input2 (type): same here
+		input1 (type): description of input1
+		input2 (type): description of input2
 	
 	Returns:
 		type of output1
@@ -52,7 +53,7 @@ def foo(input1, input2):
 			description of output2
 	
 	Raises:
-		IOError: An error occured loading myClass.myStuff.
+		IOError: An error occured loading myClass.myStuff
 	"""
 
 Example can be found in UtilityLib/moduleCSV.py
