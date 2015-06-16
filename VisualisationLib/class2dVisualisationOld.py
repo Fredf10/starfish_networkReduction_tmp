@@ -16,11 +16,9 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
 #sys.path.append(cur+'/../UtilityLib')
-from UtilityLib.moduleXML import loadNetworkFromXML 
-from UtilityLib.processing import linearWaveSplitting
-from UtilityLib.processing import nonLinearWaveSplitting
-from UtilityLib.processing import minMaxFunction
-from UtilityLib.moduleStartUp import parseOptions
+import UtilityLib.moduleXML as mXML 
+import UtilityLib.processing as mProc
+import UtilityLib.moduleStartUp as moduleStartUp
 from UtilityLib.modulePickle import loadSolutionDataFile
 from UtilityLib.modulePickle import loadExternalDataSet
 
@@ -866,54 +864,54 @@ class Window2dPlots(gtk.Window):
         if self.plotNormal:
             
             #Psol,Psol,Qsol,Qsol#
-            p_f,p_b,q_f,q_b = linearWaveSplitting(Psol,Qsol,Asol,csol,self.vessel.rho)
+            p_f,p_b,q_f,q_b = mProc.linearWaveSplitting(Psol,Qsol,Asol,csol,self.vessel.rho)
             if self.compare == True:
                 #PsolComp,PsolComp,QsolComp,QsolComp #
-                p_fComp,p_bComp,q_fComp,q_bComp = linearWaveSplitting(PsolComp,QsolComp,AsolComp,csolComp,self.vessel.rho)
+                p_fComp,p_bComp,q_fComp,q_bComp = mProc.linearWaveSplitting(PsolComp,QsolComp,AsolComp,csolComp,self.vessel.rho)
 
             if self.nonlinearWaveSplit:
                 
                 
                 
-                p_f,p_b,q_f,q_b = nonLinearWaveSplitting(Psol,Qsol,Asol,csol,compliancearray,self.vessel.rho)
+                p_f,p_b,q_f,q_b = mProc.nonLinearWaveSplitting(Psol,Qsol,Asol,csol,compliancearray,self.vessel.rho)
                 if self.compare == True:
-                    p_fComp,p_bComp,q_fComp,q_bComp = nonLinearWaveSplitting(PsolComp,QsolComp,AsolComp,csolComp,self.vessel.rho)
+                    p_fComp,p_bComp,q_fComp,q_bComp = mProc.nonLinearWaveSplitting(PsolComp,QsolComp,AsolComp,csolComp,self.vessel.rho)
             
             minMaxPoints = {}
             if self.plotMinMaxPoints == True:
                 print "Min Max Points"
                 try:
-                    minMaxPoints['Psol'],minMaxPoints['PsolT'] = minMaxFunction(Psol.ravel()/unitP,xAxisValues,delta=0.025)
+                    minMaxPoints['Psol'],minMaxPoints['PsolT'] = mProc.minMaxFunction(Psol.ravel()/unitP,xAxisValues,delta=0.025)
                     print "Pressure: "
                     pp(minMaxPoints['Psol'])
                     pp(minMaxPoints['PsolT'])
                 except: pass 
                 try:
-                    minMaxPoints['Pf'],minMaxPoints['PfT'] = minMaxFunction(p_f.ravel()/unitP,xAxisValues,delta=0.025)
+                    minMaxPoints['Pf'],minMaxPoints['PfT'] = mProc.minMaxFunction(p_f.ravel()/unitP,xAxisValues,delta=0.025)
                     print "Pressure forward: "
                     pp(minMaxPoints['Pf'])
                     pp(minMaxPoints['PfT'])
                 except: pass 
                 try:
-                    minMaxPoints['Pb'],minMaxPoints['PbT'] = minMaxFunction(p_b.ravel()/unitP,xAxisValues,delta=0.025)
+                    minMaxPoints['Pb'],minMaxPoints['PbT'] = mProc.minMaxFunction(p_b.ravel()/unitP,xAxisValues,delta=0.025)
                     print "Pressure backward: "
                     pp(minMaxPoints['Pb'])
                     pp(minMaxPoints['PbT'])
                 except: pass 
                 try:
-                    minMaxPoints['Qsol'],minMaxPoints['QsolT'] = minMaxFunction(Qsol.ravel()*unitF,xAxisValues,delta=0.025)
+                    minMaxPoints['Qsol'],minMaxPoints['QsolT'] = mProc.minMaxFunction(Qsol.ravel()*unitF,xAxisValues,delta=0.025)
                     print "Flow: "
                     pp(minMaxPoints['Qsol'])
                     pp(minMaxPoints['QsolT'])
                 except: pass 
                 try: 
-                    minMaxPoints['Qf'],minMaxPoints['QfT'] = minMaxFunction(q_f.ravel()*unitF,xAxisValues,delta=0.025)
+                    minMaxPoints['Qf'],minMaxPoints['QfT'] = mProc.minMaxFunction(q_f.ravel()*unitF,xAxisValues,delta=0.025)
                     print "Flow forward: "
                     pp(minMaxPoints['Qf'])
                     pp(minMaxPoints['QfT'])
                 except: pass 
                 try: 
-                    minMaxPoints['Qb'],minMaxPoints['QbT'] = minMaxFunction(q_b.ravel()*unitF,xAxisValues,delta=0.025)
+                    minMaxPoints['Qb'],minMaxPoints['QbT'] = mProc.minMaxFunction(q_b.ravel()*unitF,xAxisValues,delta=0.025)
                     print "Flow backward: "
                     pp(minMaxPoints['Qb'])
                     pp(minMaxPoints['QbT'])
@@ -1181,7 +1179,7 @@ def flip(items, ncol):
 
 if __name__ == '__main__':
                
-    optionsDict = parseOptions(['f','n','c'], visualisationOnly = True)
+    optionsDict = moduleStartUp.parseOptions(['f','n','c'], visualisationOnly = True)
     
     networkName  = optionsDict['networkName']
     dataNumber   = optionsDict['dataNumber']

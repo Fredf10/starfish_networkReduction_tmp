@@ -18,12 +18,12 @@ cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
 
 #sys.path.append(cur + '/../UtilityLib')
-import UtilityLib.processing as proc
+import UtilityLib.processing as mProc
 #from processing import nonLinearWaveSplitting
 
-from UtilityLib import moduleStartUp
-from UtilityLib import moduleFilePathHandler as mFPH
-from UtilityLib import moduleXML
+import UtilityLib.moduleStartUp as moduleStartUp
+import UtilityLib.moduleFilePathHandler as mFPH
+import UtilityLib.moduleXML as mXML
 
 
 import numpy as np
@@ -739,7 +739,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Asol = vascularNetwork.vessels[vesselId].Asol[:, [gridNode]]   
                     csol = vascularNetwork.vessels[vesselId].csol[:, [gridNode]]  
                     
-                    Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
                     yData00 = Psol / 133.32
                     yData01 = Psol_f / 133.32
@@ -772,7 +772,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Asol = vascularNetwork.vessels[vesselId].Asol[gridNode]   
                     csol = vascularNetwork.vessels[vesselId].csol[gridNode]  
                     
-                    Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
                     yData00 = Psol / 133.32
                     yData01 = Psol_f / 133.32
@@ -828,7 +828,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Asol = vascularNetwork.vessels[vesselId].Asol[:, [gridNode]]   
                     csol = vascularNetwork.vessels[vesselId].csol[:, [gridNode]]  
                     
-                    Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
                     liftFactor = 0
                     if i == 1:
@@ -865,7 +865,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     Asol = vascularNetwork.vessels[vesselId].Asol[gridNode]   
                     csol = vascularNetwork.vessels[vesselId].csol[gridNode]  
                     
-                    Psol_f, Psol_b, Qsol_f, Qsol_b = proc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
                     
                     yData00 = Psol / 133.32
                     yData01 = Psol_f / 133.32
@@ -1077,7 +1077,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                         # if toggled add points if "untoggled" remove points
                         # 2 find min and max points for all current lines
                         currentName = ' '.join([str(caseId),axis,linestyle])
-                        minMaxPoints = proc.minMaxFunction(line.get_ydata(), xData, delta = self.deltas[currentName][0])
+                        minMaxPoints = mProc.minMaxFunction(line.get_ydata(), xData, delta = self.deltas[currentName][0])
                         # 3 plot all min and max points for current lines
                         self.points[caseId][axis][linestyle].set_data(minMaxPoints[1], minMaxPoints[0])
         
@@ -1165,7 +1165,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                         
             # pressure / flow,  forward backward
             for n in [0,-1]:#xrange(int(vascularNetwork.vessels[vesselId].N)):
-                pf,pb,qf,qb =  proc.linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
+                pf,pb,qf,qb =  mProc.linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
                  
                 limit = 'Pf'
                 sol = pf/133.32
@@ -1678,7 +1678,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         The network is added to the existing ones if is not existing
         '''
         # load vascular network
-        vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber = dataNumber, networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
+        vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber = dataNumber, networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
         vascularNetwork.linkSolutionData()
         # # save it and refresh GUi setup
         networkSolutionName = '_'.join([networkName, dataNumber])  

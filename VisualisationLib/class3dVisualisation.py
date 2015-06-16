@@ -6,21 +6,19 @@ sys.path.append(cur+'/../')
 
 import subprocess
 
-from UtilityLib import moduleXML
-from UtilityLib.moduleStartUp import parseOptions
-from UtilityLib import moduleFilePathHandler as mFPH
+import UtilityLib.moduleXML as mXML
+import UtilityLib.moduleStartUp as moduleStartUp
+import UtilityLib.moduleFilePathHandler as mFPH
 
-from UtilityLib.processing import linearWaveSplitting
-from UtilityLib.processing import nonLinearWaveSplitting
-from UtilityLib.processing import minMaxFunction
+import UtilityLib.processing as mProc
 
 #sys.path.append(cur+'/../NetworkLib')
 from NetworkLib.classVascularNetwork import VascularNetwork 
 from NetworkLib.classVessel import Vessel 
 
-from class3dLUT import WindowLUT
-from class3dLUT import LUT
-from class3dControlGUI import ControlWindow
+import class3dLUT as c3dLUT
+
+import class3dControlGUI as c3dCtrlGUI
 
 import numpy as np
 from math  import *
@@ -164,7 +162,7 @@ class Visualisation3DGUI(pyglet.window.Window):
         
         ###
         # control GUI window
-        self.controlWindow = ControlWindow(self)
+        self.controlWindow = c3dCtrlGUI.ControlWindow(self)
         
         # register button events
         # simulation speed
@@ -724,7 +722,7 @@ class Visualisation3D(Visualisation3DGUI):
         '''
         if self.networkName and self.dataNumber:
             # load vascular network
-            self.vascularNetwork = moduleXML.loadNetworkFromXML(self.networkName, dataNumber = self.dataNumber)
+            self.vascularNetwork = mXML.loadNetworkFromXML(self.networkName, dataNumber = self.dataNumber)
             # link solution data from file
             self.vascularNetwork.linkSolutionData()   
             # load solution data from file
@@ -1113,7 +1111,7 @@ class Vessel3D(Vessel):
         self.QsolB = np.zeros_like(self.Psol)
                
         for n in xrange(int(self.N)):
-            pf,pb,qf,qb =  linearWaveSplitting(self.Psol[:,[n]],self.Qsol[:,[n]],self.Asol[:,[n]],self.csol[:,[n]],self.rho)
+            pf,pb,qf,qb =  mProc.linearWaveSplitting(self.Psol[:,[n]],self.Qsol[:,[n]],self.Asol[:,[n]],self.csol[:,[n]],self.rho)
             self.PsolF[1::,[n]] = pf.reshape(numberOfTimeSteps-1,1)
             self.PsolB[1::,[n]] = pb.reshape(numberOfTimeSteps-1,1)
             self.QsolF[1::,[n]] = qf.reshape(numberOfTimeSteps-1,1)
@@ -1346,7 +1344,7 @@ class Vessel3D(Vessel):
 
 if __name__ == '__main__':
            
-    optionsDict = parseOptions(['f','n','c'], visualisationOnly = True)
+    optionsDict = moduleStartUp.parseOptions(['f','n','c'], visualisationOnly = True)
     
     networkName  = optionsDict['networkName']
     dataNumber   = optionsDict['dataNumber']
