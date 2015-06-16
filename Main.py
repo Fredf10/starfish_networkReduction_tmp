@@ -11,18 +11,15 @@ import time
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
-#sys.path.append(cur+'/Solver')
 
-#sys.path.append(cur+'/NetworkLib')
-from NetworkLib.classVascularNetwork import VascularNetwork
+#import NetworkLib.classVascularNetwork as cVascNw
+### Unnecessary import, never used later.
 
-#sys.path.append(cur+'/Solver')
-from SolverLib.class1DflowSolver import FlowSolver
+import SolverLib.class1DflowSolver as c1DFlowSolv
 
-#sys.path.append(cur+'/UtilityLib')
-from UtilityLib import moduleXML 
-from UtilityLib import moduleStartUp #import parseOptions
-from UtilityLib import moduleFilePathHandler as mFPH
+import UtilityLib.moduleXML as mXML
+import UtilityLib.moduleStartUp as mStartUp #import parseOptions
+import UtilityLib.moduleFilePathHandler as mFPH
 
 import pprint
 import matplotlib.pyplot as plt
@@ -38,7 +35,7 @@ def main():
     print '#     STARFiSh_v0.3_development     #'
     print '====================================='
     
-    optionsDict = moduleStartUp.parseOptions(['f','n','d','s','v','r','w'])
+    optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w'])
     
     networkName           = optionsDict['networkName']
     save                  = optionsDict['save']
@@ -63,10 +60,10 @@ def main():
     
     # load network from the path!
     if resimulate == False:
-        vascularNetwork = moduleXML.loadNetworkFromXML(networkName) # moved to vascularNetowrk constror
+        vascularNetwork = mXML.loadNetworkFromXML(networkName) # moved to vascularNetowrk constror
     else:
         # resimulate network
-        vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber = dataNumber)        
+        vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber = dataNumber)        
         if simulationDescription == '':
             simulationDescription = vascularNetwork.description
         
@@ -78,7 +75,7 @@ def main():
     
     timeSolverInitStart = time.clock()
     #initialize Solver
-    flowSolver = FlowSolver(vascularNetwork)
+    flowSolver = c1DFlowSolv.FlowSolver(vascularNetwork)
     timeSolverInit = time.clock()-timeSolverInitStart
     timeSolverSolveStart = time.clock()
     #solve the system
@@ -98,7 +95,7 @@ def main():
     print '====================================='
     
     vascularNetwork.saveSolutionData()
-    moduleXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
+    mXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
     
     
     del flowSolver

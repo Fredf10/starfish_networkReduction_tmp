@@ -5,20 +5,13 @@ import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
 
-# syspaths and functions for vascular1DFlow_v0.2
-#sys.path.append(cur+'/UtilityLib')
-#sys.path.append(cur+'/NetworkLib')
-#sys.path.append(cur+'/VncLib')
+# functions for vascular1DFlow_v0.2
+
 from NetworkLib.classVascularNetwork import VascularNetwork 
 from NetworkLib.classBoundaryConditions import *
-from UtilityLib.moduleXML import writeNetworkToXML 
-from UtilityLib.moduleXML import loadNetworkFromXML 
 
-from UtilityLib.moduleCSV import readVesselDataFromCSV 
-from UtilityLib.moduleCSV import writeVesselDataToCSV 
-from UtilityLib.moduleCSV import writeBCToCSV 
-from UtilityLib.moduleCSV import readBCFromCSV
-
+import UtilityLib.moduleXML as mXML 
+import UtilityLib.moduleCSV as mCSV
 import UtilityLib.moduleFilePathHandler as mFPH
 
 from UtilityLib.constants import newestNetworkXml as nxml
@@ -533,7 +526,7 @@ def main():
                         print "     load  boundary conditions from CSV"
                         print ""
                         networkName = enterNetworkName(networkName)
-                        boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(networkName)
+                        boundaryConditions,boundaryConditionPolyChaos = mCSV.readBCFromCSV(networkName)
                         vascularNetwork.update({'boundaryConditions':boundaryConditions,
                                                 'boundaryConditionPolyChaos':boundaryConditionPolyChaos})
                         
@@ -545,7 +538,7 @@ def main():
                         networkName = enterNetworkName(networkName)
                         boundaryConditions = vascularNetwork.getVariableValue('boundaryConditions')
                         boundaryConditionPolyChaos = deepcopy(vascularNetwork.getVariableValue('boundaryConditionPolyChaos'))
-                        writeBCToCSV(networkName, boundaryConditions, boundaryConditionPolyChaos)    
+                        mCSV.writeBCToCSV(networkName, boundaryConditions, boundaryConditionPolyChaos)    
                                                 
                     elif subMenuInput == 'b':
                         break
@@ -648,10 +641,10 @@ def main():
                     # delete the old network
                     del vascularNetwork
                     
-                    vascularNetwork = loadNetworkFromXML(networkName)
+                    vascularNetwork = mXML.loadNetworkFromXML(networkName)
                     #load the new network
                     try:
-                        vascularNetwork = loadNetworkFromXML(networkName)
+                        vascularNetwork = mXML.loadNetworkFromXML(networkName)
                     except:
                         mainGraph.update_graph(None, window)
                         vascularNetwork = VascularNetwork()
@@ -687,7 +680,7 @@ def main():
                     del vascularNetwork
                     # delete the old network
                     try:
-                        vascularNetwork = loadNetworkFromXML(templateNetworkName)
+                        vascularNetwork = mXML.loadNetworkFromXML(templateNetworkName)
                         vascularNetwork.name = None
                         networkName = None
                     except:
@@ -711,7 +704,7 @@ def main():
                     networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
                     if networkName == None:break
                     
-                    vascularNetwork.updateNetwork(readVesselDataFromCSV(networkName))
+                    vascularNetwork.updateNetwork(mCSV.readVesselDataFromCSV(networkName))
                     
                     mainGraph.update_graph(vascularNetwork, window)
                     break
@@ -721,8 +714,8 @@ def main():
                     networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
                     if networkName == None:break
                     
-                    vascularNetwork.updateNetwork(readVesselDataFromCSV(networkName))
-                    boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(networkName)
+                    vascularNetwork.updateNetwork(mCSV.readVesselDataFromCSV(networkName))
+                    boundaryConditions,boundaryConditionPolyChaos = mCSV.readBCFromCSV(networkName)
                     vascularNetwork.update({'boundaryConditions':boundaryConditions,
                                             'boundaryConditionPolyChaos':boundaryConditionPolyChaos})
                     
@@ -734,7 +727,7 @@ def main():
                     try:
                         networkName,dataNumber = chooseSolutionDataCase()
                         
-                        vascularNetwork = loadNetworkFromXML(networkName,dataNumber = dataNumber)
+                        vascularNetwork = mXML.loadNetworkFromXML(networkName,dataNumber = dataNumber)
                         vascularNetwork.name = None
                         networkName = None
                         mainGraph.update_graph(vascularNetwork, window)
@@ -776,14 +769,14 @@ def main():
                     networkName = enterNetworkName(networkName)
                     vascularNetwork.name = networkName
                     if networkName == None:break
-                    writeNetworkToXML(vascularNetwork)
+                    mXML.writeNetworkToXML(vascularNetwork)
                     break
                     
                 elif subMenuInput == '2':
                     print "     write vessel data to CSV"
                     networkName = enterNetworkName(networkName) 
                     if networkName == None:break
-                    writeVesselDataToCSV(networkName, vascularNetwork.vessels)
+                    mCSV.writeVesselDataToCSV(networkName, vascularNetwork.vessels)
                     break
                 
                 elif subMenuInput == '3':
@@ -793,8 +786,8 @@ def main():
                     boundaryConditions = vascularNetwork.getVariableValue('boundaryConditions')
                     boundaryConditionPolyChaos = deepcopy(vascularNetwork.getVariableValue('boundaryConditionPolyChaos'))
                     # write data
-                    writeVesselDataToCSV(networkName, vascularNetwork.vessels)
-                    writeBCToCSV(networkName, boundaryConditions,boundaryConditionPolyChaos)  
+                    mCSV.writeVesselDataToCSV(networkName, vascularNetwork.vessels)
+                    mCSV.writeBCToCSV(networkName, boundaryConditions,boundaryConditionPolyChaos)  
                     break
                 
                 elif subMenuInput == '4':
@@ -833,7 +826,7 @@ def main():
             del vascularNetwork
             #load the new network
             try:
-                vascularNetwork = loadNetworkFromXML(networkName)
+                vascularNetwork = mXML.loadNetworkFromXML(networkName)
             except:
                 vascularNetwork = VascularNetwork()
                 print "\n  could not load network, it does not exist! \n"
@@ -848,11 +841,11 @@ def main():
             
             mainGraph.update_graph(vascularNetwork, window)
             print "     load vessel data from CSV - non existing vessels are added automatically"
-            vascularNetwork.updateNetwork(readVesselDataFromCSV(networkName))
+            vascularNetwork.updateNetwork(mCSV.readVesselDataFromCSV(networkName))
             print "     load boundaryData from csv as well? press [u]" 
             subMenuInput = raw_input("yes [u]? ")
             if subMenuInput == 'u':
-                boundaryConditions,boundaryConditionPolyChaos = readBCFromCSV(networkName)
+                boundaryConditions,boundaryConditionPolyChaos = mCSV.readBCFromCSV(networkName)
                 vascularNetwork.update({'boundaryConditions':boundaryConditions,
                                         'boundaryConditionPolyChaos':boundaryConditionPolyChaos})          
             
@@ -861,7 +854,7 @@ def main():
             
             print "     write to XML"
             vascularNetwork.name = networkName
-            writeNetworkToXML(vascularNetwork)
+            mXML.writeNetworkToXML(vascularNetwork)
             
             
     print "bye bye .."

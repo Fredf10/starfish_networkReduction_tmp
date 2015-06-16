@@ -6,11 +6,14 @@ class ODESolver:
 
       du/dt = f(u, t)
 
-    Attributes:
-    t: array of time values
-    u: array of solution values (at time points t)
-    k: step number of the most recently computed solution
-    f: callable object implementing f(u, t)
+    :Attributes: 
+        :t: array of time values 
+     
+        :u: array of solution values (at time points t)
+
+        :k: step number of the most recently computed solution
+
+        :f: callable object implementing f(u, t)
     """
     def __init__(self, f):
         if not callable(f):
@@ -24,6 +27,7 @@ class ODESolver:
 
     def advance(self):
         """Advance solution one time step."""
+
         raise NotImplementedError
 
     def set_initial_condition(self, U0):

@@ -6,7 +6,7 @@ import os,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 
 #sys.path.append(cur+'/UtilityLib')
-from UtilityLib.moduleStartUp import parseOptions
+import UtilityLib.moduleStartUp as mStartUp
 
 
 
@@ -17,7 +17,7 @@ def main():
     print '====================================='
     print ""
     
-    optionsDict = parseOptions(['f','n','v'], visualisationOnly = True)
+    optionsDict = mStartUp.parseOptions(['f','n','v'], visualisationOnly = True)
     
     networkName    = optionsDict['networkName']
     dataNumber     = optionsDict['dataNumber']

@@ -9,22 +9,20 @@
 import sys,os
 cur = os.path.dirname(os.path.realpath('__file__'))
 
-#sys.path.append(cur+'/NetworkLib')
-from NetworkLib.classVascularNetwork import VascularNetwork
+#from NetworkLib.classVascularNetwork import VascularNetwork
+### another unnecessary import.
 
-#sys.path.append('/'.join([cur,'SolverLib']))
-from SolverLib.class1DflowSolver import FlowSolver
+#from SolverLib.class1DflowSolver import FlowSolver
+### another
 
-#sys.path.append('/'.join([cur,'VascularPolynomialChaosLib']))
-from VascularPolynomialChaosLib.classVpcConfiguration import VpcConfiguration
-from VascularPolynomialChaosLib.classDistributionManager import DistributionManagerChaospy
-from VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
-from VascularPolynomialChaosLib import moduleBatchSimulationManager as mBSM
-from VascularPolynomialChaosLib.classLocationOfInterestManager import LocationOfInterestManager
+import VascularPolynomialChaosLib.classVpcConfiguration as cVPCConf
+import VascularPolynomialChaosLib.classDistributionManager as cDistMng
+import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
+import VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
+import VascularPolynomialChaosLib.classLocationOfInterestManager as cLocOfIntrMng
 
-#sys.path.append('/'.join([cur,'UtilityLib']))
-import UtilityLib.moduleStartUp as mSU
-from UtilityLib import moduleXML
+import UtilityLib.moduleStartUp as mStartUp
+import UtilityLib.moduleXML as mXML
 
 import chaospy as cp
 import pprint
@@ -62,21 +60,21 @@ def vascularPolyChaos():
     print '=============================================='
     # steps
     # 1. load vpc case and configuration 
-    optionsDict = mSU.parseOptions(['f','n'],vascularPolynomialChaos=True)
+    optionsDict = mStartUp.parseOptions(['f','n'],vascularPolynomialChaos=True)
     networkName           = optionsDict['networkName']
     dataNumber            = optionsDict['dataNumber']
     # 1.1 load configuration  
-    vpcConfiguration = VpcConfiguration(networkName,dataNumber)
+    vpcConfiguration = cVPCConf.VpcConfiguration(networkName,dataNumber)
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')
-    vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
+    vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
     # 1.3 print distributions
     vascularNetwork.randomInputManager.printOutInfo()
     if len(vascularNetwork.randomInputManager.randomInputs) == 0:
         print "VascularPolynomialChaos_v0.3: no random inputs defined!"
         exit()
     # 2. create distributions    
-    distributionManager = DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
+    distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
     # 3. add correlation if existent TODO:
     
@@ -101,7 +99,7 @@ def vascularPolyChaos():
             for sampleIndex in xrange(distributionManager.samplesSize):
                 distributionManager.passRealisation(sampleIndex)
                 vpcNetworkXmlEvaluationFile = evaluationCaseFiles[sampleIndex][2]
-                moduleXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
+                mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
             vascularNetwork.randomInputManager.saveRealisationLog(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         # 5.3 run evaluation simulations
         if vpcConfiguration.simulateEvaluations == True:
@@ -129,7 +127,7 @@ def vascularPolyChaos():
         xVals = 0.25
         confidenceAlpha = 5
         # create locationOfInterestManager
-        locationOfInterestManager = LocationOfInterestManager(distributionManager.samplesSize)
+        locationOfInterestManager = cLocOfIntrMng.LocationOfInterestManager(distributionManager.samplesSize)
         # add location of interest
         locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
         
