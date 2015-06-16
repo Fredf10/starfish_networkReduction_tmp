@@ -3,9 +3,9 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
 #sys.path.append(cur+'/../UtilityLib')
-from UtilityLib.moduleXML import loadNetworkFromXML 
-from UtilityLib.moduleStartUp import parseOptions
-from UtilityLib.modulePickle import loadSolutionDataFile
+import UtilityLib.moduleXML as mXML 
+import UtilityLib.moduleStartUp as moduleStartUp
+import UtilityLib.modulePickle as modulePickle
 
 
 #sys.path.append(cur+'/../NetworkLib')
@@ -27,7 +27,7 @@ __version__ = "0.3_dev"
 
 ## use -f and -n to define solution file you want to open, or use the inbulid menu
 
-optionsDict = parseOptions(['f','n','c'], visualisationOnly = True)
+optionsDict = moduleStartUp.parseOptions(['f','n','c'], visualisationOnly = True)
     
 networkName           = optionsDict['networkName']
 dataSetNumber         = optionsDict['dataNumber']
@@ -37,7 +37,7 @@ print dataSetNumber
 ##  open data file choosed above
 try:
     print " Try to open network {} with data number {}".format(networkName, dataSetNumber)
-    vascularNetwork = moduleXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber) 
+    vascularNetwork = mXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber) 
     vascularNetwork.linkSolutionData() 
 except:
     print "Error could not open solution data with data number {} of network {}".format(dataSetNumber,networkName)

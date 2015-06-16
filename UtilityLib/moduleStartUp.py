@@ -16,7 +16,7 @@ sys.path.append(''.join([cur,'/../']))
 import inspect
 from pprint import pprint as pp
 
-import moduleXML 
+import moduleXML as mXML
 import moduleFilePathHandler as mFPH
 
 #sys.path.append([cur,'/../VascularPolynomialChaosLib/'])
@@ -393,7 +393,7 @@ def chooseVPCconfigFile(networkName):
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         # save polychaos config file
         vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-        moduleXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber)
+        mXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber)
         # copy network file
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')

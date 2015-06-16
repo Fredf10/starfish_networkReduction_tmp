@@ -12,7 +12,7 @@ from NetworkLib.classBoundaryConditions import *
 from constants import newestNetworkXml as nxml
 from constants import variablesDict
 
-import moduleXML
+import moduleXML as mXML
 import moduleFilePathHandler as mFPH
 
 """
@@ -132,7 +132,7 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
                 # check for polyChaos variables
                 if '-pC' not in variable:
                     # convert variables to corret unit and type
-                    data[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
+                    data[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
                 else:
                     variable,number = variable.split('-pC')
                     if variable not in polyChaos.keys():
@@ -144,7 +144,7 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
         # convert polynomial chaos variables to corret unit and type
         for variable,variableValueStr in polyChaos.iteritems():
             variableUnit = columUnits[variable].split('#',1)
-            polyChaos[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
+            polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
         data['polyChaos'] = polyChaos
         for variable in data.iterkeys():
             if '-pC' in variable: variablesToDiscard.append([Id,variable])
@@ -292,7 +292,7 @@ def readBCFromCSV(networkName, delimiter=';'):
                 print variableValueStr
                 if variableValueStr != '':
                     try:
-                        boundaryDataDict[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
+                        boundaryDataDict[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
                     except:
                         pass
             if '-pC' in variable and variableValueStr != '':
@@ -306,7 +306,7 @@ def readBCFromCSV(networkName, delimiter=';'):
             for variable,variableValueStr in polyChaos.iteritems():
                 try:
                     variableUnit = columUnits[variable].split('#',1)
-                    polyChaos[variable] = moduleXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
+                    polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
                 except: pass          
             if Id not in boundaryConditionPolyChaos.keys(): 
                 boundaryConditionPolyChaos[Id] =[polyChaos]
