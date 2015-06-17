@@ -183,17 +183,24 @@ class Baroreceptor(object):
         Calls self.solveCellML()
         is used by self.__call__()
         """
+        n = self.currentTimeStep
+      
         if self.boundaryConditionII.name == 'VaryingElastanceSimple':
             self.voi, self.states, self.algebraic = self.solveCellML(strain)
                 
             if self.boundaryConditionII.newCycle == True:
                 self.boundaryConditionII.T = self.algebraic[-1][self.cellMLoutputID] # update period
                 self.boundaryConditionII.Tpeak = 0.43*self.boundaryConditionII.T # update Tpeak
-                self.newCycles = np.append(self.newCycles,self.currentTimeStep) # to save the time step where new cycles start to solution data
+                self.newCycles = np.append(self.newCycles,n) # to save the time step where new cycles start to solution data
                 
+        
+        
+            self.Pheart[n] = self.boundaryConditionII.pressure[n] # to save to solution data
+            self.Vheart[n] = self.boundaryConditionII.volume[n] # to save to solution data    
+        
         else: 
-            print "BR line 124: not a varying elastance heart"
-            
+                print "WARNING Baroreceptor::calcAndupdatePeriodTypeIIcellML: not a varying elastance heart"
+                
          
 class AorticBaroreceptor(Baroreceptor):
     """
@@ -242,31 +249,10 @@ class AorticBaroreceptor(Baroreceptor):
         # Do basic stuff
         super(AorticBaroreceptor,self).initializeForSimulation(flowSolver, vascularNetwork)
         
-        #initialize the CellML Baroreceptor model if given
-        if self.cellMLBaroreceptorModel == True:
-            baroreceptorCellML = self.baroreceptorCellML
-            # input to the CellML model and output from it --> defined in the header of the Python CellML export
-            self.cellMLinputID = baroreceptorCellML.inputID
-            self.cellMLoutputArray = baroreceptorCellML.outputArray
-            self.cellMLoutputID = baroreceptorCellML.outputID
-         
-           
-            # initialize the model (constant parameters and initial values of states) 
-            (iniStates, constants) = baroreceptorCellML.initConsts()
-            self.updateConstants(constants)
-            
-            timeArray = np.linspace(0,self.dt,2)
-            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
-            
-                     
         self.Area1 = vascularNetwork.vessels[self.vesselIds[0]].Asol
         self.Area2 = vascularNetwork.vessels[self.vesselIds[1]].Asol
         self.Pressure1 = vascularNetwork.vessels[self.vesselIds[0]].Psol
         self.Pressure2 = vascularNetwork.vessels[self.vesselIds[1]].Psol
-        
-        self.Strain = np.zeros([self.nTsteps + 1,np.shape(self.Area1)[1]+np.shape(self.Area2)[1]])
-        self.MStrain = np.zeros(self.nTsteps + 1)
-        self.T       = np.zeros(self.nTsteps + 1)
         
         # to save the timesteps where new cycles start in the solution data
         self.newCycles = np.zeros(1)
@@ -286,6 +272,44 @@ class AorticBaroreceptor(Baroreceptor):
         # estimate the unstretched Radii R0 for the calculation of the strain
         self.estimateUnstretchedRadius()
         
+        
+        ## read area, calculate radius and strain
+        A1 = self.Area1[0]
+        R1 = np.power(A1/math.pi,0.5)
+        A2 = self.Area2[0]
+        R2 = np.power(A2/math.pi,0.5)
+        epsilon1 = (R1 - self.Ro_1)/self.Ro_1 # strains in the two vessels
+        epsilon2 = (R2 - self.Ro_2)/self.Ro_2
+        # concatenate the strain arrays of the two vessels of the Aortic Arch
+        epsilon = np.concatenate((epsilon1,epsilon2),axis=0)
+        epsMean = np.mean(epsilon) # calculate one mean strain for the input to the Baroreceptor model
+        
+        
+        self.Strain = np.zeros([self.nTsteps + 1,np.shape(self.Area1)[1]+np.shape(self.Area2)[1]])
+        self.MStrain = np.zeros(self.nTsteps + 1)
+        self.MStrain[0] = epsMean
+        self.T       = np.zeros(self.nTsteps + 1)
+        
+        
+        #initialize the CellML Baroreceptor model if given
+        if self.cellMLBaroreceptorModel == True:
+            baroreceptorCellML = self.baroreceptorCellML
+            # input to the CellML model and output from it --> defined in the header of the Python CellML export
+            self.cellMLinputID = baroreceptorCellML.inputID
+            self.cellMLoutputArray = baroreceptorCellML.outputArray
+            self.cellMLoutputID = baroreceptorCellML.outputID
+         
+           
+            # initialize the model (constant parameters and initial values of states) 
+            (iniStates, constants) = baroreceptorCellML.initConsts(init_strain=self.MStrain[0])
+            self.updateConstants(constants)
+            
+            timeArray = np.linspace(0,self.dt,2)
+            self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
+            
+                     
+
+
         # update Time for the period of the inflow function (type 1 BC's)
         self.oldUpdateTime = 0
         if self.boundaryCondition != 0:
@@ -305,8 +329,10 @@ class AorticBaroreceptor(Baroreceptor):
             self.dsetGroup["Tparasym"][nDB:nDE] = self.Tparasym[nSB:nSE]
             self.dsetGroup["c_nor"][nDB:nDE] = self.c_nor[nSB:nSE]
             self.dsetGroup["c_ach"][nDB:nDE] = self.c_ach[nSB:nSE]
-            
-                                                
+            self.dsetGroup["delta"][nDB:nDE] = self.delta[nSB:nSE]
+            self.dsetGroup["HR_s"][nDB:nDE] = self.HR_s[nSB:nSE]
+            self.dsetGroup["HR_p"][nDB:nDE] = self.HR_p[nSB:nSE]
+            self.dsetGroup["MStrain"][nDB:nDE] = self.MStrain[nSB:nSE]                                    
             
             self.dsetGroup["newCycles"][nDB:nDE] =    self.newCycles[nSB:nSE]
             self.dsetGroup["Pheart"][nDB:nDE]    =self.Pheart[nSB:nSE]
@@ -419,7 +445,7 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         self.update(BaroDict)
         
     def initializeForSimulation(self, flowSolver, vascularNetwork):
-        AorticBaroreceptor.initializeForSimulation(self, flowSolver, vascularNetwork)
+        super(bugenhagenAorticBR,self).initializeForSimulation(flowSolver, vascularNetwork)
 
         # arrays  used to save BR quantities to solution data
         # the saving is done at the end of the solver method in classFlowSolver
@@ -428,6 +454,9 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         self.Tparasym = np.ones(self.nTsteps+1)*self.algebraic[0][8]
         self.c_nor = np.ones(self.nTsteps+1)*self.states[0][3]
         self.c_ach = np.ones(self.nTsteps+1)*self.states[0][4]
+        self.delta = np.ones(self.nTsteps+1)*self.algebraic[0][0]
+        self.HR_p = np.ones(self.nTsteps+1)*self.algebraic[0][10]
+        self.HR_s = np.ones(self.nTsteps+1)*self.algebraic[0][9]
             
             
         ### quantities of the Baroreflex loop
@@ -437,7 +466,10 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         self.dsetGroup.create_dataset("Tparasym", (vascularNetwork.savedArraySize,), dtype='float64')
         self.dsetGroup.create_dataset("c_nor", (vascularNetwork.savedArraySize,), dtype='float64')
         self.dsetGroup.create_dataset("c_ach", (vascularNetwork.savedArraySize,), dtype='float64')
-        
+        self.dsetGroup.create_dataset("delta", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetGroup.create_dataset("HR_p", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetGroup.create_dataset("HR_s", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetGroup.create_dataset("MStrain", (vascularNetwork.savedArraySize,), dtype='float64')
 
     def __call__(self):
         '''
@@ -452,6 +484,9 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         self.Tparasym[n+1] = self.algebraic[-1][8]
         self.c_nor[n+1] = self.states[-1][3]
         self.c_ach[n+1] = self.states[-1][4]
+        self.delta[n+1] = self.algebraic[-1][0]
+        self.HR_p[n+1] = self.algebraic[-1][10]
+        self.HR_s[n+1] = self.algebraic[-1][9]
         
 
 class pettersenAorticBR(AorticBaroreceptor):

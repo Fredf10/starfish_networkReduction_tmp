@@ -2,10 +2,10 @@
 <FigueroaPettersen.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">1.0</totalTime>
-    <CFL>0.45</CFL>
+    <totalTime unit="s">3.0</totalTime>
+    <CFL>0.60</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">1.0</timeSaveEnd>
+    <timeSaveEnd unit="s">3.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>

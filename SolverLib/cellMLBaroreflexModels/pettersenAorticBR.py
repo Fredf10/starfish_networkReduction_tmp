@@ -87,8 +87,9 @@ def createLegends():
     legend_ydot[5] = "d/dt delta_HR_pslow in component HR_ach (Beats_per_min)"
     return legend_y, legend_alg, legend_t, legend_p
 
-def initConsts(t=0):
+def initConsts(t=0, init_strain=0.01):
     p = zeros(sizeConstants)
+
     y = zeros(sizeStates)
     alg = zeros(sizeAlgebraic)
     p[0] = 4.12 #Tsmax
@@ -120,7 +121,7 @@ def initConsts(t=0):
     p[26] = 87.5 #100 #gain # both age groups again
     p[27] = 58.6 # alpha_s0
     p[28] = 76.019 # alpha_p0
-    p[29] = 0.01 # Epsilon_wall --> the input
+    p[29] = init_strain # Epsilon_wall --> the input
     y[0] = 0.608 # inital value for L1
     y[1] = 0.626 # initial value for L2
     y[2] = 1.5672 # norepinephrine release initial state
@@ -307,10 +308,10 @@ def solver2(timeArray,initial_states,constants):
 
     # Set timespan to solve over
     voi = timeArray
-    
+    max_step = timeArray[1]-timeArray[0]
     # Construct ODE object to solve
     r = ode(computeRates)
-    r.set_integrator('vode', method='bdf', atol=1e-06, rtol=1e-06, max_step=1)
+    r.set_integrator('vode', method='bdf', atol=1e-06, rtol=1e-06, max_step=max_step)
     r.set_initial_value(initial_states, voi[0])
     r.set_f_params(constants)
 
