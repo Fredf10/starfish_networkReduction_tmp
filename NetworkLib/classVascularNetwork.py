@@ -10,8 +10,8 @@ sys.path.append(cur + '/../')
 #sys.path.append(cur + '/../NetworkLib')
 #sys.path.append(cur+'/../SolverLib')
 
-from classVessel import Vessel
-from SolverLib.classBaroreceptor import AorticBaroreceptor, CarotidBaroreceptor
+import classVessel as cVes
+import SolverLib.classBaroreceptor as cBRX
 from classBoundaryConditions import *
 
 #sys.path.append(cur + '/../UtilityLib')
@@ -148,7 +148,7 @@ class VascularNetwork(object):
             
         # check Id
         if vesselId not in self.vessels:
-            vessel = Vessel(Id=vesselId , name=('vessel_' + str(vesselId)))  # create vessel with given variables
+            vessel = cVes.Vessel(Id=vesselId , name=('vessel_' + str(vesselId)))  # create vessel with given variables
             if dataDict:
                 vessel.update(dataDict)  # set vesselData if available
             self.vessels[vessel.Id] = vessel  # add vessel to network
@@ -181,9 +181,9 @@ class VascularNetwork(object):
 #             if dataDict:
 #                 baro.update(dataDict)  # set baroreceptorData if available
             if dataDict['receptorType'] == 'AorticBaroreceptor':
-                self.baroreceptors[baroId] = AorticBaroreceptor(dataDict)
+                self.baroreceptors[baroId] = cBRX.AorticBaroreceptor(dataDict)
             elif dataDict['receptorType'] == 'CarotidBR':
-                self.baroreceptors[baroId] = CarotidBaroreceptor(dataDict)
+                self.baroreceptors[baroId] = cBRX.CarotidBaroreceptor(dataDict)
         else:  
             print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
  

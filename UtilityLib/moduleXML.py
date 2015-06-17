@@ -14,7 +14,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
 #sys.path.append(cur+'/../'+'/NetworkLib')
 
-from NetworkLib.classVascularNetwork import VascularNetwork
+import NetworkLib.classVascularNetwork as cVascNw
 from NetworkLib.classBoundaryConditions import *
 
 from constants import variablesDict 
@@ -353,7 +353,7 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
         networkXmlFile = mFPH.getFilePath('networkXmlFile', networkName, dataNumber, 'read', exception = exception)
     
     # create vascularNetwork instance
-    vascularNetwork = VascularNetwork()
+    vascularNetwork = cVascNw.VascularNetwork()
     # set name
     vascularNetwork.update({'name': networkName,
                             'dataNumber':dataNumber,

@@ -27,7 +27,7 @@ import UtilityLib.moduleXML as mXML
 
 
 import numpy as np
-from pprint import pprint as pp
+import pprint
 from copy import deepcopy as copy
 
 class Visualisation2DPlotWindowAdjustValues(gtk.Window):

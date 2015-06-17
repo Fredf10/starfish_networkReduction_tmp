@@ -25,36 +25,36 @@ import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 from optparse import OptionParser
 
 def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialChaos = False):
-    '''
+    """
     parse options for the code
-    
+
     enable options to parse with str in activeOptions
-    input:     activeOptions := list with str 
-    
+    input:     activeOptions := list with str
+
             'f' : parse filename
             'n' : dataNumber
             'd' : simulation description
             'r' : resimulated case
             's' : save
             'v' : visualisation type
-            'c' : connect visualisations     
-            'w' : set working directory  
-    
+            'c' : connect visualisations
+            'w' : set working directory
+
             visualisationOnly := bool if True proposal of visualisation cases are made if non is given
-            
+
     return: dict with options and arguments
-    
+
     Usage e.g., :
-    
+
         optionsDict = parseOptions(['f','n','d','s','v','r','w'])
-        
+
         networkName           = optionsDict['networkName']
         save                  = optionsDict['save']
         dataNumber            = optionsDict['dataNumber']
         simulationDescription = optionsDict['simulationDescription']
         vizOutput             = optionsDict['vizOutput']
         resimulate            = optionsDict['resimulate']
-    '''
+    """
     
     parser = OptionParser()
     

@@ -3,7 +3,7 @@ import numpy as np
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(''.join([cur,'/../']))
+#sys.path.append(''.join([classFields.cur,'/../']))
 
 
 #sys.path.append(cur+'/NetworkLib')
@@ -13,14 +13,14 @@ from NetworkLib.classVascularNetwork import VascularNetwork
 
 from classBoundarys import Boundary
 
-from classSystemEquations import *
-from classConnections import *
-from classFields import *
+import classSystemEquations
+import classConnections
+import classFields
 from classCommunicators import *
 from classBaroreceptor import *
-from classVenousPool import *
-from classDataHandler import DataHandler
-from classTimer import *
+import classVenousPool
+import classDataHandler
+import classTimer
 
 #sys.path.append(cur+'/UtilityLib/')
 from UtilityLib.processing import memoryUsagePsutil
@@ -169,7 +169,7 @@ class FlowSolver(object):
             #estimate initial pressure
             p0,p1 = initialValues[vessel.Id]['Pressure']
             
-            initialPressure = np.linspace(p0,p1,vessel.N) 
+            initialPressure = classTimer.np.linspace(p0,p1,vessel.N)
             
             A0_max = max(vessel.A(initialPressure))
             #c_high = vessel.c(A0_max,vessel.initialPressure)
@@ -180,22 +180,22 @@ class FlowSolver(object):
             
             dz_low = min(vessel.dz)
             dt = self.calcTimeStep(dz_low,c_high,self.vascularNetwork.CFL) 
-            c_max = np.append(c_max,c_high)
-            dt_min = np.append(dt_min,dt)
-            dz_min = np.append(dz_min,dz_low)
-            gridNodens = np.append(gridNodens,vessel.N)
+            c_max = classTimer.np.append(c_max,c_high)
+            dt_min = classTimer.np.append(dt_min,dt)
+            dz_min = classTimer.np.append(dz_min,dz_low)
+            gridNodens = classTimer.np.append(gridNodens,vessel.N)
             
             logfileData[vessel.Id] = [max(c_high),min(c_high),min(dt),vessel.dz,vessel.N]
             
         # Set time variables 
         self.dt = min(dt_min)
         # calculate time steps
-        self.nTsteps = int(np.ceil(self.totalTime/self.dt))
+        self.nTsteps = int(classTimer.np.ceil(self.totalTime/self.dt))
         # calculate time steps for initialisation phase
         nTstepsInitPhase = 0
         if self.vascularNetwork.initialisationPhaseExist:
             initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
-            nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
+            nTstepsInitPhase = int(classTimer.np.ceil(initPhaseTimeSpan/self.dt))
         # correct time steps
         self.nTsteps += nTstepsInitPhase
             
@@ -216,8 +216,8 @@ class FlowSolver(object):
         
         automaticGridCorrection = {}
         
-        logfile = open(str(cur+'/../'+'LOGcurrentWaveSpeed.txt'),'wb')
-        logfile2 = open(str(cur+'/../'+'LOGproposedGrid.txt'),'wb')
+        logfile = open(str(classVenousPool.cur+'/../'+'LOGcurrentWaveSpeed.txt'),'wb')
+        logfile2 = open(str(classVenousPool.cur+'/../'+'LOGproposedGrid.txt'),'wb')
         CFL = self.vascularNetwork.CFL
         for vesselT,data in logfileData.iteritems():
             #number of deltaX
@@ -361,7 +361,7 @@ class FlowSolver(object):
         initialize system Equations
         '''
         for vesselId,vessel in self.vessels.iteritems():
-            self.systemEquations[vesselId] = System(vessel,
+            self.systemEquations[vesselId] = classSystemEquations.System(vessel,
                                                     self.simplifyEigenvalues,
                                                     self.riemannInvariantUnitBase,
                                                     self.currentTimeStep,
@@ -422,7 +422,7 @@ class FlowSolver(object):
         for leftMother,rightMother,leftDaughter,rightDaughter  in self.vascularNetwork.treeTraverseConnections:  
             ## link
             if rightMother == None and rightDaughter == None:
-                self.connections[leftMother] = Link(  self.vessels[leftMother],
+                self.connections[leftMother] = classConnections.Link(  self.vessels[leftMother],
                                                       self.systemEquations[leftMother],
                                                       self.vessels[leftDaughter],
                                                       self.systemEquations[leftDaughter],
@@ -432,7 +432,7 @@ class FlowSolver(object):
                                                       self.solvingSchemeConnections)
             ## bifurcation
             elif rightMother == None:
-                self.connections[leftMother] = Bifurcation(  self.vessels[leftMother],
+                self.connections[leftMother] = classConnections.Bifurcation(  self.vessels[leftMother],
                                                              self.systemEquations[leftMother],
                                                              self.vessels[leftDaughter],
                                                              self.systemEquations[leftDaughter],
@@ -447,7 +447,7 @@ class FlowSolver(object):
                 anastomosisId = leftMother
                 if treeList.index(leftMother) > treeList.index(rightMother):
                     anastomosisId = rightMother
-                self.connections[anastomosisId] = Anastomosis(self.vessels[leftMother],
+                self.connections[anastomosisId] = classConnections.Anastomosis(self.vessels[leftMother],
                                                              self.systemEquations[leftMother],
                                                              self.vessels[rightMother],
                                                              self.systemEquations[rightMother],
@@ -463,7 +463,7 @@ class FlowSolver(object):
         creates field numerical objects for each vessel in the network
         '''
         for vesselId,vessel in self.vessels.iteritems():    
-            self.fields[vesselId] = Field(  vessel,
+            self.fields[vesselId] = classFields.Field(  vessel,
                                             self.currentMemoryIndex,
                                             self.dt, 
                                             self.systemEquations[vesselId],
@@ -489,7 +489,7 @@ class FlowSolver(object):
         VPdict['nTsteps'] = self.nTsteps
         VPdict['boundarys'] = self.boundarys
         
-        self.venousPool = venousPool(VPdict) # call to the constructor of venousPool
+        self.venousPool = classVenousPool.venousPool(VPdict) # call to the constructor of venousPool
         
     
     def initializeTimers(self):
@@ -514,7 +514,7 @@ class FlowSolver(object):
                     TimerData['VesselsToModify'][i] = self.vessels[i]
                 
                 
-                self.timers[TimerId] = Valsalva(TimerData)
+                self.timers[TimerId] = classTimer.Valsalva(TimerData)
                 
             else: pass
     
@@ -618,7 +618,7 @@ class FlowSolver(object):
             self.numericalObjects.append(self.venousPool)
         else: pass
             
-        dataHandler = DataHandler(self.currentTimeStep,
+        dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
                                   self.nTsteps,
                                   self.vascularNetwork,
                                   self.currentMemoryIndex,
@@ -713,9 +713,9 @@ class FlowSolver(object):
                 p0,p1 = initialValues[vesselId]['Pressure']
                 Qm    = initialValues[vesselId]['Flow']
                 
-                P_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
-                Q_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
-                A_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
+                P_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
+                Q_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
+                A_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
                 
             
             for cycle in xrange(self.numberCycles-1):
@@ -733,9 +733,9 @@ class FlowSolver(object):
                         #Qerror =  np.sum(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))/self.Q[vesselId].size
                         #Aerror =  np.sum(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))/self.A[vesselId].size
                          
-                        Perror =  np.max(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
+                        Perror =  classTimer.np.max(classTimer.np.sqrt((classTimer.np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
                         #Qerror =  np.max(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))
-                        Aerror =  np.max(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
+                        Aerror =  classTimer.np.max(classTimer.np.sqrt((classTimer.np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
                          
                         P_lastCycle[vesselId] = self.P[vesselId].copy()
                         #Q_lastCycle[vesselId] = self.Q[vesselId].copy()
@@ -806,10 +806,10 @@ class FlowSolver(object):
             for vesselId,vessel in self.vessels.iteritems():
                 A1 = self.vessels[vesselId].Asol[0][0:-1]
                 A2 = self.vessels[vesselId].Asol[0][1:]
-                volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+                volumeInit = classTimer.np.sum(vessel.dz*(A1+A2+classTimer.np.sqrt(A1*A2))/3.0)*1.e6
                 A1 = self.vessels[vesselId].Asol[-1][0:-1]
                 A2 = self.vessels[vesselId].Asol[-1][1:]
-                volumeSol  = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+                volumeSol  = classTimer.np.sum(vessel.dz*(A1+A2+classTimer.np.sqrt(A1*A2))/3.0)*1.e6
                 diff = volumeInit-volumeSol
                 vesselsInit += volumeInit
                 vesselsSol  += volumeSol
