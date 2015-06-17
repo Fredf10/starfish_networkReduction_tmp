@@ -164,19 +164,26 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                     
         elif xmlElementName == 'baroreceptors':
             for baroId, baro in vascularNetwork.baroreceptors.iteritems():
-		receptorType = baro.getVariableValue('receptorType')
-                
-		#baroSubElement = etree.SubElement(xmlFileElement,'baroreceptors')
-		# receptorType = baroData['receptorType']
-		# for baroElement in xmlElement:
-		#     subElement = etree.SubElement(baroSubElement, baroElement)
-		#     for variable in nxmlW.baroreceptorReference[receptorType]
-		
-                subElement = etree.SubElement(xmlFileElement, receptorType)
-		for variable in nxmlW.baroreceptorReference[receptorType]: # baroData['receptorType']]:
-                    subsubElement = etree.SubElement(subElement, variable)
-                    writeXMLsetUnit(subsubElement,variable)
-                    writeXMLsaveValues(subsubElement,variable,baro.getVariableValue(variable))  
+                # add baroElement
+                subElement = etree.SubElement(xmlFileElement, 'baroreceptor', Id = str(baroId))
+                for subsubElementTag in nxmlW.xmlElementsReference[xmlElementName]:
+                    # check for sub element model and add attribute
+                    attributes = {}
+                    if subsubElementTag == "model":
+                        classType = baro.getVariableValue('modelName')
+                        attributes['type'] = classType
+                        variables = nxmlW.baroreceptorElementReference[subsubElementTag][classType]
+                    else: variables = nxmlW.baroreceptorElementReference[subsubElementTag]
+                    subsubElement = etree.SubElement(subElement, subsubElementTag,attributes)
+                    # save variables
+                    for variable in variables:
+                        subsubsubElement = etree.SubElement(subsubElement, variable)
+                        writeXMLsetUnit(subsubsubElement,variable)
+                        writeXMLsaveValues(subsubsubElement,variable,baro.getVariableValue(variable))  
+                        # polynomial chaos
+                        randomInputLocation = '_'.join(['baroreceptor',str(baroId),variable])
+                        if randomInputLocation in randomInputManager.map:
+                            writeRandomInputElement(subsubElement, variable, randomInputManager, randomInputLocation)
                     
         elif xmlElementName == 'generalRandomInputs':
             for randomInput in randomInputManager():
@@ -291,7 +298,8 @@ def loadingErrorMessageValueError(variableName, element, elementName):
 
 
 def loadingErrorMessageVariableError(variableName, element, elementName):
-    variableDict =   variablesDict[variableName]
+    try: variableDict =   variablesDict[variableName]
+    except : variableDict = "No entry defined for This element"
     print """ERROR loadNetworkFromXML():
           variable "{}" of {} {} is not defined.
           (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
@@ -513,27 +521,48 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                         vascularNetwork.updateNetwork({'communicators':{comId:communicatorData}})
                         
             elif xmlElementName == 'baroreceptors':
-                # loop through possible communicator class types
-                for baroreceptorType in nxml.xmlElementsReference[xmlElementName]:
-                    # find all communicator of this type
-                    for baroElements in xmlElement.findall(''.join(['.//',baroreceptorType])):
-                        # loop through all variables of this type, convert and save values of these
-                        baroreceptorData = {}
-                        for variable in nxml.xmlElementsReference[xmlElementName][baroreceptorType]: 
-                            try: element = baroElements.findall(''.join(['.//',variable]))[0]
-                            except: loadingErrorMessageVariableError(variable, 'baroreceptors', baroreceptorType)
+                for baroreceptorElement in xmlElement.findall(''.join(['.//','baroreceptor'])):
+                    try: baroId = int(baroreceptorElement.attrib['Id'])
+                    except: loadingErrorMessageVariableError('baroId', 'one baroreceptor', '')
+                    
+                    baroreceptorData = {'baroId':baroId}
+                    # loop through top level elements:
+                    for baroreceptorElementTag in nxml.xmlElementsReference[xmlElementName]:
+                        baroreceptorTopLevelElement = baroreceptorElement.findall(''.join(['.//',baroreceptorElementTag]))[0]
+                        
+                        if baroreceptorElementTag == "model":
+                            try: baroType = baroreceptorTopLevelElement.attrib['type']
+                            except: loadingErrorMessageVariableError('type', 'baroreceptor', str(baroId))
+                            variables = nxml.baroreceptorElementReference[baroreceptorElementTag][baroType]
+                            baroreceptorData['modelName'] = baroType
+                        else: variables = nxml.baroreceptorElementReference[baroreceptorElementTag]
+                        # read all variables
+                        for variable in variables: 
+                            try: 
+                                element = baroreceptorTopLevelElement.findall(''.join(['.//',variable]))[0]
+                            except: loadingErrorMessageVariableError(variable, 'baroreceptors', baroId)
                             # get variable value                        
                             try: variableValueStr = element.text
-                            except: loadingErrorMessageValueError(variable, 'baroreceptors', baroreceptorType)
+                            except: loadingErrorMessageValueError(variable, 'baroreceptors', baroId)
                             # get unit
                             try: variableUnit = element.attrib['unit']
                             except: variableUnit = None 
                             baroreceptorData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
                             if variable == 'baroId': baroId = baroreceptorData[variable]
-                        
-                        baroreceptorData['receptorType'] = baroreceptorType
-                        vascularNetwork.updateNetwork({'baroreceptors':{baroId:baroreceptorData}})
-                        
+                                                        
+                            # find polynomial chaos variable
+                            randomInputName = ''.join([variable,'-randomInput'])
+                            elementRandomInput = baroreceptorTopLevelElement.findall(''.join(['.//',randomInputName]))
+                            if len(elementRandomInput) == 1:  
+                                randomInputLocation = '_'.join(['baroreceptor',str(baroId),variable])
+                                loadRandomInputElement(elementRandomInput[0],
+                                                       nxml,
+                                                       variable,
+                                                       randomInputManager,
+                                                       randomInputLocation)
+                            
+                    vascularNetwork.updateNetwork({'baroreceptors': {baroId:baroreceptorData}})
+                
             elif xmlElementName == 'globalFluid':
                     
                 globalFluidData = {}
@@ -596,7 +625,8 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                 
     # link random variables
     randomInputManager.linkRandomInputUpdateFunctions(vascularNetwork)
-                   
+    
+    print randomInputManager.printOutInfo()
                    
     return vascularNetwork
 

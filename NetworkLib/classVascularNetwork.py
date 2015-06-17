@@ -13,7 +13,7 @@ sys.path.append(cur + '/../')
 import classVessel as cVes
 import SolverLib.classBaroreceptor as cBRX
 from classBoundaryConditions import *
-
+#from SolverLib import classBaroreceptor as cBRX
 #sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
 
@@ -115,7 +115,7 @@ class VascularNetwork(object):
                 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
         
-        self.baroreceptors = {}  # dictionarz with baroreceptors
+        self.baroreceptors = {}  # dictionary with baroreceptors
         
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data} 
         
@@ -174,19 +174,24 @@ class VascularNetwork(object):
         if baroId == None: 
             try: baroId = max(self.baroreceptors.keys()) + 1
             except: baroId = 0
-            
+             
         # check Id
         if baroId not in self.baroreceptors:
 #             baro = Baroreceptor(Id=baroId , name=('baroreceptor_' + str(baroId)))  # create baroreceptor with given variables
 #             if dataDict:
 #                 baro.update(dataDict)  # set baroreceptorData if available
-            if dataDict['receptorType'] == 'AorticBaroreceptor':
-                self.baroreceptors[baroId] = cBRX.AorticBaroreceptor(dataDict)
-            elif dataDict['receptorType'] == 'CarotidBR':
-                self.baroreceptors[baroId] = cBRX.CarotidBaroreceptor(dataDict)
-        else:  
+#            if dataDict['receptorType'] == 'AorticBaroreceptor':
+#                self.baroreceptors[baroId] = cBRX.AorticBaroreceptor(dataDict)
+#            elif dataDict['receptorType'] == 'CarotidBR':
+#                self.baroreceptors[baroId] = cBRX.CarotidBaroreceptor(dataDict)
+
+            baroType = dataDict['modelName']
+            instance = getattr(cBRX, baroType)(dataDict)
+            self.baroreceptors[baroId] = instance
+            
+        else:
             print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
- 
+  
     def update(self, vascularNetworkData):
         '''
         updates the vascularNetwork data using a dictionary in form of 
@@ -223,8 +228,8 @@ class VascularNetwork(object):
             'vascularNetworkData'  := dict with all vascularNetwork variables to update
             'globalFluid'          := dict with all global fluid properties
             'communicators'        := netCommunicators}
-            'vesselData'      := { vessel.id : DataDict}
-            'baroreceptors'      := { baroreceptor.id : DataDict}
+            'vesselData'           := { vessel.id : DataDict}
+            'baroreceptors'        := { baroreceptor.id : DataDict}
         '''
         
         for dictName in ['vascularNetworkData']:
@@ -248,8 +253,9 @@ class VascularNetwork(object):
                 try:
                     self.baroreceptors[baroId].update(baroData)
                 except:
-                    self.addBaroreceptor(baroId, baroData)    
-          
+                    self.addBaroreceptor(baroId, baroData)
+            print self.baroreceptors
+                      
     def showVessels(self):
         '''
         writes the Vesseldata for each vessel to console (calls printToConsole() from each vessel)
@@ -520,6 +526,7 @@ class VascularNetwork(object):
             del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
         
+        self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
         print self.baroreceptors
         
         
@@ -649,7 +656,9 @@ class VascularNetwork(object):
                 
             elif groupName == 'Baroreflex':
                 # This works perfectly as long as the variables are the same in the group as in the class __init__
-                self.baroreceptors[0].update(group)
+                for subGroupName, subGroup in group.iteritems():
+                    baroId = int(subGroupName.split(' - ')[-1])
+                    self.baroreceptors[baroId].update(subGroup)
             
             elif groupName == 'Heart':
                 pass

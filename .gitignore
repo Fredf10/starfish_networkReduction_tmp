@@ -28,6 +28,7 @@
 #Ignore STARFish Config file and LOGs
 STARFiSh.config
 LOG*
-
+#Ignore autodoc build folder
+AutoDocumentation/build/*
 # Ignore compiled python in the root directory
 *.pyc

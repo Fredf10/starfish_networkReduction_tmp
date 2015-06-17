@@ -72,6 +72,12 @@ class RandomInputManager(object):
                 elif objType == "vessel":
                     randomInput.updateMethods = {randomInput.variableName[0]:
                                                  vascularNetwork.vessels[int(loc[1])].update}
+                
+                elif objType == "baroreceptor":
+                    randomInput.updateMethods = {randomInput.variableName[0]:
+                                                 vascularNetwork.baroreceptors[int(loc[1])].update}
+                    print "linked baroreceptor",int(loc[1]), 'to ',vascularNetwork.baroreceptors[int(loc[1])].update
+                
                 else: break
                 if randomInput.updateMethods == {}: break
                 

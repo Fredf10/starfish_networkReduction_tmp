@@ -45,6 +45,11 @@ class LocationOfInterest(object):
                 quantityObject.data[sampleIndex] = dataDict[quantitiyName][:,0]
             ##
             # TODO: peak detection and saving of amplitude and timing if wanted
+            
+            
+        elif "baroreceptor" in self.locationName:
+            baroId = int(self.locationName.split('_')[-1])
+            ## TODO: Jacob add here your stuff
                          
         else:
             ## TODO: add more locations as necessary baroreceptor etc.
