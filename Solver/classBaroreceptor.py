@@ -1,12 +1,9 @@
 import numpy as np 
 import math
-import sys,os
 
-
-# set the path relative to THIS file not the executing file!
-cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/NetworkLib')
-import cellMLBaroreflexModels
+# import cellMLBaroreflexModels # Used later on in classes
+import cellMLBaroreflexModels.pettersenAorticBR
+import cellMLBaroreflexModels.bugenhagenAorticBR
 
 class Baroreceptor(object):
     """
@@ -247,11 +244,7 @@ class AorticBaroreceptor(Baroreceptor):
         
         #initialize the CellML Baroreceptor model if given
         if self.cellMLBaroreceptorModel == True:
-            baroreceptorCellML = None
-            # import the model from the file which defines it
-            import_str = "from cellMLBaroreflexModels import " + self.modelName + " as baroreceptorCellML"           
-            exec(import_str)
-            self.baroreceptorCellML = baroreceptorCellML
+            baroreceptorCellML = self.baroreceptorCellML
             # input to the CellML model and output from it --> defined in the header of the Python CellML export
             self.cellMLinputID = baroreceptorCellML.inputID
             self.cellMLoutputArray = baroreceptorCellML.outputArray
@@ -421,6 +414,8 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         super(bugenhagenAorticBR, self).__init__(BaroDict)
         # Configuration and solution data variables
         self.modelName = 'bugenhagenAorticBR'
+        self.baroreceptorCellML = cellMLBaroreflexModels.bugenhagenAorticBR
+        
         self.update(BaroDict)
         
     def initializeForSimulation(self, flowSolver, vascularNetwork):
@@ -472,6 +467,7 @@ class pettersenAorticBR(AorticBaroreceptor):
         # intialize with mother class constructor
         super(pettersenAorticBR, self).__init__(BaroDict)
         self.modelName = 'pettersenAorticBR'
+        self.baroreceptorCellML = cellMLBaroreflexModels.pettersenAorticBR
         
         self.L0 = None
         self.n0 = None
@@ -503,7 +499,7 @@ class pettersenAorticBR(AorticBaroreceptor):
         self.constants[5]  = self.Gs
         
     def initializeForSimulation(self, flowSolver, vascularNetwork):
-        AorticBaroreceptor.initializeForSimulation(self, flowSolver, vascularNetwork)
+        super(pettersenAorticBR,self).initializeForSimulation(flowSolver, vascularNetwork)
         # arrays  used to save BR quantities to solution data
         # the saving is done at the end of the solver method in classFlowSolver
         self.n = np.ones(self.nTsteps+1)*self.algebraic[0][5]
