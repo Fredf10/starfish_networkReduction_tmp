@@ -172,7 +172,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                     # check for sub element model and add attribute
                     attributes = {}
                     if subsubElementTag == "model":
-                        classType = baro.getVariableValue('classType')
+                        classType = baro.getVariableValue('modelName')
                         attributes['type'] = classType
                         variables = nxmlW.baroreceptorElementReference[subsubElementTag][classType]
                     else: variables = nxmlW.baroreceptorElementReference[subsubElementTag]
@@ -536,7 +536,7 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                             try: baroType = baroreceptorTopLevelElement.attrib['type']
                             except: loadingErrorMessageVariableError('type', 'baroreceptor', str(baroId))
                             variables = nxml.baroreceptorElementReference[baroreceptorElementTag][baroType]
-                            baroreceptorData['classType'] = baroType
+                            baroreceptorData['modelName'] = baroType
                         else: variables = nxml.baroreceptorElementReference[baroreceptorElementTag]
                         # read all variables
                         for variable in variables: 

@@ -46,37 +46,15 @@ vascularNetworkElements = ['simulationContext',
 
 ##########################################################################################
 ## Baroreceptor objects
-
-#baroreceptorCellML = ['baroId','vesselId']
-#baroreceptorReference = {'BaroreceptorCellML' : baroreceptorCellML}
-
-
-AorticBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIds','receptorType', 'modelName']
-CarotidBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','receptorType', 'modelName']
-
-# Hacky inheritance :-)
-bugenhagenAorticBaroreceptor = AorticBaroreceptor + ['bgh']
-pettersenPars                = ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax']
-pettersenAorticBR            = AorticBaroreceptor + pettersenPars
-
-baroreceptorModelReference = {}
-
-
-baroreceptorReference = {'bugenhagenAorticBaroreceptor' : bugenhagenAorticBaroreceptor,
-                         'pettersenAorticBaroreceptor' : pettersenAorticBR,
-                         #'CarotidBaroreceptor': CarotidBaroreceptor
-                         'CarotidBR': CarotidBaroreceptor
-                         }
-
 #### new 
 
 baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
 
-baroreceptorModelElements = {'bugenhagenAorticBaroreceptor' : ['bgh'],
-                             'pettersenAorticBaroreceptor'  : ['modelName','L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax'],
-                             #'CarotidBaroreceptor': CarotidBaroreceptor
-                             #'CarotidBR'                    : CarotidBaroreceptor
+baroreceptorModelElements = {'bugenhagenAorticBR' : [],
+                             'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax'],
+                             #'CarotidBR'         : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName']
                              }
+
 
 baroreceptorElementReference = {'topology':baroreceptorTopologyElements,
                                 'model':   baroreceptorModelElements}

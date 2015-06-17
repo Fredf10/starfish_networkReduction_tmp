@@ -44,8 +44,8 @@ class DistributionManager(object):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
-            except:
-                print "ERROR DistributionManager.updateData Wrong key: {}, could not update varibale".format(self.randomInputId, key)
+            except StandardError:
+                print "WARNING DistributionManager.updateData Wrong key: {}, could not update varibale".format(self.randomInputId, key)
     
     def loadSamples(self, networkName, dataNumber, gPCEmethod, gPCEorder):
         '''

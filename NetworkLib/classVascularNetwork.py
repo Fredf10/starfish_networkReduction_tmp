@@ -115,7 +115,7 @@ class VascularNetwork(object):
                 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
         
-        self.baroreceptors = {}  # dictionarz with baroreceptors
+        self.baroreceptors = {}  # dictionary with baroreceptors
         
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data} 
         
@@ -177,7 +177,7 @@ class VascularNetwork(object):
              
         # check Id
         if baroId not in self.baroreceptors:
-            baroType = dataDict['classType']
+            baroType = dataDict['modelName']
             instance = getattr(classBaroreceptor, baroType)(dataDict)
             self.baroreceptors[baroId] = instance
             
@@ -518,6 +518,7 @@ class VascularNetwork(object):
             del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
         
+        self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
         print self.baroreceptors
         
         
@@ -647,7 +648,9 @@ class VascularNetwork(object):
                 
             elif groupName == 'Baroreflex':
                 # This works perfectly as long as the variables are the same in the group as in the class __init__
-                self.baroreceptors[0].update(group)
+                for subGroupName, subGroup in group.iteritems():
+                    baroId = int(subGroupName.split(' - ')[-1])
+                    self.baroreceptors[baroId].update(subGroup)
             
             elif groupName == 'Heart':
                 pass

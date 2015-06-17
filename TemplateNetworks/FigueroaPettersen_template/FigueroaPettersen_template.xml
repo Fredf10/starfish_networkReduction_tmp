@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<FigueroaPettersen.xml id="xxx" version="4.1">
+<FigueroaPettersen.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">32.0</totalTime>
+    <totalTime unit="s">1.0</totalTime>
     <CFL>0.45</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">32.0</timeSaveEnd>
+    <timeSaveEnd unit="s">1.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
@@ -38,12 +38,11 @@
   <baroreceptors>
     <baroreceptor Id="1">
       <topology>
-        <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+        <cellMLBaroreceptorModel>True</cellMLBaroreceptorModel>
         <vesselIds>2 14</vesselIds>
       </topology>
-      <model type="pettersenAorticBaroreceptor">
-        <modelName>pettersenAorticBR</modelName>
-        <L0>0.52</L0>
+      <model type="pettersenAorticBR">
+      	<L0>0.52</L0>
         <n0 unit="sec-1">63.5</n0>
         <n0-randomInput>
           <distributionType>Normal</distributionType>
