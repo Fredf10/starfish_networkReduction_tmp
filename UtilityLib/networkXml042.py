@@ -46,18 +46,21 @@ vascularNetworkElements = ['simulationContext',
 
 ##########################################################################################
 ## Baroreceptor objects
+#### new 
 
-#baroreceptorCellML = ['baroId','vesselId']
-#baroreceptorReference = {'BaroreceptorCellML' : baroreceptorCellML}
+baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
+
+baroreceptorModelElements = {'bugenhagenAorticBR' : [],
+                             'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax'],
+                             #'CarotidBR'         : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName']
+                             }
 
 
-AorticBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIds','receptorType', 'modelName']
-CarotidBaroreceptor = ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','receptorType', 'modelName']
+baroreceptorElementReference = {'topology':baroreceptorTopologyElements,
+                                'model':   baroreceptorModelElements}
 
-baroreceptorReference = {'AorticBaroreceptor' : AorticBaroreceptor,
-                         #'CarotidBaroreceptor': CarotidBaroreceptor
-                         'CarotidBR': CarotidBaroreceptor
-                         }
+baroreceptorElements = ['topology',
+                        'model']
 
 
 ##########################################################################################
@@ -256,7 +259,7 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'initialisationControls': initialisationControlsElements,
                         'boundaryConditions'    : boundaryConditionElements,
                         'globalFluid'           : globalFluidElements,
-                        'baroreceptors'         : baroreceptorReference,
+                        'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference,
                         'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
