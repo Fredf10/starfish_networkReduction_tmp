@@ -7,7 +7,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
 
 #sys.path.append(''.join([cur,'/../NetworkLib/']))
-from NetworkLib.classBoundaryConditions import *
+import NetworkLib.classBoundaryConditions as ccBC
 
 from constants import newestNetworkXml as nxml
 from constants import variablesDict
@@ -15,11 +15,6 @@ from constants import variablesDict
 import moduleXML as mXML
 import moduleFilePathHandler as mFPH
 
-"""
-This is moduleCSV, should be imported as mCSV
-
-Some other information about the module 
-"""
 
 def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     '''
@@ -56,7 +51,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     
     ## openFile and create writer
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'write')
-    writer = csv.DictWriter(open(vesselCSVFile,'wb'),tags,delimiter=delimiter)
+    writer = ccBC.csv.DictWriter(open(vesselCSVFile,'wb'),tags,delimiter=delimiter)
     
     # write first row == tags
     firstRow = {}
@@ -107,7 +102,7 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
     # load data    
-    reader = csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
+    reader = ccBC.csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
     # hash data with in dictionary and separate units
     columUnits = {}
     vesselData = {}
@@ -202,7 +197,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     tags = tagsBCType1
     
     boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'write')
-    writer = csv.DictWriter(open(boundaryCSVFile,'wb'),tags,delimiter=delimiter)
+    writer = ccBC.csv.DictWriter(open(boundaryCSVFile,'wb'),tags,delimiter=delimiter)
     
     # write Tag row
     firstRow = {}
@@ -261,7 +256,7 @@ def readBCFromCSV(networkName, delimiter=';'):
     '''
     
     boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
-    reader = csv.DictReader(open(boundaryCSVFile,'rb'),delimiter=delimiter)
+    reader = ccBC.csv.DictReader(open(boundaryCSVFile,'rb'),delimiter=delimiter)
     
     # hash data with in dictionary and separate units
     columUnits = {}

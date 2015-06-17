@@ -1,4 +1,6 @@
-from NetworkLib.classBoundaryConditions import *
+import sys, os
+#from NetworkLib.classBoundaryConditions import *
+### should work without this, but won't delete yet just in case.
 import numpy as np
 import math
 

@@ -21,7 +21,7 @@ from UtilityLib.constants import variableUnitsSI as variableUnits
 from UtilityLib.constants import unitsDictSI as unitsDict
 
 #from modulePickle import loadSolutionDataFile
-from UtilityLib.moduleStartUp import chooseSolutionDataCase
+import UtilityLib.moduleStartUp as mStartUp
 
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
@@ -725,7 +725,7 @@ def main():
                 elif subMenuInput == '5':
                     print "     load network from SolutionData"
                     try:
-                        networkName,dataNumber = chooseSolutionDataCase()
+                        networkName,dataNumber = mStartUp.chooseSolutionDataCase()
                         
                         vascularNetwork = mXML.loadNetworkFromXML(networkName,dataNumber = dataNumber)
                         vascularNetwork.name = None

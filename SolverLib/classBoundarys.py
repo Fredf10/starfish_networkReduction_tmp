@@ -13,7 +13,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
 #sys.path.append(cur+'/NetworkLib')
-from NetworkLib.classBoundaryConditions import *
+import NetworkLib.classBoundaryConditions as ccBC
 
 
 class Boundary():
@@ -43,8 +43,8 @@ class Boundary():
         
         #Function which gives du-vector back
         self.duFunction = None
-        self.duVector = np.zeros((nTsteps,2))
-        self._du_ = np.empty(2)
+        self.duVector = ccBC.np.zeros((nTsteps,2))
+        self._du_ = ccBC.np.empty(2)
         # list of all type1 functions found in the given boundaryConditions, which determine 
         # the du-Function
         self.bcType1 = []
@@ -67,8 +67,8 @@ class Boundary():
         self.Q = vessel.Qsol
         self.A = vessel.Asol
         
-        self.BloodFlowSep  = np.zeros((nTsteps,2)) ## [ dbloodVolume in, dbloodVolume out] blood volume from one timestep to the next
-        self.BloodVolumen  = np.zeros(2)
+        self.BloodFlowSep  = ccBC.np.zeros((nTsteps,2)) ## [ dbloodVolume in, dbloodVolume out] blood volume from one timestep to the next
+        self.BloodVolumen  = ccBC.np.zeros(2)
                 
         posTemp = []
         for bC in boundaryConditions:            
@@ -80,7 +80,7 @@ class Boundary():
             
         #find out position of the Boundary + check if all conditions are defined at the same side
         if sum(posTemp) == 0: self.position = 0
-        elif sum(np.array(posTemp)+1) == 0: self.position = -1
+        elif sum(ccBC.np.array(posTemp)+1) == 0: self.position = -1
         else: raise ValueError("One position of one boundaryCondition is not correct")
         
         #initialize solution variable
@@ -118,13 +118,13 @@ class Boundary():
             self.type = self.bcType1.name
             try:
                 if precribeTotalValues == False:
-                    self.omegaFunction = PrescribedInflux()
+                    self.omegaFunction = ccBC.PrescribedInflux()
                 elif precribeTotalValues == True and self.bcType1ConditionQuantity == 'Flow':
-                    self.omegaFunction = PrescribedTotalFlow()
+                    self.omegaFunction = ccBC.PrescribedTotalFlow()
                 elif precribeTotalValues == True and self.bcType1ConditionQuantity == 'Pressure':
-                    self.omegaFunction = PrescribedTotalPressure()
+                    self.omegaFunction = ccBC.PrescribedTotalPressure()
             except:
-                self.omegaFunction = PrescribedInflux()
+                self.omegaFunction = ccBC.PrescribedInflux()
             self.omegaFunction.setPosition(self.position)
         else:
             print "ERROR classBoundary: Too many type2-boundary Conditions defined!"
@@ -142,7 +142,7 @@ class Boundary():
         '''
         Determine the du-vector = [0,0] if no type1 boundaryConditions are given
         '''
-        return np.zeros(2)
+        return ccBC.np.zeros(2)
     
     def duFunctionSingle(self,currentTimeStep,dt):
         '''
@@ -156,7 +156,7 @@ class Boundary():
         Determine the summized du-vector with the values of all given
         type1 boundaryConditions 
         '''
-        du = np.zeros(2)
+        du = ccBC.np.zeros(2)
         for bc in self.bcType1:
             du = du + bc.calculateDu(currentTimeStep,dt)
         return du

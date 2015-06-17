@@ -6,16 +6,18 @@ except:
 
 import os,sys
 
-#from pprint import pprint as pp
+# from pprint import pprint as pp
 
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
-#sys.path.append(cur+'/../'+'/NetworkLib')
+# sys.path.append(cur+'/../'+'/NetworkLib')
 
 import NetworkLib.classVascularNetwork as cVascNw
 from NetworkLib.classBoundaryConditions import *
+# XML data with names referencing ccBC's functions
+# won't work if this import changes
 
 from constants import variablesDict 
 from constants import unitsDictSI as unitsDict

@@ -676,7 +676,7 @@ class Visualisation3D(Visualisation3DGUI):
         # find min max pressures and apply it to LUT
         self.findMinMaxPressure()
         # create LUT      
-        self.cLUT = LUT(self.quantitiyMaxima) 
+        self.cLUT = c3dLUT.LUT(self.quantitiyMaxima)
         # creat 3d vessel representations
         
         self.createVessel3D()

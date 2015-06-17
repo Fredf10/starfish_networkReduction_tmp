@@ -3,6 +3,9 @@ import numpy as np
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
+topFolder = cur + "/../"
+#topFolder should point to where LOGcurrentWaveSpeed.txt is
+# located, and if it changes location, renaming it is appropriate.
 #sys.path.append(''.join([classFields.cur,'/../']))
 
 
@@ -23,7 +26,7 @@ import classDataHandler
 import classTimer
 
 #sys.path.append(cur+'/UtilityLib/')
-from UtilityLib.processing import memoryUsagePsutil
+import UtilityLib.processing as mProc
  
 import gc
 # import h5py
@@ -216,8 +219,8 @@ class FlowSolver(object):
         
         automaticGridCorrection = {}
         
-        logfile = open(str(classVenousPool.cur+'/../'+'LOGcurrentWaveSpeed.txt'),'wb')
-        logfile2 = open(str(classVenousPool.cur+'/../'+'LOGproposedGrid.txt'),'wb')
+        logfile = open(str(topFolder+'LOGcurrentWaveSpeed.txt'),'wb')
+        logfile2 = open(str(topFolder+'LOGproposedGrid.txt'),'wb')
         CFL = self.vascularNetwork.CFL
         for vesselT,data in logfileData.iteritems():
             #number of deltaX
@@ -655,7 +658,7 @@ class FlowSolver(object):
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
         print '%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors))
         print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTsteps)               
-        print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
+        print '%-20s %4d' % ('used Memory (Mb)',mProc.memoryUsagePsutil()  )
         #print self.communicators[0]
         #print np.shape(self.communicators[0].data['Strain'])
         #print np.shape(self.communicators[0].data['MStrain'])
