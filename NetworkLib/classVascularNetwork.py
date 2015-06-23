@@ -172,8 +172,10 @@ class VascularNetwork(object):
         '''
         # set id to 1 + highest id of existing vessels
         if baroId == None: 
-            try: baroId = max(self.baroreceptors.keys()) + 1
-            except: baroId = 0
+            try:
+                baroId = max(self.baroreceptors.keys()) + 1
+            except:
+                baroId = 0
              
         # check Id
         if baroId not in self.baroreceptors:

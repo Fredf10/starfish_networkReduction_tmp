@@ -27,37 +27,36 @@ from pprint import pprint as pp
 
 
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
-    '''
+    """
     Function return a requested file path, if this file exists
-    
-    fileType:
-        'vesselCSVFile',
-        'boundaryCSVFile',
-        'networkXmlFileTemplate',
-        'networkXmlFile',
-        'solutionFile',
-        'configFile',
-        'simulationDescriptionFile',
-        'vncRescentNetworksFile',
-        'vncNetworkGraphFile
-    
-    networkName:
-    
-        name of the network file
-    
-    dataNumber:
-    
-        data number of solution file or xml file
-    
-    mode:
-    
-        read or write
-        
-    exception: (for read mode)
-    
-        Error (default): raise error and exit if file is not exiting
-        Warning: just raise Warning and return with error string      
-    '''
+
+    Args:
+
+        fileType (str):
+            'vesselCSVFile',
+            'boundaryCSVFile',
+            'networkXmlFileTemplate',
+            'networkXmlFile',
+            'solutionFile',
+            'configFile',
+            'simulationDescriptionFile',
+            'vncRescentNetworksFile',
+            'vncNetworkGraphFile
+
+        networkName (str): name of the network file
+
+        dataNumber (int): data number of solution file or xml file
+
+        mode (str): 'read' or 'write'
+
+
+    Returns:
+        string: file path
+
+    Raises:
+        Error (default): (in read mode) raise error and exit if file is not exiting
+        Warning: (in read mode) just raise Warning and return with error string
+    """
     existingFileTypes = ['vesselCSVFile',
                          'boundaryCSVFile',
                          'networkXmlFileTemplate',
@@ -99,7 +98,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     
     ## find requested file name
     requestedFilename  = filenames[''.join([fileType])]
-    ## find directory    
+    ## find directory
+    # TODO: (einar) find out about the passing of exception in this function
     requestedDirectory = getDirectory(''.join([fileType,'Directory']), networkName, dataNumber, mode, exception = exception)
     if requestedDirectory == None:
         if exception == "Warning":

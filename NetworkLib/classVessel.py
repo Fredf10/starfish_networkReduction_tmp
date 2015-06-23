@@ -8,6 +8,11 @@ import numpy as np
 from moduleGrids import *
 from classCompliance import *
 
+# Can't change import without crashing simulation.
+# moduleGrids: ERROR: classVessel.initialize(): Grid calculation of vessel 1
+# classCompliance: ERROR: classVessel.initialize(): init compliance of vessel 1
+
+
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
@@ -226,8 +231,8 @@ class Vessel(object):
         try:
             p0,p1 = initialValues['Pressure']
             Qm    = initialValues['Flow']
-            self.Psol[0] = np.linspace(p0,p1,self.N)   
-            self.Qsol[0] = np.ones((1,self.N))*Qm  
+            self.Psol[0] = np.linspace(p0,p1,self.N)
+            self.Qsol[0] = np.ones((1,self.N))*Qm
         except:
             print "Error: cV could not use initial values from network"
             pass
@@ -336,7 +341,7 @@ class Vessel(object):
         pf = np.cumsum(dp_f)
         pb = np.cumsum(dp_b)
         qf = np.cumsum(dQ_f)
-        qb = np.cumsum(dQ_b)   
+        qb = np.cumsum(dQ_b)
     
         return pf,pb,qf,qb
         
@@ -366,7 +371,7 @@ class Vessel(object):
         pf = np.cumsum(dp_f)
         pb = np.cumsum(dp_b)
         qf = np.cumsum(dQ_f)
-        qb = np.cumsum(dQ_b)   
+        qb = np.cumsum(dQ_b)
     
         return pf,pb,qf,qb
     
@@ -436,7 +441,7 @@ class Vessel(object):
                                            [0, cos(angleXMother), sin(angleXMother)],
                                            [0,-sin(angleXMother), cos(angleXMother)]])
             
-            rotToGlobalSys = np.dot(rotDaughterMotherX,rotToGlobalSys)    
+            rotToGlobalSys = np.dot(rotDaughterMotherX,rotToGlobalSys)
             
         ## y axis, angleYMother
         if angleYMother != 0:
@@ -459,7 +464,7 @@ class Vessel(object):
         self.positionEnd[n] = np.dot(self.positionEnd[n],rotToGlobalSys) + positionEndMother
         
         gravityVector = np.array([0,0,self.gravityConstant])
-        netGravity = np.dot(gravityVector,rotToGlobalSys)[2] 
+        netGravity = np.dot(gravityVector,rotToGlobalSys)[2]
         
         self.positionStart[n]  = positionEndMother ## positionStart
         self.rotToGlobalSys[n] = rotToGlobalSys

@@ -45,10 +45,13 @@ def foo(input1, input2):
 		input1 (type): description of input1
 		input2 (type): description of input2
 	
-	Returns:
+	Returns:   ### This has different syntax depending ###
+               ### on how many outputs it has.         ###
+
+        type of soleOutput: description of soleOutput
+
 		type of output1
 			description of output1
-	
 		type of output2
 			description of output2
 	

@@ -239,7 +239,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     
     
 def readBCFromCSV(networkName, delimiter=';'):
-    '''
+    """
     Functions loads boundaryCondition data from \*.csv file inclusive polynomial chaos definitions
 
     Args:
@@ -247,13 +247,13 @@ def readBCFromCSV(networkName, delimiter=';'):
         delimiter (str): Delimiter (default = ';')
 
     Returns:
-        VascularNetwork.boundaryConditionDict 
+        VascularNetwork.boundaryConditionDict
             A description of the VascNw.BCD instance returned
-        
+
         VascularNetwork.boundaryConditionPolyChaos
             A description of the VascNw.BCPC instance returned
-       
-    '''
+
+    """
     
     boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     reader = ccBC.csv.DictReader(open(boundaryCSVFile,'rb'),delimiter=delimiter)
