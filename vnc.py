@@ -42,7 +42,7 @@ from copy import deepcopy
 
 
 def enterNetworkName(networkName, recentNetworkNames = None):
-    '''
+    """
     function to evaluate networkName input of user
     
     input:
@@ -54,7 +54,7 @@ def enterNetworkName(networkName, recentNetworkNames = None):
                                           if user input == number correspoding to recentNetworkNames: 
                                                            the correspinding networkName
                                           if user input == newNetworkName: newNetworkName
-    '''
+    """
     print "     current networkName: ",networkName
     networkNameUserInput = str(raw_input("     enter/change networkName (only! ENTER to use current networkName):\n     "))
     
@@ -74,7 +74,7 @@ def enterNetworkName(networkName, recentNetworkNames = None):
     
 
 def findAllDaughters(vascularNetwork, motherVesselID):
-    '''
+    """
     evaluates all daughters of the vessel with the passed motherVesselID
     
     input:
@@ -82,7 +82,7 @@ def findAllDaughters(vascularNetwork, motherVesselID):
         motherVesselID <int>
         
     return daughters <list> := list with all daughter ids
-    '''
+    """
     daughters = []
     viz = []
     root = motherVesselID
@@ -111,7 +111,7 @@ def findAllDaughters(vascularNetwork, motherVesselID):
     
 
 def main():
-    '''
+    """
     vnc main function
     
     menu and all options in one big function
@@ -123,7 +123,7 @@ def main():
         xdot on click should call function in class vncMain
         vascularNetwork should never be deleted ?!
         modules need to be imported as modules !!
-    '''
+    """
     # set graphs directory
     graphPath = str(cur+'/NetworkFiles/')
     

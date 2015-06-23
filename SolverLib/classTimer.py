@@ -17,10 +17,10 @@ class TimerBaseClass(object):
         self.type = '' # type of the event, e.g. Valsalva
         
     def update(self,TimeDict):
-        '''
+        """
         updates the data using a dictionary in form of 
         TimeDict = {'variableName': value}
-        '''
+        """
         for key,value in TimeDict.iteritems():
             try:
                 self.__getattribute__(key)

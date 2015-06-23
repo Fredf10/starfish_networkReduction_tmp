@@ -35,9 +35,9 @@ class FlowSolver(object):
 
     
     def __init__(self,vascularNetwork, quiet=False):
-        '''
+        """
         Constructor       
-        '''
+        """
                 
         if vascularNetwork == None: print "ERROR: No vascularNetwork given!" / exit()
         assert isinstance(vascularNetwork, VascularNetwork)
@@ -144,20 +144,20 @@ class FlowSolver(object):
        
         
 
-    '''       
+    """       
     ########################################################################################
     # initialisation Methods
     ########################################################################################
-    '''
+    """
         
     
     def calcTimeStep(self,dz,c,CFL):
         return (CFL*dz)/c
 
     def initializeTimeVariables(self, quiet):
-        '''
+        """
         initialize time variable dt and Tstep
-        '''
+        """
         self.totalTime = self.vascularNetwork.totalTime
                 
         initialValues = self.vascularNetwork.initialValues
@@ -284,9 +284,9 @@ class FlowSolver(object):
         
                 
     def initializeSolutionMatrices(self):
-        '''
+        """
         initialize solution matrices --> moved to vascularNetwork
-        '''
+        """
         # initialiase solution matrices, gravity and position over space
         self.vascularNetwork.initializeNetworkForSimulation()
         
@@ -360,9 +360,9 @@ class FlowSolver(object):
 #         self.vascularNetwork.initializeVenousGravityPressureTime(self.nTsteps)
                   
     def initializeSystemEquations(self):
-        '''
+        """
         initialize system Equations
-        '''
+        """
         for vesselId,vessel in self.vessels.iteritems():
             self.systemEquations[vesselId] = classSystemEquations.System(vessel,
                                                     self.simplifyEigenvalues,
@@ -375,9 +375,9 @@ class FlowSolver(object):
                                                         self.vessels[vesselId].Asol[0])
          
     def initializeBoundarys(self):
-        '''
+        """
         initialize boundarys
-        '''
+        """
         if len(self.vessels) == 1:
             rootId = self.vascularNetwork.root
             bcList0 = []
@@ -416,10 +416,10 @@ class FlowSolver(object):
             self.output['BndrNR'] = len(self.boundarys)
     
     def initializeConnections(self):
-        '''
+        """
         initialize Connections of the network
         by traversing the network tree
-        '''
+        """
         treeList = self.vascularNetwork.treeTraverseList
         
         for leftMother,rightMother,leftDaughter,rightDaughter  in self.vascularNetwork.treeTraverseConnections:  
@@ -462,9 +462,9 @@ class FlowSolver(object):
                                                              self.solvingSchemeConnections)
         
     def initializeFields(self):
-        '''
+        """
         creates field numerical objects for each vessel in the network
-        '''
+        """
         for vesselId,vessel in self.vessels.iteritems():    
             self.fields[vesselId] = classFields.Field(  vessel,
                                             self.currentMemoryIndex,
@@ -474,9 +474,9 @@ class FlowSolver(object):
     
 
     def initializeBaroreceptors(self):
-        '''
+        """
         method used to initialize Baroreceptor (baroreflex) objects
-        '''
+        """
         for baroId, baroData in self.baroreceptors.iteritems():
             baroData.initializeForSimulation(self,self.vascularNetwork)
  
@@ -497,9 +497,9 @@ class FlowSolver(object):
     
     def initializeTimers(self):
         
-        '''
+        """
         method used to initialize Timer objects
-        '''
+        """
         for TimerId, TimerData in self.timers.iteritems():
             
             TimerData['currentTimeStep']         = self.currentTimeStep
@@ -565,7 +565,7 @@ class FlowSolver(object):
             
               
     def initializeNumericalObjectList(self):
-        '''
+        """
         ## fill numObjectList (self.currentTimeStepumericalObjects) traversing the treeList 
         # 1. add root boundary
         # 2  add vessels
@@ -573,7 +573,7 @@ class FlowSolver(object):
         # 4. repeat 2,3 for the hole tree 
         # 5. add communicators
         # 6. add blocking Wait if multiprocessing
-        '''
+        """
         
         # get treetraversing list
         treeList = self.vascularNetwork.treeTraverseList
@@ -632,9 +632,9 @@ class FlowSolver(object):
         self.memoryOffset = dataHandler.memoryOffset
                                    
     def initOutput(self):
-        '''
+        """
         initialize solution matrices
-        '''
+        """
         #print '====================================='
         print '___________Time variables ___________'
         print '%-20s %2.3f' % ('totaltime (sec)',self.totalTime)
@@ -665,7 +665,7 @@ class FlowSolver(object):
         print '===================================== \n'
         
             
-    '''
+    """
     ########################################################################################
     # Solver Methods:
     #
@@ -674,17 +674,17 @@ class FlowSolver(object):
     #    
     #
     ########################################################################################
-    '''
+    """
        
     def MacCormack_Field(self):
-        '''
+        """
         MacCormack solver method with forward-euler time steping,
         Using either Characteristic system 0 or 1 as defined in the XML-file.
         
         This method is solving the system by looping through the defined network
         imposing the boundary conditions based on Riemann Invariants and then solving the vessels, 
         conncetions, bifucations with a predictor-corrector step method
-        '''
+        """
         if self.quiet == False: print "Solving system ..."
         
         reflectionCoefficientCount = 0

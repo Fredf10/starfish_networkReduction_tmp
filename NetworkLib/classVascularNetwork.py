@@ -28,11 +28,11 @@ import pprint
 import h5py
 
 class VascularNetwork(object):
-    '''
+    """
     Class representing a vascular Network
-    The vascular network consits out of vessels defined in classVessel::Vessel()
-    Additional Topologie, BoundaryConditions and the SimulationContext are saved.
-    '''
+    The vascular network consists out of vessels defined in classVessel::Vessel()
+    Additional Topology, BoundaryConditions and the SimulationContext are saved.
+    """
     def __init__(self, quiet=False):
 
         # # vascularNetwork variables to set via XML
@@ -72,7 +72,7 @@ class VascularNetwork(object):
                 
         # self.motion         = {'keyframe': [0, 0.1, 1.0],
         #                        'X1'     : [0, 45, 90]}
-        # dict defining the movment by change of angle unsing keyframes
+        # dict defining the movement by change of angle using keyframes
         # {'keyframe': [t0, t1, tend],
         #  'X1: [0, 45, 90]} ## <- correspond to 90 degree change of angleXtoMother of vessel 1        
         self.motionAngles = {}
@@ -119,7 +119,7 @@ class VascularNetwork(object):
         
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data} 
         
-        # # interal calculated variables
+        # # internal calculated variables
         self.root = None  # the root vessel (mother of the mothers)
         self.boundaryVessels = []  # includes all vessels with terminal boundaryConditions (except start of root)
         self.treeTraverseList = []  # tree traverse list 
@@ -136,11 +136,11 @@ class VascularNetwork(object):
         
     # all classes concerning vessel
     def addVessel(self, vesselId=None, dataDict=False):
-        '''
+        """
         adds vessel to the Network
-        if no id, a random id is choosen
+        if no id, a random id is chosen
         if no DataDict, no values are assigned
-        '''
+        """
         # set id to 1 + highest id of existing vessels
         if vesselId == None: 
             try: vesselId = max(self.vessels.keys()) + 1
@@ -156,20 +156,20 @@ class VascularNetwork(object):
             print "Error vascularNetwork.addVessel: vessel with Id {} exists already! Could not add vessel".format(vesselId)  # raise error if Id is set doubled
  
     def deleteVessel(self, inputId):
-        '''
+        """
         Remove vessel from network and delete it
-        '''
+        """
         try:
             del self.vessels[inputId]
         except:
             print "ERROR vascularNetwork.deleteVessel(): vessel with Id {} does not exist! Could not remove vessel".format(inputId)
     
     def addBaroreceptor(self, baroId=None, dataDict=False):
-        '''
+        """
         adds vessel to the Network
-        if no id, a random id is choosen
+        if no id, a random id is chosen
         if no DataDict, no values are assigned
-        '''
+        """
         # set id to 1 + highest id of existing vessels
         if baroId == None: 
             try:
@@ -195,10 +195,10 @@ class VascularNetwork(object):
             print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
   
     def update(self, vascularNetworkData):
-        '''
-        updates the vascularNetwork data using a dictionary in form of 
+        """
+        updates the vascularNetwork data using a dictionary in form of
         vascularNetworkData = {'variableName': value}
-        '''
+        """
         for key, value in vascularNetworkData.iteritems():
             try:
                 self.__getattribute__(key)
@@ -207,19 +207,19 @@ class VascularNetwork(object):
                 print 'WARNING vascularNetwork.update(): wrong key: %s, could not update vascularNetwork' % key 
                 
     def getVariableValue(self, variableName):
-        '''
+        """
         Returns value of variable with name : variableName
         States Error if not such variable
-        '''
+        """
         try:
             return self.__getattribute__(variableName)
         except: 
             print "ERROR vascularNetwork.getVariable() : VascularNetwork has no variable {}".format(variableName)
     
     def updateNetwork(self, updateDict):
-        '''
+        """
         Update vascular Network with an Dictionary: updateDict
-        
+
         updateDict = {'vascularNetworkData': {},
                       'globalFluid': {},
                       'globalFluidPolyChaos': {},
@@ -232,7 +232,7 @@ class VascularNetwork(object):
             'communicators'        := netCommunicators}
             'vesselData'           := { vessel.id : DataDict}
             'baroreceptors'        := { baroreceptor.id : DataDict}
-        '''
+        """
         
         for dictName in ['vascularNetworkData']:
             try: self.update(updateDict[dictName])
@@ -259,17 +259,17 @@ class VascularNetwork(object):
             print self.baroreceptors
                       
     def showVessels(self):
-        '''
+        """
         writes the Vesseldata for each vessel to console (calls printToConsole() from each vessel)
-        '''
+        """
         print " Vessels in Network:"
         for vessel in self.vessels.itervalues():
             vessel.printToConsole()
     
     def showNetwork(self):
-        '''
+        """
         writes Network properties (without vesselData) to console
-        '''
+        """
         print "-------------------"
         print " vascularNetwork ", self.name, "\n"
         for variable, value in self.__dict__.iteritems():
@@ -278,10 +278,10 @@ class VascularNetwork(object):
             except: print " {:<20} {:>8}".format(variable, 'None')
         
     def initialize(self, initializeForSimulation=False):
-        '''
+        """
         Initializes vascular network: the compliance of the vessels and the position of the call function of boundary type 2
-        Check if boundaryConditions and globalFluid properties are defined in a rigth manner;
-        '''   
+        Check if boundaryConditions and globalFluid properties are defined in a right manner;
+        """
         # # refresh all connections and generate traversing lists
         self.evaluateConnections()
         
@@ -403,12 +403,12 @@ class VascularNetwork(object):
                 self.evaluateWindkesselCompliance()
                 
     def initializeNetworkForSimulation(self):
-        '''
+        """
         Method to initialize the network for a simulation.
         Creates hdf5 File and groups for the vessels
         Enforces memory allocation.
         Set initial values for the simulations.
-        '''
+        """
             
         # create solution file
         if self.pathSolutionDataFilename == None:
@@ -604,10 +604,10 @@ class VascularNetwork(object):
         
                     
     def saveSolutionData(self):
-        '''
-        # solution of the system over time 
+        """
+        # solution of the system over time
         # {vesselID: { 'Psol' : [ [solution at N nodes]<-one array for each timePoint , ...  ], ..  }
-        '''        
+        """
         globalData = self.solutionDataFile.create_group('VascularNetwork')
         
         globalData.attrs['dt'] = self.dt
@@ -636,13 +636,13 @@ class VascularNetwork(object):
         
         
     def linkSolutionData(self):
-        '''
+        """
         This function prepares the solution data when the network is loaded
-        assigning the appropriate information to allow the user to call 
-        classVascularNetwork::loadSolutionDataRange to get specific values 
+        assigning the appropriate information to allow the user to call
+        classVascularNetwork::loadSolutionDataRange to get specific values
         loaded into memory.
-        
-        '''
+
+        """
 
         if self.pathSolutionDataFilename == None:
             self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'read')
@@ -716,15 +716,15 @@ class VascularNetwork(object):
     
     
     def getSolutionData(self,vesselId, variables, tvals, xvals):
-        '''
+        """
         Get interpolated solution data
         Inputs:
         vesselId - the vessel from which the data is wanted
         variables - a list of strings with desired variables
             "Pressure",
-            "Flow", 
-            "Area", 
-            "WaveSpeed", 
+            "Flow",
+            "Area",
+            "WaveSpeed",
             "MeanVelocity",
             "ForwardFlow",
             "BackwardFlow",
@@ -732,10 +732,10 @@ class VascularNetwork(object):
             "BackwardPressure"
         tvals - a numpy array (or python list) of times at which the values are desired
         xvals - a numpy array (or python list) of positions at which the values are desired
-        
+
         Returns: A dictionary with keys corresponding to the input variables, and values are
-            numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals) 
-        '''
+            numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals)
+        """
         tspan = [np.min(tvals),np.max(tvals)]
         mindt=None
 
@@ -786,25 +786,25 @@ class VascularNetwork(object):
                                   "Gravity",
                                   "Position",
                                   "Rotation"]):
-        '''
-        loads the solution data of the vessels specified into memory for the times 
+        """
+        loads the solution data of the vessels specified into memory for the times
             specified and drops any other previously loaded data.
         Inputs:
             vesselIds - a list of vessel Ids to load
                 if vesselIds = None, data of all vessels is loaded
             tspan=[t1,t2] - a time range to load into memory t2 must be greater than t1.
                 if tspan=None, all times are loaded
-            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll', 
-                'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All' 
+            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll',
+                'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All'
                 is in the list all quantities are loaded. Inputs are case insensitive.
-            mindt := the minimum spacing in time between successively loaded points if 
+            mindt := the minimum spacing in time between successively loaded points if
                 none is specified, the solution time step is used.
         Effects and Usage:
             loads the specified values into memory such that they may be accessed as
-            vascularNetwork.vessels[vesselId].Pressure, etc, returning a matrix of 
+            vascularNetwork.vessels[vesselId].Pressure, etc, returning a matrix of
             solution values corresponding to the time points in vascularNetwork.tsol.
             Accessing vessels and values not set to be loaded will produce errors.
-        '''
+        """
         # Update loaded data tracking if inputs are valid
         # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
         
@@ -890,13 +890,13 @@ class VascularNetwork(object):
 
         
     def getFileAccessIndices(self,t1,t2):
-        '''
+        """
         Helper method to convert times to indices in the saved data.
         Input:
         t1,t2 the beginning and ending times to access
         Output:
         nSelectedBegin, nSelectedEnd - the indices corresponding to t1 and t2 in the file
-        '''
+        """
         startTime = self.simulationTime[0]
         nSelectedBegin = int(np.floor((t1 - startTime) / self.dt))
         nSelectedEnd = int(np.ceil((t2 - startTime) / self.dt))+1
@@ -904,10 +904,10 @@ class VascularNetwork(object):
               
         
     def findRootVessel(self):
-        '''
+        """
         Finds the root of a network, i.e. the vessel which is not a daughter of any vessel
         Evaluates a startRank for the evaulation of the network
-        '''
+        """
         daughters = []
         approximatedBif = 0
         for vessel in self.vessels.itervalues():
@@ -933,11 +933,11 @@ class VascularNetwork(object):
             print "ERROR: vascularNetwork.searchRoot(): found several roots: {}, check network again system exit!".format(roots), exit()
         
     def checkDaughterDefinition(self):
-        '''
-        Method to check if all daughters are defined in the correct way, i.e. if a vessel has only 1 daughter 
+        """
+        Method to check if all daughters are defined in the correct way, i.e. if a vessel has only 1 daughter
         it should be defined as a leftDaughter, if it is defined as a rightDaughter, this method will rename it!
         additional check if there is a vessel with this id, if not remove daughter
-        '''
+        """
         for vessel in self.vessels.itervalues():
             if vessel.leftDaughter == None and vessel.rightDaughter != None:
                 print "WARNING vascularNetwork.checkDaughterDefiniton(): Vessel {} has no leftDaughter but a rightDaughter {}, this daughter is now assumed to be leftDaughter".format(vessel.Id, vessel.rightDaughter)
@@ -959,20 +959,20 @@ class VascularNetwork(object):
                     vessel.rightDaughter = None
         
     def evaluateConnections(self):
-        '''
+        """
         Method to evaluate all connections:
-        
+
         - check for right daughter definition (call)
         - find root of the network (call)
         - evalualte all connections link, bifurcation, anastomosis
         - apply mothers to all vessels (call)
-        
+
         Method traverses tree with defined daughters,
         - finds mothers and connections
-        
+
         -> creates treeTraverseList breadth first traversing list
         -> creates treeTraverseConnections list of connections [ [LeftMother, rightMother, leftDaughter, rightDaughter], ..]
-        '''
+        """
         
         # check for proper definition: if one daughter := leftDaughter ..
         self.checkDaughterDefinition()
@@ -1140,10 +1140,10 @@ class VascularNetwork(object):
         self.applyMothersToVessel()
         
     def applyMothersToVessel(self):
-        '''
+        """
         Functions traverses the self.treeTraverseConnections and saves the id of the
         left and right mother of the vessel
-        '''        
+        """
         for leftMother, rightMother, leftDaughter, rightDaughter in self.treeTraverseConnections:  
             
             self.vessels[leftDaughter].leftMother = leftMother
@@ -1154,10 +1154,10 @@ class VascularNetwork(object):
             except: pass
     
     def findStartAndEndNodes(self):
-        '''
+        """
         Function traverses self.treeTraverseConnections and creates start- and
-        end-nodes for all vessels in the network 
-        '''
+        end-nodes for all vessels in the network
+        """
         nodeCount = 0
         self.vessels[self.root].startNode = nodeCount
         # add end node for root vessel
@@ -1198,10 +1198,10 @@ class VascularNetwork(object):
 
             
     def calculateNetworkResistance(self):
-        '''
-        This function travers the network tree and calculates the 
+        """
+        This function travers the network tree and calculates the
         cumultative system resistances Rcum for each vessel in the Network.
-        '''
+        """
                 
         # # travers tree and create the R_cum list including the cumltative values
         for vesselId in self.treeTraverseList:
@@ -1267,11 +1267,11 @@ class VascularNetwork(object):
         
     
     def calculateInitialValues(self):
-        '''
-        This function travers the network tree and calculates the 
+        """
+        This function travers the network tree and calculates the
         esitimates the initial flow and pressure values for each vessel in the Network
         based on the meanflow/pressure value at the root node using the cumultative resistance
-        '''
+        """
         
         initialValues = {}
                     
@@ -1505,15 +1505,15 @@ class VascularNetwork(object):
                 except: print "{:3}".format(vesselId)
         
     def calculateReflectionCoefficientConnection(self, mothers, daughters):
-        '''
+        """
         Function calculates reflection coefficient of a vessel connection
-        
+
         Input:
             motherVessels   = [ [Id mother1, pressure mother1] ...  ]
             daughterVessels = [ [Id daughter1, pressure daughter1] ...  ]
-        
+
         Return: reflectionCoefficient
-        '''
+        """
         
         admittanceM = 0
         admittanceD = 0
@@ -1535,12 +1535,12 @@ class VascularNetwork(object):
         return reflectionCoefficient
         
     def optimizeTreeRefelctionCoefficients(self):
-        '''
+        """
         Calculates the optimal reflection coeffiecients for the network
-        
+
         addapted from article Reymond et al.2009
         (very poor and instable method)
-        '''  
+        """
         
         # # add rest of the vessels by traversing the connections
         for leftMother, rightMother, leftDaughter, rightDaughter  in self.treeTraverseConnections:  
@@ -1672,9 +1672,9 @@ class VascularNetwork(object):
 
                 
     def initializeGravityHydrostaticPressure(self, initialValues, root):
-        '''
+        """
         Traverse the tree and initialize the nodes with the steady state hydrostatic pressure distribution
-        ''' 
+        """
         negativePressure = False
         
         # # root vessel   
@@ -1713,9 +1713,9 @@ class VascularNetwork(object):
                     
             
     def initializeVenousGravityPressure(self):
-        '''
+        """
         Calculate and initialze the venous pressure depending on gravity for the 2 and 3 element windkessel models
-        '''
+        """
         self.venousSystemCollaps = False
         
         # calculate absolute and relative venous pressure at boundary nodes
@@ -1764,10 +1764,10 @@ class VascularNetwork(object):
                 print '%s %2i %19.3f' % ('Net gravity     : vessel ', vesselId, self.vessels[vesselId].netGravity[0])
         
     def calculate3DpositionsAndGravity(self, nTsteps=None, nSet=None):
-        '''
+        """
         Initializing the position and rotation of each vessel in 3D space
         Initializing netGravity of the vessels.
-        '''
+        """
         if nSet != None:
             nTsteps = 0
             
@@ -1798,9 +1798,9 @@ class VascularNetwork(object):
                         print 'ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother, rightMother, leftDaughter)
         
     def initializeVenousGravityPressureTime(self, nTsteps):
-        '''
+        """
         Calculate and initialze the venous pressure depending on gravity for the 2 and 3 element windkessel models
-        '''
+        """
         
         self.venousSystemCollaps = False
         

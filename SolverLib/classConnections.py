@@ -7,9 +7,9 @@ from pprint import pprint as pp
 from copy import copy as copy       
  
 class Link():        
-    '''
+    """
     Link object represends the connection between two vessels
-    '''
+    """
     def __init__(self, mother, motherSys, 
                      daughter, daughterSys,
                      currentMemoryIndex, dt, rigidAreas, solvingScheme):
@@ -92,9 +92,9 @@ class Link():
         self.sumPErrorNonLinCount = 0
     
     def callLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -208,9 +208,9 @@ class Link():
             exit()
             
     def callNonLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -368,15 +368,15 @@ class Link():
         self.A_daughter[n+1][pos2] = A2n
               
 #     def callMacCormackField1(self):
-#         '''
+#         """
 #         Call function for vessel-vessel connection
-#         '''        
+#         """        
 #         dt = self.dt
 #         n = self.currentMemoryIndex[0]
 #         pos1 = self.positions[0]
 #         pos2 = self.positions[1]
 #         
-#         #''' Predictor Step '''positions
+#         #""" Predictor Step """positions
 #         if self.step == "predictor":
 #             P1 = self.P_leftMother[n]
 #             Q1 = self.Q_leftMother[n]
@@ -386,7 +386,7 @@ class Link():
 #             Q2 = self.Q_daughter[n]
 #             A2 = self.A_daughter[n]
 #                  
-#         #'''Corrector Step'''    A
+#         #"""Corrector Step"""    A
 #         elif self.step == "corrector":
 #             P1 = self.P_mother_pre
 #             Q1 = self.Q_mother_pre
@@ -427,7 +427,7 @@ class Link():
 #         
 #         #print sol[0],sol[3]
 #         
-#         #''' Predictor Step '''
+#         #""" Predictor Step """
 #         if self.step == "predictor":
 #             self.step = "corrector"   
 #             # apply changed values
@@ -446,7 +446,7 @@ class Link():
 #                 self.A_mother_pre[pos1]   = A1[pos1]
 #                 self.A_daughter_pre[pos2] = A2[pos2]
 #         
-#         #'''Corrector Step'''    
+#         #"""Corrector Step"""    
 #         elif self.step == "corrector":
 #             self.step = "predictor"
 #             
@@ -474,14 +474,14 @@ class Link():
 #                 self.A_daughter[n+1][pos2] = A2[pos2]
 #     
 #     def fsolveConnectionSys0(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the Link
 #         Using constant areas, i.e. initial areas
 #         
 #         Input:     x = array [P1,Q1,Q2,P2]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #         
@@ -503,10 +503,10 @@ class Link():
 #         return [res3,res2,res1,res4]
 #     
 #     def jacobiMatrixSys0(self,x,args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using constant areas, i.e. initial areas
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #         
@@ -517,14 +517,14 @@ class Link():
 #          
 #         
 #     def fsolveConnectionSys1(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the Link
 #         Using recalculated areas depending on the new pressure values
 #         
 #         Input:     x = array [P1,Q1,Q2,P2]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #                         
@@ -557,10 +557,10 @@ class Link():
 #         return [res3,res2,res1,res4]
 #  
 #     def jacobiMatrixSys1(self,x, args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using recalculated areas depending on the new pressure values
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #         
@@ -705,9 +705,9 @@ class Bifurcation():
         self.sumPErrorNonLinCount = 0
     
     def callLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -843,9 +843,9 @@ class Bifurcation():
 
 
     def callNonLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         #if n == 1:
@@ -1088,9 +1088,9 @@ class Bifurcation():
         
                 
 #     def callMacCormackField2(self):
-#         '''
+#         """
 #         Call function for a bifurcation
-#         '''  
+#         """  
 #         #print self.counter
 #         #self.counter = 1+ self.counter
 #         
@@ -1101,7 +1101,7 @@ class Bifurcation():
 #         pos2 = self.positions[1]
 #         pos3 = self.positions[2]
 #         
-#         #''' Predictor Step '''positions
+#         #""" Predictor Step """positions
 #         if self.step == "predictor":
 #             P1 = self.P_leftMother[n]
 #             Q1 = self.Q_leftMother[n]
@@ -1115,7 +1115,7 @@ class Bifurcation():
 #             Q3 = self.Q_daughter[n]
 #             A3 = self.A_daughter[n]
 #                  
-#         #'''Corrector Step'''    
+#         #"""Corrector Step"""    
 #         elif self.step == "corrector":
 #             P1 = self.P_mother_pre
 #             Q1 = self.Q_mother_pre
@@ -1174,7 +1174,7 @@ class Bifurcation():
 #         sol,infodict,a,b = fsolve(self.fsolveFunction ,x ,args = args, fprime = self.jacobiMatrix,full_output=True)
 #         #print "cC",infodict['nfev'],infodict['njev'], b
 #         #if infodict['nfev'] > 2: raw_input("")
-#         #''' Predictor Step '''
+#         #""" Predictor Step """
 #         if self.step == "predictor":
 #             self.step = "corrector"
 #             
@@ -1200,7 +1200,7 @@ class Bifurcation():
 #                 self.A_leftDaughter_pre[pos2]  = A2[pos2]
 #                 self.A_rightDaughter_pre[pos3] = A3[pos3]
 #         
-#         #'''Corrector Step'''    
+#         #"""Corrector Step"""    
 #         elif self.step == "corrector":
 #             self.step = "predictor"
 #     
@@ -1251,14 +1251,14 @@ class Bifurcation():
 #             
 #     
 #     def fsolveBifurcationSys0(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the bifuraction
 #         Using constant areas, i.e. initial areas
 #         
 #         Input:     x = array [P2,Q2,P1,Q1,Q3,P3]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #         
@@ -1284,10 +1284,10 @@ class Bifurcation():
 #         return [res5,res2,res4,res1,res3,res6]
 #     
 #     def jacobiMatrixBifSys0(self,x, args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using constant areas, i.e. initial areas
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #                 
@@ -1299,14 +1299,14 @@ class Bifurcation():
 #                          [0    , 0                , 0    , 0                , L3[1]            , L3[0]]])
 #     
 #     def fsolveBifurcationSys1(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the bifuraction
 #         Using recalculated areas depending on the new pressure values
 #         
 #         Input:     x = array [P2,Q2,P1,Q1,Q3,P3]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #                         
@@ -1343,10 +1343,10 @@ class Bifurcation():
 #         return [res5,res2,res4,res1,res3,res6]
 #     
 #     def jacobiMatrixBifSys1(self,x, args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using recalculated areas depending on the new pressure values
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #         
@@ -1459,9 +1459,9 @@ class Anastomosis():
         self.sumPErrorNonLinCount = 0
     
     def callLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]

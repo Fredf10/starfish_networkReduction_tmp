@@ -18,7 +18,7 @@ import NetworkLib.classBoundaryConditions as ccBC
 
 class Boundary():
     def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, nTsteps, systemEquation):
-        '''
+        """
         Constructor of Boundary
         s
         Initializes one Boundary of a vessel
@@ -35,7 +35,7 @@ class Boundary():
         self.bcType1         :    list of all type1 functions found in the given boundaryConditions
         self.omegaInput      :    function which gives the _omega of omega_ back depending on self.position
         self.omegaFunctio    :    function with boundaryCondtion of type2 calculating the omega-vector
-        '''
+        """
         self.position = None
         
         self.name = ' '.join(['Boundary',str(vessel.Id)])
@@ -139,32 +139,32 @@ class Boundary():
 
     ### Function which calculated du
     def duFunctionZero(self,currentTimeStep,dt):
-        '''
+        """
         Determine the du-vector = [0,0] if no type1 boundaryConditions are given
-        '''
+        """
         return ccBC.np.zeros(2)
     
     def duFunctionSingle(self,currentTimeStep,dt):
-        '''
+        """
         Determine the du-vector with the values of the given
         type1 boundaryCondition 
-        '''     
+        """     
         return self.bcType1.calculateDu(currentTimeStep,dt)
     
     def duFunctionMulti(self,currentTimeStep,dt):
-        '''
+        """
         Determine the summized du-vector with the values of all given
         type1 boundaryConditions 
-        '''
+        """
         du = ccBC.np.zeros(2)
         for bc in self.bcType1:
             du = du + bc.calculateDu(currentTimeStep,dt)
         return du
     
     def duEvaluateVector(self):
-        '''
+        """
         Pre-Calculate the BoundaryConditions duVector of Type1
-        '''
+        """
         self.duVector = self.duVector*0.
         for bc in self.bcType1:
             self.duVector = self.duVector+bc.calculateDuVector(len(self.duVector),self.dt)
@@ -197,10 +197,10 @@ class Boundary():
         return duPrescribed
     
     def __call__(self): #callMacCormackField(self):    
-        '''
+        """
         new Boundary method calculates the values at the boundary
         and applies it to the new values
-        '''
+        """
         
         # create local variables for this timestep
         dt = self.dt

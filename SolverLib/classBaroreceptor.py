@@ -11,9 +11,9 @@ class Baroreceptor(object):
     """
     
     def __init__(self, BaroDict):
-        '''
+        """
         Baroreceptor model initialisation
-        '''
+        """
         ## Solver related variables
         #System and Vessel Variables
         self.dt = 0
@@ -105,10 +105,10 @@ class Baroreceptor(object):
         
         
     def update(self,baroDict):
-            '''
+            """
             updates the Baroreceptor using a dictionary in form of 
             baroDict = {'variableName': value}
-            '''
+            """
             for key,value in baroDict.iteritems():
                 try:
                     self.__getattribute__(key)
@@ -118,10 +118,10 @@ class Baroreceptor(object):
     
     
     def getVariableValue(self,variableName):
-        '''
+        """
         Returns value of variable with name : variableName
         States Error if not such variable
-        '''
+        """
         try:
             return self.__getattribute__(variableName)
         except: 
@@ -129,9 +129,9 @@ class Baroreceptor(object):
                        
                        
     def getVariableDict(self):
-        '''
+        """
         Returns a deep copy of the class variable dict
-        '''
+        """
         return self.__dict__
     
     
@@ -401,10 +401,10 @@ class AorticBaroreceptor(Baroreceptor):
         
 
 class bugenhagenAorticBR(AorticBaroreceptor):
-    '''
+    """
     for models of the AorticBaroreceptors
     Aortic Baroreceptor models with strain input and period of the heart cycle as output
-    '''
+    """
     
     def __init__(self,BaroDict):
         """
@@ -440,9 +440,9 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         
 
     def __call__(self):
-        '''
+        """
         Implements bugenhagen specific actions for the numerical object call
-        '''
+        """
         super(bugenhagenAorticBR,self).__call__()
         
         n = self.currentTimeStep[0]
@@ -455,10 +455,10 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         
 
 class pettersenAorticBR(AorticBaroreceptor):
-    '''
+    """
     for models of the AorticBaroreceptors
     Aortic Baroreceptor models with strain input and period of the heart cycle as output
-    '''
+    """
     
     def __init__(self,BaroDict):
         """
@@ -532,9 +532,9 @@ class pettersenAorticBR(AorticBaroreceptor):
         self.c_ach[n+1] = self.states[-1][3]
 
 class CarotidBaroreceptor(Baroreceptor):
-    '''
+    """
     for models of the Carotid Baroreceptors
-    '''
+    """
     def __init__(self,BaroDict):
         
         """

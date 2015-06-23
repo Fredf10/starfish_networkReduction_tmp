@@ -1,5 +1,5 @@
 def systemCheck():
-    '''
+    """
     Check for necessary moduls and 3thrd party libarys needed for STARFiSh and vnc:
         matplotlib
         numpy
@@ -12,7 +12,7 @@ def systemCheck():
         pyglet
         mencoder
         OpenGL
-    '''
+    """
     matplotlibInstalled = False
     installed = " ... installed!"
     print ""

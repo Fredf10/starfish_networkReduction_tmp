@@ -186,9 +186,9 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
 
 
 def chooseNetwork(showTemplates = True):
-    '''
+    """
     console Interface to choose a VascularNetwork for simulation / vascularPolynomial Chaos
-    '''
+    """
     dirNamesTemplate = []
     if showTemplates:
         # network templates
@@ -227,8 +227,9 @@ def chooseNetwork(showTemplates = True):
     print '====================================='
     return networkName
 
+# TODO: (einar) fix exception variable
 def evaluateDataNumber(dataNumberString, exception = "Error"):
-    '''
+    """
     Function to evaluate DataNumbers given as a string
     Max lenght of dataNumber = 3
     Input:
@@ -239,7 +240,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
         dataSetNumber = [ String, ... ,String] 
         (e.g. dataNumber = '012' dataSetNumber = ['012','023']
               dataNumber = '004' dataSetNumber = ['004'] 
-    '''
+    """
     dataSetNumber = None
     dataNumber = None
     if dataNumberString != None:
@@ -289,12 +290,12 @@ def defineSimulationDescription():
     
     
 def chooseSolutionDataCase():
-    '''
+    """
     console Interface to choose a vascular1DFlow simualtion case for e.g. Visualisation
     Output:
         networkName <string>
         dataNumber  <string>
-    '''
+    """
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkCases = [d for d in os.listdir(workingDirectory) if '.' not in  d]
         
@@ -344,14 +345,14 @@ def chooseSolutionDataCase():
 
 
 def chooseVPCconfigFile(networkName):
-    '''
+    """
     console Interface to choose a vascularPolynomialChaos Config File
      including the possility to create a template Config File
     Input:
         networkName of VascularNetwork
     Output:
         networkName,dataNumber of the Config File (networkName should be the same)
-    '''
+    """
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkDirectory = '/'.join([workingDirectory,networkName])
     

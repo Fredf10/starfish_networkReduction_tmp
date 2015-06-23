@@ -17,7 +17,7 @@ import moduleFilePathHandler as mFPH
 
 
 def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
-    '''
+    """
     Functions writes vessel data to *.csv file inclusive polynomial chaos definitions
     
     input:
@@ -25,7 +25,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
         vessels     <dict>    := vessels dict of class vascularNetwork {vesselId : vesselInstance} 
         delimiter   <string>  (default = ';')
     
-    '''
+    """
         
     # find all tags needed # TODO: read write polynomial chaos variables
     polyChaosTags = {}
@@ -87,7 +87,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     writer.writerows(data)
 
 def readVesselDataFromCSV(networkName, delimiter=';'):
-    '''
+    """
     Functions loads vessel data from *.csv file inclusive polynomial chaos definitions
     
     input:
@@ -97,7 +97,7 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
     return:
             dict := {'vesselData': vesselData} which is used by vascular network to
                     update its vessel data with the function vascularNetwork.updateNetwork(dataDict)
-    '''
+    """
         
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
@@ -153,7 +153,7 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
 
 
 def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos, delimiter=';'):
-    '''
+    """
     Functions writes boundaryCondition data to *.csv file inclusive polynomial chaos definitions
     
     input:
@@ -162,7 +162,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
         boundaryConditionPolyChaos <dict>  := boundaryConditionPolyChaos dict of class VascularNetwork 
         delimiter   <string>  (default = ';')
     
-    '''
+    """
     # find all polychaos tags
     # TODO: read write polynomial chaos variables
     polyChaosTags = {}

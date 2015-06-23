@@ -9,12 +9,12 @@ import numpy as np
 class Field():
     
     def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea, solvingSchemeField = 'MacCormack_Matrix'):
-        '''
+        """
         Constructor of Field object
         
         calculates the interior field of a vessel
         with a MackKormack Predictor-Corrector Schmea
-        '''
+        """
         
         self.name = ' '.join(['Field',str(vessel.Id)])
         
@@ -150,9 +150,9 @@ class Field():
             exit()   
         
     def MacCormackMatrix(self):
-        '''
+        """
         Mac Cormack Predictor-Corrector
-        '''
+        """
         # solve vessel objects
         dt = self.dt
         
@@ -175,7 +175,7 @@ class Field():
         
         self.A_pre[-1]  = A[-1]
         
-        #''' Predictor Step '''            
+        #""" Predictor Step """            
         # update matrices               
         m12,m21,m22,b2 = self.systemEquation.updateSystem(P,Q,A)
          
@@ -209,7 +209,7 @@ class Field():
         else:
             A_pre[0:-1] = self.AFunction(P_pre)[0:-1]        
                                           
-        #'''Corrector Step'''    
+        #"""Corrector Step"""    
         # update matrices  
         m12,m21,m22,b2 = self.systemEquation.updateSystem(P_pre,Q_pre,A_pre)
          

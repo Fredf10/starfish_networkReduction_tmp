@@ -16,7 +16,7 @@ sys.path.append(cur+'/../')
 from VisualisationLib.classRealTimeVisualisation import realTimeVisualisation
 
 class CommunicatorBaseClass(object):
-    '''
+    """
     Base-class for all boundary conditions    
     
     including variables:
@@ -28,16 +28,16 @@ class CommunicatorBaseClass(object):
         update
         readCommunicatorFile
         writeCommunicatorFile
-    '''
+    """
     communicatorId = 0
     filename = None
     blockingWait = False
         
     def update(self,comDict):
-        '''
+        """
         updates the updateCommunicatorDict data using a dictionary in form of 
         comDict = {'variableName': value}
-        '''
+        """
         for key,value in comDict.iteritems():
             try:
                 self.__getattribute__(key)
@@ -46,7 +46,7 @@ class CommunicatorBaseClass(object):
                 print 'ERROR communicator.update(): wrong key: %s, could not set up communicator' %key
                 
     def readCommunicatorFile(self, samplingTime = 0.001):
-        '''
+        """
         This function reads a data string out of a file with given filename
         
         input:    filename <string>
@@ -55,7 +55,7 @@ class CommunicatorBaseClass(object):
                   maxTime  = 1.0 ??  <float> max time until connection is stopped 
                                 
         return: dataString, None
-        '''
+        """
         dataString = None
         
         while dataString == None:
@@ -73,11 +73,11 @@ class CommunicatorBaseClass(object):
         return dataString
     
     def writeCommunicatorFile(self, dataString, samplingTime = 0.0001, maxTime = 0.1):
-        '''
+        """
         This function reads a data string out of a file with given filename
         
         input:    dataString <string>
-        '''
+        """
         
         fileExist = False
         if self.blockingWaitWrite == True:
@@ -94,9 +94,9 @@ class CommunicatorBaseClass(object):
                 
 class CommunicatorRealTimeViz(CommunicatorBaseClass):
     def __init__(self, comDict): 
-        '''
+        """
         Communicator class envokes and communicates with realTimeVisualisation
-        '''
+        """
         # def variables to set with comDict          
         self.currentMemoryIndex = [0] # n
         self.currentTimeIndex   = [0]
@@ -136,9 +136,9 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         except: pass
     
     def startRealTimeVisualisation(self):
-        '''
+        """
         This function starts the realtime visualisation in a subprocess
-        '''
+        """
         # start the visualisation
         visualisationProcess = ' '.join(['python',cur+'/../VisualisationLib/classRealTimeVisualisation.py',
                                          '-f',str(self.filenameWrite),
@@ -148,10 +148,10 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         self.realTimeVisualisationProcess = subprocess.Popen(visualisationProcess, shell = True )
                  
     def __call__(self):
-        '''
+        """
         call function of communicator realtimevisualisation
         saves data in file
-        '''
+        """
         n = self.currentMemoryIndex[0]
         self.count += 1
         
@@ -164,24 +164,24 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
             self.count = 0
 
     def terminateRealtimeViz(self):
-        '''
+        """
         Terminates subprocess realTimeVisualisation
-        '''
+        """
         self.realTimeVisualisationProcess.terminate()
 
     def stopRealtimeViz(self):
-        '''
+        """
         Stops realTimeVisualisation.update method
         called after simulation, if this is called the graphs can not be updated again
-        '''
+        """
         self.writeCommunicatorFile('STOP')
 
 
 class CommunicatorBaroreceptor(CommunicatorBaseClass):
     def __init__(self, comDict):
-        '''
+        """
         
-        '''
+        """
         # def variables to set with comDict         
          
         self.currentTimeStep    = [0] # n
@@ -232,9 +232,9 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         except: pass
         
     def __call__(self):
-        '''
+        """
         
-        '''
+        """
         n = self.currentTimeStep[0]
         self.count += 1
         

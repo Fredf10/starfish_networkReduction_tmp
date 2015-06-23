@@ -4,7 +4,7 @@ import numpy as np
 class System(object):
     
     def __init__(self,vessel,simplifyEigenvalues,riemannInvariantUnitBase,currentTimeStep,dt):
-        '''
+        """
         Constructor of System with the SystemEqations
         
         Input:
@@ -26,7 +26,7 @@ class System(object):
             L        <nested list> = [<np.array>,<np.array>] : Left-Eigenvector matrix at each boundary node 
             Z        <nested list> = [<np.array>,<np.array>] : Impedances (Z1, Z2) (forward/backward) at each boundary node 
         
-        '''        
+        """        
         self.name = ' '.join(['system equations', str(vessel.Id)])
         
         # compliance properties
@@ -79,7 +79,7 @@ class System(object):
         self.Re = 3000.0
                     
     def updateSystem(self,P,Q,A,pi=np.pi):
-        '''
+        """
         Update all the system-equation and matrices
         
         Input:
@@ -87,7 +87,7 @@ class System(object):
             Q <np.array> : current flow values of the vessel
             A <np.array> : current area values of the vessel
         
-        '''
+        """
         # current time step of solution
         n = self.currentTimeStep[0]
         # calculate needed values
@@ -114,7 +114,7 @@ class System(object):
         return m12,m21,m22,b2
             
     def updateLARLSys0InvariantFlow(self,P,Q,A,position):
-        '''
+        """
         Update LAMBDA,R,L,Z of the system equations
         
         Special terms:
@@ -132,7 +132,7 @@ class System(object):
             update  = 'all'   <string>   : set to 'L' if only L and not R should be updated
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
-        '''
+        """
         n = self.currentTimeStep[0]
                
         C = self.C_nID(P,position)
@@ -180,7 +180,7 @@ class System(object):
         return L,R,LAMBDA,Zc,Zc,domega[0]
              
     def updateLARLSys0InvariantPressure(self,P,Q,A,position):
-        '''
+        """
         Update LAMBDA,R,L,Z of the system equations
         
         Special terms:
@@ -197,7 +197,7 @@ class System(object):
             update  = 'all'   <string>   : set to 'L' if only L and not R should be updated
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
-        '''
+        """
         n = self.currentTimeStep[0]
         
         C = self.C_nID(P,position)
@@ -246,7 +246,7 @@ class System(object):
             
             
     def updateLARLSys1InvariantFlow(self,P,Q,A,position,sqrt=np.sqrt):
-        '''
+        """
         Update LAMBDA,R,L,Z of the system equations
         
         Special terms:
@@ -263,7 +263,7 @@ class System(object):
             update  = 'all'   <string>   : set to 'L' if only L and not R should be updated
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
-        '''
+        """
         dlt = self.dlt  
         n = self.currentTimeStep[0]
         
@@ -318,7 +318,7 @@ class System(object):
         return L,R,LAMBDA,Z1,Z2,domega[0]
               
     def updateLARLSys1InvariantPressure(self,P,Q,A,position,sqrt=np.sqrt):
-        '''
+        """
         Update LAMBDA,R,L,Z of the system equations
         
         Special terms:
@@ -334,7 +334,7 @@ class System(object):
             update  = 'all'   <string>   : set to 'L' if only L and not R should be updated
             Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
             ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
-        '''
+        """
         dlt = self.dlt  
         n = self.currentTimeStep[0]
             

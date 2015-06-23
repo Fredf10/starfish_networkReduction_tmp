@@ -193,8 +193,8 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
             for randomInput in randomInputManager():
                 if randomInput.type == 'generalRandomInput':
                     writeRandomInputElement(xmlFileElement, None, randomInputManager, randomInput.location)
-                            
-                                
+
+
         else: # vascularNetwork
             for variable in xmlElement:
                 subElement = etree.SubElement(xmlFileElement, variable) # add subElement
@@ -211,8 +211,8 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 #                     writeXMLsetUnit(intervalElement,variable)
 #                     intervalElement.text = ' '.join(str(i) for i in subElementIntervalValues)
 #                 except : pass   
-                                
-    
+
+
     xmlFile.write(networkXmlFile,encoding='iso-8859-1',pretty_print = True)
     
 
@@ -361,7 +361,9 @@ def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, rand
         dataDict[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
     randomInputManager.addRandomInput(dataDict)
 
-
+# TODO: (einar) fix exception variable, also exceptionhandler should be at end to make it consistent with other functions.
+# TODO: (einar) function should pass an exception out of scope if variables passed lack necessary info.
+# TODO: (einar) variable = "default" style of defining should only be used for optional arguments
 def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', networkXmlFile = None, pathSolutionDataFilename = None):
     """
     Function loads network from XML-file

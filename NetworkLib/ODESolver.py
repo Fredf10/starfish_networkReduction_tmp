@@ -119,10 +119,10 @@ class BackwardEuler(ODESolver):
             from Newton import Newton
             self.Newton = Newton
         except ImportError:
-            raise ImportError('''
+            raise ImportError("""
 Could not import module "Newton". Place Newton.py in this directory
 (%s)
-''' % (os.path.dirname(os.path.abspath(__file__))))
+""" % (os.path.dirname(os.path.abspath(__file__))))
 
     # Alternative implementation of F:
     #def F(self, w):

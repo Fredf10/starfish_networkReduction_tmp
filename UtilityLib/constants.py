@@ -3,9 +3,9 @@
 import numpy as np
 
 # define current network xml description variable
-'''
+"""
 network xml version definition
-'''
+"""
 newestNetworkXmlVersion = '4.2'
 import networkXml042 as newestNetworkXml 
 ##########################################################################################

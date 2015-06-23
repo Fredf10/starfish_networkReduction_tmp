@@ -2,18 +2,18 @@ import numpy as np
 import psutil, os
 
 def memoryUsagePsutil():
-    '''
+    """
     return the memory usage in MB
-    '''
+    """
     process = psutil.Process(os.getpid())
     return process.get_memory_info()[0] / float(2 ** 20)
     
 
 def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,maxLength=500):
-    '''
+    """
     calculates the linear wave splitting for a given P,Q,A,c (np.arrays) and rho (float) 
     return values are: P_forward, P_backward, Q_forward, Q_backward 
-    '''
+    """
 
     ## calculate Zo and recast// delete last element
     Zo =  rho*waveSpeedArray/areaArray
@@ -40,7 +40,7 @@ def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,max
     # alternative
     #pf = (pressureArray-pm+(flowArray-qm)*Zo)/2.0
         
-    '''
+    """
     ## old version 
 #     
 #     #cut (reshape) vectors if they are very long to avoid memory problems
@@ -132,15 +132,15 @@ def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,max
 #         p_b = np.dot(matrix,dp_b) 
 #         q_f = np.dot(matrix,dQ_f) 
 #         q_b = np.dot(matrix,dQ_b)   
-    '''
+    """
         
     return p_f,p_b,q_f,q_b
 
 def nonLinearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,comlianceArray,rho,gamma=2.0,maxLength=500):
-    '''
+    """
     calculates the non linear wave splitting for a given P,Q,A,c (np.arrays), rho (float, ) 
     return values are: P_forward, P_backward, Q_forward, Q_backward 
-    '''
+    """
     
     ## calculate velocity
     v = np.mean(flowArray/areaArray)
@@ -245,7 +245,7 @@ def nonLinearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,coml
     return p_f,p_b,q_f,q_b
     #return pf[1::]+pm,pb[1::]+pm,qf[1::],qb[1::]
     #return pf[0:-1],pb[1::],qf[1::],qb[1::]
-    '''
+    """
     ## old version - using matrix method
     #cut (reshape) vectors if they are very long to avoid memory problems
     lendp_f = len(dp_f)
@@ -325,18 +325,18 @@ def nonLinearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,coml
         p_b = np.dot(matrix,dp_b)
         q_f = np.dot(matrix,dQ_f)
         q_b = np.dot(matrix,dQ_b)  
-    '''
+    """
     
     
 
 
 def minMaxFunction(arrayToEvaluate,timeValues=np.array([]),delta=0.025, seperateMinMax = False):
-    '''finds mins and max of all arrays
+    """finds mins and max of all arrays
     if timeValues == 0 then indices of min and max will be returned instead
     returns if  seperateMinMax = False:
         2 arrays with [y-values (min+max)] [ x-values (min+max)] as they occure in the x-direction
     returns if  seperateMinMax = True: 
-        2 arrays with maxs[[max1 y,max1 x],[max2 y,max2 x]...] mins[...]] '''
+        2 arrays with maxs[[max1 y,max1 x],[max2 y,max2 x]...] mins[...]] """
 
     maxtab = []
     mintab  = []
@@ -415,10 +415,10 @@ def minMaxFunction(arrayToEvaluate,timeValues=np.array([]),delta=0.025, seperate
     
     
 def calculateWaveShoulderPoint(waveData, timeData, startPointT, endPointT = None):
-    '''
+    """
     This method calculates the point inside [startPointT,endPointT] of the wave data 
     where the connection line between it and starPointX has the steepest slope 
-    '''
+    """
     # find start index through time
     startIndex = None
     endIndex   = None
@@ -441,10 +441,10 @@ def calculateWaveShoulderPoint(waveData, timeData, startPointT, endPointT = None
         return [waveData[slopeIndex],timeData[slopeIndex]]
     
 def calculateWaveShoulderPointTangent(waveData, timeData, startPointT, endPointT = None):
-    '''
+    """
     This method calculates the point inside [startPointX,endPointX] of the wave data 
     where the tangent has the steepest slope  
-    '''
+    """
     # find start index through time
     startIndex = None
     endIndex   = None
@@ -467,7 +467,7 @@ def calculateWaveShoulderPointTangent(waveData, timeData, startPointT, endPointT
         return [waveData[slopeIndex],timeData[slopeIndex]]
     
 def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet = None):
-    '''
+    """
     This method calculates the reflection coefficients of a vascularNetwork by
     traversing it as binary tree.
     Inputparameter:
@@ -477,7 +477,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
         soultion data into account.
         Else, it the coefficients are calculated with the initial condictions.
     Retrun:  Rf_transient= {}  == { str(bifurcation) : [Rf_mother, Rf_leftDaughter, Rf_rightDaughter] }
-    '''
+    """
     
     
     ## firstTraverse the tree and create a list of all Bifurcations

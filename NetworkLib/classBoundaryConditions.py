@@ -8,9 +8,9 @@ import os, sys
 cur = os.path.dirname(os.path.realpath(__file__))
 
 class BoundaryCondition(object):
-	'''
+	"""
 	Base-class for all boundary conditions	
-	'''
+	"""
 	position = None
 	name = None
 	
@@ -24,10 +24,10 @@ class BoundaryCondition(object):
 	
 	
 	def update(self, bcDict):
-		'''
+		"""
 		updates the updateBoundaryDict data using a dictionary in form of 
 		bcDict = {'variableName': value}
-		'''
+		"""
 		for key, value in bcDict.iteritems():
 			try:
 				self.__getattribute__(key)
@@ -36,14 +36,14 @@ class BoundaryCondition(object):
 				print 'Error boundaryConditions.update(): wrong key: %s, could not set up boundaryCondition' % key
 				
 	def setPosition(self, position):
-		'''Set the position of the boundaryCondition '''
+		"""Set the position of the boundaryCondition """
 		self.position = position
 	
 	def getVariableValue(self, variableName):
-		'''
+		"""
 		Returns value of variable with name : variableName
 		States Error if not such variable
-		'''
+		"""
 		try:
 			return self.__getattribute__(variableName)
 		except: 
@@ -52,11 +52,11 @@ class BoundaryCondition(object):
 		
 class BoundaryConditionType2(BoundaryCondition):
 	def setPosition(self, position):
-		'''
+		"""
 		Set the position of the boundaryCondition
 		and determines the return function
 		based on the position of the bC (0,-1)
-		'''
+		"""
 		self.position = position
 		if self.position == 0:
 			self.returnFunction = self.funcPos0
@@ -117,12 +117,12 @@ class BoundaryConditionType1(BoundaryCondition):
 		self.TspaceNew = self.Tspace
 	
 	def initialize(self, bcDict):
-		'''
+		"""
 		updates - the updateBoundaryDict data using a dictionary in from of 
 				  bcDict = {'variableName': value}
 				- time period of one pulse
 				- pulseTimes
-		'''
+		"""
 		
 		self.update(bcDict)
 		
@@ -158,9 +158,9 @@ class BoundaryConditionType1(BoundaryCondition):
 				self.loadFile()
 						
 	def updatePeriodRuntime(self, TperiodNew, updateTime):
-		'''
+		"""
 		This function updates the freq, Tspace and pulsTime for new given Tperiod
-		'''
+		"""
 				
 		freq = self.freq
 		Tspace = self.Tspace
@@ -189,10 +189,10 @@ class BoundaryConditionType1(BoundaryCondition):
 				else: findFirstPulse = False
 		
 	def calculateDuVector(self, nTsteps, dt):
-		'''
+		"""
 		Function calculates the duVector for a given number of time steps Tsteps and dt
 		return: self.duVector
-		'''
+		"""
 		# create du Vector
 		self.duVector = np.zeros((nTsteps, 2))
 		
@@ -213,10 +213,10 @@ class BoundaryConditionType1(BoundaryCondition):
 		return self.duVector
 			
 	def calculateDu(self, n, dt):
-		'''
+		"""
 		Function calculates the du for a given time step and dt
 		return: du
-		'''
+		"""
 		nextStep = self.calculateOneStep(n + 1, dt)	
 		du = nextStep - self.lastU
 		self.lastU = nextStep
@@ -233,11 +233,11 @@ class BoundaryConditionType1(BoundaryCondition):
 		return du
 		
 	def calculateOneStep(self, n, dt, initPhase=False):
-		'''
+		"""
 		calculates the amplitude value for one time step n and dt
 		
 		return: array([ampP,ampQ])
-		'''
+		"""
 		t = n * dt
 		ampT = self.ampConst
 		timeInPulseTime = False
@@ -279,10 +279,10 @@ class BoundaryConditionType1(BoundaryCondition):
 			return ampT * self.duMatrix	
 		
 	def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
-		'''
+		"""
 		This function calculates the mean flow of the signal self.MeanFlow
 		and the first occurence evaluatedTime of the mean flow self.TmeanFlow
-		'''
+		"""
 		#find meanFlow
 		self.initialize({})
 		
@@ -321,9 +321,9 @@ class BoundaryConditionType1(BoundaryCondition):
 			self.MeanFlow = givenMeanFlow
 			difference = abs(givenMeanFlow - evaluatedMeanFlow)
 			if quiet == False:
-				print '''\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
+				print """\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
 	            (evaluated with integral over one period). 
-	            The difference is {} ml s-1 \n'''.format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6,difference*1.e6)
+	            The difference is {} ml s-1 \n""".format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6,difference*1.e6)
 	
 		self.TmeanFlow = 0
 		self.initPhaseTimeSpan = 0
@@ -359,14 +359,14 @@ class BoundaryConditionType1(BoundaryCondition):
 		return  self.MeanFlow, self.initPhaseTimeSpan
 		
 	def function1(self, t, t0, pulsNum):
-		'''
+		"""
 		amplitude function caracterized by signal type
-		'''
+		"""
 		pass
 	def function2(self, t, t0, pulsNum):
-		'''
+		"""
 		amplitude function caracterized by signal type
-		'''
+		"""
 		return 0
 	
 class RampMean(BoundaryConditionType1):
@@ -702,10 +702,10 @@ class PrescribedInflux(BoundaryConditionType2):
 		return self.returnFunction(_domegaField_, duPrescribed, L, R)
 
 	def funcPos0(self, _domegaField, duPrescribed, L, R):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
+		"""
 		domegaPrescribed_ = np.dot(L[0], duPrescribed)
 
 		self.omegaNew[0] = domegaPrescribed_
@@ -717,10 +717,10 @@ class PrescribedInflux(BoundaryConditionType2):
 		
 	
 	def funcPos1(self, domegaField_, duPrescribed, L, R):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
+		"""
 		_domegaPrescribed = np.dot(L[1], duPrescribed)
 		
 		self.omegaNew[0] = domegaField_
@@ -758,11 +758,11 @@ class PrescribedTotalFlow(BoundaryConditionType2):
 
 	
 	def funcPos0(self, _domegaField, duPrescribed, L):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
-		'''
+		"""
+		"""
 			# 1. of L set values l11 = 0 l12 = 1.
 			# 2. and make inverse
 			# det = l11*l22 - l12*l21 = -l21 
@@ -777,18 +777,18 @@ class PrescribedTotalFlow(BoundaryConditionType2):
 			du = np.dot(self.R,self.omegaNew)
 		How it is done:
 			inserted R in dot product
-		'''
+		"""
 		self.duNew[0] = -L[1][1] / L[1][0] * duPrescribed[1] + 1. / L[1][0] * _domegaField
 		self.duNew[1] = duPrescribed[1]
 		self.dQInOut[0] = duPrescribed[1]
 		return self.duNew, self.dQInOut
 	
 	def funcPos1(self, domegaField_, duPrescribed, L):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
-		'''
+		"""
+		"""
 		How to do it:
 			# 1. of L set values l21 = 0 l22 = 1.
 			# 2. and make inverse
@@ -804,7 +804,7 @@ class PrescribedTotalFlow(BoundaryConditionType2):
 			du = np.dot(self.R,self.omegaNew)
 		How it is done:
 			inserted R in dot product
-		'''
+		"""
 		self.duNew[0] = domegaField_ / L[0][0] - L[0][1] / L[0][0] * duPrescribed[1]
 		self.duNew[1] = duPrescribed[1]
 		
@@ -838,11 +838,11 @@ class PrescribedTotalPressure(BoundaryConditionType2):
 
 	
 	def funcPos0(self, _domegaField, duPrescribed, L):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
-		'''
+		"""
+		"""
 		How to do it:
 			# 1. of L set values l11 = 0 l12 = 1.
 			# 2. and make inverse
@@ -858,18 +858,18 @@ class PrescribedTotalPressure(BoundaryConditionType2):
 			du = np.dot(self.R,self.omegaNew)
 		How it is done:
 			inserted R in dot product
-		'''
+		"""
 		self.duNew[0] = duPrescribed[0]
 		self.duNew[1] = -L[1][0] / L[1][1] * duPrescribed[0] + _domegaField / L[1][1] 
 		self.dQInOut[0] = self.duNew[1]
 		return self.duNew, self.dQInOut
 	
 	def funcPos1(self, domegaField_, duPrescribed, L):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
-		'''
+		"""
+		"""
 		How to do it:
 			# 1. of L set values l11 = 0 l12 = 1.
 			# 2. and make inverse
@@ -886,7 +886,7 @@ class PrescribedTotalPressure(BoundaryConditionType2):
 			du = np.dot(self.R,self.omegaNew)
 		How it is done:
 			inserted R in dot product
-		'''
+		"""
 		self.duNew[0] = duPrescribed[0]
 		self.duNew[1] = domegaField_ / L[0][1] - L[0][0] / L[0][1] * duPrescribed[0] 
 		self.dQInOut[1] = self.duNew[1]
@@ -916,10 +916,10 @@ class ReflectionCoefficient(BoundaryConditionType2):
 		return self.returnFunction(_domegaField_, duPrescribed, L, R)
 		
 	def funcPos0(self, _domegaField, duPrescribed, L, R):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
+		"""
 		domegaPrescribed_ = np.dot(L[0], duPrescribed)
 		domegaReflected_ = _domegaField * self.Rt + domegaPrescribed_
 		
@@ -932,10 +932,10 @@ class ReflectionCoefficient(BoundaryConditionType2):
 		
 
 	def funcPos1(self, domegaField_, duPrescribed, L, R):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
+		"""
 		_domegaPrescribed = np.dot(L[1], duPrescribed)
 		_domegaReflected = domegaField_ * self.Rt + _domegaPrescribed
 		
@@ -993,10 +993,10 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
 		return self.returnFunction(_domegaField_, duPrescribed, L, R, n, dt)
 		
 	def funcPos0(self, _domegaField, duPrescribed, L, R, n, dt):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
+		"""
 		Rt = self.calcRt(n, dt)
 		domegaPrescribed_ = np.dot(L[0], duPrescribed)
 		domegaReflected_ = _domegaField * Rt + domegaPrescribed_
@@ -1010,10 +1010,10 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
 		
 
 	def funcPos1(self, domegaField_, duPrescribed, L, R, n, dt):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
+		"""
 		Rt = self.calcRt(n, dt)
 		_domegaPrescribed = np.dot(L[1], duPrescribed)
 		_domegaReflected = domegaField_ * Rt + _domegaPrescribed
@@ -1028,10 +1028,10 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
 
 
 	def update(self, bcDict):
-		'''
+		"""
 		updates the updateBoundaryDict data using a dictionary in from of 
 		bcDict = {'variableName': value}
-		'''
+		"""
 		for key, value in bcDict.iteritems():
 			try:
 				self.__getattribute__(key)
@@ -1116,10 +1116,10 @@ class Resistance(BoundaryConditionType2):
 		return self.returnFunction(_domegaField_, R, Z1)
 	
 	def funcPos0(self, _domegaField, R, Z1):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
+		"""
 		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		Rc = self.Rc
@@ -1137,10 +1137,10 @@ class Resistance(BoundaryConditionType2):
 			
 	
 	def funcPos1(self, domegaField_, R, Z1):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
+		"""
 		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		Rc = self.Rc
@@ -1205,7 +1205,7 @@ class Windkessel2(BoundaryConditionType2):
 		return np.array([domega_ , _domega_])
 
 		"""
-		''' Version does not take hole R matrix into account
+		""" Version does not take hole R matrix into account
 		r21,r22 = R[1][0],R[1][1]
 		taudt = 2*self.Rc*self.C/dt
 		a = 1 + taudt + self.Rc*r21
@@ -1217,7 +1217,7 @@ class Windkessel2(BoundaryConditionType2):
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domegaField_
 		return self.omegaNew	
-		'''
+		"""
 		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		taudt = self.Rc * self.C / dt
@@ -1235,10 +1235,10 @@ class Windkessel2(BoundaryConditionType2):
 		
 		
 	def funcPos1(self, domegaField_, R, dt, P, Q, n):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
+		"""
 		
 		"""Old version:
 		P0 = du[0] #/2.take this out is old ##??
@@ -1252,7 +1252,7 @@ class Windkessel2(BoundaryConditionType2):
 		_domega = ((-1.-taudt+r21*self.Rc)*_domega_ + taudt*(dw_+_dw) + P0)/denom
 		return np.array([_domega_ , _domega])
 		"""
-		''' Version does not take hole R matrix into account
+		""" Version does not take hole R matrix into account
 		r21,r22 = R[1][0],R[1][1]
 		taudt = 2*self.Rc*self.C/dt
 		a = taudt - self.Rc*r21 - 1
@@ -1264,7 +1264,7 @@ class Windkessel2(BoundaryConditionType2):
 		self.omegaNew[1] = _domega
 		return self.omegaNew	
 		#return np.array([domega_ , _domega])
-		'''
+		"""
 		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		taudt = self.Rc * self.C / dt
@@ -1317,7 +1317,7 @@ class Windkessel3(BoundaryConditionType2):
 		return self.returnFunction(_domegaField_, R, dt, P, Q, Z1, Z2, n)
 	
 	def funcPos0(self, _domegaField, R, dt, P, Q, Z1, Z2, n):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
 		
@@ -1361,7 +1361,7 @@ class Windkessel3(BoundaryConditionType2):
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domega_
 		return self.omegaNew	
-		'''
+		"""
 		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		
@@ -1401,7 +1401,7 @@ class Windkessel3(BoundaryConditionType2):
 		
 	
 	def funcPos1(self, domegaField_, R, dt, P, Q, Z1, Z2, n):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel  (newer version from Knut Petter ??? )
 		
@@ -1435,7 +1435,7 @@ class Windkessel3(BoundaryConditionType2):
 		self.omegaNew[0] = domega_
 		self.omegaNew[1] = _domega
 		return self.omegaNew	
-		'''
+		"""
 		r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 		
 		
@@ -1496,10 +1496,10 @@ class L_network(BoundaryConditionType2):
 		return self.returnFunction(_domegaField_, duPrescribed, R, L, n, dt)
 	
 	def funcPos0(self, _domega_, du, R, dt):
-		'''
+		"""
 		return function for position 0 at the start
 		of the vessel
-		'''
+		"""
 		print "ERROR: boundaryCondition Lnet is not implemented correct!"
 		exit()
 		
@@ -1519,10 +1519,10 @@ class L_network(BoundaryConditionType2):
 		return np.dot(R, self.omegaNew)
 	
 	def funcPos1(self, _domega_, du, R, dt):
-		'''
+		"""
 		return function for position -1 at the end
 		of the vessel
-		'''
+		"""
 		
 		print "ERROR: boundaryCondition Lnet is not implemented correct!"
 		exit()

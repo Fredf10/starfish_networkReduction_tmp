@@ -154,10 +154,10 @@ class venousPool(object):
     
         
     def update(self,dataDict):
-        '''
+        """
         updates the data
         Dict = {'variableName': value}
-        '''
+        """
         for key,value in dataDict.iteritems():
             try:
                 self.__getattribute__(key)
