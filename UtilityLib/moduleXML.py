@@ -441,9 +441,8 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                                 
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
-                                    path = ''.join(['networkDirectory','/'])
-                                    if path not in variableValueStr:  variableValueStr = variableValueStr.join([path,''])
-                                    boundaryDataDict['filePathName'] = variableValueStr
+                                    networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
+                                    boundaryDataDict['filePathName'] = '/'.join([networkDirectory,variableValueStr])
                                     
                             boundaryInstance.update(boundaryDataDict)
                             boundaryInstances.append(boundaryInstance)             
