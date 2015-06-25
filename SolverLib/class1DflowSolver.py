@@ -86,7 +86,7 @@ class FlowSolver(object):
         
         self.cycleMode = False
         
-        # Initialize idices to track where in memory the current solution is stored
+        # Initialize indices to track where in memory the current solution is stored
         self.memoryOffset = [0]
         self.currentMemoryIndex = [0]
         
@@ -570,7 +570,7 @@ class FlowSolver(object):
         # 1. add root boundary
         # 2  add vessels
         # 3  add connection or distal boundary condition
-        # 4. repeat 2,3 for the hole tree 
+        # 4. repeat 2,3 for the whole tree
         # 5. add communicators
         # 6. add blocking Wait if multiprocessing
         """
@@ -697,11 +697,11 @@ class FlowSolver(object):
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 #[no() for no in self.numericalObjects]
                 for numericalObject in self.numericalObjects:
-		    try:
-		        numericalObject()
-		    except:
-			print numericalObject
-			numericalObject()
+#            try:
+ #               numericalObject()
+  #          except:
+   #         print numericalObject
+                    numericalObject()
                 
         ## to be concentrated with original cycle mode !!
         else:
