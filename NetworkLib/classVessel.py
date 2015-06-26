@@ -141,7 +141,7 @@ class Vessel(object):
                 if key != 'venousPressure':
                     print "ERROR: classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id)
 
-        # initialize gird
+        # initialize grid
         try:
             self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N)
         except:

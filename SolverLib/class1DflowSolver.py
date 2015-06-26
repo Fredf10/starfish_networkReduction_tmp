@@ -696,12 +696,15 @@ class FlowSolver(object):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 #[no() for no in self.numericalObjects]
+                # TODO: (einar) what is meant to happen with numericalObject here?
+                # TODO: (einar) indentation was all wrong originally, please fix to intended functionality
                 for numericalObject in self.numericalObjects:
 #            try:
  #               numericalObject()
   #          except:
    #         print numericalObject
                     numericalObject()
+
                 
         ## to be concentrated with original cycle mode !!
         else:

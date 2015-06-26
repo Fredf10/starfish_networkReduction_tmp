@@ -1263,9 +1263,8 @@ class VascularNetwork(object):
             # # anastomosis
             elif rightDaughter == None:
                 print "\n WARNING: no method for resistance calculation for anastomosis is implemented!!! \n"
-                
-        
-    
+
+
     def calculateInitialValues(self):
         """
         This function travers the network tree and calculates the

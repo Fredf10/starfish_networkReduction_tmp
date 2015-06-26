@@ -1,0 +1,395 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{listings}
+\title{Einar's guide to better code}
+\author{Einar Nyberg Karlsen}
+\begin{document}
+\lstset{language=Python}
+
+\section{Introduction}
+Hello. I am sure that you're wondering why you need to read this. You know how to code, you've coded so much during your time at NTNU. However, this is most likely not true. 
+
+Consider a cook. If you are asked to judge how good a cook is, you would first think of whether the food tastes good, however, this is not enough. The cook should have good hygiene, be efficient, serve all the courses at the right time, not leave a hellish mess at the kitchen after making the food, not make a meal that is ridiculously overpriced. Coding is much the same. 
+
+So far, you have probably only been taught how to make code that performs the expected task. This is usually enough for personal sporadic use, but on a larger project, this will end up breaking the project eventually.
+
+\section{The easy solution}
+Well, I lied. There is no easy solution. But, I will try to give some good pointers to how to avoid the biggest pitfalls. I will assume you're reading this on a computer, and that you will be able to look things up on google and click on links in this guide. 
+
+So, what are the most common mistakes people make? In my personal experience, and from a fair amount of reading up on the matter, the following seem to appear a lot:
+
+\begin{itemize}
+\item bad naming of functions
+\item unnecessary optimization
+\item no unit testing
+\item The "do it all" function
+\item lack of hierarchy in project
+\item cross and circular dependencies
+\item no documentation of work
+\item inconsistent or complete lack of namespacing.
+\item re-inventing the wheel
+\end{itemize}
+
+Now, if you read this list and considered all the listed issues as independent, you need this guide. For instant, having a namespacing convention in place will also cover the naming of functions. Unit testing is inherently tied into the "do it all" function, as well as hierarchy. Unnecessary optimization will also be affected by unit testing, as unit testing will allow you to monitor the behaviour of each individual module. Documentation is also tied to the namespacing, as having "function1(a, b)" will cause you to need to explain each function wherever you call it, while "vectorCrossMultiply(vect1, vect2)" will be rather self explanatory. As a matter of fact, only re-inventing the wheel is independent of the other points.
+
+Therefore, I will split it into the most critical components of each subject, and handle each separately.
+
+\section{Re-inventing the wheel}
+Quite honestly, this is the simplest, and the one you've most likely already have learned, but it's still good to repeat it. For any well established programming language, there are tons of libraries that do everything from file management, math, sound, etc. In our case, Python has SciPy, the scientific library containing an incredible amount of numerical and graphical tools, and we have GTK (and others?) for visualization.
+
+So, essentially, check first to see if the needed functionality is already implemented in the project, and if not, try to use as much from libraries as possible, as they are most likely better on performance and less prone to bugs.
+
+\section{Conventions, and why you should adhere to them}
+%TODO rewrite this shit
+Isn't it wonderful how I have written all these words and you can read them and understand them fully? This is due to the English language having strict demands on things like syntax, forms, and so on. If talk like Yoda I do, harder for you to understand it gets. While you understood that sentence, you were probably put off a bit, because the order was quite frankly wrong. Now, I have probably made some minor syntactic or grammatic mistakes here and there, but I am still confident that you can understand me despite these minor issues. 
+
+Writing code that others need to read is much the same, and therefore besides the programming language, there are conventions. 
+
+The most important convention to follow is of course the convention used in the project already, assuming that it has a convention it follows. If everyone talks like Yoda, it's better to play along than to make discord. However, if 1/5 talk like Yoda, 1/5 speak Klingon, and 3/5 regular English with varying accents, you will want to stick to English yourself, get the Klingons to switch to English, then the Yodas, only then, you might want to discuss the accents.
+
+Now, let's start with the conventions!
+\subsection{Namespacing and naming your functions and variables}
+The most important convention of them all. Because this is very much tied into how you write your code, how you understand it, and how everything in it ties together.
+
+Allow me two examples:
+\begin{lstlisting}
+from bigFileWithManyFunctions import *
+from numpy import *
+
+def main():
+	var1 = 15.1
+	var2 = 12.3
+	var3 = 2.5
+	var4 = area(var1, var2)
+	var5 = degrees(var3)
+
+\end{lstlisting}
+
+Now, this is not easy code to read. As you can see, you have no concept of what the variables are, you can't intuitively see whether area and/or degrees comes from the bigFile... import, or the numpy import, as both import to the global namespace. Further, if any function in bigFile has the same name as a function in numpy, the numpy function will be the one to be called as it was imported last. This is extremely problematic as it makes the code prone to errors that can be hard to track down. Let's now look at some (not properly, but that will be discussed later) namespaced code.
+
+\begin{lstlisting}
+import bigFileWithManyFunctions as bigFile
+import numpy as np
+
+class rectangleWithTemperature(object):
+  def __init__(lenX, 
+               lenY, 
+               tempFahrenheit = 60, 
+               boolConvToCelsius = False):
+               
+    self.lenX = lenX
+    self.lenY = lenY
+    self.area = np.area(lenX, lenY)
+		
+    self.tF = tempFahrenheit
+    if boolConvToCelsius:
+      self.tC = bigFile.degrees(tF)
+
+def main():
+
+  rectInstance = rectangleWithTemperature
+                 (lenX = 15.1, 
+                  lenY = 12.3, 
+                  tempFahrenheit = 2.5, 
+                  convToCelsius = True)
+	
+\end{lstlisting}
+
+One thing worth noting here, is that you probably thought that degrees referred to angle, which is what it normally does. However, the coder here has been naughty, and not properly named his function "degrees", which should have been called "convFahrenheitToCelcius". And, to make matters worse, the function even had the same name as the numpy function degrees, which converts radians to degrees. So, not only was the original code unorganized, it was also wrong because of bad imports.
+
+You're thinking that I'm belittling you right now, but there is a very good reason why I'm pushing for you to be pedantic about this. At some point, your module will be complete, and you will jump over to working on another one. Then, half a year later, someone else encounters a bug coming from your module. He tries to find the bug, but can't understand the error message, so he contacts you. The problem is, you haven't looked at that code for half a year. You don't remember much of it, so you start looking at it again. What made sense half a year ago might not make sense any longer, and you're as stuck as he is, and late shifts of debugging the code ensue for the both of you. 
+
+\subsection{Commenting your code}
+While having reasonable names will make your code a lot cleaner, it is close to inevitable that the code reaches a point where you can't easily understand it just from looking at it. There are tech companies that claim the contrary, like Cisco, but they're highly skilled and enforce extremely strict structural conventions. Thus, we regular human beings cheat a little: we comment our code. 
+
+Throughout this project, there are two types of commenting, the regular \# commenting, which is to be used for those looking to inspect or modify the code directly, and docstrings, which are started and ended by triple doublequotes. Docstrings are to be used to document the code, and should be placed on each callable function, explaining shortly what it is intended to do, what parameters(inputs) it expects, and what it outputs. Essentially, it should explain the utility of a function, but not its inner workings, a "black-box" description of the function.
+
+Let's look at how the code looks with a bit of commenting.  
+
+\begin{lstlisting}
+import bigFileWithManyFunctions as bigFile
+import numpy as np
+
+class rectangleWithTemperature(object):
+  def __init__(lenX, 
+               lenY, 
+               tempFahrenheit = 60, 
+               convToCelsius = False):
+    """
+    Initializes a class instance of rectangleWithTemperature
+    
+    Args: 
+      lenX (float): length in X direction in meters
+      lenY (float): length in Y direction in meters
+      tempFahrenheit (float): temperature in Fahrenheit
+      convToCelsius (optional bool): decides whether or not to 
+        calculate temperature in Celsius in variable self.tC
+    """
+    
+    # initialize lengths
+    self.lenX = lenX
+    self.lenY = lenY
+    
+    # initialize area
+    self.area = np.area(lenX, lenY)
+	
+    # initialize temperature variable
+    self.tF = tempFahrenheit
+    if convToCelsius:
+      self.tC = bigFile.degrees(tF)
+
+def main():
+
+  # initialize rectangle instance
+  rectInstance = rectangleWithTemperature
+                 (lenX = 15.1, 
+                  lenY = 12.3, 
+                  tempFahrenheit = 2.5, 
+                  convToCelsius = True)
+	
+\end{lstlisting}
+
+Now, if anyone looks at the code you've written, they will see that they need to give the input lengths in meters, which would not really be intuitive as the temperature was given in Fahrenheit. While you might think this won't be a problem, "everyone uses meters and Celsius", a lack of clarity and strictness on such issues has actually caused space-shuttle launches to fail. And besides, they might use Kelvin instead of Celsius. Clarity on input, output, and expected error messages and will save you some trouble, but can save the group working on the project a whole lot of trouble.   
+
+\section{Unit Testing and You!}
+Now comes the juicy part: unit testing, and why this will cause you to write better code, implement a good hierarchy, avoid using time on unnecessary optimization, and most importantly, avoid the big taboo, having just one big blob of a function.
+
+http://stackoverflow.com/questions/61400/what-makes-a-good-unit-test
+\subsection{What is unit testing}
+So, what is unit testing? Simply put, unit testing, or test driven development as it's often called, is the method of always testing what you implement before moving on. Now you're probably thinking "but I already do that", and you're probably right, but do you keep the tests? Are they structured, do they test all demanded behaviours, including how it handles wrong input? If you have a function that should add two vectors together, what happens if they are of different lengths? what if one consists of integer values, the other floating points? 
+
+This is why you want to build unit tests for each module you make. Mind you, I'm not talking about checking if 2 + 2 = 4, some things you should assume just works, but rather, I want you to have a clear idea of exactly what should happen when you input parameters into your function, what it returns, and optimally, how long it takes. As we will be working on numerical simulation, runtimes will matter, and knowing how each module behaves will allow us to spend our time most efficiently.
+
+\subsection{Unit testing, slayer of dragons}
+Now, as you might have thought; "But I can't devise a test for my bigFunc(inp1, inp2, inp3, inp4, etc etc), what should I do?". The simple answer is: don't make bigFunc.
+
+\textbf{BLASPHEMY!} or so you might think. But it actually makes sense. No matter how clustered your operation might seem, it will almost certainly consist of smaller tasks. And, rather than clustering them together, separate them. Essentially, it boils down to a simple message: if it's too big to unit test, it's too big to exist.
+
+%TODO rewrite this as well.
+Mind you, this does not mean that you don't have big functions. But those big functions should always consist of calling smaller, testable functions rather than doing it all by themselves. Making it easy to understand, debug or radically alter the big function. This again, boils down to the concept of black-boxes. When your function should be used as a black-box, it should be testable. However, you can have white-box functions that consist of several calls to black-box functions in a manner that is easy to understand. 
+
+This is why I call unit testing the slayer of dragons, because big black boxes with unpredictable behaviour are like dragons, pretty at first, deadly when poked in the wrong spot. However, apply a regiment of unit testing to your development process, and the dragon will be chopped to pieces naturally by the process. and instead nicely distributed in the code where needed. 
+
+Which brings us to the next advantage.
+
+\subsection{Unit testing, bringer of order}
+Wow, this unit testing is really getting hyped up here. But, it is for a reason. As you read, unit testing will cause you to naturally segment the code into clear cut pieces that can be stitched together neatly. And this brings us into the next field: organizing the project as a whole. 
+
+First of all, the most important aspect of unit testing is that it enforces a strict input-output regime from each module. A module should have certain inputs, and produce certain outputs depending on the inputs. Now, what about the modules that depend on others? The answer is simple, does require extra work, but will make it easier to debug. You make mock-ups of the required submodules. Because you have already tested the submodules, you can just use the test-cases in module you're testing. It can look something like the following:
+
+
+\begin{lstlisting}
+import bigFile as bF
+
+def func(input1, input2, testing = False)
+  if testing:
+    import MOCKbigFile as bF
+  
+  result1 = bF.func1(input1)
+  result2 = bF.func2(input2)
+  output = bF.crossProduct(result1, result2)
+  return output
+
+\end{lstlisting}
+As you can see, this simple if statement within the function will cause the function to import a mock-up file instead, which can have simple "if input == case1 : return output1" clauses to give back a known output which then should be handled in a known manner, giving extremely useful tools for debugging the code later. 
+
+Where do you then get those outputs for the mock-up file? From the original unit test of the real file! So, as you can see, consistent unit testing will allow you to easily carry the tests up throughout the hierarchy. It is often said that good unit testing will cause you to have about as much testing code as you have functional code. This might seem like a hassle, but if you incorporate it into your workflow, you might even increase your efficiency because you are clear on what your code should do, and this helps when implementing it. 
+
+But now comes what most people find weird with unit testing: You want to fail. This brings us onto exceptions.
+
+\section{Exceptions, friend or foe?}
+
+You've probably seen this a hundred times, you have a typo, pass the wrong parameter, and the program dies with an error log that gives a bunch of tracebacks and a certain kind of error, like "TypeError: object <int> has no attribute append". These errors are your allies, and you should use them for all they're worth. 
+
+\subsection{The road to success is paved with failures}
+
+Wait what? You want me to fail?
+
+Well, not exactly. I want you to cause your code to fail in every possible way. If you have a code that should open an XML file, I want you to test giving it a txt file. I want you to test giving it a python file. I want you to test giving it a file that doesn't exist. I want you to test giving it a corrupted file. You get the picture.
+
+Essentially, sooner or later, you, or someone else, will mess up, and use your code wrong. When that happens, you want your code to give as specific and useful information as it can, because the standard error messages are less and less useful as the project grows in size.
+
+Let's construct a hypothetical scenario:
+you have a main function that calls on moduleReadFile 100 times to read 100 different files. It then passes the output from moduleReadFile to moduleProcessFileData, which in turn depends on 3 submodules. 
+
+The standard error message you will get is: %TODO check this
+
+Error in line X in main()
+  result = moduleProcessFileData.process(outputFromMRF)
+Error in line Y in moduleProcessFileData.process(inputFileData):
+  for line in inputFileData:
+    submodule2.sanitize(line)
+Error in line Z in submodule2.sanitize(inputLine)
+  splitInput = inputLine.split(".")
+TypeError: type None has no function split()
+
+Okay, so you have an empty line or something being passed on. Which file did it come from? the first, last? one in the middle somewhere? We want our program to catch exceptions, process them, and pass them on, and in python, this is called "try:" and "except (optional: exceptionType):"
+
+Let's say we now add some cheap information to the program. We encase line X in the following way:
+
+\begin{lstlisting}
+  for filename in filenamelist:
+
+    #read file
+    try:
+      outputFromMRF = moduleReadFile.read(filename)
+    except:
+      print "failure reading {}".format(filename)
+      
+    # process file
+    try: 
+      result = moduleProcessFileData.process(outputFromMRF)
+    except: 
+      print "failure processing {}".format(filename)
+\end{lstlisting}
+
+Now we'll get information about the filename that is useful when the program crashes, but unfortunately, our files are thousands upon thousands of lines, and we can't efficiently process them. So we want to have something in moduleProcessFileData to fix that.
+
+\begin{lstlisting}
+numLine = 1
+for line in inputFileData:
+  try: 
+    submodule2.sanitize(line)
+  except:
+    print "Error when using submodule2.sanitize(line) 
+           with line number {} from file".format(numLine)
+
+\end{lstlisting}
+
+Now we're getting somewhere. We run the program, but it's no good. We get the error, and it prints the line number, but the error message stops there.
+
+This is because "except:" catches everything. Not only will it now not send errors to the main function, but it will also keep working. This can cause your code to pass on bad data to the next submodule, which will crash because of an error in the previous one. This is why we will always want to re-raise the exception, using the simple command "raise"
+
+
+\begin{lstlisting}
+numLine = 1
+for line in inputFileData:
+  try: 
+    submodule2.sanitize(line)
+  except:
+    print "Error when using submodule2.sanitize(line) 
+           with line number {} from file".format(numLine)
+    raise
+
+\end{lstlisting}
+
+Now the function will get the error message, print out relevant information, and pass the exception along to the main function, which can then print out its information, and we should put a raise on the main function as well, as we don't want our program working on potentially corrupt data, and we rather want it to die before it does any harm. 
+
+So, the quick lesson for the most rudimentary exception handling is as follows:
+
+
+\begin{lstlisting}
+try: 
+  stuff(parameterlist)
+except:
+  print "Error doing stuff with parameters {} 
+         ".format(parameterlist) 
+  raise
+\end{lstlisting}
+
+Using this method consistently will cause your program to always give reasonable error messages. However, there are times when you want to handle your exceptions.
+
+\subsection{Exception handling, not wrestling}
+
+Now, the method I ended with on the last subsection was good for giving good feedback when your program crashes and burns, but it neglects one scenario: When you expect your program to fail some times, and want it to continue just the same. 
+
+That should be simple shouldn't it? All we do is that we don't raise the exception again.
+
+\begin{lstlisting}
+try: 
+  stuff(parameterlist)
+except:
+  doStuffToHandleException(parameterlist)
+  print "Warning: doing stuff with parameters {} 
+         failed ".format(parameterlist) 
+\end{lstlisting}
+
+There, all done! let's take the day off!
+
+or not...
+
+Because, it turns out that the clause "except:" does 
+not only stop exceptions, but also keyboard and system interrupts. 
+This means that if your program has bloated to the point it's crippling your computer, and you want to stop it, it will ignore the nice system calls, and you will have to kill the process with an axe.
+
+As you can understand, this is unwanted behaviour, and we need to fix this. The first instinct would perhaps to append the code executed within the except clause with some tests, but this will cause the except clause to be ugly and unruly. Instead, we look back to our unit testing. 
+
+When I talked about unit testing, I mentioned finding out how your module fails, and that it fails when it should. Using this information, you should in a project be able to know whether you're expecting a TypeError, NameError, or some other exception class, based on what you except the function to do. 
+
+Let's look at a modified version of the last attempt.
+
+\begin{lstlisting}
+try: 
+  stuff(parameterlist)
+  
+# expected type of error, will be cleaned out and ignored.
+except TypeError as e:
+  handleTypeErrorException(parameterlist) #clean up stuff
+  
+# print detailed information
+  print "Warning: doing stuff with parameters {} 
+         gave TypeError with following message:
+         ".format(parameterlist)
+         print e 
+         print "Parameter list should consist of 
+         types {} ".format(idealParameterlist)
+
+
+# expected type of error, should kill program unless 
+# ignoreUnimplemented == True
+         
+except NameError as e: 
+  # Ignore the exception
+  if ignoreUnimplemented == True:
+    print "Warning: stuff with input parameters {}, 
+           wanted to call function that is not 
+           implemented".format(parameterlist)
+    print type(e)
+    print e
+  # send exception upwards
+  else:
+    print "Error: stuff with input parameters {}, 
+           wanted to call function that is not 
+           implemented".format(parameterlist)  
+    raise
+
+# Any other kind of exception
+except Exception as e:
+  print "caught unexpected exception in function stuff
+         with parameters {}".format(parameters)
+  print type(e)
+  print e
+  raise
+  
+\end{lstlisting}
+
+As you can see, now we will handle a TypeError and allow the program to progress, while we will let the NameError's handling be determined by a boolean. And any other Error messages will be called out as unexpected. Perhaps most importantly is to notice that the NameError's handling raises the exception out of the scope of the try-except clause, so that except Exception does not catch it.
+
+Another very important thing to notice, is that this will not catch system errors. 
+
+%https://docs.python.org/2/library/exceptions.html#exception-hierarchy
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
