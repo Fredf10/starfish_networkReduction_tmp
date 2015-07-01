@@ -29,7 +29,7 @@ Hello. I am sure that you're wondering why you need to read this. You know how t
 
 Consider a cook. If you are asked to judge how good a cook is, you would first think of whether the food tastes good, however, this is not enough. The cook should have good hygiene, know what ingredients that are used, be efficient, serve all the courses at the right time, not leave a hellish mess at the kitchen after making the food, not make a meal that is ridiculously overpriced. Coding is much the same. 
 
-So far, you have probably only been taught how to make code that performs the expected task. This is usually enough for personal sporadic use, but on a larger project, this will end up breaking the project eventually.
+So far, you have probably only been taught how to make code that performs the expected task. Probably quite quickly as well. This is usually enough for personal sporadic use, but on a larger project, this will end up breaking the project eventually. This is why having clean code is important, as demonstrated by the graph below.
 
 \begin{center}
 \begin{figure}[H]
@@ -41,15 +41,16 @@ So far, you have probably only been taught how to make code that performs the ex
 
 A lot of the lessons in this guide are condensed snippets from the book "Clean Code" by Robert C. Martin. While I don't agree 100\% with what he claims in that book, I'd say it's somewhere between 90 to 95\% . If you have the time, I recommend reading this book in its entirety. 
 
-Throughout this guide, I will explain the essentials of making good code, and I urge you to read this guide in its entirety. At the end there will be a cheat-sheet, but if you haven't read the guide, I doubt you'll understand the significance of the things in it. 
+Throughout this guide, I will explain the essentials of making good code, and I urge you to read this guide in its entirety. At the end there will be a short summary and a cheat-sheet, but if you haven't read the guide, I doubt you'll appreciate the significance of the things in it. However, I will understand if you skip right ahead to it. 
 
-\section{The easy solution}
-Well, I lied. There is no easy solution. But, I will try to give some good pointers to how to avoid the biggest pitfalls. I will assume you're reading this on a computer, and that you will be able to look things up on google and click on links in this guide. 
+Mind you, that if you choose to read the whole thing, I will often start with an example which is considered to be bad code, and incrementally make it better. Please be aware of that fact as you read through it, as some of my "solutions" are not proper solutions, but increments towards them. 
+
+\section{Common Problems}
 
 So, what are the most common mistakes people make? In my personal experience, and from a fair amount of reading up on the matter, the following seem to appear a lot:
 
 \begin{itemize}
-\item bad naming of functions
+\item bad naming of functions and variables
 \item unnecessary optimization
 \item no unit testing
 \item The "do it all" function
@@ -66,20 +67,22 @@ Now, if you read this list and considered all the listed issues as independent, 
 Therefore, I will split it into the most critical components of each subject, and handle each separately.
 
 \section{Re-inventing the wheel}
-Quite honestly, this is the simplest, and the one you've most likely already have learned, but it's still good to repeat it. For any well established programming language, there are tons of libraries that do everything from file management, math, sound, etc. In our case, Python has SciPy, the scientific library containing an incredible amount of numerical and graphical tools, and we have GTK (and others?) for visualization. %TODO
+Quite honestly, this is the simplest, and the one you've most likely already have learned, but it's still good to repeat it. For any well established programming language, there are tons of libraries that do everything from file management, math, sound, etc. In our case, Python has SciPy, the scientific library containing an incredible amount of numerical and graphical tools, and it is just one of many well maintained packages out there. 
 
 So, essentially, check first to see if the needed functionality is already implemented in the project, and if not, try to use as much from libraries as possible, as they are most likely better on performance and less prone to bugs.
 
 \section{Conventions, and why you should adhere to them}
 %TODO rewrite this shit
-Isn't it wonderful how I have written all these words and you can read them and understand them fully? This is due to the English language having strict demands on things like syntax, forms, and so on. If talk like Yoda I do, harder for you to understand it gets. While you understood that sentence, you were probably put off a bit, because the order was quite frankly wrong. Now, I have probably made some minor syntactic or grammatic mistakes here and there, but I am still confident that you can understand me despite these minor issues. 
+Isn't it wonderful how I have written all these words and you can read them and understand them fully? This is due to the English language having strict demands on things like syntax, what tense the verb is in, and so on. If talk like Yoda I do, harder for you to understand it gets. While you understood that sentence, you were probably put off a bit, because the order was quite frankly wrong. Now, I have probably made some minor syntactic or grammatic mistakes here and there, but I am still confident that you can understand me despite these minor issues. 
 
 Writing code that others need to read is much the same, and therefore besides the programming language, there are conventions. 
 
 The most important convention to follow is of course the convention used in the project already, assuming that it has a convention it follows. If everyone talks like Yoda, it's better to play along than to make discord. However, if 1/5 talk like Yoda, 1/5 speak Klingon, and 3/5 regular English with varying accents, you will want to stick to English yourself, get the Klingons to switch to English, then the Yodas, only then, you might want to discuss the accents.
 
 Now, let's start with the conventions!
+
 \subsection{Namespacing and naming your functions and variables}
+
 The most important convention of them all. Because this is very much tied into how you write your code, how you understand it, and how everything in it ties together.
 
 Allow me two examples:
@@ -202,8 +205,7 @@ First off, we try to be compliant to the \href{https://www.python.org/dev/peps/p
 \item Use 4 spaces, not tabs (you can get your editor to do this automatically, and it is in recommended for coding in general).
 \item If your function has many inputs, list them vertically by having an extra indent or more. See the code example above how rectangleWithTemperature is called if you want an example.
 \item We use CapitalizedWords and mixedCase mostly in our code. We capitalized the first letter to signal that this is a class, and we keep it in lowercase if it is an instance of a class, or a function. This allows us to easily see what we're working with. Here's an example:\\
-assert isinstance(rectInstance, RectangleWithTemperature) \\
-assert isinstance(rectInstance, RectangleWithoutTemperature) %TODO : This needs to be better
+assert isinstance(rectInstance, RectangleWithTemperature) \\ %TODO good?
 \item Further, as we have a project with a lot of functional files, we often use the "import .... as .." method, where we have a list of abbreviations that you are expected to follow.
 \end{itemize}
 
@@ -213,15 +215,34 @@ However, we are working hard to re-factor the code to be compliant with the conv
 
 %TODO nevn hvilke filer som har brukne imports. 
 
+\section{Hierarchy, or why size matters}
+
+I want you to consider a machine. Consider all the parts it's made of. Consider how most of those parts are rather standardized. They are of a specific form, attach in a specific way, and perform in a specific manner. Each component has certain demands in functionality and structural integrity. Programs are much the same. In any large program, if you "pop the hood" on it, you will almost always find that it consists of smaller programs working in conjunction, just like any machine would. And, just like you wouldn't want to design a machine without splitting it into components, the same applies to programming. 
+
+\subsection{Abstraction levels}
+%TODO write this
+
+\subsection{The infamous black box}
+I want to introduce a concept that is important to any programmer, engineer and scientist, but is very often overlooked. The concept of the black box. The simple definition of a black box is a system where a set of inputs produce a set of outputs according to the logic of a obscured mechanism. In other words, that it's a system where it's easier to consider input - output, rather than how it actually works. 
+
+I want to ask you now, what happens when you ask python to do c = a + b ? You don't really think about it, but it's a lot more than you first think. First of all, it compares the types of the two, if they're the same, it calls the + function of the type of a, with b as its argument. If they're not, it has to look deeper, for instance, if a is an int, and b is a float, then it'll convert a to float, and then add them using float.add. However, if one of them is a string, then the two types are incompatible, and it raises a TypeError. And then you have the really deep mechanisms of how it works physically in the processor again.
+
+Why did I just tell you all of this? Because I want you to consider how much the single "+" sign actually does in python, and how little you really have considered that fact. This is the hallmark of a good black box. And now comes the morale of all this: Everything you program in a project will at some time become a black box. 
+
+\subsection{Design black boxes, not white ones}
+At some point, the module will be considered complete, and you'll move on. Then a year goes by, and you need to look into your old black box because it seems to be the root cause of some weird bug. Now, if you have been good with naming, namespacing and commenting, and made sure that your exception handling is adequate, you will be able to open up your old black box and inspect the mechanisms in a fairly short amount of time, and fix the problem. 
+
+However, it might be that the problem isn't the box itself, but its description. The most important reason why I want you to consider all code you write as a black box, is for the sake of others. If your black box is well defined, with strict input, output, and exception handling, other programmers will be able to use it as a black box. This allows them to employ your work without having to inspect and understand the foundation of your program. They might want to anyway, but they won't have to. This increases productivity a lot. 
+
 \section{Exceptions, friend or foe?}
 
-You've probably seen this a hundred times, you have a typo, pass the wrong parameter, and the program dies with an error log that gives a bunch of tracebacks and a certain kind of error, like "TypeError: object <int> has no attribute append". These errors are your allies, and you should use them for all they're worth. 
+You've probably seen this a hundred times, you have a typo, pass the wrong parameter, and the program dies with an error log that gives a bunch of tracebacks and a certain kind of error, like "TypeError: object <int> has no attribute append". While your previous experiences with exceptions might be that they are rather unhelpful, with some care, they will be your allies in debugging, and you should use them for all they're worth. 
 
 \subsection{The road to success is paved with failures}
 
 Wait what? You want me to fail?
 
-Well, not exactly. I want you to cause your code to fail in every possible way. If you have a code that should open an XML file, I want you to test giving it a txt file. I want you to test giving it a python file. I want you to test giving it a file that doesn't exist. I want you to test giving it a corrupted file. You get the picture. And I want you to keep those tests for later (you'll understand when I get to the unit testing chapter).
+Well, not exactly. I want you to cause your code to fail in every possible way. If you have a code that should open an XML file, I want you to test giving it a txt file. I want you to test giving it a python file. I want you to test giving it a file that doesn't exist. I want you to test giving it a corrupted file. You get the picture. And I want you to keep those tests for later, I'll get back to that in the next section. 
 
 Essentially, sooner or later, you, or someone else, will mess up, and use your code in the wrong way. When that happens, you want your code to give as specific and useful information as it can, because the standard error messages are less and less useful as the project grows in size.
 
@@ -293,10 +314,9 @@ for line in inputFileData:
 
 Now the function will get the error message, print out relevant information, and pass the exception along to the main function, which can then print out its information, and we should put a raise on the main function as well, as we don't want our program working on potentially corrupt data, and we rather want it to die before it does any harm. 
 
-For instance, you might find that it says it failed on the 54. file, line 1, which is a good indicator that the file is either empty or corrupt. Having this information would be impossible without the exception handling, or a debugger, but debuggers are a hassle to use in my opinion, and it's better to actively counteract such problems than to rely on a tool to fix them retroactively. 
+For instance, you might find that it says it failed on the 54. file, line 1, which is a good indicator that the file is either empty or corrupt. Having this information would be impossible without the exception handling, or a debugger, but debuggers are a hassle to use in my opinion, and it's better to actively counteract such problems than to rely on a tool to fix them retroactively.
 
 So, the quick lesson for the most rudimentary exception handling is as follows:
-
 
 \begin{lstlisting}
 try: 
@@ -419,8 +439,7 @@ As you can understand from this list, Exception is the one you want to focus on.
 
 \section{Unit Testing and You!}
 
-%TODO Rework this to use Mock() and unittest.Testcase
-
+%TODO fix overselling, refactor into having own chapter on blackbox etc.
 Now comes the juicy part: unit testing, and why this will cause you to write better code, implement a good hierarchy, avoid using time on unnecessary optimization, and most importantly, avoid the big taboo, having just one big blob of a function.
 
 \subsection{What is unit testing}
@@ -429,17 +448,6 @@ So, what is unit testing? Simply put, unit testing is the method of always testi
 This is why you want to build unit tests for each module you make. Mind you, I'm not talking about checking if 2 + 2 = 4, some things you should assume just works, but rather, I want you to have a clear idea of exactly what should happen when you input parameters into your function, what it returns. As we will be working on numerical simulation, runtimes will be dominated by the numerical solvers, which means that until the program is complete, optimization of anything else will no be a priority. However, knowing how each module behaves will be, and if you recall Figure \ref{cleanCodeEfficiency}, it is crucial to the project's progress. 
 
 If you do unit testing correctly, it'll be \href{http://stackoverflow.com/questions/61400/what-makes-a-good-unit-test}{"A TRIP"}.
-
-\subsection{The infamous black box}
-Before I progress into the unit testing, I want to introduce a concept that is important to any programmer, engineer and scientist, but is very often overlooked. The concept of the black box. The simple definition is a system where a set of inputs produce a set of outputs according to the logic of a obscured mechanism. In other words, that it's a system where it's easier to consider input --> output, rather than how it actually works. 
-
-I want to ask you now, what happens when you ask python to do c = a + b ? You don't really think about it, but it's a lot more than you first think. First of all, it compares the types of the two, if they're the same, it calls the + function of the type of a, with b as its argument. If they're not, it has to look deeper, for instance, if a is an int, and b is a float, then it'll convert a to float, and then add them using float.add. However, if one of them is a string, then the two types are incompatible, and it raises a TypeError. And then you have the really deep mechanisms of how it works physically in the processor again.
-
-Why did I just tell you all of this? Because I want you to consider how much the single "+" sign actually does in python, and how little you really have considered that fact. This is the hallmark of a good black box. And now comes the morale of all this: Everything you program in a project will at some time become a black box. 
-
-At some point, the module will be considered complete, and you'll move on. Then a year goes by, and you need to look into your old black box because it seems to be the root cause of some weird bug. Now, if you have been good with naming, namespacing and commenting, and made sure that your exception handling is adequate, you will be able to open up your old black box and inspect the mechanisms in a fairly short amount of time, and fix the problem. However, it might be that the problem isn't the box itself, but its description. The most important reason why I want you to consider all code you write as a black box, is for the sake of others. If your black box is well defined, with strict input, output, and exception handling, other programmers will be able to use it as a black box. This allows them to employ your work without having to inspect and understand the foundation of your program. They might want to anyway, but they won't have to. This increases productivity a lot. 
-
-This is why, you want to have tested the behaviour of every function, class, etc, you have, in order to be confident that your code can be treated like a well defined black box, in a similar manner to the "+" operator. 
 
 \subsection{Unit testing, slayer of dragons}
 Now, as you might have thought; "But I can't devise a test for my bigFunc(inp1, inp2, inp3, inp4, etc etc), what should I do?". The simple answer is: don't make bigFunc.
@@ -512,13 +520,13 @@ Now that you've gone through the guide, let's recap quickly.
 \begin{itemize}
 \item Try to use pre-existing solutions rather than implementing your own.
 \item Have clear names and use proper namespacing in your code. 
-\item Document your code with docstrings adhering to the Google docstring standard.
+\item Document your code with docstrings adhering to the Google docstring standard. Be clear on the input-output.
 \item Structure your code so that it is as self-explanatory as possible, and use \# comments where additional clarification is useful.
+\item Remember that all code you write will end up being treated as a black-box sooner or later. So make sure that it actually works like one, with a clear input-output dichotomy. 
 \item Exceptions should crash your program, unless you have very specific reasons why it shouldn't.
 \item You should catch, append and then re-raise the exception at each level of the code, so that an informative traceback will appear when the program dies.
 \item You should not use "except:", as this will catch system exits and keyboard interrupts. If you want a catch-all, use "except Exception as e:"
-\item Remember that all code you write will end up being treated as a black-box sooner or later. So make sure that it actually works like one.
-\item Unit Testing is desirable, and you should test crucial behaviour of each feature you wish to push to the main project.
+\item Unit Testing is desirable, and you should test crucial behaviour of each feature you wish to push to the main project. Also, test that you code fails the way it should. 
 \item Keep your Unit tests. Write them well. Systematize them. Make sure they're thorough and fast.
 \end{itemize}
 
@@ -573,7 +581,7 @@ def main():
 try: 
   rectInstance = Rectangle(parameterlist)
 
-# handle expected TypeError because of unsanitized input 
+# handle expected TypeError because of reasons.
 except TypeError as e:  
   handleTypeErrorInRectangleInit(<relevant parameters>)
   storeHandledExceptionInfo(e, "describingString")
@@ -582,7 +590,7 @@ except AssertionError as e:
   if allow1dRect: # Enabled when bugtesting module. 
     handleAssertionErrorInRectangleInit(<relevant parameters>)
     storeHandledExceptionInfo(e, "describingString")
-  else:
+  else:           # Default, re-raises AssertionError.
     raise type(e), type(e)(e.message +       # keep old message
                     "\n "describingString"), # add new info
                     sys.exc_info()[2]        # traceback info
@@ -592,6 +600,7 @@ except Exception as e:
                   "\n "describingString"), # add new info
                   sys.exc_info()[2]        # traceback info
 \end{lstlisting}
+Of course, usually you want to only use the last part unless you have a really good reason to do otherwise.
 
 \subsection{Unit Testing}
 
