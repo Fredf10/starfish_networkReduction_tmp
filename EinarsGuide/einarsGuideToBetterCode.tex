@@ -9,12 +9,20 @@
 \usepackage{listings}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{soul}
+
 \title{Einar's guide to better code}
 \author{Einar Nyberg Karlsen}
 \begin{document}
 \lstset{language=Python, 
 		showstringspaces=false,
 		basicstyle=\ttfamily\small}
+		
+\maketitle
+
+\tableofcontents
+
+\newpage
 
 \section{Introduction}
 Hello. I am sure that you're wondering why you need to read this. You know how to code, you've coded so much during your time at NTNU. However, this is most likely not true. 
@@ -32,6 +40,8 @@ So far, you have probably only been taught how to make code that performs the ex
 \end{center}
 
 A lot of the lessons in this guide are condensed snippets from the book "Clean Code" by Robert C. Martin. While I don't agree 100\% with what he claims in that book, I'd say it's somewhere between 90 to 95\% . If you have the time, I recommend reading this book in its entirety. 
+
+Throughout this guide, I will explain the essentials of making good code, and I urge you to read this guide in its entirety. At the end there will be a cheat-sheet, but if you haven't read the guide, I doubt you'll understand the significance of the things in it. 
 
 \section{The easy solution}
 Well, I lied. There is no easy solution. But, I will try to give some good pointers to how to avoid the biggest pitfalls. I will assume you're reading this on a computer, and that you will be able to look things up on google and click on links in this guide. 
@@ -123,7 +133,7 @@ You're thinking that I'm belittling you right now, but there is a very good reas
 \subsection{Commenting your code}
 While having reasonable names will make your code a lot cleaner, it is close to inevitable that the code reaches a point where you can't easily understand it just from looking at it. There are tech companies that claim the contrary, like Cisco, but they're highly skilled and enforce extremely strict structural conventions. Thus, we regular human beings cheat a little: we comment our code. 
 
-Throughout this project, there are two types of commenting, the regular \# commenting, which is to be used for those looking to inspect or modify the code directly, and docstrings, which are started and ended by triple doublequotes. Docstrings are to be used to document the code, and should be placed on each callable function, explaining shortly what it is intended to do, what parameters(inputs) it expects, and what it outputs. Essentially, it should explain the utility of a function, but not its inner workings, a "black-box" description of the function.
+Throughout this project, there are two types of commenting, the regular \# commenting, which is to be used for those looking to inspect or modify the code directly, and docstrings, which are started and ended by triple doublequotes. Docstrings are to be used to document the code, and should be placed on each callable function, explaining shortly what it is intended to do, what parameters(inputs) it expects, and what it outputs. Essentially, it should explain the utility of a function, but not its inner workings, a "black-box" description of the function. For our project, we adhere to the google docstring standard.
 
 Let's look at how the code looks with even better names and a bit of commenting.  
 
@@ -372,7 +382,25 @@ Another very important thing to notice, is that this will not catch system error
 
 Of course, I'm being overly descriptive in my warning and error messages in this code, real code will not need this level of pedantic error messages, but you will find that I'm not that far off either. 
 
-\subsection{The various types of exceptions}
+\subsection{How to actually do it}
+
+I'm a bad person. I've shown you so much, and it's not actually they way you're supposed to handle exceptions. Before you get angry, please bear with me. The reason I've shown you this is because it's easier to explain the logic before introducing the concept of padding your exception. Let me show you how it's actually done.
+
+\begin{lstlisting}
+try: 
+  stuff(parameterlist)
+except Exception as e:
+  raise type(e), type(e)(e.message + 
+                  '\n IN FILEA: function stuff was called with 
+                  params {}'.format(parameterlist)), 
+                  sys.exc_info()[2] # traceback info
+\end{lstlisting}
+
+As you can see, we don't print anything, instead we raise a new exception that has the same type, a padded message, and contains the original traceback. This has certain advantages. First of all, you can decide at any level whether or not the message should be silent, whereas with the print method, you will always print each step until you reach the one that suppresses the exception. Secondly, you will get the whole string in one piece, at the end of your error traceback, which means that you can look at it the same way you would a standard unhandled exception. Third, and maybe the most important, this allows for neater unit testing, as print statements are not particularly liked by python's unit testing framework. 
+
+However, and this is important, you should still consider having print statements, or some error/warning logging for the exceptions that do get suppressed.
+
+\subsection{The other types of exceptions}
 
 I will urge you to look at this webpage, \href{https://docs.python.org/2/library/exceptions.html\#exception-hierarchy}{Pythons exception hierarchy} to get a general idea of how exceptions are structured. As you can see, there are three classes beside Exception. There's SystemExit, KeyboardInterrupt, and GeneratorExit. 
 
@@ -384,9 +412,10 @@ I will urge you to look at this webpage, \href{https://docs.python.org/2/library
 
 \item GeneratorExit is actually not really an error or an exception. However, because you might want to perform certain actions when closing a generator, they added this to the built-in exceptions so it would have the desired traits. Unless you're using a generator, you will not need to bother with this one.
 
-\item Exception is the one you want to focus on. However, since I've already spent so much time explaining it, I'll just say this final thing: Notice that Warning is a subclass of Exception. This is because the functionality of the Exception class is suited for Warning. But, when issuing warnings, one uses warnings.warn(Warning('text')), as this does not start the termination chain a regular Exception would. The rest of the Exception tree should be self-explanatory enough. 
-
 \end{itemize}
+
+As you can understand from this list, Exception is the one you want to focus on. However, since I've already spent so much time explaining it, I'll just say this final thing: Notice that Warning is a subclass of Exception. This is because the functionality of the Exception class is suited for Warning. But, when issuing warnings, one uses warnings.warn(Warning('text')), as this does not start the termination chain a regular Exception would. The rest of the Exception tree should be self-explanatory enough. 
+
 
 \section{Unit Testing and You!}
 
@@ -436,24 +465,10 @@ But make no mistake, you should always test your code.
 
 \subsection{Your first test}
 
+\subsection{The unittest package}
+
 %import unittest
-%class testing(unittest.testCase) eller noe slikt
-
-\subsection{Systematising your tests}
-
-Now. What should your test do? Let's go back to \href{http://stackoverflow.com/questions/61400/what-makes-a-good-unit-test}{"A TRIP"} again, and how you fulfil the requirements for this acronym.
-
-\begin{itemize}
-\item Automatic. This one is fairly simple, you want to have your tests in a python script which uses the built in "unittest" package. I'll get to that in a while.
-\item Thorough. Now, this one is a bit trickier. What you might be thinking is that all you need to do is test the function on top, and if that works, then the test is done. This is not unit testing. Unit testing is to test every single part of the code that can be considered an independent unit. This ties back into the black boxes we talked about earlier. Everything that can be considered a black box, should be tested accordingly.
-\item Repeatable. Well, this one really falls under automatic in my opinion. 
-\item Independent. As the answer at stackoverflow said, this is the most important one. Every test should test one thing, and one thing alone. If your function should switch between three different outputs depending on its input\footnote{Well, if it does, you really should look into refactoring your function, but this is just for the purpose of demonstration.}, then you should have three separate tests to check that all three work. They should not depend on the result of anything else. This is important because you need to be absolutely sure that something fails or passes solely on its own merit.
-\item Professional. Your tests should meet standards of programming. Essentially, your test code should be clean and understandable. Not only because others might need it to be, but because clean code will usually have less bugs. It won't help to test your code if your test doesn't work. 
-\end{itemize}
-
-There is one last one that is mentioned, which I find to be absolutely crucial, and that is that a test should be fast. Let's look back at the case I used to illustrate the need for exceptions. A function that would take in 100 files, feed each file into another function. To test that, you only need to feed it two files, that can be empty for all it cares. As a matter of fact, because it asks the moduleFileRead for the actual reading, the test doesn't even have to check that it reads the files, only that it calls moduleFileRead.readFile() with the elements from its input list. Similarly, you only have to test that it then takes whatever output, as long as its not an exception, and passes it to the processing module. 
-
-In other words, the test should test the full, yet minimal, requirement of the functionality of the function, and it should test it well. 
+%class testing(unittest.TestCase) eller noe slikt
 
 \subsection{Making mock functions for testing}
 Now, what about the modules that depend on others? The answer is simple, does require extra work, but will make it easier to debug. You make mock-ups of the required modules. 
@@ -474,6 +489,111 @@ def func(input1, input2, testing = False)
 As you can see, this simple if statement within the function will cause the function to import a mock-up file instead, which can have simple "if input == case1 : return output1" clauses to give back a known output which then should be handled in a known manner, giving extremely useful tools for debugging the code later. 
 
 Where do you then get those outputs for the mock-up file? From the original unit test of the real file! So, as you can see, consistent unit testing will allow you to easily carry the tests up throughout the hierarchy. It is often said that good unit testing will cause you to have about as much testing code as you have functional code. This might seem like a hassle, but if you incorporate it into your workflow, you might even increase your efficiency because you are clear on what your code should do, and this helps when implementing it. 
+
+
+\subsection{Systematising your tests}
+
+Now, how should your tests be? Let's \st{shamelessly steal from} reference Clean Code again by looking at another acronym: FIRST.
+
+\begin{itemize} 
+\item Fast. Let's look back at the case I used to illustrate the need for exceptions. A function that would take in 100 files, feed each file into another function. To test that, you only need to feed it two files, that can be empty for all it cares. As a matter of fact, because it asks the moduleFileRead for the actual reading, the test doesn't even have to check that it reads the files, only that it calls moduleFileRead.readFile() with the elements from its input list. Similarly, you only have to test that it then takes whatever output, as long as its not an exception, and passes it to the processing module. 
+\item Independent. This is the most important one. Every test should test one thing, and one thing alone. If your function should switch between three different outputs depending on its input\footnote{Well, if it does, you really should look into refactoring your function, but this is just for the purpose of demonstration.}, then you should have three separate tests to check that all three work. They should not depend on the result of anything else. This is important because you need to be absolutely sure that something fails or passes solely on its own merit.
+\item Repeatable. This one is fairly simple, you want to have your all your tests run by a single python script which uses the built in "unittest" package. I'll get to that in a while.
+\item Self Validating. The tests should have a boolean output. Either the test succeeds, or it fails. This is a crucial part of making them fast as well, as it won't matter if the test runs in 0.1 seconds, if you have to spend 5 minutes to look at it to check if it succeeded.
+\item Timely. This comes back to the testing paradigm. The test should be written at a relevant point in the development cycle. The way I like to think of it is that it's debatable whether or not to write tests or code first, but the test always comes before the deployment of the module. Essentially, before your code gets introduced into the project, it has to have been tested thoroughly.  
+\end{itemize}
+
+Between the two acronyms, I feel that most of the testing philosophy should be covered. Of course, the topic of unit testing is so deep that many would argue it deserves its own book. But, I hope this has helped
+
+
+\section{The Short Summary}
+Now that you've gone through the guide, let's recap quickly.
+
+\begin{itemize}
+\item Try to use pre-existing solutions rather than implementing your own.
+\item Have clear names and use proper namespacing in your code. 
+\item Document your code with docstrings adhering to the Google docstring standard.
+\item Structure your code so that it is as self-explanatory as possible, and use \# comments where additional clarification is useful.
+\item Exceptions should crash your program, unless you have very specific reasons why it shouldn't.
+\item You should catch, append and then re-raise the exception at each level of the code, so that an informative traceback will appear when the program dies.
+\item You should not use "except:", as this will catch system exits and keyboard interrupts. If you want a catch-all, use "except Exception as e:"
+\item Remember that all code you write will end up being treated as a black-box sooner or later. So make sure that it actually works like one.
+\item Unit Testing is desirable, and you should test crucial behaviour of each feature you wish to push to the main project.
+\item Keep your Unit tests. Write them well. Systematize them. Make sure they're thorough and fast.
+\end{itemize}
+
+\section{The Cheat Sheet}
+
+\subsection{Conventions and Namespacing}
+%TODO fix litt her
+\begin{lstlisting}
+import numpy as np
+import UtilityLib.rectangles as rectUtils
+
+class Rectangle(object):
+  def __init__(lenX, 
+               lenY = 1.0) 
+    """
+    Initializes an instance of Rectangle
+    
+    Args: 
+      lenX (float): length in X direction in meters
+      lenY (optional float): length in Y direction in 
+        meters, defaults to 1.0
+    Raises:
+      TypeError: If lenX or lenY can't be converted to floats.
+      AssertionError: If lenX or lenY == 0.0.
+    """
+    
+    self.lenX = float(lenX)
+    assert self.lenX != 0.0
+    
+    self.lenY = float(lenY)
+    assert self.lenY != 0.0
+
+    self.area = rectUtils.calculateArea(lenX, lenY)
+
+  def get_lenX(self):
+    """Returns: float: The value of lenX """
+    return self.lenX
+
+def main():
+
+  # construct instance of Rectangle class
+  rectInstance = Rectangle(
+                  lenX = 15.1, 
+                  lenY = 12.3)
+	
+\end{lstlisting}
+
+
+\subsection{Exception Handling}
+
+\begin{lstlisting}
+try: 
+  rectInstance = Rectangle(parameterlist)
+
+# handle expected TypeError because of unsanitized input 
+except TypeError as e:  
+  handleTypeErrorInRectangleInit(<relevant parameters>)
+  storeHandledExceptionInfo(e, "describingString")
+  
+except AssertionError as e: 
+  if allow1dRect: # Enabled when bugtesting module. 
+    handleAssertionErrorInRectangleInit(<relevant parameters>)
+    storeHandledExceptionInfo(e, "describingString")
+  else:
+    raise type(e), type(e)(e.message +       # keep old message
+                    "\n "describingString"), # add new info
+                    sys.exc_info()[2]        # traceback info
+  
+except Exception as e: 
+  raise type(e), type(e)(e.message +       # keep old message
+                  "\n "describingString"), # add new info
+                  sys.exc_info()[2]        # traceback info
+\end{lstlisting}
+
+\subsection{Unit Testing}
 
 
 \end{document}
