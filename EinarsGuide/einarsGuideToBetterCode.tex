@@ -204,14 +204,18 @@ First off, we try to be compliant to the \href{https://www.python.org/dev/peps/p
 \begin{itemize}
 \item Use 4 spaces, not tabs (you can get your editor to do this automatically, and it is in recommended for coding in general).
 \item If your function has many inputs, list them vertically by having an extra indent or more. See the code example above how rectangleWithTemperature is called if you want an example.
-\item We use CapitalizedWords and mixedCase mostly in our code. We capitalized the first letter to signal that this is a class, and we keep it in lowercase if it is an instance of a class, or a function. This allows us to easily see what we're working with. Here's an example:\\
-assert isinstance(rectInstance, RectangleWithTemperature) \\ %TODO good?
+\item We use CapitalizedWords and mixedCase mostly in our code. We capitalized the first letter to signal that this is a class, and we keep it in lowercase if it is an instance of a class, or a function. This allows us to easily see what we're working with.
+\item We disobey the convention on function names, where PEP 8 wants them to be lowercase and seperated by underscores, we use mixedCase for functions as well.
+\item If you have a list of things, add list to the name. Do not use plural s. \\
+good: vesselList, bad: vessels
 \item Further, as we have a project with a lot of functional files, we often use the "import .... as .." method, where we have a list of abbreviations that you are expected to follow.
 \end{itemize}
 
 Now, there is one important aspect of this that you need to know. This code base is a work in progress, the conventions are not necessarily implemented thoroughly at the moment you're reading this. This means that some times, you might have to break the conventions to make it work with the existing codebase. However, this should be the only time when you break the conventions we have set for this project.
 
 However, we are working hard to re-factor the code to be compliant with the conventions, unit testing and exception handling. If there is no compatibility concern, you should always comply with this guide, not the codebase. In the case of exception handling, always comply to this guide.
+
+Throughout the guide, there will be a lot of code used as example. However, a lot of it will intentionally be sloppy, so it can showcase the issues with sloppy conventions and methodology. If in doubt, check the Cheat Sheet at the end of the guide for correct conventions.
 
 %TODO nevn hvilke filer som har brukne imports. 
 
@@ -220,14 +224,35 @@ However, we are working hard to re-factor the code to be compliant with the conv
 I want you to consider a machine. Consider all the parts it's made of. Consider how most of those parts are rather standardized. They are of a specific form, attach in a specific way, and perform in a specific manner. Each component has certain demands in functionality and structural integrity. Programs are much the same. In any large program, if you "pop the hood" on it, you will almost always find that it consists of smaller programs working in conjunction, just like any machine would. And, just like you wouldn't want to design a machine without splitting it into components, the same applies to programming. 
 
 \subsection{Abstraction levels}
-%TODO write this
+Now, The programmer who wrote Clean Code says that functions should stay within one abstraction level. In the case of numerical programming, I find this to often be too strict, as the nature of numerics often demand a few layers of abstraction co-existing. But, as always, he's not that far off either. The more you can split things up into simple operations, the more control you have. Let's make an example to illustrate how it works.
+
+\begin{lstlisting}
+
+def moveRightLeg(directionClass):
+  moveRightLegSideways(directionClass.side)
+  moveRightLegAlong(directionClass.along)
+  moveRightLegHeight(directionClass.height)
+
+def moveRightLegSideways(sidedata):
+  if sidedata == 0.0: return None
+  elif sidedata < 0.0: # to the left
+    moveRightLegLeft(abs(sidedata))
+  else:
+    moveRightLegRight(sidedata)
+
+\end{lstlisting}
+
+And so it continues. This might seem a bit pedantic, but imagine the incredible amount of code that would appear in moveRightLeg if you didn't abstract it into smaller functions. Of course, there are times when functions are inherently connected, and you can't avoid it. 
+
+As you can see in this mock-code, it is really simple to understand what the function does in rough detail. You will have to inspect the deeper functions, to see the inner workings, but do you really want to do that for all the code you will use? Thus, I present the black box.
 
 \subsection{The infamous black box}
 I want to introduce a concept that is important to any programmer, engineer and scientist, but is very often overlooked. The concept of the black box. The simple definition of a black box is a system where a set of inputs produce a set of outputs according to the logic of a obscured mechanism. In other words, that it's a system where it's easier to consider input - output, rather than how it actually works. 
 
+\subsection{The + sign, a beautiful black box}
 I want to ask you now, what happens when you ask python to do c = a + b ? You don't really think about it, but it's a lot more than you first think. First of all, it compares the types of the two, if they're the same, it calls the + function of the type of a, with b as its argument. If they're not, it has to look deeper, for instance, if a is an int, and b is a float, then it'll convert a to float, and then add them using float.add. However, if one of them is a string, then the two types are incompatible, and it raises a TypeError. And then you have the really deep mechanisms of how it works physically in the processor again.
 
-Why did I just tell you all of this? Because I want you to consider how much the single "+" sign actually does in python, and how little you really have considered that fact. This is the hallmark of a good black box. And now comes the morale of all this: Everything you program in a project will at some time become a black box. 
+Why did I just tell you all of this? Because I want you to consider how much the single "+" sign actually does in python, and how few people really have considered that fact. This is the hallmark of a good black box. And now comes the morale of all this: Everything you program in a project will at some time become a black box. 
 
 \subsection{Design black boxes, not white ones}
 At some point, the module will be considered complete, and you'll move on. Then a year goes by, and you need to look into your old black box because it seems to be the root cause of some weird bug. Now, if you have been good with naming, namespacing and commenting, and made sure that your exception handling is adequate, you will be able to open up your old black box and inspect the mechanisms in a fairly short amount of time, and fix the problem. 
@@ -471,49 +496,109 @@ My personal recommendation is simply to try both. Some will want to force themse
 
 But make no mistake, you should always test your code.
 
-\subsection{Your first test}
-
 \subsection{The unittest package}
 
-%import unittest
-%class testing(unittest.TestCase) eller noe slikt
+Now, Python has a built-in library, unittest, which will help automate a lot of the testing. The standard procedure is as follows:
+\begin{enumerate}
+\item import unittest
+\item import file(s) you wish to test
+\item make class(es) which inherit from unittest.TestCase
+\item make functions within the classes with the name test\_whatYouWishToTest. Use self.assert<type>() calls within the function. \href{https://docs.python.org/2/library/unittest.html\#unittest.TestCase.debug}{List of asserts}
+\item end with the following line: \\
+ if \_\_name\_\_ == '\_\_main\_\_': unittest.main()
+\end{enumerate}
 
-\subsection{Making mock functions for testing}
-Now, what about the modules that depend on others? The answer is simple, does require extra work, but will make it easier to debug. You make mock-ups of the required modules. 
+Enough dry talk, let's have an example.
 
 \begin{lstlisting}
-import bigFile as bF
+import unittest
+import FileToTest
 
-def func(input1, input2, testing = False)
-  if testing:
-    import MOCKbigFile as bF
-  
-  result1 = bF.func1(input1)
-  result2 = bF.func2(input2)
-  output = bF.crossProduct(result1, result2)
-  return output
+class TestStringMethods(unittest.TestCase):
+
+  def test_splitString(self):
+    s = 'hello world'
+    self.assertEqual(FileToTest.splitString(s), 
+                     ['hello', 'world'])
+    with self.assertRaises(TypeError):
+        FileToTest.splitString(2)
+
+if __name__ == '__main__':
+    unittest.main()
 
 \end{lstlisting}
-As you can see, this simple if statement within the function will cause the function to import a mock-up file instead, which can have simple "if input == case1 : return output1" clauses to give back a known output which then should be handled in a known manner, giving extremely useful tools for debugging the code later. 
 
-Where do you then get those outputs for the mock-up file? From the original unit test of the real file! So, as you can see, consistent unit testing will allow you to easily carry the tests up throughout the hierarchy. It is often said that good unit testing will cause you to have about as much testing code as you have functional code. This might seem like a hassle, but if you incorporate it into your workflow, you might even increase your efficiency because you are clear on what your code should do, and this helps when implementing it. 
+Now, as you can see, it's fairly straight forward, your class inherits from the TestCase class in the unittest package, so that it contains specialized assert functions used by unittest.main(). All tests are in functions prefaced with test<underscore> and a descriptive name. But, there are certain issues with this test. 
+First off, if test\_splitString fails, you will have to look at what part of the test itself failed. This is why it's common practice to split tests into as simple as possible tests. 
 
+However, it might be that you want to have several tests that want to use similar variables. But, as was mentioned in the acronym "A TRIP", one important criteria is the independence of tests. The way to solve this is by abstracting the tests into having inheritance themselves.
+
+\begin{lstlisting}
+import unittest
+import FileToTest 
+
+class SetUpStringTestCase(unittest.TestCase):
+  def setUp():
+    self.testString = 'hello world'
+    self.correctSplitString = ['hello', 'world']
+    self.wordCount = 2
+    self.letterCount = 10
+    self.spaceCount = 1
+
+class TestSplitString(SetUpStringTestCase):
+
+  def test_correctBehaviour(self):
+    self.assertEqual(FileToTest.splitString(self.testString), 
+                     self.correctSplitString)
+
+  def test_wrongInputType(self):
+    with self.assertRaises(TypeError):
+      FileToTest.splitString(2)
+
+  def test_tooManyArgs(self):
+    with self.assertRaises(TypeError):
+      FileToTest.splitString(self.testString, 
+                             self.testString)
+
+
+class TestConcatinateString(SetUpStringTestCase):
+
+  def test_correctBehaviour(self):
+    self.assertEqual(
+        FileToTest.concatinateString(self.correctSplitString), 
+        self.testString)
+
+  def test_wrongInputType(self):
+    with self.assertRaises(TypeError):
+      FileToTest.concatinateString([1, 2])
+          
+if __name__ == '__main__':
+    unittest.main()
+
+\end{lstlisting}
+
+As you can see, this way, each class will specify what function you wish to test, and each testing function will specify what aspect you wish to test. Further, each test case will initialize a standard set of values defined in the SetUpStringTestCase class, so you won't have to initialize those variables over and over. Further, by adhering to the naming and namespacing conventions, the code is quite self-explanatory.
+
+Now, there is one huge pitfall in this code. If for instance, in class TestConcatinateString, test\_correctBehaviour changes one of the variables, that change will carry on to the next test in the class. So be careful, and if in doubt, split the tests you suspect can change the variables into their own classes. However, since we're working in Python, it's less likely to be a problem than in languages that depend more on call-by-reference.  
+
+%\subsection{Making mock functions for testing}
+%TODO decide if should remain
 
 \subsection{Systematising your tests}
 
-Now, how should your tests be? Let's \st{shamelessly steal from} reference Clean Code again by looking at another acronym: FIRST.
+Now, how should your tests be? Let's reference Clean Code again by looking at another acronym: FIRST.
 
 \begin{itemize} 
-\item Fast. Let's look back at the case I used to illustrate the need for exceptions. A function that would take in 100 files, feed each file into another function. To test that, you only need to feed it two files, that can be empty for all it cares. As a matter of fact, because it asks the moduleFileRead for the actual reading, the test doesn't even have to check that it reads the files, only that it calls moduleFileRead.readFile() with the elements from its input list. Similarly, you only have to test that it then takes whatever output, as long as its not an exception, and passes it to the processing module. 
-\item Independent. This is the most important one. Every test should test one thing, and one thing alone. If your function should switch between three different outputs depending on its input\footnote{Well, if it does, you really should look into refactoring your function, but this is just for the purpose of demonstration.}, then you should have three separate tests to check that all three work. They should not depend on the result of anything else. This is important because you need to be absolutely sure that something fails or passes solely on its own merit.
-\item Repeatable. This one is fairly simple, you want to have your all your tests run by a single python script which uses the built in "unittest" package. I'll get to that in a while.
+\item Fast. Let's look back at the case I used to illustrate the need for exceptions. A function that would take in 100 files, feed each file into another function. To test that, you only need to feed it two files, that can be empty for all it cares. As a matter of fact, because it asks the moduleFileRead for the actual reading, the test doesn't even have to check that it reads the files, only that it calls moduleFileRead.readFile() with the elements from its input list. Similarly, you only have to test that it then takes whatever output, as long as its not an exception, and passes it to the processing module. The general rule is that your tests should be minimal.
+\item Independent. This is the most important one. Every test should test one thing, and one thing alone. If your function should switch between three different outputs depending on its input\footnote{Well, if it does, you really should look into refactoring your function, but this is just for the purpose of demonstration.}, then you should have three separate tests to check that all three work. They should not depend on the result of anything else. This is important because you need to be absolutely sure that something fails or passes solely on its own merit. And most importantly, no test should be affected by any other test!
+\item Repeatable. This one is fairly simple, you want to have your all your tests run by a single python script which uses the built in "unittest" package. I'll get to that after this list.
 \item Self Validating. The tests should have a boolean output. Either the test succeeds, or it fails. This is a crucial part of making them fast as well, as it won't matter if the test runs in 0.1 seconds, if you have to spend 5 minutes to look at it to check if it succeeded.
 \item Timely. This comes back to the testing paradigm. The test should be written at a relevant point in the development cycle. The way I like to think of it is that it's debatable whether or not to write tests or code first, but the test always comes before the deployment of the module. Essentially, before your code gets introduced into the project, it has to have been tested thoroughly.  
 \end{itemize}
 
 Between the two acronyms, I feel that most of the testing philosophy should be covered. Of course, the topic of unit testing is so deep that many would argue it deserves its own book. But, I hope this has helped
 
-
+\newpage
 \section{The Short Summary}
 Now that you've gone through the guide, let's recap quickly.
 
@@ -524,12 +609,13 @@ Now that you've gone through the guide, let's recap quickly.
 \item Structure your code so that it is as self-explanatory as possible, and use \# comments where additional clarification is useful.
 \item Remember that all code you write will end up being treated as a black-box sooner or later. So make sure that it actually works like one, with a clear input-output dichotomy. 
 \item Exceptions should crash your program, unless you have very specific reasons why it shouldn't.
+\item If you absolutely want to stop exceptions, you should not use "except:", as this will catch system exits and keyboard interrupts. If you want a catch-all, use "except Exception as e:"
 \item You should catch, append and then re-raise the exception at each level of the code, so that an informative traceback will appear when the program dies.
-\item You should not use "except:", as this will catch system exits and keyboard interrupts. If you want a catch-all, use "except Exception as e:"
-\item Unit Testing is desirable, and you should test crucial behaviour of each feature you wish to push to the main project. Also, test that you code fails the way it should. 
-\item Keep your Unit tests. Write them well. Systematize them. Make sure they're thorough and fast.
+\item Unit Testing is desirable, and you should test crucial behaviour of each feature you wish to push to the main project. Also, test that you code fails the way it should. Few things are as hard to track down as code that passes wrong data onto other parts in the program.
+\item Keep your Unit tests. Write them well. Systematize them. Make sure they're thorough, independent of each other, and fast.
 \end{itemize}
 
+\newpage
 \section{The Cheat Sheet}
 
 \subsection{Conventions and Namespacing}
@@ -542,7 +628,8 @@ class Rectangle(object):
   def __init__(lenX, 
                lenY = 1.0) 
     """
-    Initializes an instance of Rectangle
+    Initializes an instance of Rectangle. 
+    Will attempt to convert input to floats.
     
     Args: 
       lenX (float): length in X direction in meters
@@ -574,7 +661,7 @@ def main():
 	
 \end{lstlisting}
 
-
+\newpage
 \subsection{Exception Handling}
 
 \begin{lstlisting}
@@ -586,11 +673,14 @@ except TypeError as e:
   handleTypeErrorInRectangleInit(<relevant parameters>)
   storeHandledExceptionInfo(e, "describingString")
   
+# state dependent exception handling
 except AssertionError as e: 
-  if allow1dRect: # Enabled when bugtesting module. 
+
+  if allow1dRect:     # Enabled when bugtesting module. 
     handleAssertionErrorInRectangleInit(<relevant parameters>)
     storeHandledExceptionInfo(e, "describingString")
-  else:           # Default, re-raises AssertionError.
+
+  else:               # Default, re-raises AssertionError.
     raise type(e), type(e)(e.message +       # keep old message
                     "\n "describingString"), # add new info
                     sys.exc_info()[2]        # traceback info
@@ -600,10 +690,48 @@ except Exception as e:
                   "\n "describingString"), # add new info
                   sys.exc_info()[2]        # traceback info
 \end{lstlisting}
-Of course, usually you want to only use the last part unless you have a really good reason to do otherwise.
+Of course, usually you want to only use the last part unless you have a really good reason to do otherwise. One of the most common reasons is in the case of user input, where you have to account for the user misspelling things.
 
+Further, The handle<...> and store<...> functions are just thought up examples, if you need them, implement them.
+
+\newpage
 \subsection{Unit Testing}
 
+\begin{lstlisting}
+import unittest
+import FileToTest 
+
+class SetUpTestDataForFileToTest(unittest.TestCase):
+  def setUp():
+    self.correctVariable = <suitable data>
+    self.wrongVariable = <unsuitable data>
+    self.myClass = MyClass(<initdata>) 
+    
+#  def tearDown(self):  
+#    self.myClass.destructor()  
+#    self.myClass = None
+# should be used if setUp initializes class  
+# instance which needs a destructor.
+
+
+class TestSpecificFunction(SetUpTestDataForFileToTest):
+
+  def test_correctBehaviour(self):
+    self.correctResult = <correctResult>
+    self.assertEqual(
+        FileToTest.specificFunction(self.correctVariable), 
+        self.correctResult
+        )
+
+  def test_wrongInputType(self):
+    with self.assertRaises(TypeError):
+      FileToTest.specificFunction(self.wrongVariable)
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+\end{lstlisting}
 
 \end{document}
 
