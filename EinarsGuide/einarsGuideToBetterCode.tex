@@ -39,12 +39,15 @@ So far, you have probably only been taught how to make code that performs the ex
 \end{figure}
 \end{center}
 
-A lot of the lessons in this guide are condensed snippets from the book "Clean Code" by Robert C. Martin. While I don't agree 100\% with what he claims in that book, I'd say it's somewhere between 90 to 95\% . If you have the time, I recommend reading this book in its entirety. 
+The reasoning behind this illustrative graph, is that as projects grow, more and more programmers working on it will depend on each others code, and if everyone produces code only they themselves can use, the project will halt, and work will have to be done to fix it. 
 
 Throughout this guide, I will explain the essentials of making good code, and I urge you to read this guide in its entirety. At the end there will be a short summary and a cheat-sheet, but if you haven't read the guide, I doubt you'll appreciate the significance of the things in it. However, I will understand if you skip right ahead to it. 
 
+A lot of the lessons in this guide are condensed snippets from the book "Clean Code" by Robert C. Martin. While I don't agree 100\% with what he claims in that book, I'd say it's somewhere between 90 to 95\% . If you have the time, I recommend reading this book in its entirety. 
+
 Mind you, that if you choose to read the whole thing, I will often start with an example which is considered to be bad code, and incrementally make it better. Please be aware of that fact as you read through it, as some of my "solutions" are not proper solutions, but increments towards them. 
 
+\newpage
 \section{Common Problems}
 
 So, what are the most common mistakes people make? In my personal experience, and from a fair amount of reading up on the matter, the following seem to appear a lot:
@@ -66,6 +69,7 @@ Now, if you read this list and considered all the listed issues as independent, 
 
 Therefore, I will split it into the most critical components of each subject, and handle each separately.
 
+\newpage
 \section{Re-inventing the wheel}
 Quite honestly, this is the simplest, and the one you've most likely already have learned, but it's still good to repeat it. For any well established programming language, there are tons of libraries that do everything from file management, math, sound, etc. In our case, Python has SciPy, the scientific library containing an incredible amount of numerical and graphical tools, and it is just one of many well maintained packages out there. 
 
@@ -109,6 +113,7 @@ class RectangleWithTemperature(object):
   def __init__(lenX, 
                lenY, 
                tempFahrenheit = 60, 
+               printCompletion = False,
                boolConvToCelsius = False):
                
     self.lenX = lenX
@@ -118,6 +123,9 @@ class RectangleWithTemperature(object):
     self.t = tempFahrenheit
     if boolConvToCelsius:
       self.t = bigFile.degrees(self.t)
+    
+    if printCompletion:
+      print "construction of rectangle complete"
 
 def main():
 
@@ -132,6 +140,8 @@ def main():
 One thing worth noting here, is that you probably thought that degrees referred to angle, which is what it normally does. However, the coder here has been naughty, and not properly named his function "degrees", which should have been called "convFahrenheitToCelcius". And, to make matters worse, the function even had the same name as the numpy function degrees, which converts radians to degrees. So, not only was the original code unorganized, it was also wrong because of bad imports.
 
 You're thinking that I'm belittling you right now, but there is a very good reason why I'm pushing for you to be pedantic about this. At some point, your module will be complete, and you will jump over to working on another one. Then, half a year later, someone else encounters a bug coming from your module. He tries to find the bug, but can't understand the error message, so he contacts you. The problem is, you haven't looked at that code for half a year. You don't remember much of it, so you start looking at it again. What made sense half a year ago might not make sense any longer, and you're as stuck as he is, and late shifts of debugging the code ensue for the both of you. 
+
+One final thing to notice, is how in the improved version, I call the class with parameter names as well as values. This is due to the fact that I have here hard-coded the values into the function call, and just seeing a list saying "15.1, 12.3, 2.5, True" won't say much to anyone looking at the code, and they'll have to look up the class constructor to see what the parameters mean. A general rule to consider is that if you need to look up the function's documentation to see what the parameters it's been called with mean, you probably want to use the parameter names in the function call. Further, in Python, using the parameter name will allow you to choose specific optional arguments, which can simplify a lot of function calls.
 
 \subsection{Commenting your code}
 While having reasonable names will make your code a lot cleaner, it is close to inevitable that the code reaches a point where you can't easily understand it just from looking at it. There are tech companies that claim the contrary, like Cisco, but they're highly skilled and enforce extremely strict structural conventions. Thus, we regular human beings cheat a little: we comment our code. 
@@ -148,6 +158,7 @@ class RectangleWithTemperature(object):
   def __init__(lenX, 
                lenY, 
                tempFahrenheit = 60, 
+               printCompletion = False,
                convToCelsius = False):
     """
     Initializes an instance of rectangleWithTemperature
@@ -157,6 +168,9 @@ class RectangleWithTemperature(object):
       lenY (float): length in Y direction in meters
       tempFahrenheit (optional float): 
         temperature in Fahrenheit, defaults to 60
+      printCompletion (optional bool):
+        decides if constructor will 
+        print success upon completion.
       convToCelsius (optional bool): 
         decides whether or not to set temperature 
         in Celsius, defaults to False.
@@ -174,7 +188,11 @@ class RectangleWithTemperature(object):
       self.temp = rectUtils.convFahrToCelcius(tempFahrenheit)
     else:
       self.temp = tempFahrenheit
-    
+
+    # print success    
+    if printCompletion:
+      print "construction of rectangle complete"
+
 
 def main():
 
@@ -193,9 +211,9 @@ Also, as you can see, thanks to the good naming of variables and functions, all 
 
 Commenting should be considered a last resort to fix the failure of the code to be self-explanatory.
 
-Of course, this is a bit strict, There might be frameworks that won't allow us to make neat code, or some other valid reason. So, don't feel bad about having comments, but try to always keep it in mind, that the code should be readable without it to the best of your ability. A good way to code is to first write the comment, implement, and see if you now can remove your comment and it's still understandable. If you can't, you should really take a long hard look at whether or not you need to re-factor it. And most importantly, if you can't avoid having a comment, make sure your code actually does what your comment says it does. Nothing is more time consuming than a bug hiding behind a sloppy comment. 
+Of course, this is a bit strict, There might be frameworks that won't allow us to make neat code, or some other valid reason. So, don't feel bad about having comments, but try to always keep it in mind, that the code should be readable without it to the best of your ability. A good way to code is to first write the comment, implement, and see if you now can remove your comment and it's still understandable. If you can't, you should really take a long hard look at whether or not you need to re-factor it. And most importantly, if you can't avoid having a comment, make sure your code actually does what your comment says it does. Few things are more time consuming than a bug hiding behind a misleading comment. 
 
-Docstrings however, should always be used, as these will be read by our auto-documentation script, and will provide the foundation of our API documentation. (The docstrings in this guide are slightly wrong, as showcasing code in latex forces a slight reordering of lines.)
+Docstrings however, should always be used, as these will be read by our auto-documentation script, and will provide the foundation of our API documentation. (The docstrings in this guide might be slightly wrong, as showcasing code in latex forces a slight reordering of lines.)
 
 \subsection{The conventions we use in our project}
 
@@ -205,7 +223,7 @@ First off, we try to be compliant to the \href{https://www.python.org/dev/peps/p
 \item Use 4 spaces, not tabs (you can get your editor to do this automatically, and it is in recommended for coding in general).
 \item If your function has many inputs, list them vertically by having an extra indent or more. See the code example above how rectangleWithTemperature is called if you want an example.
 \item We use CapitalizedWords and mixedCase mostly in our code. We capitalized the first letter to signal that this is a class, and we keep it in lowercase if it is an instance of a class, or a function. This allows us to easily see what we're working with.
-\item We disobey the convention on function names, where PEP 8 wants them to be lowercase and seperated by underscores, we use mixedCase for functions as well.
+\item We disobey the convention on function names, where PEP 8 wants them to be lowercase and seperated by underscores, we use mixedCase for functions as well. This is due to underscore being a hassle to use.
 \item If you have a list of things, add list to the name. Do not use plural s. \\
 good: vesselList, bad: vessels
 \item Further, as we have a project with a lot of functional files, we often use the "import .... as .." method, where we have a list of abbreviations that you are expected to follow.
@@ -219,6 +237,7 @@ Throughout the guide, there will be a lot of code used as example. However, a lo
 
 %TODO nevn hvilke filer som har brukne imports. 
 
+\newpage
 \section{Hierarchy, or why size matters}
 
 I want you to consider a machine. Consider all the parts it's made of. Consider how most of those parts are rather standardized. They are of a specific form, attach in a specific way, and perform in a specific manner. Each component has certain demands in functionality and structural integrity. Programs are much the same. In any large program, if you "pop the hood" on it, you will almost always find that it consists of smaller programs working in conjunction, just like any machine would. And, just like you wouldn't want to design a machine without splitting it into components, the same applies to programming. 
@@ -259,31 +278,36 @@ At some point, the module will be considered complete, and you'll move on. Then 
 
 However, it might be that the problem isn't the box itself, but its description. The most important reason why I want you to consider all code you write as a black box, is for the sake of others. If your black box is well defined, with strict input, output, and exception handling, other programmers will be able to use it as a black box. This allows them to employ your work without having to inspect and understand the foundation of your program. They might want to anyway, but they won't have to. This increases productivity a lot. 
 
+\newpage
 \section{Exceptions, friend or foe?}
 
-You've probably seen this a hundred times, you have a typo, pass the wrong parameter, and the program dies with an error log that gives a bunch of tracebacks and a certain kind of error, like "TypeError: object <int> has no attribute append". While your previous experiences with exceptions might be that they are rather unhelpful, with some care, they will be your allies in debugging, and you should use them for all they're worth. 
+You've probably seen this a hundred times, you have a typo, pass the wrong parameter, and the program dies with an error log that gives a bunch of tracebacks and a certain kind of error, like "TypeError: object [int] has no attribute append". While your previous experiences with exceptions might be that they are rather unhelpful, with some care, they will be your allies in debugging, and you should use them for all they're worth. 
 
 \subsection{The road to success is paved with failures}
 
 Wait what? You want me to fail?
 
-Well, not exactly. I want you to cause your code to fail in every possible way. If you have a code that should open an XML file, I want you to test giving it a txt file. I want you to test giving it a python file. I want you to test giving it a file that doesn't exist. I want you to test giving it a corrupted file. You get the picture. And I want you to keep those tests for later, I'll get back to that in the next section. 
+Well, not exactly. I want you to cause your code to fail in every possible way. If you have a code that should open an XML file, I want you to test giving it a txt file. I want you to test giving it a python file. I want you to test giving it a file that doesn't exist. I want you to test giving it a corrupted file. You get the picture. And I want you to keep those tests for later, I'll gea padded message,t back to that in the next section. 
 
 Essentially, sooner or later, you, or someone else, will mess up, and use your code in the wrong way. When that happens, you want your code to give as specific and useful information as it can, because the standard error messages are less and less useful as the project grows in size.
 
 Let's construct a hypothetical scenario:
 you have a main function that calls on moduleReadFile 100 times to read 100 different files. It then passes the output from moduleReadFile to moduleProcessFileData, which in turn depends on 3 submodules. 
 
-The standard error message you will get is: %TODO check this
+The standard error message you will get is something along the lines of this: 
 
-Error in line X in main()
-  result = moduleProcessFileData.process(outputFromMRF)
-Error in line Y in moduleProcessFileData.process(inputFileData):
-  for line in inputFileData:
+\begin{lstlisting}
+Traceback (most recent call last):
+  File "Main.py", line [last line] in <module>
+    main()
+  File "Main.py", line X in main    
+    moduleProcessFileData.process(outputFromMRF)
+  File "moduleProcessFileData line Y in process
     submodule2.sanitize(line)
-Error in line Z in submodule2.sanitize(inputLine)
-  splitInput = inputLine.split(".")
-TypeError: type None has no function split()
+  File "submodule2",  line Z in sanitize
+    splitInput = inputLine.split(".")
+  AttributeError: 'NoneType' has no attribute 'split'
+\end{lstlisting}
 
 Okay, so you have an empty line or something being passed on. Which file did it come from? the first, last? one in the middle somewhere? We want our program to catch exceptions, process them, and pass them on, and in python, this is called "try:" and "except (optional: exceptionType):"
 
@@ -354,7 +378,7 @@ except:
 
 Using this method consistently will cause your program to always give reasonable error messages. However, there are times when you want to handle your exceptions.
 
-\subsection{Exception handling, not wrestling}
+\subsection{Exception handling}
 
 Now, the method I ended with on the last subsection was good for giving good feedback when your program crashes and burns, but it neglects one scenario: When you expect your program to fail some times, and want it to continue just the same. 
 
@@ -441,7 +465,7 @@ except Exception as e:
                   sys.exc_info()[2] # traceback info
 \end{lstlisting}
 
-As you can see, we don't print anything, instead we raise a new exception that has the same type, a padded message, and contains the original traceback. This has certain advantages. First of all, you can decide at any level whether or not the message should be silent, whereas with the print method, you will always print each step until you reach the one that suppresses the exception. Secondly, you will get the whole string in one piece, at the end of your error traceback, which means that you can look at it the same way you would a standard unhandled exception. Third, and maybe the most important, this allows for neater unit testing, as print statements are not particularly liked by python's unit testing framework. 
+As you can see, we don't print anything, instead we raise a new exception that has the same type, the old message appended with new information, and contains the original traceback. This has certain advantages. First of all, you can decide at any level whether or not the message should be silent, whereas with the print method, you will always print each step until you reach the one that suppresses the exception. Secondly, you will get the whole string in one piece, at the end of your error traceback, which means that you can look at it the same way you would a standard unhandled exception. Third, and maybe the most important, this allows for neater unit testing, as print statements are not particularly liked by python's unit testing framework. 
 
 However, and this is important, you should still consider having print statements, or some error/warning logging for the exceptions that do get suppressed.
 
@@ -461,7 +485,7 @@ I will urge you to look at this webpage, \href{https://docs.python.org/2/library
 
 As you can understand from this list, Exception is the one you want to focus on. However, since I've already spent so much time explaining it, I'll just say this final thing: Notice that Warning is a subclass of Exception. This is because the functionality of the Exception class is suited for Warning. But, when issuing warnings, one uses warnings.warn(Warning('text')), as this does not start the termination chain a regular Exception would. The rest of the Exception tree should be self-explanatory enough. 
 
-
+\newpage
 \section{Unit Testing and You!}
 
 %TODO fix overselling, refactor into having own chapter on blackbox etc.
@@ -470,19 +494,9 @@ Now comes the juicy part: unit testing, and why this will cause you to write bet
 \subsection{What is unit testing}
 So, what is unit testing? Simply put, unit testing is the method of always testing what you implement before moving on. Now you're probably thinking "but I already do that", and you're probably right, but do you keep the tests? Are they structured, do they test all demanded behaviours, including how it handles wrong input? If you have a function that should add two vectors together, what happens if they are of different lengths? what if one consists of integer values, the other floating points? 
 
-This is why you want to build unit tests for each module you make. Mind you, I'm not talking about checking if 2 + 2 = 4, some things you should assume just works, but rather, I want you to have a clear idea of exactly what should happen when you input parameters into your function, what it returns. As we will be working on numerical simulation, runtimes will be dominated by the numerical solvers, which means that until the program is complete, optimization of anything else will no be a priority. However, knowing how each module behaves will be, and if you recall Figure \ref{cleanCodeEfficiency}, it is crucial to the project's progress. 
+This is why you want to build unit tests for each module you make. Mind you, I'm not talking about checking if 2 + 2 = 4, some things you should assume just works, but rather, I want you to have a clear idea of exactly what should happen when you input parameters into your function, what it returns. As we will be working on numerical simulation, runtimes will be dominated by the numerical solvers, which means that until the program is complete, optimization of anything else will not be a priority. However, knowing how each module behaves will be, and if you recall Figure \ref{cleanCodeEfficiency}, it is crucial to the project's progress. 
 
 If you do unit testing correctly, it'll be \href{http://stackoverflow.com/questions/61400/what-makes-a-good-unit-test}{"A TRIP"}.
-
-\subsection{Unit testing, slayer of dragons}
-Now, as you might have thought; "But I can't devise a test for my bigFunc(inp1, inp2, inp3, inp4, etc etc), what should I do?". The simple answer is: don't make bigFunc.
-
-What? But I need bigFunc! Or so you might think. But it actually makes sense. No matter how complex your operation might seem, it will almost certainly consist of smaller tasks. And, rather than clustering them together, separate them. Essentially, it boils down to a simple message: if it's too big to unit test, it's too big to exist.
-
-%TODO rewrite this as well.
-Mind you, this does not mean that you don't have big functions. But those big functions should always consist of calling smaller, testable functions rather than doing it all by themselves. Making it easy to understand, debug or radically alter the big function. This again, boils down to the concept of black-boxes. A large function should consist of smaller, well defined black boxes, chained up in a way that produces the desired output. 
-
-This is why I call unit testing the slayer of dragons, because big black boxes with unpredictable behaviour are like dragons, pretty at first, deadly when poked in the wrong spot. However, apply a regiment of unit testing to your development process, and the dragon will be chopped to pieces naturally by the process. and instead nicely distributed in the code where needed. 
 
 \subsection{What testing paradigm is best for you?}
 
@@ -494,7 +508,7 @@ However, code first, tests later is more in touch with the standard way of doing
 
 My personal recommendation is simply to try both. Some will want to force themselves to test thoroughly by adhering to TDD, while others will want the freedom to do it a bit more at their own pace.
 
-But make no mistake, you should always test your code.
+But make no mistake, you should test your code, and you should do it properly, using either the built-in features of python 2.7, or an extended testing library. For this guide, I will focus on the built-in, as most of the extended ones are built upon it again. 
 
 \subsection{The unittest package}
 
@@ -503,7 +517,7 @@ Now, Python has a built-in library, unittest, which will help automate a lot of 
 \item import unittest
 \item import file(s) you wish to test
 \item make class(es) which inherit from unittest.TestCase
-\item make functions within the classes with the name test\_whatYouWishToTest. Use self.assert<type>() calls within the function. \href{https://docs.python.org/2/library/unittest.html\#unittest.TestCase.debug}{List of asserts}
+\item make functions within the classes with the name test\_whatYouWishToTest. Use self.assert[type]() calls within the function. \href{https://docs.python.org/2/library/unittest.html\#unittest.TestCase.debug}{List of asserts}
 \item end with the following line: \\
  if \_\_name\_\_ == '\_\_main\_\_': unittest.main()
 \end{enumerate}
@@ -528,7 +542,7 @@ if __name__ == '__main__':
 
 \end{lstlisting}
 
-Now, as you can see, it's fairly straight forward, your class inherits from the TestCase class in the unittest package, so that it contains specialized assert functions used by unittest.main(). All tests are in functions prefaced with test<underscore> and a descriptive name. But, there are certain issues with this test. 
+Now, as you can see, it's fairly straight forward, your class inherits from the TestCase class in the unittest package, so that it contains specialized assert functions used by unittest.main(). All tests are in functions prefaced with test[underscore] and a descriptive name. But, there are certain issues with this test. 
 First off, if test\_splitString fails, you will have to look at what part of the test itself failed. This is why it's common practice to split tests into as simple as possible tests. 
 
 However, it might be that you want to have several tests that want to use similar variables. But, as was mentioned in the acronym "A TRIP", one important criteria is the independence of tests. The way to solve this is by abstracting the tests into having inheritance themselves.
@@ -544,6 +558,7 @@ class SetUpStringTestCase(unittest.TestCase):
     self.wordCount = 2
     self.letterCount = 10
     self.spaceCount = 1
+
 
 class TestSplitString(SetUpStringTestCase):
 
@@ -581,8 +596,18 @@ As you can see, this way, each class will specify what function you wish to test
 
 Now, there is one huge pitfall in this code. If for instance, in class TestConcatinateString, test\_correctBehaviour changes one of the variables, that change will carry on to the next test in the class. So be careful, and if in doubt, split the tests you suspect can change the variables into their own classes. However, since we're working in Python, it's less likely to be a problem than in languages that depend more on call-by-reference.  
 
+
+\subsection{Unit testing, slayer of dragons}
+Now, as you might have thought; "But I can't devise a test for my bigFunc(inp1, inp2, inp3, inp4, etc etc), what should I do?". The simple answer is: don't make bigFunc.
+
+What? But I need bigFunc! Or so you might think. But it actually makes sense. No matter how complex your operation might seem, it will almost certainly consist of smaller tasks. And, rather than clustering them together, separate them. Essentially, it boils down to a simple message: if it's too big to unit test, it's too big to exist.
+
+This is why I call unit testing the slayer of dragons, because big black boxes with unpredictable behaviour are like dragons, pretty at first, deadly when poked in the wrong spot. However, apply a regime of unit testing to your development process, and you'll find what functions are too big without looking specifically for them.
+
+
 %\subsection{Making mock functions for testing}
 %TODO decide if should remain
+
 
 \subsection{Systematising your tests}
 
@@ -595,6 +620,8 @@ Now, how should your tests be? Let's reference Clean Code again by looking at an
 \item Self Validating. The tests should have a boolean output. Either the test succeeds, or it fails. This is a crucial part of making them fast as well, as it won't matter if the test runs in 0.1 seconds, if you have to spend 5 minutes to look at it to check if it succeeded.
 \item Timely. This comes back to the testing paradigm. The test should be written at a relevant point in the development cycle. The way I like to think of it is that it's debatable whether or not to write tests or code first, but the test always comes before the deployment of the module. Essentially, before your code gets introduced into the project, it has to have been tested thoroughly.  
 \end{itemize}
+
+Of course, since we're programming a heavily numerical system, there's one more aspect which I'd like to stress, and it's really about thoroughness. Because of our dependence on floating point operations, which can produce rounding errors when close to zero, we want to test feeding our system edge cases that checks how our functions handle numbers close to or equal 0 whereever it's relevant. In computers, you can get that items that should have been zero actually have a microscopic value, and if they're subtracted from a number that is zero, this can lead to unwanted behaviour later in the simulation. 
 
 Between the two acronyms, I feel that most of the testing philosophy should be covered. Of course, the topic of unit testing is so deep that many would argue it deserves its own book. But, I hope this has helped
 
@@ -655,6 +682,8 @@ class Rectangle(object):
 def main():
 
   # construct instance of Rectangle class
+  # notice naming the arguments of the constructor 
+  # as they're not intuitive without the names.
   rectInstance = Rectangle(
                   lenX = 15.1, 
                   lenY = 12.3)
@@ -692,7 +721,7 @@ except Exception as e:
 \end{lstlisting}
 Of course, usually you want to only use the last part unless you have a really good reason to do otherwise. One of the most common reasons is in the case of user input, where you have to account for the user misspelling things.
 
-Further, The handle<...> and store<...> functions are just thought up examples, if you need them, implement them.
+Further, The handle[...] and store[...] functions are just thought up examples, if you need them, implement them.
 
 \newpage
 \subsection{Unit Testing}
