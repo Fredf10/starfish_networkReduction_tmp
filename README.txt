@@ -32,7 +32,7 @@ enter the AutoDocumentation folder and run "make html". If
 you've altered modules, run "make clean" first. If you've 
 altered module names, folders, or top level modules, edit 
 AutoDocumentation/sources/index.rst accordingly, and then 
-run "sh fullclean.sh".
+run "make fullupdate".
 
 We will use a slightly modified Google standard 
 for writing docstrings. (return is different)
