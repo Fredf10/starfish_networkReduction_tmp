@@ -67,6 +67,23 @@ class STARFiSh(object):
             f.write("======================\n\n")
             f.close()
 
+    def errorAppendInfo(self, infoString = None):
+        """
+        Global Exception information appending. 
+        Warning: May mess up debugger, should be checked if this is true
+        before employing it throughout code.
+        Warning: Using this function will make a traceback appear at the 
+        line this function was called. This is unavoidable behaviour.
+
+        Args:
+            infoString (string): String containing additional information.
+        """
+        if infoString == None:
+            raise
+        else: 
+            try: raise
+            except Exception as e:
+                raise type(e), type(e)(e.message + "\nAppended : " + infoString),sys.exc_info()[2]
 
 
 
