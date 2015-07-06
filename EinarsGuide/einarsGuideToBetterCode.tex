@@ -449,9 +449,9 @@ As you can see, now we will handle a TypeError and allow the program to progress
 
 Another very important thing to notice, is that this will not catch system errors and calls. System errors will propagate all the way and kill the program, which they should. 
 
-Of course, I'm being overly descriptive in my warning and error messages in this code, real code will not need this level of pedantic error messages, but you will find that I'm not that far off either. 
+Of course, I'm being overly descriptive in my warning and error messages in this code, real code will not need this level of pedantic error messages, but you will find that I'm not that far off either. Now, there is one problem with this approach: What if you want to determine higher up whether or not to print anything? The way we're doing it now, the code prints for each level, and quite a lot as well.
 
-\subsection{How to actually do it}
+\subsection{Appending Exceptions}
 
 I'm a bad person. I've shown you so much, and it's not actually they way you're supposed to handle exceptions. Before you get angry, please bear with me. The reason I've shown you this is because it's easier to explain the logic before introducing the concept of padding your exception. Let me show you how it's actually done.
 
@@ -459,15 +459,35 @@ I'm a bad person. I've shown you so much, and it's not actually they way you're 
 try: 
   stuff(parameterlist)
 except Exception as e:
-  raise type(e), type(e)(e.message + 
+  raise type(e), type(e)(e.message + # original info
                   '\n IN FILEA: function stuff was called with 
                   params {}'.format(parameterlist)), 
-                  sys.exc_info()[2] # traceback info
+                  sys.exc_info()[2]  # traceback info
 \end{lstlisting}
 
 As you can see, we don't print anything, instead we raise a new exception that has the same type, the old message appended with new information, and contains the original traceback. This has certain advantages. First of all, you can decide at any level whether or not the message should be silent, whereas with the print method, you will always print each step until you reach the one that suppresses the exception. Secondly, you will get the whole string in one piece, at the end of your error traceback, which means that you can look at it the same way you would a standard unhandled exception. Third, and maybe the most important, this allows for neater unit testing, as print statements are not particularly liked by python's unit testing framework. 
 
-However, and this is important, you should still consider having print statements, or some error/warning logging for the exceptions that do get suppressed.
+Now, since you're reading this guide to work on STARFiSh, I have happy news for you. We have implemented a super-class which contains generalized warning and exception appending.
+
+\subsection{STARFiSh's own handling}
+
+Now, since we'll be working in a heavily object oriented manner, we have made a super-class which all other classes inherit from. This class will be worked to contain some commonly found data such as vesselID, maybe a description string, etc. But the most important features are the general functions, among which are warn() and errAppend().
+
+Let's have a look at how we call each of them.
+
+\begin{lstlisting}
+try: stuff()
+except Exception:
+  self.warn(infoString, exceptionHappened = True, 
+            quiet = False, verbose = False, saveToFile = False)
+
+try: stuff()
+except Exception:
+  tmp1,tmp2,tmp3 = self.errAppend(infoString)
+  raise tmp1,tmp2,tmp3
+\end{lstlisting}
+
+As you can see, a lot smoother than the original methods I've described.
 
 \subsection{The other types of exceptions}
 
@@ -722,6 +742,27 @@ except Exception as e:
 Of course, usually you want to only use the last part unless you have a really good reason to do otherwise. One of the most common reasons is in the case of user input, where you have to account for the user misspelling things.
 
 Further, The handle[...] and store[...] functions are just thought up examples, if you need them, implement them.
+
+\newpage
+\subsection{Our Exception and Warning system}
+
+
+\begin{lstlisting}
+try: stuff()
+except Exception:
+  self.warn(infoString, exceptionHappened = True, 
+            quiet = False, verbose = False, saveToFile = False)
+
+\end{lstlisting}
+
+\begin{lstlisting}
+
+try: stuff()
+except Exception:
+  tmp1,tmp2,tmp3 = self.errAppend(infoString)
+  raise tmp1,tmp2,tmp3
+\end{lstlisting}
+
 
 \newpage
 \subsection{Unit Testing}

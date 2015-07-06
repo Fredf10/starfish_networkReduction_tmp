@@ -19,15 +19,15 @@ class STARFiSh(object):
     Global Update function for dictionaries.
     """
 
-    def warn(self, infoString = None, exceptionHappened = True, 
+    def warn(self, infoString = None, exceptionHappened = True,
              quiet = False, verbose = False, saveToFile = False):
         """ 
         Global Warning Function
         
         Args: 
             infoString (String): String describing why the warning was made.
-            exceptionHappened (Optional Bool): Boolean determining if it 
-                should use the last exception's info or not. 
+            exceptionHappened (Optional Bool): Boolean determining if it
+                should use the last exception's info or not.
                 Defaults to True.
             quiet (Opt. Bool): Whether to print warning at all. 
                 Defaults to False.
