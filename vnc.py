@@ -672,7 +672,7 @@ def main():
                     print ""
                     indexChoosen = None
                     while  indexChoosen not in [str(i) for i in xrange(len(dirNamesTemplate))]:
-                         indexChoosen = raw_input("     Insert index of network: ")
+                        indexChoosen = raw_input("     Insert index of network: ")
                                                    
                     templateNetworkName = dirNamesTemplate[int(indexChoosen)]
                     #load the new network
