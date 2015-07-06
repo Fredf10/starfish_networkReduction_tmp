@@ -59,6 +59,7 @@ def runSingleBatchSimulation(batchData):
     flowSolver = FlowSolver(vascularNetworkTemp, quiet=True)
     flowSolver.solve()
     vascularNetworkTemp.saveSolutionData()
+    moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFile)
     del flowSolver
     gc.collect()
     timeSolverSolve = time.clock()-timeStart
