@@ -12,7 +12,8 @@ class STARFiSh(object):
     will inherit from. 
     
     Contains:
-    Global Warning function (for handling exceptions)
+        Global Warning function; warn()
+        Global Error Appending function; *choose*
     
     Planned features: 
     Global Update function for dictionaries.
@@ -75,6 +76,10 @@ class STARFiSh(object):
         Warning: Using this function will make a traceback appear at the 
         line this function was called. This is unavoidable behaviour.
 
+        This will be called in the following way inside an except clause:
+        except:
+            self.errorAppendInfo(infoString)
+
         Args:
             infoString (string): String containing additional information.
         """
@@ -86,7 +91,30 @@ class STARFiSh(object):
                 raise type(e), type(e)(e.message + "\nAppended : " + infoString),sys.exc_info()[2]
 
 
+    def alternativeErrorAppend(self, infoString = None):
+        """
+        This is the alternative way in case the first messes up debuggers, 
+        or just just deemed too annoying with its excessive tracebacks.
+        
+        Not entirely sure this won't mess a bit with debuggers as well. 
 
+        It will work by demanding that the programmer calls the function in 
+        the following way:
+
+        except:
+            tmp1, tmp2, tmp3 = self.alternativeErrorAppend(string)
+            raise tmp1, tmp2, tmp3
+
+        Not the worst syntax, but still a hassle
+        uglier code, cleaner tracebacks :/
+        """
+        if infoString == None:
+            try: raise
+            except: return sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]
+        else:
+            try: raise
+            except Exception as e:
+                return type(e), type(e)(e.message + "\nAppended : " + infoString), sys.exc_info()[2]
 
 
 
