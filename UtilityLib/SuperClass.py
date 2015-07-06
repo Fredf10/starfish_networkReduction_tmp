@@ -7,13 +7,13 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 root = ''.join([cur,'/../'])
 logFilePath = root + 'warninglog.txt'
 
-class STARFiSh(object):
+class SuperClass(object):
     """Super class every other class in STARFiSh 
     will inherit from. 
     
     Contains:
         Global Warning function; warn()
-        Global Error Appending function; *choose*
+        Global Error Appending function; appendException()
     
     Planned features: 
     Global Update function for dictionaries.
@@ -68,45 +68,23 @@ class STARFiSh(object):
             f.write("======================\n\n")
             f.close()
 
-    def errorAppendInfo(self, infoString = None):
-        """
-        Global Exception information appending. 
-        Warning: May mess up debugger, should be checked if this is true
-        before employing it throughout code.
-        Warning: Using this function will make a traceback appear at the 
-        line this function was called. This is unavoidable behaviour.
-
-        This will be called in the following way inside an except clause:
-        except:
-            self.errorAppendInfo(infoString)
-
-        Args:
-            infoString (string): String containing additional information.
-        """
-        if infoString == None:
-            raise
-        else: 
-            try: raise
-            except Exception as e:
-                raise type(e), type(e)(e.message + "\nAppended : " + infoString),sys.exc_info()[2]
-
-
-    def alternativeErrorAppend(self, infoString = None):
-        """
-        This is the alternative way in case the first messes up debuggers, 
-        or just just deemed too annoying with its excessive tracebacks.
+    def appendException(self, infoString = None):
+        """ 
+        The exception appending function. 
         
-        Not entirely sure this won't mess a bit with debuggers as well. 
-
-        It will work by demanding that the programmer calls the function in 
-        the following way:
-
-        except:
-            tmp1, tmp2, tmp3 = self.alternativeErrorAppend(string)
-            raise tmp1, tmp2, tmp3
-
-        Not the worst syntax, but still a hassle
-        uglier code, cleaner tracebacks :/
+        The function returns three variables which will be needed to be 
+        passed on to raise in the except clause that called this function.
+        
+        Args:
+            infoString (string): A string with the information you 
+                wish to append to the exception's message
+        Returns:
+            ExceptionType
+                The first argument raise requires
+            ExceptionWithMessage
+                the second argument raise requires
+            TracebackObjectLocation
+                The third argument raise requires
         """
         if infoString == None:
             try: raise
