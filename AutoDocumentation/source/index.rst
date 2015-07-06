@@ -14,7 +14,7 @@ Contents:
    :maxdepth: 2
 
    Main
-   Visualize
+   Visualisation
    vnc
    systemCheck 
    NetworkLib
