@@ -7,28 +7,29 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 root = ''.join([cur,'/../'])
 logFilePath = root + 'warninglog.txt'
 
-class SuperClass(object):
+class StarfishBaseObject(object):
     """Super class every other class in STARFiSh 
     will inherit from. 
     
     Contains:
         Global Warning function; warn()
+
         Global Error Appending function; appendException()
     
     Planned features: 
     Global Update function for dictionaries.
     """
 
-    def warn(self, infoString = None, exceptionHappened = True,
+    def warning(self, infoString = None, noException = False,
              quiet = False, verbose = False, saveToFile = False):
         """ 
         Global Warning Function
         
         Args: 
             infoString (String): String describing why the warning was made.
-            exceptionHappened (Optional Bool): Boolean determining if it
+            noException (Optional Bool): Boolean determining if it
                 should use the last exception's info or not.
-                Defaults to True.
+                Defaults to False.
             quiet (Opt. Bool): Whether to print warning at all. 
                 Defaults to False.
             verbose (Opt. Bool): Whether or not to print full traceback.
@@ -44,10 +45,9 @@ class SuperClass(object):
         else: 
             completeString = completeString + "no string passed to warn()"
 
-        if exceptionHappened:
+        if not noException:
             try: raise
-            except:
-                exceptionInfo = "\n" + traceback.format_exc()
+            except: exceptionInfo = "\n" + traceback.format_exc()
         else: exceptionInfo = " "
 
         if verbose:
@@ -68,23 +68,14 @@ class SuperClass(object):
             f.write("======================\n\n")
             f.close()
 
-    def appendException(self, infoString = None):
+    def exception(self, infoString = None):
         """ 
         The exception appending function. 
-        
-        The function returns three variables which will be needed to be 
-        passed on to raise in the except clause that called this function.
-        
+       
         Args:
             infoString (string): A string with the information you 
                 wish to append to the exception's message
-        Returns:
-            ExceptionType
-                The first argument raise requires
-            ExceptionWithMessage
-                the second argument raise requires
-            TracebackObjectLocation
-                The third argument raise requires
+
         """
         if infoString == None:
             try: raise
@@ -92,7 +83,7 @@ class SuperClass(object):
         else:
             try: raise
             except Exception as e:
-                return type(e), type(e)(e.message + "\nAppended : " + infoString), sys.exc_info()[2]
+                raise type(e), type(e)(e.message + "\nAppended : " + infoString), sys.exc_info()[2]
 
 
 

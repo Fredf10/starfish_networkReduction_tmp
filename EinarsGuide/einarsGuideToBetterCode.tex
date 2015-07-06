@@ -746,12 +746,23 @@ Further, The handle[...] and store[...] functions are just thought up examples, 
 \newpage
 \subsection{Our Exception and Warning system}
 
+Do notice, this is to be used within classes that inherit from the SuperClass, 
+This is because we want to be able to turn warnings into error-loggers upon release, 
+and we might want to use some data stored in the SuperClass then. 
+
+One thing to notice, if you use self.warn without an exception having happened, this 
+must be sent to the function.
 
 \begin{lstlisting}
 try: stuff()
 except Exception:
-  self.warn(infoString, exceptionHappened = True, 
-            quiet = False, verbose = False, saveToFile = False)
+  self.warn(infoString, noException = False, #default value
+            verbose = False, saveToFile = False)
+
+if condition: 
+  success()
+else: 
+  self.warn(infoString, noException = True)
 
 \end{lstlisting}
 
