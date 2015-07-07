@@ -13,9 +13,11 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 #sys.path.append(cur+'/../Visualisation')
 
+import UtilityLib.classStarfishBaseObject as cSBO
+
 from VisualisationLib.classRealTimeVisualisation import realTimeVisualisation
 
-class CommunicatorBaseClass(object):
+class CommunicatorBaseClass(cSBO.StarfishBaseObject):
     """
     Base-class for all boundary conditions    
     
@@ -42,8 +44,8 @@ class CommunicatorBaseClass(object):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
-            except: 
-                print 'ERROR communicator.update(): wrong key: %s, could not set up communicator' %key
+            except Exception:
+                self.warning("communicator.update(): wrong key: %s, could not set up communicator" %key)
                 
     def readCommunicatorFile(self, samplingTime = 0.001):
         """
@@ -84,7 +86,7 @@ class CommunicatorBaseClass(object):
             while fileExist == False:
                 try:
                     open(''.join([cur,'/',self.filenameWrite])) 
-                except:
+                except Exception:
                     fileExist = True
                     with open(''.join([cur,'/',self.filenameWrite]),'w') as dataFile:
                         dataFile.write(dataString)         
@@ -224,8 +226,7 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         
         self.epsilon = numpy.zeros(sizeEpsilon)
         self.epsMean = 0
-        
-                
+
         try:    os.remove(''.join([cur,'/',self.filenameRead]))
         except: pass
         try:    os.remove(''.join([cur,'/',self.filenameWrite]))
@@ -250,8 +251,7 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
         self.data['MStrain'][n] = self.epsMean
         print 'epsilon'
         print self.epsMean
-        
-                       
+
         time1 = 5.
         time2 = 10
         a = True
@@ -263,7 +263,6 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
                 updateTime = n*self.dt
                         
                 self.boundaryCondition.updatePeriodRuntime(Tnew,updateTime)
-                
     
             if n*self.dt > time2-self.dt/2. and n*self.dt < time2+self.dt/2.: 
                 

@@ -12,11 +12,13 @@ import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
+import UtilityLib.classStarfishBaseObject as cSBO
+
 #sys.path.append(cur+'/NetworkLib')
 import NetworkLib.classBoundaryConditions as ccBC
 
 
-class Boundary():
+class Boundary(cSBO.StarfishBaseObject):
     def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, nTsteps, systemEquation):
         """
         Constructor of Boundary
@@ -127,7 +129,7 @@ class Boundary():
                 self.omegaFunction = ccBC.PrescribedInflux()
             self.omegaFunction.setPosition(self.position)
         else:
-            print "ERROR classBoundary: Too many type2-boundary Conditions defined!"
+            self.warning("classBoundary: Too many type2-boundary Conditions defined!", noException= True)
         
         # 4. Define the output of A, dependend if rigidArea
         self.rigidArea = rigidArea
@@ -229,9 +231,8 @@ class Boundary():
                         
         # check new p value
         if P_calc < 0:
-            print "ERROR: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,currentTimeStep*dt,currentTimeStep,dt)
-            print P_calc
-            exit()
+            raise ValueError("{} calculated negative pressure P_calc = {} at time {} (n {},dt {})".format(self.name, P_calc, currentTimeStep*dt,currentTimeStep,dt))
+            #exit()
         
         # calculate new value for the area
         A_calc = A[position] # assign old value
@@ -244,7 +245,7 @@ class Boundary():
         self.A[currentMemoryIndex+1][position] = A_calc
         
         try: self.BloodFlowSep[currentTimeStep] = self.BloodFlowSep[currentTimeStep-1]+dBloodVolumen
-        except: print "passed bloodflow integration"
+        except Exception: print "passed bloodflow integration"
         try:    self.BloodVolumen = self.BloodVolumen + 0.5*(self.BloodFlowSep[currentTimeStep-1]+self.BloodFlowSep[currentTimeStep])*dt
-        except: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[currentTimeStep]*dt
+        except Exception: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[currentTimeStep]*dt
         

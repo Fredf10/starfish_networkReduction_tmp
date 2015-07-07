@@ -1177,7 +1177,7 @@ class Bifurcation():
 #         #""" Predictor Step """
 #         if self.step == "predictor":
 #             self.step = "corrector"
-#             
+#
 #             # apply changed values
 #             self.P_mother_pre[pos1]        = sol[2]
 #             self.Q_mother_pre[pos1]        = sol[3]
@@ -1185,7 +1185,7 @@ class Bifurcation():
 #             self.Q_leftDaughter_pre[pos2]  = sol[1]
 #             self.P_rightDaughter_pre[pos3] = sol[5]
 #             self.Q_rightDaughter_pre[pos3] = sol[4]
-#             
+#
 #             if self.rigidAreas == False:
 #                 # calculate new areas
 #                 A1n = self.A_func[0]([sol[2]],pos1)
@@ -1448,7 +1448,8 @@ class Anastomosis():
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
         else:
-            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
+            raise ValueError("Connections; wrong solving scheme! {}".format(solvingScheme))
+#            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
         
         ## benchamark Test variables
         self.sumQErrorCount = 0
@@ -1550,9 +1551,10 @@ class Anastomosis():
         self.Q_daughter[n+1][pos3]    = Q3_new
         
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new, P3_new
-            exit()
+            tmpstring = "Connection: {} calculated negative pressure at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
+            tmpstring = tmpstring + "\n the values were: P1_new = {}, P2_new = {}, P3_new = {}".format(P1_new, P2_new, P3_new)
+            raise ValueError(tmpstring)
+            #exit()
                 
         # calculate new areas
         if self.rigidAreas == False:
@@ -1577,7 +1579,7 @@ class Anastomosis():
             self.maxQError  = sumQError
         #print self.name,' \n Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "Warning: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print sumQError, ' <- Q1,Q2,Q3 ',Q1_new, Q2_new, Q3_new
             #exit()
         

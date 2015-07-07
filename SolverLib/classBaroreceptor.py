@@ -1,11 +1,17 @@
-import numpy as np 
+import sys, os
+import numpy as np
 import math
 
 # import cellMLBaroreflexModels # Used later on in classes
 import cellMLBaroreflexModels.pettersenAorticBR
 import cellMLBaroreflexModels.bugenhagenAorticBR
 
-class Baroreceptor(object):
+cur = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(cur + '/../')
+import UtilityLib.classStarfishBaseObject as cSBO
+
+
+class Baroreceptor(cSBO.StarfishBaseObject):
     """
     Mother class for all baroreceptor models
     """
@@ -57,8 +63,7 @@ class Baroreceptor(object):
         self.nTsteps                 = flowSolver.nTsteps
         
         self.dsetGroup = vascularNetwork.BrxDataGroup.create_group('Baroreflex - '+str(self.baroId))
-      
-                     
+
         bc2out = {}
         terminalBoundaries = 0
         
@@ -105,16 +110,16 @@ class Baroreceptor(object):
         
         
     def update(self,baroDict):
-            """
-            updates the Baroreceptor using a dictionary in form of 
-            baroDict = {'variableName': value}
-            """
-            for key,value in baroDict.iteritems():
-                try:
-                    self.__getattribute__(key)
-                    self.__setattr__(key,value)
-                except: 
-                    print "ERROR 139 baroreceptor.update(): wrong key: %s, could not set up baroreceptor" %key
+        """
+        updates the Baroreceptor using a dictionary in form of
+        baroDict = {'variableName': value}
+        """
+        for key,value in baroDict.iteritems():
+            try:
+                self.__getattribute__(key)
+                self.__setattr__(key,value)
+            except Exception:
+                self.warning("baroreceptor.update(): wrong key: %s, could not set up baroreceptor" %key)
     
     
     def getVariableValue(self,variableName):
@@ -124,8 +129,8 @@ class Baroreceptor(object):
         """
         try:
             return self.__getattribute__(variableName)
-        except: 
-            print "ERROR CarotidBaroreceptor.getVariable() : CarotidBaroreceptor has no variable {}".format(variableName)
+        except Exception:
+            self.warning("CarotidBaroreceptor.getVariable() : CarotidBaroreceptor has no variable {}".format(variableName))
                        
                        
     def getVariableDict(self):
@@ -249,16 +254,15 @@ class AorticBaroreceptor(Baroreceptor):
             self.cellMLinputID = baroreceptorCellML.inputID
             self.cellMLoutputArray = baroreceptorCellML.outputArray
             self.cellMLoutputID = baroreceptorCellML.outputID
-         
-           
+
             # initialize the model (constant parameters and initial values of states) 
             (iniStates, constants) = baroreceptorCellML.initConsts()
             self.updateConstants(constants)
             
             timeArray = np.linspace(0,self.dt,2)
             self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray,iniStates,self.constants)
-            
-                     
+
+
         self.Area1 = vascularNetwork.vessels[self.vesselIds[0]].Asol
         self.Area2 = vascularNetwork.vessels[self.vesselIds[1]].Asol
         self.Pressure1 = vascularNetwork.vessels[self.vesselIds[0]].Psol
