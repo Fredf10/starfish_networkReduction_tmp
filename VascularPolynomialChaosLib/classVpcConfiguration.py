@@ -31,12 +31,12 @@ class VpcConfiguration(object):
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
-        self.createSample     = True
+        self.createSample     = False
         
         ### 1.step genrealized polynomial chaos evaluations + data storing
-        self.createEvaluationXmlFiles = True
+        self.createEvaluationXmlFiles = False
         
-        self.simulateEvaluations    = True
+        self.simulateEvaluations    = False
         self.local                  = True #TODO: add functions for server
         self.multiprocessing        = True
         self.numberOfProcessors     = 12

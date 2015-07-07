@@ -40,6 +40,8 @@ class LocationOfInterestManager(object):
         '''
         vpcQuantityOfInterestFile = mFPH_VPC.getFilePath('vpcSolutionDataFile', networkName, dataNumber, mode = "write", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
         saveFile = h5py.File(vpcQuantityOfInterestFile,'w')
+        # add simulation time
+        saveFile.create_dataset('simulationTime', data=self.simulationTime)
         for locationOfInterest in self.locationOfInterests:        
             # add information of each quantity in each location
             locationOfInterest.saveQuantitiyOfInterestData(saveFile)
@@ -81,15 +83,19 @@ class LocationOfInterestManager(object):
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationOfInterests:
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
+        # second postprocessing find extrema if needed
+        for locationOfInterest in self.locationOfInterests:
+            locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
+                         
                         
-    def calculateStatisticsPolynomialChaos(self,orthogonalPolynomials, samples, distributions):
+    def calculateStatisticsPolynomialChaos(self,orthogonalPolynomials, samples, distributions, dependentCase):
         '''
         Calculate statisitcs for each quantity of interest at each location of interest based
         on the generalized polynomial chaos expansion.
         '''
         for locationOfInterest in self.locationOfInterests:
             for quantity in locationOfInterest.quantitiesOfInterestToProcess:
-                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(orthogonalPolynomials, samples, distributions)
+                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(orthogonalPolynomials, samples, distributions, dependentCase)
                 
     
     def calculateStatisticsMonteCarlo(self):

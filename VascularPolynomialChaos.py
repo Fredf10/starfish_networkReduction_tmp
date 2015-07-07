@@ -82,7 +82,6 @@ def vascularPolyChaos():
     a = 0.8
     CorrelationMatrix = np.array([[1.,a,a],[a,1.,a],[a,a,1.]])
     
-    
     dependentCase = True
     
     if dependentCase == True:
@@ -136,7 +135,8 @@ def vascularPolyChaos():
         
         # 6. process quantity of interest
         ## TODO: defined query location and quantities to process
-        quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure'] #,'ExtremaPressure']
+        quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure' ]#,
+                                         #'ExtremaPressure','ExtremaBackwardPressure']#,'InflectionPointPressure']
         queryLocation = 'vessel_0'
         xVals = 0.25
         confidenceAlpha = 5
@@ -155,7 +155,8 @@ def vascularPolyChaos():
         # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
         locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager.orthogonalPolynomials,
                                                                      distributionManager.samples,
-                                                                     distributionManager.jointDistribution)
+                                                                     distributionManager.jointDistribution,
+                                                                     dependentCase)
         locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         
         ## if monte carlo
