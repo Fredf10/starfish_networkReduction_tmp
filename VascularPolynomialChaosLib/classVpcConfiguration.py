@@ -22,8 +22,8 @@ class VpcConfiguration(object):
         update variables from vpcConfig-file (networkName,dataNumber)
         '''
         ## TODO: delete old members:
-        self.createDistributions = False
-        self.runSimulations = False
+        self.createDistributions = True
+        self.runSimulations = True
         
         ### network name and datanumber
         self.networkName = networkName
@@ -31,14 +31,14 @@ class VpcConfiguration(object):
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
-        self.createSample     = False
+        self.createSample     = True
         
         ### 1.step genrealized polynomial chaos evaluations + data storing
-        self.createEvaluationXmlFiles = False
+        self.createEvaluationXmlFiles = True
         
-        self.simulateEvaluations    = False
+        self.simulateEvaluations    = True
         self.local                  = True #TODO: add functions for server
-        self.multiprocessing        = True
+        self.multiprocessing        = False
         self.numberOfProcessors     = 12
         self.evaluationNumbers      = []
         

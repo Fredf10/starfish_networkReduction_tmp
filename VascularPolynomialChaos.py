@@ -63,6 +63,7 @@ def vascularPolyChaos():
     optionsDict = mStartUp.parseOptions(['f','n'],vascularPolynomialChaos=True)
     networkName           = optionsDict['networkName']
     dataNumber            = optionsDict['dataNumber']
+    
     # 1.1 load configuration  
     vpcConfiguration = cVPCConf.VpcConfiguration(networkName,dataNumber)
     # 1.2 load vascular network file polynomial chaos
@@ -70,9 +71,11 @@ def vascularPolyChaos():
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
     # 1.3 print distributions
     vascularNetwork.randomInputManager.printOutInfo()
+    # TODO: do not use exit()
     if len(vascularNetwork.randomInputManager.randomInputs) == 0:
         print "VascularPolynomialChaos_v0.3: no random inputs defined!"
         exit()
+        
     # 2. create distributions    
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
@@ -93,7 +96,7 @@ def vascularPolyChaos():
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])        
+            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])        
         # 5.2 save/create xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
@@ -120,8 +123,8 @@ def vascularPolyChaos():
                     mBSM.runBatchAsMultiprocessing(batchFileList, vpcConfiguration.numberOfProcessors , quiet = True)
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
         
-        print "starting Post processing - stopping here"
-        #exit()
+        print "starting Post processing "
+        
         # 6. process quantity of interest
         ## TODO: defined query location and quantities to process
         quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure'] #,'ExtremaPressure']
