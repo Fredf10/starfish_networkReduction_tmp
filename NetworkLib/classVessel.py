@@ -416,9 +416,11 @@ class Vessel(object):
                 
         Initializing net gravity on the vessels.
         '''
-         
-        try:    angleXMother = self.angleXMotherTime[n]
-        except: angleXMother = self.angleXMother
+        
+        if hasattr(self, "angleXMotherTime") and len(self.angleXMotherTime)>=n:
+            angleXMother = self.angleXMotherTime[n]
+        else:
+            angleXMother = self.angleXMother
         
         try:    angleYMother = self.angleYMotherTime[n]
         except: angleYMother = self.angleYMother
