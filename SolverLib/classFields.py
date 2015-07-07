@@ -39,7 +39,7 @@ class Field():
         
         self.step = "predictor"
         
-        #solvingSchemeField = 'MacCormack_Flux'
+        solvingSchemeField = 'MacCormack_Flux'
         
         if solvingSchemeField == 'MacCormack_Matrix':
             self.__call__ = self.MacCormackMatrix
