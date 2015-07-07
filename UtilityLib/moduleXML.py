@@ -441,8 +441,11 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                                 
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
-                                    networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
-                                    boundaryDataDict['filePathName'] = '/'.join([networkDirectory,variableValueStr])
+                                    ## TODO: fix problem when loading an absolute path
+                                    # networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
+                                    # variableValueStr = '/'.join([networkDirectory,variableValueStr])
+                                    
+                                    boundaryDataDict['filePathName'] = variableValueStr
                                     
                             boundaryInstance.update(boundaryDataDict)
                             boundaryInstances.append(boundaryInstance)             
@@ -624,9 +627,7 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                 
     # link random variables
     randomInputManager.linkRandomInputUpdateFunctions(vascularNetwork)
-    
-    print randomInputManager.printOutInfo()
-                   
+                           
     return vascularNetwork
 
 
