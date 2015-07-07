@@ -1,8 +1,15 @@
 import  numpy as np 
+import sys, os
 # raise errors
 np.seterr(invalid='raise')
 
-class Compliance(object):
+cur = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(cur+'/../')
+
+import UtilityLib.classStarfishBaseObject as cSBO
+
+class Compliance(cSBO.StarfishBaseObject):
 	"""
 	Base-Class for the Compliance-models
 	"""	
@@ -77,15 +84,16 @@ class Compliance(object):
 			try:
 				self.__getattribute__(key)
 				self.__setattr__(key,value)
-			except:
-				print "ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key)
+			except Exception:
+				self.warning("compliance.updateData Wrong key: {}, could not update varibale".format(key))
+#				print "ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key)
 
 class Exponential(Compliance):
 	"""
 	Exponential Compliance Model 
 	"""
 	def __init__(self, rho, As):
- 		Compliance.__init__(self, rho, As)
+		Compliance.__init__(self, rho, As)
 		self.betaExponential = None
 		self.P0 = 0 #self.Ps*np.exp(self.beta*(self.A0/self.As-1.))
 		
@@ -121,7 +129,7 @@ class Laplace(Compliance):
 	Laplace Compliance Model actually Hookean Model
 	"""
 	def __init__(self, rho, As):
- 		Compliance.__init__(self, rho, As)
+		Compliance.__init__(self, rho, As)
 		self.betaLaplace   = None
 		
 	def initialize(self,complianceDataDict):

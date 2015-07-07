@@ -17,6 +17,8 @@ from classBoundaryConditions import *
 #sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
 
+import UtilityLib.classStarfishBaseObject as cSBO
+
 #sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 
@@ -27,7 +29,7 @@ import pprint
 
 import h5py
 
-class VascularNetwork(object):
+class VascularNetwork(cSBO.StarfishBaseObject):
     """
     Class representing a vascular Network
     The vascular network consists out of vessels defined in classVessel::Vessel()
@@ -152,8 +154,9 @@ class VascularNetwork(object):
             if dataDict:
                 vessel.update(dataDict)  # set vesselData if available
             self.vessels[vessel.Id] = vessel  # add vessel to network
-        else:  
-            print "Error vascularNetwork.addVessel: vessel with Id {} exists already! Could not add vessel".format(vesselId)  # raise error if Id is set doubled
+        else:
+            self.warning("vascularNetwork.addVessel: vessel with Id {} exists already! Could not add vessel".format(vesselId), noException= True)
+#            print "Error vascularNetwork.addVessel: vessel with Id {} exists already! Could not add vessel".format(vesselId)  # raise error if Id is set doubled
  
     def deleteVessel(self, inputId):
         """
@@ -161,7 +164,8 @@ class VascularNetwork(object):
         """
         try:
             del self.vessels[inputId]
-        except:
+        except Exception:
+            self.warning("vascularNetwork.deleteVessel(): vessel with Id {} does not exist! Could not remove vessel".format(inputId))
             print "ERROR vascularNetwork.deleteVessel(): vessel with Id {} does not exist! Could not remove vessel".format(inputId)
     
     def addBaroreceptor(self, baroId=None, dataDict=False):
@@ -192,7 +196,8 @@ class VascularNetwork(object):
             self.baroreceptors[baroId] = instance
             
         else:
-            print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
+            self.warning("vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId),noException= True)
+            #print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
   
     def update(self, vascularNetworkData):
         """
@@ -203,8 +208,9 @@ class VascularNetwork(object):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key, value)
-            except: 
-                print 'WARNING vascularNetwork.update(): wrong key: %s, could not update vascularNetwork' % key 
+            except Exception:
+                self.warning("vascularNetwork.update(): wrong key: %s, could not update vascularNetwork" % key)
+                #print 'WARNING vascularNetwork.update(): wrong key: %s, could not update vascularNetwork' % key
                 
     def getVariableValue(self, variableName):
         """
@@ -213,8 +219,9 @@ class VascularNetwork(object):
         """
         try:
             return self.__getattribute__(variableName)
-        except: 
-            print "ERROR vascularNetwork.getVariable() : VascularNetwork has no variable {}".format(variableName)
+        except Exception:
+            self.warning("vascularNetwork.getVariable() : VascularNetwork has no variable {}".format(variableName))
+            #print "ERROR vascularNetwork.getVariable() : VascularNetwork has no variable {}".format(variableName)
     
     def updateNetwork(self, updateDict):
         """
@@ -236,25 +243,25 @@ class VascularNetwork(object):
         
         for dictName in ['vascularNetworkData']:
             try: self.update(updateDict[dictName])
-            except: pass
+            except Exception: self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork")
             
 #         for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
         for dictName in ['globalFluid', 'communicators']: 
             try: self.getVariableValue(dictName).update(updateDict[dictName])
-            except: pass
+            except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork")
                         
         if 'vesselData' in updateDict:
             for vesselId, vesselData in (updateDict['vesselData']).iteritems():
                 try:
                     self.vessels[vesselId].update(vesselData)
-                except:
+                except Exception:
                     self.addVessel(vesselId, vesselData)    
                      
         if 'baroreceptors' in updateDict:
             for baroId, baroData in (updateDict['baroreceptors']).iteritems():
                 try:
                     self.baroreceptors[baroId].update(baroData)
-                except:
+                except Exception:
                     self.addBaroreceptor(baroId, baroData)
             print self.baroreceptors
                       
@@ -275,7 +282,7 @@ class VascularNetwork(object):
         for variable, value in self.__dict__.iteritems():
             try: 
                 print " {:<20} {:>8}".format(variable, value)
-            except: print " {:<20} {:>8}".format(variable, 'None')
+            except Exception: print " {:<20} {:>8}".format(variable, 'None')
         
     def initialize(self, initializeForSimulation=False):
         """
@@ -295,7 +302,7 @@ class VascularNetwork(object):
                     try:
                         gamma = self.globalFluid['gamma']
                         self.globalFluid['dlt'] = (gamma + 2.0) / (gamma + 1)
-                    except:
+                    except Exception:
                         print "ERROR: VascularNetwork.initialize(): global fluid properties are not proper defined! Check:"
                         pprint.pprint(self.globalFluid)
                         exit()
@@ -303,6 +310,7 @@ class VascularNetwork(object):
                     print "ERROR: VascularNetwork.initialize(): global fluid properties are not proper defined! Check:"
                     pprint.pprint(self.globalFluid)
                     exit()
+                    #TODO This can't be changed atm, pprint blocks me from using raise
         # ## initialize vessels
         for vessel in self.vessels.itervalues():
             vessel.initialize(self.globalFluid)
@@ -332,24 +340,26 @@ class VascularNetwork(object):
         definedButNotatBC = set(self.boundaryConditions.keys()).difference([self.root] + self.boundaryVessels)
         atBCButNotDefined = set([self.root] + self.boundaryVessels).difference(self.boundaryConditions.keys())
         if len(definedButNotatBC.union(atBCButNotDefined)) > 0:
-            print "ERROR: VascularNetwork.initialize(): BoundaryConditions are not proper defined:"
-            if len(definedButNotatBC) > 0:print "       for Vessel(s) {} boundaryConditions are defined but \n        Vessel(s) is(are) not at the Boundary!!!".format(list(definedButNotatBC))
-            if len(atBCButNotDefined) > 0:print "       for Vessel(s) {} no BoundaryConditions are defined!!!".format(list(atBCButNotDefined))
-            exit()
+            tmpstring = "VascularNetwork.initialize(): BoundaryConditions are not proper defined:"
+#            print "ERROR: VascularNetwork.initialize(): BoundaryConditions are not proper defined:"
+            if len(definedButNotatBC) > 0:tmpstring = tmpstring + "for Vessel(s) {} boundaryConditions are defined but \n   Vessel(s) is(are) not at the Boundary!!!".format(list(definedButNotatBC))
+            if len(atBCButNotDefined) > 0:tmpstring = tmpstring + "for Vessel(s) {} no BoundaryConditions are defined!!!".format(list(atBCButNotDefined))
+            raise ImportError(tmpstring)
         if len(self.vessels) == 1:
             bcPositions = []
             for Id, bcs in self.boundaryConditions.iteritems():
                 for bc in bcs:
                     bcPositions.append(bc.position)
             if 1 not in bcPositions and -1 not in bcPositions:
-                print "ERROR: VascularNetwork.initialize(): BoundaryConditions are not proper defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[0].name)
-                exit() 
+                raise ImportError("VascularNetwork.initialize(): BoundaryConditions are not proper defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[0].name))
+                #print "ERROR: VascularNetwork.initialize(): BoundaryConditions are not proper defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[0].name)
+                #exit()
         
         # initialize boundary conditions of type 1
         for Id, bcs in self.boundaryConditions.iteritems():
             for bc in bcs:
                 try: bc.initialize({})
-                except: pass
+                except Exception: self.warning("old except: pass clause in VascularNetwork.initialize")
                
         windkesselExist = False
         for Id, bcs in self.boundaryConditions.iteritems():
@@ -365,10 +375,12 @@ class VascularNetwork(object):
                 if bc.name in ['VaryingElastanceHeart']:
                     try:
                         bc.mitral.rho = self.globalFluid['rho']
-                    except: print "WARNING: VascularNetwork.initialize(): could not set blood density for mitral valve!"
+                    except Exception:
+                        self.warning("VascularNetwork.initialize(): could not set blood density for mitral valve!")
                     try:
                         bc.aortic.rho = self.globalFluid['rho']
-                    except: print "WARNING: VascularNetwork.initialize(): could not set blood density for aortic valve!"
+                    except Exception:
+                        self.warning("VascularNetwork.initialize(): could not set blood density for aortic valve!")
         
         
         # # initialize 3d positions of the vascularNetwork
@@ -419,12 +431,14 @@ class VascularNetwork(object):
         
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
-            print "ERROR: VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime], exit()"
-            exit()
+            raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime]")
+#            print "ERROR: VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime], exit()"
+ #           exit()
         
         if self.timeSaveBegin < 0 or self.timeSaveBegin > self.timeSaveEnd:
-            print "WARNING: VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd], exit()"
-            exit()
+            raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd]")
+#            print "WARNING: VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd], exit()"
+ #           exit()
         
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
@@ -871,20 +885,21 @@ class VascularNetwork(object):
                             vessel.postProcessing(["linearWavesplit"])
                         if 'Gravity' in values:
                             try: vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except: print "WARNING vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file"
+                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file")
                         if 'Rotation' in values:
                             try: vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except: print "WARNING vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file"
+                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file")
                         if 'Position' in values:
                             try: vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except: print "WARNING vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file"
+                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file")
                     else:
-                        print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
-                        print "this is a very bad exception text, as it is raised if the saved number of gridpoints is different from the xml file"
+                        self.warning("classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel {} not in saved data".format(vesselId), noException= True)
+                        self.warning("this is a very bad warning text, as it is raised if the saved number of gridpoints is different from the xml file", noException= True)
             
         else:
-            print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
-            exit()
+            raise ImportError("classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here")
+#            print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
+#            exit()
 
 
         
@@ -917,8 +932,8 @@ class VascularNetwork(object):
                     if vessel.rightDaughter != None: 
                         daughters.append(vessel.rightDaughter)
                         approximatedBif += 1
-                except: pass
-            except: pass
+                except Exception: self.warning("old except: pass clause #1 in VascularNetwork.findRootVessel")
+            except Exception: self.warning("old except: pass clause #2 in VascularNetwork.findRootVessel")
                 
         # find startRank by approximation of numbers of generations
         approxGen = len(set(daughters)) - 2 * approximatedBif + int(np.sqrt(approximatedBif))
@@ -927,9 +942,10 @@ class VascularNetwork(object):
         roots = list(set(self.vessels.keys()).difference(daughters))
         try:
             self.root = roots[0]
-        except: print "ERROR: vascularNetwork.searchRoot(): could not find a root node, system exit", exit()
+        except Exception:
+            self.exception("vascularNetwork.findRootVessel(): could not find a root node")
         if len(roots) > 1:
-            print "ERROR: vascularNetwork.searchRoot(): found several roots: {}, check network again system exit!".format(roots), exit()
+            raise ImportError("vascularNetwork.searchRoot(): found several roots: {}, check network again!".format(roots))
         
     def checkDaughterDefinition(self):
         """
@@ -946,15 +962,15 @@ class VascularNetwork(object):
             if vessel.leftDaughter != None:
                 try:
                     self.vessels[vessel.leftDaughter]
-                except: 
-                    print "WARNING: vascularNetwork.checkDaugtherDefinition():\n      leftDaughter with Id {} of vessel {} does not exist".format(vessel.leftDaughter, vessel.Id,)
+                except Exception:
+                    self.warning("vascularNetwork.checkDaugtherDefinition():\n      leftDaughter with Id {} of vessel {} does not exist".format(vessel.leftDaughter, vessel.Id,))
                     vessel.leftDaughter = None 
                     
             if vessel.rightDaughter != None:
                 try:
                     self.vessels[vessel.rightDaughter]
-                except: 
-                    print "WARNING: vascularNetwork.checkDaugtherDefinition():\n       rightDaughter with Id {} of vessel {} does not exist".format(vessel.rightDaughter, vessel.Id,)
+                except Exception:
+                    self.warning("vascularNetwork.checkDaugtherDefinition():\n       rightDaughter with Id {} of vessel {} does not exist".format(vessel.rightDaughter, vessel.Id,))
                     vessel.rightDaughter = None
         
     def evaluateConnections(self):
@@ -1113,7 +1129,7 @@ class VascularNetwork(object):
                                 ranking[rightDaughter] = rankingRightDaughter
                                 currentConnectionList.append(rightDaughter)
                             else:
-                                print "ERROR right daughter forced to anastomosis, not possible"
+                                self.warning("right daughter forced to anastomosis, not possible", noException=True)
                             
                         elif len(existingMothers) == 2:
                             self.treeTraverseList.append(rightDaughter)
@@ -1150,7 +1166,7 @@ class VascularNetwork(object):
             try:
                 self.vessels[rightDaughter].leftMother = leftMother
                 self.vessels[rightDaughter].rightMother = rightMother
-            except: pass
+            except Exception: self.warning("old except: pass clause in VascularNetwork.applyMothersToVessel")
     
     def findStartAndEndNodes(self):
         """
@@ -1221,10 +1237,10 @@ class VascularNetwork(object):
                             Rtotal = bc.Rc + Z
                             bc.update({'Rtotal':Rtotal})
                             print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
-                    except: pass
+                    except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance")
                     # # add resistance to the value
                     try: boundaryResistance = boundaryResistance + bc.Rtotal
-                    except:
+                    except Exception:
                         # # winkessel 2 elements and single resistance
                         try:
                             if bc.Rc == 'VesselImpedance':
@@ -1234,11 +1250,11 @@ class VascularNetwork(object):
                                 waveSpeed = self.vessels[vesselId].c(area, compliance)
                                 Z = 1.0 / (compliance * waveSpeed)[-1]
                                 boundaryResistance = boundaryResistance + Z
-                        except: pass
+                        except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.calculateNetworkResistance")
                         try:
                             # # winkessel 2 elements and single resistance
                             boundaryResistance = boundaryResistance + bc.Rc
-                        except: pass
+                        except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.calculateNetworkResistance")
                     
                 # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
                 if boundaryResistance == 0: 
@@ -1261,7 +1277,7 @@ class VascularNetwork(object):
                 self.Rcum[leftMother] = self.vessels[leftMother].resistance + 1.0 / (1.0 / self.Rcum[leftDaughter] + 1.0 / self.Rcum[rightDaughter])
             # # anastomosis
             elif rightDaughter == None:
-                print "\n WARNING: no method for resistance calculation for anastomosis is implemented!!! \n"
+                self.warning("no method for resistance calculation for anastomosis is implemented!!! \n")
 
 
     def calculateInitialValues(self):
@@ -1286,16 +1302,16 @@ class VascularNetwork(object):
                 inflowBoundaryCondition = bc
         
         if self.venousSystemCollaps == True and self.initialsationMethod != 'ConstantPressure':
-            print '\nERROR: Auto, MeanFlow, Mean Pressure: initialization not implemented for collapsing venous system! \n'
-            exit()
+            raise NotImplementedError("Auto, MeanFlow, Mean Pressure: initialization not implemented for collapsing venous system! \n")
+            #exit()
         
         if self.initialsationMethod == 'Auto':
             try:
                 meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
                 self.initialisationPhaseExist = True
-            except:
-                print "Error: classVascularNetwork: Unable to calculate mean flow at inflow point"
-                exit()
+            except Exception:
+                self.exception("classVascularNetwork: Unable to calculate mean flow at inflow point")
+                #exit()
                 
         elif self.initialsationMethod == 'MeanFlow':
             try:
@@ -1303,17 +1319,17 @@ class VascularNetwork(object):
                 # # addjust bc condition
                 xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
                 self.initialisationPhaseExist = True
-            except:
-                print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
-                exit()
+            except Exception:
+                self.exception("classVascularNetwork: Unable to set given meanFlow at inflow point")
+                #exit()
                 
         elif self.initialsationMethod == 'MeanPressure':
             try:
                 meanInPressure = self.initMeanPressure
                 self.initialisationPhaseExist = True
-            except:
-                print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
-                exit()
+            except Exception:
+                self.exception("classVascularNetwork: Unable to set given meanFlow at inflow point")
+                #exit()
         
         elif self.initialsationMethod == 'ConstantPressure':
             
@@ -1327,9 +1343,9 @@ class VascularNetwork(object):
                 if self.initPhaseTimeSpan > 0:
                     self.initialisationPhaseExist = True 
                      
-            except:
-                print "Error: classVascularNetwork: Unable to evaluate time shift to 0 at inflow point"
-                exit()
+            except Exception:
+                self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
+                #exit()
             #############################Inititalisation Method constant pressure #############
             initialValues[root] = {}
             initialValues[root]['Pressure'] = [constantPressure, constantPressure]
@@ -1381,8 +1397,7 @@ class VascularNetwork(object):
         ######
         
         if self.venousSystemCollaps == True:
-            "WARNING: no method  for venous collapsing system is implemented to initialize network with method 'Tree' !!!"
-            pass
+            self.warning("no method for venous collapsing system is implemented to initialize network with method 'Tree' !!!", noException=True)
         
         if meanInflow != None:
             p0 = self.Rcum[root] * meanInflow 
@@ -1393,13 +1408,13 @@ class VascularNetwork(object):
             p0 = meanInPressure  
             # # addjust bc condition
             try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
-            except:
-                print "Error: VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !"
-                exit()
+            except Exception:
+                self.exception("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
+                #exit()
             p1 = p0 - self.vessels[root].resistance * meanInflow
         else: 
-            print "Error: Neither flow or pressure value given at inflow point!"
-            exit()
+            raise ValueError("Neither flow or pressure value given at inflow point!")
+            #exit()
         
         initialValues[root] = {}
         initialValues[root]['Pressure'] = [p0, p1]
@@ -1425,8 +1440,7 @@ class VascularNetwork(object):
                                         
             # # anastomosis
             elif rightDaughter == None:
-                print "WARNING: VascularNetwork: no method for anastomosis is implemented to initialize network !!!"
-                pass
+                self.warning("VascularNetwork: no method for anastomosis is implemented to initialize network !!!", noException= True)
 
         
         # # adjust pressure with venous pressure
@@ -1475,8 +1489,7 @@ class VascularNetwork(object):
             b = self.compPercentageWK3
             C_wkTotal = b / (1 - b) * self.TotalVolumeComplianceTree
         else:
-            print "Error: VascularNetwork in calculating C_wkTotal!"
-            exit()
+            raise ValueError("VascularNetwork in calculating C_wkTotal!")
         
         if self.quiet == False:
             print '====================================='
@@ -1501,14 +1514,14 @@ class VascularNetwork(object):
                 # self.boundaryConditions[vesselId][-1].Z   = 'VesselImpedance'
                                 
                 if wk3Compliance < 0:
-                    print "ERROR: Windkessel Compliance at vessel {}:  {} < 0!".format(vesselId, wk3Compliance)
-                    exit()
+                    raise ValueError("Windkessel Compliance at vessel {}:  {} < 0!".format(vesselId, wk3Compliance))
+                    #exit()
         if self.quiet == False:
             print '________estimated compliances________'
             print ' vesselId       Rt       C     Cdef'
             for vesselId in self.vessels.keys():
                 try: print "{:3} {:10.3f} {:10.3f} {:10.3f}".format(vesselId, wk3CompPrintList[vesselId][0], wk3CompPrintList[vesselId][1], wk3CompPrintList[vesselId][2])
-                except: print "{:3}".format(vesselId)
+                except Exception: print "{:3}".format(vesselId)
         
     def calculateReflectionCoefficientConnection(self, mothers, daughters):
         """
@@ -1568,7 +1581,7 @@ class VascularNetwork(object):
                     # # setup initial pressure for right daughter used if anastomosis     
                     p0, p1 = self.initialValues[rightMother]['Pressure']
                     initialPressureRM = np.linspace(p0, p1, int(self.vessels[rightMother].N))
-                except:pass
+                except Exception: self.warning("Old except: pass clause #1 in VascularNetwork.optimizeTreeRefelctionCoefficients")
                 # # setup initial pressure for left daughter         
                 p0, p1 = self.initialValues[leftDaughter]['Pressure']
                 initialPressureLD = np.linspace(p0, p1, int(self.vessels[leftDaughter].N))
@@ -1576,7 +1589,7 @@ class VascularNetwork(object):
                 try: 
                     p0, p1 = self.initialValues[rightDaughter]['Pressure']
                     initialPressureRD = np.linspace(p0, p1, int(self.vessels[rightDaughter].N))
-                except: pass
+                except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.optimizeTreeRefelctionCoefficients")
                 # # calculate reflection coefficient
                 if rightMother == None and rightDaughter == None:
                     reflectionCoefficient = self.calculateReflectionCoefficientConnection([[leftMother, initialPressureLM, ]],
@@ -1595,17 +1608,17 @@ class VascularNetwork(object):
                         try:
                             self.vessels[vesselId].radiusProximal = self.vessels[vesselId].radiusProximal * 1.005
                             try: self.vessels[vesselId].radiusDistal = self.vessels[vesselId].radiusDistal * 1.005
-                            except: pass
+                            except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.optimizeTreeRefelctionCoefficients")
                             self.vessels[vesselId].initialize({})
-                        except: pass
+                        except Exception: self.warning("Old except: pass clause #4 in VascularNetwork.optimizeTreeRefelctionCoefficients")
                 else:
                     for vesselId in [leftDaughter, rightDaughter]:
                         try:
                             self.vessels[vesselId].radiusProximal = self.vessels[vesselId].radiusProximal * 0.995
                             try: self.vessels[vesselId].radiusDistal = self.vessels[vesselId].radiusDistal * 0.995
-                            except: pass
+                            except Exception: self.warning("Old except: pass clause #5 in VascularNetwork.optimizeTreeRefelctionCoefficients")
                             self.vessels[vesselId].initialize({})
-                        except: pass
+                        except Exception: self.warning("Old except: pass clause #6 in VascularNetwork.optimizeTreeRefelctionCoefficients")
             print " new Reflection Coeff area ratio", radiusLeftDaughterInit, self.vessels[leftDaughter].radiusProximal, 1 - (radiusLeftDaughterInit) / self.vessels[leftDaughter].radiusProximal
                 # print "      new Reflection coefficient {}, areas".format(reflectionCoefficient), self.vessels[leftDaughter].radiusProximal #, self.vessels[rightDaughter].radiusProximal 
             # print
@@ -1687,8 +1700,9 @@ class VascularNetwork(object):
         p0, p1 = initialValues[root]['Pressure']
         p1 = p1 + self.vessels[root].netGravity[0] * self.vessels[root].length
         
-        if p1 < 0. : print """ERROR: classVascularNetwork.initializeGravityHydrostaticPressure(), \n 
-                            calculated negative pressure in initialization of vessel {} with inital values {}""".format(root, [p0, p1]) ; exit()
+        if p1 < 0. :
+            raise ValueError("classVascularNetwork.initializeGravityHydrostaticPressure(), \n calculated negative pressure in initialization of vessel {} with inital values {}".format(root, [p0, p1]))
+            #exit()
                     
         initialValues[root]['Pressure'] = [p0, p1]
 
@@ -1712,8 +1726,9 @@ class VascularNetwork(object):
                 
                 initialValues[daughter]['Pressure'] = [p0, p1]
                 
-                if p1 < 0. : print """ERROR: classVascularNetwork.initializeGravityHydrostaticPressure(), \n 
-                                    calculated negative pressure in initialization of vessel {} with inital values {}""".format(daughter, [p0, p1]) ; exit()
+                if p1 < 0. :
+                    raise ValueError("classVascularNetwork.initializeGravityHydrostaticPressure(), \n calculated negative pressure in initialization of vessel {} with inital values {}".format(daughter, [p0, p1]))
+                    #exit()
                               
         return initialValues
                     
@@ -1733,7 +1748,7 @@ class VascularNetwork(object):
                 if round(relativeVenousPressure, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
                     relativeVenousPressure = self.minimumVenousPressure
                     self.venousSystemCollaps = True
-                    print 'Warning: Venous system showing collapsing dynamics! \n'
+                    self.warning("Venous system showing collapsing dynamics!", noException= True)
                         
             for bc in self.boundaryConditions[vesselId]:
                 # update venous pressure at boundary nodes
@@ -1752,7 +1767,7 @@ class VascularNetwork(object):
                 # checks if venous system is collapsing(having less than minimum allowed negative pressure)
                 if self.venousSystemCollaps == True:
                     print '\n'
-                    print 'Warning: Venous system showing collapsing dynamics! \n'
+                    self.warning("Warning: Venous system showing collapsing dynamics!", noException= True)
         
     def print3D(self):
     
@@ -1820,7 +1835,7 @@ class VascularNetwork(object):
                 if self.minimumVenousPressure != None:
                     if round(relativeVP, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
                         relativeVP = self.minimumVenousPressure
-                        print 'Warning: Venous system showing collapsing dynamics! \n'
+                        self.warning("Venous system showing collapsing dynamics!", noException= True)
                         
                 relativeVenousPressure[n] = relativeVP
                         

@@ -350,7 +350,7 @@ class BoundaryConditionType1(BoundaryCondition):
                         self.TmeanFlow = linearInt
                         break
                 else:
-                    print "WARNING no corresponding time found to set mean flow {}, simulation is initialized with no time shift".format(self.MeanFlow*1.e6)
+                    self.warning("no corresponding time found to set mean flow {}, simulation is initialized with no time shift".format(self.MeanFlow*1.e6))
 
         if self.TmeanFlow != 0:
             self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
@@ -1505,8 +1505,9 @@ class L_network(BoundaryConditionType2):
         return function for position 0 at the start
         of the vessel
         """
-        print "ERROR: boundaryCondition Lnet is not implemented correct!"
-        exit()
+        raise NotImplementedError("boundaryCondition Lnet is not implemented correct!")
+        #print "ERROR: boundaryCondition Lnet is not implemented correct!"
+        #exit()
 
         dQ0 = du[1] / 2.0
 
@@ -1528,9 +1529,10 @@ class L_network(BoundaryConditionType2):
         return function for position -1 at the end
         of the vessel
         """
+        raise NotImplementedError("boundaryCondition Lnet is not implemented correct!")
 
-        print "ERROR: boundaryCondition Lnet is not implemented correct!"
-        exit()
+        #print "ERROR: boundaryCondition Lnet is not implemented correct!"
+        #exit()
 
         dQ0 = du[1] / 2.0
         r21, r22 = R[1][0], R[1][1]
