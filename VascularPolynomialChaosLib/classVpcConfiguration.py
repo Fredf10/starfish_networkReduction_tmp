@@ -31,10 +31,10 @@ class VpcConfiguration(object):
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
-        self.createSample     = True
+        self.createSample     = False
         
         ### 1.step genrealized polynomial chaos evaluations + data storing
-        self.createEvaluationXmlFiles = True
+        self.createEvaluationXmlFiles = False
         
         self.simulateEvaluations    = False
         self.local                  = True #TODO: add functions for server
@@ -43,15 +43,15 @@ class VpcConfiguration(object):
         self.evaluationNumbers      = []
         
         # 2.1 pre process data for all locations of interest
-        self.preProcessData   = False
+        self.preProcessData   = True
         # 2.2 create plots for min max points
         self.plotMinMaxPoints = True
         
         
         ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
-        self.createOrthoPoly  = False
+        self.createOrthoPoly  = True
         ### step Construct generalized polynomial chaos expansion and  pre process data
-        self.calculateGPCE    = False
+        self.calculateGPCE    = True
             
         #### not implemented yet
         ### 3.step post processing - sensitivity analysis

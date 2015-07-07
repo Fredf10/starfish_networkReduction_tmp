@@ -69,7 +69,7 @@ class LocationOfInterestManager(object):
             numberOfTimePoints.append(len(vascularNetwork.simulationTime))
             timeStart.append(min(vascularNetwork.simulationTime))
             timeEnd.append(max(vascularNetwork.simulationTime))
-            
+                        
             vascularNetwork.solutionDataFile.close()
             del vascularNetwork
         

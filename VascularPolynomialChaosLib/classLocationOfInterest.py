@@ -38,6 +38,7 @@ class LocationOfInterest(object):
     
         if "vessel" in self.locationName:
             vesselId = int(self.locationName.split('_')[-1])
+            
             dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xval])
             
             for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
