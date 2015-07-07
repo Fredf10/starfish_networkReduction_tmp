@@ -454,7 +454,7 @@ class VascularNetwork(object):
             vessel.initializeForSimulation(self.initialValues[vesselId],
                                            self.memoryArraySizeTime,
                                            self.nTsteps)       
-        # Put a reference to the dsetGroup into the saving dictionary if needed
+            # Put a reference to the dsetGroup into the saving dictionary if needed
             if vessel.save == True:
                 # create a new group in the data file
                 dsetGroup = self.vesselDataGroup.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
@@ -854,7 +854,6 @@ class VascularNetwork(object):
                     dsetGroup = self.vesselsToSave[vesselId]
                     if dsetGroup['Pressure'].shape[1] == vessel.N:
                         del vessel.Psol, vessel.Qsol, vessel.Asol
-                        
                         # TODO Implement h5py direct_read method to improve speed
                         if 'Pressure' in values: 
                             vessel.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces] 
@@ -879,9 +878,9 @@ class VascularNetwork(object):
                         if 'Position' in values:
                             try: vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
                             except: print "WARNING vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file"
-                else:
-                    print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
-                    
+                    else:
+                        print 'classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel ', vesselId, 'not in saved data'
+                        print "this is a very bad exception text, as it is raised if the saved number of gridpoints is different from the xml file"
             
         else:
             print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
@@ -1278,13 +1277,21 @@ class VascularNetwork(object):
         meanInflow = None
         meanInPressure = None
         
+        
+        ## find root inflow boundary condition, ie. bc condition with type 1:
+        # varying elastance is type 2 and is only initialized with constant pressure
+        inflowBoundaryCondition = None
+        for bc in self.boundaryConditions[root]:
+            if bc.type == 1:
+                inflowBoundaryCondition = bc
+        
         if self.venousSystemCollaps == True and self.initialsationMethod != 'ConstantPressure':
             print '\nERROR: Auto, MeanFlow, Mean Pressure: initialization not implemented for collapsing venous system! \n'
             exit()
         
         if self.initialsationMethod == 'Auto':
             try:
-                meanInflow, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(quiet=self.quiet)
+                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
                 self.initialisationPhaseExist = True
             except:
                 print "Error: classVascularNetwork: Unable to calculate mean flow at inflow point"
@@ -1294,7 +1301,7 @@ class VascularNetwork(object):
             try:
                 meanInflow = self.initMeanFlow
                 # # addjust bc condition
-                xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
+                xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
                 self.initialisationPhaseExist = True
             except:
                 print "Error: classVascularNetwork: Unable to set given meanFlow at inflow point"
@@ -1313,8 +1320,8 @@ class VascularNetwork(object):
             constantPressure = self.initMeanPressure
             try:
                 constantPressure = self.initMeanPressure
-                if self.boundaryConditions[root][0].name not in ['VaryingElastanceHeart', 'VaryingElastanceSimple','ExpFunc']:
-                    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
+                if inflowBoundaryCondition != None:
+                    xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
                 
                 self.initialisationPhaseExist = False 
                 if self.initPhaseTimeSpan > 0:

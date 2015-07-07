@@ -25,8 +25,9 @@ def main():
     if vizOutput == 'non':
         vizOutput = "2D+3D"
         
-    string1 = ' '.join(['python',cur+'/VisualisationLib/class2dVisualisation.py','-f',networkName, '-n',dataNumber, '-c'])
-    string2 = ' '.join(['python',cur+'/VisualisationLib/class3dVisualisation.py','-f',networkName, '-n',dataNumber, '-c True'])
+
+    string1 = ' '.join(['python',cur+'/VisualisationLib/class2dVisualisation.py','-f',networkName, '-n',dataNumber, '-c']) 
+    string2 = ' '.join(['python',cur+'/VisualisationLib/class3dVisualisation.py','-f',networkName, '-n',dataNumber, '-c True']) 
     
     if vizOutput == "2D":
         

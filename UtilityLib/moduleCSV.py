@@ -28,11 +28,11 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     """
         
     # find all tags needed # TODO: read write polynomial chaos variables
-    polyChaosTags = {}
-    for vessel in vessels.itervalues():
-        pcTags = vessel.getVariableValue('polyChaos').keys()
-        for pcTag in pcTags: 
-            if pcTag not in polyChaosTags.keys(): polyChaosTags[pcTag] = len(vessel.getVariableValue('polyChaos')[pcTag])     
+#     polyChaosTags = {}
+#     for vessel in vessels.itervalues():
+#         pcTags = vessel.getVariableValue('polyChaos').keys()
+#         for pcTag in pcTags: 
+#             if pcTag not in polyChaosTags.keys(): polyChaosTags[pcTag] = len(vessel.getVariableValue('polyChaos')[pcTag])     
     tags = []
     for tag in nxml.vesselAttributes: tags.append(tag)
     for vesselElement in nxml.vesselElements:
@@ -41,13 +41,13 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
                 for tag in specificCompElements:
                     if tag not in tags:
                         tags.append(tag)
-                        if tag in polyChaosTags.keys():
-                            for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
+#                         if tag in polyChaosTags.keys():
+#                             for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
         else: 
             for tag in nxml.vesselElementReference[vesselElement]:
                 tags.append(tag)
-                if tag in polyChaosTags.keys():
-                    for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
+#                 if tag in polyChaosTags.keys():
+#                     for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
     
     ## openFile and create writer
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'write')
@@ -62,10 +62,10 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     unitRow = {}
     for tag in tags:
         try:
-            if '-pC' in tag: 
-                tagUnit = tag.split('-pC')[0]
-                unitRow[tag] = ''.join(['#',variablesDict[tagUnit]['unitSI']])
-            else:
+#             if '-pC' in tag: 
+#                 tagUnit = tag.split('-pC')[0]
+#                 unitRow[tag] = ''.join(['#',variablesDict[tagUnit]['unitSI']])
+#             else:
                 unitRow[tag] = ''.join(['#',variablesDict[tag]['unitSI']])
         except: unitRow[tag] = ''
     unitRow['Id'] = 'unit'
@@ -76,12 +76,12 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     for vessel in vessels.itervalues():
         vesselDict = {}
         for tag in tags:
-            if '-pC' in tag:
-                try:
-                    variable,number = tag.split('-pC')
-                    vesselDict[tag] = vessel.getVariableValue('polyChaos')[variable][int(number)-1]
-                except: pass            
-            else: 
+#             if '-pC' in tag:
+#                 try:
+#                     variable,number = tag.split('-pC')
+#                     vesselDict[tag] = vessel.getVariableValue('polyChaos')[variable][int(number)-1]
+#                 except: pass            
+#             else: 
                 vesselDict[tag] = vessel.getVariableValue(tag)
         data.append(vesselDict)
     writer.writerows(data)
@@ -117,32 +117,32 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
     
     variablesToDiscard = []
     for Id,data in vesselData.iteritems():
-        polyChaos = {}
+#         polyChaos = {}
         for variable,variableValueStr in data.iteritems():
             # check if value is defined
             if variableValueStr not in ['', None]:
                 #find units 
                 if '#' in columUnits[variable]: #  '#' in variable or 
                     nothing,variableUnit = columUnits[variable].split('#',1)
-                # check for polyChaos variables
-                if '-pC' not in variable:
-                    # convert variables to corret unit and type
-                    data[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
-                else:
-                    variable,number = variable.split('-pC')
-                    if variable not in polyChaos.keys():
-                        polyChaos[variable] = variableValueStr
-                    else:
-                        polyChaos[variable] = ' '.join([polyChaos[variable],variableValueStr])   
+#                 # check for polyChaos variables
+#                 if '-pC' not in variable:
+                # convert variables to corret unit and type
+                data[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
+#                 else:
+#                     variable,number = variable.split('-pC')
+#                     if variable not in polyChaos.keys():
+#                         polyChaos[variable] = variableValueStr
+#                     else:
+#                         polyChaos[variable] = ' '.join([polyChaos[variable],variableValueStr])   
                                              
             else: variablesToDiscard.append([Id,variable]) # find out variables which have no values
         # convert polynomial chaos variables to corret unit and type
-        for variable,variableValueStr in polyChaos.iteritems():
-            variableUnit = columUnits[variable].split('#',1)
-            polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
-        data['polyChaos'] = polyChaos
-        for variable in data.iterkeys():
-            if '-pC' in variable: variablesToDiscard.append([Id,variable])
+#         for variable,variableValueStr in polyChaos.iteritems():
+#             variableUnit = columUnits[variable].split('#',1)
+#             polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
+#         data['polyChaos'] = polyChaos
+#         for variable in data.iterkeys():
+#             if '-pC' in variable: variablesToDiscard.append([Id,variable])
             
     # remove variables which have no values 
     for Id,variableToDiscard in variablesToDiscard:

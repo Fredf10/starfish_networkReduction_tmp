@@ -121,11 +121,11 @@ def vascularPolyChaos():
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
         
         print "starting Post processing - stopping here"
-        exit()
+        #exit()
         # 6. process quantity of interest
         ## TODO: defined query location and quantities to process
-        quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
-        queryLocation = 'vessel_1'
+        quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure'] #,'ExtremaPressure']
+        queryLocation = 'vessel_0'
         xVals = 0.25
         confidenceAlpha = 5
         # create locationOfInterestManager

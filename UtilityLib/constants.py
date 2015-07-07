@@ -296,7 +296,7 @@ variablesDict = {## class Vascular Network
                  'centralVenousPressure'    : {'type':'float',      'unitSI': 'Pa',      'strCases': None, 'multiVar': False},
                  'minimumVenousPressure'    : {'type':'float None', 'unitSI': 'Pa',      'strCases': None, 'multiVar': False},
                  # solver calibration
-                 'solvingSchemeField'       : {'type':'str',   'unitSI': None, 'strCases': ['MacCormack_Matrix'], 'multiVar': False},
+                 'solvingSchemeField'       : {'type':'str',   'unitSI': None, 'strCases': ['MacCormack_Matrix','MacCormack_Flux'], 'multiVar': False},
                  'solvingSchemeConnections' : {'type':'str',   'unitSI': None, 'strCases': ['Linear'], 'multiVar': False},
                  'rigidAreas'               : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},
                  'simplifyEigenvalues'      : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},

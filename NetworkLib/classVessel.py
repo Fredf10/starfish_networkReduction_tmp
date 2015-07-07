@@ -432,9 +432,11 @@ class Vessel(cSBO.StarfishBaseObject):
 
         Initializing net gravity on the vessels.
         """
-
-        try:    angleXMother = self.angleXMotherTime[n]
-        except Exception: angleXMother = self.angleXMother
+       
+        if hasattr(self, "angleXMotherTime") and len(self.angleXMotherTime)>0:
+            angleXMother = self.angleXMotherTime[n]
+        else:
+            angleXMother = self.angleXMother
 
         try:    angleYMother = self.angleYMotherTime[n]
         except Exception: angleYMother = self.angleYMother

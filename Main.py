@@ -107,19 +107,19 @@ def main():
     
     
     if vizOutput == "2D":
-        string = ' '.join(['python',cur+'/Visualisation/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber)])                
+        string = ' '.join(['python',cur+'/VisualisationLib/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber)])                
         subprocess.Popen(string, shell=True)
         
     
     if vizOutput == "3D":
-        string = ' '.join(['python',cur+'/Visualisation/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
+        string = ' '.join(['python',cur+'/VisualisationLib/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
         subprocess.Popen(string, shell=True)
         
         
     if vizOutput == "2D+3D":
            
-        string1 = ' '.join(['python',cur+'/Visualisation/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
-        string2 = ' '.join(['python',cur+'/Visualisation/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
+        string1 = ' '.join(['python',cur+'/VisualisationLib/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
+        string2 = ' '.join(['python',cur+'/VisualisationLib/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
         
         viz2d = subprocess.Popen(string1, shell = True )
         viz3d = subprocess.Popen(string2, shell = True )
