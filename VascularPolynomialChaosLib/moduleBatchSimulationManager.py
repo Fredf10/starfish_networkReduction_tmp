@@ -26,7 +26,7 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     
     Input:
         batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
-            batchData <list> := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]
+            batchData <list> := list with [networkName, dataNumber, networkXmlFile, networkXmlFileSave, pathSolutionDataFilename]
         
     '''
     timeStartBatch = time.time()

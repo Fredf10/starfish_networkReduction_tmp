@@ -38,7 +38,7 @@ class VpcConfiguration(object):
         
         self.simulateEvaluations    = True
         self.local                  = True #TODO: add functions for server
-        self.multiprocessing        = False
+        self.multiprocessing        = True
         self.numberOfProcessors     = 12
         self.evaluationNumbers      = []
         
@@ -215,7 +215,7 @@ class VpcConfiguration(object):
         
         vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
     
-        self.update(moduleXML.loadPolyChaosXML(vpcConfigXmlFile))
+        #self.update(moduleXML.loadPolyChaosXML(vpcConfigXmlFile))
         
         
         

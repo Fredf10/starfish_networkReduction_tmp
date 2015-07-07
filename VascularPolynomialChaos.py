@@ -40,7 +40,7 @@ def vascularPolyChaos():
     
     # 2. create distributions
     
-    # 3. add correlation if existent
+    # 3. add dependentCase if existent
     
     # 4. create samples
         
@@ -71,26 +71,35 @@ def vascularPolyChaos():
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
     # 1.3 print distributions
     vascularNetwork.randomInputManager.printOutInfo()
-    # TODO: do not use exit()
-    if len(vascularNetwork.randomInputManager.randomInputs) == 0:
-        print "VascularPolynomialChaos_v0.3: no random inputs defined!"
-        exit()
-        
+    
+    assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
+            
     # 2. create distributions    
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
-    # 3. add correlation if existent TODO:
+    
+    # 3. add dependentCase if existent TODO:
+    a = 0.8
+    CorrelationMatrix = np.array([[1.,a,a],[a,1.,a],[a,a,1.]])
+    
+    
+    dependentCase = True
+    
+    if dependentCase == True:
+        distributionManager.createDependentDistribution(CorrelationMatrix)
     
     ## do the analysis for all defined polynomial orders:
     for polynomialOrder in vpcConfiguration.polynomialOrders:
         # 4. create samples
         if vpcConfiguration.createSample == True:      
             distributionManager.createSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
+            distributionManager.saveSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         else:
             distributionManager.loadSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
+                
         # 5. evaluate model / on local machine or on server
         # 5.1 create evaluation case file list
-        evaluationCaseFiles = [] # list of [ [networkName,dataNumber,xml-filePath, hdf-filePath] for each evaluation
+        evaluationCaseFiles = [] # list of [ [networkName,dataNumber,xml-filePath(LOAD) ,xml-filePath(SAVE), hdf-filePath] for each evaluation
         for simulationIndex in xrange(distributionManager.samplesSize):
             vpcNetworkXmlEvaluationFile = mFPH_VPC.getFilePath('vpcEvaluationNetworkXmlFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
@@ -100,7 +109,7 @@ def vascularPolyChaos():
         # 5.2 save/create xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
-                distributionManager.passRealisation(sampleIndex)
+                distributionManager.passRealisation(sampleIndex, dependentCase)
                 vpcNetworkXmlEvaluationFile = evaluationCaseFiles[sampleIndex][2]
                 mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
             vascularNetwork.randomInputManager.saveRealisationLog(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
