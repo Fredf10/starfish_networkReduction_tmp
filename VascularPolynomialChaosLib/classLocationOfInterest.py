@@ -41,7 +41,8 @@ class LocationOfInterest(object):
             dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xval])
             
             for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
-                if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,len(simulationTime)))
+                if quantityObject.data == None: 
+                    quantityObject.data = np.empty((sampleSize,len(simulationTime)))
                 quantityObject.data[sampleIndex] = dataDict[quantitiyName][:,0]
             ##
             # TODO: peak detection and saving of amplitude and timing if wanted
@@ -49,6 +50,14 @@ class LocationOfInterest(object):
             
         elif "baroreceptor" in self.locationName:
             baroId = int(self.locationName.split('_')[-1])
+            dataDict = {}
+            for quantitiyName in self.quantitiesOfInterest.keys():
+                dataDict[quantitiyName] = vascularNetwork.baroreceptors[baroId].getVariableValue(quantitiyName)
+            
+            for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
+                if quantityObject.data == None: 
+                    quantityObject.data = np.empty((sampleSize,len(simulationTime)))
+                quantityObject.data[sampleIndex] = dataDict[quantitiyName][:]
             ## TODO: Jacob add here your stuff
                          
         else:

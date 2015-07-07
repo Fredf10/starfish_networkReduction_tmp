@@ -1,7 +1,7 @@
 ########################################################################################
 #                            Vascular Polynomial Chaos 0.3
 ########################################################################################
-## 
+##
 # created by Vinzenz Eck vinzenz.eck@mytum.de
 # uses polynomial Chaos toolbox from Jonathan Feinberg, Simula Center Oslo
 ##
@@ -33,25 +33,25 @@ import cPickle
 
 def vascularPolyChaos():
     '''
-    Perform vascular polynomial chaos 
+    Perform vascular polynomial chaos
     or MonteCarlo analysis for STARFiSh simulation case
     # steps
-    # 1. load vpc case and configuration 
-    
+    # 1. load vpc case and configuration
+
     # 2. create distributions
-    
+
     # 3. add correlation if existent
-    
+
     # 4. create samples
-        
+
     # 5. evaluate model / on local machine or on server
-    
+
     # 6. postprocess evaluated data, peak finding etc
-    
+
     # 7. create Orthogonal polynomials
-    
+
     # 8. calculate polynomial chaos expansion
-    
+
     # 9. uncertainty quantfication, sensitivity analysis
     '''
     print ""
@@ -59,11 +59,11 @@ def vascularPolyChaos():
     print '#        VascularPolynomialChaos_v0.3        #'
     print '=============================================='
     # steps
-    # 1. load vpc case and configuration 
+    # 1. load vpc case and configuration
     optionsDict = mStartUp.parseOptions(['f','n'],vascularPolynomialChaos=True)
     networkName           = optionsDict['networkName']
     dataNumber            = optionsDict['dataNumber']
-    # 1.1 load configuration  
+    # 1.1 load configuration
     vpcConfiguration = cVPCConf.VpcConfiguration(networkName,dataNumber)
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')
@@ -73,15 +73,15 @@ def vascularPolyChaos():
     if len(vascularNetwork.randomInputManager.randomInputs) == 0:
         print "VascularPolynomialChaos_v0.3: no random inputs defined!"
         exit()
-    # 2. create distributions    
+    # 2. create distributions
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
     # 3. add correlation if existent TODO:
-    
+
     ## do the analysis for all defined polynomial orders:
     for polynomialOrder in vpcConfiguration.polynomialOrders:
         # 4. create samples
-        if vpcConfiguration.createSample == True:      
+        if vpcConfiguration.createSample == True:
             distributionManager.createSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
         else:
             distributionManager.loadSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
@@ -93,7 +93,7 @@ def vascularPolyChaos():
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])        
+            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])
         # 5.2 save/create xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
@@ -119,24 +119,39 @@ def vascularPolyChaos():
                 else:
                     mBSM.runBatchAsMultiprocessing(batchFileList, vpcConfiguration.numberOfProcessors , quiet = True)
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
-        
-        print "starting Post processing - stopping here"
-        exit()
+
+        if not vpcConfiguration.postProcessing:
+            print "starting Post processing - stopping here"
+            exit()
         # 6. process quantity of interest
-        ## TODO: defined query location and quantities to process
-        quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
-        queryLocation = 'vessel_1'
-        xVals = 0.25
-        confidenceAlpha = 5
         # create locationOfInterestManager
         locationOfInterestManager = cLocOfIntrMng.LocationOfInterestManager(distributionManager.samplesSize)
-        # add location of interest
+        ## TODO: define query location and quantities to process
+        # Example
+        # quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
+        # queryLocation = 'vessel_1'
+        # xVals = 0.25
+        # confidenceAlpha = 5
+        # # add location of interest to manager
+        # locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
+
+
+        quantitiesOfInterestToProcess = ['n', 'T']
+        queryLocation = 'baroreceptor_1'
+        
+        # add location of interest to manager
         locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
-        
+
+        # add additional locations of interest 
+        # quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
+        # queryLocation = 'vessel_2'
+        # xVals = 0.25
+        # confidenceAlpha = 5
+        # locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
+
         if vpcConfiguration.preProcessData == True:
-            ## process the data of interest
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
-        
+
         # if polynomial chaos
         # 7. create Orthogonal polynomials
         distributionManager.calculateOrthogonalPolynomials()
@@ -145,11 +160,11 @@ def vascularPolyChaos():
                                                                      distributionManager.samples,
                                                                      distributionManager.jointDistribution)
         locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
-        
+
         ## if monte carlo
         # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
         #locationOfInterestManager.calculateStatisticsMonteCarlo()
-        
+
         # 10. plotting of variables
 if __name__ == '__main__':
     vascularPolyChaos()

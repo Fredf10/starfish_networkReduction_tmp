@@ -2,10 +2,10 @@
 <FigueroaPettersen.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">3.0</totalTime>
+    <totalTime unit="s">25.0</totalTime>
     <CFL>0.60</CFL>
-    <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">3.0</timeSaveEnd>
+    <timeSaveBegin unit="s">10.0</timeSaveBegin>
+    <timeSaveEnd unit="s">25.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
@@ -22,7 +22,7 @@
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
     <initMeanFlow unit="m3 s-1">1e-06</initMeanFlow>
-    <initMeanPressure unit="Pa">100.0*133.32</initMeanPressure>
+    <initMeanPressure unit="Pa">101.28*133.32</initMeanPressure>
     <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
     <compPercentageWK3>0.2</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
@@ -34,7 +34,6 @@
     <gamma>2.0</gamma>
   </globalFluid>
   <communicators/>
-  
   <baroreceptors>
     <baroreceptor Id="1">
       <topology>
@@ -42,25 +41,75 @@
         <vesselIds>2 14</vesselIds>
       </topology>
       <model type="pettersenAorticBR">
-      	<L0>0.52</L0>
-        <n0 unit="sec-1">63.5</n0>
+      	<L0>0.260</L0>
+	<L0-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>0.25</a>
+          <b>0.2</b>
+        </L0-randomInput>
+        <n0 unit="sec-1">20.0</n0>
         <n0-randomInput>
-          <distributionType>Normal</distributionType>
-          <a>2.0</a>
-          <b>12.0</b>
+          <distributionType>Uniform</distributionType>
+          <a>15</a>
+          <b>20.0</b>
         </n0-randomInput>
-        <g unit="sec-1">87.5</g>
-        <tau1 unit="sec-1">0.1</tau1>
-        <tau2 unit="sec-1">0.5</tau2>
-        <Gp>0.492</Gp>
+        <g unit="sec-1">600</g>
+        <g-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>525</a>
+          <b>200.0</b>
+        </g-randomInput>
+ 
+	<tau1 unit="sec-1">0.1</tau1>
+       <tau1-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>0.05</a>
+          <b>0.15</b>
+        </tau1-randomInput>
+ 
+	<tau2 unit="sec-1">0.7</tau2>
+       <tau2-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>0.5</a>
+          <b>0.5</b>
+        </tau2-randomInput>
+ 
+	<Gp>0.492</Gp>
+	<Gp-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>0.45</a>
+          <b>0.1</b>
+        </Gp-randomInput>
+ 
         <Gs>0.178</Gs>
-        <Gs-randomInput>
-          <distributionType>Normal</distributionType>
-          <a>2.0</a>
-          <b>12.0</b>
-        </Gs-randomInput>
-        <delta_HR_smax unit="min-1">0.0241666666667</delta_HR_smax>
-        <delta_HR_pmax unit="min-1">0.0158333333333</delta_HR_pmax>
+	<Ga-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>0.12</a>
+          <b>0.1</b>
+        </Ga-randomInput>
+ 
+	<HR0>107</HR0>
+	<HR0-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>100</a>
+          <b>30</b>
+        </HR0-randomInput>
+ 
+    	<HRmax>194</HRmax>
+    	<HRmax-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>170</a>
+          <b>50</b>
+        </HRmax-randomInput>
+ 
+	<HRmin>50</HRmin>
+    	<HRmin-randomInput>
+          <distributionType>Uniform</distributionType>
+          <a>40</a>
+          <b>20</b>
+        </HRmin-randomInput>
+
+
       </model>
     </baroreceptor>
   </baroreceptors>
@@ -69,7 +118,7 @@
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>
         <T unit = 's'>0.6905</T>
-        <Emax unit = 'mmHg ml-1'>2.31</Emax>
+        <Emax unit = 'mmHg ml-1'>2.01</Emax>
         <Emin unit = 'mmHg ml-1'>0.06</Emin>
         <Tpeak unit = 's'>0.296915</Tpeak>
         <V0 unit = 'ml'>20</V0>
