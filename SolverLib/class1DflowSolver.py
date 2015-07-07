@@ -8,6 +8,9 @@ topFolder = cur + "/../"
 # located, and if it changes location, renaming it is appropriate.
 #sys.path.append(''.join([classFields.cur,'/../']))
 
+sys.path.append(cur+'/../')
+
+import UtilityLib.classStarfishBaseObject as cSBO
 
 #sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
@@ -31,7 +34,7 @@ import UtilityLib.processing as mProc
 import gc
 # import h5py
 
-class FlowSolver(object):
+class FlowSolver(cSBO.StarfishBaseObject):
 
     
     def __init__(self,vascularNetwork, quiet=False):
@@ -39,9 +42,9 @@ class FlowSolver(object):
         Constructor       
         """
                 
-        if vascularNetwork == None: print "ERROR: No vascularNetwork given!" / exit()
-        assert isinstance(vascularNetwork, VascularNetwork)
-        # the vascular network to solve
+        if vascularNetwork == None: raise ValueError("ERROR: No vascularNetwork given!")
+        assert isinstance(vascularNetwork, VascularNetwork) #TODO asserts get removed automatically
+        # the vascular network to solve                     #TODO when compiled for release
         self.vascularNetwork = vascularNetwork
         self.vascularNetwork.quiet = quiet
         
@@ -519,7 +522,7 @@ class FlowSolver(object):
                 
                 self.timers[TimerId] = classTimer.Valsalva(TimerData)
                 
-            else: pass
+#            else: pass
     
     
             
@@ -555,7 +558,7 @@ class FlowSolver(object):
                         for bc in bcs:
                             if bc.type == 1:
                                 comData['boundaryCondition'] = bc                                                            
-            except: pass
+            except Exception: self.warning("old except: pass clause in c1dFlowSolv.initializeCommunicators")
                         
             comData['currentMemoryIndex'] = self.currentMemoryIndex
             comData['currentTimeStep']    = self.currentTimeStep
@@ -588,14 +591,14 @@ class FlowSolver(object):
             try:
                 if vesselId == self.vascularNetwork.root:
                     self.numericalObjects.append(self.boundarys[vesselId][0])
-            except: pass
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.initializeNumObjList")
             
             ## add field
             self.numericalObjects.append(self.fields[vesselId])
             
             ## try add Connection
             try: self.numericalObjects.append(self.connections[vesselId])    
-            except: pass
+            except Exception: self.warning("old except: pass #2 clause in c1dFlowSolv.initializeNumObjList")
             
             ## try add distal BC
             try:
@@ -604,12 +607,12 @@ class FlowSolver(object):
                         self.numericalObjects.append(self.boundarys[vesselId][0])
                     else:
                         self.numericalObjects.append(self.boundarys[vesselId][1])
-            except: pass
+            except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList")
         
         for communicator in self.communicators.itervalues():
             self.numericalObjects.append(communicator) 
             try:    communicator.startRealTimeVisualisation()
-            except: pass
+            except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList")
             
         for baroreceptor in self.baroreceptors.itervalues():
             self.numericalObjects.append(baroreceptor)
@@ -619,7 +622,7 @@ class FlowSolver(object):
                    
         if self.venousPool != 0:
             self.numericalObjects.append(self.venousPool)
-        else: pass
+#        else: pass
             
         dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
                                   self.nTsteps,
@@ -644,7 +647,7 @@ class FlowSolver(object):
         print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
         print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
         try: print '%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6)
-        except: pass
+        except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput")
         print '%-20s %2.1f' % ('CFL init max',self.vascularNetwork.CFL)
         print '%-20s %2.1f' % ('dz min (mm)',self.output['dz_min']*1.0E3)
         print '%-20s %2.1f' % ('c min (m/s)',self.output['c_min'])
@@ -849,7 +852,7 @@ class FlowSolver(object):
         ## stop realtime visualisation
         for communicator in self.communicators.itervalues():           
             try: communicator.stopRealtimeViz()
-            except: pass
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field")
             
         ### garbage collection
         gc.collect()

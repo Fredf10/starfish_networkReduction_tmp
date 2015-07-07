@@ -16,9 +16,10 @@ from classCompliance import *
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
+import UtilityLib.classStarfishBaseObject as cSBO
 from UtilityLib.constants import newestNetworkXml as nxml
 
-class Vessel(object):
+class Vessel(cSBO.StarfishBaseObject):
     """
     Class representing a vessel in a vascular Network
     """
@@ -137,16 +138,19 @@ class Vessel(object):
                 if self.applyGlobalFluid == True:
                     self.__getattribute__(key)
                     self.__setattr__(key,value)
-            except:
+            except Exception:
                 if key != 'venousPressure':
-                    print "ERROR: classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id)
+                    self.exception("classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id))
+#                    print "ERROR: classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id)
 
         # initialize grid
         try:
             self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N)
-        except:
-            print "ERROR: classVessel.initialize(): Grid calculation of vessel {}!".format(self.Id)
-            exit()
+        except Exception:
+            self.exception("classVessel.initialize(): Grid calculation of vessel {} failed!".format(self.Id))
+#            print "ERROR: classVessel.initialize(): Grid calculation of vessel {}!".format(self.Id)
+#            exit()
+
 
         ## calculate compliance reference area vector As
         try:
@@ -166,9 +170,11 @@ class Vessel(object):
                 #self.AsVector = np.linspace(AsAveraged,AsAveraged,self.N)
                 #print "WARNING: no reference Area for the Compliance As is given for vessel {} ! \n         As is now calculatet with given radiusA and radiusB".format(self.Id)
             else:
-                print "WARNING: classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id)
-        except:
-            print "ERROR: classVessel.initialize(): As calculation of vessel {}!".format(self.Id)
+                raise ValueError("classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id))
+#                print "WARNING: classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id)
+        except Exception:
+            self.exception("classVessel.initialize(): As calculation of vessel {}!".format(self.Id))
+#            print "ERROR: classVessel.initialize(): As calculation of vessel {}!".format(self.Id)
 
         ## initialize compliance
         try:
@@ -193,9 +199,10 @@ class Vessel(object):
                 self.C     = self.compliance.C0
                 self.C_nID = self.compliance.C0_Node
 
-        except:
-            print "ERROR: classVessel.initialize(): init Compliance of vessel {}!".format(self.Id)
-            exit()
+        except Exception:
+            self.exception("classVessel.initialize(): init Compliance of vessel {}!".format(self.Id))
+#            print "ERROR: classVessel.initialize(): init Compliance of vessel {}!".format(self.Id)
+#            exit()
 
         # set up Resistance
         try:
@@ -205,8 +212,9 @@ class Vessel(object):
             elif self.geometryType == "cone":
                 self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
 
-        except:
-            print "ERROR: classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id)
+        except Exception:
+            self.exception("classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id))
+#            print "ERROR: classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id)
 
         # calculate Womersley number
 
@@ -233,9 +241,10 @@ class Vessel(object):
             Qm    = initialValues['Flow']
             self.Psol[0] = np.linspace(p0,p1,self.N)
             self.Qsol[0] = np.ones((1,self.N))*Qm
-        except:
-            print "Error: cV could not use initial values from network"
-            pass
+        except Exception:
+            self.warning("cV could not use initial values from network")
+#           print "Error: cV could not use initial values from network"
+#           pass
 
         self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
 
@@ -272,12 +281,12 @@ class Vessel(object):
             waveSpeed : sqrt(A/(rho*C))
         """
         try : return sqrt(Area/(self.rho*Compliance))
-        except:
+        except Exception:
             errorMessage = "ERROR: classVessel.waveSpeed(): wave speed calculation of vessel id {}!".format(self.Id)
             if (Area < 0).any()  : errorMessage = errorMessage.join(["\n     Area < 0 !!!"])
             if (Compliance < 0).any() : errorMessage = errorMessage.join(["\n    Compliance < 0 !!!"])
-            raise NameError(errorMessage)
-            exit()
+            raise ValueError(errorMessage)
+
 
     def Impedance(self,Pressure):
         """
@@ -384,8 +393,9 @@ class Vessel(object):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
-            except:
-                print "ERROR Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key)
+            except Exception:
+                self.warning("Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key))
+#                print "ERROR Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key)
 
     def getVariableValue(self,variableName):
         """
@@ -394,8 +404,9 @@ class Vessel(object):
         """
         try:
             return self.__getattribute__(variableName)
-        except:
-            print "ERROR Vessel.getVariable() : vessel has no variable {}".format(variableName)
+        except Exception:
+            self.warning("Vessel.getVariable() : vessel has no variable {}".format(variableName))
+            #print "ERROR Vessel.getVariable() : vessel has no variable {}".format(variableName)
 
     def getVariableDict(self):
         """
@@ -412,7 +423,7 @@ class Vessel(object):
         for variable,value in self.__dict__.iteritems():
             try:
                 print " {:<20} {:>8}".format(variable,value)
-            except: print " {:<20} {:>8}".format(variable,'None')
+            except Exception: print " {:<20} {:>8}".format(variable,'None')
 
     def caculatePositionAndGravity(self, n, positionEndMother, rotToGlobalSysMother):
         """
@@ -423,13 +434,13 @@ class Vessel(object):
         """
 
         try:    angleXMother = self.angleXMotherTime[n]
-        except: angleXMother = self.angleXMother
+        except Exception: angleXMother = self.angleXMother
 
         try:    angleYMother = self.angleYMotherTime[n]
-        except: angleYMother = self.angleYMother
+        except Exception: angleYMother = self.angleYMother
 
         try:    angleZMother = self.angleZMotherTime[n]
-        except: angleZMother = self.angleZMother
+        except Exception: angleZMother = self.angleZMother
 
         rotToGlobalSys = rotToGlobalSysMother
 
