@@ -51,7 +51,7 @@ vascularNetworkElements = ['simulationContext',
 baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
 
 baroreceptorModelElements = {'bugenhagenAorticBR' : [],
-                             'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax'],
+                             'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','HR0', 'HRmax','HRmin'],
                              #'CarotidBR'         : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName']
                              }
 

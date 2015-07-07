@@ -399,8 +399,9 @@ variablesDict = {## class Vascular Network
                  'tau2': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
                  'Gp': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'Gs': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 'delta_HR_smax': {'type':'float',  'unitSI':  'min-1',     'strCases': None, 'multiVar': False},
-                 'delta_HR_pmax': {'type':'float',  'unitSI':  'min-1',     'strCases': None, 'multiVar': False}, 
+                 'HR0': {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
+                 'HRmax': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'HRmin': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False}, 
                  ## Bugenhagen pars
                  'bgh': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},    
                  ### random variables

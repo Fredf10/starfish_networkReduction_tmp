@@ -390,31 +390,30 @@ class VascularNetwork(object):
             if self.estimateWindkesselCompliance != 'No' and windkesselExist:
                 # calculate terminal vessel compliance
                 self.evaluateWindkesselCompliance()
-                
-    def initializeNetworkForSimulation(self):
+   def initializeNetworkForSimulation(self):
         '''
         Method to initialize the network for a simulation.
         Creates hdf5 File and groups for the vessels
         Enforces memory allocation.
         Set initial values for the simulations.
         '''
-            
+
         # create solution file
         if self.pathSolutionDataFilename == None:
             self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
         self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
-        
+
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
-        
+
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
             print "ERROR: VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime], exit()"
             exit()
-        
+
         if self.timeSaveBegin < 0 or self.timeSaveBegin > self.timeSaveEnd:
             print "WARNING: VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd], exit()"
             exit()
-        
+
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
         # set save counter to the correct parts
@@ -424,25 +423,25 @@ class VascularNetwork(object):
                 self.nSaveBegin = 0
             else:
                 self.nSaveBegin += self.nTstepsInitPhase
-        self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1   
+        self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1
         self.nDCurrent = 0
-        
-        # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime    
+
+        # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime
         estimatedMemorySolutionDataSpace = 0
         for vessel in self.vessels.itervalues():
             estimatedMemorySolutionDataSpace += vessel.N * 8 * 3  # byte
-        
-        self.memoryArraySizeTime = int(np.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))       
+
+        self.memoryArraySizeTime = int(np.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))
         # Don't allocate more memory than needed
         if self.memoryArraySizeTime > (self.nTsteps + 1):
             self.memoryArraySizeTime = self.nTsteps + 1
-                
+
         # initialize for simulation
         for vesselId, vessel in self.vessels.iteritems():
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
                                            self.memoryArraySizeTime,
-                                           self.nTsteps)       
+                                           self.nTsteps)
         # Put a reference to the dsetGroup into the saving dictionary if needed
             if vessel.save == True:
                 # create a new group in the data file
@@ -451,16 +450,16 @@ class VascularNetwork(object):
                 dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
                 dsetA = dsetGroup.create_dataset("Area", (self.savedArraySize,nGridPoints), dtype='float64')
-     
+
                 if self.nSaveBegin==0:
                     dsetP[0] = vessel.Psol[0]
                     dsetQ[0] = vessel.Qsol[0]
                     dsetA[0] = vessel.Asol[0]
                     self.nDCurrent = 1
-                    
-                self.vesselsToSave[vesselId] =  dsetGroup      
 
-        
+                self.vesselsToSave[vesselId] =  dsetGroup
+
+
         # # initialize varying elastance model
         # # initialize boundary condition type 1: initial phase
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
@@ -473,54 +472,63 @@ class VascularNetwork(object):
                     if self.initialisationPhaseExist:
                         bC.update({'initialisationPhaseExist': True,
                                    'nTstepsInitPhase': self.nTstepsInitPhase})
-                    
+
         # # initialize gravity and 3d positions over time
-        # create motion description out of motion dict of vascularNetwork
-        # self.motion = [] # [ { vesselId : { angleXMother: ax, angleYMother: ay, angleZMotheraz }_n ] for all n in range (0,Tsteps-1)
-        
-        # define motion
-        motionDict = {}
-        headUpTilt = False
-        # # head up tilt
-        if headUpTilt == True:
-            tSteps4 = int(self.nTsteps / 40.0)
-            start = self.vessels[1].angleXMother
-            end = start - 70 * np.pi / 180
-            startAngle = np.ones(tSteps4 * 20.0) * start
-            endAngle = np.ones(18.0*tSteps4) * end
-            tiltAngle = np.linspace(start, end, self.nTsteps - 38. * tSteps4)
-             
-            angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
-                     
-            motionDict = {1:{'angleXMotherTime': angleXSystem}}
-         
-        for vesselId, angleDict in motionDict.iteritems():
-            self.vessels[vesselId].update(angleDict)
-            
-        # # calculate gravity and positions   
-        self.calculate3DpositionsAndGravity(nTsteps=self.nTsteps)
-            
-        # # calculate venous pressure for windkessel
-        self.initializeVenousGravityPressureTime(self.nTsteps)
-        
-        
+        # TODO: Does this always need to be called?
+        self.initializeHeadUpTilt(headUpTilt=False)
+       
         ##
         for vesselId, vessel in self.vessels.iteritems():
             dsetGroup = self.vesselsToSave[vesselId]
             dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
             dsetRot = dsetGroup.create_dataset("RotationToGlobal", (self.savedArraySize,3,3), dtype='float64')
             dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
-            
+
             # TODO: Verify that numpy's index range protocal... it seems to cutoff the final value in the range selected.
             dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1]
             dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1]
             del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
-        
+
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
-        print self.baroreceptors
+    
+    def initializeHeadUpTilt(self, headUpTilt = False):
+        # define motion
+        motionDict = {}
         
+        # A hard coded head up tilt beginning at 5 seconds
+        # The tilt is executed at a rate of 5 degrees per second up to 60
+        # degrees.
+        tstart = 5.
+        duration = 12.
+        tstop = tstart + duration
+        tiltAngle= 60. * np.pi / 180
         
+        if headUpTilt:
+            start = self.vessels[1].angleXMother
+            end = start - tiltAngle
+            nStepsTilt = int(duration/self.dt)
+            nStepsStart = int(tstart/self.dt)
+            
+            # TODO determine appropropriate response to short simulation time
+            assert tstop < self.totalTime, 'tstop > totalTime'
+            nStepsEnd = int((self.nTsteps*self.dt - tstop)/self.dt)
+            startAngle = np.ones(nStepsStart)*start
+            endAngle = np.ones(nStepsEnd)*end
+            tiltAngle = np.linspace(start, end, nStepsTilt)
+            angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
+            motionDict = {1:{'angleXMotherTime': angleXSystem}}
+
+        # TODO: Do these belong here?    
+        for vesselId, angleDict in motionDict.iteritems():
+            self.vessels[vesselId].update(angleDict)
+
+        # # calculate gravity and positions
+        self.calculate3DpositionsAndGravity(nTsteps=self.nTsteps)
+
+        # # calculate venous pressure for windkessel
+        self.initializeVenousGravityPressureTime(self.nTsteps)
+
         
     def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
         """

@@ -117,21 +117,32 @@ def initConsts(t=0, init_strain=0.01):
     p[22] = 0.1 # tau1
     p[23] = 0.5 # tau2
     p[24] = 0.52 #0.32 #threshold value L0 values for young (39 years) and old group (75 years)
-    p[25] = 63.5 # background firing rate, estimated with CellML simulation of Bugenhagen
+    p[25] = 30 # background firing rate, estimated with CellML simulation of Bugenhagen
     p[26] = 87.5 #100 #gain # both age groups again
     p[27] = 58.6 # alpha_s0
     p[28] = 76.019 # alpha_p0
     p[29] = init_strain # Epsilon_wall --> the input
     y[0] = 0.608 # inital value for L1
     y[1] = 0.626 # initial value for L2
-    y[2] = 1.5672 # norepinephrine release initial state
-    y[3] = 1.60 # acetylcholine release initial state
-    y[4] = 57.587 # delta_HR_s initial value
-    y[5] = 12.2467 # delta_HR_pslow initial value
+    y[2] = 2.407 #  1.5672 # norepinephrine release initial state
+    y[3] = 1.95 # 1.60 # acetylcholine release initial state
+    y[4] = 71.205 # 57.587 # delta_HR_s initial value
+    y[5] = 13.24  # 12.2467 # delta_HR_pslow initial value
     p[30] = p[12]-p[11]
     p[31] = p[11]-p[13]
+    # y = steadyStates(y, p, t)
     return y, p
 
+def steadyStates(y,p,t):
+    alg = computeAlgebraic(p, y, t)
+    y[0] = p[29] # inital value for L1
+    y[1] = p[29] # initial value for L2
+    y[2] = p[16]*alg[9]*p[7]
+    y[3] = p[17]*alg[10]*p[8]
+    y[4] = alg[1]
+    y[5] = (1-p[20])*alg[2]
+    return y
+    
 def computeRates(t, y, p):
     ydot = zeros(sizeStates)
     alg = zeros(sizeAlgebraic)
