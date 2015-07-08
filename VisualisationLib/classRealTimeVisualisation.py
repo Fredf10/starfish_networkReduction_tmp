@@ -56,7 +56,8 @@ class realTimeVisualisation(gtk.Window):
         self.filename         = '../.realtime.viz'
         self.quantitiesToPlot = ['Pressure','Flow']
         self.initialValues    = [0,0,0,0,0]
-        
+
+        #TODO: Try Except Pass should be fixed
         try:
             self.dt               =  networkVariables['dt']
             self.filename         =  networkVariables['filename']
@@ -68,6 +69,8 @@ class realTimeVisualisation(gtk.Window):
         '''
         
         '''
+
+        #TODO: Try Except Pass should be fixed
         try:
             with open(''.join([cur,'/',self.filename]),'r') as dataFile:
                 for dataLine in dataFile:
@@ -77,6 +80,8 @@ class realTimeVisualisation(gtk.Window):
         except: pass
         
         dataDict = {}
+
+        #TODO: Try Except Pass should be fixed
         try:
             dataDict = eval(dataString)
         except:
@@ -85,7 +90,9 @@ class realTimeVisualisation(gtk.Window):
                     return False
             except: pass
             pass
-        
+
+
+        #TODO: Try Except Pass should be fixed
         try:
             for quantity in self.quantitiesToPlot:
                 newValue = dataDict[quantity]

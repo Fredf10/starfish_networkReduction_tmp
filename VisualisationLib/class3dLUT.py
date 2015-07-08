@@ -417,4 +417,4 @@ class LUT(object):
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
             except: 
-                print 'Error LUT.update(): wrong key: %s, could not set up LUT' %key 
+                print 'Warning: LUT.update(): wrong key: %s, could not set up LUT' %key
