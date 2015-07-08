@@ -21,7 +21,8 @@ class StarfishBaseObject(object):
     """
 
     def warning(self, infoString = None, noException = False,
-             quiet = False, verbose = False, saveToFile = False):
+                quiet = False, verbose = False, saveToFile = False,
+                oldExceptPass = False):
         """ 
         Global Warning Function
         
@@ -38,6 +39,9 @@ class StarfishBaseObject(object):
                 Will save info in STARFiSh/warninglog.txt
                 Defaults to False.
         """
+        if oldExceptPass:
+            quiet = True
+            saveToFile = False
 
         completeString = "Warning: "
         if infoString != None:

@@ -558,7 +558,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         for bc in bcs:
                             if bc.type == 1:
                                 comData['boundaryCondition'] = bc                                                            
-            except Exception: self.warning("old except: pass clause in c1dFlowSolv.initializeCommunicators")
+            except Exception: self.warning("old except: pass clause in c1dFlowSolv.initializeCommunicators", oldExceptPass= True)
                         
             comData['currentMemoryIndex'] = self.currentMemoryIndex
             comData['currentTimeStep']    = self.currentTimeStep
@@ -591,14 +591,14 @@ class FlowSolver(cSBO.StarfishBaseObject):
             try:
                 if vesselId == self.vascularNetwork.root:
                     self.numericalObjects.append(self.boundarys[vesselId][0])
-            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.initializeNumObjList")
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
             
             ## add field
             self.numericalObjects.append(self.fields[vesselId])
             
             ## try add Connection
             try: self.numericalObjects.append(self.connections[vesselId])    
-            except Exception: self.warning("old except: pass #2 clause in c1dFlowSolv.initializeNumObjList")
+            except Exception: self.warning("old except: pass #2 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
             
             ## try add distal BC
             try:
@@ -607,12 +607,12 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         self.numericalObjects.append(self.boundarys[vesselId][0])
                     else:
                         self.numericalObjects.append(self.boundarys[vesselId][1])
-            except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList")
+            except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
         
         for communicator in self.communicators.itervalues():
             self.numericalObjects.append(communicator) 
             try:    communicator.startRealTimeVisualisation()
-            except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList")
+            except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
             
         for baroreceptor in self.baroreceptors.itervalues():
             self.numericalObjects.append(baroreceptor)
@@ -647,7 +647,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
         print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
         try: print '%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6)
-        except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput")
+        except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput", oldExceptPass= True)
         print '%-20s %2.1f' % ('CFL init max',self.vascularNetwork.CFL)
         print '%-20s %2.1f' % ('dz min (mm)',self.output['dz_min']*1.0E3)
         print '%-20s %2.1f' % ('c min (m/s)',self.output['c_min'])
@@ -852,7 +852,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         ## stop realtime visualisation
         for communicator in self.communicators.itervalues():           
             try: communicator.stopRealtimeViz()
-            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field")
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field", oldExceptPass= True)
             
         ### garbage collection
         gc.collect()

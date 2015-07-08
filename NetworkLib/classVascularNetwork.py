@@ -243,12 +243,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         for dictName in ['vascularNetworkData']:
             try: self.update(updateDict[dictName])
-            except Exception: self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork")
+            except Exception: self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
             
 #         for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
         for dictName in ['globalFluid', 'communicators']: 
             try: self.getVariableValue(dictName).update(updateDict[dictName])
-            except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork")
+            except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
                         
         if 'vesselData' in updateDict:
             for vesselId, vesselData in (updateDict['vesselData']).iteritems():
@@ -359,7 +359,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for Id, bcs in self.boundaryConditions.iteritems():
             for bc in bcs:
                 try: bc.initialize({})
-                except Exception: self.warning("old except: pass clause in VascularNetwork.initialize")
+                except Exception: self.warning("old except: pass clause in VascularNetwork.initialize", oldExceptPass= True)
                
         windkesselExist = False
         for Id, bcs in self.boundaryConditions.iteritems():
@@ -932,8 +932,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     if vessel.rightDaughter != None: 
                         daughters.append(vessel.rightDaughter)
                         approximatedBif += 1
-                except Exception: self.warning("old except: pass clause #1 in VascularNetwork.findRootVessel")
-            except Exception: self.warning("old except: pass clause #2 in VascularNetwork.findRootVessel")
+                except Exception: self.warning("old except: pass clause #1 in VascularNetwork.findRootVessel", oldExceptPass= True)
+            except Exception: self.warning("old except: pass clause #2 in VascularNetwork.findRootVessel", oldExceptPass= True)
                 
         # find startRank by approximation of numbers of generations
         approxGen = len(set(daughters)) - 2 * approximatedBif + int(np.sqrt(approximatedBif))
@@ -955,7 +955,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         for vessel in self.vessels.itervalues():
             if vessel.leftDaughter == None and vessel.rightDaughter != None:
-                print "WARNING vascularNetwork.checkDaughterDefiniton(): Vessel {} has no leftDaughter but a rightDaughter {}, this daughter is now assumed to be leftDaughter".format(vessel.Id, vessel.rightDaughter)
+                self.warning("vascularNetwork.checkDaughterDefiniton(): Vessel {} has no leftDaughter but a rightDaughter {}, this daughter is now assumed to be leftDaughter".format(vessel.Id, vessel.rightDaughter), noException= True)
                 vessel.leftDaughter = vessel.rightDaughter
                 vessel.rightDaughter = None
             # check if daughter vessel exists
@@ -1166,7 +1166,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             try:
                 self.vessels[rightDaughter].leftMother = leftMother
                 self.vessels[rightDaughter].rightMother = rightMother
-            except Exception: self.warning("old except: pass clause in VascularNetwork.applyMothersToVessel")
+            except Exception: self.warning("old except: pass clause in VascularNetwork.applyMothersToVessel", oldExceptPass= True)
     
     def findStartAndEndNodes(self):
         """
@@ -1237,7 +1237,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             Rtotal = bc.Rc + Z
                             bc.update({'Rtotal':Rtotal})
                             print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
-                    except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance")
+                    except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
                     # # add resistance to the value
                     try: boundaryResistance = boundaryResistance + bc.Rtotal
                     except Exception:
@@ -1250,11 +1250,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                 waveSpeed = self.vessels[vesselId].c(area, compliance)
                                 Z = 1.0 / (compliance * waveSpeed)[-1]
                                 boundaryResistance = boundaryResistance + Z
-                        except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.calculateNetworkResistance")
+                        except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
                         try:
                             # # winkessel 2 elements and single resistance
                             boundaryResistance = boundaryResistance + bc.Rc
-                        except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.calculateNetworkResistance")
+                        except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
                     
                 # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
                 if boundaryResistance == 0: 
@@ -1581,7 +1581,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     # # setup initial pressure for right daughter used if anastomosis     
                     p0, p1 = self.initialValues[rightMother]['Pressure']
                     initialPressureRM = np.linspace(p0, p1, int(self.vessels[rightMother].N))
-                except Exception: self.warning("Old except: pass clause #1 in VascularNetwork.optimizeTreeRefelctionCoefficients")
+                except Exception: self.warning("Old except: pass clause #1 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
                 # # setup initial pressure for left daughter         
                 p0, p1 = self.initialValues[leftDaughter]['Pressure']
                 initialPressureLD = np.linspace(p0, p1, int(self.vessels[leftDaughter].N))
@@ -1589,7 +1589,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 try: 
                     p0, p1 = self.initialValues[rightDaughter]['Pressure']
                     initialPressureRD = np.linspace(p0, p1, int(self.vessels[rightDaughter].N))
-                except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.optimizeTreeRefelctionCoefficients")
+                except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
                 # # calculate reflection coefficient
                 if rightMother == None and rightDaughter == None:
                     reflectionCoefficient = self.calculateReflectionCoefficientConnection([[leftMother, initialPressureLM, ]],
@@ -1608,17 +1608,17 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         try:
                             self.vessels[vesselId].radiusProximal = self.vessels[vesselId].radiusProximal * 1.005
                             try: self.vessels[vesselId].radiusDistal = self.vessels[vesselId].radiusDistal * 1.005
-                            except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.optimizeTreeRefelctionCoefficients")
+                            except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
                             self.vessels[vesselId].initialize({})
-                        except Exception: self.warning("Old except: pass clause #4 in VascularNetwork.optimizeTreeRefelctionCoefficients")
+                        except Exception: self.warning("Old except: pass clause #4 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
                 else:
                     for vesselId in [leftDaughter, rightDaughter]:
                         try:
                             self.vessels[vesselId].radiusProximal = self.vessels[vesselId].radiusProximal * 0.995
                             try: self.vessels[vesselId].radiusDistal = self.vessels[vesselId].radiusDistal * 0.995
-                            except Exception: self.warning("Old except: pass clause #5 in VascularNetwork.optimizeTreeRefelctionCoefficients")
+                            except Exception: self.warning("Old except: pass clause #5 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
                             self.vessels[vesselId].initialize({})
-                        except Exception: self.warning("Old except: pass clause #6 in VascularNetwork.optimizeTreeRefelctionCoefficients")
+                        except Exception: self.warning("Old except: pass clause #6 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
             print " new Reflection Coeff area ratio", radiusLeftDaughterInit, self.vessels[leftDaughter].radiusProximal, 1 - (radiusLeftDaughterInit) / self.vessels[leftDaughter].radiusProximal
                 # print "      new Reflection coefficient {}, areas".format(reflectionCoefficient), self.vessels[leftDaughter].radiusProximal #, self.vessels[rightDaughter].radiusProximal 
             # print
