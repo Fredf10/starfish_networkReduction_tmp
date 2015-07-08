@@ -144,6 +144,8 @@ class Field():
         self.P[n+1][1:-1] = Pnewinterior
         self.Q[n+1][1:-1] = Qnewinterior
         self.A[n+1][1:-1] = Anewinterior
+
+        #TODO: Please explain this if statement in a comment.
         if (self.P[n+1] < 0).any():
             print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print self.P[n+1]
@@ -199,9 +201,9 @@ class Field():
          
         # check pressure solution
         if (P_pre < 0).any():
-            print "ERROR: {} calculated negativ pressure in predictor step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P_pre
-            exit()
+            raise ValueError("{} calculated negative pressure P_pre = {} in predictor step at time {} (n {},dt {}), exit system".format(self.name, P_pre,n*dt,n,dt))
+            #print P_pre
+            #exit()
              
         # solve area
         if self.rigidArea == True:
@@ -225,9 +227,9 @@ class Field():
          
         # check pressure solution
         if (self.P[n+1] < 0).any():
-            print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print self.P[n+1]
-            exit()
+            raise ValueError("{} calculated negative pressure self.P[n+1] = {} in corrector step at time {} (n {},dt {}), exit system".format(self.name,self.P[n+1],n*dt,n,dt))
+            #print self.P[n+1]
+            #exit()
          
         # solve area
         if self.rigidArea == True:

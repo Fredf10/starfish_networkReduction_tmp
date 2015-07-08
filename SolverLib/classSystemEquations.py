@@ -1,7 +1,11 @@
-import numpy as np 
+import sys, os
+import numpy as np
 
+cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
+import UtilityLib.classStarfishBaseObject as cSBO
 
-class System(object):
+class System(cSBO.StarfishBaseObject):
     
     def __init__(self,vessel,simplifyEigenvalues,riemannInvariantUnitBase,currentTimeStep,dt):
         """
@@ -165,7 +169,7 @@ class System(object):
         ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
         errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
         if errorIdentity > 5.e-16:
-            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+            self.warning("SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity), noException= True)
         
         ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
         # calculate omegas
@@ -229,7 +233,7 @@ class System(object):
         ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
         errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
         if errorIdentity > 5.e-16:
-            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+            self.warning("SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity), noException= True)
         
         ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
         # calculate omegas
@@ -303,7 +307,7 @@ class System(object):
         ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
         errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
         if errorIdentity > 5.e-16:
-            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+            self.warning("SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity), noException = True)
         
         ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
         # calculate omegas
@@ -375,7 +379,7 @@ class System(object):
         ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
         errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
         if errorIdentity > 5.e-16:
-            print "WARNING: SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity)
+            self.warning("SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity), noException= True)
             
         ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
         # calculate omegas

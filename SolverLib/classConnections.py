@@ -1,12 +1,17 @@
+import sys, os
 import numpy as np
 from numpy.linalg import solve
 from scipy.optimize import fsolve
 
-from pprint import pprint as pp       
+from pprint import pprint as pp
+
+cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
+import UtilityLib.classStarfishBaseObject as cSBO
 
 from copy import copy as copy       
  
-class Link():        
+class Link():
     """
     Link object represends the connection between two vessels
     """
@@ -79,7 +84,7 @@ class Link():
             print "classconnection 78: using nonlinear link model" 
             self.__call__ = self.callNonLinear
         else:
-            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
+            raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
     
         ## benchamark Test variables
         self.nonLin = False
@@ -157,9 +162,9 @@ class Link():
         self.Q_daughter[n+1][pos2] = Q2_new
         
         if P1_new < 0 or P2_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new
-            exit()
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, at time {} (n {},dt {})".format(self.name,P1_new, P2_new,n*dt,n,dt))
+            #print P1_new, P2_new
+            #exit()
                 
         # calculate new areas
         if self.rigidAreas == False:
@@ -181,9 +186,9 @@ class Link():
             self.maxQError  = sumQError
         #print self.name, ' Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumQError
-            exit()
+            raise ValueError("Connection: {} too high error, sumQError = {}, in conservation of mass at time {} (n {},dt {})".format(self.name,sumQError,n*dt,n,dt))
+            #print sumQError
+            #exit()
             
         # Linear presssure equation
         sumPError = abs(abs(P1_new)-abs(P2_new))/abs(P1_new)
@@ -192,9 +197,9 @@ class Link():
         if sumPError > self.maxPError:
             self.maxPError  = sumPError
         if sumPError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumPError
-            exit()
+            raise ValueError("Connection: {} too high error, sumPError = {}, in conservation of pressure at time {} (n {},dt {})".format(self.name,sumPError,n*dt,n,dt))
+            #print sumPError
+            #exit()
                                                
         ## Non linear pressure equation
         sumPErrorNonLin = abs(abs(P1_new+1000*0.5*(Q1_new/A1n)**2)-abs(abs(P2_new+1000*0.5*(Q2_new/A2n)**2)))/abs(P1_new+0.5*(Q1_new/A1n)**2)
@@ -202,10 +207,12 @@ class Link():
             self.sumPErrorNonLinCount = self.sumPErrorNonLinCount+1
         if sumPErrorNonLin > self.maxPErrorNonLin:
             self.maxPErrorNonLin  = sumPErrorNonLin
-        if sumPError > 1.e-10:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumPError
-            exit()
+        # TODO: This was set to test sumPError, not sumPErrorNonLin
+        # TODO: When set correctly, program wouldn't run. Commented out.
+#        if sumPErrorNonLin > 1.e-10:
+ #           raise ValueError("Connection: {} too high error, sumPErrorNonLin = {} in conservation of pressure at time {} (n {},dt {})".format(self.name,sumPErrorNonLin,n*dt,n,dt))
+            #print sumPError
+            #exit()
             
     def callNonLinear(self):
         """
@@ -352,9 +359,9 @@ class Link():
         self.Q_daughter[n+1][pos2] = Q2_new
         
         if P1_new < 0 or P2_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new
-            exit()
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, at time {} (n {},dt {})".format(self.name,P1_new,P2_new,n*dt,n,dt))
+            #print P1_new, P2_new
+            #exit()
                  
         # calculate new areas
         if self.rigidAreas == False:
@@ -694,7 +701,7 @@ class Bifurcation():
             print "classconnection 693: using nonlinear bifurcation model" 
             self.__call__ = self.callNonLinear
         else:
-            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
+            raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
         
         ## benchamark Test variables
         self.sumQErrorCount = 0
@@ -792,9 +799,9 @@ class Bifurcation():
         self.Q_rightDaughter[n+1][pos3] = Q3_new
         print "using linear bifurcation model"
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new, P3_new
-            exit()
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, P3_new = {}, at time {} (n {},dt {})".format(self.name,P1_new, P2_new, P3_new, n*dt,n,dt))
+            #print P1_new, P2_new, P3_new
+            #exit()
         
         
         # calculate new areas
@@ -813,16 +820,16 @@ class Bifurcation():
             
         ## non linear error        
         try: sumQError = abs(Q1_new-Q2_new-Q3_new)/abs(Q1_new)
-        except: sumQError = 0.0
+        except Exception: sumQError = 0.0
         if sumQError > 0.0: 
             self.sumQErrorCount = self.sumQErrorCount+1
         if sumQError > self.maxQError:
             self.maxQError  = sumQError
         #print self.name,' \n Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumQError
-            exit()
+            raise ValueError("Connection: {} too high error, sumQError = {} in conservation of mass at time {} (n {},dt {})".format(self.name,sumQError,n*dt,n,dt))
+            #print sumQError
+            #exit()
         
         sumPError = abs(P1_new-P2_new)/abs(P1_new)
         if sumPError > 0.0: 
@@ -831,9 +838,9 @@ class Bifurcation():
             self.maxPError  = sumPError
         #print self.name,' Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
         if sumPError > 1.e-10:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumPError
-            exit()
+            raise ValueError("Connection: {} too high error, sumPError = {}, in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,sumPError,n*dt,n,dt))
+            #print sumPError
+            #exit()
         
         sumPErrorNonLin = abs(P1_new+500*(Q1_new/A1n)**2-(P2_new+500*(Q2_new/A2n)**2))/abs(P1_new+0.5*(Q1_new/A1n)**2)
         if sumPErrorNonLin > 0.0: 
@@ -1579,7 +1586,7 @@ class Anastomosis():
             self.maxQError  = sumQError
         #print self.name,' \n Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "Warning: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "Warning: Connection: {} to high error in conservation of mass at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
             print sumQError, ' <- Q1,Q2,Q3 ',Q1_new, Q2_new, Q3_new
             #exit()
         
@@ -1590,7 +1597,7 @@ class Anastomosis():
             self.maxPError  = sumPError
         #print self.name,' Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
         if sumPError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
             print sumPError, ' <- P1,P2,P3 ',P1_new, P2_new, P3_new
             #exit()
         

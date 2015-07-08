@@ -248,7 +248,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 #         for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
         for dictName in ['globalFluid', 'communicators']: 
             try: self.getVariableValue(dictName).update(updateDict[dictName])
-            except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", verbose= True)
+            except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork")
                         
         if 'vesselData' in updateDict:
             for vesselId, vesselData in (updateDict['vesselData']).iteritems():

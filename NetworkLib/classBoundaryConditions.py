@@ -323,9 +323,9 @@ class BoundaryConditionType1(BoundaryCondition):
         else:
             self.MeanFlow = givenMeanFlow
             difference = abs(givenMeanFlow - evaluatedMeanFlow)
-            tmpstring = ("given meanFlow given {} differs from meanFlow of boundaryCondition {}".format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6)
-                         + "(evaluated with integral over one period)."
-                         + "The difference is {} ml s-1".format(difference*1.e6))
+            tmpstring = ("given meanFlow given {} differs \n from meanFlow of boundaryCondition {}".format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6)
+                         + "\n(evaluated with integral over one period)."
+                         + "\nThe difference is {} ml s-1".format(difference*1.e6))
             self.warning(tmpstring,  noException= True, quiet= quiet)
 #			if quiet == False:
 #				print """\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
