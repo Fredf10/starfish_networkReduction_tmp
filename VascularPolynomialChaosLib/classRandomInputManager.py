@@ -45,8 +45,25 @@ class RandomInputManager(object):
         else:
             try:
                 return self.randomInputs[index]
-            except:
+            except IndexError:
+                print "error index does not exist!"
                 return []
+        
+    def rotateRandomInputVectorByOne(self):
+        '''
+        rotates the random input vector by moving the first element to the last element
+        e.g. [1,2,3] -> [2,3,1]
+        '''
+        self.randomInputs = []
+        # 1. get lenght of all inputs
+        
+        # 2. move first random input to the last place in self.randomInputs
+        
+        # 3. update all random input id's
+        
+        # 4. update the map
+        
+        # 5. link random inputs again
             
     def linkRandomInputUpdateFunctions(self, vascularNetwork):
         '''

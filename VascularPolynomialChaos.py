@@ -69,19 +69,18 @@ def vascularPolyChaos():
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
-    # 1.3 print distributions
-    vascularNetwork.randomInputManager.printOutInfo()
-    
+    # 1.3 print defined random variables
     assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
-            
+    vascularNetwork.randomInputManager.printOutInfo()
+        
     # 2. create distributions    
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
     
-    # 3. add dependentCase if existent TODO:
+    # 3. add dependentCase if existent 
+    # TODO: add correlation matrix to xml definitions and variable dependentCase to definitions
     a = 0.8
     CorrelationMatrix = np.array([[1.,a,a],[a,1.,a],[a,a,1.]])
-    
     dependentCase = True
     
     if dependentCase == True:

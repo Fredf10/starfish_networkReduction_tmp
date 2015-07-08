@@ -1,5 +1,3 @@
-#from yum.update_md import UpdateMetadata
-
 
 
 class RandomInput(object):
