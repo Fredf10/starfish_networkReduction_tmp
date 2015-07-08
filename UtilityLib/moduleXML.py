@@ -344,7 +344,11 @@ def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, rand
     randomInputManager.addRandomInput(dataDict)
 
 
-def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', networkXmlFile = None, pathSolutionDataFilename = None):
+def loadNetworkFromXML(networkName ,
+                       dataNumber = "xxx",
+                       exception = 'Error',
+                       networkXmlFile = None,
+                       pathSolutionDataFilename = None):
     '''
     Function laods network from XML-file
     
