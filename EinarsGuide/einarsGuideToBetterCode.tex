@@ -345,7 +345,7 @@ for line in inputFileData:
 
 Now we're getting somewhere. We run the program, but it's no good. We get the error, and it prints the line number, but the error message stops there.
 
-This is because "except:" catches everything. Not only will it now not send errors to the main function, but it will also keep working. This can cause your code to pass on bad data to the next submodule, which will crash because of an error in the previous one. This is why we will always want to re-raise the exception, using the simple command "raise"
+This is because "except:" catches everything. Not only will it now not send errors to the main function, but it will also keep working. This can cause your code to pass on bad data to the next submodule, which will crash because of an error in the previous one. This is why we will always want to re-raise the exception, using the simple command "raise".
 
 
 \begin{lstlisting}
@@ -459,9 +459,9 @@ I'm a bad person. I've shown you so much, and it's not actually they way you're 
 try: 
   stuff(parameterlist)
 except Exception as e:
-  raise type(e), type(e)(e.message + # original info
-                  '\n IN FILEA: function stuff was called with 
-                  params {}'.format(parameterlist)), 
+  raise type(e), type(e)(e.message  # original info
+                  + "\n IN FILEA: function stuff was called with 
+                  params {}".format(parameterlist)), 
                   sys.exc_info()[2]  # traceback info
 \end{lstlisting}
 
@@ -471,20 +471,19 @@ Now, since you're reading this guide to work on STARFiSh, I have happy news for 
 
 \subsection{STARFiSh's own handling}
 
-Now, since we'll be working in a heavily object oriented manner, we have made a super-class which all other classes inherit from. This class will be worked to contain some commonly found data such as vesselID, maybe a description string, etc. But the most important features are the general functions, among which are warn() and errAppend().
+Now, since we'll be working in a heavily object oriented manner, we have made a super-class which all other classes inherit from. This class will be worked to contain some commonly found data such as vesselID, maybe a description string, etc. But the most important features are the general functions, among which are warning() and exception().
 
 Let's have a look at how we call each of them.
 
 \begin{lstlisting}
 try: stuff()
 except Exception:
-  self.warn(infoString, exceptionHappened = True, 
+  self.warning(infoString, noException = False, 
             quiet = False, verbose = False, saveToFile = False)
 
 try: stuff()
 except Exception:
-  tmp1,tmp2,tmp3 = self.errAppend(infoString)
-  raise tmp1,tmp2,tmp3
+  self.exception(infoString)
 \end{lstlisting}
 
 As you can see, a lot smoother than the original methods I've described.
@@ -624,10 +623,7 @@ What? But I need bigFunc! Or so you might think. But it actually makes sense. No
 
 This is why I call unit testing the slayer of dragons, because big black boxes with unpredictable behaviour are like dragons, pretty at first, deadly when poked in the wrong spot. However, apply a regime of unit testing to your development process, and you'll find what functions are too big without looking specifically for them.
 
-
-%\subsection{Making mock functions for testing}
-%TODO decide if should remain
-
+Now, if you do have a function that calls a lot of other functions, I'd recommend looking at using the mock package to help test. 
 
 \subsection{Systematising your tests}
 
@@ -756,7 +752,7 @@ must be sent to the function.
 \begin{lstlisting}
 try: stuff()
 except Exception:
-  self.warn(infoString, noException = False, #default value
+  self.warn(infoString, noException = False, 
             verbose = False, saveToFile = False)
 
 if condition: 
@@ -771,6 +767,11 @@ else:
 try: stuff()
 except Exception:
   self.exception(infoString)
+  
+if condition:
+  success()
+else:
+  raise <Appropriate Exception type>("infostring")
 
 \end{lstlisting}
 
