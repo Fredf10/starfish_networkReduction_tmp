@@ -350,6 +350,9 @@ def minMaxFunction(arrayToEvaluate,timeValues=np.array([]),delta=0.025, seperate
     mn, mx = np.Inf, -np.Inf
     mnpos, mxpos = np.NaN, np.NaN
     
+    # adjust delta as percentage of min-max range of signal to adapt to different signal magnitudes
+    delta = (np.max(arrayToEvaluate)-np.min(arrayToEvaluate))*delta
+    
     # determine to look for min or max
     zeroNaNinputdetection = True
     startValue = arrayToEvaluate[0]

@@ -72,16 +72,16 @@ def vascularPolyChaos():
     # 1.3 print defined random variables
     assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
     vascularNetwork.randomInputManager.printOutInfo()
-        
+    
     # 2. create distributions    
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
     
     # 3. add dependentCase if existent 
     # TODO: add correlation matrix to xml definitions and variable dependentCase to definitions
-    a = 0.8
+    a = 0.5
     CorrelationMatrix = np.array([[1.,a,a],[a,1.,a],[a,a,1.]])
-    dependentCase = True
+    dependentCase = False
     
     if dependentCase == True:
         distributionManager.createDependentDistribution(CorrelationMatrix)
@@ -134,8 +134,8 @@ def vascularPolyChaos():
         
         # 6. process quantity of interest
         ## TODO: defined query location and quantities to process
-        quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure' ]#,
-                                         #'ExtremaPressure','ExtremaBackwardPressure']#,'InflectionPointPressure']
+        quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure' ,'ExtremaFlow',
+                                         'ExtremaPressure' ]#,'ExtremaBackwardPressure']#,'InflectionPointPressure']
         queryLocation = 'vessel_0'
         xVals = 0.25
         confidenceAlpha = 5
@@ -148,20 +148,21 @@ def vascularPolyChaos():
             ## process the data of interest
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
         
-        # if polynomial chaos
-        # 7. create Orthogonal polynomials
-        distributionManager.calculateOrthogonalPolynomials()
-        # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
-        locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager.orthogonalPolynomials,
-                                                                     distributionManager.samples,
-                                                                     distributionManager.jointDistribution,
-                                                                     dependentCase)
-        locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
-        
-        ## if monte carlo
-        # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
-        #locationOfInterestManager.calculateStatisticsMonteCarlo()
-        
+        if vpcConfiguration.postProcessing == True:
+            # if polynomial chaos
+            # 7. create Orthogonal polynomials
+            distributionManager.calculateOrthogonalPolynomials()
+            # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
+            locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager.orthogonalPolynomials,
+                                                                         distributionManager.samples,
+                                                                         distributionManager.jointDistribution,
+                                                                         dependentCase)
+            locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
+            
+            ## if monte carlo
+            # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
+            #locationOfInterestManager.calculateStatisticsMonteCarlo()
+            
         # 10. plotting of variables
 if __name__ == '__main__':
     vascularPolyChaos()

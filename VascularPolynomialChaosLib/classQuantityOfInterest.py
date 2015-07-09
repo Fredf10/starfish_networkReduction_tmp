@@ -27,6 +27,10 @@ class QuantityOfInterest(object):
         self.firstOrderSensitivities = None
         self.totalSensitivities      = None
         
+        # use saltellis MC method evaluating the gpc-expansion
+        self.firstOrderSensitivitiesMC = None
+        self.totalSensitivitiesMC = None
+        
     def calculateStatisticsPolynomialChaos(self, orthogonalPolynomials, samples, distributions, dependentCase):
         '''
         Function which calculates the gPCExpansion for the given data
@@ -37,7 +41,7 @@ class QuantityOfInterest(object):
         print self.locationName,'--',self.quantityName
         
         # polynomial chaos expansion
-        self.gPCExpansion = cp.fit_regression(orthogonalPolynomials, samples.T, self.data) 
+        self.gPCExpansion = cp.fit_regression(orthogonalPolynomials, samples.T, self.data)
                  
         # statistics
         self.expectedValue       = cp.E(self.gPCExpansion, distributions)
@@ -67,10 +71,9 @@ class QuantityOfInterest(object):
                 self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributions)
             else:
                 # dependent: use saltellies monte carlo method with polynomial chaos as function for evaluations
-                self.firstOrderSensitivities = cp.Sens_m_sample(self.gPCExpansion,distributions,int(1e4))
-                self.totalSensitivities      = cp.Sens_t_sample(self.gPCExpansion,distributions,int(1e4))
-                #samplesSalelli      
-                
+                print "No method for sensitivity with dependent variables implemented yet"
+                pass
+            
     def calculateStatisticsMonteCarlo(self):
         '''
         Function to calculate statistics
@@ -89,7 +92,9 @@ class QuantityOfInterest(object):
                            "conditionalExpectedValue",
                            "conditionalVariance",
                            "firstOrderSensitivities",
-                           "totalSensitivities"]
+                           "totalSensitivities",
+                           "firstOrderSensitivitiesMC",
+                           "totalSensitivitiesMC"]
         
         for variableName in variablesToSave:
             variableValue = self.getVariableValue(variableName)
