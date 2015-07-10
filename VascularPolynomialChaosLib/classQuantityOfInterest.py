@@ -6,11 +6,11 @@ class QuantityOfInterest(object):
     '''
     
     '''
-    def __init__(self,quantityName, locationName, confidenceAlpha):
+    def __init__(self,quantityName, locationName, confidenceAlpha, data = None):
         
         self.locationName = locationName
         self.quantityName = quantityName
-        self.data = None
+        self.data = data
         
         # statistic properties
         self.gPCExpansion = None
@@ -47,7 +47,7 @@ class QuantityOfInterest(object):
         self.expectedValue       = cp.E(self.gPCExpansion, distributions)
         self.variance            = cp.Var(self.gPCExpansion, distributions)
         self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributions)
-        self.conficenceInterval =  self.conficenceInterval.reshape(2,len(self.expectedValue))
+        self.conficenceInterval =  self.conficenceInterval.reshape(2,len(np.atleast_1d(self.expectedValue)))
         
         # conditional expected values  and sensitivity coefficients
         distributionDimension = len(distributions)
@@ -92,9 +92,7 @@ class QuantityOfInterest(object):
                            "conditionalExpectedValue",
                            "conditionalVariance",
                            "firstOrderSensitivities",
-                           "totalSensitivities",
-                           "firstOrderSensitivitiesMC",
-                           "totalSensitivitiesMC"]
+                           "totalSensitivities"]
         
         for variableName in variablesToSave:
             variableValue = self.getVariableValue(variableName)

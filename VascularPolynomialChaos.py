@@ -135,7 +135,7 @@ def vascularPolyChaos():
         # 6. process quantity of interest
         ## TODO: defined query location and quantities to process
         quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure' ,'ExtremaFlow',
-                                         'ExtremaPressure' ]#,'ExtremaBackwardPressure']#,'InflectionPointPressure']
+                                         'ExtremaPressure', 'InflectionPointBackwardPressure' ]#,'ExtremaBackwardPressure']#,'InflectionPointPressure']
         queryLocation = 'vessel_0'
         xVals = 0.25
         confidenceAlpha = 5

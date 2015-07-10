@@ -45,18 +45,18 @@ class VpcConfiguration(object):
         # 2.1 pre process data for all locations of interest
         self.preProcessData   = True
         # 2.2 create plots for min max points
-        self.plotMinMaxPoints = True
+        self.plotMinMaxPoints = True #TODO: remove
         
         
         # TODO: decide if we want to save gpce and polys or calculate it new every time
         ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
         self.createOrthoPoly  = True
         ### step Construct generalized polynomial chaos expansion and  pre process data
-        self.calculateGPCE    = False #
+        self.calculateGPCE    = True #
             
         #### not implemented yet
         ### 3.step post processing - sensitivity analysis
-        self.postProcessing  = False
+        self.postProcessing  = True
         self.plotMeanSTD     = True
         self.plotPeaks       = True
         #plotSensitiviy  = False

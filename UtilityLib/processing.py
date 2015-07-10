@@ -447,6 +447,15 @@ def calculateWaveShoulderPointTangent(waveData, timeData, startPointT, endPointT
     '''
     This method calculates the point inside [startPointX,endPointX] of the wave data 
     where the tangent has the steepest slope  
+    
+    '''
+    print "ERROR: Function renamed to calculatePointOfInflection: this function will be removed soon!"
+    exit()
+    
+def calculatePointOfInflection(waveData, timeData, startPointT, endPointT = None):
+    '''
+    This method calculates the point inside [startPointX,endPointX] of the wave data 
+    where the tangent has the steepest slope  
     '''
     # find start index through time
     startIndex = None
@@ -454,10 +463,11 @@ def calculateWaveShoulderPointTangent(waveData, timeData, startPointT, endPointT
     startIndex = np.where(timeData == startPointT)
     if startIndex == None:
         print "ERROR calculateWaveShoulderPoint: could not find startIndex! return"; return
-    if endPointT: endIndex   = np.where(timeData == endPointT)
-    else: endPointT = len(timeData)
-    print startIndex
-    print endIndex
+    if endPointT != None: 
+        endIndex = np.where(timeData == endPointT)
+    else:
+        endIndex = [len(timeData)-1]
+        
     slope = 0
     slopeIndex = None
     for i in xrange(startIndex[0],endIndex[0]):

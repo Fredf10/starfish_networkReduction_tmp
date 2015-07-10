@@ -83,6 +83,7 @@ class LocationOfInterestManager(object):
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationOfInterests:
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
+        
         # second postprocessing find extrema if needed
         for locationOfInterest in self.locationOfInterests:
             locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
