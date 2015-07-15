@@ -1,7 +1,6 @@
-import unittest
 import sys, os, gc
-import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
@@ -13,16 +12,18 @@ import SolverLib.class1DflowSolver as c1dFS
 def test_singleVessel():
 
     # Set which values should be tested, and the threshold for mean square error
-    testDict = {"pressure": 10.0,
-                "area": 10.0,
-                "flow": 10.0}
+    testDict = {"Pressure": 10.0,
+                "Area": 10.0,
+                "Flow": 10.0}
 
-    ## load and run a new simulation of reference
+    # load and run a new simulation of reference
     networkName = "singleVessel"
     dataNumber = "999"
     dataNumberSol = "012"
     networkXmlFileLoad = cur + "/singleVessel/singleVessel.xml"
     networkXmlSolutionLoad = cur + "/singleVessel/singleVessel_SolutionData_012.xml"
+
+    # Temporary files for saving data
     networkXmlFileSave = cur + "/tmp.xml"
     pathSolutionDataFilename = cur + "/tmpSol.hdf5"
 
@@ -49,19 +50,59 @@ def test_singleVessel():
                                                       pathSolutionDataFilename = pathSolutionDataFilename)
     vascularNetworkRef.linkSolutionData()
 
+    # Make a dictionary for the root mean square errors
+    RMSEDict = {}
+
     for vesselId in vascularNetworkNew.vessels:
-        print "testing vessel nr. {} \n".format(vesselId)
+        RMSEDict[vesselId] = {}
+        dataDictNew = {}
+        dataDictRef = {}
+#        print "testing vessel nr. {}".format(vesselId)
+        keyList = []
+        for key in testDict:
+            keyList.append(key)
 
-        dataDictNew = vascularNetworkNew.getSolutionData( vesselId, ['Pressure'], vascularNetworkNew.simulationTime, [0.0, 0.2])
-        dataDictRef = vascularNetworkRef.getSolutionData( vesselId, ['Pressure'], vascularNetworkRef.simulationTime, [0.0, 0.2])
+        dataDictNew = vascularNetworkNew.getSolutionData( vesselId,
+                                                          keyList,
+                                                          vascularNetworkNew.simulationTime, [0.0, 0.2])
+        dataDictRef = vascularNetworkRef.getSolutionData( vesselId,
+                                                          keyList,
+                                                          vascularNetworkNew.simulationTime, [0.0, 0.2])
 
-#   lag dict = {"pressure": tolerance}
-#   "pressure", "area", "flow"
-    # root mean square error
+        for key in testDict:
+#            print "testing key {}".format(key)
+            testVals = np.array(dataDictNew[key])
+            refVals = np.array(dataDictRef[key])
+            if len(testVals) != len(refVals):
+                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+            if len(testVals[0]) != len(refVals[0]):
+                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+            SEArrayEntrance = np.zeros(len(testVals))
+            SEArrayExit = np.zeros(len(testVals))
+            for i in xrange(len(testVals)):
+                SEArrayEntrance[i] = (testVals[i][0] - refVals[i][0])*(testVals[i][0] - refVals[i][0])
+                SEArrayExit[i] = (testVals[i][1] - refVals[i][1])*(testVals[i][1] - refVals[i][1])
+            RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))
 
-    print dataDictNew
-    print dataDictRef
+##    Uncomment these if you want to  have a printout of all RMSE values
+#    print "Root Mean Square Error for each part of the network is:"
+#    print RMSEDict
 
+    TooHighError = False
+    for vesselId in RMSEDict:
+        for key in RMSEDict[vesselId]:
+            if testDict[key] < RMSEDict[vesselId][key] :
+                TooHighError = True
+                print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
+
+    if not TooHighError:
+        print "\nAll values below error threshold"
+        print "Test Successful!"
+
+#        print dataDictNew
+#        print dataDictNew
+#        print dataDictRef
+# root mean square
 
 if __name__ == "__main__":
     test_singleVessel()
