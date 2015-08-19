@@ -1,11 +1,10 @@
+import os
 def systemCheck():
     '''
     Check for necessary moduls and 3thrd party libarys needed for STARFiSh and vnc:
         matplotlib
         numpy
         scipy
-        #mayavi2
-        #tvtk
         lxml2
         pydot
         gtk
@@ -13,7 +12,6 @@ def systemCheck():
         mencoder
         OpenGL
     '''
-    matplotlibInstalled = False
     installed = " ... installed!"
     print ""
     print "Check for necessary moduls and 3thrd party libarys needed for vascular1DFlow and vnc"
@@ -23,26 +21,26 @@ def systemCheck():
     try:
         import matplotlib.pyplot 
         print installed
-        matplotlibInstalled = True
     except:
         print " IMPORT ERROR; no version of matplotlib.pyplot found"
     
-    print "should check for ffmpeg instead, but checks mencoder ...   ",
-    if matplotlibInstalled:
-        import matplotlib.animation as animation
-        
-        if animation.MencoderWriter.isAvailable():
-            print installed
-        else:
-            print " IMPORT ERROR; no version of mencoder found"     
+    print "check for ffmpeg     ",
+    if os.path.isfile("/bin/ffmpeg"):
+        print installed
     else:
-        print " IMPORT ERROR; no version of matplotlib.pyplot found thus cannot check for mencoder"     
+        print " ERROR could not find ffmpeg installation; this needs to be manual"
+        print " (not supported by the automatic installer)"
+        print " for Fedora:"
+        print "            1.) add RPMfusion free repositories to yum:"
+        print "                 http://rpmfusion.org/Configuration "
+        print "                 or"
+        print "                 sudo yum install --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+        print "            2.) sudo yum install ffmpeg"     
         
     print "check for numpy      ",
     try:
         import numpy
         print installed
-        
     except:
         print " IMPORT ERROR; no version of numpy found"
     
@@ -53,27 +51,6 @@ def systemCheck():
     except:
         print " IMPORT ERROR; no version of scipy found"
     
-#     print "check for  mayavi2 ..."
-#     try:
-#         import mayavi
-#         print installed
-#     except:
-#         try: 
-#             import enthought.mayavi
-#             print installed," [Old Version !!]"
-#         except:
-#             print "IMPORT ERROR; no version of mayavi2 found"
-#     
-#     print "check for  tvtk ..."
-#     try:
-#         import tvtk
-#         print installed
-#     except:
-#         try:
-#             import enthought.tvtk.api
-#             print installed," [Old Version !!]"
-#         except:
-#             print "IMPORT ERROR; no version of tvtk found"
     print "check for psutil"
     try:
         import psutil
@@ -115,15 +92,27 @@ def systemCheck():
         print installed
     except:
         print " IMPORT ERROR; no version of pyOpenGL found" 
-# 
-#     print "check for xdot ...",
-#     try:
-#         import xdot
-#         print installed
-#     except:
-#         print "IMPORT ERROR; no version of xdot found (http://pypi.python.org/pypi/xdot )" 
         
-
+    print "check for h5py       ",
+    try:
+        import h5py
+        print installed
+    except:
+        print " IMPORT ERROR; no version of h5py found"  
+    
+    print "check for sphinx     ",
+    try:
+        import sphinx
+        print installed
+    except:
+        print " IMPORT ERROR; no version of sphinx found"  
+    
+    print "check for reportlab  ",
+    try:
+        import reportlab
+        print installed
+    except:
+        print " IMPORT ERROR; no version of reportlab found"         
 
 if __name__ == '__main__':
     systemCheck()
