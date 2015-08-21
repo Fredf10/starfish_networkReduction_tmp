@@ -364,7 +364,11 @@ def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, rand
 # TODO: (einar) fix exception variable, also exceptionhandler should be at end to make it consistent with other functions.
 # TODO: (einar) function should pass an exception out of scope if variables passed lack necessary info.
 # TODO: (einar) variable = "default" style of defining should only be used for optional arguments
-def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', networkXmlFile = None, pathSolutionDataFilename = None):
+def loadNetworkFromXML(networkName ,
+                       dataNumber = "xxx", 
+                       exception = 'Error', 
+                       networkXmlFile = None, 
+                       pathSolutionDataFilename = None):
     """
     Function loads network from XML-file
 

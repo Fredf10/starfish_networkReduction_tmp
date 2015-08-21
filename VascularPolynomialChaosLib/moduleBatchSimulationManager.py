@@ -26,7 +26,7 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     
     Input:
         batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
-            batchData <list> := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]
+            batchData <list> := list with [networkName, dataNumber, networkXmlFile, networkXmlFileSave, pathSolutionDataFilename]
         
     '''
     timeStartBatch = time.time()
@@ -50,16 +50,16 @@ def runSingleBatchSimulation(batchData):
     Function which runs a single simulation the defined with batchData
     
     Input:
-        batchData <list> := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]
+        batchData <list> := list with [networkName, dataNumber, networkXmlFileLoad, networkXmlFileSave, pathSolutionDataFilename]
     '''
     timeStart = time.clock()
-    networkName,dataNumber,networkXmlFile,pathSolutionDataFilename = batchData
-    vascularNetworkTemp = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
+    networkName,dataNumber,networkXmlFileLoad,networkXmlFileSave,pathSolutionDataFilename = batchData
+    vascularNetworkTemp = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFileLoad, pathSolutionDataFilename = pathSolutionDataFilename)
     vascularNetworkTemp.quiet = True
     flowSolver = FlowSolver(vascularNetworkTemp, quiet=True)
     flowSolver.solve()
     vascularNetworkTemp.saveSolutionData()
-    moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFile)
+    moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFileSave)
     del flowSolver
     gc.collect()
     timeSolverSolve = time.clock()-timeStart

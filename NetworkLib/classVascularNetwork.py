@@ -540,6 +540,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1]
             dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1]
             del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
+            #TODO: do this nicer way
+            vessel.positionStart  = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
+            vessel.positionEnd    = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
+            vessel.rotToGlobalSys = np.array([np.eye(3)])
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
         
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
@@ -700,7 +704,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     def _checkAccessInputs(self,t1,t2, mindt):
         
         # Check if the time span is valid
-        startTime = self.simulationTime[0];
+        startTime = self.simulationTime[0]
         endTime = self.simulationTime[-1]
         
         
@@ -821,8 +825,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         # Update loaded data tracking if inputs are valid
         # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
-        
-       
+
         values = set(values) 
         if 'All' in values:
             values.update(["All",

@@ -12,21 +12,28 @@ class DistributionManager(object):
         self.randomInputVector     = randomInputVector
         self.marginalDistributions = []
         self.jointDistribution     = None
+        self.jointDistributionDependent = None
         self.distributionDimension = None
         # samples
         self.expansionOrder  = 0
         self.samples         = None
+        self.samplesDependent = None
         self.samplesSize     = 0
         self.sampleMethod    = None
         # orthogonalPolynomials
         self.orthogonalPolynomials = None
         
-    def passRealisation(self, sampleIndex):
+    def passRealisation(self, sampleIndex, dependentCase = False):
         '''
         Function to pass samples of the random variables to
         the random inputs
         '''
-        sample = self.samples[sampleIndex]
+        if dependentCase == False:
+            sample = self.samples[sampleIndex]
+        else:
+            sample = self.samplesDependent[sampleIndex]
+            
+        print sample         
         if len(sample) == len(self.randomInputVector):
             print "\nSample number {}".format(sampleIndex)
             print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","realisation")
@@ -60,6 +67,11 @@ class DistributionManager(object):
         self.samplesSize    = dset.attrs.get('samplesSize')
         self.sampleMethod   = dset.attrs.get('sampleMethod')
         self.expansionOrder = dset.attrs.get('expansionOrder')
+        
+        if 'sampleSpaceDependent' in f.keys():
+            dset = f['sampleSpaceDependent']
+            self.samplesDependent = dset[:]
+            
         f.close()
         # check if data is accordingly to the case
         if self.sampleMethod != gPCEmethod:
@@ -82,6 +94,7 @@ class DistributionManager(object):
         dset.attrs.create('samplesSize', data=self.samplesSize)
         dset.attrs.create('sampleMethod', data=self.sampleMethod)
         dset.attrs.create('expansionOrder', data=self.expansionOrder)
+        dset = f.create_dataset("sampleSpaceDependent", data=self.samplesDependent)
         f.flush()
         f.close()
         
@@ -172,12 +185,29 @@ class DistributionManagerChaospy(DistributionManager):
         if expansionOrder != None:
             self.expansionOrder = expansionOrder
             self.samplesSize = 2*cp.terms(expansionOrder,self.distributionDimension)
+                    
         self.samples = self.jointDistribution.sample(self.samplesSize,sampleMethod).transpose()   
              
         if self.distributionDimension == 1:
             self.samples = self.samples.reshape(self.samplesSize,1)
+        
+        # create dependent samples if correlation exists
+        if self.jointDistributionDependent != None:
+            self.createDependentSamples()
+    
+    def createDependentDistribution(self,CorrelationMatrix):
+        '''
+        Method creates a dependent distribution with Nataf transformation 
+        based on a correlation matrix of the dependent random variables
+        '''
+        self.jointDistributionDependent = cp.Nataf(self.jointDistribution, CorrelationMatrix)
+        
+    def createDependentSamples(self):
+        '''
                 
-        self.saveSamples(networkName, dataNumber, gPCEmethod = sampleMethod, gPCEorder = expansionOrder)
+        '''
+        self.samplesDependent = self.jointDistributionDependent.inv(self.jointDistribution.fwd(self.samples))
+                
         
     def calculateOrthogonalPolynomials(self):
         '''

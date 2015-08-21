@@ -376,7 +376,6 @@ def chooseVPCconfigFile(networkName):
         for i,filename in enumerate(filenames):
                 print "   [ {:3} ]     {}".format(i+1, filename)
         index = 1+len(filenames)
-    print index, range(index)
     
     userInput = 'a'
     while userInput not in [str(i) for i in xrange(index)]:
@@ -400,7 +399,7 @@ def chooseVPCconfigFile(networkName):
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
     else:
-        networkName = filenames[userInput-2]
+        networkName = filenames[userInput-1]
         dataNumber = networkName.split('.')[0].split('_')[2]
         
     return dataNumber   
