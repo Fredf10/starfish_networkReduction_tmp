@@ -24,6 +24,18 @@ class VpcConfiguration(object):
         ## TODO: delete old members:
         self.createDistributions = True
         self.runSimulations = True
+        self.plotMinMaxPoints = True #TODO: remove
+        
+        ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
+        self.createOrthoPoly  = True
+        ### step Construct generalized polynomial chaos expansion and  pre process data
+        self.calculateGPCE    = True #
+        
+        # plots not implemented
+        self.plotMeanSTD     = False
+        self.plotPeaks       = True
+        #plotSensitiviy  = False
+        #------------------------------------------------
         
         ### network name and datanumber
         self.networkName = networkName
@@ -31,12 +43,12 @@ class VpcConfiguration(object):
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
-        self.createSample     = False
+        self.createSample     = True
         
         ### 1.step genrealized polynomial chaos evaluations + data storing
-        self.createEvaluationXmlFiles = False
+        self.createEvaluationXmlFiles = True
         
-        self.simulateEvaluations    = False
+        self.simulateEvaluations    = True
         self.local                  = True #TODO: add functions for server
         self.multiprocessing        = True
         self.numberOfProcessors     = 12
@@ -44,28 +56,13 @@ class VpcConfiguration(object):
         
         # 2.1 pre process data for all locations of interest
         self.preProcessData   = True
-        # 2.2 create plots for min max points
-        self.plotMinMaxPoints = True #TODO: remove
         
-        
-        # TODO: decide if we want to save gpce and polys or calculate it new every time
-        ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
-        self.createOrthoPoly  = True
-        ### step Construct generalized polynomial chaos expansion and  pre process data
-        self.calculateGPCE    = True #
-            
-        #### not implemented yet
-        ### 3.step post processing - sensitivity analysis
+        ### 3.step post processing - orthogonal polynomials, gpce expansion, uncertainty quantification and sensitivity analysis
         self.postProcessing  = True
-        self.plotMeanSTD     = True
-        self.plotPeaks       = True
-        #plotSensitiviy  = False
         
         #----POLYNOMIAL CHAOS DEFINITIONS -------------------------------------------------------------#
-        ####    
-        
         #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
-        self.polynomialOrders = [3]
+        self.polynomialOrders = [2,3]
         # method of the spares grid collocation 
         self.sampleMethod = 'M'
         #Parameters
@@ -91,10 +88,11 @@ class VpcConfiguration(object):
         # 
         #  
         
-                
+        #----MONTE CARLO DEFINITIONS -------------------------------------------------------------#
+        
+        
         #----CHOICE OF INVESTIGATION POINTS FOR WHICH THE POLYNOMIAL CHAOS IS CALCULATED-----------#
 
-        
         # [[vesselId, node],[vesselId, node],[vesselId, node]]
         self.locationsToEvaluate = [[0,0] ]#   , [0,99]  , [0,199],[1,99],[1,199]]
         self.locationNames = ['A' ]#,'B','C','D','E']

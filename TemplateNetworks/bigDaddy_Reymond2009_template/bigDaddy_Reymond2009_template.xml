@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<bigDaddy_Reymond2009.xml id="xxx" version="4.1">
+<bigDaddy_Reymond2009.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
     <totalTime unit="s">4.0</totalTime>
@@ -273,6 +273,8 @@
       </Windkessel-3Elements>
     </boundaryCondition>
   </boundaryConditions>
+  <generalRandomInputs>
+  </generalRandomInputs>
   <vessels>
     <vessel Id="1" name="Ascending aorta">
       <topology>

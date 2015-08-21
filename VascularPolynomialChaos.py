@@ -104,7 +104,7 @@ def vascularPolyChaos():
             vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])        
-        # 5.2 save/create xml files
+        # 5.2 save/create simulation xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
                 distributionManager.passRealisation(sampleIndex, dependentCase)

@@ -44,7 +44,6 @@
       <bgh>1.0</bgh>
      </bugenhagenAorticBaroreceptor>
   </baroreceptors>
-
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>
@@ -113,6 +112,8 @@
       </Windkessel-3Elements>
     </boundaryCondition>
   </boundaryConditions>
+  <generalRandomInputs>
+  </generalRandomInputs>
   <vessels>
     <vessel Id="1" name="Ascending aorta">
       <topology>

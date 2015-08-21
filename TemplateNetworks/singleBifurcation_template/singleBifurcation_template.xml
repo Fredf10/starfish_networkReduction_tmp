@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleBifurcation.xml id="1.0" version="4.0">
+<singleBifurcation.xml id="1.0" version="4.2">
   <simulationContext>
     <totalTime unit="s">5.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
@@ -78,6 +78,8 @@
         <Z unit="Pa s m-3">VesselImpedance</Z>
       </Windkessel-3Elements>
   </boundaryConditions>
+  <generalRandomInputs>
+  </generalRandomInputs>
   <vessels>
     <vessel Id="0" name="parentVessel">
       <topology>

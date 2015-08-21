@@ -157,7 +157,7 @@ class RandomInputManager(object):
         randomInputManagerInfo.append( "\n Defined Random Variables\n")
         randomInputManagerInfo.append( '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","distribution"))
         randomInputManagerInfo.append( "-------------------------------------------------------------------- \n")
-        randomInputInfos = list(itertools.chain.from_iterable([randomInput.generateInfo() for randomInput in self.randomInputs]))
+        randomInputInfos = list(itertools.chain.from_iterable([randomInput.generateInfo() for randomInput in self.randomInputVector]))
         for info in randomInputInfos:
             randomInputManagerInfo.append(info)
         return randomInputManagerInfo

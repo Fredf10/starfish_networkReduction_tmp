@@ -94,7 +94,9 @@ class DistributionManager(object):
         dset.attrs.create('samplesSize', data=self.samplesSize)
         dset.attrs.create('sampleMethod', data=self.sampleMethod)
         dset.attrs.create('expansionOrder', data=self.expansionOrder)
-        dset = f.create_dataset("sampleSpaceDependent", data=self.samplesDependent)
+        if self.samplesDependent != None:
+            dset = f.create_dataset("sampleSpaceDependent", data=self.samplesDependent)
+        
         f.flush()
         f.close()
         
