@@ -187,7 +187,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                     
         elif xmlElementName == 'generalRandomInputs':
             for randomInput in randomInputManager():
-                if randomInput.type == 'generalRandomInput':
+                if randomInput.randomInputType == 'generalRandomInput':
                     writeRandomInputElement(xmlFileElement, None, randomInputManager, randomInput.location)
                             
                                 
@@ -318,11 +318,11 @@ def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, rand
         randomInputLocation    
     '''    
     
-    dataDict = {'location'    : randomInputLocation,
-                'variableName': [variableName],
-                'type'        : 'parametricRandomInput'}
+    dataDict = {'location'        : randomInputLocation,
+                'variableName'    : [variableName],
+                'randomInputType' : 'parametricRandomInput'}
     
-    if variableName == None: dataDict['type'] = 'generalRandomInput'
+    if variableName == None: dataDict['randomInputType'] = 'generalRandomInput'
     
     if variableName == None:
         for attribute in nxml.generalRandomInputsAttributes:

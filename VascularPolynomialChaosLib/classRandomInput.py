@@ -6,7 +6,7 @@ class RandomInput(object):
     '''
     def __init__(self, dataDict = None):
         ##
-        self.type             = None # 'generalRandomInput' 'parametricRandomInput'
+        self.randomInputType  = None # 'generalRandomInput' 'parametricRandomInput'
         ## meta information # location of the deterministic variable
         self.location         = None # location e.g. vessel_1 or Sinus2_1
         ##        

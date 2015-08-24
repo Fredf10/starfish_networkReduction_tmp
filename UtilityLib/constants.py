@@ -407,6 +407,8 @@ variablesDict = {## class Vascular Network
                  'distributionType': {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'a'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  'b'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
+                 'location'        : {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'randomInputType' : {'type':'str',    'unitSI': None,     'strCases': ['generalRandomInput','parametricRandomInput'], 'multiVar': False},
                  }
 
 ##########################################################################################

@@ -23,7 +23,7 @@ Some other information about the module
 
 def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     '''
-    Functions writes vessel data to *.csv file inclusive polynomial chaos definitions
+    Functions writes vessel data to *.csv file 
     
     input:
         networkName <string>
@@ -31,13 +31,6 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
         delimiter   <string>  (default = ';')
     
     '''
-        
-    # find all tags needed # TODO: read write polynomial chaos variables
-#     polyChaosTags = {}
-#     for vessel in vessels.itervalues():
-#         pcTags = vessel.getVariableValue('polyChaos').keys()
-#         for pcTag in pcTags: 
-#             if pcTag not in polyChaosTags.keys(): polyChaosTags[pcTag] = len(vessel.getVariableValue('polyChaos')[pcTag])     
     tags = []
     for tag in nxml.vesselAttributes: tags.append(tag)
     for vesselElement in nxml.vesselElements:
@@ -46,14 +39,10 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
                 for tag in specificCompElements:
                     if tag not in tags:
                         tags.append(tag)
-#                         if tag in polyChaosTags.keys():
-#                             for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
         else: 
             for tag in nxml.vesselElementReference[vesselElement]:
                 tags.append(tag)
-#                 if tag in polyChaosTags.keys():
-#                     for count in range(polyChaosTags[tag]): tags.append(''.join([tag,'-pC',str(int(count)+1)]))
-    
+                
     ## openFile and create writer
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'write')
     writer = csv.DictWriter(open(vesselCSVFile,'wb'),tags,delimiter=delimiter)
@@ -67,11 +56,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     unitRow = {}
     for tag in tags:
         try:
-#             if '-pC' in tag: 
-#                 tagUnit = tag.split('-pC')[0]
-#                 unitRow[tag] = ''.join(['#',variablesDict[tagUnit]['unitSI']])
-#             else:
-                unitRow[tag] = ''.join(['#',variablesDict[tag]['unitSI']])
+            unitRow[tag] = ''.join(['#',variablesDict[tag]['unitSI']])
         except: unitRow[tag] = ''
     unitRow['Id'] = 'unit'
     
@@ -81,13 +66,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     for vessel in vessels.itervalues():
         vesselDict = {}
         for tag in tags:
-#             if '-pC' in tag:
-#                 try:
-#                     variable,number = tag.split('-pC')
-#                     vesselDict[tag] = vessel.getVariableValue('polyChaos')[variable][int(number)-1]
-#                 except: pass            
-#             else: 
-                vesselDict[tag] = vessel.getVariableValue(tag)
+            vesselDict[tag] = vessel.getVariableValue(tag)
         data.append(vesselDict)
     writer.writerows(data)
 
@@ -106,6 +85,7 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
         
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
+    
     # load data    
     reader = csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
     # hash data with in dictionary and separate units
@@ -118,8 +98,6 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
             Id = int(Id)
             vesselData[Id] = row
         
-    # TODO: read write polynomial chaos variables
-    
     variablesToDiscard = []
     for Id,data in vesselData.iteritems():
 #         polyChaos = {}
@@ -129,37 +107,73 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
                 #find units 
                 if '#' in columUnits[variable]: #  '#' in variable or 
                     nothing,variableUnit = columUnits[variable].split('#',1)
-#                 # check for polyChaos variables
-#                 if '-pC' not in variable:
                 # convert variables to corret unit and type
                 data[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
-#                 else:
-#                     variable,number = variable.split('-pC')
-#                     if variable not in polyChaos.keys():
-#                         polyChaos[variable] = variableValueStr
-#                     else:
-#                         polyChaos[variable] = ' '.join([polyChaos[variable],variableValueStr])   
-                                             
             else: variablesToDiscard.append([Id,variable]) # find out variables which have no values
-        # convert polynomial chaos variables to corret unit and type
-#         for variable,variableValueStr in polyChaos.iteritems():
-#             variableUnit = columUnits[variable].split('#',1)
-#             polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
-#         data['polyChaos'] = polyChaos
-#         for variable in data.iterkeys():
-#             if '-pC' in variable: variablesToDiscard.append([Id,variable])
-            
     # remove variables which have no values 
     for Id,variableToDiscard in variablesToDiscard:
         del vesselData[Id][variableToDiscard]
     
     return {'vesselData':vesselData}    
 
-
+def writeRandomInputstoCSV(networkName, randomInputManager, delimiter = ';'):
+    '''
+    Function writes random variable data to *.csv  file
+    '''
+    # TODO: add units
+    # evaluate tags
+    variablesToSaveTags = []
+    variablesToSaveTags.extend(nxml.generalRandomInputsAttributes)
+    for listValue in nxml.randomInputsReference.itervalues():
+        variablesToSaveTags.extend(listValue)
+    variablesToSaveTags.extend(['randomInputType','location'])
+    # create writer 
+    randomVariableCSVFile = mFPH.getFilePath('randomVariableCSVFile', networkName,'xxx', 'write', exception = 'Warning')
+    writer = csv.DictWriter(open(randomVariableCSVFile,'wb'),variablesToSaveTags, delimiter=delimiter)
+    
+    firstRow = {key: key for key in variablesToSaveTags}
+    writer.writerow(firstRow)
+    
+    for randomInput in randomInputManager.randomInputs:
+        rowDict = {}
+        for variablesToSaveTag in variablesToSaveTags:
+            rowDict[variablesToSaveTag] = randomInput.getVariableValue(variablesToSaveTag)
+        writer.writerow(rowDict)
+        
+def readRandomInputsfromCSV(networkName, randomInputManager, delimiter = ';'):
+    '''
+    Function reads the random variable data from a *.csv file
+    all existing rv definitions in the randomInputManager will be erased
+    '''
+    
+    # prepare randomInputManager
+    randomInputManager.deleteAllRandomInputs()
+    
+    # create reader
+    randomVariableCSVFile = mFPH.getFilePath('randomVariableCSVFile', networkName,'xxx', 'read', exception = 'Warning')
+    reader = csv.DictReader(open(randomVariableCSVFile,'rb'), delimiter=delimiter)
+        
+    # evaluate tags
+    variablesToLoadTags = []
+    variablesToLoadTags.extend(nxml.generalRandomInputsAttributes)
+    for listValue in nxml.randomInputsReference.itervalues():
+        variablesToLoadTags.extend(listValue)
+    variablesToLoadTags.extend(['randomInputType','location'])
+    # add random variables
+    for row in reader:
+        dataDict = {}
+        for variable in variablesToLoadTags: 
+            if variable in row.keys():
+                # TODO: add units
+                variableUnit = None 
+                # save converted CSV-value
+                dataDict[variable] = mXML.loadVariablesConversion(variable, row[variable], variableUnit)
+            else: print "WARNING: mCSV.readRandomInputsfromCSV(), no variable {} defined in the csv file but needed to create proper working random input".format(variable)
+        randomInputManager.addRandomInput(dataDict)
 
 def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos, delimiter=';'):
     '''
-    Functions writes boundaryCondition data to *.csv file inclusive polynomial chaos definitions
+    Functions writes boundaryCondition data to *.csv file 
     
     input:
         networkName <string>

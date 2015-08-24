@@ -618,9 +618,10 @@ def main():
             print "     [3] - load vessel data from CSV"
             print "     [4] - load vessel data and boundary conditions from CSV"
             print "     [5] - load network from SolutionData"
+            print "     [6] - load random inputs from CSV"
             print "     [b] - back to the main menu"
             print ""
-            while  subMenuInput not in ["1","2","3","b"]:
+            while  subMenuInput not in ["1","2","3",'4','5','6',"b"]:
                 subMenuInput = raw_input("what to do? ")
                 
                 if subMenuInput != '2':
@@ -735,6 +736,12 @@ def main():
                     except: print "\n ERROR occured could not open requested network, file does not exist or is out dated"
                     break
                 
+                
+                elif subMenuInput == '6':
+                    print "     load random input from CSV"
+                    networkName = enterNetworkName(networkName)
+                    mCSV.readRandomInputsfromCSV(networkName, vascularNetwork.randomInputManager)
+                    vascularNetwork.randomInputManager.linkRandomInputUpdateFunctions(vascularNetwork)
                 elif subMenuInput == 'b':
                     break
             
@@ -759,9 +766,10 @@ def main():
             print "     [2] - write vessel data to CSV"
             print "     [3] - write vessel data and boundary conditions to CSV"
             print "     [4] - write graph to .png"
+            print "     [5] - write random input data to CSV"
             print "     [b] - back to the main menu"
             print ""
-            while subMenuInput not in ["1","2","3","b"]:
+            while subMenuInput not in ["1","2","3",'4','5',"b"]:
                 subMenuInput = raw_input("what to do? ")
                      
                 if subMenuInput == '1':
@@ -796,7 +804,13 @@ def main():
                     #mainGraph.graph.write(graphPath+networkName+'/'+pictureName+'.dot')
                     mainGraph.graph.write_png(vncNetworkGraphFile)
                     break
-                    
+                
+                elif subMenuInput == '5':
+                    print "     write random input data to CSV"
+                    networkName = enterNetworkName(networkName) 
+                    mCSV.writeRandomInputstoCSV(networkName, vascularNetwork.randomInputManager)                
+                    break
+                
                 if subMenuInput == 'b':
                     break
         

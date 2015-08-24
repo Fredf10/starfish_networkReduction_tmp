@@ -31,6 +31,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     Function return a requested file path, if this file exists
     
     fileType:
+        'randomVariableCSVFile'
         'vesselCSVFile',
         'boundaryCSVFile',
         'networkXmlFileTemplate',
@@ -58,7 +59,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
         Error (default): raise error and exit if file is not exiting
         Warning: just raise Warning and return with error string      
     '''
-    existingFileTypes = ['vesselCSVFile',
+    existingFileTypes = ['randomVariableCSVFile',
+                         'vesselCSVFile',
                          'boundaryCSVFile',
                          'networkXmlFileTemplate',
                          'networkXmlFile',
@@ -88,6 +90,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                  'simulationDescriptionFile' : ''.join(['simulationCaseDescriptions.txt']),
                  'vncRescentNetworksFile'    : '.recentNetworkNames.pickle',
                  'vncNetworkGraphFile'       : ''.join([networkName,'.png']),
+                 'randomVariableCSVFile'     : ''.join([networkName,'RV.csv']),
                  }    
                 
     ## if fileType=networkXmlFile check if master (dn = XXX) or simulated is meant
@@ -134,6 +137,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     it is created.
     
     directoryType:
+        'randomVariableCSVFileDirectory'
         'workingDirectory',
         'configFileDirectory',
         'vesselCSVFileDirectory',
@@ -167,7 +171,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         Warning: just raise Warning and return with error string      
     '''
     
-    existingDirectoryTypes = {'workingDirectory',
+    existingDirectoryTypes = {
+                              'workingDirectory',
                               'configFileDirectory',
                               'vesselCSVFileDirectory',
                               'boundaryCSVFileDirectory',
@@ -179,6 +184,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'movieDirectory',
                               'simulationDescriptionFileDirectory',
                               'vncRescentNetworksFileDirectory',
+                              'randomVariableCSVFileDirectory',
                               'vncNetworkGraphFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
@@ -205,6 +211,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'configFileDirectory'                : starfishHomeDirectory,
                    'vesselCSVFileDirectory'             : networkXmlFileDirectory,
                    'boundaryCSVFileDirectory'           : networkXmlFileDirectory,
+                   'randomVariableCSVFileDirectory'     : networkXmlFileDirectory,
                    'networkXmlFileTemplateDirectory'    : networkXmlFileTemplateDirectory,
                    'networkXmlFileXXXDirectory'         : networkXmlFileDirectory,
                    'networkXmlFileSimDirectory'         : solutionFileDirectory,

@@ -46,7 +46,7 @@ class RandomInputManager(object):
             try:
                 return self.randomInputs[index]
             except IndexError:
-                print "error index does not exist!"
+                print "cRIM49: error index does not exist!"
                 return []
                     
     def linkRandomInputUpdateFunctions(self, vascularNetwork):
@@ -58,11 +58,14 @@ class RandomInputManager(object):
         
         randomInputMap = {}
         for randomInput in self.randomInputs:
-            if randomInput.type == 'parametricRandomInput':
+            if randomInput.randomInputType == 'parametricRandomInput':
                 # check distribution
                 dist = randomInput.distributionType 
                 loc = randomInput.location.split('_')
                 objType = loc[0]
+                
+                if randomInput.variableName == []:
+                    randomInput.variableName.append(loc[-1])
                 
                 if objType == "boundaryCondition":
                     for bc in vascularNetwork.boundaryConditions[int(loc[2])]:
@@ -77,7 +80,8 @@ class RandomInputManager(object):
                 elif objType == "baroreceptor":
                     randomInput.updateMethods = {randomInput.variableName[0]:
                                                  vascularNetwork.baroreceptors[int(loc[1])].update}
-                    print "linked baroreceptor",int(loc[1]), 'to ',vascularNetwork.baroreceptors[int(loc[1])].update
+                    
+                    print "cRIM81, linked baroreceptor",int(loc[1]), 'to ',vascularNetwork.baroreceptors[int(loc[1])].update
                 
                 else: break
                 if randomInput.updateMethods == {}: break
@@ -161,3 +165,15 @@ class RandomInputManager(object):
         for info in randomInputInfos:
             randomInputManagerInfo.append(info)
         return randomInputManagerInfo
+    
+    def deleteAllRandomInputs(self):
+        '''
+        Function removes all existing random inputs
+        '''
+        for rI in self.randomInputs:
+            del rI
+        self.randomInputs = []
+        self.randomInputVector = []
+        self.map = {}
+        self.randomInputDimension = 0
+                
