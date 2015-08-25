@@ -700,36 +700,48 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         self.initialize()
         
-               
+                     
     def _checkAccessInputs(self,t1,t2, mindt):
+        """
+        Checks to ensure the data requested actually exists.
+        
+        Args:
+            t1 (float): initial time of data requested
+            t2 (float): final time of data requested
+            mindt (float): the minimum time separating data points requested
+        Raises:
+            ValueError: If t1 or t2 lie outside the range of simulationTime,
+             mindt is larger than the range of simulationTime, or the intrinsic
+             time step, dt, is larger than t2-t1.
+        """
         
         # Check if the time span is valid
-        startTime = self.simulationTime[0]
+        startTime = self.simulationTime[0];
         endTime = self.simulationTime[-1]
-        
-        
+
+
         # Assume inputs are valid, otherwise flag invalid inputs
         inputsAreValid = True
         if t1>t2 :
-            print 'ERROR:Invalid time range t1=', t1, '> t2=', t2
+            raise ValueError("ERROR:Invalid time range t1=%f > t2=%f" % (t1,t2))
             inputsAreValid = False
-                 
+
         if t1 < startTime :
-            print 'ERROR:Invalid start time t1=', t1, 'before beginning of saved data t=', startTime
+            raise ValueError("ERROR:Invalid start time t1=%f before beginning of saved data t=%f" % (t1,startTime))
             inputsAreValid = False
-        
+
         if t2 > endTime:
-            print 'ERROR:Invalid end time t2=', t2, 'after end of saved data t=', endTime
+            raise ValueError("ERROR:Invalid end time t2=%f after end of saved data t=%f" % (t2, endTime))
             inputsAreValid = False
-            
+
         if isNumber(mindt) and mindt > endTime - startTime:
             inputsAreValid = False
-            print 'ERROR: Invalid minimum time step ', mindt , ' larger than solution time span.'
-         
+            raise ValueError("ERROR: Invalid minimum time step %f larger than solution time span." % (mindt))
+
         if self.dt > t2-t1:
             inputsAreValid = False
-            print 'ERROR: Invalid time range t2-t1=', t2-t1, 'is smaller than the solution time step dt'
-          
+            raise ValueError("ERROR: Invalid time range t2-t1=%f is smaller than the solution time step dt" %(t2-t1))
+
         return inputsAreValid
     
     
