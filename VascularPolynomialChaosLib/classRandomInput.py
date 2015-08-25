@@ -37,7 +37,7 @@ class RandomInput(object):
         realisation = self.a + self.b * sample_i
         return realisation
         
-    def passRealisationToAssosiatedObj(self,input):
+    def passRealisationToAssosiatedObj(self, input):
         '''
         methods update connected deterministic variable value from given
         'sample' drawn from random vector 

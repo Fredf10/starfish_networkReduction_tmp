@@ -24,6 +24,11 @@ class RandomInputManager(object):
         '''
         randomInputLocation = randomInputDict['location']
         
+        if randomInputLocation == '' or randomInputLocation == None:
+            if randomInputDict['randomInputType'] == 'generalRandomInput':
+                randomInputLocation = ''.join([randomInputDict['randomInputType'],'_',randomInputDict['name']])
+                randomInputDict['location'] = randomInputLocation
+        
         if randomInputLocation not in self.map.keys():
             randomInput = RandomInput()
             randomInputId = len(self.randomInputs)
@@ -54,13 +59,21 @@ class RandomInputManager(object):
         link update functions and create randomInputvector
         
         input vascularNetwork 
+        
+        only 1 level of nested randomInputs is currently implemented
+        
+        parametricRandomInputs can be in the form of:
+            a+b*Uniform(0,1) / a+b*Normal(0,1)
+            or
+            a+b*Z1 where Z1 is a general random input defined as 
+        
         '''
         
         randomInputMap = {}
         for randomInput in self.randomInputs:
+            dist = randomInput.distributionType 
             if randomInput.randomInputType == 'parametricRandomInput':
                 # check distribution
-                dist = randomInput.distributionType 
                 loc = randomInput.location.split('_')
                 objType = loc[0]
                 
@@ -86,15 +99,17 @@ class RandomInputManager(object):
                 else: break
                 if randomInput.updateMethods == {}: break
                 
-                if dist in ['Normal','Uniform']:
-                    # append random input to random input vector
-                    self.randomInputVector.append(randomInput)
+            # find links between random inputs
+            if dist in ['Normal','Uniform']:
+                # append random input to random input vector
+                self.randomInputVector.append(randomInput)
+            else:
+                if dist not in randomInputMap:
+                    randomInputMap[dist] = {randomInput.randomInputId : randomInput.passRealisationToAssosiatedObj}
                 else:
-                    if dist not in randomInputMap:
-                        randomInputMap[dist] = {randomInput.randomInputId : randomInput.passRealisationToAssosiatedObj}
-                    else:
-                        randomInputMap[dist][randomInput.randomInputId] = randomInput.passRealisationToAssosiatedObj
+                    randomInputMap[dist][randomInput.randomInputId] = randomInput.passRealisationToAssosiatedObj
         
+        # link general random inputs 
         for dist,updateMethods in randomInputMap.iteritems():
             # find random input with dist:
             for randomInputLocation in self.map.keys():
@@ -102,7 +117,9 @@ class RandomInputManager(object):
                     generalRandomInput = self(self.map[randomInputLocation])
                     generalRandomInput.updateMethods = updateMethods
                     generalRandomInput.variableName = updateMethods.keys()
-                    self.randomInputVector.append(generalRandomInput)
+                    #self.randomInputVector.append(generalRandomInput)
+        
+        
         
         self.randomInputDimension = len(self.randomInputVector)
          
