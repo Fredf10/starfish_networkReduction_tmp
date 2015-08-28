@@ -25,39 +25,38 @@ from copy import copy as copy
 
 from pprint import pprint as pp
 
-
+# TODO: (einar) Rename input variable exception and corresponding strings
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
-    '''
+    """
     Function return a requested file path, if this file exists
-    
-    fileType:
-        'vesselCSVFile',
-        'boundaryCSVFile',
-        'networkXmlFileTemplate',
-        'networkXmlFile',
-        'solutionFile',
-        'configFile',
-        'simulationDescriptionFile',
-        'vncRescentNetworksFile',
-        'vncNetworkGraphFile
-    
-    networkName:
-    
-        name of the network file
-    
-    dataNumber:
-    
-        data number of solution file or xml file
-    
-    mode:
-    
-        read or write
-        
-    exception: (for read mode)
-    
-        Error (default): raise error and exit if file is not exiting
-        Warning: just raise Warning and return with error string      
-    '''
+
+    Args:
+
+        fileType (str):
+            'vesselCSVFile',
+            'boundaryCSVFile',
+            'networkXmlFileTemplate',
+            'networkXmlFile',
+            'solutionFile',
+            'configFile',
+            'simulationDescriptionFile',
+            'vncRescentNetworksFile',
+            'vncNetworkGraphFile
+
+        networkName (str): name of the network file
+
+        dataNumber (int): data number of solution file or xml file
+
+        mode (str): 'read' or 'write'
+
+
+    Returns:
+        string: file path
+
+    Raises:
+        Error (default): (in read mode) raise error and exit if file is not exiting
+        Warning: (in read mode) just raise Warning and return with error string
+    """
     existingFileTypes = ['vesselCSVFile',
                          'boundaryCSVFile',
                          'networkXmlFileTemplate',
@@ -99,8 +98,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     
     ## find requested file name
     requestedFilename  = filenames[''.join([fileType])]
-    ## find directory    
-    requestedDirectory = getDirectory(''.join([fileType,'Directory']), networkName, dataNumber, mode, exception = exception)
+    ## find directory
+    requestedDirectory = getDirectory(''.join([fileType,'Directory']), networkName, dataNumber, mode, exception)
     if requestedDirectory == None:
         if exception == "Warning":
             print "WARNING: moduleFilePathHandler.getFileAndPaths() directory of file '{}' does not exits. Exit()".format(requestedFilename)
@@ -127,12 +126,13 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                 raise ValueError("ERROR: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))
               
     return requestedFilePath
-    
+
+# TODO: (einar) fix exception variable in function
 def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error'):
-    '''
+    """
     Function returns a requested directory path, if this directory does not exists
     it is created.
-    
+
     directoryType:
         'workingDirectory',
         'configFileDirectory',
@@ -147,25 +147,25 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         'simulationDescriptionFileDirectory',
         'vncRescentNetworksFileDirectory',
         'vncNetworkGraphFileDirectory'
-        
-    
+
+
     networkName:
-    
+
         name of the network file
-    
+
     dataNumber:
-    
+
         data number of solution file or xml file
-    
+
     mode:
-    
+
         read or write
-        
+
     exception: (for read mode)
-    
+
         Error (default): raise error and exit if file is not exiting
-        Warning: just raise Warning and return with error string      
-    '''
+        Warning: just raise Warning and return with error string
+    """
     
     existingDirectoryTypes = {'workingDirectory',
                               'configFileDirectory',
@@ -232,11 +232,11 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     return requestedDirectory
 
 def createWorkingCopyOfTemplateNetwork(templateNetworkName, destinationNetworkName = None):
-    '''
+    """
     Function which copys all data from a template network wtih template network name into
     the working directory.
     It uses the same name of the template network if destinationNetworkName is not defined
-    '''
+    """
     if destinationNetworkName == None:
         destinationNetworkName = templateNetworkName.split('_template')[0]
     
@@ -258,14 +258,14 @@ def createWorkingCopyOfTemplateNetwork(templateNetworkName, destinationNetworkNa
 
 
 def readConfigFile(options):
-    '''
+    """
     Function to read from options from STARFiSh.ini config file
     input:
         options = list with options
                 existing options: 'WorkingDirectory'
     output:
         configurations = dict with {option: configuration from file}
-    ''' 
+    """ 
     import ConfigParser
     config = ConfigParser.ConfigParser()
     config.read(getFilePath('configFile', "", '', 'read'))
@@ -287,14 +287,14 @@ def readConfigFile(options):
     return configurations    
 
 def saveConfigFile(configurations):
-    '''
+    """
     Function to save configurations to options in the STARFiSh.ini config file
     The file will update the existing config file, it is not neccessary to pass all 
     configurations which exist.
     input:
         configurations = dict with {option: configuration from file}
         
-    ''' 
+    """ 
     # open config to get current states
     existingOptions = ['WorkingDirectory']
     
@@ -318,7 +318,7 @@ def saveConfigFile(configurations):
         Config.write(configfile)
     
 def updateSimulationDescriptions(networkName, currentDataNumber, currentDescription):
-    '''
+    """
     Function to update the text-file with the simulation description for the given network:
     Input:
         networkName <String> (= name of the network to process)
@@ -326,7 +326,7 @@ def updateSimulationDescriptions(networkName, currentDataNumber, currentDescript
     workflow:
         1. open all pickle files and write out the simulation descriptions and datanumbers
         2. write information into file
-    '''
+    """
     # open File
     #simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'read')#, exception = 'No')
     try:
@@ -361,11 +361,12 @@ def updateSimulationDescriptions(networkName, currentDataNumber, currentDescript
     simCaseDescFile = open(simCaseDescFilePath, 'w')
     simCaseDescFile.writelines(simCaseDescriptionFileLines)
     simCaseDescFile.close()
-    
+
+# TODO: (einar) fix exception variable
 def getSimulationCaseDescriptions(networkName, exception = 'Warning'):
-    '''
-    
-    '''
+    """
+
+    """
     simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, 'xxx', 'read', exception = 'No')
     try:
         simCaseDescFile = open(simCaseDescFilePath, 'r')
@@ -390,19 +391,19 @@ def getSimulationCaseDescriptions(networkName, exception = 'Warning'):
     
    
 def regenerateSimulationCaseDescription(networkName):
-    '''
+    """
     Function to regenerate the simulation case descriptions of a network
-    '''
+    """
     
         
 def loadExternalDataSet(fileName):
-    '''
+    """
     Function to open external (preprocessed) DataSets with the file ending *.v1dfExD
     Input:
         fileName <string> (with the total path)
     Output:
         extData <dict> 
-    '''
+    """
     
     externalData = {'PressureTime':None,'Pressure':None,'PressureUnit':'',
                     'FlowTime':None,'Flow':None,'FlowUnit':'',
@@ -421,14 +422,14 @@ def loadExternalDataSet(fileName):
 ## Old unneeded functions replaced by functions in classVascularNetwork due to new data handling
 
 # def parseDirectoryForSimulationCases(networkName):
-#     '''
+#     """
 #     Function to search for all simulationCases of a given network
 #     Input:
 #         networkName <String> (= name of the network to process) 
 #     Output:
 #         simulationCases <Dict> = { dataNumber1<String:SimCase1<String>, ...
 #                                    dataNumberN<String:SimCaseN<String>}
-#     '''
+#     """
 #     path = ''.join([cur,'/../','NetworkFiles/',networkName,'/','SolutionData','/'])
 #     simulationCases = {}
 #     

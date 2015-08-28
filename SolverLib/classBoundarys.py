@@ -12,13 +12,15 @@ import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
+import UtilityLib.classStarfishBaseObject as cSBO
+
 #sys.path.append(cur+'/NetworkLib')
-from NetworkLib.classBoundaryConditions import *
+import NetworkLib.classBoundaryConditions as ccBC
 
 
-class Boundary():
+class Boundary(cSBO.StarfishBaseObject):
     def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, nTsteps, systemEquation):
-        '''
+        """
         Constructor of Boundary
         s
         Initializes one Boundary of a vessel
@@ -35,7 +37,7 @@ class Boundary():
         self.bcType1         :    list of all type1 functions found in the given boundaryConditions
         self.omegaInput      :    function which gives the _omega of omega_ back depending on self.position
         self.omegaFunctio    :    function with boundaryCondtion of type2 calculating the omega-vector
-        '''
+        """
         self.position = None
         
         self.name = ' '.join(['Boundary',str(vessel.Id)])
@@ -43,8 +45,8 @@ class Boundary():
         
         #Function which gives du-vector back
         self.duFunction = None
-        self.duVector = np.zeros((nTsteps,2))
-        self._du_ = np.empty(2)
+        self.duVector = ccBC.np.zeros((nTsteps,2))
+        self._du_ = ccBC.np.empty(2)
         # list of all type1 functions found in the given boundaryConditions, which determine 
         # the du-Function
         self.bcType1 = []
@@ -67,8 +69,8 @@ class Boundary():
         self.Q = vessel.Qsol
         self.A = vessel.Asol
         
-        self.BloodFlowSep  = np.zeros((nTsteps,2)) ## [ dbloodVolume in, dbloodVolume out] blood volume from one timestep to the next
-        self.BloodVolumen  = np.zeros(2)
+        self.BloodFlowSep  = ccBC.np.zeros((nTsteps,2)) ## [ dbloodVolume in, dbloodVolume out] blood volume from one timestep to the next
+        self.BloodVolumen  = ccBC.np.zeros(2)
                 
         posTemp = []
         for bC in boundaryConditions:            
@@ -80,7 +82,7 @@ class Boundary():
             
         #find out position of the Boundary + check if all conditions are defined at the same side
         if sum(posTemp) == 0: self.position = 0
-        elif sum(np.array(posTemp)+1) == 0: self.position = -1
+        elif sum(ccBC.np.array(posTemp)+1) == 0: self.position = -1
         else: raise ValueError("One position of one boundaryCondition is not correct")
         
         #initialize solution variable
@@ -118,16 +120,16 @@ class Boundary():
             self.type = self.bcType1.name
             try:
                 if precribeTotalValues == False:
-                    self.omegaFunction = PrescribedInflux()
+                    self.omegaFunction = ccBC.PrescribedInflux()
                 elif precribeTotalValues == True and self.bcType1ConditionQuantity == 'Flow':
-                    self.omegaFunction = PrescribedTotalFlow()
+                    self.omegaFunction = ccBC.PrescribedTotalFlow()
                 elif precribeTotalValues == True and self.bcType1ConditionQuantity == 'Pressure':
-                    self.omegaFunction = PrescribedTotalPressure()
+                    self.omegaFunction = ccBC.PrescribedTotalPressure()
             except:
-                self.omegaFunction = PrescribedInflux()
+                self.omegaFunction = ccBC.PrescribedInflux()
             self.omegaFunction.setPosition(self.position)
         else:
-            print "ERROR classBoundary: Too many type2-boundary Conditions defined!"
+            self.warning("classBoundary: Too many type2-boundary Conditions defined!", noException= True)
         
         # 4. Define the output of A, dependend if rigidArea
         self.rigidArea = rigidArea
@@ -139,32 +141,32 @@ class Boundary():
 
     ### Function which calculated du
     def duFunctionZero(self,currentTimeStep,dt):
-        '''
+        """
         Determine the du-vector = [0,0] if no type1 boundaryConditions are given
-        '''
-        return np.zeros(2)
+        """
+        return ccBC.np.zeros(2)
     
     def duFunctionSingle(self,currentTimeStep,dt):
-        '''
+        """
         Determine the du-vector with the values of the given
         type1 boundaryCondition 
-        '''     
+        """     
         return self.bcType1.calculateDu(currentTimeStep,dt)
     
     def duFunctionMulti(self,currentTimeStep,dt):
-        '''
+        """
         Determine the summized du-vector with the values of all given
         type1 boundaryConditions 
-        '''
-        du = np.zeros(2)
+        """
+        du = ccBC.np.zeros(2)
         for bc in self.bcType1:
             du = du + bc.calculateDu(currentTimeStep,dt)
         return du
     
     def duEvaluateVector(self):
-        '''
+        """
         Pre-Calculate the BoundaryConditions duVector of Type1
-        '''
+        """
         self.duVector = self.duVector*0.
         for bc in self.bcType1:
             self.duVector = self.duVector+bc.calculateDuVector(len(self.duVector),self.dt)
@@ -197,10 +199,10 @@ class Boundary():
         return duPrescribed
     
     def __call__(self): #callMacCormackField(self):    
-        '''
+        """
         new Boundary method calculates the values at the boundary
         and applies it to the new values
-        '''
+        """
         
         # create local variables for this timestep
         dt = self.dt
@@ -229,9 +231,8 @@ class Boundary():
                         
         # check new p value
         if P_calc < 0:
-            print "ERROR: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,currentTimeStep*dt,currentTimeStep,dt)
-            print P_calc
-            exit()
+            raise ValueError("{} calculated negative pressure P_calc = {} at time {} (n {},dt {})".format(self.name, P_calc, currentTimeStep*dt,currentTimeStep,dt))
+            #exit()
         
         # calculate new value for the area
         A_calc = A[position] # assign old value
@@ -244,7 +245,7 @@ class Boundary():
         self.A[currentMemoryIndex+1][position] = A_calc
         
         try: self.BloodFlowSep[currentTimeStep] = self.BloodFlowSep[currentTimeStep-1]+dBloodVolumen
-        except: print "passed bloodflow integration"
+        except Exception: print "passed bloodflow integration"
         try:    self.BloodVolumen = self.BloodVolumen + 0.5*(self.BloodFlowSep[currentTimeStep-1]+self.BloodFlowSep[currentTimeStep])*dt
-        except: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[currentTimeStep]*dt
+        except Exception: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[currentTimeStep]*dt
         

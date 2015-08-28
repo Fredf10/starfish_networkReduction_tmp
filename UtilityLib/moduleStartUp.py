@@ -19,42 +19,42 @@ from pprint import pprint as pp
 import moduleXML as mXML
 import moduleFilePathHandler as mFPH
 
-#sys.path.append([cur,'/../VascularPolynomialChaosLib/'])
+# sys.path.append([cur,'/../VascularPolynomialChaosLib/'])
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 
 from optparse import OptionParser
 
 def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialChaos = False):
-    '''
+    """
     parse options for the code
-    
+
     enable options to parse with str in activeOptions
-    input:     activeOptions := list with str 
-    
+    input:     activeOptions := list with str
+
             'f' : parse filename
             'n' : dataNumber
             'd' : simulation description
             'r' : resimulated case
             's' : save
             'v' : visualisation type
-            'c' : connect visualisations     
-            'w' : set working directory  
-    
+            'c' : connect visualisations
+            'w' : set working directory
+
             visualisationOnly := bool if True proposal of visualisation cases are made if non is given
-            
+
     return: dict with options and arguments
-    
+
     Usage e.g., :
-    
+
         optionsDict = parseOptions(['f','n','d','s','v','r','w'])
-        
+
         networkName           = optionsDict['networkName']
         save                  = optionsDict['save']
         dataNumber            = optionsDict['dataNumber']
         simulationDescription = optionsDict['simulationDescription']
         vizOutput             = optionsDict['vizOutput']
         resimulate            = optionsDict['resimulate']
-    '''
+    """
     
     parser = OptionParser()
     
@@ -186,9 +186,9 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
 
 
 def chooseNetwork(showTemplates = True):
-    '''
+    """
     console Interface to choose a VascularNetwork for simulation / vascularPolynomial Chaos
-    '''
+    """
     dirNamesTemplate = []
     if showTemplates:
         # network templates
@@ -227,8 +227,9 @@ def chooseNetwork(showTemplates = True):
     print '====================================='
     return networkName
 
+# TODO: (einar) fix exception variable
 def evaluateDataNumber(dataNumberString, exception = "Error"):
-    '''
+    """
     Function to evaluate DataNumbers given as a string
     Max lenght of dataNumber = 3
     Input:
@@ -239,7 +240,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
         dataSetNumber = [ String, ... ,String] 
         (e.g. dataNumber = '012' dataSetNumber = ['012','023']
               dataNumber = '004' dataSetNumber = ['004'] 
-    '''
+    """
     dataSetNumber = None
     dataNumber = None
     if dataNumberString != None:
@@ -289,12 +290,12 @@ def defineSimulationDescription():
     
     
 def chooseSolutionDataCase():
-    '''
+    """
     console Interface to choose a vascular1DFlow simualtion case for e.g. Visualisation
     Output:
         networkName <string>
         dataNumber  <string>
-    '''
+    """
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkCases = [d for d in os.listdir(workingDirectory) if '.' not in  d]
         
@@ -344,14 +345,14 @@ def chooseSolutionDataCase():
 
 
 def chooseVPCconfigFile(networkName):
-    '''
+    """
     console Interface to choose a vascularPolynomialChaos Config File
      including the possility to create a template Config File
     Input:
         networkName of VascularNetwork
     Output:
         networkName,dataNumber of the Config File (networkName should be the same)
-    '''
+    """
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkDirectory = '/'.join([workingDirectory,networkName])
     
@@ -375,7 +376,6 @@ def chooseVPCconfigFile(networkName):
         for i,filename in enumerate(filenames):
                 print "   [ {:3} ]     {}".format(i+1, filename)
         index = 1+len(filenames)
-    print index, range(index)
     
     userInput = 'a'
     while userInput not in [str(i) for i in xrange(index)]:
@@ -399,7 +399,7 @@ def chooseVPCconfigFile(networkName):
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
     else:
-        networkName = filenames[userInput-2]
+        networkName = filenames[userInput-1]
         dataNumber = networkName.split('.')[0].split('_')[2]
         
     return dataNumber   

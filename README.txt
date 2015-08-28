@@ -32,7 +32,7 @@ enter the AutoDocumentation folder and run "make html". If
 you've altered modules, run "make clean" first. If you've 
 altered module names, folders, or top level modules, edit 
 AutoDocumentation/sources/index.rst accordingly, and then 
-run "sh fullclean.sh".
+run "make fullupdate".
 
 We will use a slightly modified Google standard 
 for writing docstrings. (return is different)
@@ -45,10 +45,13 @@ def foo(input1, input2):
 		input1 (type): description of input1
 		input2 (type): description of input2
 	
-	Returns:
+	Returns:   ### This has different syntax depending ###
+               ### on how many outputs it has.         ###
+
+        type of soleOutput: description of soleOutput
+
 		type of output1
 			description of output1
-	
 		type of output2
 			description of output2
 	

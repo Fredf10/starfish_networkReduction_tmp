@@ -1,9 +1,15 @@
-from NetworkLib.classBoundaryConditions import *
+import sys, os
+#from NetworkLib.classBoundaryConditions import *
+### should work without this, but won't delete yet just in case.
 import numpy as np
 import math
 
+cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
+import UtilityLib.classStarfishBaseObject as cSBO
 
-class venousPool(object):
+
+class venousPool(cSBO.StarfishBaseObject):
     """
     Very simple model of the venous side, considering the veins as one big compliant reservoir,
     and assuming a pure pressure gain between CVP and LAP
@@ -108,8 +114,7 @@ class venousPool(object):
         self.Pvector[n+1] = self.P
         self.P_LAvector[n+1] = self.P_LA
         self.Vusvvector[n+1] = self.Vusv
-        
-        
+
         
     def updateBoundaryConditions(self):
         """
@@ -152,19 +157,14 @@ class venousPool(object):
     
         
     def update(self,dataDict):
-        '''
+        """
         updates the data
         Dict = {'variableName': value}
-        '''
+        """
         for key,value in dataDict.iteritems():
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
-            except: 
-                print 'ERROR venousPool.update(): wrong key: %s, could not set up venousPool' %key    
+            except Exception:
+                self.warning("venousPool.update(): wrong key: %s, could not set up venousPool" %key)
             
-            
-            
-            
-    
-    

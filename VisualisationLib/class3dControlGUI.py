@@ -593,6 +593,7 @@ class ControlWindow(pyglet.window.Window):
         for control in self.controls:
             control.draw()
         for control in self.controls:
+            #TODO: Try Except Pass should be fixed
             try: control.drawHelp()
             except: pass
     

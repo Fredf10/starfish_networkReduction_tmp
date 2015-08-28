@@ -62,21 +62,21 @@ class LocationOfInterestManager(object):
         timeStart = []
         timeEnd = []
         
-        for networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile in evaluationCaseFiles:
+        for networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile in evaluationCaseFiles:
             vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
             vascularNetwork.linkSolutionData()
             
             numberOfTimePoints.append(len(vascularNetwork.simulationTime))
             timeStart.append(min(vascularNetwork.simulationTime))
             timeEnd.append(max(vascularNetwork.simulationTime))
-            
+                        
             vascularNetwork.solutionDataFile.close()
             del vascularNetwork
         
         self.simulationTime = np.linspace(max(timeStart), min(timeEnd), min(numberOfTimePoints))
         
         # pass the data to the locationsOfInterests which will load the information needed
-        for sampleIndex,[networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile] in enumerate(evaluationCaseFiles):
+        for sampleIndex,[networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile] in enumerate(evaluationCaseFiles):
             vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationOfInterests:

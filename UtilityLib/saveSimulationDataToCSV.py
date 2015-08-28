@@ -5,8 +5,9 @@ sys.path.append(cur+'/../')
 #sys.path.append(cur+'/../UtilityLib')
 import UtilityLib.moduleXML as mXML 
 import UtilityLib.moduleStartUp as moduleStartUp
-import UtilityLib.modulePickle as modulePickle
 
+#import UtilityLib.modulePickle as modulePickle
+### modulePickle doesn't seem to exist anymore
 
 #sys.path.append(cur+'/../NetworkLib')
 from NetworkLib.classVascularNetwork import VascularNetwork 

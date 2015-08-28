@@ -24,6 +24,8 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  update     to refresh the source files"
+	@echo "  clean      to remove all build files"
+	@echo "  fullupdate to purge and then autogenerate the source files"
 	@echo "  html       to make standalone HTML files"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
@@ -54,6 +56,17 @@ update:
 
 clean:
 	rm -rf $(BUILDDIR)/*
+
+fullupdate:
+	mv source/index.rst ./index.rst 
+	rm -rf source/*.rst 
+	mv ./index.rst source/index.rst 
+	@echo "Cleaned all source files" 
+	rm -rf $(BUILDDIR)/* 
+	@echo "Cleaned all build files" 
+	sphinx-apidoc -o ./source ../ 
+	@echo "Generated new source files" 
+	@echo "please edit source/index.rst accordingly and run make html"
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

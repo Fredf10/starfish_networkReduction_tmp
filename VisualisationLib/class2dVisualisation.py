@@ -27,7 +27,7 @@ import UtilityLib.moduleXML as mXML
 
 
 import numpy as np
-from pprint import pprint as pp
+import pprint
 from copy import deepcopy as copy
 
 class Visualisation2DPlotWindowAdjustValues(gtk.Window):
@@ -139,6 +139,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                     value = entry.get_active_text()                    
                     try: type = self.variableTypes[key][index]
                     except: type = 'str'
+                    #TODO: Try Except Pass should be fixed
                     try: self.actualValuesDict[key][index] = eval(type)(value)
                     except: print """WARNING: could not convert "{}" to "{}" """.format(text,type)
                     
@@ -147,6 +148,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                     if text is not '':
                         try: type = self.variableTypes[key][index]
                         except: type = 'float'
+                        #TODO: Try Except Pass should be fixed
                         try: self.actualValuesDict[key][index] = eval(type)(text)
                         except: print """WARNING: could not convert "{}" to "{}" """.format(text,type)
                             
@@ -163,6 +165,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                 value = self.inititalValuesDict[key][index]
                 
                 comboChoices = None
+                #TODO: Try Except Pass should be fixed
                 try: comboChoices = self.variableFixedChoice[key][index]
                 except: pass
                 
@@ -586,6 +589,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.updateDescriptions()
             self.descriptions.set_visible(True)
         else:
+            #TODO: Try Except Pass should be fixed
             try: self.descriptions.set_visible(False)
             except: pass
                    
@@ -606,6 +610,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 if label != '':
                     labels.append(label)
                     handles.append(currentAxis)
+        #TODO: Try Except Pass should be fixed
         try:  
             self.legend.set_visible(False)
             self.legend.remove()   
@@ -623,6 +628,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             feakLine = Rectangle((-1, -1.005), -1.005, -1.005, fc=currentColor, fill=True, edgecolor='none', linewidth=0)
             handles.append(feakLine)
             labels.append(vascularNetwork.description)
+        #TODO: Try Except Pass should be fixed
         try:  
             self.descriptions.set_visible(False)
             self.descriptions.remove()   
@@ -677,6 +683,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
                     
                 if self.selectedExternalData != None:
+                    #TODO: Try Except Pass should be fixed
                     try:
                         xData   = self.selectedExternalData['SolutionData'][vesselId]['Time']+self.limits['external time shift']
                         try:
@@ -1157,6 +1164,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             
             # pressure
             limit = 'G'
+            #TODO: Try Except Pass should be fixed
             try: 
                 netG = vascularNetwork.vessels[vesselId].netGravity 
                 self.limits[limit] = [min([self.limits[limit][0], np.min(netG)]),
@@ -1224,6 +1232,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                            np.max(qb*1.e6)])]
                          
             if self.selectedExternalData != None:
+                #TODO: Try Except Pass should be fixed
                 try:
                     # pressure
                     limit = 'P'
@@ -1303,6 +1312,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.updatePlotWindow()
         else:
             self.clearPlotWindow(lines = False)
+            #TODO: Try Except Pass should be fixed
             try: self.deltasWindow.destroy()
             except: pass
             self.deltasWindow = None
@@ -1315,6 +1325,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         if widget.get_active() and self.buttonMinMaxPoints.get_active():
             self.deltasWindow = Visualisation2DPlotWindowAdjustValues(self,'deltas',self.deltas,self.deltasInit)    
         else:
+            #TODO: Try Except Pass should be fixed
             try: self.deltasWindow.destroy()
             except: pass
             self.deltasWindow = None
@@ -1467,6 +1478,7 @@ class Visualisation2DMainCase(object):
         call function of the combobox to choose solution data set number
         '''
         cbIndex = widget.get_active()
+        #TODO: Try Except Pass should be fixed
         try: self.currentNetwork = self.networkCases[cbIndex]
         except: pass
         self.updateVesselComboBox()
@@ -1766,7 +1778,8 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         fileFilter = gtk.FileFilter()
         fileFilter.add_pattern("*.v1dfExD")
         filenames = self.LoadDialog(fileFilter)
-        
+
+        #TODO: Try Except Pass should be fixed
         try:
             fileName = filenames[0]
             self.externalData = mFPH.loadExternalDataSet(fileName)
