@@ -2,10 +2,10 @@
 <FigueroaBugenhagen.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">3.0</totalTime>
+    <totalTime unit="s">20.0</totalTime>
     <CFL>0.65</CFL>
-    <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">3.0</timeSaveEnd>
+    <timeSaveBegin unit="s">5.0</timeSaveBegin>
+    <timeSaveEnd unit="s">20.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
@@ -33,6 +33,14 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
+    <externalStimuli>
+      <externalStimulus type='headUpTilt' Id='1'>
+          <startAngle unit='deg'>0</startAngle>
+          <stopAngle unit='deg'>60</stopAngle>
+          <duration unit='s'>7.</duration>
+          <startTime unit='s'>5.</startTime>
+      </externalStimulus>
+  </externalStimuli>
   <communicators/>
   <baroreceptors>
 	 <baroreceptor Id="1">

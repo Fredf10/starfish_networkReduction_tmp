@@ -19,7 +19,8 @@ import UtilityLib.moduleFilePathHandler as mFPH
 
 #sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
-import numpy as np
+# import numpy as np
+import math
 from scipy import interpolate
 #from math import pi, cos, sin
 import pprint
@@ -242,8 +243,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             try: self.update(updateDict[dictName])
             except Exception: self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
-#         for dictName in ['globalFluid', 'communicators', 'baroreceptors']:
-        for dictName in ['globalFluid', 'communicators']:
+        for dictName in ['globalFluid', 'communicators', 'externalStimuli']:
             try: self.getVariableValue(dictName).update(updateDict[dictName])
             except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
@@ -429,13 +429,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
             raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime]")
-#            print "ERROR: VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime], exit()"
- #           exit()
 
         if self.timeSaveBegin < 0 or self.timeSaveBegin > self.timeSaveEnd:
             raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd]")
-#            print "WARNING: VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd], exit()"
- #           exit()
 
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
@@ -497,8 +493,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                    'nTstepsInitPhase': self.nTstepsInitPhase})
 
         # # initialize gravity and 3d positions over time
-        # TODO: Does this always need to be called?
-        self.initializeHeadUpTilt(headUpTilt=False)
+        for stimulus in self.externalStimuli.itervalues():
+            if stimulus['type'] == "headUpTilt":
+                self.initializeHeadUpTilt(stimulus)
+            
 
         ##
         for vesselId, vessel in self.vessels.iteritems():
@@ -519,7 +517,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
 
-    def initializeHeadUpTilt(self, headUpTilt = False):
+    def initializeHeadUpTilt(self, headUpTilt):
         # define motion
         motionDict = {}
 
@@ -528,25 +526,30 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # degrees.
         tstart = 5.
         duration = 12.
-        tstop = tstart + duration
         tiltAngle= 60. * np.pi / 180
+        
+        tstart = headUpTilt['startTime']
+        duration = headUpTilt['duration']
+        tiltAngle = headUpTilt['stopAngle']
+       
+        tstop = tstart + duration
+        
+        start = self.vessels[1].angleXMother
+        end = start - tiltAngle
+        nStepsStart = int(math.floor(tstart/self.dt))
+        nStepsTilt = int(math.ceil(tstop/self.dt)) - nStepsStart
+        # TODO determine appropriate behaviour if simulation time is shorter that head up tilt time
+        assert tstop < self.totalTime, 'tstop > totalTime'
+        # nStepsEnd = ceil((self.nTsteps*self.dt - tstop)/self.dt)
+        nStepsEnd = int(math.ceil(self.totalTime/self.dt))- nStepsTilt - nStepsStart
+        
+        startAngle = np.ones(nStepsStart)*start
+        endAngle = np.ones(nStepsEnd)*end
+        tiltAngle = np.linspace(start, end, nStepsTilt+1) #Account for time points not time steps
+        angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
+        motionDict = {1:{'angleXMotherTime': angleXSystem}}
 
-        if headUpTilt:
-            start = self.vessels[1].angleXMother
-            end = start - tiltAngle
-            nStepsTilt = int(duration/self.dt)
-            nStepsStart = int(tstart/self.dt)
-
-            # TODO determine appropropriate response to short simulation time
-            assert tstop < self.totalTime, 'tstop > totalTime'
-            nStepsEnd = int((self.nTsteps*self.dt - tstop)/self.dt)
-            startAngle = np.ones(nStepsStart)*start
-            endAngle = np.ones(nStepsEnd)*end
-            tiltAngle = np.linspace(start, end, nStepsTilt)
-            angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
-            motionDict = {1:{'angleXMotherTime': angleXSystem}}
-
-        # TODO: Do these belong here?
+        # TODO: Do these belong here? and do they need to happen every simulation?
         for vesselId, angleDict in motionDict.iteritems():
             self.vessels[vesselId].update(angleDict)
 
@@ -1769,7 +1772,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if round(relativeVenousPressure, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
                     relativeVenousPressure = self.minimumVenousPressure
                     self.venousSystemCollaps = True
-                    self.warning("Venous system showing collapsing dynamics!", noException= True)
+                    self.warning("Venous system showing collapsing dynamics! Calculated Pressure %f".format(relativeVenousPressure), noException= True)
 
             for bc in self.boundaryConditions[vesselId]:
                 # update venous pressure at boundary nodes
@@ -1782,13 +1785,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             print '_______________Venous Pressures _____________________________'
             print '%s %36.1f' % ('Central venous pressure:', round(self.centralVenousPressure, 2))
 
-            if self.gravitationalField == True:
+#            if self.gravitationalField == True:
                 # for vesselId in sorted(self.boundaryVessels):
                 #    print '%s %2i %15s %20.1f' % ('Boundary vessel',vesselId,',relative pressure  :', venousPressure[vesselId]/133.32)
-                # checks if venous system is collapsing(having less than minimum allowed negative pressure)
-                if self.venousSystemCollaps == True:
-                    print '\n'
-                    self.warning("Warning: Venous system showing collapsing dynamics!", noException= True)
+#                 # checks if venous system is collapsing(having less than minimum allowed negative pressure)
+#                 if self.venousSystemCollaps == True:
+#                     print '\n'
+#                     self.warning("Warning: Venous system showing collapsing dynamics!", noException= True)
 
     def print3D(self):
 
@@ -1810,6 +1813,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         Initializing the position and rotation of each vessel in 3D space
         Initializing netGravity of the vessels.
         """
+        # TODO: what is this?
         if nSet != None:
             nTsteps = 0
 
@@ -1837,7 +1841,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
                 if rightMother != None:
                     if np.sum(self.vessels[rightMother].positionEnd - self.vessels[leftMother].positionEnd) < 3.e-15:
-                        print 'ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother, rightMother, leftDaughter)
+                        raise NotImplementedError('ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother, rightMother, leftDaughter))
 
     def initializeVenousGravityPressureTime(self, nTsteps):
         """

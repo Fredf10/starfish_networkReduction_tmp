@@ -254,7 +254,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.rotToGlobalSys   = np.zeros((nTsteps+1,3,3))
         self.netGravity       = np.zeros((nTsteps+1,1))
 
-    #### Functions for to calculate depenend solution variables (also used for simulations)
+    #### Functions for to calculate dependent solution variables (also used for simulations)
 
     def postProcessing(self, variablesToProcess):
         """
@@ -428,7 +428,7 @@ class Vessel(cSBO.StarfishBaseObject):
     def caculatePositionAndGravity(self, n, positionEndMother, rotToGlobalSysMother):
         """
         calculates the position and gravity for given time point n and inserts these
-        in the corresponding vectos
+        in the corresponding vectors
 
         Initializing net gravity on the vessels.
         """
@@ -446,9 +446,9 @@ class Vessel(cSBO.StarfishBaseObject):
 
         rotToGlobalSys = rotToGlobalSysMother
 
-        # 2. assamble rot matrices,
-        # 2.1 calculate local rotmatrix to mother depending on 
-        ## x axis, angleXMother
+        # 2. assemble rotation matrices,
+        ## 2.1 calculate local rotation matrix to mother depending on 
+        ### x axis, angleXMother
         if angleXMother != 0:
             rotDaughterMotherX = np.array([[1, 0                     , 0                     ],
                                            [0, cos(angleXMother), sin(angleXMother)],
