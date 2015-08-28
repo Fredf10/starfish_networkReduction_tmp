@@ -314,6 +314,11 @@ variablesDict = {## class Vascular Network
                  'my'                : {'type':'float',      'unitSI': 'Pa s',   'strCases': None, 'multiVar': False},
                  'rho'               : {'type':'float',      'unitSI': 'kg m-3', 'strCases': None, 'multiVar': False},
                  'gamma'             : {'type':'float None', 'unitSI':  None,    'strCases': None, 'multiVar': False},
+                 # external stimuli
+                 'startAngle' : {'type':'float', 'unitSI':'deg', 'strCases': None, 'multiVar': False},
+                 'stopAngle'  : {'type':'float', 'unitSI':'deg', 'strCases': None, 'multiVar': False},
+                 'startTime'  : {'type':'float', 'unitSI':'s', 'strCases': None, 'multiVar': False},
+                 'duration'   : {'type':'float', 'unitSI':'s', 'strCases': None, 'multiVar': False},
                  ## class Communicators
                  'comType'           : {'type':'str', 'unitSI': None, 'strCases': ['CommunicatorRealTimeViz','CommunicatorBaroreceptor'], 'multiVar': False},
                  'comId'             : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},

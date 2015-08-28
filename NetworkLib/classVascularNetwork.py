@@ -1,7 +1,6 @@
 import sys, os
 from reportlab.lib.validators import isNumber
 
-#from duplicity.tarfile import TUREAD
 # from UtilityLib.saveSimulationDataToCSV import vesselId
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
@@ -9,25 +8,23 @@ sys.path.append(cur + '/../')
 
 #sys.path.append(cur + '/../NetworkLib')
 #sys.path.append(cur+'/../SolverLib')
+import UtilityLib.classStarfishBaseObject as cSBO
 
 import classVessel as cVes
 import SolverLib.classBaroreceptor as cBRX
-from classBoundaryConditions import *
-#from SolverLib import classBaroreceptor as cBRX
+
 #sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
 
-import UtilityLib.classStarfishBaseObject as cSBO
 
 #sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
-
 import numpy as np
 from scipy import interpolate
-from math import pi, cos, sin
+#from math import pi, cos, sin
 import pprint
-
 import h5py
+from classBoundaryConditions import *
 
 class VascularNetwork(cSBO.StarfishBaseObject):
     """
@@ -116,7 +113,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
-
+        self.externalStimuli = {}
         self.baroreceptors = {}  # dictionary with baroreceptors
 
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data}

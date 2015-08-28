@@ -40,11 +40,32 @@ globalFluidElements = ['my',
                        'gamma']
 
 
+
+
+## External Stimuli such as Head up tilt, Valsalva and Mueller maneuvers
+headUpTiltElements = ['startAngle',
+                       'stopAngle',
+                       'startTime',
+                       'duration']
+valsalvaElements = []
+hemmorrhageElements = []
+
+externalStimulusElements = {'headUpTilt' : headUpTiltElements,
+                    'valsalva'   : valsalvaElements,
+                    'hemmorrhage' : valsalvaElements,
+                    }
+
+externalStimuliElementReference = {'externalStimulus':externalStimulusElements}
+
+
+##
+# TODO what's the deal with this? 
 vascularNetworkElements = ['simulationContext',
-                           'solverCalibration',
-                           'initialisationControls']
+                          'solverCalibration',
+                          'initialisationControls']
 
 ##########################################################################################
+
 ## Baroreceptor objects
 #### new 
 
@@ -248,6 +269,7 @@ xmlElements  = [ 'simulationContext',
                  'solverCalibration',
                  'initialisationControls',
                  'globalFluid',
+                 'externalStimuli',
                  'baroreceptors',
                  'communicators',
                  'boundaryConditions',
@@ -259,8 +281,9 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'initialisationControls': initialisationControlsElements,
                         'boundaryConditions'    : boundaryConditionElements,
                         'globalFluid'           : globalFluidElements,
+                        'externalStimuli'       : externalStimulusElements,
                         'baroreceptors'         : baroreceptorElements,
-                        'communicators'         : communicatorReference,
+                        'communicators'         : communicatorReference, #TODO why is this Reference?
                         'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
 
