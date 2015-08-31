@@ -264,3 +264,15 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
 
+
+
+
+##########################################################################################
+##########################################################################################
+### uncertainty quantification and sensitivity analysis
+
+locationOfInterest = ['quantitiesOfInterestToProcess',
+                      'queryLocation',
+                      'xVals',
+                      'confidenceAlpha']
+

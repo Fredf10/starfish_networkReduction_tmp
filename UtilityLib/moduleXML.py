@@ -394,7 +394,7 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
         import networkXml041 as nxml  
     
     if xmlFileVersion != newestNetworkXmlVersion:
-        print " WARNING the version of the network xml file you try to load is outdated it may occure some problems!"
+        print " WARNING the version of the network xml file you try to load is outdated it may cause some problems!"
        
     for xmlElementName in nxml.xmlElements:
         for xmlElement in root.findall(''.join([".//",xmlElementName])):
@@ -585,19 +585,6 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                     globalFluidData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit) 
                     
                     ## TODO: reimplement global fluid polynomial chaos
-#                     # find polynomial chaos variable
-#                     try:                        
-#                         # find polychaos variables
-#                         element = xmlElement.findall(''.join(['.//',variable,'-polyChaos']))[0]
-#                         # get variable value                        
-#                         try: variableValueStr = element.text
-#                         except: loadingErrorMessageValueError(variable, 'global fluid', '')
-#                         # get unit
-#                         try: variableUnit = element.attrib['unit']
-#                         except: variableUnit = None 
-#                         # save converted XML-value                      
-#                         globalFluidPolychaosData[variable] = loadVariablesConversion(variable, variableValueStr, variableUnit)
-#                     except: pass
                 vascularNetwork.updateNetwork({'globalFluid':globalFluidData}) ##,'globalFluidPolyChaos':globalFluidPolychaosData})
                     
             elif xmlElementName == 'generalRandomInputs':
@@ -800,12 +787,10 @@ def unitConversion(unitsDict,value,unit):
 def loadPolyChaosXML(vpcConfigXmlFile):
     ### import units of all variables in the SI system outdated used of only few functions -> to be changed
     ## just used for polynomial chaos config.
-    from constants import variableUnitsSI as variableUnits
-    from constants import vPCconfigurationTemplate
-    
-    vPCconfiguration =  {}
     
     # load the data!
+    parser = etree.XMLParser(encoding='iso-8859-1')
+    tree = etree.parse(vpcConfigXmlFile, parser)
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
         tree = etree.parse(vpcConfigXmlFile, parser)
@@ -816,112 +801,15 @@ def loadPolyChaosXML(vpcConfigXmlFile):
             exit()     
             
     # create root
+    from VascularPolynomialChaosLib.classVpcConfiguration import VpcConfiguration 
+    from VascularPolynomialChaosLib.classLocationOfInterestManager import LocationOfInterestManager
+    
     root = tree.getroot()
-    
-    #----------------------------------------------------------------------------------------# 
-    ### Read Control Variables
-    controlVariables = ['createDistributions','createOrthoPoly','createSample','runSimulations','calculateGPCE','preProcessData','plotMinMaxPoints','plotMeanSTD','plotPeaks']
-    for control in root.findall(".//controlVariables"):
-        for data in control:
-            if data.tag in controlVariables:
-                vPCconfiguration[data.tag] = eval(data.text)
-    for preProcessing in root.findall(".//preProcessing"):
-        for data in preProcessing:
-            if data.tag in controlVariables:
-                vPCconfiguration[data.tag] = eval(data.text)
-    for calculations in root.findall(".//calculations"):
-        for data in calculations:
-            if data.tag in controlVariables:
-                vPCconfiguration[data.tag] = eval(data.text)
-    for preProcessing in root.findall(".//postProcessing"):
-        for data in preProcessing:
-            if data.tag in controlVariables:
-                vPCconfiguration[data.tag] = eval(data.text)
-    
-    if vPCconfiguration['plotPeaks'] or vPCconfiguration['plotMeanSTD'] is True: vPCconfiguration['postProcessing'] = True
-    else: vPCconfiguration['postProcessing'] = False
-    
-    #----------------------------------------------------------------------------------------#    
-    #### POLYNOMIAL CHAOS DEFINITIONS    
-    for preProcessing in root.findall(".//polyChaosConfig"):
-        for data in preProcessing:
-            if data.tag == "polynomialOrders":
-                vPCconfiguration['polynomialOrders'] = map(int, data.text.split(' '))
-            if data.tag == 'sampleMethod':
-                vPCconfiguration['sampleMethod'] = data.text#''.join(['<',data.text.replace(' ','><'),'>'])
-                        
-    
-    #----------------------------------------------------------------------------------------#
-    #### WAVE SPLITTING
-    for waveSplitting in root.findall(".//waveSplitting"):
-        for data in waveSplitting:
-            if data.tag == 'linearWaveSplit':
-                vPCconfiguration[data.tag] = eval(data.text)
-            if data.tag == 'velocityProfileCoefficient':
-                if data.text != 'None' and data.text !=  None: 
-                    vPCconfiguration['velocityProfileCoefficient'] = float(data.text)
-
-    #---------------------------------------------------------------------------------------#
-    ### POSTPROCESSING: PLOTTING
-    for preProcessing in root.findall(".//generalPlotting"):
-        for data in preProcessing:
-            if data.tag == 'plotDirectory':
-                vPCconfiguration[data.tag] = data.text
-            if data.tag == "deterministicDataSetNumbers":
-                if data.text: vPCconfiguration[data.tag] = map(int, data.text.split(' '))
-                else: vPCconfiguration[data.tag] = []
-            if data.tag == "polynomsToPlotOrder":
-                vPCconfiguration[data.tag] = map(int, data.text.split(' '))
-    
-    for plotsMeanSTD in root.findall(".//plotsMeanSTD"):
-        for data in plotsMeanSTD:
-            if data.tag == 'plotConfidenceInterval':
-                vPCconfiguration['plotMeanConfidenceInterval'] = eval(data.text)
-            if data.tag == 'confidenceAlpha':
-                if data.text != 'None' and data.text !=  None: 
-                    vPCconfiguration['plotMeanConfidenceAlpha'] = float(data.text)
-            if data.tag == 'sigmaInterval':
-                vPCconfiguration['plotMeanSigmaInterval'] = eval(data.text)
-    
-    for plotsPeaks in root.findall(".//plotsPeaks"):
-        for data in plotsPeaks:
-            if data.tag in ['peakAnalysis','plotPeaksMeanSTDBoxPlotsSingle','plotPeaksAnalyticSensitivity']:
-                vPCconfiguration[data.tag] = eval(data.text)
-                
-            if data.tag == 'plotPeaksConfidenceAlpha':
-                if data.text != 'None' and data.text !=  None: 
-                    vPCconfiguration['plotPeaksConfidenceAlpha'] = float(data.text)
-    
-    #----------------------------------------------------------------------------------------#
-    # INVESTIGATION POINTS
-    polynomsToCalculate = []
-    names = []
-    delta = {}
-    peaksToEvaluate = {}
-    
-    for evaluationPoint in root.findall(".//evaluationPoint"):
-        evaluationPointsDict = evaluationPoint.attrib
-        names.append(evaluationPointsDict['name'])
-        polynomsToCalculate.append([int(evaluationPointsDict['vesselId']),int(evaluationPointsDict['gridNode'])])
-        
-        deltaDict = {}
-        peaksToEvaluateDict = {}
-        
-        for data in evaluationPoint:
-            if data.tag == "deltasMinMaxFunction":
-                for value in data.findall(".//"):
-                    deltaDict[value.tag] = unitConversion(unitsDict, float(value.text), value.attrib['unit'])
-            if data.tag == "peaksToEvaluate":
-                for value in data.findall(".//"):
-                    if value.text: peaksToEvaluateDict[''.join(['extrema',value.tag])] = map(int, value.text.split(' '))
-                    else: peaksToEvaluateDict[''.join(['extrema',value.tag])] = []
-        
-        delta[evaluationPointsDict['name']] = deltaDict
-        peaksToEvaluate[evaluationPointsDict['name']] = peaksToEvaluateDict
-        
-    vPCconfiguration['locationsToEvaluate'] = polynomsToCalculate
-    vPCconfiguration['locationNames'] = names
-    vPCconfiguration['delta'] = delta
-    vPCconfiguration['peaksToEvaluate'] = peaksToEvaluate
-                
-    return vPCconfiguration
+    for xmlNode in root:
+        print xmlNode
+        print xmlNode.attrib
+        if 'class' in xmlNode.attrib:
+            classObject = eval(xmlNode.attrib['class'])(xmlNode)
+            print classObject
+            
+    return 

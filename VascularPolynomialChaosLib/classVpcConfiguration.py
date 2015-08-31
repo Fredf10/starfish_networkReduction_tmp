@@ -5,8 +5,6 @@ import sys,os
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur+'/../')
 
-#sys.path.append('/'.join([cur,'..','UtilityLib']))
-from UtilityLib import moduleXML
 
 import moduleFilePathHandlerVPC as mFPH_VPC
 
@@ -14,32 +12,16 @@ class VpcConfiguration(object):
     '''
     Configuration class of a vascular polynomial chaos class
     '''
-    def __init__(self, networkName, dataNumber):
+    def __init__(self, xmlNode):
         '''
         define all variables with comments here
         
         try to:
         update variables from vpcConfig-file (networkName,dataNumber)
         '''
-        ## TODO: delete old members:
-        self.createDistributions = True
-        self.runSimulations = True
-        self.plotMinMaxPoints = True #TODO: remove
-        
-        ##  orthogonal polynoms ( TRUE == create and save, FALSE == load existing)
-        self.createOrthoPoly  = True
-        ### step Construct generalized polynomial chaos expansion and  pre process data
-        self.calculateGPCE    = True #
-        
-        # plots not implemented
-        self.plotMeanSTD     = False
-        self.plotPeaks       = True
-        #plotSensitiviy  = False
-        #------------------------------------------------
-        
         ### network name and datanumber
-        self.networkName = networkName
-        self.dataNumber  = dataNumber
+        #self.networkName = networkName
+        #self.dataNumber  = dataNumber
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
@@ -61,6 +43,7 @@ class VpcConfiguration(object):
         self.postProcessing  = True
         
         #----POLYNOMIAL CHAOS DEFINITIONS -------------------------------------------------------------#
+        self.runPolynomialChaos = True
         #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
         self.polynomialOrders = [2,3]
         # method of the spares grid collocation 
@@ -89,133 +72,170 @@ class VpcConfiguration(object):
         #  
         
         #----MONTE CARLO DEFINITIONS -------------------------------------------------------------#
+        self.runMonteCarlo = False
+        
+        #----External Variables -------------------------------------------------------------#
         
         
-        #----CHOICE OF INVESTIGATION POINTS FOR WHICH THE POLYNOMIAL CHAOS IS CALCULATED-----------#
+        
+        
+        self.externVariables = { 'createSample'             : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'createEvaluationXmlFiles' : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'simulateEvaluations'      : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'preProcessData'           : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'postProcessing'           : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'localEvaluation'          : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},               
+                                 'multiprocessing'          : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},  
+                                 'numberOfProcessors'       : {'type':'int',    'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'evaluationNumbers'        : {'type':'int',    'unitSI': None,   'strCases': None, 'multiVar': True},
+                                 'runPolynomialChaos'       : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
+                                 'polynomialOrders'         : {'type':'int',    'unitSI': None,   'strCases': None, 'multiVar': True}, 
+                                 'sampleMethod'             : {'type':'str',    'unitSI': None,   'strCases': ['K','R','L','S','H','M','C','NC','G','RG'], 'multiVar': False},
+                                 'runMonteCarlo'            : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False}
+                                 }
+        
+        self.externXmlAttributes  = []
+        self.externXmlElements    = self.externVariables.keys()
+        # optional set order to elements for germans only :)
+        self.externXmlElements    = ['createSample',
+                                    'createEvaluationXmlFiles',
+                                    'simulateEvaluations',
+                                    'preProcessData' ,
+                                    'postProcessing',
+                                    'localEvaluation',                 
+                                    'multiprocessing',     
+                                    'numberOfProcessors',   
+                                    'evaluationNumbers',
+                                    'runPolynomialChaos',
+                                    'polynomialOrders', 
+                                    'sampleMethod',
+                                    'runMonteCarlo']
+        
+        
+        self.readDataFromXmlNode(xmlNode)
+        
+    def readDataFromXmlNode(self, xmlNode):
+        '''
+        parser which parses the xml-node given and search for data defined in
+        
+        externAttributes
+        externElements
+        externVariables
+        
+        '''
+        newData = {}
+        # load object attributes
+        for attribute in self.externXmlAttributes:
+            newData[attribute] = self.loadVariablesConversion(attribute, xmlNode.attrib[attribute], '')
+                                            
+        for externXmlElement in self.externXmlElements: 
+            print externXmlElement
+            # check if externXmlElement exists in the current node
+            try: element = xmlNode.findall(''.join(['.//',externXmlElement]))[0]
+            except: self.loadingErrorMessageVariableError(externXmlElement, 'vessel', 'Id')
+            # get variable value     
+            try: variableValueStr = element.text
+            except: self.loadingErrorMessageValueError(externXmlElement, 'vessel', 'Id')
+            # get unit
+            if 'unit' in element.attrib: variableUnit = element.attrib['unit']
+            else: variableUnit = None 
+            # save converted XML-value
+            newData[externXmlElement] = self.loadVariablesConversion(externXmlElement, variableValueStr, variableUnit)
+     
+        print newData
+     
+    def loadVariablesConversion(self, variable, variableValueStr, variableUnit, unit = 'unitSI'):
+        '''
+        checks the element.text string and
+        evaluates it corresponding to the definition
+        of the variable in the constants variablesDict 
+        
+        return converted evaluated value of variable
+        '''
+        
+        sys.path.append('/'.join([cur,'..','UtilityLib']))
+        from constants import unitsDictSI as unitsDict
+        
+        multiVariable = False
+        variableValue = 'notConvertable'
+        convertError = []
+        variableTypes = self.externVariables[variable]['type']
+        # check if variable is a multiple variable (means list of variables)
+        if self.externVariables[variable]['multiVar']:
+            variableValueStrings = variableValueStr.replace(',',' ').split() 
+            multiVariable = True
+            variableValues = []
+        else:
+            variableValueStrings = [variableValueStr]
+        
+        # check if variable can have multiple types
+        if ' ' in variableTypes:
+            variableTypes = variableTypes.replace(',',' ').split()
+        else: variableTypes = [variableTypes]
+        variableTypes.sort()
+        
+        # start conversion loop over variable and types
+        for variableValueString in variableValueStrings:
+            for variableType in variableTypes:
+                            
+                if variableType in ['float','int']:
+                    try: variableValue = float(eval(variableValueString))
+                    except: convertError.append('float') 
+                    
+                    if self.externVariables[variable][unit]:
+                        try:
+                            if ' ' in variableUnit:
+                                variableUnits = variableUnit.split(' ')
+                                for variableUnit in variableUnits: variableValue = variableValue*unitsDict[variableUnit]
+                            else: variableValue = variableValue*unitsDict[variableUnit]
+                        except: pass 
+                        
+                    if variableType == 'int': 
+                        try: variableValue = int(variableValue)
+                        except: convertError.append('int') 
+                        
+                elif variableType == 'bool': 
+                    try: 
+                        if variableValueString == 'False': variableValue = False
+                        elif variableValueString == 'True': variableValue = True
+                        else: variableValue = eval(variableValueString)
+                    except: 
+                        convertError.append('bool') 
+                    
+                elif variableType in ['str']:
+                    if variableValueString in self.externVariables[variable]['strCases']: variableValue = variableValueString
+                    elif self.externVariables[variable]['strCases'][0] == 'anything': variableValue = variableValueString
+                    else: convertError.append(''.join(['str == ',str(self.externVariables[variable]['strCases'])]))
+                
+                elif variableType in ['None']:
+                    if variableValueString == 'None' or variableValueString == '' or variableValueString == None:
+                        variableValue = None
+                    else: convertError.append('None')
+                        
+            if variableValue == 'notConvertable':
+                raise ValueError("""ERROR: moduleXML.loadVariablesConversion():
+                      Cannot convert given value "{}" of variable "{}"
+                      to {}!
+                      Check if it is of type {}, system exit!""".format(variableValueString,variable,convertError,variableTypes))
+            if multiVariable == False: return variableValue
+            else: variableValues.append(variableValue)
+        
+        return variableValues   
+        
+    def loadingErrorMessageValueError(self, variableName, element, elementName):
+        variableDict =  self.externVariables[variableName]
+        raise ValueError("""ERROR loadNetworkFromXML():
+              value for variable <<{}>> of {} {} is not defined.
+              (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict))
 
-        # [[vesselId, node],[vesselId, node],[vesselId, node]]
-        self.locationsToEvaluate = [[0,0] ]#   , [0,99]  , [0,199],[1,99],[1,199]]
-        self.locationNames = ['A' ]#,'B','C','D','E']
-        
-        #### WAVE SPLITTING
-        # linear or non linear wave splitting ( non linear =  default)
-        self.linearWaveSplit = True
-        # velocity profile coefficient (1 = linear, 2= peuiseulle ..)
-        self.velocityProfileCoefficient = 2.0
-        
-        #### PEACK EVALUATION
-        # fine tune min max function delta to find all the peaks
-        self.delta ={'A': 
-                {'Pressure' :1.0,'Flow':1.0e-8,
-                'Pressure_f':1.0,'Flow_f':1.0e-8,
-                'Pressure_b':1.0,'Flow_b':1.0e-8} ,
-                'B':
-                {'Pressure' :2.7,'Flow':0.5e-7,
-                'Pressure_f':2.7,'Flow_f':0.5e-7,
-                'Pressure_b':2.7,'Flow_b':0.5e-7} , 
-                'C':
-                {'Pressure' :2.7,'Flow':0.5e-7,
-                'Pressure_f':2.7,'Flow_f':0.5e-7,
-                'Pressure_b':2.7,'Flow_b':0.5e-7} ,
-                'D':
-                {'Pressure' :2.7,'Flow':0.5e-7,
-                'Pressure_f':2.7,'Flow_f':0.5e-7,
-                'Pressure_b':2.7,'Flow_b':0.5e-7} ,
-                'E':
-                {'Pressure' :2.7,'Flow':0.5e-7,
-                'Pressure_f':2.7,'Flow_f':0.5e-7,
-                'Pressure_b':2.7,'Flow_b':0.5e-7} }
-        
-        #check extrema in minMaxPointsand write number of peaks you want compare starting with 0 in the brackets
-        self.peaksToEvaluate =    {'A': 
-                            {'extremaPressure':[0],'extremaFlow':[0],
-                            'extremaPressure_f':[0],'extremaFlow_f':[0],
-                            'extremaPressure_b':[0],'extremaFlow_b':[1]} ,
-                            'B':
-                            {'extremaPressure':[0],'extremaFlow':[0,1],
-                            'extremaPressure_f':[0],'extremaFlow_f':[0],
-                            'extremaPressure_b':[0],'extremaFlow_b':[0]},  
-                            'C':
-                            {'extremaPressure':[0],'extremaFlow':[0],
-                            'extremaPressure_f':[0],'extremaFlow_f':[0],
-                            'extremaPressure_b':[0],'extremaFlow_b':[0]} , 
-                            'D':
-                            {'extremaPressure':[0],'extremaFlow':[0],
-                            'extremaPressure_f':[0],'extremaFlow_f':[0],
-                            'extremaPressure_b':[],'extremaFlow_b':[]} , 
-                            'E':
-                            {'extremaPressure':[0],'extremaFlow':[0],
-                            'extremaPressure_f':[0],'extremaFlow_f':[0],
-                            'extremaPressure_b':[],'extremaFlow_b':[]}  }
-        
-        #--POSTPROCESSING: PLOTTING-------------------------------------------------------------------------------------#
-        ### 
-        
-        self.plotDirectory = 'PolynomialChaos'
-        ## load additional data for postprocessing
-        # load additional simulation results from deterministic simulations
-        # (stored in the same directory as the xml file
-        self.deterministicDataSetNumbers = [] # [200,199,201] # not in use
-        # load additional polynomials with a different order then defined above 
-        # if 0 then the current order is respected only
-        self.polynomsToPlotOrder = [0]
-        
-        ##########################################################################################
-        ## MEAN and STD plots
-        # bool for confidence interval area for 100-plotMeanConfidenceAlpha % confidence
-        self.plotMeanConfidenceInterval = False 
-        self.plotMeanConfidenceAlpha    = 1.0 
-        # bool for sigma interval area
-        self.plotMeanSigmaInterval = False
-            
-        ##########################################################################################
-        ## Plot of Peak Analysis
-        
-        # do peak analysis and save it if True // else: load peak file 
-        self.peakAnalysis = False 
-        # Confidence interval with 100-plotPeaksConfidenceAlpha % confidence
-        self.plotPeaksConfidenceAlpha = 1.0
-        
-        ### analytic bar plots
-        # compare occ.time and amplitude to analytic values (e.g. Sherwin Bifurcation) in bar plots
-        self.plotPeaksAnalyticSensitivity = False
-        
-        ### Mean and STD Box plots 
-        # save plots for each parameters in a seperate file if True // else: save one countious
-        self.plotPeaksMeanSTDBoxPlotsSingle = False
-        
-        ##########################################################################################  
-        #---Additional hidden fine tuning parameters---
-        # set start and end value for the time-line, if plotxTimeEnd = 'totalTime' simulation-endtime is taken
-        self.totalTime = 'vascularNetwork.totalTime'
-        
-        self.plotxTimeStart = 0.0 
-        self.plotxTimeEnd   = 'totalTime'
-        self.plotXLablesTime = ['0','0.2','0.4','0.6','0.8']
-        self.plotYLabelNumber = 5
-            
-        self.startEvaluation = 0 ## start the polychaos evaluations from number xxx
-        
-        self.plotFileType = '.pdf'#'.png'
-        ## MEAN and STD plots
-        self.latexUnits = False
-        if self.latexUnits: self.plotMeanStdQuantities = {'Pressure':r'$[mmHg]$', 'Pressure_f':r'$[mmHg]$', 'Pressure_b':r'$[mmHg]$',
-                                                          'Flow':r'$[\frac{ml}{s}]$','Flow_f':r'$[\frac{ml}{s}]$','Flow_b':r'$[\frac{ml}{s}]$'}
-        else: self.plotMeanStdQuantities = {'Pressure':'[mmHg]'} #, 'Pressure_f':'[mmHg]', 'Pressure_b':r'[mmHg]', 
-                                            #'Flow':'[ml/s]','Flow_f':r'[ml/s]','Flow_b':r'[ml/s]'}
-        
-        #fine tune y-axis for Mean  and STD plots if [0,0] use automatic-limit-caluclation
-        self.limits= {'Pressure':  [ 0,0],'Flow':  [ 0,0],
-                      'Pressure_b':[ 0,0],'Flow_b':[ 0,0],
-                      'Pressure_f':[ 0,0],'Flow_f':[ 0,0]}
-         
-         
-        #--Updating: data from file------------------------------------------------------------------------------------#
-        
-        vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
     
-        #self.update(moduleXML.loadPolyChaosXML(vpcConfigXmlFile))
-        
+    def loadingErrorMessageVariableError(self, variableName, element, elementName):
+        if variableName in self.externVariables:
+            variableDict = self.externVariables[variableName]
+        else: variableDict = "No entry defined for This element"
+        raise ValueError("""ERROR loadNetworkFromXML():
+              variable "{}" of {} {} is not defined.
+              (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict))
         
         
     def update(self, Dict):

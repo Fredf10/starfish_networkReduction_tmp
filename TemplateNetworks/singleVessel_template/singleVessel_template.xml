@@ -28,13 +28,13 @@
     <compPercentageTree>0.8</compPercentageTree>
     <compTotalSys unit="m3 Pa-1">4.895587352e-08</compTotalSys>
   </initialisationControls>
-  <globalFluid>
+  <globalFluid version='1.0'>
     <my unit="Pa s">0.004</my>
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
   <baroreceptors>
-  	<BaroreceptorCellML>
+  	<BaroreceptorCellML version='1.2'>
   		<vesselId>1</vesselId>
   		<baroId>1</baroId>
   	</BaroreceptorCellML>  		

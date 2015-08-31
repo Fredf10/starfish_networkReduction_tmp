@@ -409,6 +409,12 @@ variablesDict = {## class Vascular Network
                  'b'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  'location'        : {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'randomInputType' : {'type':'str',    'unitSI': None,     'strCases': ['generalRandomInput','parametricRandomInput'], 'multiVar': False},
+                 ############### 
+                 ## UQ SA
+                 'quantitiesOfInterestToProcess' : {'type':'str',  'unitSI': None,     'strCases': ['anything'] , 'multiVar': False},
+                 'queryLocation'            : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
+                 'xVals'                    : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
+                 'confidenceAlpha'          : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  }
 
 ##########################################################################################
@@ -416,47 +422,4 @@ variablesDict = {## class Vascular Network
 
 
 polynomialChaosDistributions = ['Uniform','Normal']
-
-vPCconfigurationTemplate ={ 'createDistributions' : True,
-                            'createOrthoPoly'  : True,
-                            'createSample'     : True,
-                            'runSimulations'   : True,
-                            'calculateGPCE'    : True,
-                            'preProcessData'   : True,
-                            'plotMinMaxPoints' : True,
-                            'postProcessing'   : True,
-                            'plotMeanSTD'      : True,
-                            'plotPeaks'        : True,
-                            'polynomialOrders' : [3],
-                            'sampleMethod'     : 'M',
-                            'linearWaveSplit'  : True,
-                            'velocityProfileCoefficient' : 2.0,
-                            'locationsToEvaluate' : [[0,0], [0,2]],
-                            'locationNames' : ['A' ,'B'],
-                            'delta'  :{'A': 
-                                        {'Pressure' :1.0,'Flow':1.0e-8,
-                                        'Pressure_f':1.0,'Flow_f':1.0e-8,
-                                        'Pressure_b':1.0,'Flow_b':1.0e-8} ,
-                                        'B':
-                                        {'Pressure' :2.7,'Flow':0.5e-7,
-                                        'Pressure_f':2.7,'Flow_f':0.5e-7,
-                                        'Pressure_b':2.7,'Flow_b':0.5e-7} },
-                            'peaksToEvaluate' : {'A': 
-                                                {'extremaPressure':[0],'extremaFlow':[0],
-                                                'extremaPressure_f':[0],'extremaFlow_f':[0],
-                                                'extremaPressure_b':[0],'extremaFlow_b':[0]} ,
-                                                'B':
-                                                {'extremaPressure':[0],'extremaFlow':[0],
-                                                'extremaPressure_f':[0],'extremaFlow_f':[0],
-                                                'extremaPressure_b':[0],'extremaFlow_b':[0]} },
-                            'plotDirectory' : 'PolynomialChaos',
-                            'deterministicDataSetNumbers' : [],
-                            'polynomsToPlotOrder' : [0],
-                            'plotMeanConfidenceInterval' : False,
-                            'plotMeanConfidenceAlpha' : 1.0,
-                            'plotMeanSigmaInterval' : False,
-                            'peakAnalysis' : True,
-                            'plotPeaksConfidenceAlpha' : 1.0,
-                            'plotPeaksAnalyticSensitivity' : False,
-                            'plotPeaksMeanSTDBoxPlotsSingle' : True                            }
 

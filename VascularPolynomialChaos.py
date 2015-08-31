@@ -64,7 +64,13 @@ def vascularPolyChaos():
     networkName           = optionsDict['networkName']
     dataNumber            = optionsDict['dataNumber']
     
+    
+    
     # 1.1 load configuration  
+    vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
+    mXML.loadPolyChaosXML(vpcConfigXmlFile)
+    exit()
+    
     vpcConfiguration = cVPCConf.VpcConfiguration(networkName,dataNumber)
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')

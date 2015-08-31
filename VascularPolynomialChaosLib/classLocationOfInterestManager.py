@@ -19,13 +19,15 @@ class LocationOfInterestManager(object):
     '''
     
     '''
-    def __init__(self, sampleSize):
+    def __init__(self,xmlNode, sampleSize = None):
         
         self.locationOfInterests = []
         self.sampleSize = sampleSize
         
     def addLocationOfInterest(self,locationName, quantitiesOfInterestToProcess, xVals, confidenceAlpha):
+        '''
         
+        '''
         self.locationOfInterests.append(LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVals, confidenceAlpha))    
             
     def loadQuantitiyOfInterestData(self):
