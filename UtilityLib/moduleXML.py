@@ -38,7 +38,7 @@ def writeXMLsetUnit(xmlElement, variable, value, unit = 'unitSI'):
     Checks if element has a unit and adds it in the XML file
     """
     try:
-        # TODO: Problem with this is that the units are converted when read in, but not when read out!
+        # TODO:Should we add a field to write out non SI to xml?
         unitName = variablesDict[variable][unit]
         if unitName:
             xmlElement.set('unit', unitName)
@@ -335,7 +335,7 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                   to {}!
                   Check if it is of type {}, system exit!
                   """.format(variableValueString,variable,convertError,variableTypes)
-            exit()
+            raise TypeError()
 
         if multiVariable == False: return variableValue
         else: variableValues.append(variableValue)

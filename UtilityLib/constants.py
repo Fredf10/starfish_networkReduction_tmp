@@ -315,8 +315,8 @@ variablesDict = {## class Vascular Network
                  'rho'               : {'type':'float',      'unitSI': 'kg m-3', 'strCases': None, 'multiVar': False},
                  'gamma'             : {'type':'float None', 'unitSI':  None,    'strCases': None, 'multiVar': False},
                  # external stimuli
-                 'startAngle' : {'type':'float', 'unitSI':'deg', 'strCases': None, 'multiVar': False},
-                 'stopAngle'  : {'type':'float', 'unitSI':'deg', 'strCases': None, 'multiVar': False},
+                 'startAngle' : {'type':'float', 'unitSI':'rad', 'strCases': None, 'multiVar': False},
+                 'stopAngle'  : {'type':'float', 'unitSI':'rad', 'strCases': None, 'multiVar': False},
                  'startTime'  : {'type':'float', 'unitSI':'s', 'strCases': None, 'multiVar': False},
                  'duration'   : {'type':'float', 'unitSI':'s', 'strCases': None, 'multiVar': False},
                  ## class Communicators
@@ -398,10 +398,10 @@ variablesDict = {## class Vascular Network
                  ## Pettersen pars
                  'modelName' : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'L0': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 'n0': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
-                 'g': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
-                 'tau1': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
-                 'tau2': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
+                 'n0': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
+                 'g': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
+                 'tau1': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
+                 'tau2': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
                  'Gp': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'Gs': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'HR0': {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
