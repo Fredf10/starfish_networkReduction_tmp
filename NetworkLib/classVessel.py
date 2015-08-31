@@ -43,6 +43,9 @@ class Vessel(cSBO.StarfishBaseObject):
         self.rightDaughter      = None              # id of right daugther vessel
         self.leftMother         = None              # id of left mother
         self.rightMother        = None              # id of right mother
+        
+        # Coordinate system is RHS with Z along vessel axis. Origin is at the center of area of
+        # the vessel, with Z+ pointing towards the distal end
         self.angleXMother       = 0                 # rotation angle in rad around x-axis relative to mother vessel
         self.angleYMother       = 0                 # rotation angle in rad around y-axis relative to mother vessel
         self.angleZMother       = 0                 # rotation angle in rad around z-axis relative to mother vessel

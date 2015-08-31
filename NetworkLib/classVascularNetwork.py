@@ -497,7 +497,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             if stimulus['type'] == "headUpTilt":
                 self.initializeHeadUpTilt(stimulus)
             
+        # # calculate gravity and positions
+        self.calculate3DpositionsAndGravity(nTsteps=self.nTsteps)
 
+        # # calculate venous pressure for windkessel
+        self.initializeVenousGravityPressureTime(self.nTsteps)
+        
         ##
         for vesselId, vessel in self.vessels.iteritems():
             dsetGroup = self.vesselsToSave[vesselId]
@@ -553,11 +558,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for vesselId, angleDict in motionDict.iteritems():
             self.vessels[vesselId].update(angleDict)
 
-        # # calculate gravity and positions
-        self.calculate3DpositionsAndGravity(nTsteps=self.nTsteps)
 
-        # # calculate venous pressure for windkessel
-        self.initializeVenousGravityPressureTime(self.nTsteps)
 
 
     def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
@@ -1812,6 +1813,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         Initializing the position and rotation of each vessel in 3D space
         Initializing netGravity of the vessels.
+        
+        Coordinate system is RHS with Z vertical so gravity acts in -Z.
+                
         """
         # TODO: what is this?
         if nSet != None:
