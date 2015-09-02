@@ -1552,11 +1552,14 @@ class L_network(BoundaryConditionType2):
 class VaryingElastance(BoundaryConditionType2):
 
     """
-    An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
-    (as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
+    An implementation of a time-varying elastance model of the left ventricle
+     based on the modfied varying elastance equation including a source 
+     resistance K (as proposed by Shroff), and a parametrized time varying 
+     elastance function (as given by Stergiopulos).
 
-    The general shape of the elastance function is given by three shape parameters. Various conditions of heart contractility are then created by scaling this
-    function using the parameters:
+    The general shape of the elastance function is given by three shape 
+    parameters. Various conditions of heart contractility are then created 
+    by scaling this function using the parameters:
     T - Heart period
     Emax - Maximum elastance
     Emin - Minimum elastance
@@ -1566,14 +1569,22 @@ class VaryingElastance(BoundaryConditionType2):
     V0 - Volume axis intercept
     K - Source resistance
 
-    NB! The source resistance (K) was introduced to the implementation as an experiment. It modifies the elastance curve depending on ventricular outflow,
-    so that it becomes dependent on the afterload of the heart. Introducing the source resistance did produce a load dependence
-    (shown by curved isochrones in p-v loops), however the results are in no way to be trusted since the modified varying elastance equation was not intended
-    to be used together with the specific varying elastance curve shape used here (Stergiopulos). A proper implementation of the source resistance
-    requires a different curve shape. The parameter K is therefore set to zero by default, but it should perhaps be removed from the code altogether??
+    NB! The source resistance (K) was introduced to the implementation as 
+    an experiment. It modifies the elastance curve depending on ventricular 
+    outflow, so that it becomes dependent on the afterload of the heart. 
+    Introducing the source resistance did produce a load dependence (shown 
+    by curved isochrones in p-v loops), however the results are in no way to 
+    be trusted since the modified varying elastance equation was not intended 
+    to be used together with the specific varying elastance curve shape used 
+    here (Stergiopulos). A proper implementation of the source resistance 
+    requires a different curve shape. The parameter K is therefore set to zero 
+    by default, but it should perhaps be removed from the code altogether?
 
-    Currently only the return method "def funcPos0" has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
-    It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.   """
+    Currently only the return method "def funcPos0" has been implemented so 
+    that the boundary condition can only be put at the proximal end of a blood 
+    vessel. It is fairly straightforward to implement funcPos1 if necessary, 
+    this does however require a lot of duplicated code.   
+    """
     def __init__(self):
         self.type = 2
 
