@@ -38,9 +38,7 @@ class Field():
         self.A_pre = np.ones_like(vessel.Asol[0])
         
         self.step = "predictor"
-        
-        solvingSchemeField = 'MacCormack_Flux'
-        
+                       
         if solvingSchemeField == 'MacCormack_Matrix':
             self.__call__ = self.MacCormackMatrix
             print "Classfields49: using Matrix based formulation in field calculation"
@@ -76,7 +74,7 @@ class Field():
         Q = self.Q[n]
         A = self.A[n]
         C = self.vessel.C(P)
-
+        netGravity = self.vessel.netGravity[n]
                 
         #dt = self.dt
         dx = self.dz[0] #currently only equidistant spacing is implemented and thus dz can be taken as float instead of vector
@@ -110,7 +108,9 @@ class Field():
         C1 = C[1:]
         C2 = C[:-1]
         up[:,:-1] = u[:,:-1] - dt*(self.F(u[:,1:],A1,C1,Aconst1,Cconst1)-self.F(u[:,:-1],A2,C2,Aconst1,Cconst1))/dx 
-        up[1,:-1] = up[1,:-1]-dt*2*(gamma+2)*my*Utemp1*np.pi/rho
+        # TODO: make sure the areas used are correct
+        A_grav = A[:-1]
+        up[1,:-1] = up[1,:-1]-dt*2*(gamma+2)*my*Utemp1*np.pi/rho +  dt* A_grav * netGravity
         
         if self.rigidArea == True:
             A_p = A
@@ -127,7 +127,8 @@ class Field():
         Aconst2 = A_p[1:]
         Cconst2 = C_p[1:]
         u[:,1:] = .5*(u[:,1:]+up[:,1:] -  dt/dx*(self.F(up[:,1:],A_p1,C_p1,Aconst2,Cconst2)-self.F(up[:,:-1],A_p2,C_p2,Aconst2,Cconst2)))
-        u[1,1:] = u[1,1:]-0.5*dt*2*(gamma+2)*my*Utemp2*np.pi/rho
+        A_grav = A_p1
+        u[1,1:] = u[1,1:]-0.5*dt*2*(gamma+2)*my*Utemp2*np.pi/rho + 0.5 * dt * A_grav * netGravity
         
         Pnewinterior = u[0,:]
         Qnewinterior = u[1,:]
@@ -202,9 +203,7 @@ class Field():
         # check pressure solution
         if (P_pre < 0).any():
             raise ValueError("{} calculated negative pressure P_pre = {} in predictor step at time {} (n {},dt {}), exit system".format(self.name, P_pre,n*dt,n,dt))
-            #print P_pre
-            #exit()
-             
+
         # solve area
         if self.rigidArea == True:
             A_pre = A
@@ -228,8 +227,6 @@ class Field():
         # check pressure solution
         if (self.P[n+1] < 0).any():
             raise ValueError("{} calculated negative pressure self.P[n+1] = {} in corrector step at time {} (n {},dt {}), exit system".format(self.name,self.P[n+1],n*dt,n,dt))
-            #print self.P[n+1]
-            #exit()
          
         # solve area
         if self.rigidArea == True:

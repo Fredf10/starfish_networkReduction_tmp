@@ -90,7 +90,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.simplifyEigenvalues = False  #
         self.riemannInvariantUnitBase = 'Pressure'  # 'Pressure' or 'Flow'
         self.automaticGridAdaptation = True  # False True
-        # self.solvingSchemeField       = 'MacCormack' # MacCormack
+        self.solvingSchemeField       = 'MacCormack_Flux' # MacCormack_Flux or MacCormack_Matrix
         self.solvingSchemeConnections = 'Linear'  # 'Linear'
 
         # initialization controls
@@ -539,6 +539,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
        
         tstop = tstart + duration
         
+        # TODO: Is vessels[1] the root?
         start = self.vessels[1].angleXMother
         end = start - tiltAngle
         nStepsStart = int(math.floor(tstart/self.dt))

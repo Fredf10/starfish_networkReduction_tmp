@@ -473,7 +473,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
                                             self.currentMemoryIndex,
                                             self.dt, 
                                             self.systemEquations[vesselId],
-                                            self.rigidAreas)
+                                            self.rigidAreas,
+                                            self.vascularNetwork.solvingSchemeField)
     
 
     def initializeBaroreceptors(self):

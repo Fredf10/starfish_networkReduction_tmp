@@ -17,7 +17,7 @@ simulationContextElements = ['description',
 
 # initialisation controls
 solverCalibrationElements =  [
-#                              'solvingSchemeField',
+                              'solvingSchemeField',
 #                              'solvingSchemeConnections',
                               'rigidAreas',
                               'simplifyEigenvalues',

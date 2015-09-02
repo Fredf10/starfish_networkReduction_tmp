@@ -18,6 +18,7 @@
     <simplifyEigenvalues>False</simplifyEigenvalues>
     <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
     <automaticGridAdaptation>True</automaticGridAdaptation>
+    <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
   </solverCalibration>
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
@@ -36,7 +37,7 @@
     <externalStimuli>
       <externalStimulus type='headUpTilt' Id='1'>
           <startAngle unit='deg'>0</startAngle>
-          <stopAngle unit='deg'>60</stopAngle>
+          <stopAngle unit='deg'>-60</stopAngle>
           <duration unit='s'>7.</duration>
           <startTime unit='s'>5.</startTime>
       </externalStimulus>
