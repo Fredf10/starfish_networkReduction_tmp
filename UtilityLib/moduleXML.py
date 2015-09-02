@@ -330,12 +330,11 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                 #TODO: fix exception handling here
 
         if variableValue == 'notConvertable':
-            print """ERROR: moduleXML.loadVariablesConversion():
+            raise TypeError("""ERROR: moduleXML.loadVariablesConversion():
                   Cannot convert given value "{}" of variable "{}"
                   to {}!
                   Check if it is of type {}, system exit!
-                  """.format(variableValueString,variable,convertError,variableTypes)
-            raise TypeError()
+                  """.format(variableValueString,variable,convertError,variableTypes))
 
         if multiVariable == False: return variableValue
         else: variableValues.append(variableValue)
