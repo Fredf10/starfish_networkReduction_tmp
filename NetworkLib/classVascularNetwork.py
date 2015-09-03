@@ -195,7 +195,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         else:
             self.warning("vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId),noException= True)
-            #print "Error vascularNetwork.addBaroreceptor: baroreceptor with Id {} exists already! Could not add baroreceptor".format(baroId)  # raise error if Id is set doubled
 
     def update(self, vascularNetworkData):
         """
@@ -208,7 +207,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.__setattr__(key, value)
             except Exception:
                 self.warning("vascularNetwork.update(): wrong key: %s, could not update vascularNetwork" % key)
-                #print 'WARNING vascularNetwork.update(): wrong key: %s, could not update vascularNetwork' % key
 
     def getVariableValue(self, variableName):
         """
@@ -219,7 +217,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             return self.__getattribute__(variableName)
         except Exception:
             self.warning("vascularNetwork.getVariable() : VascularNetwork has no variable {}".format(variableName))
-            #print "ERROR vascularNetwork.getVariable() : VascularNetwork has no variable {}".format(variableName)
 
     def updateNetwork(self, updateDict):
         """
@@ -519,20 +516,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             vessel.positionEnd    = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
             vessel.rotToGlobalSys = np.array([np.eye(3)])
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
-
+            
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
 
     def initializeHeadUpTilt(self, headUpTilt):
-        # define motion
-        motionDict = {}
+        """
+        Takes a head upt tilt stimulus object and applies the specification to 
+        generate vessel positions over the simulation
+        """
 
-        # A hard coded head up tilt beginning at 5 seconds
-        # The tilt is executed at a rate of 5 degrees per second up to 60
-        # degrees.
-        tstart = 5.
-        duration = 12.
-        tiltAngle= 60. * np.pi / 180
-        
         tstart = headUpTilt['startTime']
         duration = headUpTilt['duration']
         tiltAngle = headUpTilt['stopAngle']
@@ -553,6 +545,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         endAngle = np.ones(nStepsEnd)*end
         tiltAngle = np.linspace(start, end, nStepsTilt+1) #Account for time points not time steps
         angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
+        # TODO: Why is the key "1" here?
         motionDict = {1:{'angleXMotherTime': angleXSystem}}
 
         # TODO: Do these belong here? and do they need to happen every simulation?

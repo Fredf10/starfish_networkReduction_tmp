@@ -30,6 +30,8 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         # Configuration and solution data variables
         self.modelName = ''
         self.baroId = None
+        self.cellMLBaroreceptorModel = False
+        self.vesselIds = []
 
         self.boundaryCondition = 0
         self.boundaryConditionII = 0
@@ -100,7 +102,9 @@ class Baroreceptor(cSBO.StarfishBaseObject):
 
         ### quantities in the left ventricle --> to extract for postprocessing
         self.newCycles = np.zeros(1)
-        self.dsetGroup.create_dataset("newCycles", (vascularNetwork.savedArraySize,), dtype='float64')
+        
+        self.dsetGroup.create_dataset("newCycles", (0,), chunks=True, maxshape=(None,), dtype='float64')
+        
         self.Pheart = np.zeros(self.nTsteps+1)
         self.dsetGroup.create_dataset("Pheart", (vascularNetwork.savedArraySize,), dtype='float64')
         self.Vheart = np.zeros(self.nTsteps+1)
@@ -110,6 +114,19 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         self.Venous_dsetGroup.create_dataset("V_vein", (vascularNetwork.savedArraySize,), dtype='float64')
         self.Venous_dsetGroup.create_dataset("CVP", (vascularNetwork.savedArraySize,), dtype='float64')
         self.Venous_dsetGroup.create_dataset("LAP", (vascularNetwork.savedArraySize,), dtype='float64')
+    
+    def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
+
+        if saving:
+            ### quantities of the Baroreflex loop
+            self.dsetGroup["newCycles"].resize(self.newCycles.shape)
+            self.dsetGroup["newCycles"][:]    = self.newCycles
+            self.dsetGroup["Pheart"][nDB:nDE]  = self.Pheart[nSB:nSE]
+            self.dsetGroup["Vheart"][nDB:nDE]  = self.Vheart[nSB:nSE]
+
+            self.Venous_dsetGroup["V_vein"][nDB:nDE] = self.venousPool.Vvector[nSB:nSE]
+            self.Venous_dsetGroup["CVP"][nDB:nDE] = self.venousPool.Pvector[nSB:nSE]
+            self.Venous_dsetGroup["LAP"][nDB:nDE] = self.venousPool.P_LAvector[nSB:nSE]
 
 
     def update(self,baroDict):
@@ -335,7 +352,8 @@ class AorticBaroreceptor(Baroreceptor):
 
 
     def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
-
+        
+        super(AorticBaroreceptor, self).flushSolutionData(saving,nDB,nDE,nSB,nSE)
         if saving:
             ### quantities of the Baroreflex loop
             self.dsetGroup["MStrain"][nDB:nDE] = self.MStrain[nSB:nSE]
@@ -345,6 +363,8 @@ class AorticBaroreceptor(Baroreceptor):
             self.dsetGroup["Tparasym"][nDB:nDE] = self.Tparasym[nSB:nSE]
             self.dsetGroup["c_nor"][nDB:nDE] = self.c_nor[nSB:nSE]
             self.dsetGroup["c_ach"][nDB:nDE] = self.c_ach[nSB:nSE]
+            
+            self.dsetGroup["newCycles"] =    self.newCycles
 
 
     def estimateUnstretchedRadius(self):
@@ -667,7 +687,7 @@ class CarotidBaroreceptor(Baroreceptor):
         constructor for the CarotidBaroreceptor
         """
         #System and Vessel Variables
-        super(CarotidBaroreceptor, self).__init__()
+        super(CarotidBaroreceptor, self).__init__(BaroDict)
 
 
         self.vesselIdLeft = 0
@@ -820,7 +840,7 @@ class CarotidBaroreceptor(Baroreceptor):
         which may not have been available at construction.
         """
         # Do basic stuff
-        Baroreceptor.initializeForSimulation(self, flowSolver, vascularNetwork)
+        super(CarotidBaroreceptor, self).initializeForSimulation( flowSolver, vascularNetwork)
 
         # New Solver Initialization
         self.pressureLeft   = vascularNetwork.vessels[self.vesselIdLeft].Psol
@@ -875,7 +895,7 @@ class CarotidBaroreceptor(Baroreceptor):
 
 
     def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
-
+        super(CarotidBaroreceptor, self).flushSolutionData(saving,nDB,nDE,nSB,nSE)
         if saving:
             # save solution for carotid baroreceptor type
             self.dsetGroup["F_cs"][nDB:nDE] = self.F_cs[nSB:nSE]
@@ -889,14 +909,6 @@ class CarotidBaroreceptor(Baroreceptor):
             self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE]
             self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE]
 
-
-            self.dsetGroup["newCycles"][nDB:nDE] =    self.newCycles[nSB:nSE]
-            self.dsetGroup["Pheart"][nDB:nDE]    =self.Pheart[nSB:nSE]
-            self.dsetGroup["Vheart"][nDB:nDE]    = self.Vheart[nSB:nSE]
-
-            self.Venous_dsetGroup["V_vein"][nDB:nDE] = self.venousPool.Vvector[nSB:nSE]
-            self.Venous_dsetGroup["CVP"][nDB:nDE] = self.venousPool.Pvector[nSB:nSE]
-            self.Venous_dsetGroup["LAP"][nDB:nDE] = self.venousPool.P_LAvector[nSB:nSE]
 
 
     #############################################################################
@@ -1140,13 +1152,12 @@ class CarotidBaroreceptor(Baroreceptor):
 
         n = self.currentTimeStep[0]
         n_mem = self.currentMemoryIndex[0]
-
-        if self.modelName == 'Ursino':
-
-            self.UrsinoBRmodel(n,n_mem)
-#             print "BR646"
-#             print self.F_efferent[n]
-#             print self.delta_TPR[n]
-#             print self.delta_T[n]
-#             print self.delta_Emax[n]
-#             print self.delta_Vusv[n]
+        self.UrsinoBRmodel(n,n_mem)
+        DBG = True
+        if DBG:
+            print "DB CarotidBaroreceptor.__call__() 1158"
+            print "DB F_efferent", self.F_efferent[n]
+            print "DB delta_TPR", self.delta_TPR[n]
+            print "DB delta_T", self.delta_T[n]
+            print "DB delta_Emax", self.delta_Emax[n]
+            print "DB delta_Vusv", self.delta_Vusv[n]

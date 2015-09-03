@@ -6,17 +6,17 @@ cur = os.path.dirname(os.path.realpath(__file__))
 class DataHandler(object):
     
     def __init__(self, currentTimeStep, nTsteps, network, currentMemoryIndex, memoryArraySize):
-        '''
+        """
         Initialize DataHandler numerical object for solver
     
-        Input:
+        Args:
            currentTimeStep    := the current position of the solver relative to the total solution
            nTsteps            := the total number of time steps required for the solution
            network            := the vascular network object
            currentMemoryIndex := the index in vessel memory buffer corresponding to currentTimeStep
            memoryArraySize    := the number of time steps to be stored in the runtime memory
-        '''
-        
+        """
+                
         self.nTsteps = nTsteps
         
         self.chunkCount = 0

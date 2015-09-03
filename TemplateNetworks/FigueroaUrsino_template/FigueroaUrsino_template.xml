@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<FigueroaBugenhagen.xml id="xxx" version="4.2">
+<FigueroaUrsino.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
     <totalTime unit="s">20.0</totalTime>
     <CFL>0.65</CFL>
-    <timeSaveBegin unit="s">5.0</timeSaveBegin>
+    <timeSaveBegin unit="s">0.0</timeSaveBegin>
     <timeSaveEnd unit="s">20.0</timeSaveEnd>
     <maxMemory unit="MB">5000</maxMemory>
     <saveInitialisationPhase>True</saveInitialisationPhase>
@@ -34,7 +34,8 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-    <externalStimuli>
+  <communicators/>
+      <externalStimuli>
       <externalStimulus type='headUpTilt' Id='1'>
           <startAngle unit='deg'>0</startAngle>
           <stopAngle unit='deg'>-60</stopAngle>
@@ -42,25 +43,30 @@
           <startTime unit='s'>5.</startTime>
       </externalStimulus>
   </externalStimuli>
-  <communicators/>
-  <baroreceptors>
-      <baroreceptor Id="1">
-          <topology>
-              <cellMLBaroreceptorModel>True</cellMLBaroreceptorModel>
-              <vesselIds>2 14</vesselIds>
-          </topology>	
-          <model type="bugenhagenAorticBR"/>
-    </baroreceptor>
-  </baroreceptors>
-
+<baroreceptors>
+  <baroreceptor Id="1">
+      <topology>
+        <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+        <vesselIds>2 14</vesselIds>
+      </topology>
+      <model type="CarotidBaroreceptor">
+        <cellMLBaroreceptorModel>False</cellMLBaroreceptorModel>
+          <baroId>1</baroId>
+        <modelName>CarotidBaroreceptor</modelName>
+        <receptorType>CarotidBR</receptorType>
+        <vesselIdLeft>12</vesselIdLeft>
+        <vesselIdRight>16</vesselIdRight>
+      </model>
+  </baroreceptor>
+</baroreceptors>
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>
-        <T unit = 's'>0.684753885875</T>
-        <Emax unit = 'mmHg ml-1'>2.31</Emax>
+        <T unit = 's'>0.4686</T>
+        <Emax unit = 'mmHg ml-1'>3.049429067</Emax>2.31
         <Emin unit = 'mmHg ml-1'>0.06</Emin>
-        <Tpeak unit = 's'>0.2944441709</Tpeak>
-        <V0 unit = 'ml'>20</V0>
+        <Tpeak unit = 's'>0.201498</Tpeak>
+        <V0 unit = 'ml'>16.66</V0>20
         <K>0</K>
       </VaryingElastanceSimple>
     </boundaryCondition>
@@ -587,4 +593,4 @@
       </fluid>
     </vessel>
   </vessels>
-</FigueroaBugenhagen.xml>
+</FigueroaUrsino.xml>
