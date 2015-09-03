@@ -8,7 +8,7 @@ class QuantityOfInterest(object):
     '''
     def __init__(self,quantityName, locationName, confidenceAlpha, data = None):
         
-        self.locationName = locationName
+        self.queryLocation = locationName
         self.quantityName = quantityName
         self.data = data
         
@@ -35,10 +35,10 @@ class QuantityOfInterest(object):
         '''
         Function which calculates the gPCExpansion for the given data
         '''
-        assert self.data != None, 'QuantityOfInterest {} : {} cannot calculate gPCExpansion and statistics as there is no data defined'.format(self.locationName,self.quantityName)
+        assert self.data != None, 'QuantityOfInterest {} : {} cannot calculate gPCExpansion and statistics as there is no data defined'.format(self.queryLocation,self.quantityName)
                    
         print "    starting the polychaos polynomial calculation from polychaos simulation result!!"
-        print self.locationName,'--',self.quantityName
+        print self.queryLocation,'--',self.quantityName
         
         # polynomial chaos expansion
         self.gPCExpansion = cp.fit_regression(orthogonalPolynomials, samples.T, self.data)

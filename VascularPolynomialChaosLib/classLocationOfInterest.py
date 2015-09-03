@@ -10,24 +10,54 @@ import UtilityLib.processing as mProc
 
 import matplotlib.pyplot as plt
 
-class LocationOfInterest(object):
+from testBaseClass import TestBaseClass 
+
+class LocationOfInterest(TestBaseClass):
     '''
     
     '''
-    def __init__(self,locationName, quantitiesOfInterestToProcess, xval, confidenceAlpha):
+    
+    # defined external data
+    externVariables      = {'quantitiesOfInterestToProcess' : TestBaseClass.ExtValue(str, strCases = ['anything'], multiVar = True),
+                                 'queryLocation'            : TestBaseClass.ExtValue(str, strCases = ['anything']),
+                                 'xVal'                     : TestBaseClass.ExtValue(float,  unit = 'm'),
+                                 'confidenceAlpha'          : TestBaseClass.ExtValue(float)}
+    
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['queryLocation',
+                                 'xVal',
+                                 'quantitiesOfInterestToProcess',
+                                 'confidenceAlpha']
+            
         
-        self.locationName = locationName
-        self.xval = xval #position in x 
-        self.quantitiesOfInterestToProcess = quantitiesOfInterestToProcess
-        self.quantitiesOfInterest = {}
-        self.confidenceAlpha = confidenceAlpha
+#         self.externHdf5 = ['queryLocation',
+#                            'xVal',
+#                            'quantitiesOfInterestToProcess']
+#         
+#         self.externCSV = ['queryLocation',
+#                           'xVal',
+#                           'quantitiesOfInterestToProcess']
+        
+    def __init__(self, xmlNode):
+        
+        self.queryLocation                 = "queryLocation"
+        self.xVal                          = 0 #xVal #position in x 
+        self.quantitiesOfInterestToProcess = [] #quantitiesOfInterestToProcess
+        self.quantitiesOfInterest          = {}
+        self.confidenceAlpha               = 1 #confidence Alpha
         
         self.pointEvaluationQuantities = []
                         
-        # check if vessel and add missing qoi to the list if needed
-        quantitiesOfInterestToCreate = copy(quantitiesOfInterestToProcess)
+        self.readDataFromXmlNode(xmlNode)
+        self.initialize()
         
-        for quantity in quantitiesOfInterestToProcess:
+    def initialize(self):
+                        
+        # check if vessel and add missing qoi to the list if needed
+        quantitiesOfInterestToCreate = copy(self.quantitiesOfInterestToProcess)
+        
+        for quantity in self.quantitiesOfInterestToProcess:
             if 'Extrema' in quantity:
                 quantityNamePure = quantity.split('Extrema')[-1]
                 quantitiesOfInterestToCreate.extend([quantityNamePure])
@@ -41,30 +71,32 @@ class LocationOfInterest(object):
                 self.pointEvaluationQuantities.append(quantity)
         
         for quantity in quantitiesOfInterestToCreate:
-            self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity,locationName, confidenceAlpha)
+            self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity, self.queryLocation, self.confidenceAlpha)
         
     def preprocessSolutionData(self, vascularNetwork, simulationTime, sampleSize, sampleIndex):
         '''
         
         '''
     
-        if "vessel" in self.locationName:
-            vesselId = int(self.locationName.split('_')[-1])
+        print "DB cLoI", len(simulationTime), sampleSize
+    
+        if "vessel" in self.queryLocation:
+            vesselId = int(self.queryLocation.split('_')[-1])
             
-            dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xval])
+            dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xVal])
             for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
                 # normal quantity of interest
                 if 'Extrema' not in quantitiyName and 'InflectionPoint' not in quantitiyName:    
                     if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,len(simulationTime)))
                     quantityObject.data[sampleIndex] = dataDict[quantitiyName][:,0]
                 
-        elif "baroreceptor" in self.locationName:
-            baroId = int(self.locationName.split('_')[-1])
+        elif "baroreceptor" in self.queryLocation:
+            baroId = int(self.queryLocation.split('_')[-1])
             ## TODO: Jacob add here your stuff
                          
         else:
             ## TODO: add more locations as necessary baroreceptor etc.
-            print "class LoacationOfInterest: location {} is not supported yet".format(self.locationName)
+            print "class LoacationOfInterest: location {} is not supported yet".format(self.queryLocation)
      
      
     
@@ -206,8 +238,8 @@ class LocationOfInterest(object):
                     qOINameAmplitude = ''.join([quantityNamePure,'InflectionPointAmplitude'])
                     qOINameTiming    = ''.join([quantityNamePure,'InflectionPointTiming'])
                 # create 2 new quantities of interest
-                quantityOfInterestAmplitude = QuantityOfInterest(qOINameAmplitude, quantityObject.locationName, quantityObject.confidenceAlpha, data = amplitudeData[:,selectedPoint])
-                quantityOfInterestTiming = QuantityOfInterest(qOINameTiming, quantityObject.locationName, quantityObject.confidenceAlpha, data = timingData[:,selectedPoints])
+                quantityOfInterestAmplitude = QuantityOfInterest(qOINameAmplitude, quantityObject.queryLocation, quantityObject.confidenceAlpha, data = amplitudeData[:,selectedPoint])
+                quantityOfInterestTiming = QuantityOfInterest(qOINameTiming, quantityObject.queryLocation, quantityObject.confidenceAlpha, data = timingData[:,selectedPoints])
                 # append them in the quqntity of interest vector
                 self.quantitiesOfInterest[qOINameAmplitude] = quantityOfInterestAmplitude
                 self.quantitiesOfInterest[qOINameTiming] = quantityOfInterestTiming
@@ -223,9 +255,9 @@ class LocationOfInterest(object):
         '''
         method to save the data of the location and all quantities of interest to file
         '''
-        locationGroup = saveFile.create_group(self.locationName)
+        locationGroup = saveFile.create_group(self.queryLocation)
         locationGroup.attrs.create('quantitiesOfInterestToProcess', data=self.quantitiesOfInterestToProcess)
-        locationGroup.attrs.create('xval', data=self.xval)
+        locationGroup.attrs.create('xVal', data=self.xVal)
         locationGroup.attrs.create('confidenceAlpha', data=self.confidenceAlpha)
         
         for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():

@@ -804,12 +804,15 @@ def loadPolyChaosXML(vpcConfigXmlFile):
     from VascularPolynomialChaosLib.classVpcConfiguration import VpcConfiguration 
     from VascularPolynomialChaosLib.classLocationOfInterestManager import LocationOfInterestManager
     
+    evalDict = {'VpcConfiguration':VpcConfiguration, 'LocationOfInterestManager':LocationOfInterestManager}
+    
+    evaluatedClasses = {}
     root = tree.getroot()
     for xmlNode in root:
-        print xmlNode
-        print xmlNode.attrib
         if 'class' in xmlNode.attrib:
-            classObject = eval(xmlNode.attrib['class'])(xmlNode)
-            print classObject
-            
-    return 
+            classToCreate = xmlNode.attrib['class']
+            if classToCreate in evalDict:
+                evaluatedClasses[classToCreate] = evalDict[classToCreate](xmlNode)
+            else:
+                print "WARNING object class {} unknown".format(classToCreate)
+    return evaluatedClasses

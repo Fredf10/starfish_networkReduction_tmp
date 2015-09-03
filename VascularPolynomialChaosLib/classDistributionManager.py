@@ -67,7 +67,7 @@ class DistributionManager(object):
         self.samplesSize    = dset.attrs.get('samplesSize')
         self.sampleMethod   = dset.attrs.get('sampleMethod')
         self.expansionOrder = dset.attrs.get('expansionOrder')
-        
+                
         if 'sampleSpaceDependent' in f.keys():
             dset = f['sampleSpaceDependent']
             self.samplesDependent = dset[:]

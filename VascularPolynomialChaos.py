@@ -66,12 +66,13 @@ def vascularPolyChaos():
     
     
     
-    # 1.1 load configuration  
+    # 1.1 load configuration and locations of interest
     vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
-    mXML.loadPolyChaosXML(vpcConfigXmlFile)
-    exit()
+    loadedClassesFromXML = mXML.loadPolyChaosXML(vpcConfigXmlFile)
+       
+    vpcConfiguration = loadedClassesFromXML['VpcConfiguration']
+    locationOfInterestManager = loadedClassesFromXML['LocationOfInterestManager']
     
-    vpcConfiguration = cVPCConf.VpcConfiguration(networkName,dataNumber)
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
@@ -119,7 +120,7 @@ def vascularPolyChaos():
             vascularNetwork.randomInputManager.saveRealisationLog(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         # 5.3 run evaluation simulations
         if vpcConfiguration.simulateEvaluations == True:
-            if vpcConfiguration.local == True:
+            if vpcConfiguration.localEvaluation == True:
                 startIndex = 0
                 endIndex   = int(distributionManager.samplesSize)
                 newRange = vpcConfiguration.evaluationNumbers
@@ -137,19 +138,8 @@ def vascularPolyChaos():
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
         
         print "starting Post processing "
-        
         # 6. process quantity of interest
-        ## TODO: defined query location and quantities to process
-        quantitiesOfInterestToProcess = ['Pressure', 'BackwardPressure' ,'ExtremaFlow',
-                                         'ExtremaPressure', 'InflectionPointBackwardPressure' ]#,'ExtremaBackwardPressure']#,'InflectionPointPressure']
-        queryLocation = 'vessel_0'
-        xVals = 0.25
-        confidenceAlpha = 5
-        # create locationOfInterestManager
-        locationOfInterestManager = cLocOfIntrMng.LocationOfInterestManager(distributionManager.samplesSize)
-        # add location of interest
-        locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
-        
+        locationOfInterestManager.sampleSize = distributionManager.samplesSize
         if vpcConfiguration.preProcessData == True:
             ## process the data of interest
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)

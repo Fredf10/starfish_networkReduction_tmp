@@ -15,20 +15,31 @@ from UtilityLib import moduleXML
 import numpy as np
 import h5py
 
-class LocationOfInterestManager(object):
+from testBaseClass import TestBaseClass 
+
+class LocationOfInterestManager(TestBaseClass):
     '''
     
     '''
-    def __init__(self,xmlNode, sampleSize = None):
+    externVariables      = {'locationsOfInterest' : TestBaseClass.ExtDict({'locationOfInterest': TestBaseClass.ExtObject({'LocationOfInterest':LocationOfInterest})}),
+                           } 
+    externXmlAttributes  = []
+    externXmlElements    = ['locationsOfInterest']
+    
+    def __init__(self,xmlNode = None, sampleSize = None):
         
-        self.locationOfInterests = []
+        self.locationsOfInterest = {}
         self.sampleSize = sampleSize
+                                
+        # read data from xml node if the data is provided
+        if xmlNode:
+            self.readDataFromXmlNode(xmlNode)
         
-    def addLocationOfInterest(self,locationName, quantitiesOfInterestToProcess, xVals, confidenceAlpha):
+    def addLocationOfInterest(self,locationId, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):
         '''
         
         '''
-        self.locationOfInterests.append(LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVals, confidenceAlpha))    
+        self.locationsOfInterest[locationId] = LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVal, confidenceAlpha)
             
     def loadQuantitiyOfInterestData(self):
         '''
@@ -44,7 +55,7 @@ class LocationOfInterestManager(object):
         saveFile = h5py.File(vpcQuantityOfInterestFile,'w')
         # add simulation time
         saveFile.create_dataset('simulationTime', data=self.simulationTime)
-        for locationOfInterest in self.locationOfInterests:        
+        for locationOfInterest in self.locationsOfInterest.values():        
             # add information of each quantity in each location
             locationOfInterest.saveQuantitiyOfInterestData(saveFile)
         saveFile.flush()
@@ -83,11 +94,11 @@ class LocationOfInterestManager(object):
         for sampleIndex,[networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile] in enumerate(evaluationCaseFiles):
             vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
             vascularNetwork.linkSolutionData()
-            for locationOfInterest in self.locationOfInterests:
+            for locationOfInterest in self.locationsOfInterest.values():
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
         
         # second postprocessing find extrema if needed
-        for locationOfInterest in self.locationOfInterests:
+        for locationOfInterest in self.locationsOfInterest.values():
             locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
                          
                         
@@ -96,7 +107,7 @@ class LocationOfInterestManager(object):
         Calculate statisitcs for each quantity of interest at each location of interest based
         on the generalized polynomial chaos expansion.
         '''
-        for locationOfInterest in self.locationOfInterests:
+        for locationOfInterest in self.locationsOfInterest.values():
             for quantity in locationOfInterest.quantitiesOfInterestToProcess:
                 locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(orthogonalPolynomials, samples, distributions, dependentCase)
                 
@@ -107,7 +118,7 @@ class LocationOfInterestManager(object):
         on a Monte Carlo simulation
         '''
         pass
-        for locationOfInterest in self.locationOfInterests:
+        for locationOfInterest in self.locationsOfInterest:
             for quantity in locationOfInterest.quantitiesOfInterestToProcess:
                 locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsMonteCarlo()
                         

@@ -409,12 +409,6 @@ variablesDict = {## class Vascular Network
                  'b'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  'location'        : {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'randomInputType' : {'type':'str',    'unitSI': None,     'strCases': ['generalRandomInput','parametricRandomInput'], 'multiVar': False},
-                 ############### 
-                 ## UQ SA
-                 'quantitiesOfInterestToProcess' : {'type':'str',  'unitSI': None,     'strCases': ['anything'] , 'multiVar': False},
-                 'queryLocation'            : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
-                 'xVals'                    : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
-                 'confidenceAlpha'          : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  }
 
 ##########################################################################################
