@@ -210,7 +210,8 @@ class Reymond(Compliance):
 	Cs   : compliance at reference pressure of compliance model
 	'''
 	def __init__(self, rho, As):
- 		Compliance.__init__(self, rho, As)
+		
+		Compliance.__init__(self, rho, As)
 		self.distensibility = None
 		self.Cs             = None # compliance at reference pressure ps
 		
@@ -245,7 +246,7 @@ class Reymond(Compliance):
 		Pwidth = self.Pwidth
 		P = P-self.externalPressure
 		return self.Cs* (a1 + b1/(1.0+(((P)-PmaxC)/Pwidth)**2.0))
-     	
+	
 	def A_Node(self, P, node):
 		a1 = self.a1
 		b1 = self.b1
