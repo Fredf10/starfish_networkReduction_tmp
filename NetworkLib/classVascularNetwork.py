@@ -518,7 +518,25 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
             
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
-
+    
+    class WholeBodyTilt(cSBO.StarfishBaseObject):
+        """Encapsulates data related to the tilting motion of the network.
+        
+        A WholeBodyTilt object specifies the action of tilting the entire 
+        network about the root vessel of the network.
+        
+        Attributes:
+            startTime  (float): The time in seconds when the tilt begins
+            duration  (float): The length in second of the tilt
+            stopAngle (float): The angle swept out by the tilt, relative to
+             a supine position with a positive angle meaning an elevation 
+             of the feet above the head.
+        """
+        def __init__(self):
+            self.startTime
+            self.duration
+            self.stopAngle
+        
     def initializeHeadUpTilt(self, headUpTilt):
         """
         Takes a head upt tilt stimulus object and applies the specification to 
@@ -533,7 +551,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         # TODO: Is vessels[1] the root?
         start = self.vessels[1].angleXMother
-        end = start - tiltAngle
+        end = start + tiltAngle
         nStepsStart = int(math.floor(tstart/self.dt))
         nStepsTilt = int(math.ceil(tstop/self.dt)) - nStepsStart
         # TODO determine appropriate behaviour if simulation time is shorter that head up tilt time
@@ -1384,14 +1402,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.centralVenousPressure
                 initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.centralVenousPressure
 
-            # # Check if gravity is on and if user would correct for hydrostatic pressure
+            # # Check if gravity is on and if user wants to correct for hydrostatic pressure
             if self.gravitationalField == True:
 
                 input = ['K']
-                while input not in ['y', 'n']:
+                while input not in ['y', 'Y', 'yes', 'Yes', 'n', 'no', 'No', 'NO']:
                     input = str(raw_input("\n Adjust for hydrostatic pressure(y/n): "))
 
-                if input == 'y':  # 'y' Adjust ConstantPressure to correct for hydrostatic pressure
+                if input in ['y', 'Y', 'yes', 'Yes']:  # 'y' Adjust ConstantPressure to correct for hydrostatic pressure
                     initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)
                     self.initialValues = initialValuesWithGravity
 

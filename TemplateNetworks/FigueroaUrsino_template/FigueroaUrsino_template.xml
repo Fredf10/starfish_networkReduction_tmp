@@ -34,14 +34,24 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-  <communicators/>
-      <externalStimuli>
-      <externalStimulus type='headUpTilt' Id='1'>
-          <startAngle unit='deg'>0</startAngle>
-          <stopAngle unit='deg'>-60</stopAngle>
-          <duration unit='s'>7.</duration>
-          <startTime unit='s'>5.</startTime>
-      </externalStimulus>
+    <externalStimuli>
+        <comment> this is where comments about something particular to a template file should go. These will be removed from the file written by STARFiSh</comment>
+	    <!-- This is an example to comment out a portion of an input xml file so that it is not read in to the simulation
+	      <externalStimulus type='headUpTilt' Id='1'>
+	          <comment> corresponds to a tilting the head 80 degrees up from the supine position </comment>
+	          <startAngle unit='deg'>0</startAngle>
+	          <stopAngle unit='deg'>-80</stopAngle>
+	          <duration unit='s'>7.</duration>
+	          <startTime unit='s'>15.</startTime>
+	      </externalStimulus>
+	    -->
+	    <externalStimulus type='headUpTilt' Id='1'>
+	          <startAngle unit='deg'>0</startAngle>
+	          <comment> corresponds to a tilting the head 60 degrees up from the supine position </comment>
+	          <stopAngle unit='deg'>-60</stopAngle>
+	          <duration unit='s'>7.</duration>
+	          <startTime unit='s'>5.</startTime>
+	      </externalStimulus>
   </externalStimuli>
 <baroreceptors>
   <baroreceptor Id="1">
