@@ -262,8 +262,8 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                     
             elif variableType == 'bool': 
                 try: 
-                    if variableValueString == 'False': variableValue = False
-                    elif variableValueString == 'True': variableValue = True
+                    if variableValueString == 'False' or variableValueString == 'FALSE': variableValue = False
+                    elif variableValueString == 'True' or variableValueString == 'TRUE': variableValue = True
                     else: variableValue = eval(variableValueString)
                 except: 
                     convertError.append('bool') 
@@ -442,8 +442,9 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
                                     ## TODO: fix problem when loading an absolute path
-                                    # networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
+                                    networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
                                     # variableValueStr = '/'.join([networkDirectory,variableValueStr])
+                                    boundaryDataDict['networkDirectory'] = networkDirectory
                                     
                                     boundaryDataDict['filePathName'] = variableValueStr
                                     

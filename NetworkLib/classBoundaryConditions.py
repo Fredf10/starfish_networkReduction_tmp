@@ -632,18 +632,20 @@ class FlowFromFile(BoundaryConditionType1):
 		BoundaryConditionType1.__init__(self)
 		
 		# # additional variables fill in with data in the readXML file
+		self.networkDirectory = ''
 		self.filePathName = ''
 		self.dataTime = []
 		self.dataFlow = []
 		self.loadedFile = False
 		
 	def loadFile(self):
+		
 		try:
 			# set the path relative to THIS file not the executing file!
 			if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
 			#pathAndFilename = ''.join([cur, '/../NetworkFiles/', self.filePathName])
-			
-			reader = csv.DictReader(open(self.filePathName, 'rb'), delimiter=';')
+			pathAndFilename = '/'.join([self.networkDirectory, self.filePathName])
+			reader = csv.DictReader(open(pathAndFilename, 'rb'), delimiter=';')
 		except:
 			print 'ERROR: boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit'.format(self.filePathName.split('/')[-1])
 			exit()
