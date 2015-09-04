@@ -43,7 +43,6 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         self.venousPool = None
 
         self.dsetGroup = None
-        self.Venous_dsetGroup = None
 
         # update with BaroDict --> see also the initialize method in FlowSolver
         self.update(BaroDict)
@@ -102,32 +101,18 @@ class Baroreceptor(cSBO.StarfishBaseObject):
 
         ### quantities in the left ventricle --> to extract for postprocessing
         self.newCycles = np.zeros(1)
-        
         self.dsetGroup.create_dataset("newCycles", (0,), chunks=True, maxshape=(None,), dtype='float64')
         
         self.Pheart = np.zeros(self.nTsteps+1)
-        self.dsetGroup.create_dataset("Pheart", (vascularNetwork.savedArraySize,), dtype='float64')
         self.Vheart = np.zeros(self.nTsteps+1)
-        self.dsetGroup.create_dataset("Vheart", (vascularNetwork.savedArraySize,), dtype='float64')
 
-        self.Venous_dsetGroup = self.dsetGroup.create_group('venousPool')
-        self.Venous_dsetGroup.create_dataset("V_vein", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.Venous_dsetGroup.create_dataset("CVP", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.Venous_dsetGroup.create_dataset("LAP", (vascularNetwork.savedArraySize,), dtype='float64')
-    
+ 
     def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
 
         if saving:
             ### quantities of the Baroreflex loop
             self.dsetGroup["newCycles"].resize(self.newCycles.shape)
             self.dsetGroup["newCycles"][:]    = self.newCycles
-            self.dsetGroup["Pheart"][nDB:nDE]  = self.Pheart[nSB:nSE]
-            self.dsetGroup["Vheart"][nDB:nDE]  = self.Vheart[nSB:nSE]
-
-            self.Venous_dsetGroup["V_vein"][nDB:nDE] = self.venousPool.Vvector[nSB:nSE]
-            self.Venous_dsetGroup["CVP"][nDB:nDE] = self.venousPool.Pvector[nSB:nSE]
-            self.Venous_dsetGroup["LAP"][nDB:nDE] = self.venousPool.P_LAvector[nSB:nSE]
-
 
     def update(self,baroDict):
         """
@@ -363,8 +348,6 @@ class AorticBaroreceptor(Baroreceptor):
             self.dsetGroup["Tparasym"][nDB:nDE] = self.Tparasym[nSB:nSE]
             self.dsetGroup["c_nor"][nDB:nDE] = self.c_nor[nSB:nSE]
             self.dsetGroup["c_ach"][nDB:nDE] = self.c_ach[nSB:nSE]
-            
-            self.dsetGroup["newCycles"] =    self.newCycles
 
 
     def estimateUnstretchedRadius(self):

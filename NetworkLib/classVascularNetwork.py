@@ -12,6 +12,7 @@ import UtilityLib.classStarfishBaseObject as cSBO
 
 import classVessel as cVes
 import SolverLib.classBaroreceptor as cBRX
+import SolverLib.classVenousPool as classVenousPool
 
 #sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
@@ -110,7 +111,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         # # dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
-
+        
+        self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
+        # self.venousPool = classVenousPool.venousPool({}) # TODO add to xml
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
@@ -237,25 +240,29 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
 
         for dictName in ['vascularNetworkData']:
-            try: self.update(updateDict[dictName])
-            except Exception: self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
+            try: 
+                self.update(updateDict[dictName])
+            except Exception: 
+                self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         for dictName in ['globalFluid', 'communicators', 'externalStimuli']:
-            try: self.getVariableValue(dictName).update(updateDict[dictName])
-            except Exception: self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
+            try: 
+                self.getVariableValue(dictName).update(updateDict[dictName])
+            except Exception: 
+                self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         if 'vesselData' in updateDict:
             for vesselId, vesselData in (updateDict['vesselData']).iteritems():
                 try:
                     self.vessels[vesselId].update(vesselData)
-                except Exception:
+                except KeyError:
                     self.addVessel(vesselId, vesselData)
 
         if 'baroreceptors' in updateDict:
             for baroId, baroData in (updateDict['baroreceptors']).iteritems():
                 try:
                     self.baroreceptors[baroId].update(baroData)
-                except Exception:
+                except KeyError:
                     self.addBaroreceptor(baroId, baroData)
             print self.baroreceptors
 
@@ -474,7 +481,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     self.nDCurrent = 1
 
                 self.vesselsToSave[vesselId] =  dsetGroup
-
+                
 
         # # initialize varying elastance model
         # # initialize boundary condition type 1: initial phase
@@ -595,7 +602,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # indices mapping beginning and end of memory to the absolute number time steps in solution
         nCB = offset+1
         nCE = offset+memoryArraySize-1 # nCE == currentTimeStep+1
-
+        nDB = None
+        nDE = None
+        nSB = None
+        nSE = None
         # check if we need to save
         saving = not(nCE < self.nSaveBegin or nCB > self.nSaveEnd) # not(not saving)
 
@@ -641,6 +651,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         for baro in self.baroreceptors.itervalues():
             baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
+            
+        if self.venousPool:
+            self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
 
 
     def saveSolutionData(self):
@@ -1768,7 +1781,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     #exit()
 
         return initialValues
-
 
     def initializeVenousGravityPressure(self):
         """

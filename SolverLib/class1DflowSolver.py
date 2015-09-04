@@ -67,11 +67,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
               
         # Baroreceptor model
         self.baroreceptors = self.vascularNetwork.baroreceptors
-        baro = False
-        if self.baroreceptors:
-            baro = True
-        vein = baro or False
-        self.venousPool = 0
+       
+        self.venousPool = self.vascularNetwork.venousPool
         #
         
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
@@ -135,8 +132,9 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeConnections()
         self.initializeFields()
         self.initializeCommunicators()
-        if vein == True:
-            self.initializeVenousPool()
+        
+        if self.venousPool:
+            self.venousPool.initializeForSimulation(self,self.vascularNetwork)
         
         self.initializeBaroreceptors()
         self.initializeTimers()
@@ -484,20 +482,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
         for baroId, baroData in self.baroreceptors.iteritems():
             baroData.initializeForSimulation(self,self.vascularNetwork)
  
-    def initializeVenousPool(self):
-        """
-        method for the initialization of a "venous pool"
-        """
-        
-        VPdict = {}
-        VPdict['currentTimeStep'] = self.currentTimeStep
-        VPdict['currentMemoryIndex'] = self.currentMemoryIndex
-        VPdict['dt'] = self.dt
-        VPdict['nTsteps'] = self.nTsteps
-        VPdict['boundarys'] = self.boundarys
-        
-        self.venousPool = classVenousPool.venousPool(VPdict) # call to the constructor of venousPool
-        
     
     def initializeTimers(self):
         
@@ -621,9 +605,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
         for timer in self.timers.itervalues():
             self.numericalObjects.append(timer)
                    
-        if self.venousPool != 0:
+        if self.venousPool:
             self.numericalObjects.append(self.venousPool)
-#        else: pass
             
         dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
                                   self.nTsteps,
