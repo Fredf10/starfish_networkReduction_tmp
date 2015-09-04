@@ -392,7 +392,8 @@ def chooseVPCconfigFile(networkName):
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         # save polychaos config file
         vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-        mXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber)
+        # TODO: after fixing xml reading a template configfile should be created
+        #mXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber)
         # copy network file
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')

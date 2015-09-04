@@ -379,7 +379,7 @@ variablesDict = {## class Vascular Network
                  'betaLaplace'       : {'type':'float',  'unitSI': 'Pa m-1',   'strCases': None, 'multiVar': False},
                  'betaExponential'   : {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'betaHayashi'       : {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 'distensibility'    : {'type':'float',  'unitSI': 'Pa-1', 'strCases': None, 'multiVar': False},
+                 'Cs'                : {'type':'float',  'unitSI': 'm2 Pa-1', 'strCases': None, 'multiVar': False},
                  # fluid 
                  'applyGlobalFluid'  : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
                  # baroreceptors

@@ -57,7 +57,7 @@ class Vessel(object):
         
         self.wallThickness      = None              # wall thickness
         self.youngModulus       = None              # youngModulus
-        self.distensibility     = None              # arterial distensibility for Reymond compliance model
+        self.Cs                 = None              # arterial area compliance at reference pressure for Reymond compliance model
         self.betaExponential    = None              # material Parameter of Exponential compliance model
         self.betaHayashi        = 1.                # material Parameter of Hayashi compliance model
         self.betaLaplace        = None              # material Parameter of Laplace compliance model

@@ -212,7 +212,6 @@ class Reymond(Compliance):
 	def __init__(self, rho, As):
 		
 		Compliance.__init__(self, rho, As)
-		self.distensibility = None
 		self.Cs             = None # compliance at reference pressure ps
 		
 		# defined constants from the paper
@@ -227,8 +226,7 @@ class Reymond(Compliance):
 		and calculate set the marterial parameters
 		'''
 		self.update(complianceDataDict)
-		self.Cs              = self.As*self.distensibility 
-		self.C0preCalculated = self.C(self.Ps)
+		self.Cs              = self.Cs*np.ones_like(self.As)
 			
 	def A(self, P):
 		a1 = self.a1
