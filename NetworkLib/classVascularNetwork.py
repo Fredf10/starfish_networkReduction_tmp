@@ -719,6 +719,7 @@ class VascularNetwork(object):
             "BackwardFlow",
             "ForwardPressure",
             "BackwardPressure"
+            'Compliance'
         tvals - a numpy array (or python list) of times at which the values are desired
         xvals - a numpy array (or python list) of positions at which the values are desired
         
@@ -733,7 +734,6 @@ class VascularNetwork(object):
             variables.append('linearWavesplit')
         
         self.loadSolutionDataRange([vesselId], tspan, mindt, variables) 
-        
         data_dict = {}
         # Create Interpolating Function
         # interpolate.interp2d(self.tsol,self.vessels[vesselId].z,self.vessels,kind='linear',copy=False)
@@ -749,6 +749,9 @@ class VascularNetwork(object):
         if 'WaveSpeed' in variables:
             interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].csol,kind='linear',copy=False)
             data_dict['WaveSpeed'] = interpfct(xvals,tvals) 
+        if 'Compliance' in variables:
+            interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].Csol,kind='linear',copy=False)
+            data_dict['Compliance'] = interpfct(xvals,tvals) 
         if 'MeanVelocity' in variables:
             interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].vsol,kind='linear',copy=False)
             data_dict['MeanVelocity'] = interpfct(xvals,tvals) 
@@ -772,6 +775,7 @@ class VascularNetwork(object):
                                   "Flow", 
                                   "Area", 
                                   "WaveSpeed", 
+                                  'Compliance',
                                   "MeanVelocity",
                                   "Gravity",
                                   "Position",
@@ -806,6 +810,7 @@ class VascularNetwork(object):
                         "Flow", 
                         "Area", 
                         "WaveSpeed", 
+                        'Compliance',
                         "MeanVelocity",
                         "linearWavesplit",
                         "Gravity",
@@ -817,7 +822,9 @@ class VascularNetwork(object):
             values.update(['Pressure','Flow'])
         elif "linearWavesplit" in values:
             values.update(['Pressure','Flow','Area',"WaveSpeed"])
-            
+        elif 'Compliance' in values:
+            values.update(['Pressure', 'Compliance'])
+                        
         if tspan is not None:
             t1 = tspan[0]
             t2 = tspan[1]
@@ -857,6 +864,8 @@ class VascularNetwork(object):
                         if 'MeanVelocity' in values:
                             #vessel.vsol = vessel.Qsol/vessel.Asol
                             vessel.postProcessing(["MeanVelocity"])
+                        if 'Compliance' in values:
+                            vessel.postProcessing(['Compliance'])
                         if "linearWavesplit" in values:
                             vessel.postProcessing(["linearWavesplit"])
                         if 'Gravity' in values:

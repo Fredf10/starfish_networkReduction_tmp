@@ -2240,6 +2240,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 			self.cycleNumber += 1
 			self.num = 0
 			self.newCycle = True
+			
 
 	def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
 		

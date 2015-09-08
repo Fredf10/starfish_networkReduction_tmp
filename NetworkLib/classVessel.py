@@ -57,10 +57,15 @@ class Vessel(object):
         
         self.wallThickness      = None              # wall thickness
         self.youngModulus       = None              # youngModulus
-        self.Cs                 = None              # arterial area compliance at reference pressure for Reymond compliance model
         self.betaExponential    = None              # material Parameter of Exponential compliance model
         self.betaHayashi        = 1.                # material Parameter of Hayashi compliance model
         self.betaLaplace        = None              # material Parameter of Laplace compliance model
+        # reymond model
+        self.Cs                 = None              # arterial area compliance at reference pressure for Reymond compliance model
+        self.PmaxC              = None
+        self.Pwidth             = None
+        self.a1                 = None
+        self.b1                 = None
         
         # FLUID properties TODO: annotate units
         self.applyGlobalFluid   = True              # bool: apply global fluid properties or the ones stored in vessel XML
@@ -115,6 +120,7 @@ class Vessel(object):
         # calculated values for post processing
         self.csol         = None # wave speed
         self.vsol         = None # mean velocity
+        self.Csol         = None # compliance solution
         
         self.quiet = False
         Vessel.number += 1
@@ -256,6 +262,8 @@ class Vessel(object):
                 self.vsol = self.Qsol/self.Asol   
             elif variableToProcess == "linearWavesplit":
                 self.linearWaveSplitting()
+            elif variableToProcess == "Compliance":
+                self.Csol = self.C(self.Psol)
                    
     def waveSpeed(self,Area,Compliance,sqrt= np.sqrt):
         '''

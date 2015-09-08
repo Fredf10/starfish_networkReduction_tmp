@@ -78,8 +78,6 @@ class LocationOfInterest(TestBaseClass):
         
         '''
     
-        print "DB cLoI", len(simulationTime), sampleSize
-    
         if "vessel" in self.queryLocation:
             vesselId = int(self.queryLocation.split('_')[-1])
             
