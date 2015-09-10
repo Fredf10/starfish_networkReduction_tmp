@@ -87,10 +87,13 @@ def vascularPolyChaos():
     # 3. add dependentCase if existent 
     # TODO: add correlation matrix to xml definitions and variable dependentCase to definitions
     a = 0.5
-    CorrelationMatrix = np.array([[1.,a,a],[a,1.,a],[a,a,1.]])
+    CorrelationMatrix = np.array([[1.,a,a**2.0],
+                                  [a,1.,a],
+                                  [a**2.,a,1.]])
     dependentCase = False
-    
+       
     if dependentCase == True:
+        # this enables dependentCase in Distribution Manager
         distributionManager.createDependentDistribution(CorrelationMatrix)
     
     ## do the analysis for all defined polynomial orders:
@@ -114,7 +117,7 @@ def vascularPolyChaos():
         # 5.2 save/create simulation xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
-                distributionManager.passRealisation(sampleIndex, dependentCase)
+                distributionManager.passRealisation(sampleIndex)
                 vpcNetworkXmlEvaluationFile = evaluationCaseFiles[sampleIndex][2]
                 mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
             vascularNetwork.randomInputManager.saveRealisationLog(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
@@ -149,10 +152,7 @@ def vascularPolyChaos():
             # 7. create Orthogonal polynomials
             distributionManager.calculateOrthogonalPolynomials()
             # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
-            locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager.orthogonalPolynomials,
-                                                                         distributionManager.samples,
-                                                                         distributionManager.jointDistribution,
-                                                                         dependentCase)
+            locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager)
             locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
             
             ## if monte carlo

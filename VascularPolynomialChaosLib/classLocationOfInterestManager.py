@@ -102,14 +102,14 @@ class LocationOfInterestManager(TestBaseClass):
             locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
                          
                         
-    def calculateStatisticsPolynomialChaos(self,orthogonalPolynomials, samples, distributions, dependentCase):
+    def calculateStatisticsPolynomialChaos(self,distributionManager):
         '''
         Calculate statisitcs for each quantity of interest at each location of interest based
         on the generalized polynomial chaos expansion.
         '''
         for locationOfInterest in self.locationsOfInterest.values():
             for quantity in locationOfInterest.quantitiesOfInterestToProcess:
-                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(orthogonalPolynomials, samples, distributions, dependentCase)
+                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(distributionManager)
                 
     
     def calculateStatisticsMonteCarlo(self):

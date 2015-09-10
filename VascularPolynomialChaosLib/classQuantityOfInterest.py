@@ -31,7 +31,7 @@ class QuantityOfInterest(object):
         self.firstOrderSensitivitiesMC = None
         self.totalSensitivitiesMC = None
         
-    def calculateStatisticsPolynomialChaos(self, orthogonalPolynomials, samples, distributions, dependentCase):
+    def calculateStatisticsPolynomialChaos(self,distributionManager):
         '''
         Function which calculates the gPCExpansion for the given data
         '''
@@ -39,40 +39,41 @@ class QuantityOfInterest(object):
                    
         print "    starting the polychaos polynomial calculation from polychaos simulation result!!"
         print self.queryLocation,'--',self.quantityName
-        
+                
         # polynomial chaos expansion
-        self.gPCExpansion = cp.fit_regression(orthogonalPolynomials, samples.T, self.data)
+        self.gPCExpansion = cp.fit_regression(distributionManager.orthogonalPolynomials, distributionManager.samples.T, self.data)
                  
         # statistics
-        self.expectedValue       = cp.E(self.gPCExpansion, distributions)
-        self.variance            = cp.Var(self.gPCExpansion, distributions)
-        self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributions)
+        self.expectedValue       = cp.E(self.gPCExpansion, distributionManager.distributions)
+        self.variance            = cp.Var(self.gPCExpansion, distributionManager.distributions)
+        self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributionManager.distributions)
         self.conficenceInterval =  self.conficenceInterval.reshape(2,len(np.atleast_1d(self.expectedValue)))
         
         # conditional expected values  and sensitivity coefficients
-        distributionDimension = len(distributions)
+        distributionDimension = len(distributionManager.distributions)
         if distributionDimension > 1:
             # test dependecy or not
-            if dependentCase == False:
+            if distributionManager.dependentCase == False:
                 # independent case: use analytic expression from polynomial chaos expansion
                 self.conditionalExpectedValue = []
                 self.conditionalVariance      = []
                 # conditional mean and variance
                 for rvIndex in xrange(distributionDimension):
-                    currDistMean = cp.E(distributions)
+                    currDistMean = cp.E(distributionManager.distributions)
                     currDistMean[rvIndex] = np.nan
                     # reduce polynomials
                     currPolynomTime = self.gPCExpansion(*currDistMean)
-                    self.conditionalExpectedValue.append(cp.E(currPolynomTime,distributions))
-                    self.conditionalVariance.append(cp.Var(currPolynomTime,distributions))    
+                    self.conditionalExpectedValue.append(cp.E(currPolynomTime,distributionManager.distributions))
+                    self.conditionalVariance.append(cp.Var(currPolynomTime,distributionManager.distributions))    
             
                 # sensitivity indices
-                self.firstOrderSensitivities = cp.Sens_m(self.gPCExpansion,distributions)
-                self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributions)
+                self.firstOrderSensitivities = cp.Sens_m(self.gPCExpansion,distributionManager.distributions)
+                self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributionManager.distributions)
             else:
-                # dependent: use saltellies monte carlo method with polynomial chaos as function for evaluations
-                print "No method for sensitivity with dependent variables implemented yet"
-                pass
+                # dependent rancom variables
+                sensindices = cp.Sens_nataf(distributionManager.expansionOrder, distributionManager.jointDistributionDependent, distributionManager.samplesDependent, self.data)
+                self.firstOrderSensitivities = sensindices[0]
+                self.totalSensitivities      = sensindices[1]
             
     def calculateStatisticsMonteCarlo(self):
         '''

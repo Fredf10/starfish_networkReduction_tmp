@@ -14,6 +14,7 @@ class DistributionManager(object):
         self.jointDistribution     = None
         self.jointDistributionDependent = None
         self.distributionDimension = None
+        self.dependentCase = False
         # samples
         self.expansionOrder  = 0
         self.samples         = None
@@ -23,12 +24,12 @@ class DistributionManager(object):
         # orthogonalPolynomials
         self.orthogonalPolynomials = None
         
-    def passRealisation(self, sampleIndex, dependentCase = False):
+    def passRealisation(self, sampleIndex):
         '''
         Function to pass samples of the random variables to
         the random inputs
         '''
-        if dependentCase == False:
+        if self.dependentCase == False:
             sample = self.samples[sampleIndex]
         else:
             sample = self.samplesDependent[sampleIndex]
@@ -202,6 +203,8 @@ class DistributionManagerChaospy(DistributionManager):
         Method creates a dependent distribution with Nataf transformation 
         based on a correlation matrix of the dependent random variables
         '''
+        # TODO: check size of correlation and distributions
+        self.dependentCase = True
         self.jointDistributionDependent = cp.Nataf(self.jointDistribution, CorrelationMatrix)
         
     def createDependentSamples(self):
