@@ -398,6 +398,11 @@ def chooseVPCconfigFile(networkName):
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
+        # TODO
+        # ask if run simulations or not 
+        # no just quit
+        print "files created!, exit()"
+        exit()
     else:
         networkName = filenames[userInput-1]
         dataNumber = networkName.split('.')[0].split('_')[2]
