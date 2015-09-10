@@ -59,8 +59,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.globalData = None
         
         # keep track of time points loaded in memory
-        self.tsol =None
-        self.networkVolume = None
+        self.tsol = None
+        self.arterialVolume = None
+        
 
         # running options
         self.cycleMode = False
@@ -464,9 +465,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
 
         self.globalData = self.solutionDataFile.create_group('VascularNetwork')
-        self.globalData.create_dataset('Volume', (self.savedArraySize,), dtype='float64')
+        self.globalData.create_dataset('ArterialVolume', (self.savedArraySize,), dtype='float64')
         self.globalData.create_dataset('TotalVolume', (self.savedArraySize,), dtype='float64')
-        self.networkVolume = np.zeros(self.memoryArraySizeTime)
+        self.arterialVolume = np.zeros(self.memoryArraySizeTime)
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
 
@@ -645,8 +646,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             nDE = self.nDCurrent+lengthToWrite
 
             self.nDCurrent += lengthToWrite
-            # zero out network volume if flushing data
-            self.networkVolume = self.networkVolume*0.0    
+            # zero out arterial volume if flushing data
+            self.arterialVolume = self.arterialVolume*0.0    
 
         for vesselId,dsetGroup in self.vesselsToSave.iteritems():
             # access each variable to save.
@@ -657,7 +658,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             A1 = self.vessels[vesselId].Asol[:,0:-1]
             A2 = self.vessels[vesselId].Asol[:,1:]
             volume = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0,axis=1)
-            self.networkVolume += volume
+            self.arterialVolume += volume
                 
             if saving:
                 dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
@@ -673,9 +674,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
         if self.venousPool: 
             self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            self.globalData['TotalVolume'][nDB:nDE] = volume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
+            self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
         
-        self.globalData['Volume'][nDB:nDE] = volume[nMB:nME]
+        self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
         
 
     def saveSolutionData(self):
