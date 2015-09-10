@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <singleBifurcation.xml id="1.0" version="4.2">
   <simulationContext>
+  	<description>my STARFiSh simulation</description>
     <totalTime unit="s">5.0</totalTime>
-    <timeSaveBegin unit="s">0.0</timeSaveBegin>
-	<timeSaveEnd unit="s">2.0</timeSaveEnd>
+    <timeSaveBegin unit="s">3.0</timeSaveBegin>
+	<timeSaveEnd unit="s">5.0</timeSaveEnd>
 	<maxMemory unit="MB">500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.9</CFL>
@@ -45,7 +46,7 @@
   <boundaryConditions>
     <boundaryCondition vesselId="0">
       <Flow-Sinus2>
-        <amp unit="ml s-1">500</amp>
+        <amp unit="ml s-1">400</amp>
         <ampConst unit="m3 s-1">0.0</ampConst>
         <Npulse>25.0</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
