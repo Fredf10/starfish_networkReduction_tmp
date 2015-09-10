@@ -28,7 +28,6 @@ class StaticVenousPool(cSBO.StarfishBaseObject):
     """
     
     def __init__(self,dataDict):
-        
         self.dt = 0 #will be updated with update method
         self.currentTimeStep = 0 # current time step
         self.currentMemoryIndex = 0
@@ -38,8 +37,8 @@ class StaticVenousPool(cSBO.StarfishBaseObject):
         
         self.update(dataDict)
         self.veinId  = 0
-        self.V = 5600.0e-6 # * 0.61 # estimated blood volume on venous side under normal conditions
-        self.Vusv0 = 3213e-6 # unstretched volume at reference state
+        self.V = 5600.0e-6*0.61 # estimated blood volume on venous side under normal conditions
+        self.Vusv0 = 2378e-6 #  ? 3213e-6 # unstretched volume at reference state
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
         self.k = 0.1124 #0.1124e-9 # constant
@@ -147,16 +146,53 @@ class venousPool(cSBO.StarfishBaseObject):
         
         self.update(dataDict)
         self.veinId  = 0
-        self.V = 5600.0e-6 # * 0.61 # estimated blood volume on venous side under normal conditions
-        self.Vusv0 = 3213e-6 # unstretched volume at reference state
+       
+
+        '''
+        ### FINDING INITIAL VALUES FOR VOLUME
+        V = 3892. # 5600.0e-6 *0.61# * 0.61 # estimated blood volume on venous side under normal conditions
+        Vusv0 = 2378. #  ? 3213e-6 # unstretched volume at reference state
+        P0 = 2.0 # pressure constant for calculation of P venous    
+        k = 0.1124 
+              
+        Vusv = Vusv0  
+        def pFct(V):
+            P = P0*(np.exp(k*(V-Vusv)**1.5/(V)))
+            return P
+            
+        from scipy import optimize as opt
+        fct = lambda V: pFct(V) - 3.0
+        opt.brentq(fct, 2400,4000)
+        # 2850.912397321067
+        fct = lambda V: pFct(V) - 4.0
+        opt.brentq(fct, 2400,4000)
+        # 3091.6779241832583
+        fct = lambda V: pFct(V) - 5.0
+        opt.brentq(fct, 2400,4000)
+        # 3270.4477485970647
+        fct = lambda V: pFct(V) - 6.0
+        opt.brentq(fct, 2400,4000)
+        # 3414.6023352947177
+        fct = lambda V: pFct(V) - 7.0
+        opt.brentq(fct, 2400,4000)
+        # 3536.118289840244
+        fct = lambda V: pFct(V) - 8.0
+        opt.brentq(fct, 2400,4000)
+        # 3641.5166289669837
+        '''
+
+        
+        self.V = 3270.4477485970647e-6 # 3892e-6 # 5600.0e-6 *0.61# * 0.61 # estimated blood volume on venous side under normal conditions
+        self.Vusv0 = 2378e-6 #  ? 3213e-6 # unstretched volume at reference state
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
         self.k = 0.1124 #0.1124e-9 # constant
         
         self.pressureGain = 1.0/0.228 # pressure gain between CVP and LAP - Bell paper
         
-        self.Vusv = 2335.46e-6 #3037.0e-6 # initial states for Vus, CVP and LAP
-        self.P = self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
+        self.Vusv = self.Vusv0 # 2335.46e-6 #3037.0e-6 # initial states for Vus, CVP and LAP
+        self.P = self.pressureFromVolume(self.V)
+        # self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
         self.P_LA = self.pressureGain*self.P
         
         self.Qin = 0.0 # in and outflow to the venous pool
@@ -178,11 +214,7 @@ class venousPool(cSBO.StarfishBaseObject):
         self.boundarys               = flowSolver.boundarys
         self.boundaryCondtions = vascularNetwork.boundaryConditions
 
-        self.P
-        self.P_LA
-        self.Qin
-        self.Qout
-                ### vectors for export
+        ### vectors for export
         self.Vusvvector = np.ones(self.nTsteps+1)*self.Vusv
         self.dsetGroup.create_dataset("Vus", (vascularNetwork.savedArraySize,), dtype='float64')
         self.Vvector = np.ones(self.nTsteps+1)*self.V    
@@ -195,6 +227,14 @@ class venousPool(cSBO.StarfishBaseObject):
         self.dsetGroup.create_dataset("Qin", (vascularNetwork.savedArraySize,), dtype='float64')
         self.Qout_vector = np.zeros(self.nTsteps+1)
         self.dsetGroup.create_dataset("Qout", (vascularNetwork.savedArraySize,), dtype='float64')
+        
+#         print "DEBUG"
+#         print "self.Vusv0", self.Vusv0
+#         print "self.Vusv", self.Vusv
+#         print "self.V", self.V
+#         print "self.P", self.P
+#         
+#         exit()
         
     def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
 
@@ -226,8 +266,6 @@ class venousPool(cSBO.StarfishBaseObject):
 
         self.Qin = Qin
         
-        
-        
     
     def estimateOutflow(self):
         """
@@ -251,7 +289,9 @@ class venousPool(cSBO.StarfishBaseObject):
                         
         self.Qout = Qout
         
-    
+    def pressureFromVolume(self,V):
+        return self.P0*(np.exp(self.k*(V*1e6-self.Vusv*1e6)**1.5/(V*1e6)))
+        
     def updateVenousPool(self):
         """
         update the state of the venous pool (volume and pressure)
@@ -259,7 +299,8 @@ class venousPool(cSBO.StarfishBaseObject):
         """
         self.V = self.V + self.dt*(+self.Qin - self.Qout)
         try:
-            self.P = self.P0*(math.exp(self.k*math.pow((self.V[0]*1e6-self.Vusv*1e6),1.5)/(self.V[0]*1e6)))
+            # P = P0*(np.exp(k*(V*1e6-Vusv*1e6)**1.5/(V*1e6))-1.0)
+            self.P = self.pressureFromVolume(self.V[0])
         except ValueError:
             if self.V[0] - self.Vusv < 0:
                 self.exception(
