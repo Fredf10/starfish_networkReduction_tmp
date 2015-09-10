@@ -102,7 +102,8 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         # def variables to set with comDict          
         self.currentMemoryIndex = [0] # n
         self.currentTimeIndex   = [0]
-        self.currentTimeStep    = None
+        self.currentTimeStep    = 0
+        self.updaterElastance   = 0
         self.dn                 = 1   #dn
         self.dt                 = 0.1 #dt
         self.node               = 0   # node
@@ -132,7 +133,10 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         # variables depending on init variables
         self.inititalValues     = []
         for quantity in self.quantitiesToPlot:
-            self.inititalValues.append(str(self.data[quantity][0][self.node]*self.unitDict[quantity]))
+            if quantity == 'elastance':
+                self.inititalValues.append(str(self.data[quantity][0]))
+            else:
+                self.inititalValues.append(str(self.data[quantity][0][self.node]*self.unitDict[quantity]))
                 
         try: os.remove(''.join([cur,'/',self.filename]))
         except: pass
@@ -156,11 +160,14 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         """
         n = self.currentMemoryIndex[0]
         self.count += 1
-        
+        self.updaterElastance += 1
         if self.count == self.dn:        
             dataDict = {}
             for quantity in self.quantitiesToPlot:
-                dataDict[quantity] = self.data[quantity][n][self.node]*self.unitDict[quantity]
+                if quantity == 'elastance':
+                    dataDict[quantity] = self.data[quantity][self.updaterElastance]
+                else:
+                    dataDict[quantity] = self.data[quantity][n][self.node]*self.unitDict[quantity]
             
             self.writeCommunicatorFile(str(dataDict))            
             self.count = 0

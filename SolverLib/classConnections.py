@@ -960,9 +960,13 @@ class Bifurcation():
             
 
             if self.rigidAreas == False:
-                A1_last = self.A_func[0]([P1discretize],pos1)
-                A2_last = self.A_func[1]([P2discretize],pos2)
-                A3_last = self.A_func[2]([P3discretize],pos3)
+                try:
+                    A1_last = self.A_func[0]([P1discretize],pos1)
+                    A2_last = self.A_func[1]([P2discretize],pos2)
+                    A3_last = self.A_func[2]([P3discretize],pos3)
+                except FloatingPointError as E:
+                    print "Floating Point error in Connection {}".format(self.name)
+                    raise E
             else:
                 A1_last = A1[pos1]
                 A2_last = A2[pos2]
@@ -1055,7 +1059,7 @@ class Bifurcation():
         self.Q_rightDaughter[n+1][pos3] = Q3_new
         
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print P1_new, P2_new, P3_new
             print "Niterations: ", Niterations
             

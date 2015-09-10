@@ -325,7 +325,7 @@ variablesDict = {## class Vascular Network
                  'vesselId'          : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  'node'              : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  'dn'                : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
-                 'quantitiesToPlot'  : {'type':'str', 'unitSI': None, 'strCases': ['Pressure','Area','Flow'], 'multiVar': True},
+                 'quantitiesToPlot'  : {'type':'str', 'unitSI': None, 'strCases': ['Pressure','Area','Flow','elastance'], 'multiVar': True},
                  ## boundary conditions
                  # flux bc
                  'amp'               : {'type':'float',  'unitSI': 'm3 s-1',    'strCases': None, 'multiVar': False},
