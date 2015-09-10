@@ -73,7 +73,9 @@ baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
 
 baroreceptorModelElements = {'bugenhagenAorticBR' : [],
                              'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','HR0', 'HRmax','HRmin'],
-                             'CarotidBaroreceptor'         : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName']
+                             'CarotidBaroreceptor': ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName'],
+                             'CombinedBaroreflex' : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName',
+                                                             'aortic_ke', 'aortic_G_R', 'aortic_G_T', 'aortic_G_Emax', 'aortic_G_Vusv']
                              }
 
 

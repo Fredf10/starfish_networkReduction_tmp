@@ -409,6 +409,12 @@ variablesDict = {## class Vascular Network
                  'HRmin': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False}, 
                  ## Bugenhagen pars
                  'bgh': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},    
+                 ## Combined pars
+                 'aortic_ke':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_R':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_T':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_Emax':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_Vusv': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  ### random variables
                  'distributionType': {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'a'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
