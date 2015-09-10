@@ -38,7 +38,7 @@ class StaticVenousPool(cSBO.StarfishBaseObject):
         
         self.update(dataDict)
         self.veinId  = 0
-        self.V = 5600.0e-6 * 0.61 # estimated blood volume on venous side under normal conditions
+        self.V = 5600.0e-6 # * 0.61 # estimated blood volume on venous side under normal conditions
         self.Vusv0 = 3213e-6 # unstretched volume at reference state
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
@@ -147,7 +147,7 @@ class venousPool(cSBO.StarfishBaseObject):
         
         self.update(dataDict)
         self.veinId  = 0
-        self.V = 5600.0e-6 * 0.61 # estimated blood volume on venous side under normal conditions
+        self.V = 5600.0e-6 # * 0.61 # estimated blood volume on venous side under normal conditions
         self.Vusv0 = 3213e-6 # unstretched volume at reference state
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
@@ -176,6 +176,7 @@ class venousPool(cSBO.StarfishBaseObject):
         self.dt                      = flowSolver.dt
         self.nTsteps                 = flowSolver.nTsteps
         self.boundarys               = flowSolver.boundarys
+        self.boundaryCondtions = vascularNetwork.boundaryConditions
 
         self.P
         self.P_LA
@@ -215,9 +216,16 @@ class venousPool(cSBO.StarfishBaseObject):
         for key in self.boundarys:
             for x in range(len(self.boundarys[key])):
                 if self.boundarys[key][x].position == -1: #distal boundaries    
-                    Qin = Qin + self.boundarys[key][x].Q[self.currentMemoryIndex,-1]
+                    bcCondition = self.boundarys[key][x].bcType2[0]
+                    # TODO: Add other types
+                    if bcCondition.name == 'Windkessel-3Elements':                    
+                        deltaP = self.boundarys[key][x].P[self.currentMemoryIndex,-1] - bcCondition.venousPressure[self.currentMemoryIndex]
+                        Qin = Qin + deltaP/bcCondition.Rtotal
+                        
+                    
 
         self.Qin = Qin
+        
         
         
     

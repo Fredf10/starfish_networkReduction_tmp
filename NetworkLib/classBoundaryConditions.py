@@ -2170,13 +2170,19 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.Emax = 2.31 * 133.3e6
         self.Emin = 0.06 * 133.3e6
         self.Tpeak = 0.4
+        
+        # BRX update variables
+        self.T_BRX = self.T
+        self.Emax_BRX = self.Emax
+        self.Emin_BRX = self.Emin
 
         self.V0 = 20e-6
 
         self.K = 0.0
+        # self.Rv = 0.00007500616 * 133 / (10 ** -6) # From Lau and Figueroa paper
         self.Rv = 0.005 * 133 / (10 ** -6)
 
-        """Shape parameters"""
+        ## Shape parameters
         self.alpha = 1.672
         self.n1 = 1.32
         self.n2 = 21.9
@@ -2203,6 +2209,13 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
         self.dQInOut = np.empty((2))
 
+    def update(self, bcDict):
+        super(VaryingElastanceSimple,self).update(bcDict)
+
+        # BRX update variables
+        self.T_BRX = self.T
+        self.Emax_BRX = self.Emax
+        self.Emin_BRX = self.Emin
 
     def initializeSolutionVectors(self, Tsteps):
         """Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state
@@ -2230,8 +2243,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.pressure[0] = self.atriumPressure
         self.volume[0] = self.atriumPressure / self.E(0) + self.V0
 
-
-
     def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 
 # 		self.updateValves(P, n, dt)
@@ -2243,10 +2254,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         # calculate du and return this!
         return np.dot(R, self.omegaNew), self.dQInOut
 
-
-
-
-
     def getCycleTime(self, n, dt):
         return self.num * dt
 
@@ -2255,6 +2262,10 @@ class VaryingElastanceSimple(BoundaryConditionType2):
             self.cycleNumber += 1
             self.num = 0
             self.newCycle = True
+            self.T = self.T_BRX
+            self.Tpeak = 0.4*self.T
+            self.Emax = self.Emax_BRX
+            self.Emin = self.Emin_BRX
 
     def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
 
@@ -2276,6 +2287,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 # 		ttemp = t-dt
         E = self.E(t)
         e2 = self.E(t)
+        
+        
     # 	dE= (self.E(t+deltatdiff) -E)/deltatdiff
         Vn = self.volume[n]
         self.R11 = r11
@@ -2290,53 +2303,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.aortaP[n] = Pn
 # 		self.DtFlow[n]=(Qn-Qnold)/dt
         ventrPn = self.pressure[n]
-        #if self.cycleNumber == 3:
-        #	self.T = 0.7
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 6:
-        #	self.T = 1
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 10:
-        #	self.T = 0.8
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 11:
-        #	self.T = 0.7
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 12:
-        #	self.T = 0.6
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 14:
-        #	self.T = 0.5
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 18:
-        #	self.T = 0.6
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 19:
-        #	self.T = 0.7
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 20:
-        #	self.T = 0.8
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 21:
-        #	self.T = 0.9
-        #	self.Tpeak = 0.43 * self.T
-
-        #if self.cycleNumber == 22:
-        #	self.T = 1
-        #	self.Tpeak = 0.43 * self.T
-
-
-
-
 
         def diastole(u, t):
 
@@ -2348,7 +2314,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
             DV = (venoP - u[1]) / self.Rv
             DP = dE * (u[0] - self.V0) + E * (venoP - u[1]) / self.Rv
             return [DV, DP]
-
 
         def systole(u, t):
 
@@ -2423,8 +2388,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
     def funcPos1(self, _domega, R, L, n, dt, P, Q, A):
         pass
 
-
-
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
            according to Tpeak, T, Emax and Emin. """
@@ -2435,28 +2398,4 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         shapeFunction1 = (t / (a1)) ** n1 / (1 + (t / (a1)) ** n1)
         shapeFunction2 = (1 + (t / (a2)) ** n2) ** (-1)
         return (self.Emax - self.Emin) * self.alpha * shapeFunction1 * shapeFunction2 + self.Emin
-# 	def diastole(self,u,t):
-# 		
-# 		"""Differential equations during diastole u[0]=V, u[1]=Pv, return dV/dt and dP/dt"""
-# 		
-# 		deltatdiff = 0.00001
-# 		E= self.E(t)
-# 		dE= (self.E(t+deltatdiff) -E)/deltatdiff
-# 		DV = (self.atriumPressure-u[1])/self.Rv
-# 		DP = (dE*u[0]-self.V0)+E*(self.atriumPressure-u[1])/self.Rv
-# 		return [DV,DP]
-# 	
-# 	
-# 	def systole(self,u,t):
-# 		
-# 		deltatdiff = 0.00001
-# 		E= self.E(t)
-# 		dE= (self.E(t+deltatdiff) -E)/deltatdiff
-# 		
-# 		DV = -u[3]
-# 		DP = (dE*(u[0]-self.V0) - E*u[3] )
-# 		DW1 = ((dE*(u[0]-self.V0) - E*u[3] - self.R12*self.DtW2)/self.R11)
-# 		DQ = (self.R21/self.R11)*(dE*(u[0]-self.V0) - E*u[3] ) +self.DtW2*(self.R22-(self.R12*self.R21)/self.R11)
-# 		return[DV,DP,DW1,DQ]
-
 

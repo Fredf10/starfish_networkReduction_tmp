@@ -32,7 +32,10 @@ class DataHandler(object):
         self.currentMemoryIndex = currentMemoryIndex
         
         self.network = network
-        
+    
+    def emergencyFlush(self):
+        self.network.flushSolutionMemory( self.currentTimeStep[0], self.currentMemoryIndex[0],self.chunkCount)
+
     def __call__(self):
         '''
         call function for DataHandler to save the data for each vessel in the network
@@ -52,3 +55,7 @@ class DataHandler(object):
             ## if the simulation is finished but memory not filled
             # initiate flush of memoryArrays
             self.network.flushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
+            
+        
+        
+        

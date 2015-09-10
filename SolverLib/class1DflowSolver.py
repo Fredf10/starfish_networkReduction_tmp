@@ -50,6 +50,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         
         self.vessels = self.vascularNetwork.vessels
         self.fields = {}
+        self.dataHandler = None
         # the boundarys of the network { vesselID : [<instance>::classBoundary_02(Characteristics.py), .. ]}
         # 1 boundary for each start/end-vessel except if only 1 vessel in the network
         self.boundarys = {}
@@ -131,12 +132,13 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeBoundarys()
         self.initializeConnections()
         self.initializeFields()
-        self.initializeCommunicators()
         
         if self.venousPool:
             self.venousPool.initializeForSimulation(self,self.vascularNetwork)
         
         self.initializeBaroreceptors()
+        
+        self.initializeCommunicators()
         self.initializeTimers()
         self.initializeNumericalObjectList()
         if quiet==False:
@@ -521,11 +523,13 @@ class FlowSolver(cSBO.StarfishBaseObject):
             #try:
             data = {'Pressure': self.vessels[comData['vesselId']].Psol,
                     'Flow'    : self.vessels[comData['vesselId']].Qsol,
-                    'Area'    : self.vessels[comData['vesselId']].Asol
+                    'Area'    : self.vessels[comData['vesselId']].Asol,
                     }
+            try:
+                data['elastance']= self.baroreceptors[1].boundaryConditionII.Elastance
+            except: pass
+            
             comData['data']           = data
-                
-                
             #except: pass
             
             ## not used now
@@ -608,15 +612,15 @@ class FlowSolver(cSBO.StarfishBaseObject):
         if self.venousPool:
             self.numericalObjects.append(self.venousPool)
             
-        dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
+        self.dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
                                   self.nTsteps,
                                   self.vascularNetwork,
                                   self.currentMemoryIndex,
                                   self.vascularNetwork.memoryArraySizeTime)
         
-        self.numericalObjects.append(dataHandler)
+        self.numericalObjects.append(self.dataHandler)
         
-        self.memoryOffset = dataHandler.memoryOffset
+        self.memoryOffset = self.dataHandler.memoryOffset
                                    
     def initOutput(self):
         """
@@ -686,12 +690,16 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 # TODO: (einar) what is meant to happen with numericalObject here?
                 # TODO: (einar) indentation was all wrong originally, please fix to intended functionality
                 for numericalObject in self.numericalObjects:
-#            try:
- #               numericalObject()
-  #          except:
-   #         print numericalObject
-                    numericalObject()
-
+                    try:
+                        numericalObject()
+                    except Exception:
+                        # Save the Solution data for debugging
+                        print "Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject)
+                        self.dataHandler.emergencyFlush()
+                        self.vascularNetwork.saveSolutionData()
+                        print "Success in saving solution data file. Reraising Exception"
+                        raise # TODO: why does self.exception() not force the program to quit?
+                        # self.exception()
                 
         ## to be concentrated with original cycle mode !!
         else:

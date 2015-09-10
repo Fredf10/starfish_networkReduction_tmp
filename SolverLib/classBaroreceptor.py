@@ -33,9 +33,9 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         self.cellMLBaroreceptorModel = False
         self.vesselIds = []
 
-        self.boundaryCondition = 0
-        self.boundaryConditionII = 0
-        self.boundaryConditionIIout = {}
+        self.boundaryCondition = None
+        self.boundaryConditionII = None
+        self.boundaryConditionIIout = None
 
         self.newCycles = None
         self.Pheart = None
@@ -330,7 +330,7 @@ class AorticBaroreceptor(Baroreceptor):
 
         # update Time for the period of the inflow function (type 1 BC's)
         self.oldUpdateTime = 0
-        if self.boundaryCondition != 0:
+        if self.boundaryCondition  is not None:
             self.newUpdateTime = round(self.boundaryCondition.Tperiod/self.dt)
 
 
@@ -412,7 +412,7 @@ class AorticBaroreceptor(Baroreceptor):
         # does this on a beat-to-beat basis
         if self.cellMLBaroreceptorModel == True:
 
-            if self.boundaryCondition != 0:
+            if self.boundaryCondition is not None:
                 self.calcAndupdatePeriodTypeIcellML(n,self.MStrain[self.oldUpdateTime:(self.newUpdateTime-2)])
                 print self.algebraic[-1][self.cellMLoutputID]
                 print self.boundaryCondition.Tperiod
@@ -688,57 +688,50 @@ class CarotidBaroreceptor(Baroreceptor):
 
 #         ### for update of period in type 1 boundary condition
 #         self.oldUpdateTime = 0
-#         if self.boundaryCondition != 0:
+#         if self.boundaryCondition  is not None:
 #             self.newUpdateTime = round(self.boundaryCondition.Tperiod/self.dt)
 #
 #
-        #######################################
         """
         Parameters for the Ursino model of the carotid baroreflex
         """
-        #######################################
 
-        ### model parameters afferent part of the Ursino model - Ursino 1999
+        ## model parameters afferent part of the Ursino model - Ursino 1999
 
-        self.pn = 135*133.32 # adjusted from 92 mmHg as given in paper, chose a value close to the initialisation
-        self.ka = 1567. # parameter associated to the static pressure - firing rate function
+        self.pn = 70*133.32 # 92*133.32 # 135*133.32 # adjusted from 92 mmHg as given in paper, chose a value close to the initialisation
+        self.ka = 1.5*1567. # parameter associated to the static pressure - firing rate function
         self.fmin = 2.51 # lower saturation of afferent firing rate
         self.tau_z= 6.37 # time constant of zero of first order dynamical block of afferent part
         self.fmax = 47.78 # upper saturation of afferent firing rate
         self.tau_p= 2.076 # time constant of pole of first order dynamical block of afferent part
 
-        # model parameters efferent part of the Ursino model  - Ursino 1999
+        ## model parameters efferent part of the Ursino model  - Ursino 1999
 
         self.fe_inf = 2.10 #
         self.fe_0 = 16.11 #
         self.ke = 0.0675 #
         self.fe_min = 2.66 # threshold value for efferent firing used in the effector parts
 
-        # model parameters for the TPR effector part of the Ursino model  - Ursino 1999
-
+        ## model parameters for the TPR effector part of the Ursino model  - Ursino 1999
         self.cR = 0.317*133.32e6 # gain
         self.tauR = 6 # time constant
         self.DR = 2.0 # delay
         self.R0 = 0.61*133.32e6 # value in absence of sympathetic drive
 
-
-
         # model parameters for the EmaxLV effector part of the Ursino model  - Ursino 1999
         self.cE = 0.475 * 133.322368e6 # gain
         self.tauE = 8. # time constant
         self.DE = 2.0 # pure delay
-        self.E0 = 2.392*133.322368e6 # value in absence of sympathetic drive
+        self.E0 = 2.2502*133.322368e6 # 2.392*133.322368e6 # value in absence of sympathetic drive
 
         # model parameters for the T effector part of the Ursino model  - Ursino 1999
-
         self.cT = -0.08 # gain
         self.tauT = 2.0 # time constant
         self.DT = 2.0 # pure delay
-        self.T0 = 0.58 # value in absence of sympathetic drive
+        self.T0 = 0.580 # 1.1 # 0.580 is the value in absence of sympathetic drive so it can only get smaller than this
 
 
         # model parameters for the Vusv effector part of the Ursino model  - Ursino 1999
-
         self.cVusv = -625.0e-6 # gain
         self.tauVusv = 20.0 # time constant
         self.DVusv = 3.0 # pure delay
@@ -749,11 +742,11 @@ class CarotidBaroreceptor(Baroreceptor):
         ### values set close to steady state values which were found by open-loop simulation
         ### and readjusted after closing the loop, in order to minimize the transients
 
-        self.dTPRin = 5.85e7
-        self.dTin = -0.1114
-        self.dEmaxin = 87.65e6
-        self.dVusvin = -877.54e-6
-        self.Ptildin = 10600.
+        self.dTPRin = 3.51e7 # 5.85e7
+        self.dTin = -0.066 # -0.1114
+        self.dEmaxin = 61.3e6 # 87.65e6
+        self.dVusvin = -700e-6 # -877.54e-6
+        self.Ptildin = 13600 # 10600.
         # ratio between total WK resistance of Network and value given by Ursino
         self.ratio = 1.0 # Updated when initializing for simulation
         # self.ratio = (self.ResTot0)/(self.R0 + self.dTPRin)
@@ -811,7 +804,7 @@ class CarotidBaroreceptor(Baroreceptor):
         self.newCycles = None
         self.Pheart = None
         self.Vheart = None
-
+        self.dsetHeart = None
         # update with dictionary
         self.update(BaroDict)
 
@@ -841,7 +834,7 @@ class CarotidBaroreceptor(Baroreceptor):
 
         ### for update of period in type 1 boundary condition
         self.oldUpdateTime = 0
-        if self.boundaryCondition != 0:
+        if self.boundaryCondition  is not None:
             self.newUpdateTime = round(self.boundaryCondition.Tperiod/self.dt)
 
 
@@ -859,21 +852,36 @@ class CarotidBaroreceptor(Baroreceptor):
         self.F_cs = np.zeros(self.nTsteps+1) # mean value of afferent firing (mean of left and right carotid sinus)
         self.dsetGroup.create_dataset("F_cs", (vascularNetwork.savedArraySize,), dtype='float64')
 
+        # Set baseline values to those used for the BC
+        self.E0 = self.boundaryConditionII.Emax # 
+        self.T0 = self.boundaryConditionII.T # 0.580 # 1.1 # 0.580 is the value in absence of sympathetic drive so it can only get smaller than this
+
         # efferent part
-        self.F_efferent = np.zeros(self.nTsteps+1)
+        self.F_efferent = np.empty(self.nTsteps+1)
         self.dsetGroup.create_dataset("F_efferent", (vascularNetwork.savedArraySize,), dtype='float64')
 
         # effector parts: initilized with the initial value of the respective quantities
-        self.delta_TPR = np.ones(self.nTsteps+1)*self.dTPRin
+        self.delta_TPR = np.empty(self.nTsteps+1)*self.dTPRin
         self.dsetGroup.create_dataset("delta_TPR", (vascularNetwork.savedArraySize,), dtype='float64')
 
-        self.delta_Emax = np.ones(self.nTsteps+1)*self.dEmaxin
+        self.dsetGroup.create_dataset("T", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.delta_Emax = np.empty(self.nTsteps+1)*self.dEmaxin
         self.dsetGroup.create_dataset("delta_Emax", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Vusv = np.ones(self.nTsteps+1)*self.dVusvin
+        self.delta_Vusv = np.empty(self.nTsteps+1)*self.dVusvin
         self.dsetGroup.create_dataset("delta_Vusv", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_T = np.ones(self.nTsteps+1)*self.dTin
+        self.delta_T = np.empty(self.nTsteps+1)*self.dTin
         self.dsetGroup.create_dataset("delta_T", (vascularNetwork.savedArraySize,), dtype='float64')
 
+
+        self.dsetHeart = self.dsetGroup.create_group('Heart')
+        self.dsetHeart.create_dataset("pressure", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("volume", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("mitralQ", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("Elastance", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("Flow", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("Flow2", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("deltaP", (vascularNetwork.savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("aortaP", (vascularNetwork.savedArraySize,), dtype='float64')
 
 
 
@@ -886,11 +894,20 @@ class CarotidBaroreceptor(Baroreceptor):
             # efferent part
             self.dsetGroup["F_efferent"][nDB:nDE] =self.F_efferent[nSB:nSE]
 
-
+            self.dsetGroup["T"][nDB:nDE] = self.delta_T[nSB:nSE] + self.T0
             self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE]
             self.dsetGroup["delta_Emax"][nDB:nDE] = self.delta_Emax[nSB:nSE]
             self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE]
             self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE]
+            
+            self.dsetHeart['pressure'][nDB:nDE] = self.boundaryConditionII.pressure[nSB:nSE]
+            self.dsetHeart['volume'][nDB:nDE] = self.boundaryConditionII.volume[nSB:nSE] 
+            self.dsetHeart['mitralQ'][nDB:nDE] = self.boundaryConditionII.mitralQ[nSB:nSE]
+            self.dsetHeart['Elastance'][nDB:nDE] = self.boundaryConditionII.Elastance[nSB:nSE]
+            self.dsetHeart['Flow'][nDB:nDE] = self.boundaryConditionII.Flow[nSB:nSE]
+            self.dsetHeart['Flow2'][nDB:nDE] = self.boundaryConditionII.Flow2[nSB:nSE]
+            self.dsetHeart['deltaP'][nDB:nDE] = self.boundaryConditionII.deltaP[nSB:nSE]
+            self.dsetHeart['aortaP'][nDB:nDE] = self.boundaryConditionII.aortaP[nSB:nSE]
 
 
 
@@ -1052,9 +1069,8 @@ class CarotidBaroreceptor(Baroreceptor):
         if n == (round(self.newUpdateTime-2)):
 
             newPeriod = self.T0 + self.delta_T[n+1]
-
+            print newPeriod
             self.boundaryCondition.updatePeriodRuntime(newPeriod,(self.newUpdateTime-2)*self.dt)
-
             # update the updateTime for the update of the next period
             self.oldUpdateTime = self.newUpdateTime
             self.newUpdateTime = self.oldUpdateTime + round(self.boundaryCondition.Tperiod/self.dt)
@@ -1073,7 +1089,7 @@ class CarotidBaroreceptor(Baroreceptor):
 
         for key in self.boundaryConditionIIout:
             if self.boundaryConditionIIout[key].name == 'Windkessel-3Elements':
-                self.boundaryConditionIIout[key].Rtotal = (newTotalResistance)/self.ResTot0*self.Res0[key]
+                self.boundaryConditionIIout[key].Rtotal = (newTotalResistance/self.ResTot0)*self.Res0[key]
 
             ## for Resistance outlets - not tested
             elif self.boundaryConditionIIout[key].name == 'Resistance':
@@ -1084,18 +1100,16 @@ class CarotidBaroreceptor(Baroreceptor):
                 self.boundaryConditionIIout[key].Rc = (newTotalResistance)/self.ResTot0*self.Res0[key]
 
         ## update inlet BC's of type 2 --> Varying Elastance heart
-        if self.boundaryConditionII != 0:
+        if self.boundaryConditionII is not None:
+            self.boundaryConditionII.T_BRX = self.T0 + self.delta_T[n+1]
+            self.boundaryConditionII.Emax_BRX = self.E0 + self.delta_Emax[n+1] # update the VaryingElastance heart (only implemented in simple heart)
+            # self.boundaryConditionII.self.Emin_BRX = self.Emin
+
+            self.Pheart[n] = self.boundaryConditionII.pressure[n] # to save to solution data
+            self.Vheart[n] = self.boundaryConditionII.volume[n]
+            
             if self.boundaryConditionII.newCycle == True:
-                self.boundaryConditionII.Emax = self.E0 + self.delta_Emax[n+1] # update the VaryingElastance heart (only implememnted in simple heart)
-                self.boundaryConditionII.T = self.T0 + self.delta_T[n+1]
                 self.newCycles = np.append(self.newCycles,n) # to save to solution data
-                self.Pheart[n] = self.boundaryConditionII.pressure[n] # to save to solution data
-                self.Vheart[n] = self.boundaryConditionII.volume[n] # to save to solution data
-
-
-            else:
-                self.Pheart[n] = self.boundaryConditionII.pressure[n] # to save to solution data
-                self.Vheart[n] = self.boundaryConditionII.volume[n]
 
 
     def updateVenousSide(self,n):
@@ -1136,7 +1150,7 @@ class CarotidBaroreceptor(Baroreceptor):
         n = self.currentTimeStep[0]
         n_mem = self.currentMemoryIndex[0]
         self.UrsinoBRmodel(n,n_mem)
-        DBG = True
+        DBG = False
         if DBG:
             print "DB CarotidBaroreceptor.__call__() 1158"
             print "DB F_efferent", self.F_efferent[n]
@@ -1144,3 +1158,5 @@ class CarotidBaroreceptor(Baroreceptor):
             print "DB delta_T", self.delta_T[n]
             print "DB delta_Emax", self.delta_Emax[n]
             print "DB delta_Vusv", self.delta_Vusv[n]
+            print "DB self.boundaryConditionII.T_BRX", self.boundaryConditionII.T_BRX
+            print "DB self.T0 + self.delta_T[n+1]", self.T0 + self.delta_T[n+1]

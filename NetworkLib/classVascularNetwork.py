@@ -56,9 +56,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.nDCurrent = None
         self.memoryArraySizeTime = None  # memory array size for the time arrays
         self.solutionDataFile = None  # file name of the solution data
-
+        self.globalData = None
+        
         # keep track of time points loaded in memory
         self.tsol =None
+        self.networkVolume = None
 
         # running options
         self.cycleMode = False
@@ -107,13 +109,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.compPercentageTree = 0.8  # Ctree percentage on total Csys
         self.compTotalSys = 5.0  # total Csys
 
-        self.optimizeTree = False  # optmizie areas of vessels to minimize reflections in root direction
+        self.optimizeTree = False  # optimize areas of vessels to minimize reflections in root direction
 
         # # dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
         
-        self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
-        # self.venousPool = classVenousPool.venousPool({}) # TODO add to xml
+        # self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
+        self.venousPool = classVenousPool.venousPool({}) # TODO add to xml
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
@@ -126,10 +128,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.root = None  # the root vessel (mother of the mothers)
         self.boundaryVessels = []  # includes all vessels with terminal boundaryConditions (except start of root)
         self.treeTraverseList = []  # tree traverse list
-        self.treeTraverseConnections = []  # tree travers list including connections [ LM, RM , LD, RD ]
+        self.treeTraverseConnections = []  # tree traversal list including connections [ LM, RM , LD, RD ]
 
         self.initialValues = {}
-        self.Rcum = {}  # Dictionary with all cumultative resistances
+        self.Rcum = {}  # Dictionary with all cumulative resistances
         self.Cends = {}  # Dictionary with the area compliances of all terminating vessels (at ends)
         self.totalTerminalAreaCompliance = None  # the sum of all Cends
         self.TotalVolumeComplianceTree = None  # total volume compliance of all vessels
@@ -423,12 +425,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         Set initial values for the simulations.
         """
 
-        # create solution file
-        if self.pathSolutionDataFilename == None:
-            self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
-        self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
 
-        self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
@@ -458,6 +455,20 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # Don't allocate more memory than needed
         if self.memoryArraySizeTime > (self.nTsteps + 1):
             self.memoryArraySizeTime = self.nTsteps + 1
+
+
+        # Initialize solution file and data set groups
+        # create solution file
+        if self.pathSolutionDataFilename == None:
+            self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
+        self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
+
+        self.globalData = self.solutionDataFile.create_group('VascularNetwork')
+        self.globalData.create_dataset('Volume', (self.savedArraySize,), dtype='float64')
+        self.globalData.create_dataset('TotalVolume', (self.savedArraySize,), dtype='float64')
+        self.networkVolume = np.zeros(self.memoryArraySizeTime)
+        self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
+
 
         # initialize for simulation
         for vesselId, vessel in self.vessels.iteritems():
@@ -634,12 +645,20 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             nDE = self.nDCurrent+lengthToWrite
 
             self.nDCurrent += lengthToWrite
+            # zero out network volume if flushing data
+            self.networkVolume = self.networkVolume*0.0    
 
-        # For vessels in the saving dictionary
         for vesselId,dsetGroup in self.vesselsToSave.iteritems():
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
             vessel = self.vessels[vesselId]
+            
+            # calc vessel volume
+            A1 = self.vessels[vesselId].Asol[:,0:-1]
+            A2 = self.vessels[vesselId].Asol[:,1:]
+            volume = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0,axis=1)
+            self.networkVolume += volume
+                
             if saving:
                 dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
                 dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
@@ -648,21 +667,23 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             vessel.Psol[0] = vessel.Psol[-1]
             vessel.Qsol[0] = vessel.Qsol[-1]
             vessel.Asol[0] = vessel.Asol[-1]
-
+        
         for baro in self.baroreceptors.itervalues():
             baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
             
-        if self.venousPool:
+        if self.venousPool: 
             self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-
+            self.globalData['TotalVolume'][nDB:nDE] = volume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
+        
+        self.globalData['Volume'][nDB:nDE] = volume[nMB:nME]
+        
 
     def saveSolutionData(self):
         """
         # solution of the system over time
         # {vesselID: { 'Psol' : [ [solution at N nodes]<-one array for each timePoint , ...  ], ..  }
         """
-        globalData = self.solutionDataFile.create_group('VascularNetwork')
-
+        globalData = self.globalData 
         globalData.attrs['dt'] = self.dt
         globalData.attrs['nTsteps'] = self.nTsteps
         globalData.attrs['nTstepsInitPhase'] = self.nTstepsInitPhase
@@ -686,7 +707,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         dsetTime[:] = np.linspace(startTime, endTime, savedArraySize).reshape(savedArraySize,)
 
         self.solutionDataFile.close()
-
+    
+    def calculateNetworkVolume(self):
+        pass
 
     def linkSolutionData(self):
         """
