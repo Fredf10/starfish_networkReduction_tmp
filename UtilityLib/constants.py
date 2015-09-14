@@ -410,7 +410,17 @@ variablesDict = {## class Vascular Network
                  ## Bugenhagen pars
                  'bgh': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},    
                  ## Combined pars
-                 'aortic_ke':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'pn':  {'type':'float',  'unitSI':  "Pa",     'strCases': None, 'multiVar': False},
+                 'ka':  {'type':'float',  'unitSI':  "Pa",     'strCases': None, 'multiVar': False},
+                 'tau_z':  {'type':'float',  'unitSI':  "s",     'strCases': None, 'multiVar': False},
+                 'cR':  {'type':'float',  'unitSI':  "Pa s m-3",     'strCases': None, 'multiVar': False},
+                 'cT':  {'type':'float',  'unitSI':  "s",     'strCases': None, 'multiVar': False},
+                 'cE':  {'type':'float',  'unitSI':  "Pa m-3",     'strCases': None, 'multiVar': False},
+                 'cVusv': {'type':'float',  'unitSI':  "m3",     'strCases': None, 'multiVar': False},
+                 'carotid_G_R':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'carotid_G_T':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'carotid_G_Emax':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'carotid_G_Vusv': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'aortic_G_R':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'aortic_G_T':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'aortic_G_Emax':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},

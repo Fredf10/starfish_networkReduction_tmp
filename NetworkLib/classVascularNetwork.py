@@ -20,7 +20,7 @@ import UtilityLib.moduleFilePathHandler as mFPH
 
 #sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
-# import numpy as np
+import numpy as np
 import math
 from scipy import interpolate
 #from math import pi, cos, sin
@@ -57,7 +57,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.memoryArraySizeTime = None  # memory array size for the time arrays
         self.solutionDataFile = None  # file name of the solution data
         self.globalData = None
-        
+        self.tiltAngle = None # Angle the network is tilted relative to supine position
         # keep track of time points loaded in memory
         self.tsol = None
         self.arterialVolume = None
@@ -467,6 +467,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.globalData = self.solutionDataFile.create_group('VascularNetwork')
         self.globalData.create_dataset('ArterialVolume', (self.savedArraySize,), dtype='float64')
         self.globalData.create_dataset('TotalVolume', (self.savedArraySize,), dtype='float64')
+        self.globalData.create_dataset('TiltAngle', (self.savedArraySize,),dtype='float64')
+        self.tiltAngle = np.zeros(self.nTsteps)
         self.arterialVolume = np.zeros(self.memoryArraySizeTime)
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
@@ -584,7 +586,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
         # TODO: Why is the key "1" here?
         motionDict = {1:{'angleXMotherTime': angleXSystem}}
-
+        
+        self.tiltAngle = angleXSystem
+        
         # TODO: Do these belong here? and do they need to happen every simulation?
         for vesselId, angleDict in motionDict.iteritems():
             self.vessels[vesselId].update(angleDict)
@@ -737,8 +741,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 # This works perfectly as long as the variables are the same in the group as in the class __init__
                 for subGroupName, subGroup in group.iteritems():
                     baroId = int(subGroupName.split(' - ')[-1])
-                    self.baroreceptors[baroId].update(subGroup)
-
+                    try:
+                        self.baroreceptors[baroId].update(subGroup)
+                    except KeyError: # will fail for nested data
+                        pass
+                
             elif groupName == 'Heart':
                 pass
 
@@ -1827,7 +1834,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 # update venous pressure at boundary nodes
                 if bc.name in ['_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
                     bc.update({'venousPressure':relativeVenousPressure})
-
+       
         # # print out of method
         if self.quiet == False:
             print '\n============================================================='
@@ -1921,4 +1928,19 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 # update venous pressure at boundary nodes
                 if bc.name in ['_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
                     bc.update({'venousPressure':relativeVenousPressure})
+                
+                    
+                # TODO REMOVE THIS HACK
+                if vesselId == 27 and False:
+                    abdominalVenuosHeight = -0.45*np.cos(self.tiltAngle)
+                    abdominalVenousPressure = self.centralVenousPressure + self.globalFluid['rho'] * abdominalVenuosHeight* self.gravityConstant - self.vessels[vesselId].externalPressure
+                    # from matplotlib import pyplot as plt
+                    # plt.plot(self.tiltAngle)
+                    # plt.show()
+                    # plt.plot(abdominalVenuosHeight)
+                    # plt.show()
+                    # plt.plot(abdominalVenousPressure)
+                    # plt.show() 
+                    self.boundaryConditions[vesselId][0].update({'venousPressure':abdominalVenousPressure})
+                    
 

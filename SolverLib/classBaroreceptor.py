@@ -801,11 +801,12 @@ class CarotidBaroreceptor(Baroreceptor):
         ### states of the Ursino model###
         # afferent part: left and right side
         self.PtildLeft = np.zeros(self.nTsteps + 1)
-        self.PtildLeft[0] = self.Ptildin  # intial value for first oprder dynamical block
+        self.PtildLeft[0] = self.Ptildin  # intial value for first order dynamical block
 
         self.PtildRight = np.zeros(self.nTsteps + 1)
         self.PtildRight[0] = self.Ptildin
-
+        self.dsetGroup.create_dataset("Ptild", (vascularNetwork.savedArraySize,), dtype='float64')
+        
         self.F_cs_left = np.zeros(self.nTsteps + 1)
         self.F_cs_right = np.zeros(self.nTsteps + 1)
 
@@ -817,19 +818,22 @@ class CarotidBaroreceptor(Baroreceptor):
         self.T0 = self.boundaryConditionII.T  # 0.580 # 1.1 # 0.580 is the value in absence of sympathetic drive so it can only get smaller than this
         self.Vusv0 = self.venousPool.Vusv0  #
         # efferent part
-        self.F_efferent = np.empty(self.nTsteps + 1)
+        self.F_efferent = np.zeros(self.nTsteps + 1)
         self.dsetGroup.create_dataset("F_efferent", (vascularNetwork.savedArraySize,), dtype='float64')
 
         # effector parts: initilized with the initial value of the respective quantities
-        self.delta_TPR = np.empty(self.nTsteps + 1) * self.dTPRin
+        self.delta_TPR = np.zeros(self.nTsteps + 1) * self.dTPRin
         self.dsetGroup.create_dataset("delta_TPR", (vascularNetwork.savedArraySize,), dtype='float64')
 
         self.dsetGroup.create_dataset("T", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Emax = np.empty(self.nTsteps + 1) * self.dEmaxin
+        self.delta_Emax = np.zeros(self.nTsteps + 1) 
+        self.delta_Emax[0] = self.dEmaxin
         self.dsetGroup.create_dataset("delta_Emax", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Vusv = np.empty(self.nTsteps + 1) * self.dVusvin
+        self.delta_Vusv = np.zeros(self.nTsteps + 1)
+        self.delta_Vusv[0] = self.dVusvin
         self.dsetGroup.create_dataset("delta_Vusv", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_T = np.empty(self.nTsteps + 1) * self.dTin
+        self.delta_T = np.zeros(self.nTsteps + 1) 
+        self.delta_T[0] = self.dTin
         self.dsetGroup.create_dataset("delta_T", (vascularNetwork.savedArraySize,), dtype='float64')
 
 
@@ -848,6 +852,9 @@ class CarotidBaroreceptor(Baroreceptor):
     def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
         super(CarotidBaroreceptor, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
         if saving:
+            
+           
+            self.dsetGroup["Ptild"][nDB:nDE] = 0.5*(self.PtildLeft[nSB:nSE] + self.PtildLeft[nSB:nSE])
             # save solution for carotid baroreceptor type
             self.dsetGroup["F_cs"][nDB:nDE] = self.F_cs[nSB:nSE]
 
@@ -1130,23 +1137,37 @@ class CombinedBaroreflex(Baroreceptor):
         constructor for the CombinedBaroreflex
         """
         # System and Vessel Variables
-        super(CombinedBaroreflex, self).__init__(BaroDict)
         self.name = 'CombinedBaroreflex'
+        self.pn = 100.*133.32
+        self.ka = 1568.*0.75
+        self.tau_z = 6.37
         self.carotid = CarotidBaroreceptor({})
-        self.carotid.changeEffectors = False
-        self.carotid.baroId = 2
         self.carotid.vesselIdLeft = 12
         self.carotid.vesselIdRight = 16
+        self.carotid.pn = self.pn
+        self.carotid.ka = self.ka 
+        self.carotid_G_R = 0.5
+        self.carotid_G_T = 0.4
+        self.carotid_G_Emax = 0.5
+        self.carotid_G_Vusv = 0.5
         
-        self.aortic = bugenhagenAorticBR({})
+        self.carotid.changeEffectors = False
+        self.carotid.baroId = 2
+        
+        # self.aortic = bugenhagenAorticBR({})
+        # self.aortic.vesselIds = [2, 14]
+        self.aortic = CarotidBaroreceptor({})
+        self.aortic.vesselIdLeft = 2
+        self.aortic.vesselIdRight = 14
         self.aortic.changeEffectors = False
         self.aortic.baroId = 3
-        self.aortic.vesselIds = [2, 14]
-        self.aortic_ke = 0.0675/2.0
+        self.aortic.pn = self.pn
+        self.aortic.ka = self.ka
         self.aortic_G_R = 0.5
-        self.aortic_G_T = 0.5
+        self.aortic_G_T = 0.7
         self.aortic_G_Emax = 0.5
         self.aortic_G_Vusv = 0.5
+        
         
         
         # # model parameters for the TPR effector part of the Ursino model  - Ursino 1999
@@ -1162,10 +1183,10 @@ class CombinedBaroreflex(Baroreceptor):
         self.E0 = 2.2502 * 133.322368e6  # 2.392*133.322368e6 # value in absence of sympathetic drive
 
         # model parameters for the T effector part of the Ursino model  - Ursino 1999
-        self.cT = -0.08  # gain
+        self.cT = -0.08*2.  # gain
         self.tauT = 2.0  # time constant
         self.DT = 2.0  # pure delay
-        self.T0 = 0.580  # 1.1 # 0.580 is the value in absence of sympathetic drive so it can only get smaller than this
+        self.T0 = 1.1 # 0.580 is the value in absence of sympathetic drive so it can only get smaller than this
 
 
         # model parameters for the Vusv effector part of the Ursino model  - Ursino 1999
@@ -1188,8 +1209,21 @@ class CombinedBaroreflex(Baroreceptor):
         
         self.Res0 = {}  # Windkessel resistances of all boundaries --> for updating the resistances
         self.ResTot0 = 0.0  # total resistance of the windkessels
+        
+        
+        # update with dictionary
+        super(CombinedBaroreflex, self).__init__(BaroDict)
+        self.update(BaroDict)
 
-    
+    def update(self,BaroDict):
+        super(CombinedBaroreflex,self).update(BaroDict)
+        self.carotid.pn = self.pn
+        self.carotid.ka = self.ka 
+        self.carotid.tau_z = self.tau_z
+        self.aortic.pn = self.pn
+        self.aortic.ka = self.ka 
+        self.aortic.tau_z = self.tau_z
+
     def initializeForSimulation(self, flowSolver, vascularNetwork):
         super(CombinedBaroreflex, self).initializeForSimulation(flowSolver, vascularNetwork)
         self.carotid.initializeForSimulation(flowSolver, vascularNetwork)
@@ -1219,21 +1253,22 @@ class CombinedBaroreflex(Baroreceptor):
         self.T0 = self.boundaryConditionII.T  #
         self.Vusv0 = self.venousPool.Vusv0  #
         
-        # efferent part
-        self.Fe_aa = np.empty(self.nTsteps + 1)
-        self.dsetGroup.create_dataset("F_aortic_efferent", (vascularNetwork.savedArraySize,), dtype='float64')
 
         # effector parts: initilized with the initial value of the respective quantities
-        self.delta_TPR = np.empty(self.nTsteps + 1) * self.dTPRin
+        self.delta_TPR = np.zeros(self.nTsteps + 1) * self.dTPRin
         self.dsetGroup.create_dataset("delta_TPR", (vascularNetwork.savedArraySize,), dtype='float64')
 
         self.dsetGroup.create_dataset("T", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Emax = np.empty(self.nTsteps + 1) * self.dEmaxin
+        self.delta_Emax = np.zeros(self.nTsteps + 1) 
+        self.delta_Emax[0] = self.dEmaxin
         self.dsetGroup.create_dataset("delta_Emax", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Vusv = np.empty(self.nTsteps + 1) * self.dVusvin
+        self.delta_Vusv = np.zeros(self.nTsteps + 1)
+        self.delta_Vusv[0] = self.dVusvin
         self.dsetGroup.create_dataset("delta_Vusv", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_T = np.empty(self.nTsteps + 1) * self.dTin
+        self.delta_T = np.zeros(self.nTsteps + 1) 
+        self.delta_T[0] = self.dTin
         self.dsetGroup.create_dataset("delta_T", (vascularNetwork.savedArraySize,), dtype='float64')
+
     
     def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
         super(CombinedBaroreflex, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
@@ -1242,16 +1277,12 @@ class CombinedBaroreflex(Baroreceptor):
         
         if saving:
             # save solution for carotid baroreceptor type
-            self.dsetGroup["F_aortic_efferent"][nDB:nDE] = self.Fe_aa[nSB:nSE]
             self.dsetGroup["T"][nDB:nDE] = self.delta_T[nSB:nSE] + self.T0
             self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE]
             self.dsetGroup["delta_Emax"][nDB:nDE] = self.delta_Emax[nSB:nSE]
             self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE]
             self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE]
 
-    def aorticEfferentFiringRate(self, n):
-        self.Fe_aa[n + 1] = self.carotid.fe_inf + (self.carotid.fe_0 - self.carotid.fe_inf) * np.exp(-self.aortic_ke * self.aortic.n[n + 1])
-    
     def resistanceEffector(self, n):
         """
         Effector part for TPR of the Baroreceptor model as defined by Ursino 1999
@@ -1266,8 +1297,10 @@ class CombinedBaroreflex(Baroreceptor):
 
         elif n > delay:
             deltaF_cs = self.carotid.F_efferent[n + 1 - delay] - self.carotid.fe_min
-            deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
-            deltaF_combined = self.aortic_G_R * deltaF_aa + (1 - self.aortic_G_R) * deltaF_cs
+            deltaF_aa = self.aortic.F_efferent[n + 1 - delay] - self.aortic.fe_min
+            # deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
+            # deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
+            deltaF_combined = (self.aortic_G_R * deltaF_aa + self.carotid_G_R * deltaF_cs)
             
             if deltaF_combined >= 0.0:
                 vR = self.cR * math.log(deltaF_combined + 1)
@@ -1292,8 +1325,9 @@ class CombinedBaroreflex(Baroreceptor):
 
         elif n > delay:
             deltaF_cs = self.carotid.F_efferent[n + 1 - delay] - self.carotid.fe_min
-            deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
-            deltaF_combined = self.aortic_G_Emax * deltaF_aa + (1 - self.aortic_G_Emax) * deltaF_cs
+            deltaF_aa = self.aortic.F_efferent[n + 1 - delay] - self.aortic.fe_min
+            # deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
+            deltaF_combined = self.aortic_G_Emax * deltaF_aa + self.carotid_G_Emax * deltaF_cs
             
             if deltaF_combined >= 0.0:
                 vE = self.cE * np.log(deltaF_combined + 1)
@@ -1318,8 +1352,9 @@ class CombinedBaroreflex(Baroreceptor):
 
         elif n > delay:
             deltaF_cs = self.carotid.F_efferent[n + 1 - delay] - self.carotid.fe_min
-            deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
-            deltaF_combined = self.aortic_G_T * deltaF_aa + (1 - self.aortic_G_T) * deltaF_cs
+            deltaF_aa = self.aortic.F_efferent[n + 1 - delay] - self.aortic.fe_min
+            # deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
+            deltaF_combined = self.aortic_G_T * deltaF_aa + self.carotid_G_T * deltaF_cs
 
             if deltaF_combined >= 0.0:
                 vT = self.cT * math.log(deltaF_combined + 1)
@@ -1344,8 +1379,9 @@ class CombinedBaroreflex(Baroreceptor):
 
         elif n > delay:
             deltaF_cs = self.carotid.F_efferent[n + 1 - delay] - self.carotid.fe_min
-            deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
-            deltaF_combined = self.aortic_G_Vusv * deltaF_aa + (1 - self.aortic_G_Vusv) * deltaF_cs
+            deltaF_aa = self.aortic.F_efferent[n + 1 - delay] - self.aortic.fe_min
+            # deltaF_aa = self.Fe_aa[n + 1 - delay] - self.carotid.fe_min
+            deltaF_combined = self.aortic_G_Vusv * deltaF_aa + self.carotid_G_Vusv * deltaF_cs
 
             if deltaF_combined >= 0.0:
                 vVusv = self.cVusv * np.log(deltaF_combined + 1)
@@ -1425,7 +1461,7 @@ class CombinedBaroreflex(Baroreceptor):
         n_mem = self.currentMemoryIndex[0]
         self.carotid()
         self.aortic()
-        self.aorticEfferentFiringRate(n)
+        # self.aorticEfferentFiringRate(n)
         self.resistanceEffector(n)
         self.EmaxLVEffector(n)
         self.TEffector(n)

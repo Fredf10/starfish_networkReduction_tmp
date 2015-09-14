@@ -71,11 +71,14 @@ vascularNetworkElements = ['simulationContext',
 
 baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
 
+CombinedBaroreflexElements = [ 'baroId', 'modelName',
+                               'cR', 'cE','cT', 'cVusv','pn','ka','tau_z',
+                               'aortic_G_R', 'aortic_G_T', 'aortic_G_Emax', 'aortic_G_Vusv', 
+                               'carotid_G_R', 'carotid_G_T', 'carotid_G_Emax', 'carotid_G_Vusv']
 baroreceptorModelElements = {'bugenhagenAorticBR' : [],
                              'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','HR0', 'HRmax','HRmin'],
                              'CarotidBaroreceptor': ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName'],
-                             'CombinedBaroreflex' : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName',
-                                                             'aortic_ke', 'aortic_G_R', 'aortic_G_T', 'aortic_G_Emax', 'aortic_G_Vusv']
+                             'CombinedBaroreflex' : CombinedBaroreflexElements,
                              }
 
 
