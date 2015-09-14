@@ -2175,6 +2175,12 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.T_BRX = self.T
         self.Emax_BRX = self.Emax
         self.Emin_BRX = self.Emin
+        
+        # Runtime Variables
+        self.rt_T = self.T
+        self.rt_Emax = self.Emax
+        self.rt_Emin = self.Emin
+        self.rt_Tpeak = self.Tpeak
 
         self.V0 = 20e-6
 
@@ -2215,7 +2221,13 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         # BRX update variables
         self.T_BRX = self.T
         self.Emax_BRX = self.Emax
-        self.Emin_BRX = self.Emin
+        self.Emin_BRX = self.Emin      
+        # Runtime Variables
+        self.rt_T = self.T
+        self.rt_Emax = self.Emax
+        self.rt_Emin = self.Emin
+        self.rt_Tpeak = self.Tpeak
+
 
     def initializeSolutionVectors(self, Tsteps):
         """Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state
@@ -2262,10 +2274,10 @@ class VaryingElastanceSimple(BoundaryConditionType2):
             self.cycleNumber += 1
             self.num = 0
             self.newCycle = True
-            self.T = self.T_BRX
-            self.Tpeak = 0.4*self.T
-            self.Emax = self.Emax_BRX
-            self.Emin = self.Emin_BRX
+            self.rt_T = self.T_BRX
+            self.rt_Tpeak = 0.4*self.rt_T
+            self.rt_Emax = self.Emax_BRX
+            self.rt_Emin = self.Emin_BRX
 
     def funcPos0(self, _domega, R, n, dt, Pn, Qn, A):
 
@@ -2391,11 +2403,11 @@ class VaryingElastanceSimple(BoundaryConditionType2):
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
            according to Tpeak, T, Emax and Emin. """
-        a1 = 0.708 * self.Tpeak
+        a1 = 0.708 * self.rt_Tpeak
         a2 = 1.677 * a1
 
         n1, n2 = self.n1, self.n2
         shapeFunction1 = (t / (a1)) ** n1 / (1 + (t / (a1)) ** n1)
         shapeFunction2 = (1 + (t / (a2)) ** n2) ** (-1)
-        return (self.Emax - self.Emin) * self.alpha * shapeFunction1 * shapeFunction2 + self.Emin
+        return (self.rt_Emax - self.rt_Emin) * self.alpha * shapeFunction1 * shapeFunction2 + self.rt_Emin
 
