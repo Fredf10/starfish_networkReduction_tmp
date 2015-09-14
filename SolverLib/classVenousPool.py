@@ -181,9 +181,11 @@ class venousPool(cSBO.StarfishBaseObject):
         # 3641.5166289669837
         '''
 
+        # TODO figure out how to have BRX not need these as maximal values
+        self.V = 3770.4477485970647e-6 # 3892e-6 # 5600.0e-6 *0.61# * 0.61 # estimated blood volume on venous side under normal conditions
+        self.Vusv0 =  3400.e-6 # 2378e-6 #  ? 3213e-6 # unstretched volume at reference state
         
-        self.V = 3270.4477485970647e-6 # 3892e-6 # 5600.0e-6 *0.61# * 0.61 # estimated blood volume on venous side under normal conditions
-        self.Vusv0 = 2378e-6 #  ? 3213e-6 # unstretched volume at reference state
+        
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
         self.k = 0.1124 #0.1124e-9 # constant
