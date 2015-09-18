@@ -187,7 +187,7 @@ class DistributionManagerChaospy(DistributionManager):
         # calculate samplesSize from expansion order if given
         if expansionOrder != None:
             self.expansionOrder = expansionOrder
-            self.samplesSize = 2*cp.terms(expansionOrder,self.distributionDimension)
+            self.samplesSize = int(2*cp.terms(expansionOrder,self.distributionDimension))
                     
         self.samples = self.jointDistribution.sample(self.samplesSize,sampleMethod).transpose()   
              

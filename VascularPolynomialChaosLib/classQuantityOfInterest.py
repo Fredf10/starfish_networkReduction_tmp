@@ -44,13 +44,13 @@ class QuantityOfInterest(object):
         self.gPCExpansion = cp.fit_regression(distributionManager.orthogonalPolynomials, distributionManager.samples.T, self.data)
                  
         # statistics
-        self.expectedValue       = cp.E(self.gPCExpansion, distributionManager.distributions)
-        self.variance            = cp.Var(self.gPCExpansion, distributionManager.distributions)
-        self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributionManager.distributions)
+        self.expectedValue       = cp.E(self.gPCExpansion, distributionManager.jointDistribution)
+        self.variance            = cp.Var(self.gPCExpansion, distributionManager.jointDistribution)
+        self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributionManager.jointDistribution)
         self.conficenceInterval =  self.conficenceInterval.reshape(2,len(np.atleast_1d(self.expectedValue)))
         
         # conditional expected values  and sensitivity coefficients
-        distributionDimension = len(distributionManager.distributions)
+        distributionDimension = len(distributionManager.jointDistribution)
         if distributionDimension > 1:
             # test dependecy or not
             if distributionManager.dependentCase == False:
@@ -59,21 +59,32 @@ class QuantityOfInterest(object):
                 self.conditionalVariance      = []
                 # conditional mean and variance
                 for rvIndex in xrange(distributionDimension):
-                    currDistMean = cp.E(distributionManager.distributions)
+                    currDistMean = cp.E(distributionManager.jointDistribution)
                     currDistMean[rvIndex] = np.nan
                     # reduce polynomials
                     currPolynomTime = self.gPCExpansion(*currDistMean)
-                    self.conditionalExpectedValue.append(cp.E(currPolynomTime,distributionManager.distributions))
-                    self.conditionalVariance.append(cp.Var(currPolynomTime,distributionManager.distributions))    
+                    self.conditionalExpectedValue.append(cp.E(currPolynomTime,distributionManager.jointDistribution))
+                    self.conditionalVariance.append(cp.Var(currPolynomTime,distributionManager.jointDistribution))    
             
                 # sensitivity indices
-                self.firstOrderSensitivities = cp.Sens_m(self.gPCExpansion,distributionManager.distributions)
-                self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributionManager.distributions)
+                self.firstOrderSensitivities = cp.Sens_m(self.gPCExpansion,distributionManager.jointDistribution)
+                self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributionManager.jointDistribution)
             else:
                 # dependent rancom variables
-                sensindices = cp.Sens_nataf(distributionManager.expansionOrder, distributionManager.jointDistributionDependent, distributionManager.samplesDependent, self.data)
-                self.firstOrderSensitivities = sensindices[0]
-                self.totalSensitivities      = sensindices[1]
+                
+                # this method is broken
+                #sensindices = cp.Sens_nataf(distributionManager.expansionOrder, distributionManager.jointDistributionDependent, distributionManager.samplesDependent.T, self.data)
+                #
+                
+                self.firstOrderSensitivities = cp.Sens_m_nataf(distributionManager.expansionOrder,
+                                                               distributionManager.jointDistributionDependent,
+                                                               distributionManager.samplesDependent.T,
+                                                               self.data)
+                
+                self.totalSensitivities      = cp.Sens_t_nataf(distributionManager.expansionOrder,
+                                                               distributionManager.jointDistributionDependent,
+                                                               distributionManager.samplesDependent.T,
+                                                               self.data)
             
     def calculateStatisticsMonteCarlo(self):
         '''

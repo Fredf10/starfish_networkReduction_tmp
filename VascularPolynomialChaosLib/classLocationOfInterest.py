@@ -19,9 +19,9 @@ class LocationOfInterest(TestBaseClass):
     
     # defined external data
     externVariables      = {'quantitiesOfInterestToProcess' : TestBaseClass.ExtValue(str, strCases = ['anything'], multiVar = True),
-                                 'queryLocation'            : TestBaseClass.ExtValue(str, strCases = ['anything']),
-                                 'xVal'                     : TestBaseClass.ExtValue(float,  unit = 'm'),
-                                 'confidenceAlpha'          : TestBaseClass.ExtValue(float)}
+                             'queryLocation'            : TestBaseClass.ExtValue(str, strCases = ['anything']),
+                             'xVal'                     : TestBaseClass.ExtValue(float,  unit = 'm'),
+                             'confidenceAlpha'          : TestBaseClass.ExtValue(float)}
     
     externXmlAttributes  = []
     
@@ -249,11 +249,10 @@ class LocationOfInterest(TestBaseClass):
             del self.quantitiesOfInterest[quantityName]
             self.quantitiesOfInterestToProcess.remove(quantityName)
             
-    def saveQuantitiyOfInterestData(self, saveFile):
+    def saveQuantitiyOfInterestData(self, locationGroup):
         '''
         method to save the data of the location and all quantities of interest to file
         '''
-        locationGroup = saveFile.create_group(self.queryLocation)
         locationGroup.attrs.create('quantitiesOfInterestToProcess', data=self.quantitiesOfInterestToProcess)
         locationGroup.attrs.create('xVal', data=self.xVal)
         locationGroup.attrs.create('confidenceAlpha', data=self.confidenceAlpha)

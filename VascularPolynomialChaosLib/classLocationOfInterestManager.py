@@ -55,9 +55,10 @@ class LocationOfInterestManager(TestBaseClass):
         saveFile = h5py.File(vpcQuantityOfInterestFile,'w')
         # add simulation time
         saveFile.create_dataset('simulationTime', data=self.simulationTime)
-        for locationOfInterest in self.locationsOfInterest.values():        
+        for locationId,locationOfInterest in self.locationsOfInterest.iteritems():        
             # add information of each quantity in each location
-            locationOfInterest.saveQuantitiyOfInterestData(saveFile)
+            locationGroup = saveFile.create_group(locationId)
+            locationOfInterest.saveQuantitiyOfInterestData(locationGroup)
         saveFile.flush()
         saveFile.close()
             

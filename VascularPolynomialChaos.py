@@ -87,9 +87,9 @@ def vascularPolyChaos():
     # 3. add dependentCase if existent 
     # TODO: add correlation matrix to xml definitions and variable dependentCase to definitions
     a = 0.5
-    CorrelationMatrix = np.array([[1.,a,a**2.0],
+    CorrelationMatrix = np.array([[1.,a,a],
                                   [a,1.,a],
-                                  [a**2.,a,1.]])
+                                  [a,a,1.]])
     dependentCase = False
        
     if dependentCase == True:

@@ -807,6 +807,7 @@ class FlowSolver(object):
                 A1 = self.vessels[vesselId].Asol[0][0:-1]
                 A2 = self.vessels[vesselId].Asol[0][1:]
                 volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+                
                 A1 = self.vessels[vesselId].Asol[-1][0:-1]
                 A2 = self.vessels[vesselId].Asol[-1][1:]
                 volumeSol  = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
