@@ -11,8 +11,8 @@ sys.path.append(cur + '/../')
 import UtilityLib.classStarfishBaseObject as cSBO
 
 import classVessel as cVes
-import SolverLib.classBaroreceptor as cBRX
-import SolverLib.classVenousPool as classVenousPool
+import classBaroreceptor as cBRX
+import classVenousPool as classVenousPool
 
 #sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
@@ -504,7 +504,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple']:
                     Qm = self.initialValues[vesselId]['Flow']
                     bC.update({'aorticFlowPreviousTimestep':Qm})
-                    bC.initializeSolutionVectors(self.nTsteps)
+                    bC.initializeSolutionVectors(self.nTsteps, self.savedArraySize,self.solutionDataFile)
                 if bC.type == 1:
                     if self.initialisationPhaseExist:
                         bC.update({'initialisationPhaseExist': True,
@@ -672,7 +672,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             vessel.Psol[0] = vessel.Psol[-1]
             vessel.Qsol[0] = vessel.Qsol[-1]
             vessel.Asol[0] = vessel.Asol[-1]
-        
+            
+        for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
+            for bC in boundaryConditions:
+                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple']:
+                    bC.flushSolutionData(saving,nDB,nDE,nSB,nSE)
+            
         for baro in self.baroreceptors.itervalues():
             baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
             

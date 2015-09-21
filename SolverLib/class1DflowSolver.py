@@ -23,8 +23,6 @@ import classSystemEquations
 import classConnections
 import classFields
 from classCommunicators import *
-from classBaroreceptor import *
-import classVenousPool
 import classDataHandler
 import classTimer
 

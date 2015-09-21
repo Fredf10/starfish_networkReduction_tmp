@@ -2165,7 +2165,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
         self.omegaNew = np.empty((2))
 
-        # Default parameters
+        # Default parameters (NOT Time VARYING)
         self.T = 1
         self.Emax = 2.31 * 133.3e6
         self.Emin = 0.06 * 133.3e6
@@ -2198,22 +2198,15 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.R22 = None
         self.DtW2 = None
 
-
-
-        # n-1 values
-# 		self.aorticFlowPreviousTimestep = None
-
-# 		self.system = {'both open':np.array([0,1,2]), 'mitral open': np.array([0,1]), 'aortic open':np.array([1,2])} 
-
+        # Cycle management for restarting isovolumetric phase
         self.newCycle = False
         self.cycleNumber = 0
         self.num = 0
-        self.atriumPressure = 7.5 * 133.32  # Pressure in the atrium ## venouse pressure?!
-
-# 		self.x0 = np.array([0.0, 0.0, 0.0]) #Initial values for the iterative solver
-
+        self.atriumPressure = 7.5 * 133.32  # TODO: Fix this: Pressure in the atrium ## venouse pressure?!
 
         self.dQInOut = np.empty((2))
+        
+        self.dsetHeart = None
 
     def update(self, bcDict):
         super(VaryingElastanceSimple,self).update(bcDict)
@@ -2229,11 +2222,14 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.rt_Tpeak = self.Tpeak
 
 
-    def initializeSolutionVectors(self, Tsteps):
-        """Initializes some solution vectors storing pressure, flow and volume of the ventricle, as well as opening and closing state
+    def initializeSolutionVectors(self, Tsteps, savedArraySize, solutionDataFile):
+        """Initializes some solution vectors storing pressure, flow and volume 
+        of the ventricle, as well as opening and closing state
 
-        NB! This method is not called from the class constructor, but is called externally by the initializeSolutionMatrices method in the solver,
-        this is a bit messy, but was the easiest way to do it since the BC is initiated before the number of time steps is known.
+        NB! This method is not called from the class constructor, but is 
+        called externally by the initializeSolutionMatrices method in the 
+        solver, this is a bit messy, but was the easiest way to do it since the 
+        BC is initiated before the number of time steps is known.
         """
 
         """ Initialize Solution Vectors """
@@ -2250,7 +2246,19 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.DtFlow = np.zeros(Tsteps+1)
         self.deltaP = np.zeros(Tsteps+1)
         self.aortaP = np.zeros(Tsteps+1)
-
+        
+            
+        self.dsetHeart = solutionDataFile.create_group('Heart')
+        self.dsetHeart.create_dataset("pressure", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("volume", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("mitralQ", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("Elastance", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("Flow", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("Flow2", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("deltaP", (savedArraySize,), dtype='float64')
+        self.dsetHeart.create_dataset("aortaP", (savedArraySize,), dtype='float64')
+        
+            
         """ Initial conditions in the ventricle"""
         self.pressure[0] = self.atriumPressure
         self.volume[0] = self.atriumPressure / self.E(0) + self.V0
@@ -2310,8 +2318,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.DtW2 = _domega / dt
 
 
-        self.Elastance[n + 1] = E / 133.3e6
-        self.Flow[n] = Qn * 1e6
+        self.Elastance[n + 1] = E
+        self.Flow[n] = Qn
         self.aortaP[n] = Pn
 # 		self.DtFlow[n]=(Qn-Qnold)/dt
         ventrPn = self.pressure[n]
@@ -2399,7 +2407,19 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
     def funcPos1(self, _domega, R, L, n, dt, P, Q, A):
         pass
-
+    
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
+        
+        if saving:
+            self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE]
+            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE] 
+            self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE]
+            self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE]
+            self.dsetHeart['Flow'][nDB:nDE] = self.Flow[nSB:nSE]
+            self.dsetHeart['Flow2'][nDB:nDE] = self.Flow2[nSB:nSE]
+            self.dsetHeart['deltaP'][nDB:nDE] = self.deltaP[nSB:nSE]
+            self.dsetHeart['aortaP'][nDB:nDE] = self.aortaP[nSB:nSE]
+    
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
            according to Tpeak, T, Emax and Emin. """
