@@ -537,6 +537,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
             
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
+        
     
     class WholeBodyTilt(cSBO.StarfishBaseObject):
         """Encapsulates data related to the tilting motion of the network.
@@ -1526,6 +1527,33 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)
 
         self.initialValues = initialValuesWithGravity
+
+    def evaluateTotalArterialCompliance(self):
+
+        #arterial compliance
+        arterialCompliance = 0
+        for vesselId, vessel_i in self.vessels.iteritems():
+            # vessel_i = self.vessels[vesselId]
+
+            p0, p1 = self.initialValues[vesselId]['Pressure']
+            initialPressure = np.linspace(p0, p1, int(vessel_i.N))
+            C = vessel_i.C(initialPressure)
+            
+            Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            
+            arterialCompliance = arterialCompliance + Cvol
+
+        windkesselCompliance = 0
+        for bcs in self.boundaryConditions.itervalues():
+            for bc in bcs:
+                if "Windkessel" in bc.name:
+                    windkesselCompliance = windkesselCompliance + bc.C
+            
+        print "arterial compliance", arterialCompliance*133.32*1e6
+        print "windkessel compliance", windkesselCompliance*133.32*1e6
+        print "total arterial compliance", (arterialCompliance+windkesselCompliance)*133.32*1e6
+        self.calculateNetworkResistance()
+        print "total arterial resistance", self.Rcum[self.root]/133.32*1e-6
 
     def evaluateWindkesselCompliance(self):
 
