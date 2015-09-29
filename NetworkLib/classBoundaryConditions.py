@@ -641,6 +641,7 @@ class FlowFromFile(BoundaryConditionType1):
 
         # # additional variables fill in with data in the readXML file
         self.filePathName = ''
+        self.networkDirectory = ''
         self.dataTime = []
         self.dataFlow = []
         self.loadedFile = False
@@ -649,7 +650,8 @@ class FlowFromFile(BoundaryConditionType1):
         try:
             # set the path relative to THIS file not the executing file!
             if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
-            pathAndFilename = ''.join([cur, '/../NetworkFiles/', self.filePathName])
+            
+            pathAndFilename = '/'.join([self.networkDirectory, self.filePathName])
             reader = csv.DictReader(open(pathAndFilename, 'rb'), delimiter=';')
         except Exception:
             self.exception("boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit".format(self.filePathName.split('/')[-1]))
@@ -2186,7 +2188,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
         self.K = 0.0
         # self.Rv = 0.00007500616 * 133 / (10 ** -6) # From Lau and Figueroa paper
-        self.Rv = 0.005 * 133 / (10 ** -6)
+        self.Rv = 0.003*133.32*1e6 #0.005 * 133 / (10 ** -6)
 
         ## Shape parameters
         self.alpha = 1.672
@@ -2261,7 +2263,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
             
         """ Initial conditions in the ventricle"""
         self.pressure[0] = self.atriumPressure
-        self.volume[0] = self.atriumPressure / self.E(0) + self.V0
+        self.volume[0]   = self.atriumPressure / self.E(0) + self.V0
 
     def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 

@@ -503,9 +503,9 @@ def loadNetworkFromXML(networkName ,
                                 # adjust path to boundary condition file
                                 if variable == 'filePathName':
                                     ## TODO: fix problem when loading an absolute path
-                                    # networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
+                                    networkDirectory = '/'.join(networkXmlFile.split('/')[0:-1])
                                     # variableValueStr = '/'.join([networkDirectory,variableValueStr])
-
+                                    boundaryDataDict['networkDirectory'] = networkDirectory
                                     boundaryDataDict['filePathName'] = variableValueStr
 
                             boundaryInstance.update(boundaryDataDict)

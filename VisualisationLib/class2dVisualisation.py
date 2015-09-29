@@ -435,7 +435,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         from matplotlib import rc
         from matplotlib import rcParams
         
-        rcParams['text.usetex'] = True
+        rcParams['text.usetex'] = False
         rcParams['text.latex.unicode'] = True
         rcParams['font.family'] = 'sans-serif'
         rcParams['font.size'] = self.fontSizeLabel
@@ -461,7 +461,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         ax2.spines['right'].set_visible(False)
         ax2.tick_params(axis='y', right='off')
            
-        ax2.set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+        ax2.set_xlabel('Time $s$', fontsize=self.fontSizeLabel)
            
         ax22 = ax2.twinx()
         ax22.set_visible(False)

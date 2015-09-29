@@ -116,7 +116,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
         
         # self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
-        self.venousPool = classVenousPool.venousPool({}) # TODO add to xml
+        self.venousPool = classVenousPool.StaticVenousPool({}) # TODO add to xml
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
@@ -406,6 +406,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # calculate the initial values of the network
             self.calculateInitialValues()
 
+            # evaluate the total arterial compiance and resistacne
+            self.evaluateNetworkResistanceAndCompliance()
+
             # show wave speed of network
             if self.quiet == False: self.showWaveSpeedOfNetwork()
 
@@ -425,8 +428,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         Enforces memory allocation.
         Set initial values for the simulations.
         """
-
-
 
         # initialize saving indices
         if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
@@ -539,6 +540,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
             
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
+        
     
     class WholeBodyTilt(cSBO.StarfishBaseObject):
         """Encapsulates data related to the tilting motion of the network.
@@ -1495,8 +1497,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # addjust bc condition
             try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
             except Exception:
-                self.exception("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
-                #exit()
+                self.warning("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
+                
+                self.initialisationPhaseExist = False
+                self.initPhaseTimeSpan = 0.
+                
             p1 = p0 - self.vessels[root].resistance * meanInflow
         else:
             raise ValueError("Neither flow or pressure value given at inflow point!")
@@ -1539,6 +1544,62 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.initialValues = initialValuesWithGravity
 
+    def evaluateNetworkResistanceAndCompliance(self):
+        
+        arterialCompliance = 0
+        
+        arterialCompliance120 = 0
+        arterialCompliance80  = 0
+        arterialCompliancePmean = 0
+        for vesselId, vessel_i in self.vessels.iteritems():
+
+            p0, p1 = self.initialValues[vesselId]['Pressure']
+            initialPressure = np.linspace(p0, p1, int(vessel_i.N))
+            C = vessel_i.C(initialPressure)
+            Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            
+            arterialCompliance = arterialCompliance + Cvol
+            
+            p0 = 120*133.32
+            p1 = p0
+            C = vessel_i.C(np.linspace(p0, p1, int(vessel_i.N)))
+            Cvol120 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] 
+            arterialCompliance120 = arterialCompliance120 + Cvol120
+            
+            p0 = 75*133.32
+            p1 = p0
+            C = vessel_i.C(np.linspace(p0, p1, int(vessel_i.N)))
+            Cvol80 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] 
+            arterialCompliance80 = arterialCompliance80 + Cvol80
+            
+            numberEstimates = 20
+            complianceEstimates = np.empty(numberEstimates)
+            for index,p in zip(xrange(numberEstimates),np.linspace(65.,110.,numberEstimates)):
+                pressure = np.linspace(p*133.32, p*133.32, int(vessel_i.N))
+                C = vessel_i.C(pressure)
+                complianceEstimates[index] = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] 
+                
+            arterialCompliancePmean = arterialCompliancePmean + np.mean(complianceEstimates)
+            
+        windkesselCompliance = 0
+        for bcs in self.boundaryConditions.itervalues():
+            for bc in bcs:
+                if "Windkessel" in bc.name:
+                    windkesselCompliance = windkesselCompliance + bc.C
+            
+        print "{:6} - arterial compliance initPressure".format(arterialCompliance*133.32*1e6)
+        print "{:6} - arterial compliance 120".format(arterialCompliance120*133.32*1e6)
+        print "{:6} - arterial compliance 80".format(arterialCompliance80*133.32*1e6)
+        print "{:6} - arterial compliance physiological MPA range 65-120 mmHg".format(arterialCompliancePmean*133.32*1e6)
+        print 
+        print "{:6} - windkessel compliance".format(windkesselCompliance*133.32*1e6)
+        print "--------------------------"
+        totalArterialCompliance = (arterialCompliancePmean+windkesselCompliance)
+        print "{:6} - total arterial compliance".format(totalArterialCompliance*133.32*1e6)
+        print "{:6} - ration between arterial/total compliance".format(arterialCompliancePmean/totalArterialCompliance)
+        self.calculateNetworkResistance()
+        print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
+
     def evaluateWindkesselCompliance(self):
 
         self.TotalVolumeComplianceTree = 0.0
@@ -1554,7 +1615,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
             self.Cends[vesselId] = C[-1]
 
-            Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] # ## works only if equidistant grid
+            
             # Cvol = C[-1]*vessel_i.length
 
             # print sum(C[1:-1])*vessel_i.dz[0], Cvol2, C[0]*vessel_i.length

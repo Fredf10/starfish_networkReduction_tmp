@@ -37,15 +37,15 @@ class StaticVenousPool(cSBO.StarfishBaseObject):
         
         self.update(dataDict)
         self.veinId  = 0
-        self.V = 5600.0e-6*0.61 # estimated blood volume on venous side under normal conditions
-        self.Vusv0 = 2378e-6 #  ? 3213e-6 # unstretched volume at reference state
+        self.V = 3770.4477485970647e-6 # estimated blood volume on venous side under normal conditions
+        self.Vusv0 = 3400e-6#  ? 3213e-6 # unstretched volume at reference state
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
         
         self.k = 0.1124 #0.1124e-9 # constant
         
-        self.pressureGain = 1.0/0.228 # pressure gain between CVP and LAP - Bell paper
+        self.pressureGain = 3. #1.0/0.228 # pressure gain between CVP and LAP - Bell paper
         
-        self.Vusv = 2335.46e-6 #3037.0e-6 # initial states for Vus, CVP and LAP
+        self.Vusv = 3400e-6 #3037.0e-6 # initial states for Vus, CVP and LAP
         self.P = self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
         self.P_LA = self.pressureGain*self.P
         
