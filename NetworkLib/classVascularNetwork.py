@@ -116,7 +116,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
         
         # self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
-        self.venousPool = classVenousPool.venousPool({}) # TODO add to xml
+        self.venousPool = classVenousPool.StaticVenousPool({}) # TODO add to xml
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
@@ -1485,8 +1485,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # addjust bc condition
             try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
             except Exception:
-                self.exception("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
-                #exit()
+                self.warning("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
+                
+                self.initialisationPhaseExist = False
+                self.initPhaseTimeSpan = 0.
+                
             p1 = p0 - self.vessels[root].resistance * meanInflow
         else:
             raise ValueError("Neither flow or pressure value given at inflow point!")
