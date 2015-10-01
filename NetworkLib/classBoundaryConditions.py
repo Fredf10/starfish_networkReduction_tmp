@@ -1473,6 +1473,12 @@ class Windkessel3(BoundaryConditionType2):
 		return np.dot(R, self.omegaNew), self.dQInOut
 		
 
+	def f(self,Pn):
+		'''
+		
+		'''
+		
+
 
 class L_network(BoundaryConditionType2):
 	"""	
