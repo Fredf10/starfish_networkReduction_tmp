@@ -1274,18 +1274,22 @@ class Windkessel2(BoundaryConditionType2):
         """
         r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
            
-#         taudt = self.Rc * self.C / dt
-#         a = self.Rc * r21 - (1. + 2.*taudt) * r11
-#         b = (2.*taudt + 1.) * r12 - self.Rc * r22
-#         _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
         
-        import scipy.optimize as so
+        newScheme = False
+        if newScheme == True:
         
-        # TODO: replace
-        _omegaOld = r21*P+r22*Q
-        _domega = so.fsolve(self.solveW2, x0 = _omegaOld, args = [domegaField_,P, Q, dt, r11, r12, r21, r22])
+            import scipy.optimize as so
+            # TODO: replace
+            _omegaOld = r21*P+r22*Q
+            _domega = so.fsolve(self.solveW2, x0 = _omegaOld, args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22])
+                 
+        else:
+            taudt = self.Rc * self.C / dt
+            a = self.Rc * r21 - (1. + 2.*taudt) * r11
+            b = (2.*taudt + 1.) * r12 - self.Rc * r22
+            _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
         
-        
+                 
         self.omegaNew[0] = domegaField_
         self.omegaNew[1] = _domega
         
@@ -1293,15 +1297,18 @@ class Windkessel2(BoundaryConditionType2):
         
         return np.dot(R, self.omegaNew), self.dQInOut
             
-    def solveW2(self,_domega, domegaField_,P, Q, dt, r11, r12, r21, r22 ):
+    def solveW2(self,_domega, args):
         
+        domegaField_,P, Q, dt,n, r11, r12, r21, r22 = args
         
-        dp = r11*domegaField_+ r12*_domega
-        dq = r11*domegaField_+ r22*_domega
+        dP = r11*domegaField_+ r12*_domega
+        dQ = r21*domegaField_+ r22*_domega
         
-        raise NotImplementedError("JACOB°!!!!!")
-
-
+        return self.f(dP,dQ,P,Q,dt,n)
+        
+    def f(self,dP,dQ,P,Q,dt,n):
+        return self.C*dP/dt + (P+dP-self.venousPressure[n])/self.Rc - (Q+dQ)
+       
 class Windkessel3(BoundaryConditionType2):
     """
     Boundary profile - type 2
