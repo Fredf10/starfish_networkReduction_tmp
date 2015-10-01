@@ -1471,13 +1471,7 @@ class Windkessel3(BoundaryConditionType2):
 		self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()	
 		
 		return np.dot(R, self.omegaNew), self.dQInOut
-		
 
-	def f(self,Pn):
-		'''
-		
-		'''
-		
 
 
 class L_network(BoundaryConditionType2):
