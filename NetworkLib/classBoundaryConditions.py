@@ -94,26 +94,26 @@ class BoundaryConditionType1(BoundaryCondition):
         self.prescribe = 'influx'
 
         # # variables from xml
-        self.amp	 = 0
+        self.amp     = 0
         self.ampConst = 0
         self.Npulse = 1.
-        self.freq	 = 1.
+        self.freq     = 1.
         self.Tpulse = 0.
         self.Tspace = 0.
         self.runtimeEvaluation = False
 
         # # evaluated values
-        self.lastU       		 = 0.0
-        self.TmeanFlow   		 = 0.0
-        self.initPhaseTimeSpan 	 = 0.0
-        self.MeanFlow    		 = 0.0
-        self.Tperiod     		 = 0.0
-        self.pulseTime   		 = []
-        self.duMatrix    		 = np.ones(2)
-        self.duVector    		 = np.empty(2)
+        self.lastU                = 0.0
+        self.TmeanFlow            = 0.0
+        self.initPhaseTimeSpan      = 0.0
+        self.MeanFlow             = 0.0
+        self.Tperiod              = 0.0
+        self.pulseTime            = []
+        self.duMatrix             = np.ones(2)
+        self.duVector             = np.empty(2)
 
         self.initialisationPhaseExist = False
-        self.nTstepsInitPhase 		 = 0
+        self.nTstepsInitPhase          = 0
 
         # values to manipulate period during runtime
         self.updateTime = -10.0
@@ -278,7 +278,7 @@ class BoundaryConditionType1(BoundaryCondition):
 
             return ampT * self.duMatrix
 
-        except Exception:  		#TODO This should get some comment to explain what is happening.
+        except Exception:          #TODO This should get some comment to explain what is happening.
             return ampT * self.duMatrix
 
     def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
@@ -309,7 +309,7 @@ class BoundaryConditionType1(BoundaryCondition):
                 evaluatedTime[n-nTstepsStart]= (n-nTstepsStart)*dt
 
             evaluatedMeanFlow = np.mean(evaluatedFlow)
-            #print dt, evaluatedMeanFlow ,	MeanFlow-evaluatedMeanFlow, nTsteps-nTstepsStart
+            #print dt, evaluatedMeanFlow ,    MeanFlow-evaluatedMeanFlow, nTsteps-nTstepsStart
             if evaluatedMeanFlow < min(evaluatedFlow) or evaluatedMeanFlow > max(evaluatedFlow):
                 print "Meanflow is wrong"
                 exit()
@@ -327,10 +327,10 @@ class BoundaryConditionType1(BoundaryCondition):
                          + "\n(evaluated with integral over one period)."
                          + "\nThe difference is {} ml s-1".format(difference*1.e6))
             self.warning(tmpstring,  noException= True, quiet= quiet)
-#			if quiet == False:
-#				print """\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
-#	            (evaluated with integral over one period).
-#	            The difference is {} ml s-1 \n""".format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6,difference*1.e6)
+#            if quiet == False:
+#                print """\n  WARNING:  given meanFlow given {} differs from meanFlow of boundaryCondition {}
+#                (evaluated with integral over one period).
+#                The difference is {} ml s-1 \n""".format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6,difference*1.e6)
 # TODO wrote this before convert to spaces
 
         self.TmeanFlow = 0
@@ -449,9 +449,9 @@ class AortaInflow(BoundaryConditionType1):
         self.T = 0.9550
 
     def function1(self, t, t0, pulsNum):
-# 		print "self.T is: ", self.T
-# 		print "t is: ", t
-# 		print "return is: ", 4.0*np.arctan(1.0)*0.0126*0.0126*(0.20617+0.37759*np.sin(2*np.pi*t/self.T+0.59605)+0.2804*np.sin(4*np.pi*t/self.T-0.35859)+0.15337*np.sin(6*np.pi*t/self.T-1.2509)-0.049889*np.sin(8*np.pi*t/self.T+1.3921)+0.038107*np.sin(10*np.pi*t/self.T-1.1068)-0.041699*np.sin(12*np.pi*t/self.T+1.3985)-0.020754*np.sin(14*np.pi*t/self.T+0.72921)+0.013367*np.sin(16*np.pi*t/self.T-1.5394)-0.021983*np.sin(18*np.pi*t/self.T+0.95617)-0.013072*np.sin(20*np.pi*t/self.T-0.022417)+0.0037028*np.sin(22*np.pi*t/self.T-1.4146)-0.013973*np.sin(24*np.pi*t/self.T+0.77416)-0.012423*np.sin(26*np.pi*t/self.T-0.46511)+0.0040098*np.sin(28*np.pi*t/self.T+0.95145)-0.0059704*np.sin(30*np.pi*t/self.T+0.86369)-0.0073439*np.sin(32*np.pi*t/self.T-0.64769)+0.0037006*np.sin(34*np.pi*t/self.T+0.74663)-0.0032069*np.sin(36*np.pi*t/self.T+0.85926)-0.0048171*np.sin(38*np.pi*t/self.T-1.0306)+0.0040403*np.sin(40*np.pi*t/self.T+0.28009)-0.0032409*np.sin(42*np.pi*t/self.T+1.202)-0.0032517*np.sin(44*np.pi*t/self.T-0.93316)+0.0029112*np.sin(46*np.pi*t/self.T+0.21405)-0.0022708*np.sin(48*np.pi*t/self.T+1.1869)-0.0021566*np.sin(50*np.pi*t/self.T-1.1574)+0.0025511*np.sin(52*np.pi*t/self.T-0.12915)-0.0024448*np.sin(54*np.pi*t/self.T+1.1185)-0.0019032*np.sin(56*np.pi*t/self.T-0.99244)+0.0019476*np.sin(58*np.pi*t/self.T-0.059885)-0.0019477*np.sin(60*np.pi*t/self.T+1.1655)-0.0014545*np.sin(62*np.pi*t/self.T-0.85829)+0.0013979*np.sin(64*np.pi*t/self.T+0.042912)-0.0014305*np.sin(66*np.pi*t/self.T+1.2439)-0.0010775*np.sin(68*np.pi*t/self.T-0.79464)+0.0010368*np.sin(70*np.pi*t/self.T-0.0043058)-0.0012162*np.sin(72*np.pi*t/self.T+1.211)-0.00095707*np.sin(74*np.pi*t/self.T-0.66203)+0.00077733*np.sin(76*np.pi*t/self.T+0.25642)-0.00092407*np.sin(78*np.pi*t/self.T+1.3954)-0.00079585*np.sin(80*np.pi*t/self.T-0.49973))
+#         print "self.T is: ", self.T
+#         print "t is: ", t
+#         print "return is: ", 4.0*np.arctan(1.0)*0.0126*0.0126*(0.20617+0.37759*np.sin(2*np.pi*t/self.T+0.59605)+0.2804*np.sin(4*np.pi*t/self.T-0.35859)+0.15337*np.sin(6*np.pi*t/self.T-1.2509)-0.049889*np.sin(8*np.pi*t/self.T+1.3921)+0.038107*np.sin(10*np.pi*t/self.T-1.1068)-0.041699*np.sin(12*np.pi*t/self.T+1.3985)-0.020754*np.sin(14*np.pi*t/self.T+0.72921)+0.013367*np.sin(16*np.pi*t/self.T-1.5394)-0.021983*np.sin(18*np.pi*t/self.T+0.95617)-0.013072*np.sin(20*np.pi*t/self.T-0.022417)+0.0037028*np.sin(22*np.pi*t/self.T-1.4146)-0.013973*np.sin(24*np.pi*t/self.T+0.77416)-0.012423*np.sin(26*np.pi*t/self.T-0.46511)+0.0040098*np.sin(28*np.pi*t/self.T+0.95145)-0.0059704*np.sin(30*np.pi*t/self.T+0.86369)-0.0073439*np.sin(32*np.pi*t/self.T-0.64769)+0.0037006*np.sin(34*np.pi*t/self.T+0.74663)-0.0032069*np.sin(36*np.pi*t/self.T+0.85926)-0.0048171*np.sin(38*np.pi*t/self.T-1.0306)+0.0040403*np.sin(40*np.pi*t/self.T+0.28009)-0.0032409*np.sin(42*np.pi*t/self.T+1.202)-0.0032517*np.sin(44*np.pi*t/self.T-0.93316)+0.0029112*np.sin(46*np.pi*t/self.T+0.21405)-0.0022708*np.sin(48*np.pi*t/self.T+1.1869)-0.0021566*np.sin(50*np.pi*t/self.T-1.1574)+0.0025511*np.sin(52*np.pi*t/self.T-0.12915)-0.0024448*np.sin(54*np.pi*t/self.T+1.1185)-0.0019032*np.sin(56*np.pi*t/self.T-0.99244)+0.0019476*np.sin(58*np.pi*t/self.T-0.059885)-0.0019477*np.sin(60*np.pi*t/self.T+1.1655)-0.0014545*np.sin(62*np.pi*t/self.T-0.85829)+0.0013979*np.sin(64*np.pi*t/self.T+0.042912)-0.0014305*np.sin(66*np.pi*t/self.T+1.2439)-0.0010775*np.sin(68*np.pi*t/self.T-0.79464)+0.0010368*np.sin(70*np.pi*t/self.T-0.0043058)-0.0012162*np.sin(72*np.pi*t/self.T+1.211)-0.00095707*np.sin(74*np.pi*t/self.T-0.66203)+0.00077733*np.sin(76*np.pi*t/self.T+0.25642)-0.00092407*np.sin(78*np.pi*t/self.T+1.3954)-0.00079585*np.sin(80*np.pi*t/self.T-0.49973))
         return 4.0*np.arctan(1.0)*0.0126*0.0126*(0.20617+0.37759*np.sin(2*np.pi*t/self.T+0.59605)+0.2804*np.sin(4*np.pi*t/self.T-0.35859)+0.15337*np.sin(6*np.pi*t/self.T-1.2509)-0.049889*np.sin(8*np.pi*t/self.T+1.3921)+0.038107*np.sin(10*np.pi*t/self.T-1.1068)-0.041699*np.sin(12*np.pi*t/self.T+1.3985)-0.020754*np.sin(14*np.pi*t/self.T+0.72921)+0.013367*np.sin(16*np.pi*t/self.T-1.5394)-0.021983*np.sin(18*np.pi*t/self.T+0.95617)-0.013072*np.sin(20*np.pi*t/self.T-0.022417)+0.0037028*np.sin(22*np.pi*t/self.T-1.4146)-0.013973*np.sin(24*np.pi*t/self.T+0.77416)-0.012423*np.sin(26*np.pi*t/self.T-0.46511)+0.0040098*np.sin(28*np.pi*t/self.T+0.95145)-0.0059704*np.sin(30*np.pi*t/self.T+0.86369)-0.0073439*np.sin(32*np.pi*t/self.T-0.64769)+0.0037006*np.sin(34*np.pi*t/self.T+0.74663)-0.0032069*np.sin(36*np.pi*t/self.T+0.85926)-0.0048171*np.sin(38*np.pi*t/self.T-1.0306)+0.0040403*np.sin(40*np.pi*t/self.T+0.28009)-0.0032409*np.sin(42*np.pi*t/self.T+1.202)-0.0032517*np.sin(44*np.pi*t/self.T-0.93316)+0.0029112*np.sin(46*np.pi*t/self.T+0.21405)-0.0022708*np.sin(48*np.pi*t/self.T+1.1869)-0.0021566*np.sin(50*np.pi*t/self.T-1.1574)+0.0025511*np.sin(52*np.pi*t/self.T-0.12915)-0.0024448*np.sin(54*np.pi*t/self.T+1.1185)-0.0019032*np.sin(56*np.pi*t/self.T-0.99244)+0.0019476*np.sin(58*np.pi*t/self.T-0.059885)-0.0019477*np.sin(60*np.pi*t/self.T+1.1655)-0.0014545*np.sin(62*np.pi*t/self.T-0.85829)+0.0013979*np.sin(64*np.pi*t/self.T+0.042912)-0.0014305*np.sin(66*np.pi*t/self.T+1.2439)-0.0010775*np.sin(68*np.pi*t/self.T-0.79464)+0.0010368*np.sin(70*np.pi*t/self.T-0.0043058)-0.0012162*np.sin(72*np.pi*t/self.T+1.211)-0.00095707*np.sin(74*np.pi*t/self.T-0.66203)+0.00077733*np.sin(76*np.pi*t/self.T+0.25642)-0.00092407*np.sin(78*np.pi*t/self.T+1.3954)-0.00079585*np.sin(80*np.pi*t/self.T-0.49973))
 
 class AoBifInflow(BoundaryConditionType1):
@@ -773,8 +773,8 @@ class PrescribedTotalFlow(BoundaryConditionType2):
             # 2. and make inverse
             # det = l11*l22 - l12*l21 = -l21
             self.R[0][0] =  L[1][1] / -L[1][0]
-            self.R[0][1] =  1./L[1][0] 	#-1 / -L[1][0]
-            self.R[1][0] =  1.			#-L[1][0] / -L[1][0]
+            self.R[0][1] =  1./L[1][0]     #-1 / -L[1][0]
+            self.R[1][0] =  1.            #-L[1][0] / -L[1][0]
             self.R[1][1] =  0
             # 3. set omega vector
             self.omegaNew[0] = duPrescribed[1]
@@ -984,7 +984,7 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
         self.Tpulse = 0.0
         self.Tspace = 0.0
         self.freq = 1.
-        self.Npulse	 = 1.
+        self.Npulse     = 1.
         self.TmeanFlow = 0.0
         # ##
 
@@ -1273,20 +1273,33 @@ class Windkessel2(BoundaryConditionType2):
         #return np.array([domega_ , _domega])
         """
         r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
-
-        taudt = self.Rc * self.C / dt
-
-        a = self.Rc * r21 - (1. + 2.*taudt) * r11
-        b = (2.*taudt + 1.) * r12 - self.Rc * r22
-
-        _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
-
+           
+#         taudt = self.Rc * self.C / dt
+#         a = self.Rc * r21 - (1. + 2.*taudt) * r11
+#         b = (2.*taudt + 1.) * r12 - self.Rc * r22
+#         _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
+        
+        import scipy.optimize as so
+        
+        # TODO: replace
+        _omegaOld = r21*P+r22*Q
+        _domega = so.fsolve(self.solveW2, x0 = _omegaOld, args = [domegaField_,P, Q, dt, r11, r12, r21, r22])
+        
+        
         self.omegaNew[0] = domegaField_
         self.omegaNew[1] = _domega
-
+        
         self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
-
+        
         return np.dot(R, self.omegaNew), self.dQInOut
+            
+    def solveW2(self,_domega, domegaField_,P, Q, dt, r11, r12, r21, r22 ):
+        
+        
+        dp = r11*domegaField_+ r12*_domega
+        dq = r11*domegaField_+ r22*_domega
+        
+        raise NotImplementedError("JACOB°!!!!!")
 
 
 class Windkessel3(BoundaryConditionType2):
@@ -1388,7 +1401,7 @@ class Windkessel3(BoundaryConditionType2):
         if self.Rc == None:
             Rc = self.Rtotal - Z
             # # Rc not time-varying activate this line:
-#			self.Rc = Rc
+#            self.Rc = Rc
             # #
 
         C = self.C
@@ -1735,17 +1748,17 @@ class VaryingElastance(BoundaryConditionType2):
         mitrQn1 = self.mitralQ[n - 1]
         venoP = self.atriumPressure
         t = self.getCycleTime(n + 1, dt)
-# 		ttemp = t-dt
-# 		print "n is",n
-# 		print "self num is", self.num
-# 		print "time is",t
-# 		print "numtime is", self.num*dt
+#         ttemp = t-dt
+#         print "n is",n
+#         print "self num is", self.num
+#         print "time is",t
+#         print "numtime is", self.num*dt
         E = self.E(t)
         Vn = self.volume[n]
         self.Elastance[n + 1] = E / 133.3e6
         self.Flow[n] = Qn * 1e6
         self.aortaP[n] = Pn
-# 		self.DtFlow[n]=(Qn-Qnold)/dt
+#         self.DtFlow[n]=(Qn-Qnold)/dt
         ventrPn = self.pressure[n]
         if self.cycleNumber == 3:
             self.T = 0.7
@@ -1785,8 +1798,8 @@ class VaryingElastance(BoundaryConditionType2):
         n_p = 1.  # self.Emax*self.V0
         n_q = 1.  # (n_p/B_ref)**0.5
         n_o = 1.  # n_q/r21
-# 		if Qn<-20e-6:
-# 		B=None
+#         if Qn<-20e-6:
+#         B=None
 
         args = dt, mitrLdivB, mitrB, LdivB, L, mitrL, B, mitrQn1, mitrQn, ventrPn, venoP, E, Vn, Qn, Qn1, r11, r12, r21, r22, Pn, _domega, n_q, n_p, B_ref
 
@@ -1841,7 +1854,7 @@ class VaryingElastance(BoundaryConditionType2):
             self.volume[n + 1] = Vn - (Qn + 0.5 * (-self.mitralQ[n] - self.mitralQ[n + 1] + dQ)) * dt
 
         self.aorticFlowPreviousTimestep = Qn
-# 		Qnold=Qn
+#         Qnold=Qn
         self.num = self.num + 1
         self.omegaNew[0] = domega_
         self.omegaNew[1] = _domega
@@ -1902,7 +1915,7 @@ class VaryingElastance(BoundaryConditionType2):
         x[self.system[partialSystem]] += x_partial
         dQm, dPv, domega_ = x
 
-# 		Knut Petters version:
+#         Knut Petters version:
         """
         def f1():
             a = mitrQn/n_q + dQm
@@ -2064,8 +2077,8 @@ class Valve:
         elif A / A_eff > 1e4:
             B = None
         else:
-# 			B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
-# 			B = 0.5*self.rho*(1/A_eff - 1/A)  # expression: Masterthesis Knut Petter
+#             B = 5*0.5*self.rho*(1/A_eff - 1/A)**2
+#             B = 0.5*self.rho*(1/A_eff - 1/A)  # expression: Masterthesis Knut Petter
             B = self.rho / (2 * A_eff ** 2)  # paper Mynard et al. 2012
         return B
 
@@ -2083,7 +2096,7 @@ class Valve:
         elif A / A_s > 1e4:
             L = None
         else:
-# 			L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter 
+#             L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter 
             L = self.rho * leff / A_s  # paper Mynard et al. 2012
         return L
 
@@ -2267,7 +2280,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
     def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 
-# 		self.updateValves(P, n, dt)
+#         self.updateValves(P, n, dt)
         self.newCycle = False                     # Update the state of the mitral and aortic valve at timestep n + 1
         self.startNewCycleIfCriteriaIsMet(n, dt)
         self.funcPos0(_domegaField_, R, n, dt, P, Q, A)  # Compute the riemann variant going into the vessel save in omegaNew
@@ -2294,24 +2307,24 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         # Qn1 == value at old time step
         # change to self.aorticPressurePreviousTimestep ...
 
-# 		Qn1 = self.aorticFlowPreviousTimestep
+#         Qn1 = self.aorticFlowPreviousTimestep
 
         L = np.linalg.inv(R)
         L11, L12, L21, L22 = L[0][0], L[0][1], L[1][0], L[1][1]
         omegaprevious_ = L11 * Pn + L12 * Qn
         r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
-    # 	deltatdiff = 0.00001
-# 		mitrQn = self.mitralQ[n]
-# 		mitrQn1 = self.mitralQ[n-1]
+    #     deltatdiff = 0.00001
+#         mitrQn = self.mitralQ[n]
+#         mitrQn1 = self.mitralQ[n-1]
         venoP = self.atriumPressure
         t = self.getCycleTime(n + 1, dt)
         t2 = self.getCycleTime(n, dt)
-# 		ttemp = t-dt
+#         ttemp = t-dt
         E = self.E(t)
         e2 = self.E(t)
         
         
-    # 	dE= (self.E(t+deltatdiff) -E)/deltatdiff
+    #     dE= (self.E(t+deltatdiff) -E)/deltatdiff
         Vn = self.volume[n]
         self.R11 = r11
         self.R12 = r12
@@ -2323,7 +2336,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.Elastance[n + 1] = E
         self.Flow[n] = Qn
         self.aortaP[n] = Pn
-# 		self.DtFlow[n]=(Qn-Qnold)/dt
+#         self.DtFlow[n]=(Qn-Qnold)/dt
         ventrPn = self.pressure[n]
 
         def diastole(u, t):
@@ -2347,7 +2360,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
             DV = -u[2]
             DP = (dE * (u[0] - self.V0) - Etemp * u[2])
-    # 		#DW1 = ((dE*(u[0]-self.V0) - Etemp*u[3] - self.R12*self.DtW2)/self.R11)
+    #         #DW1 = ((dE*(u[0]-self.V0) - Etemp*u[3] - self.R12*self.DtW2)/self.R11)
             DQ = (self.R21 / self.R11) * (dE * (u[0] - self.V0) - Etemp * u[2]) + self.DtW2 * (self.R22 - (self.R12 * self.R21) / self.R11)
             return[DV, DP, DQ]
 
@@ -2432,4 +2445,3 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         shapeFunction1 = (t / (a1)) ** n1 / (1 + (t / (a1)) ** n1)
         shapeFunction2 = (1 + (t / (a2)) ** n2) ** (-1)
         return (self.rt_Emax - self.rt_Emin) * self.alpha * shapeFunction1 * shapeFunction2 + self.rt_Emin
-
