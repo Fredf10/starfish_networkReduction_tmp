@@ -683,7 +683,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for baro in self.baroreceptors.itervalues():
             baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
         
-        # TODO if saving/ Rolling of data
+        # TODO: if saving/ Rolling of data
         if self.venousPool: 
             self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
             if saving:
