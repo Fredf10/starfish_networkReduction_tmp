@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<template id="001">
+ <VpcConfiguration class="VpcConfiguration" testAttribute= "the big writing">
+	  <createSample>True</createSample>   
+	  <createEvaluationXmlFiles>True</createEvaluationXmlFiles>
+	  <simulateEvaluations>True</simulateEvaluations>
+	  <localEvaluation>True</localEvaluation>        
+	  <multiprocessing>True</multiprocessing>
+	  <numberOfProcessors>12</numberOfProcessors>
+	  <evaluationNumbers>0</evaluationNumbers>
+	  <runPolynomialChaos>True</runPolynomialChaos>
+	  <preProcessData>True</preProcessData> 
+	  <postProcessing>True</postProcessing>
+	  <polynomialOrders>3</polynomialOrders>
+	  <sampleMethod>M</sampleMethod>
+	  <runMonteCarlo>False</runMonteCarlo>
+  </VpcConfiguration>
+  <LocationOfInterestManager class="LocationOfInterestManager">
+	  <locationsOfInterest>
+	  	<LocationOfInterest class="LocationOfInterest" Id="exampleLocation"> 
+	  		<quantitiesOfInterestToProcess>Pressure Flow</quantitiesOfInterestToProcess>
+	  		<queryLocation>vessel_1</queryLocation>
+	  		<xVal unit="m">0.05</xVal>
+	  		<confidenceAlpha>5</confidenceAlpha>
+	  	</LocationOfInterest>
+	  </locationsOfInterest>
+	  <testDict>
+	     <a Id = '1' unit = "Pa">12</a>
+         <a Id = '2' unit = "Pa">12</a>
+         <a Id = '3' unit = "Pa">12</a>
+         <b Id = '4' unit = "Pa">12</b>
+         <b Id = '5' unit = "Pa">12</b>
+	  </testDict>
+  </LocationOfInterestManager>
+</template>
+
+  
