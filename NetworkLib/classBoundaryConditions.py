@@ -1,6 +1,7 @@
 import numpy as np 
 import csv
 from math import exp
+import scipy.optimize as so
 import ODESolver as OD
 
 import os, sys
@@ -68,6 +69,111 @@ class BoundaryConditionType2(BoundaryCondition):
             self.returnFunction = self.funcPos1
         else:
             self.returnFunction = None
+
+
+class generalPQ_BC(BoundaryConditionType2):
+    """
+    Defines a wrapper for boundary conditions which may be defined as
+        f(u,du/dt,t) = 0,
+    where u = [P,Q]
+
+    call function input:
+     _domega_,dO,du,R,L,n,dt
+    returns the domega-vector with (domega_ , _domega) based on the input values
+    and its returnFunction
+    """
+    def funcPos0(self, _domegaField, R, dt, P, Q, n):
+        """return function for position 0 at the start
+        of the vessel
+        """
+        raise NotImplementedError("Residual function not implemented for omega_")
+        r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
+
+        omegaOld_ = r11*P+r12*Q
+        # TODO: Generalize residual wrappers?
+        # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
+        domega_ = so.fsolve(self.residualW1, x0 = omegaOld_, args = (_domegaField,P, Q, dt,n, r11, r12, r21, r22))
+        
+        self.omegaNew[0] = domega_
+        self.omegaNew[1] = _domegaField
+
+        self.dQInOut = R[:][1] * self.omegaNew
+
+        return np.dot(R, self.omegaNew), self.dQInOut
+
+
+    def funcPos1(self, domegaField_, R, dt, P, Q, n):
+        """
+        return function for position -1 at the end
+        of the vessel
+        """
+        r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
+        _omegaOld = r21*P+r22*Q
+        
+        # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
+        _domega = so.newton(self.residualW2Newton, x0 = _omegaOld,  tol=1e-6, args = (domegaField_,P, Q, dt,n, r11, r12, r21, r22))
+                 
+        self.omegaNew[0] = domegaField_
+        self.omegaNew[1] = _domega
+        
+        self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
+        return np.dot(R, self.omegaNew), self.dQInOut
+    
+    def residualW1Newton(self,domega_, _domegaField, P, Q, dt,n, r11, r12, r21, r22):
+        """
+        Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
+        
+        Args:
+            args = [_domegaField,P, Q, dt,n, r11, r12, r21, r22]
+            
+        """
+        dP = r11*domega_+ r12*_domegaField
+        dQ = r21*domega_+ r22*_domegaField
+        return self.residualPQ(dP,dQ,P,Q,dt,n)
+    
+    def residualW2Newton(self,_domega, domegaField_,P, Q, dt,n, r11, r12, r21, r22):
+        """
+        Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
+        
+        Args:
+            args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22]
+            
+        """
+        dP = r11*domegaField_+ r12*_domega
+        dQ = r21*domegaField_+ r22*_domega
+        
+        return self.residualPQ(dP,dQ,P,Q,dt,n)
+    
+    def residualW1(self,domega_, args):
+        """
+        Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
+        
+        Args:
+            args = [_domegaField,P, Q, dt,n, r11, r12, r21, r22]
+            
+        """
+        _domegaField,P, Q, dt,n, r11, r12, r21, r22 = args
+        dP = r11*domega_+ r12*_domegaField
+        dQ = r21*domega_+ r22*_domegaField
+        
+        return self.residualPQ(dP,dQ,P,Q,dt,n)    
+         
+    def residualW2(self,_domega, args):
+        """
+        Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
+        
+        Args:
+            args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22]
+            
+        """
+        domegaField_,P, Q, dt,n, r11, r12, r21, r22 = args
+        dP = r11*domegaField_+ r12*_domega
+        dQ = r21*domegaField_+ r22*_domega
+        
+        return self.residualPQ(dP,dQ,P,Q,dt,n)
+        
+    def residualPQ(self,dP,dQ,P,Q,dt,n):
+        raise NotImplementedError('Residual equation residualPQ for omega_2 must be implemented.')
 
 ########################################################################################
 # Type 1 boundary Conditions
@@ -1164,6 +1270,34 @@ class Resistance(BoundaryConditionType2):
         return np.dot(R, self.omegaNew), self.dQInOut
 
 
+class Windkessel2DAE(generalPQ_BC):
+    """
+    Boundary profile - type 2
+
+    2 Element Windkessel solved using as a DAE using Backwards Euler
+
+    call function input:
+     _domega_,dO,du,R,L,n,dt
+    returns the domega-vector with (domega_ , _domega) based on the input values
+    and its returnFunction
+    """
+    def __init__(self):
+        self.type = 2
+        self.Rc = 1
+        self.C = 0
+
+        self.venousPressure = 7.*133
+
+        self.returnFunction = None
+        self.omegaNew = np.empty((2))
+        self.dQInOut = np.empty((2))
+
+    def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
+        return self.returnFunction(_domegaField_, R, dt, P, Q, n)
+    
+    def residualPQ(self,dP,dQ,P,Q,dt,n):
+        return self.C*dP/dt + (P+dP-self.venousPressure[n])/self.Rc - (Q+dQ)
+    
 class Windkessel2(BoundaryConditionType2):
     """
     Boundary profile - type 2

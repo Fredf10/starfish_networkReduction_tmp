@@ -682,12 +682,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
         for baro in self.baroreceptors.itervalues():
             baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            
+        
+        # TODO if saving/ Rolling of data
         if self.venousPool: 
             self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
-        
-        self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
+            if saving:
+                self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
+        if saving:
+            self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
         
 
     def saveSolutionData(self):
@@ -1998,7 +2000,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # update bc
             for bc in self.boundaryConditions[vesselId]:
                 # update venous pressure at boundary nodes
-                if bc.name in ['_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
+                if bc.name in ['_Windkessel-2ElementsDAE', 'Windkessel-2ElementsDAE','_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
                     bc.update({'venousPressure':relativeVenousPressure})
                 
                     
