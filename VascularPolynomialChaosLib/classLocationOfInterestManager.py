@@ -21,7 +21,7 @@ class LocationOfInterestManager(TestBaseClass):
     '''
     
     '''
-    externVariables      = {'locationsOfInterest' : TestBaseClass.ExtDict({'locationOfInterest': TestBaseClass.ExtObject({'LocationOfInterest':LocationOfInterest})}),
+    externVariables      = {'locationsOfInterest' : TestBaseClass.ExtDict('LocationOfInterest',TestBaseClass.ExtObject({'LocationOfInterest':LocationOfInterest})),
                            } 
     externXmlAttributes  = []
     externXmlElements    = ['locationsOfInterest']
@@ -31,8 +31,10 @@ class LocationOfInterestManager(TestBaseClass):
         self.locationsOfInterest = {}
         self.sampleSize = sampleSize
                                 
+        self.testDict = {}
+                                
         # read data from xml node if the data is provided
-        if xmlNode:
+        if xmlNode is not None:
             self.readDataFromXmlNode(xmlNode)
         
     def addLocationOfInterest(self,locationId, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):

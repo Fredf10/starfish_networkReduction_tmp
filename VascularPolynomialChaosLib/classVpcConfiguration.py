@@ -28,10 +28,11 @@ class VpcConfiguration(TestBaseClass):
                          'runPolynomialChaos'       : TestBaseClass.ExtValue(bool),
                          'polynomialOrders'         : TestBaseClass.ExtValue(int, multiVar=True), 
                          'sampleMethod'             : TestBaseClass.ExtValue(str, strCases = ['K','R','L','S','H','M','C','NC','G','RG']),
-                         'runMonteCarlo'            : TestBaseClass.ExtValue(bool),  
+                         'runMonteCarlo'            : TestBaseClass.ExtValue(bool), 
+                         'testAttribute'            : TestBaseClass.ExtValue(str, strCases = ['anything'])
                          }
                 
-    externXmlAttributes  = []
+    externXmlAttributes  = ['testAttribute']
     
     externXmlElements    = ['createSample',
                             'createEvaluationXmlFiles',
@@ -58,6 +59,8 @@ class VpcConfiguration(TestBaseClass):
         ### network name and datanumber
         #self.networkName = networkName
         #self.dataNumber  = dataNumber
+        
+        self.testAttribute = "superText"
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)

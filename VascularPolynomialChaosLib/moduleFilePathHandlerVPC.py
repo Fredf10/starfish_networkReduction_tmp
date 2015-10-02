@@ -36,6 +36,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
         'vpcConfigXmlFile',
         'vpcNetworkXmlFile',
         'vpcNetworkXmlEvaluationFile'
+        'vpcConfigTemplateFile'
     
     networkName:
     
@@ -55,6 +56,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
         Warning: just raise Warning and return with error string      
     '''
     existingFileTypes = ['vpcConfigXmlFile',
+                         'vpcConfigTemplateFile',
                          'vpcNetworkXmlFile',
                          'vpcSampleFile',
                          'vpcEvaluationNetworkXmlFile',
@@ -69,6 +71,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
         
     # file names
     filenames = {
+                 'vpcConfigTemplateFile'        : 'template_vpcConfig_xxx.xml',
                  'vpcConfigXmlFile'             : ''.join([networkName,'_vpcConfig_',dataNumber,'.xml']),
                  'vpcNetworkXmlFile'            : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
                  'vpcSampleFile'                : ''.join(['samples.hdf5']),
@@ -151,19 +154,22 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vpcEvaluationSolutionDataFileDirectory',
                               'vpcSampleFileDirectory',
                               'evaluationLogFileDirectory',
-                              'vpcSolutionDataFileDirectory'} 
+                              'vpcSolutionDataFileDirectory',
+                              'vpcConfigTemplateFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
                           is not in existingDirectoryTypes{}".format(directoryType, existingDirectoryTypes))
     ##definitions
-    starfishHomeDirectory      = ''.join([cur,'/..'])
-    workingDirectory           = mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory']
-    networkXmlFileDirectory    = ''.join([workingDirectory,'/',networkName])
-    vpcCaseDirectory           = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
-    vpcOrderMethodDirectory    = ''.join([vpcCaseDirectory,'/','method_',gPCEmethod,'_order_',str(gPCEorder).zfill(2)])
-    vpcEvaluationNetDirectory  = ''.join([vpcOrderMethodDirectory,'/evaluationNetworkFiles'])
-    vpcEvaluationSolDirectory  = ''.join([vpcOrderMethodDirectory,'/evaluationSolutionData'])
+    starfishHomeDirectory       = ''.join([cur,'/..'])
+    workingDirectory            = mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory']
+    networkXmlFileDirectory     = ''.join([workingDirectory,'/',networkName])
+    vpcCaseDirectory            = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
+    vpcOrderMethodDirectory     = ''.join([vpcCaseDirectory,'/','method_',gPCEmethod,'_order_',str(gPCEorder).zfill(2)])
+    vpcEvaluationNetDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationNetworkFiles'])
+    vpcEvaluationSolDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationSolutionData'])
+    vpcConficTemplateDicrectory = ''.join([starfishHomeDirectory,'/TemplateNetworks','/vascularPolynomialChaos'])
+    
     ## look up tables
     # directories
     directories = {
@@ -176,6 +182,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'vpcEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
                    'evaluationLogFileDirectory'            : vpcOrderMethodDirectory,
                    'vpcSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
+                   'vpcConfigTemplateFileDirectory'        : vpcConficTemplateDicrectory,
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

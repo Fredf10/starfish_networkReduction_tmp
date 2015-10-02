@@ -622,167 +622,36 @@ def loadNetworkFromXML(networkName , dataNumber = "xxx", exception = 'Error', ne
 ###----------------------------------------------------------------------------------------
 ### Polynomial chaos
 
-def savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber, vPCconfiguration = None):
+def savePolyChaosXML(vpcConfigXmlFile, networkName,dataNumber, classesToWrite):
     '''
     Function to write a xml file with vascularPolynomialChaos Configurations
-    '''
-    from constants import variableUnitsSI as variableUnits
-    from constants import vPCconfigurationTemplate
-        
-    root = etree.Element(networkName, id= dataNumber, version="1.0")
+    '''        
+    root = etree.Element(networkName, id= dataNumber)
         
     xmlFile = etree.ElementTree(root)
     
-    if vPCconfiguration == None:
-        vPCconfiguration = vPCconfigurationTemplate
+    from VascularPolynomialChaosLib.classVpcConfiguration import VpcConfiguration 
+    from VascularPolynomialChaosLib.classLocationOfInterestManager import LocationOfInterestManager
     
-    #----------------------------------------------------------------------------------------# 
-    ### Write Control Variables
-    controlVariables = etree.SubElement(root, "controlVariables")
+    evalDict = {'VpcConfiguration':VpcConfiguration, 'LocationOfInterestManager':LocationOfInterestManager}
     
-    preProcessing = etree.SubElement(controlVariables, "preProcessing")
+    xmlDefClasses = ['VpcConfiguration','LocationOfInterestManager']
     
-    createOrthoPoly = etree.SubElement(preProcessing, "createDistributions")
-    createOrthoPoly.text = str(vPCconfiguration['createDistributions'])
-    createOrthoPoly = etree.SubElement(preProcessing, "createOrthoPoly")
-    createOrthoPoly.text = str(vPCconfiguration['createOrthoPoly'])
-    createSample = etree.SubElement(preProcessing, "createSample")
-    createSample.text = str(vPCconfiguration['createSample'])
-       
-    runSimulations = etree.SubElement(controlVariables, "runSimulations")
-    runSimulations.text = str(vPCconfiguration['runSimulations'])
-    
-    calculations = etree.SubElement(controlVariables, "calculations")
-    
-    calculateGPCE = etree.SubElement(calculations, "calculateGPCE")
-    calculateGPCE.text = str(vPCconfiguration['calculateGPCE'])
-    preProcessData = etree.SubElement(calculations, "preProcessData")
-    preProcessData.text = str(vPCconfiguration['preProcessData'])
-    plotMinMaxPoints = etree.SubElement(calculations, "plotMinMaxPoints")
-    plotMinMaxPoints.text = str(vPCconfiguration['plotMinMaxPoints'])
-    
-    postProcessing = etree.SubElement(controlVariables, "postProcessing")
-    #postProcessing.text = str(vPCconfiguration['postProcessing'])    
-    plotMeanSTD = etree.SubElement(postProcessing, "plotMeanSTD")
-    plotMeanSTD.text = str(vPCconfiguration['plotMeanSTD'])
-    plotPeaks = etree.SubElement(postProcessing, "plotPeaks")
-    plotPeaks.text = str(vPCconfiguration['plotPeaks'])
-
-    #----------------------------------------------------------------------------------------#    
-    #### POLYNOMIAL CHAOS DEFINITIONS    
-    polyChaosDefinition = etree.SubElement(root, "polyChaosConfig")
-        
-    polynomialOrders = etree.SubElement(polyChaosDefinition, "polynomialOrders")
-    polynomialOrders.text = ' '.join(str(i) for i in vPCconfiguration['polynomialOrders'])
-    sampleMethod = etree.SubElement(polyChaosDefinition, "sampleMethod")
-    sampleMethod.text = vPCconfiguration['sampleMethod'] #.replace('><',' ').strip("><")
-    
-    #----------------------------------------------------------------------------------------#
-    #### WAVE SPLITTING
-    waveSplitting = etree.SubElement(root, "waveSplitting")
-    
-    linearWaveSplit = etree.SubElement(waveSplitting, "linearWaveSplit")
-    linearWaveSplit.text = str(vPCconfiguration['linearWaveSplit'])
-    velocityProfileCoefficient = etree.SubElement(waveSplitting, "velocityProfileCoefficient")
-    velocityProfileCoefficient.text = str(vPCconfiguration['velocityProfileCoefficient'])
-    
-    #---------------------------------------------------------------------------------------#
-    ### POSTPROCESSING: PLOTTING
-    
-    postprocessing = etree.SubElement(root, "postProcessingConfig")
-    
-    generalPlotting = etree.SubElement(postprocessing, "generalPlotting")
-    ##########################################################################################
-    plotDirectory = etree.SubElement(generalPlotting, "plotDirectory")
-    plotDirectory.text = str(vPCconfiguration['plotDirectory'])
-    deterministicDataSetNumbers = etree.SubElement(generalPlotting, "deterministicDataSetNumbers")
-    deterministicDataSetNumbers.text = ' '.join(str(i) for i in vPCconfiguration['deterministicDataSetNumbers'])
-    polynomsToPlotOrder = etree.SubElement(generalPlotting, "polynomsToPlotOrder")
-    polynomsToPlotOrder.text = ' '.join(str(i) for i in vPCconfiguration['polynomsToPlotOrder'])
-    
-    meanSTDplots = etree.SubElement(postprocessing, "plotsMeanSTD")
-    ##########################################################################################
-    plotMeanConfidenceInterval = etree.SubElement(meanSTDplots, "plotConfidenceInterval")
-    plotMeanConfidenceInterval.text = str(vPCconfiguration['plotMeanConfidenceInterval'])
-    plotMeanConfidenceAlpha = etree.SubElement(meanSTDplots, "confidenceAlpha")
-    plotMeanConfidenceAlpha.text = str(vPCconfiguration['plotMeanConfidenceAlpha'])
-    plotMeanSigmaInterval = etree.SubElement(meanSTDplots, "sigmaInterval")
-    plotMeanSigmaInterval.text = str(vPCconfiguration['plotMeanSigmaInterval'])
-
-    plotsPeaks = etree.SubElement(postprocessing, "plotsPeaks")
-    ##########################################################################################
-    peakAnalysis = etree.SubElement(plotsPeaks, "peakAnalysis")
-    peakAnalysis.text = str(vPCconfiguration['peakAnalysis'])
-    plotPeaksConfidenceAlpha = etree.SubElement(plotsPeaks, "plotPeaksConfidenceAlpha")
-    plotPeaksConfidenceAlpha.text = str(vPCconfiguration['plotPeaksConfidenceAlpha'])
-    plotPeaksAnalyticSensitivity = etree.SubElement(plotsPeaks, "plotPeaksAnalyticSensitivity")
-    plotPeaksAnalyticSensitivity.text = str(vPCconfiguration['plotPeaksAnalyticSensitivity'])
-    plotPeaksMeanSTDBoxPlotsSingle = etree.SubElement(plotsPeaks, "plotPeaksMeanSTDBoxPlotsSingle")
-    plotPeaksMeanSTDBoxPlotsSingle.text = str(vPCconfiguration['plotPeaksMeanSTDBoxPlotsSingle'])
-
-    
-    #----------------------------------------------------------------------------------------#
-    # INVESTIGATION POINTS
-    evaluationPoints = etree.SubElement(root, "evaluationPoints")
-    
-    evalPointCount = 0
-    for idNodeTuple in vPCconfiguration['locationsToEvaluate']:
-        try:
-            name = str(vPCconfiguration['locationNames'][evalPointCount])
-        except: "Error: no name for id,node {} tuple defined".format(idNodeTuple)
-        evaluationPoint = etree.SubElement(evaluationPoints, "evaluationPoint",  vesselId = str(idNodeTuple[0]), name = str(name), gridNode = str(idNodeTuple[1]))        
-        try:
-            deltas = etree.SubElement(evaluationPoint, "deltasMinMaxFunction")
-            deltaPressure = etree.SubElement(deltas, "Pressure", unit = variableUnits['Pressure'])
-            deltaPressure.text = str(vPCconfiguration['delta'][name]['Pressure'])
-            deltaPressureForward = etree.SubElement(deltas, "Pressure_f", unit = variableUnits['Pressure'])
-            deltaPressureForward.text = str(vPCconfiguration['delta'][name]['Pressure_f'])
-            deltaPressureBackward = etree.SubElement(deltas, "Pressure_b", unit = variableUnits['Pressure'])
-            deltaPressureBackward.text = str(vPCconfiguration['delta'][name]['Pressure_b'])
-            deltaFlow = etree.SubElement(deltas, "Flow", unit = variableUnits['Flow'])
-            deltaFlow.text = str(vPCconfiguration['delta'][name]['Flow'])
-            deltaFlowForward = etree.SubElement(deltas, "Flow_f", unit = variableUnits['Flow'])
-            deltaFlowForward.text = str(vPCconfiguration['delta'][name]['Flow_f'])
-            deltaFlowBackward = etree.SubElement(deltas, "Flow_b", unit = variableUnits['Flow'])
-            deltaFlowBackward.text = str(vPCconfiguration['delta'][name]['Flow_b'])
-        except: "Error: in deltas for id,node {} tuple defined".format(idNodeTuple)
-        try:
-            peaksToEvaluate = etree.SubElement(evaluationPoint, "peaksToEvaluate")
-            
-            extremaPressure = etree.SubElement(peaksToEvaluate, "Pressure", unit = variableUnits['Pressure'])
-            extremaPressure.text = ' '.join(str(i) for i in vPCconfiguration['peaksToEvaluate'][name]['extremaPressure'])
-            extremaPressureBackward = etree.SubElement(peaksToEvaluate, "Pressure_f", unit = variableUnits['Pressure'])
-            extremaPressureBackward.text = ' '.join(str(i) for i in vPCconfiguration['peaksToEvaluate'][name]['extremaPressure_f'])
-            deltaPressureBackward = etree.SubElement(peaksToEvaluate, "Pressure_b", unit = variableUnits['Pressure'])
-            deltaPressureBackward.text = ' '.join(str(i) for i in vPCconfiguration['peaksToEvaluate'][name]['extremaPressure_b'])
-            deltaFlow = etree.SubElement(peaksToEvaluate, "Flow", unit = variableUnits['Flow'])
-            deltaFlow.text = ' '.join(str(i) for i in vPCconfiguration['peaksToEvaluate'][name]['extremaFlow'])
-            deltaFlowForward = etree.SubElement(peaksToEvaluate, "Flow_f", unit = variableUnits['Flow'])
-            deltaFlowForward.text = ' '.join(str(i) for i in vPCconfiguration['peaksToEvaluate'][name]['extremaFlow_f'])
-            deltaFlowBackward = etree.SubElement(peaksToEvaluate, "Flow_b", unit = variableUnits['Flow'])
-            deltaFlowBackward.text = ' '.join(str(i) for i in vPCconfiguration['peaksToEvaluate'][name]['extremaFlow_b']) 
-            
-        except: "Error: in deltas for id,node {} tuple defined".format(idNodeTuple)
-        evalPointCount = evalPointCount+1
+    for className in xmlDefClasses:
+        if className in classesToWrite:
+            classInstance = classesToWrite[className]
+            if isinstance(classInstance, evalDict[className]):
+                attributes = {'class':className}
+                xmlNode = etree.SubElement(root, className,attributes)
+                classInstance.writeDataToXmlNode(xmlNode)
+            else: 
+                print "WARNING: mXML.savePolyChaosXML provided classInstance of {} is not classInstance of {}".format(className,className)
+        else:
+            print "WARNING: mXML.savePolyChaosXML: cannot save class {} to config xml as it is not defined in input dict classesToWrite".format(className)
+ 
 
     xmlFile.write(vpcConfigXmlFile,encoding='iso-8859-1',pretty_print = True)
     print " ... vpcConfig template saved"
-  
-  
-
-# Conversion
-def unitConversion(unitsDict,value,unit):
-    try: 
-        value = float(value)
-    except:
-        if value is None: return value
-        else: print 'ERROR: unitConversion not feasible: value {} not convertable to float'.format(value)
-    if ' ' in unit:
-        unit = unit.split(' ')
-        for un in range (0,len(unit),1): value = value*unitsDict[unit[un]]
-    else: 
-        value = value*unitsDict[unit]
-    return value
   
     
 def loadPolyChaosXML(vpcConfigXmlFile):

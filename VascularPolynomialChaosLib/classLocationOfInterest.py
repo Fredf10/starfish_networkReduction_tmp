@@ -19,16 +19,16 @@ class LocationOfInterest(TestBaseClass):
     
     # defined external data
     externVariables      = {'quantitiesOfInterestToProcess' : TestBaseClass.ExtValue(str, strCases = ['anything'], multiVar = True),
-                             'queryLocation'            : TestBaseClass.ExtValue(str, strCases = ['anything']),
-                             'xVal'                     : TestBaseClass.ExtValue(float,  unit = 'm'),
-                             'confidenceAlpha'          : TestBaseClass.ExtValue(float)}
+                             'queryLocation'                : TestBaseClass.ExtValue(str, strCases = ['anything']),
+                             'xVal'                         : TestBaseClass.ExtValue(float,  unit = 'm'),
+                             'confidenceAlpha'              : TestBaseClass.ExtValue(float)}
     
     externXmlAttributes  = []
     
     externXmlElements    = ['queryLocation',
-                                 'xVal',
-                                 'quantitiesOfInterestToProcess',
-                                 'confidenceAlpha']
+                             'xVal',
+                             'quantitiesOfInterestToProcess',
+                             'confidenceAlpha']
             
         
 #         self.externHdf5 = ['queryLocation',

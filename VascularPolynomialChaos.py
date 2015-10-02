@@ -67,11 +67,15 @@ def vascularPolyChaos():
     
     
     # 1.1 load configuration and locations of interest
+    # TODO: one class UQconfig holding caseConfig (vpcConfiguration) and locationOfInterestManager class
     vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
     loadedClassesFromXML = mXML.loadPolyChaosXML(vpcConfigXmlFile)
        
     vpcConfiguration = loadedClassesFromXML['VpcConfiguration']
     locationOfInterestManager = loadedClassesFromXML['LocationOfInterestManager']
+    
+    print "DB VPC 76 exit"
+    exit()
     
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')

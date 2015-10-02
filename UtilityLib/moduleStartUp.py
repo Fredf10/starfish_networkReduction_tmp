@@ -368,7 +368,7 @@ def chooseVPCconfigFile(networkName):
             
     print "\n  No dataNumber for Config-File passed, choose between all available Config Files:"
     print "  (NB: use -n dataNumber to define a specific Config-file you want to open)\n"
-    print "   [   0 ] - Create new template Config-File"
+    print "   [   0 ] - Create new template Config-File and exit()"
     #print "   [ 1 ] - Create template Config-File and run vascularPolynomialChaos."
     index = 1
     if filenames != []:
@@ -390,17 +390,19 @@ def chooseVPCconfigFile(networkName):
         while dataNumber == False:
             userInputDataNumber = str(raw_input("\n  Insert dataNumber for polynomial Chaos case (overwrites if existing): "))
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
+        
+        # load template configuration
+        vpcConfigTemplateFile = mFPH_VPC.getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
+        templateConfigClasses = mXML.loadPolyChaosXML(vpcConfigTemplateFile)
+        
         # save polychaos config file
         vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-        # TODO: after fixing xml reading a template configfile should be created
-        #mXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber)
+        mXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber,templateConfigClasses)
+        
         # copy network file
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
-        # TODO
-        # ask if run simulations or not 
-        # no just quit
         print "files created!, exit()"
         exit()
     else:
