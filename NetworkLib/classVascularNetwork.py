@@ -502,8 +502,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # # initialize boundary condition type 1: initial phase
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple']:
+                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
                     Qm = self.initialValues[vesselId]['Flow']
+                    # TODO: Figure out what this is supposed to be doing
                     bC.update({'aorticFlowPreviousTimestep':Qm})
                     bC.initializeSolutionVectors(self.nTsteps, self.savedArraySize,self.solutionDataFile)
                 if bC.type == 1:
@@ -677,7 +678,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple']:
+                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
                     bC.flushSolutionData(saving,nDB,nDE,nSB,nSE)
             
         for baro in self.baroreceptors.itervalues():
