@@ -4,6 +4,14 @@ VascularPolynomialChaosLib package
 Submodules
 ----------
 
+VascularPolynomialChaosLib.classConfigurationUQSA module
+--------------------------------------------------------
+
+.. automodule:: VascularPolynomialChaosLib.classConfigurationUQSA
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 VascularPolynomialChaosLib.classDistributionManager module
 ----------------------------------------------------------
 
@@ -72,6 +80,14 @@ VascularPolynomialChaosLib.moduleFilePathHandlerVPC module
 ----------------------------------------------------------
 
 .. automodule:: VascularPolynomialChaosLib.moduleFilePathHandlerVPC
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+VascularPolynomialChaosLib.testBaseClass module
+-----------------------------------------------
+
+.. automodule:: VascularPolynomialChaosLib.testBaseClass
     :members:
     :undoc-members:
     :show-inheritance:

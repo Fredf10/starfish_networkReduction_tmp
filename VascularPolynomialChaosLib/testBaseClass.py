@@ -1,11 +1,10 @@
 
 
-# TODO: Fix imports
 import os,sys
-cur = os.path.dirname(os.path.realpath(__file__))
-sys.path.append('/'.join([cur,'..','UtilityLib']))
-from constants import unitsDictSI as unitsDict
-        
+
+from UtilityLib.constants import unitsDictSI as unitsDict
+from UtilityLib.moduleHelperFunctions import getGitHash
+
 try:
     from lxml import etree
 except:
@@ -18,22 +17,20 @@ class TestBaseClass(object):
     externXmlElements    = []
     
     class ExtValue(object):
+        '''
+        Class to describe and external "value"-variable
         
+        Args:
+            variableType (type, list of types): type of the external value-variable, accepted types = [bool,int,float,str,None]
+            unit (str): str of the SI-unit to which the variable value is automatically converted to 
+            strCases (list): necessary if variableType is str, list of strings with all possible cases the variable str can be, if anything is allowed, this need to be set to ['anything'] 
+            multiVar (bool): if True: variable is treated as a list of variables of the given type, values can be both separated wiht ' ', and ',' in the XML-file
+            
+        Raises:
+            ValueError: raise error if an unappropriate variableType is passed
+            ValueError: raise error if no strCases is passed, when variableType includes str
+        '''
         def __init__(self, variableType, unit = None, strCases = None, multiVar = False):
-            '''
-            
-            Note:
-                        
-            Args:
-            
-            Attributes:
-            
-            Examples:
-            
-            Raises:
-            
-            Returns: 
-            '''
             
             if type(variableType) is not list:
                 variableType = [variableType]
@@ -55,22 +52,17 @@ class TestBaseClass(object):
                     raise ValueError("ERROR: extValue of type <str> in {} has no <strCases> -list defined.".format(self.__class__.__name__,variableType))
                 
     class ExtDict(object):
+        '''
+        Class to describe an external dictionary-variable
         
+        Args:
+            dictObjName (str): name of the external dictionary value-element in the xml tag
+            dictObjType (ExtValue, ExtObject): external variable type of the dictionary value-element
+            
+        Raises:
+            ValueError: (TODO: NOT IMPLEMENTED) raise error if an unappropriate dictObjType is passed
+        '''
         def __init__(self, dictObjName, dictObjType):
-            '''
-            
-            Note:
-                        
-            Args:
-            
-            Attributes:
-            
-            Examples:
-            
-            Raises:
-            
-            Returns: 
-            '''
             
             self.variableType = ['dict']
             self.dictObjName = dictObjName
@@ -83,22 +75,18 @@ class TestBaseClass(object):
 #             else: raise ValueError("ERROR: ExtDict in {}, dictObjType is not a class instance: <<{}>>".format(self.__class__.__name__,dictObjType))
 #             
     class ExtObject(object):
+        '''
+        Class to describe an external object-variable
         
+        Args:
+            classCases (dict): dictionary containing all possible object types including the variable can be with the following format
+            {'xmlTagOfObject': objectClass}
+            
+        Raises:
+            ValueError: raise error if an classCases is not of dype dict
+        '''
         def __init__(self, classCases):
-            '''
             
-            Note:
-                        
-            Args:
-            
-            Attributes:
-            
-            Examples:
-            
-            Raises:
-            
-            Returns: 
-            '''
             
             self.variableType = ['object']
             
@@ -106,23 +94,32 @@ class TestBaseClass(object):
                 self.classCases = classCases
             else: raise ValueError("ERROR: ExtObject in {}, classCases is not a dictionary: <<{}>>".format(self.__class__.__name__, classCases))
         
+                    
+    
+    def writeXMLFile(self, filePathName):
+        '''
+        Function to write a xml file as defined within the class structures with
+        externVariables, externXmlAttributes, externXmlElements
         
+        Args:
+             filePathName (str): path and filename to xml file
+        '''
+        
+        fileName = filePathName.split('/')[-1].split('.')[0]
+        root = etree.Element(fileName, gitHash = getGitHash())
+        xmlFile = etree.ElementTree(root)
+        self.writeDataToXmlNode(root)
+        xmlFile.write(filePathName,encoding='iso-8859-1',pretty_print = True)
+       
     def writeDataToXmlNode(self,xmlNode):
         '''
-        function writes data to xml-node
+        Function which writes the data defined with 'self.externXmlAttributes' and 'self.externXmlElements' to and         xmlNode.
         
-        
-        Note:
-                    
         Args:
-        
-        Attributes:
-        
-        Examples:
-        
+            xmlNode (etree.element): XML node element from etree parser.
+            
         Raises:
-        
-        Returns: 
+            KeyError: If externXmlElement in 'self.externXmlElement' is not appropriate defined in 'self.externalVariables'
         '''        
         # 1. write attributes
         for attribute in self.externXmlAttributes:
@@ -152,14 +149,14 @@ class TestBaseClass(object):
             
     def writeExtDictXml(self,externXmlNode, dictToWrite, externVariable):
         '''
-        Writes dictionary xml note and envokes the dictionary data to be written
+        Writes dictionary xml node and envokes the dictionary data to be written
         
         Note:
                     
         Args:
-            externXmlNode (etree element)  : node in the xml file
+            externXmlNode (etree.element)  : node in the xml file
             externXmlElement (dict)        : dict to be written
-            externVariable (ExtObject)     : instance of ExtObject defining the variable properties
+            externVariable (ExtDict)       : instance of ExtDict defining the variable properties
         '''
         # iterate through dictionary
         for key,value in dictToWrite.iteritems():
@@ -176,9 +173,14 @@ class TestBaseClass(object):
         
     def writeExtObjectXml(self,externXmlNode, classToWrite, externVariable):
         '''
-        externXmlNode := node in the xml file
-        classToWrite (object) : class-instance to be written
-        externVariable := instance of ExtObject defining the variable properties
+        Writes object xml node and envokes the object to write it's own data by calling object.writeDataToXmlNode(externXmlNode)
+        
+        Note:
+                    
+        Args:
+            externXmlNode (etree.element)  : node in the xml file
+            classToWrite (object)          : class instance to be written
+            externVariable (ExtObject)     : instance of ExtObject defining the variable properties
         '''
         classNameDefined = False
         for definedClassName, definedClasses in externVariable.classCases.iteritems():
@@ -193,8 +195,10 @@ class TestBaseClass(object):
         
     def writeExtValueXml(self,externXmlNode, variableValues, externVariable):
         '''
+        Writes value xml node including units if existing object.writeDataToXmlNode(externXmlNode)
+        
         Args:
-            externXmlNode : node in the xml file
+            externXmlNode  : node in the xml file
             variableValues : str of the variable values
             externVariable : instance of ExtObject defining the variable properties
         '''
@@ -205,15 +209,39 @@ class TestBaseClass(object):
             externXmlNode.text = ' '.join(str(i) for i in variableValues)
         else:
             externXmlNode.text = str(variableValues)
-        
-    def readDataFromXmlNode(self, xmlNode):
+    
+    def loadXMLFile(self,filePathName):
         '''
-        parser which parses the xml-node given and search for data defined in
+        Function to load a xml file as defined within the class structures with externVariables, externXmlAttributes, externXmlElements
         
-        externAttributes
-        externElements
-        externVariables
+        Args:
+             filePathName (str): path and filename to xml file
         
+        Raises: ValueError if etree.parserError occures including line number of the xml error
+        '''
+        parser = etree.XMLParser(encoding='iso-8859-1')
+        tree = etree.parse(filePathName, parser)
+        try:
+            parser = etree.XMLParser(encoding='iso-8859-1')
+            tree = etree.parse(filePathName, parser)
+        except (etree.ParseError, ImportError) as e:
+            if isinstance(e, etree.ParseError):
+                raise ValueError(" Error in XML file on line: {}".e.position[0])     
+        root = tree.getroot()
+        self.loadDataFromXmlNode(root)
+        
+    def loadDataFromXmlNode(self, xmlNode):
+        '''
+        Function which loads the data defined with 'self.externXmlAttributes' and 'self.externXmlElements' from a passed xmlNode.
+        
+        Args:
+            xmlNode (etree.element): XML node element from etree parser.
+            
+        Raises:
+            KeyError: If xml node attribute is not defined in 'self.externVariables'
+            KeyError: If xml node attribute type is not defiened as self.ExtValue in 'self.externVariables'
+            ValueError: If xml node does not have a corresponding xml element as defined in 'self.externXmlElements'
+            KeyError: If externXmlElement in 'self.externXmlElements' is not appropriate defined in 'self.externalVariables'
         '''
         newData = {}
         # load object attributes
@@ -223,8 +251,7 @@ class TestBaseClass(object):
                 if isinstance(self.externVariables[attribute], self.ExtValue):
                     newData[attribute] = self.loadVariableConversion(xmlNode.attrib[attribute], '', self.externVariables[attribute])
                 else:raise KeyError("""ERROR: try to read attribute <<{}>> of xml-node {},
-                 however <<{}>> is not defined as class-instance <self.ExtValue>  in self.externVariables""".format(attribute, xmlNode, attribute))
-                    
+                 however <<{}>> is not defined as class-instance <self.ExtValue>  in self.externVariables""".format(attribute, xmlNode, attribute))   
             else: raise KeyError("""ERROR: try to read attribute <<{}>> of xml-node {},
                however <<{}>> is not defined in self.externVariables""".format(attribute, xmlNode, attribute))
             
@@ -237,17 +264,23 @@ class TestBaseClass(object):
                                 
                 # try to get the corresponding xml element:
                 try: externXmlNode = xmlNode.findall(''.join(['.//',externXmlElement]))[0]
-                except IndexError: self.loadingErrorMessageVariableError(externXmlElement, xmlNode)
+                except IndexError:                 
+                    if externXmlElement in self.externVariables: variableType = self.externVariables[externXmlElement].variableType
+                    else: variableType = "No entry defined for This element"
+                    raise ValueError("""ERROR loadNetworkFromXML():
+                                  variable "{}" of {} is not defined.
+                                  (Hint:{}) , system exit!""".format(externXmlElement, xmlNode, variableType))
+                
                 
                 ## find out what type the externXmlElement variable is:
                 if isinstance(externVariable,self.ExtDict): 
-                    newData[externXmlElement] = self.loadExtDict(externXmlNode, externXmlElement, externVariable)
+                    newData[externXmlElement] = self.loadExtDictXml(externXmlNode, externXmlElement, externVariable)
                         
                 elif isinstance(externVariable,self.ExtObject):
-                    newData[externXmlElement] = self.loadExtObject(externXmlNode, externXmlElement, externVariable)
+                    newData[externXmlElement] = self.loadExtObjectXml(externXmlNode, externXmlElement, externVariable)
                     
                 elif isinstance(externVariable,self.ExtValue):
-                    newData[externXmlElement] = self.loadExtValue(externXmlNode, externXmlElement, externVariable)
+                    newData[externXmlElement] = self.loadExtValueXml(externXmlNode, externXmlElement, externVariable)
                     
             else: raise KeyError("""ERROR: try to read <<{}>> of xml-node {},
                however <<{}>> is not defined in self.externVariables""".format(externXmlElement, xmlNode, externXmlElement))
@@ -255,13 +288,14 @@ class TestBaseClass(object):
         self.setVariablesDict(newData)
      
     
-    def loadExtDict(self,externXmlNode, externXmlElement, externVariable):
-        # TODO: rename loadExtDictXml
+    def loadExtDictXml(self,externXmlNode, externXmlElement, externVariable):
         '''
+        Loads dictionary xml node and envokes the dictionary data to be loaded (either object or value)
         
-        externXmlNode := node in the xml file
-        externXmlElement := str of the variable name
-        externVariable := instance of ExtDict defining the variable properties
+        Args:
+            externXmlNode (etree.element): node of the xml file with dict definition
+            externXmlElement (str) : str of the variable name 
+            externVariable := instance of ExtDict defining the variable properties
         '''
         elementDictData= {}
                 
@@ -278,10 +312,10 @@ class TestBaseClass(object):
                         
                         # check if ExtObject is expected or if ExtValue is expected
                         if isinstance(dictVariable,self.ExtObject):
-                            elementDictData[dictXmlNodeId] = self.loadExtObject(dictXmlNode,dictXmlElement,dictVariable)
+                            elementDictData[dictXmlNodeId] = self.loadExtObjectXml(dictXmlNode,dictXmlElement,dictVariable)
                             
                         elif isinstance(dictVariable,self.ExtValue):
-                            elementDictData[dictXmlNodeId] = self.loadExtValue(dictXmlNode,dictXmlElement,dictVariable)
+                            elementDictData[dictXmlNodeId] = self.loadExtValueXml(dictXmlNode,dictXmlElement,dictVariable)
                             
                         else: raise ValueError("""ERROR try to read <<{}>> of xml-node {},
                    however <{}> is not defined as class-instance <self.ExtValue> or <self.ExtObject> in self.externVariables""".format(dictXmlElement, externXmlElement, dictXmlElement))
@@ -298,18 +332,25 @@ class TestBaseClass(object):
         return elementDictData
             
             
-    def loadExtObject(self,externXmlNode, externXmlElement, externVariable):
-        #TODO: rename to loadExtObjectXml
+    def loadExtObjectXml(self,externXmlNode, externXmlElement, externVariable):
         '''
-        externXmlNode := node in the xml file
-        externXmlElement := str of the variable name
-        externVariable := instance of ExtObject defining the variable properties
+        Loads class xml node and envokes the class to read its data (either object or value)
+        
+        Args:
+            externXmlNode (etree.element): node of the xml file with class definition
+            externXmlElement (str) : str of the variable name 
+            externVariable := instance of ExtDict defining the variable properties
         '''
         # check if class in attribute
         if 'class' in externXmlNode.attrib:
             classXmlNode = externXmlNode.attrib['class']
             if classXmlNode in externVariable.classCases:
-                return externVariable.classCases[classXmlNode](externXmlNode)
+                # create extObject class with constructor
+                extObject = externVariable.classCases[classXmlNode]()
+                # update class with external data
+                extObject.loadDataFromXmlNode(externXmlNode)
+                # return extObject 
+                return extObject
             else:
                 raise ValueError("""ERROR try to read <<{}>> of xml-node {},
                however class-tpye <<{}>> is not defined ExtObject.classCases""".format(externXmlElement, externXmlNode, classXmlNode))
@@ -318,17 +359,14 @@ class TestBaseClass(object):
                however attribute <<class>> is not defined in the XML-tag""".format(externXmlElement, externXmlNode))
             
         
-    def loadExtValue(self,externXmlNode, externXmlElement, externVariable):
-        #TODO: rename to loadExtValueXML
+    def loadExtValueXml(self,externXmlNode, externXmlElement, externVariable):
         '''
-        Load the value of externXmlElement:
+        Loads value xml node. Checks the externXmlNode.text string and evaluates it corresponding to the properties in externVariable
         
-        Checks the externXmlNode.text string and
-        evaluates it corresponding to the properties in externVariable
-        
-        externXmlNode := node in the xml file
-        externXmlElement := str of the variable name
-        externVariable := instance of ExtValue defining the variable properties
+        Args:
+            externXmlNode (etree.element): node of the xml file with class definition
+            externXmlElement (str) : str of the variable name 
+            externVariable := instance of ExtDict defining the variable properties
         '''
         ## retrieve data from xml load
         # get variable value str from xml node
@@ -341,7 +379,17 @@ class TestBaseClass(object):
         return self.loadVariableConversion(variableValueStr, variableUnit, externVariable)
         
     def loadVariableConversion(self, variableValueStr, variableUnit, externVariable):
+        '''
+        Converts a value-str of a variable into the type defined by externVariable and the converts into the unit defined by externVariable from given unit (variableUnit) 
         
+        Args:
+            variableValueStr (str): value-str of the variable to be converted
+            variableUnit (str) : str of the variable unit passed in 'variableValueStr'
+            externVariable := instance of ExtDict defining the variable properties
+        
+        Returns:
+            converted variable (str,bool,int,float,None,list): returns the converted variable
+        '''
         # start conversion process
         multiVariable = False
         variableValue = 'notConvertable'
@@ -390,7 +438,7 @@ class TestBaseClass(object):
                     else: convertError.append('None')
                         
             if variableValue == 'notConvertable':
-                raise ValueError("""ERROR: {}.loadExtValue():
+                raise ValueError("""ERROR: {}.loadExtValueXml():
                       Cannot convert given value "{}" of variable "{}"
                       to {}!
                       Check if it is of type {}, system exit!""".format(self.__class__.__name__,
@@ -403,22 +451,15 @@ class TestBaseClass(object):
         
         return variableValues   
     
-    def loadingErrorMessageVariableError(self, variableName, element):
-        # TODO: is this really needed?
-        if variableName in self.externVariables:
-            variableType = self.externVariables[variableName].variableType
-        else: variableType = "No entry defined for This element"
-        raise ValueError("""ERROR loadNetworkFromXML():
-              variable "{}" of {} is not defined.
-              (Hint:{}) , system exit!""".format(variableName, element, variableType))
         
+    def setVariablesDict(self, dataDict):
+        '''
+        updates the class data using a dictionary in from of dataDict = {'variableName': value}
         
-    def setVariablesDict(self, Dict):
+        Args:
+            dataDict (dict): dictionary with new data to update class in from of dataDict = {'variableName': value}
         '''
-        updates the class data using a dictionary in from of 
-        dataDict = {'variableName': value}
-        '''
-        for key,value in Dict.iteritems():
+        for key,value in dataDict.iteritems():
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
@@ -427,10 +468,17 @@ class TestBaseClass(object):
                 
     def getVariable(self,variableName):
         '''
-        Returns value of variable with name : variableName
-        States Error if not such variable
+        getter function for any variable in self
+                
+        Args:
+             variableName (str): str of the variable name self.variableName
+        Returns:
+            value of self.variableName 
+        Raises:
+            prints warning/Error if not such variable exist
         '''
         try:
             return self.__getattribute__(variableName)
         except: 
+            # TODO: exchange with appropriate warning exception
             print "ERROR Vessel.getVariable() : vessel has no variable {}".format(variableName)

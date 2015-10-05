@@ -39,7 +39,7 @@ class LocationOfInterest(TestBaseClass):
 #                           'xVal',
 #                           'quantitiesOfInterestToProcess']
         
-    def __init__(self, xmlNode):
+    def __init__(self):
         
         self.queryLocation                 = "queryLocation"
         self.xVal                          = 0 #xVal #position in x 
@@ -48,9 +48,6 @@ class LocationOfInterest(TestBaseClass):
         self.confidenceAlpha               = 1 #confidence Alpha
         
         self.pointEvaluationQuantities = []
-                        
-        self.readDataFromXmlNode(xmlNode)
-        self.initialize()
         
     def initialize(self):
                         

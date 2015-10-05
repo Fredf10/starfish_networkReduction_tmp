@@ -23,7 +23,7 @@ from classDataHandler import DataHandler
 from classTimer import *
 
 #sys.path.append(cur+'/UtilityLib/')
-from UtilityLib.processing import memoryUsagePsutil
+from UtilityLib.moduleHelperFunctions import memoryUsagePsutil
  
 import gc
 # import h5py

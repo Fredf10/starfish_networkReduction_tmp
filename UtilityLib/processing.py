@@ -1,12 +1,7 @@
 import numpy as np
-import psutil, os
 
-def memoryUsagePsutil():
-    '''
-    return the memory usage in MB
-    '''
-    process = psutil.Process(os.getpid())
-    return process.memory_info()[0] / float(2 ** 20)
+
+
     
 
 def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,maxLength=500):

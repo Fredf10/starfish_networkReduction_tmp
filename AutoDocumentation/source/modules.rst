@@ -11,8 +11,8 @@
    VascularPolynomialChaos
    VascularPolynomialChaosLib
    VascularPolynomialChaosOld
+   Visualisation
    VisualisationLib
-   Visualize
    VncLib
    systemCheck
    vnc

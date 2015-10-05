@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 #############################################################################
 #
@@ -19,41 +21,32 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')
 
 from copy import copy as copy 
-
 from pprint import pprint as pp
-
-
-#sys.path.append([cur,'/../UtilityLib/'])
 import UtilityLib.moduleFilePathHandler as mFPH
 
-
+from classConfigurationUQSA import ConfigurationUQSA
 
 def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gPCEorder = "None", evaluationNumber = "None", exception = 'Error'):
     '''
     Function return a requested file path, if this file exists
     
-    fileType:
-        'vpcConfigXmlFile',
-        'vpcNetworkXmlFile',
-        'vpcNetworkXmlEvaluationFile'
-        'vpcConfigTemplateFile'
-    
-    networkName:
-    
-        name of the network file
-    
-    dataNumber:
-    
-        data number of solution file or xml file
-    
-    mode:
-    
-        read or write
+    Args:
+        fileType (str): 'vpcConfigXmlFile',
+                        'vpcConfigTemplateFile',
+                        'vpcNetworkXmlFile',
+                        'vpcSampleFile',
+                        'vpcEvaluationNetworkXmlFile',
+                        'vpcEvaluationSolutionDataFile',
+                        'vpcProcessedSolutionDataFile',
+                        'evaluationLogFile',
+                        'vpcSolutionDataFile'
         
-    exception: (for read mode)
-    
-        Error (default): raise error and exit if file is not exiting
-        Warning: just raise Warning and return with error string      
+        networkName (str):name of the network file
+        dataNumber (str):data number of solution file or xml file
+        mode (str): read or write
+        exception (str): (for read mode),
+                    Error (default): raise error and exit if file is not exiting,
+                    Warning: just raise Warning and return with error string,  
     '''
     existingFileTypes = ['vpcConfigXmlFile',
                          'vpcConfigTemplateFile',
@@ -123,28 +116,22 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     Function returns a requested directory path, if this directory does not exists
     it is created.
     
-    directoryType:
-        'workingDirectory',
-        'vpcConfigXmlFileDirectory',
-        'vpcNetworkXmlFileDirectory',
-        
-    
-    networkName:
-    
-        name of the network file
-    
-    dataNumber:
-    
-        data number of solution file or xml file
-    
-    mode:
-    
-        read or write
-        
-    exception: (for read mode)
-    
-        Error (default): raise error and exit if file is not exiting
-        Warning: just raise Warning and return with error string      
+    Args:
+        directoryType (str):  'workingDirectory',
+                              'vpcConfigXmlFileDirectory',
+                              'vpcNetworkXmlFileDirectory',
+                              'vpcEvaluationNetworkXmlFileDirectory',
+                              'vpcEvaluationSolutionDataFileDirectory',
+                              'vpcSampleFileDirectory',
+                              'evaluationLogFileDirectory',
+                              'vpcSolutionDataFileDirectory',
+                              'vpcConfigTemplateFileDirectory'
+        networkName (str): name of the network file
+        dataNumber (str): data number of solution file or xml file
+        mode (str): read or write
+        exception (str): (for read mode) 
+                    Error (default): raise error and exit if file is not exiting-
+                    Warning: just raise Warning and return with error string      
     '''
     
     existingDirectoryTypes = {'workingDirectory',
@@ -197,3 +184,47 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
             requestedDirectory = None
     
     return requestedDirectory
+
+
+
+def createConfigurationUQSAXMLfromTemplate(networkName, dataNumber):
+    '''
+    Function creates configuration file for UQSA for the case defined by given networkName and dataNumber from a template file
+    
+    Args:
+        networkName (str): name of the network
+        dataNumber (str): data number of case
+    '''
+    configurationFilePathTemplate = getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
+    configurationUQSA = ConfigurationUQSA()
+    configurationUQSA.loadXMLFile(configurationFilePathTemplate)
+    configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
+    configurationUQSA.writeXMLFile(configurationFilePath)
+        
+def loadConfigurationUQSAFromXMLFile(networkName, dataNumber):
+    '''
+    Function loads configuration file for UQSA for the case defined by given networkName and dataNumber from a template file and returns a ConfigurationUQSA class instance
+    
+    Args:
+        networkName (str): name of the network
+        dataNumber (str): data number of case
+    
+    Returns: 
+        configurationUQSA (object): ConfigurationUQSA class instance with loaded data
+    '''
+    configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
+    configurationUQSA = ConfigurationUQSA()
+    configurationUQSA.loadXMLFile(configurationFilePath)
+    return configurationUQSA
+    
+def writeConfigutationUQSAToXMLFile(networkName, dataNumber, configurationUQSA):
+    '''
+    Function writes a configuration file for a given configurationUQSA class for the case defined by given networkName and dataNumber from a template file
+    
+    Args:
+        networkName (str): name of the network
+        dataNumber (str): data number of case
+        configurationUQSA (object): ConfigurationUQSA class instance with data to write
+    '''
+    configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
+    configurationUQSA.writeXMLFile(configurationFilePath)

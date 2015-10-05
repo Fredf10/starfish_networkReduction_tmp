@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 #############################################################################
 #
 # moduleStartUp
@@ -391,14 +395,8 @@ def chooseVPCconfigFile(networkName):
             userInputDataNumber = str(raw_input("\n  Insert dataNumber for polynomial Chaos case (overwrites if existing): "))
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         
-        # load template configuration
-        vpcConfigTemplateFile = mFPH_VPC.getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
-        templateConfigClasses = mXML.loadPolyChaosXML(vpcConfigTemplateFile)
-        
-        # save polychaos config file
-        vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-        mXML.savePolyChaosXML(vpcConfigXmlFile,networkName,dataNumber,templateConfigClasses)
-        
+        # create template configuration
+        mFPH_VPC.createConfigurationUQSAXMLfromTemplate(networkName, dataNumber)
         # copy network file
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')

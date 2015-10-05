@@ -2,14 +2,14 @@
 
 
 import sys,os
-cur = os.path.dirname(os.path.realpath('__file__'))
-sys.path.append(cur+'/../')
-
+cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(''.join([cur,'/../']))
 
 from classLocationOfInterest import LocationOfInterest
 import moduleFilePathHandlerVPC as mFPH_VPC
 
 #sys.path.append(''.join([cur,'/../UtilityLib']))
+#import moduleXML
 from UtilityLib import moduleXML
 
 import numpy as np
@@ -21,22 +21,18 @@ class LocationOfInterestManager(TestBaseClass):
     '''
     
     '''
-    externVariables      = {'locationsOfInterest' : TestBaseClass.ExtDict('LocationOfInterest',TestBaseClass.ExtObject({'LocationOfInterest':LocationOfInterest})),
+    externVariables      = {'locationsOfInterest' : TestBaseClass.ExtDict('locationOfInterest',TestBaseClass.ExtObject({'LocationOfInterest':LocationOfInterest})),
                            } 
     externXmlAttributes  = []
     externXmlElements    = ['locationsOfInterest']
     
-    def __init__(self,xmlNode = None, sampleSize = None):
+    def __init__(self):
         
         self.locationsOfInterest = {}
-        self.sampleSize = sampleSize
+        self.sampleSize = None
                                 
         self.testDict = {}
-                                
-        # read data from xml node if the data is provided
-        if xmlNode is not None:
-            self.readDataFromXmlNode(xmlNode)
-        
+                
     def addLocationOfInterest(self,locationId, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):
         '''
         

@@ -5,9 +5,6 @@ import sys,os
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur+'/../')
 
-
-import moduleFilePathHandlerVPC as mFPH_VPC
-
 from testBaseClass import TestBaseClass 
 
 
@@ -28,11 +25,10 @@ class VpcConfiguration(TestBaseClass):
                          'runPolynomialChaos'       : TestBaseClass.ExtValue(bool),
                          'polynomialOrders'         : TestBaseClass.ExtValue(int, multiVar=True), 
                          'sampleMethod'             : TestBaseClass.ExtValue(str, strCases = ['K','R','L','S','H','M','C','NC','G','RG']),
-                         'runMonteCarlo'            : TestBaseClass.ExtValue(bool), 
-                         'testAttribute'            : TestBaseClass.ExtValue(str, strCases = ['anything'])
+                         'runMonteCarlo'            : TestBaseClass.ExtValue(bool)
                          }
                 
-    externXmlAttributes  = ['testAttribute']
+    externXmlAttributes  = []
     
     externXmlElements    = ['createSample',
                             'createEvaluationXmlFiles',
@@ -48,19 +44,14 @@ class VpcConfiguration(TestBaseClass):
                             'sampleMethod',
                             'runMonteCarlo']
     
-    def __init__(self, xmlNode):
+    def __init__(self):
         '''
-        define all variables with comments here
         
-        try to:
-        update variables from vpcConfig-file (networkName,dataNumber)
         '''
         
         ### network name and datanumber
         #self.networkName = networkName
         #self.dataNumber  = dataNumber
-        
-        self.testAttribute = "superText"
         
         #control variables
         ##  0.2 collocation method ( TRUE == create and save, FALSE == load existing)
@@ -112,7 +103,4 @@ class VpcConfiguration(TestBaseClass):
         
         #----MONTE CARLO DEFINITIONS -------------------------------------------------------------#
         self.runMonteCarlo = False
-        
-        # update info from xml
-        self.readDataFromXmlNode(xmlNode)
         

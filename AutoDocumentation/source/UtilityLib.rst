@@ -28,6 +28,14 @@ UtilityLib.moduleFilePathHandler module
     :undoc-members:
     :show-inheritance:
 
+UtilityLib.moduleHelperFunctions module
+---------------------------------------
+
+.. automodule:: UtilityLib.moduleHelperFunctions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 UtilityLib.moduleStartUp module
 -------------------------------
 
