@@ -1,7 +1,11 @@
+import sys, os
 import numpy as np
 
+cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
+import UtilityLib.classStarfishBaseObject as cSBO
 
-class TimerBaseClass(object):
+class TimerBaseClass(cSBO.StarfishBaseObject):
     """
     Base class for a timer object.
     intended to implement "timed" events in the simulation, e.g. Valsalva maneuver, Hemorrhage, motion,...
@@ -17,16 +21,16 @@ class TimerBaseClass(object):
         self.type = '' # type of the event, e.g. Valsalva
         
     def update(self,TimeDict):
-        '''
+        """
         updates the data using a dictionary in form of 
         TimeDict = {'variableName': value}
-        '''
+        """
         for key,value in TimeDict.iteritems():
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
-            except: 
-                print 'ERROR communicator.update(): wrong key: %s, could not set up communicator' %key
+            except Exception:
+                self.warning("communicator.update(): wrong key: %s, could not set up communicator" %key)
         
     
 

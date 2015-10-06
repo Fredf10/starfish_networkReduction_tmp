@@ -1,19 +1,26 @@
 import  numpy as np 
+import sys, os
 # raise errors
 np.seterr(invalid='raise')
 
-class Compliance(object):
-	'''
+cur = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(cur+'/../')
+
+import UtilityLib.classStarfishBaseObject as cSBO
+
+class Compliance(cSBO.StarfishBaseObject):
+	"""
 	Base-Class for the Compliance-models
-	'''	
+	"""	
 	def __init__(self, rho, As):
-		'''
+		"""
 		rho  : flunode density
 		Ps   : reference pressure of the compliance model
 		As   : area at reference pressure of the compliance model 
 		beta : Material model parameter beta
 		P0   : P0
-		'''
+		"""
 		self.rho 				= rho
 		self.As 				= As				
 		self.Ps 				= None
@@ -23,77 +30,78 @@ class Compliance(object):
 		self.C0preCalculated 	= None 
 			
 	def A(self, P):
-		'''
+		"""
 		Function which calculates the area from given pressure
 		Input:  Pressure
 		Output: Area
-		'''
+		"""
 		pass
 	def A_Node(self, P, node):
-		'''
+		"""
 		Function which calculates the area from given pressure
 		at certain node of the vessel
 		Input:  Pressure, node
 		Output: Area
-		'''
+		"""
 		pass
 	def C(self, P) : 
-		'''
+		"""
 		Function which calculates the compliance from given pressure
 		Input:  Pressure
 		Output: Compliance
-		'''
+		"""
 		pass
 	def C_Node(self, P, node) : 
-		'''
+		"""
 		Function which calculates the compliance from given pressure
 		at certain node of the vessel
 		Input:  Pressure, node
 		Output: Compliance
-		'''
+		"""
 		pass
 	def C0(self, P):
-		'''
+		"""
 		Function which calculates the compliance from given reference pressure
 		Input:  Pressure ( not used just for consistency needed)
 		Output: pre calculated constant Compliance C0vector
-		'''
+		"""
 		return self.C0preCalculated
 	def C0_Node(self, P, node):
-		'''
+		"""
 		Function which calculates the compliance from given reference pressure
 		at certain node of the vessel
 		Input:  Pressure ( not used just for consistency needed), node
 		Output: pre calculated constant Compliance C0vector[node]
-		'''
+		"""
 		return self.C0preCalculated[node]	
 	
 	def update(self, complianceData):
-		'''
+		"""
 		updates the compliance data using a dictionary in from of 
 		complianceData = {'variableName': value}
-		'''
+		"""
 		for key,value in complianceData.iteritems():
 			try:
 				self.__getattribute__(key)
 				self.__setattr__(key,value)
-			except:
-				print "ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key)
+			except Exception:
+				self.warning("compliance.updateData Wrong key: {}, could not update varibale".format(key))
+#				print "ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key)
 
 class Exponential(Compliance):
-	'''
+	"""
 	Exponential Compliance Model 
-	'''
+	"""
 	def __init__(self, rho, As):
- 		Compliance.__init__(self, rho, As)
+		Compliance.__init__(self, rho, As)
 		self.betaExponential = None
 		self.P0 = 0 #self.Ps*np.exp(self.beta*(self.A0/self.As-1.))
 		
 	def initialize(self,complianceDataDict):
-		'''
+		"""
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
-		'''
+		"""
 		self.update(complianceDataDict)
 		self.betaExponential = np.ones(len(self.As))*self.betaExponential 
 		self.C0preCalculated = self.C(self.Ps)
@@ -117,18 +125,18 @@ class Exponential(Compliance):
 		return self.As[node] / (self.betaExponential[node] * P)	
 
 class Laplace(Compliance):
-	'''
+	"""
 	Laplace Compliance Model actually Hookean Model
-	'''
+	"""
 	def __init__(self, rho, As):
- 		Compliance.__init__(self, rho, As)
+		Compliance.__init__(self, rho, As)
 		self.betaLaplace   = None
 		
 	def initialize(self,complianceDataDict):
-		'''
+		"""
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
-		'''
+		"""
 		self.update(complianceDataDict)
 		self.betaLaplace     = np.ones(len(self.As))*self.betaLaplace 
 		self.C0preCalculated = self.C(self.Ps)
@@ -148,11 +156,11 @@ class Laplace(Compliance):
 		return (2.*(P / self.betaLaplace[node] + np.sqrt(self.As[node]))) / self.betaLaplace[node]
 
 class Laplace2(Laplace):
-	'''
+	"""
 	Laplace Compliance Model actually Hookean Model
 	same model equations as Laplace, but it calculates the marterial parameter from 
 	youngs modulus and wallThickness
-	'''
+	"""
 	def __init__(self, rho, As):
  		Compliance.__init__(self, rho, As)
 		self.wallThickness = None
@@ -160,10 +168,10 @@ class Laplace2(Laplace):
 		self.betaLaplace   = None
 		
 	def initialize(self,complianceDataDict):
-		'''
+		"""
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
-		'''
+		"""
 		self.update(complianceDataDict)
 		self.betaLaplace = (4./3.)*(np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
 		self.C0preCalculated = self.C(self.Ps)
@@ -171,18 +179,18 @@ class Laplace2(Laplace):
 		
 
 class Hayashi(Compliance):
-	'''
+	"""
 	Compliance model found in Hayashi et al. 1993
-	'''
+	"""
  	def __init__(self, rho, As):
  		Compliance.__init__(self, rho, As)
 		self.betaHayashi = None
 			
 	def initialize(self,complianceDataDict):
-		'''
+		"""
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
-		'''
+		"""
 		self.update(complianceDataDict)
 		self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
 		self.C0preCalculated = self.C(self.Ps)
@@ -202,13 +210,13 @@ class Hayashi(Compliance):
 		return 2.0* self.As[node] / self.betaHayashi[node] * ( 1.0 + np.log( P/self.Ps ) / self.betaHayashi[node] ) / P
 	
 class Reymond(Compliance):
-	'''
+	"""
 	Compliance model found in Reymond et al. 2009
 	
 	special parameter:
 	
 	Cs   : compliance at reference pressure of compliance model
-	'''
+	"""
 	def __init__(self, rho, As):
 		
 		Compliance.__init__(self, rho, As)
@@ -221,10 +229,10 @@ class Reymond(Compliance):
 		self.Pwidth = 30. *133.32
 	
 	def initialize(self,complianceDataDict):
-		'''
+		"""
 		Initilalize compliance class with type specific variables
 		and calculate set the marterial parameters
-		'''
+		"""
 		self.update(complianceDataDict)
 		self.Cs              = self.Cs*np.ones_like(self.As)
 			

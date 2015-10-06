@@ -676,7 +676,7 @@ class Visualisation3D(Visualisation3DGUI):
         # find min max pressures and apply it to LUT
         self.findMinMaxPressure()
         # create LUT      
-        self.cLUT = c3dLUT.LUT(self.quantitiyMaxima) 
+        self.cLUT = c3dLUT.LUT(self.quantitiyMaxima)
         # creat 3d vessel representations
         
         self.createVessel3D()
@@ -698,6 +698,7 @@ class Visualisation3D(Visualisation3DGUI):
         for dirName, dirNames, fileNames in os.walk(self.movieSaveDirectory):
             for fileName in fileNames:
                 if self.networkName in fileName:
+                    #TODO: Try Except Pass should be fixed
                     try:
                         number = int(fileName.split('_')[-1].split(self.movieFileType)[0])
                         self.movieNumber = max(self.movieNumber,1 + number)
@@ -706,6 +707,7 @@ class Visualisation3D(Visualisation3DGUI):
         for dirName, dirNames, fileNames in os.walk(self.screenShotDataDirectory):
             for fileName in fileNames:
                 if self.networkName in fileName:
+                    #TODO: Try Except Pass should be fixed
                     try: 
                         number = int(fileName.split('_')[-1].split('.png')[0])
                         self.screenShotNumber = max(self.screenShotNumber,1 + number)

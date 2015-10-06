@@ -40,3 +40,31 @@ class aorticFlowPressure:
 		0.92,0.925,0.93,0.935,0.94,0.945,0.95,0.955,0.96,0.965,0.97,0.975,0.98,0.985,0.99,0.995,1.,1.005,1.01])
 		self.dt=np.array([0.005])
 
+if __name__ == "__main__":
+	
+	import matplotlib.pyplot as plt
+	
+	data = aorticFlowPressure()
+	
+	ax = plt.subplot(2,1,1)
+	ax.plot(data.t,data.P/mmHg)
+	ax = plt.subplot(2,1,2)
+	ax.plot(data.t,data.Q/ml)
+	
+	print "systolic Presssure",np.max(data.P/mmHg)
+	print "diastolic Presssure",np.min(data.P/mmHg)
+	print "mean Presssure",np.mean(data.P/mmHg)
+	print "mean Presssure estimate",np.min(data.P/mmHg)+ (np.max(data.P/mmHg)-np.min(data.P/mmHg))/3.
+	print "geometric mean pressure", np.sqrt(np.max(data.P/mmHg)*np.min(data.P/mmHg))
+	print "mean Presssure estimate diff 2",np.min(data.P/mmHg)+ (np.max(data.P/mmHg)-np.min(data.P/mmHg))/2.
+	
+	print "mean flow", np.mean(data.Q/ml)
+	
+	print "resistance", np.mean(data.P/mmHg)/np.mean(data.Q/ml)
+	
+	
+	
+	plt.show()
+	
+	
+

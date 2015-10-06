@@ -19,9 +19,9 @@ sys.path.append(cur+'/../')
 import UtilityLib.moduleXML as mXML 
 import UtilityLib.processing as mProc
 import UtilityLib.moduleStartUp as moduleStartUp
-from UtilityLib.modulePickle import loadSolutionDataFile
-from UtilityLib.modulePickle import loadExternalDataSet
-
+#from UtilityLib.modulePickle import loadSolutionDataFile
+#from UtilityLib.modulePickle import loadExternalDataSet
+#deprecated
 
 #sys.path.append(cur+'/../NetworkLib')
 from NetworkLib.classVascularNetwork import VascularNetwork 

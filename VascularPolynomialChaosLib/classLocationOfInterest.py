@@ -1,13 +1,10 @@
 
 
-from classQuantityOfInterest import QuantityOfInterest
-
 from copy import copy as copy
-
 import numpy as np
 
+from classQuantityOfInterest import QuantityOfInterest
 import UtilityLib.processing as mProc
-
 import matplotlib.pyplot as plt
 
 from testBaseClass import TestBaseClass 
@@ -87,6 +84,14 @@ class LocationOfInterest(TestBaseClass):
                 
         elif "baroreceptor" in self.queryLocation:
             baroId = int(self.queryLocation.split('_')[-1])
+            dataDict = {}
+            for quantitiyName in self.quantitiesOfInterest.keys():
+                dataDict[quantitiyName] = vascularNetwork.baroreceptors[baroId].getVariableValue(quantitiyName)
+            
+            for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
+                if quantityObject.data == None: 
+                    quantityObject.data = np.empty((sampleSize,len(simulationTime)))
+                quantityObject.data[sampleIndex] = dataDict[quantitiyName][:]
             ## TODO: Jacob add here your stuff
                          
         else:

@@ -3,9 +3,9 @@
 import numpy as np
 
 # define current network xml description variable
-'''
+"""
 network xml version definition
-'''
+"""
 newestNetworkXmlVersion = '4.2'
 import networkXml042 as newestNetworkXml 
 ##########################################################################################
@@ -314,13 +314,18 @@ variablesDict = {## class Vascular Network
                  'my'                : {'type':'float',      'unitSI': 'Pa s',   'strCases': None, 'multiVar': False},
                  'rho'               : {'type':'float',      'unitSI': 'kg m-3', 'strCases': None, 'multiVar': False},
                  'gamma'             : {'type':'float None', 'unitSI':  None,    'strCases': None, 'multiVar': False},
+                 # external stimuli
+                 'startAngle' : {'type':'float', 'unitSI':'rad', 'strCases': None, 'multiVar': False},
+                 'stopAngle'  : {'type':'float', 'unitSI':'rad', 'strCases': None, 'multiVar': False},
+                 'startTime'  : {'type':'float', 'unitSI':'s', 'strCases': None, 'multiVar': False},
+                 'duration'   : {'type':'float', 'unitSI':'s', 'strCases': None, 'multiVar': False},
                  ## class Communicators
                  'comType'           : {'type':'str', 'unitSI': None, 'strCases': ['CommunicatorRealTimeViz','CommunicatorBaroreceptor'], 'multiVar': False},
                  'comId'             : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  'vesselId'          : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  'node'              : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
                  'dn'                : {'type':'int', 'unitSI': None, 'strCases': None, 'multiVar': False},
-                 'quantitiesToPlot'  : {'type':'str', 'unitSI': None, 'strCases': ['Pressure','Area','Flow'], 'multiVar': True},
+                 'quantitiesToPlot'  : {'type':'str', 'unitSI': None, 'strCases': ['Pressure','Area','Flow','elastance'], 'multiVar': True},
                  ## boundary conditions
                  # flux bc
                  'amp'               : {'type':'float',  'unitSI': 'm3 s-1',    'strCases': None, 'multiVar': False},
@@ -397,16 +402,33 @@ variablesDict = {## class Vascular Network
                  ## Pettersen pars
                  'modelName' : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'L0': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 'n0': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
-                 'g': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
-                 'tau1': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
-                 'tau2': {'type':'float',  'unitSI':  'sec-1',     'strCases': None, 'multiVar': False},
+                 'n0': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
+                 'g': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
+                 'tau1': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
+                 'tau2': {'type':'float',  'unitSI':  's-1',     'strCases': None, 'multiVar': False},
                  'Gp': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'Gs': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 'delta_HR_smax': {'type':'float',  'unitSI':  'min-1',     'strCases': None, 'multiVar': False},
-                 'delta_HR_pmax': {'type':'float',  'unitSI':  'min-1',     'strCases': None, 'multiVar': False}, 
+                 'HR0': {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
+                 'HRmax': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'HRmin': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False}, 
                  ## Bugenhagen pars
                  'bgh': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},    
+                 ## Combined pars
+                 'pn':  {'type':'float',  'unitSI':  "Pa",     'strCases': None, 'multiVar': False},
+                 'ka':  {'type':'float',  'unitSI':  "Pa",     'strCases': None, 'multiVar': False},
+                 'tau_z':  {'type':'float',  'unitSI':  "s",     'strCases': None, 'multiVar': False},
+                 'cR':  {'type':'float',  'unitSI':  "Pa s m-3",     'strCases': None, 'multiVar': False},
+                 'cT':  {'type':'float',  'unitSI':  "s",     'strCases': None, 'multiVar': False},
+                 'cE':  {'type':'float',  'unitSI':  "Pa m-3",     'strCases': None, 'multiVar': False},
+                 'cVusv': {'type':'float',  'unitSI':  "m3",     'strCases': None, 'multiVar': False},
+                 'carotid_G_R':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'carotid_G_T':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'carotid_G_Emax':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'carotid_G_Vusv': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_R':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_T':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_Emax':  {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
+                 'aortic_G_Vusv': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  ### random variables
                  'distributionType': {'type':'str',    'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  'a'               : {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},

@@ -1,6 +1,13 @@
 import numpy as np
+import sys, os
 
-class ODESolver:
+cur = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(cur+'/../')
+
+import UtilityLib.classStarfishBaseObject as cSBO
+
+class ODESolver(cSBO.StarfishBaseObject):
     """
     Superclass for numerical methods solving scalar and vector ODEs
 
@@ -43,7 +50,7 @@ class ODESolver:
         try:
             f0 = self.f(self.U0, 0)
         except IndexError:
-            raise IndexError('Index of u out of bounds in f(u,t) func. Legal indices are %s' % (str(range(self.neq))))
+            self.exception('Index of u out of bounds in f(u,t) func. Legal indices are %s' % (str(range(self.neq))))
         if f0.size != self.neq:
             raise ValueError('f(u,t) returns %d components, while u has %d components' % (f0.size, self.neq))
 
@@ -119,10 +126,7 @@ class BackwardEuler(ODESolver):
             from Newton import Newton
             self.Newton = Newton
         except ImportError:
-            raise ImportError('''
-Could not import module "Newton". Place Newton.py in this directory
-(%s)
-''' % (os.path.dirname(os.path.abspath(__file__))))
+            self.exception("Could not import module 'Newton'. Place Newton.py in this directory (%s)" % (os.path.dirname(os.path.abspath(__file__))))
 
     # Alternative implementation of F:
     #def F(self, w):
@@ -142,8 +146,7 @@ Could not import module "Newton". Place Newton.py in this directory
             self.Newton_iter = []
         self.Newton_iter.append(n)
         if n >= 30:
-            print "Newton's failed to converge at t=%g "\
-                  "(%d iterations)" % (t[k+1], n)
+            print "Newton's failed to converge at t=%g (%d iterations)" % (t[k+1], n)
         return u_new
 
 

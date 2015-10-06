@@ -7,7 +7,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
 
 #sys.path.append(''.join([cur,'/../NetworkLib/']))
-from NetworkLib.classBoundaryConditions import *
+import NetworkLib.classBoundaryConditions as ccBC
 
 from constants import newestNetworkXml as nxml
 from constants import variablesDict
@@ -15,14 +15,9 @@ from constants import variablesDict
 import moduleXML as mXML
 import moduleFilePathHandler as mFPH
 
-"""
-This is moduleCSV, should be imported as mCSV
-
-Some other information about the module 
-"""
 
 def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
-    '''
+    """
     Functions writes vessel data to *.csv file 
     
     input:
@@ -30,7 +25,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
         vessels     <dict>    := vessels dict of class vascularNetwork {vesselId : vesselInstance} 
         delimiter   <string>  (default = ';')
     
-    '''
+    """
     tags = []
     for tag in nxml.vesselAttributes: tags.append(tag)
     for vesselElement in nxml.vesselElements:
@@ -45,7 +40,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
                 
     ## openFile and create writer
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'write')
-    writer = csv.DictWriter(open(vesselCSVFile,'wb'),tags,delimiter=delimiter)
+    writer = ccBC.csv.DictWriter(open(vesselCSVFile,'wb'),tags,delimiter=delimiter)
     
     # write first row == tags
     firstRow = {}
@@ -71,7 +66,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     writer.writerows(data)
 
 def readVesselDataFromCSV(networkName, delimiter=';'):
-    '''
+    """
     Functions loads vessel data from *.csv file inclusive polynomial chaos definitions
     
     input:
@@ -81,13 +76,13 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
     return:
             dict := {'vesselData': vesselData} which is used by vascular network to
                     update its vessel data with the function vascularNetwork.updateNetwork(dataDict)
-    '''
+    """
         
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
     
     # load data    
-    reader = csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
+    reader = ccBC.csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
     # hash data with in dictionary and separate units
     columUnits = {}
     vesselData = {}
@@ -172,7 +167,7 @@ def readRandomInputsfromCSV(networkName, randomInputManager, delimiter = ';'):
         randomInputManager.addRandomInput(dataDict)
 
 def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos, delimiter=';'):
-    '''
+    """
     Functions writes boundaryCondition data to *.csv file 
     
     input:
@@ -181,7 +176,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
         boundaryConditionPolyChaos <dict>  := boundaryConditionPolyChaos dict of class VascularNetwork 
         delimiter   <string>  (default = ';')
     
-    '''
+    """
     # find all polychaos tags
     # TODO: read write polynomial chaos variables
     polyChaosTags = {}
@@ -216,7 +211,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     tags = tagsBCType1
     
     boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'write')
-    writer = csv.DictWriter(open(boundaryCSVFile,'wb'),tags,delimiter=delimiter)
+    writer = ccBC.csv.DictWriter(open(boundaryCSVFile,'wb'),tags,delimiter=delimiter)
     
     # write Tag row
     firstRow = {}
@@ -258,7 +253,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     
     
 def readBCFromCSV(networkName, delimiter=';'):
-    '''
+    """
     Functions loads boundaryCondition data from \*.csv file inclusive polynomial chaos definitions
 
     Args:
@@ -266,16 +261,16 @@ def readBCFromCSV(networkName, delimiter=';'):
         delimiter (str): Delimiter (default = ';')
 
     Returns:
-        VascularNetwork.boundaryConditionDict 
+        VascularNetwork.boundaryConditionDict
             A description of the VascNw.BCD instance returned
-        
+
         VascularNetwork.boundaryConditionPolyChaos
             A description of the VascNw.BCPC instance returned
-       
-    '''
+
+    """
     
     boundaryCSVFile = mFPH.getFilePath('boundaryCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
-    reader = csv.DictReader(open(boundaryCSVFile,'rb'),delimiter=delimiter)
+    reader = ccBC.csv.DictReader(open(boundaryCSVFile,'rb'),delimiter=delimiter)
     
     # hash data with in dictionary and separate units
     columUnits = {}

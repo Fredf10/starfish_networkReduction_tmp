@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <singleBifurcation.xml id="1.0" version="4.2">
   <simulationContext>
-  	<description>my STARFiSh simulation</description>
+    <description>my STARFiSh simulation</description>
     <totalTime unit="s">5.0</totalTime>
     <timeSaveBegin unit="s">3.0</timeSaveBegin>
 	<timeSaveEnd unit="s">5.0</timeSaveEnd>
@@ -18,6 +18,7 @@
     <simplifyEigenvalues>False</simplifyEigenvalues>
     <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
     <automaticGridAdaptation>True</automaticGridAdaptation>
+    <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
   </solverCalibration>
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>

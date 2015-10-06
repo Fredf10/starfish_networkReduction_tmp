@@ -1,7 +1,7 @@
 ########################################################################################
 #                            Vascular Polynomial Chaos 0.3
 ########################################################################################
-## 
+##
 # created by Vinzenz Eck vinzenz.eck@mytum.de
 # uses polynomial Chaos toolbox from Jonathan Feinberg, Simula Center Oslo
 ##
@@ -20,7 +20,7 @@ import VascularPolynomialChaosLib.classDistributionManager as cDistMng
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 import VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
 import VascularPolynomialChaosLib.classLocationOfInterestManager as cLocOfIntrMng
-import VascularPolynomialChaosLib.classConfigurationUQSA as cConfUQSA
+import VascularPolynomialChaosLib.classConfigurationUQSA
 
 import UtilityLib.moduleStartUp as mStartUp
 import UtilityLib.moduleXML as mXML
@@ -34,25 +34,25 @@ import cPickle
 
 def vascularPolyChaos():
     '''
-    Perform vascular polynomial chaos 
+    Perform vascular polynomial chaos
     or MonteCarlo analysis for STARFiSh simulation case
     # steps
-    # 1. load vpc case and configuration 
-    
+    # 1. load vpc case and configuration
+
     # 2. create distributions
-    
+
     # 3. add dependentCase if existent
-    
+
     # 4. create samples
-        
+
     # 5. evaluate model / on local machine or on server
-    
+
     # 6. postprocess evaluated data, peak finding etc
-    
+
     # 7. create Orthogonal polynomials
-    
+
     # 8. calculate polynomial chaos expansion
-    
+
     # 9. uncertainty quantfication, sensitivity analysis
     '''
     print ""
@@ -60,10 +60,12 @@ def vascularPolyChaos():
     print '#        VascularPolynomialChaos_v0.3        #'
     print '=============================================='
     # steps
-    # 1. load vpc case and configuration 
+    # 1. load vpc case and configuration
     optionsDict = mStartUp.parseOptions(['f','n'],vascularPolynomialChaos=True)
     networkName = optionsDict['networkName']
     dataNumber  = optionsDict['dataNumber']
+    
+    
     
     # 1.1 load configuration and locations of interest    
     configurationUQSA         = mFPH_VPC.loadConfigurationUQSAFromXMLFile(networkName, dataNumber)
@@ -78,10 +80,10 @@ def vascularPolyChaos():
     assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
     vascularNetwork.randomInputManager.printOutInfo()
     
-    # 2. create distributions    
+    # 2. create distributions
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
     distributionManager.createRandomVariables()
-    
+
     # 3. add dependentCase if existent 
     # TODO: add correlation matrix to xml definitions and variable dependentCase to definitions
     a = 0.5
@@ -93,16 +95,16 @@ def vascularPolyChaos():
     if dependentCase == True:
         # this enables dependentCase in Distribution Manager
         distributionManager.createDependentDistribution(CorrelationMatrix)
-    
+
     ## do the analysis for all defined polynomial orders:
     for polynomialOrder in vpcConfiguration.polynomialOrders:
         # 4. create samples
-        if vpcConfiguration.createSample == True:      
+        if vpcConfiguration.createSample == True:
             distributionManager.createSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
             distributionManager.saveSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
         else:
             distributionManager.loadSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
-                
+
         # 5. evaluate model / on local machine or on server
         # 5.1 create evaluation case file list
         evaluationCaseFiles = [] # list of [ [networkName,dataNumber,xml-filePath(LOAD) ,xml-filePath(SAVE), hdf-filePath] for each evaluation
@@ -111,7 +113,7 @@ def vascularPolyChaos():
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])        
+            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])
         # 5.2 save/create simulation xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
@@ -137,14 +139,33 @@ def vascularPolyChaos():
                 else:
                     mBSM.runBatchAsMultiprocessing(batchFileList, vpcConfiguration.numberOfProcessors , quiet = True)
             else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
-        
+
         print "starting Post processing "
         # 6. process quantity of interest
         locationOfInterestManager.sampleSize = distributionManager.samplesSize
+        # Example
+        # quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
+        # queryLocation = 'vessel_1'
+        # xVals = 0.25
+        # confidenceAlpha = 5
+        # # add location of interest to manager
+        # locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
+
+
+        quantitiesOfInterestToProcess = ['n', 'T']
+        queryLocation = 'baroreceptor_1'
+
+        # add location of interest to manager
+        # add additional locations of interest
+        # quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
+        # queryLocation = 'vessel_2'
+        # xVals = 0.25
+        # confidenceAlpha = 5
+        # locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
+
         if vpcConfiguration.preProcessData == True:
-            ## process the data of interest
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
-        
+
         if vpcConfiguration.postProcessing == True:
             # if polynomial chaos
             # 7. create Orthogonal polynomials

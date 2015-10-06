@@ -5,12 +5,15 @@ import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
 
+
 from classLocationOfInterest import LocationOfInterest
 import moduleFilePathHandlerVPC as mFPH_VPC
 
 #sys.path.append(''.join([cur,'/../UtilityLib']))
-#import moduleXML
+#import moduleXML as mXML
+
 from UtilityLib import moduleXML
+
 
 import numpy as np
 import h5py

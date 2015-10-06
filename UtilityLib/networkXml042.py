@@ -17,7 +17,7 @@ simulationContextElements = ['description',
 
 # initialisation controls
 solverCalibrationElements =  [
-#                              'solvingSchemeField',
+                              'solvingSchemeField',
 #                              'solvingSchemeConnections',
                               'rigidAreas',
                               'simplifyEigenvalues',
@@ -40,19 +40,45 @@ globalFluidElements = ['my',
                        'gamma']
 
 
+
+
+## External Stimuli such as Head up tilt, Valsalva and Mueller maneuvers
+headUpTiltElements = ['startAngle',
+                       'stopAngle',
+                       'startTime',
+                       'duration']
+valsalvaElements = []
+hemmorrhageElements = []
+
+externalStimulusElements = {'headUpTilt' : headUpTiltElements,
+                    'valsalva'   : valsalvaElements,
+                    'hemmorrhage' : valsalvaElements,
+                    }
+
+externalStimuliElementReference = {'externalStimulus':externalStimulusElements}
+
+
+##
+# TODO what's the deal with this? 
 vascularNetworkElements = ['simulationContext',
-                           'solverCalibration',
-                           'initialisationControls']
+                          'solverCalibration',
+                          'initialisationControls']
 
 ##########################################################################################
+
 ## Baroreceptor objects
 #### new 
 
 baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
 
+CombinedBaroreflexElements = [ 'baroId', 'modelName',
+                               'cR', 'cE','cT', 'cVusv','pn','ka','tau_z',
+                               'aortic_G_R', 'aortic_G_T', 'aortic_G_Emax', 'aortic_G_Vusv', 
+                               'carotid_G_R', 'carotid_G_T', 'carotid_G_Emax', 'carotid_G_Vusv']
 baroreceptorModelElements = {'bugenhagenAorticBR' : [],
-                             'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','delta_HR_smax', 'delta_HR_pmax'],
-                             #'CarotidBR'         : ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName']
+                             'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','HR0', 'HRmax','HRmin'],
+                             'CarotidBaroreceptor': ['baroId','cellMLBaroreceptorModel','vesselIdLeft','vesselIdRight','modelName'],
+                             'CombinedBaroreflex' : CombinedBaroreflexElements,
                              }
 
 
@@ -248,6 +274,7 @@ xmlElements  = [ 'simulationContext',
                  'solverCalibration',
                  'initialisationControls',
                  'globalFluid',
+                 'externalStimuli',
                  'baroreceptors',
                  'communicators',
                  'boundaryConditions',
@@ -259,8 +286,9 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'initialisationControls': initialisationControlsElements,
                         'boundaryConditions'    : boundaryConditionElements,
                         'globalFluid'           : globalFluidElements,
+                        'externalStimuli'       : externalStimulusElements,
                         'baroreceptors'         : baroreceptorElements,
-                        'communicators'         : communicatorReference,
+                        'communicators'         : communicatorReference, #TODO why is this Reference?
                         'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
 

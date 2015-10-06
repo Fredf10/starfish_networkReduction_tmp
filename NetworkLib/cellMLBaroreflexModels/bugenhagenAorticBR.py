@@ -18,7 +18,6 @@ c_ach_ID = {'type':'state', 'val': 3}
 # pylint: disable-all
 from math import *
 from numpy.core import *
-from matplotlib.cbook import iterable
 from scipy.optimize import fsolve
 def createLegends():
     legend_y = [""] * sizeStates
@@ -59,31 +58,33 @@ def createLegends():
     legend_p[29] = "K_nor in component Parameters (AU)"
     legend_p[30] = "K_ach in component Parameters (AU)"
     legend_p[31] = "Gamma in component Parameters (dimensionless)"
-    legend_alg[5] = "alpha_cns in component Nervous_System (hertz)"
-    legend_alg[3] = "n in component Nervous_System (hertz)"
-    legend_alg[0] = "Delta in component Coupling_Dynamics (dimensionless)"
     legend_p[32] = "alpha_s0 in component Nervous_System (hertz)"
     legend_p[33] = "alpha_p0 in component Nervous_System (hertz)"
+    legend_p[34] = "Eps_wall in component Coupling_Dynamics (dimensionless)"
+    legend_p[35] = "delta_HR_smax in component Heart_Response_Nor (Beats_per_min)"
+    legend_p[36] = "delta_HR_pmax in component HR_ach (Beats_per_min)"
+    
+    legend_alg[0] = "Delta in component Coupling_Dynamics (dimensionless)"
+    legend_alg[1] = "delta_HR_ss in component Heart_Response_Nor (Beats_per_min)"
+    legend_alg[2] = "delta_HR_ps in component HR_ach (Beats_per_min)"
+    legend_alg[3] = "n in component Nervous_System (hertz)"
+    legend_alg[4] = "delta_HR_pfast in component HR_ach (Beats_per_min)"
+    legend_alg[5] = "alpha_cns in component Nervous_System (hertz)"
+    legend_alg[6] = "delta_HR_p in component HR_ach (Beats_per_min)"
+    legend_alg[7] = "Ts in component PNS_tones (AU)"
+    legend_alg[8] = "Tp in component PNS_tones (AU)"
+    legend_alg[9] = "HR_s in component HR_Combined (Beats_per_min)"
+    legend_alg[10] = "HR_p in component HR_Combined (Beats_per_min)"
+    legend_alg[11] = "HR in component HR_Combined (Beats_per_min)"
+    legend_alg[12] = "Period in component HR_Combined (Sec_per_Beat)"
+    
     legend_y[0] = "Eps_1 in component Coupling_Dynamics (dimensionless)"
     legend_y[1] = "Eps_2 in component Coupling_Dynamics (dimensionless)"
     legend_y[2] = "Eps_3 in component Coupling_Dynamics (dimensionless)"
-    legend_p[34] = "Eps_wall in component Coupling_Dynamics (dimensionless)"
-    legend_alg[7] = "Ts in component PNS_tones (AU)"
-    legend_alg[8] = "Tp in component PNS_tones (AU)"
     legend_y[3] = "c_nor in component Norepinephrine (AU)"
     legend_y[4] = "C_ach in component Acetylcholine (AU)"
-    legend_alg[1] = "delta_HR_ss in component Heart_Response_Nor (Beats_per_min)"
-    legend_p[35] = "delta_HR_smax in component Heart_Response_Nor (Beats_per_min)"
     legend_y[5] = "delta_HR_s in component Heart_Response_Nor (Beats_per_min)"
-    legend_alg[2] = "delta_HR_ps in component HR_ach (Beats_per_min)"
-    legend_p[36] = "delta_HR_pmax in component HR_ach (Beats_per_min)"
-    legend_alg[4] = "delta_HR_pfast in component HR_ach (Beats_per_min)"
     legend_y[6] = "delta_HR_pslow in component HR_ach (Beats_per_min)"
-    legend_alg[6] = "delta_HR_p in component HR_ach (Beats_per_min)"
-    legend_alg[11] = "HR in component HR_Combined (Beats_per_min)"
-    legend_alg[10] = "HR_p in component HR_Combined (Beats_per_min)"
-    legend_alg[9] = "HR_s in component HR_Combined (Beats_per_min)"
-    legend_alg[12] = "Period in component HR_Combined (Sec_per_Beat)"
     legend_ydot[0] = "d/dt Eps_1 in component Coupling_Dynamics (dimensionless)"
     legend_ydot[1] = "d/dt Eps_2 in component Coupling_Dynamics (dimensionless)"
     legend_ydot[2] = "d/dt Eps_3 in component Coupling_Dynamics (dimensionless)"
@@ -93,7 +94,7 @@ def createLegends():
     legend_ydot[6] = "d/dt delta_HR_pslow in component HR_ach (Beats_per_min)"
     return legend_y, legend_alg, legend_t, legend_p
 
-def initConsts(t=0):
+def initConsts(t=0, init_strain=0):
     p = zeros(sizeConstants)
     y = zeros(sizeStates)
     alg = zeros(sizeAlgebraic)
@@ -134,7 +135,13 @@ def initConsts(t=0):
     y[0] = 0.2165 #0.2042 # eps1 ## initial values adapted after comparison with openCell simulation
     y[1] = 0.14369 #0.183 # eps2
     y[2] = 0.1128275 #0.161 # eps3
-    p[34] = 0.01 # eps_wall - the strain that comes as input to the system
+    p[34] = init_strain
+    # Sybmolic solution to steady state
+    y[0] = (p[3]*p[34]*(p[4]*p[5] + p[4]*p[6] + p[5]*p[6]))/(p[3]*p[4]*p[5] + p[3]*p[4]*p[6] + p[3]*p[5]*p[6] + p[4]*p[5]*p[6])
+    y[1] = (p[3]*p[4]*p[34]*(p[5] + p[6]))/(p[3]*p[4]*p[5] + p[3]*p[4]*p[6] + p[3]*p[5]*p[6] + p[4]*p[5]*p[6])
+    y[2] = (p[3]*p[4]*p[5]*p[34])/(p[3]*p[4]*p[5] + p[3]*p[4]*p[6] + p[3]*p[5]*p[6] + p[4]*p[5]*p[6])
+
+    p[34] = 0.29 # 0.01 # eps_wall - the strain that comes as input to the system
     y[3] = 2.407 #1.441 # c_nor
     y[4] = 1.95 #1.0 # c_ach
     y[5] = 71.205 #0 # delta_HR_s
@@ -145,8 +152,11 @@ def initConsts(t=0):
 
 def computeRates(t, y, p):
     ydot = zeros(sizeStates)
-    alg = zeros(sizeAlgebraic)
-    alg = rootfind_0(t, p, y, alg)
+    alg = computeAlgebraic(p, y, t) # zeros(sizeAlgebraic)
+    # alg = rootfind_0(t, p, y, alg)
+    ydot[0] = ((p[3]*(p[34]-y[0])-p[4]*(y[0]-y[1]))/p[8]+ydot[1])
+    ydot[1] = ((p[4]*(y[0]-y[1])-p[5]*(y[1]-y[2]))+p[8]*ydot[0]+p[9]*ydot[2])/(p[8]+p[9])
+    ydot[2] = ((p[5]*(y[1]-y[2])-p[6]*y[2])+p[9]*ydot[1])/(p[9]+p[10])
     alg[1] = (p[35]*(power(y[3], 2.00000)))/(power(p[29], 2.00000)+power(y[3], 2.00000))
     ydot[5] = (-y[5]+alg[1])/p[20]
     alg[2] = (p[36]*(power(y[4], 2.00000)))/(power(p[30], 2.00000)+power(y[4], 2.00000))
@@ -162,11 +172,16 @@ def computeRates(t, y, p):
 
 def computeAlgebraic(p, y, t):
     alg = zeros(sizeAlgebraic)
-    alg = rootfind_0(t, p, y, alg)
+    # alg = rootfind_0(t, p, y, alg)
     alg[1] = (p[35]*(power(y[3], 2.00000)))/(power(p[29], 2.00000)+power(y[3], 2.00000))
     alg[2] = (p[36]*(power(y[4], 2.00000)))/(power(p[30], 2.00000)+power(y[4], 2.00000))
-    alg[0] = -y[0]
-    alg[3] = p[0]*(alg[0]-p[1]*p[26])
+    alg[0] = p[34] - y[0]
+    
+    if alg[0]>p[26]:
+        alg[3] = p[0]*(alg[0]-p[1]*p[26])
+    else:
+        alg[3] = 0.0
+        
     alg[5] = p[15]*alg[3]
     alg[7] = p[13]+(p[11]-p[13])/(exp(p[16]*(alg[5]-p[32]))+1.00000)
     alg[8] = p[14]+(p[12]-p[14])/(exp(-p[17]*(alg[5]-p[33]))+1.00000)
@@ -345,6 +360,8 @@ def solver2(timeArray,initial_states,constants):
     # Construct ODE object to solve
     r = ode(computeRates)
     r.set_integrator('vode', method='bdf', atol=1e-06, rtol=1e-06, max_step=1)
+
+    
     r.set_initial_value(initial_states, voi[0])
     r.set_f_params(constants)
 

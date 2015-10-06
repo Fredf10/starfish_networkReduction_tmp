@@ -22,9 +22,9 @@ sys.path.append(cur+'/../')
 
 from copy import copy as copy 
 from pprint import pprint as pp
+
 import UtilityLib.moduleFilePathHandler as mFPH
 
-from classConfigurationUQSA import ConfigurationUQSA
 
 def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gPCEorder = "None", evaluationNumber = "None", exception = 'Error'):
     '''
@@ -195,6 +195,9 @@ def createConfigurationUQSAXMLfromTemplate(networkName, dataNumber):
         networkName (str): name of the network
         dataNumber (str): data number of case
     '''
+    
+    from classConfigurationUQSA import ConfigurationUQSA
+    
     configurationFilePathTemplate = getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
     configurationUQSA = ConfigurationUQSA()
     configurationUQSA.loadXMLFile(configurationFilePathTemplate)
@@ -212,6 +215,8 @@ def loadConfigurationUQSAFromXMLFile(networkName, dataNumber):
     Returns: 
         configurationUQSA (object): ConfigurationUQSA class instance with loaded data
     '''
+    from classConfigurationUQSA import ConfigurationUQSA
+    
     configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
     configurationUQSA = ConfigurationUQSA()
     configurationUQSA.loadXMLFile(configurationFilePath)

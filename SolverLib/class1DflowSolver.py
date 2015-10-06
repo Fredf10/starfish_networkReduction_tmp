@@ -3,8 +3,14 @@ import numpy as np
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(''.join([cur,'/../']))
+topFolder = cur + "/../"
+#topFolder should point to where LOGcurrentWaveSpeed.txt is
+# located, and if it changes location, renaming it is appropriate.
+#sys.path.append(''.join([classFields.cur,'/../']))
 
+sys.path.append(cur+'/../')
+
+import UtilityLib.classStarfishBaseObject as cSBO
 
 #sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
@@ -13,14 +19,12 @@ from NetworkLib.classVascularNetwork import VascularNetwork
 
 from classBoundarys import Boundary
 
-from classSystemEquations import *
-from classConnections import *
-from classFields import *
+import classSystemEquations
+import classConnections
+import classFields
 from classCommunicators import *
-from classBaroreceptor import *
-from classVenousPool import *
-from classDataHandler import DataHandler
-from classTimer import *
+import classDataHandler
+import classTimer
 
 #sys.path.append(cur+'/UtilityLib/')
 from UtilityLib.moduleHelperFunctions import memoryUsagePsutil
@@ -28,22 +32,23 @@ from UtilityLib.moduleHelperFunctions import memoryUsagePsutil
 import gc
 # import h5py
 
-class FlowSolver(object):
+class FlowSolver(cSBO.StarfishBaseObject):
 
     
     def __init__(self,vascularNetwork, quiet=False):
-        '''
+        """
         Constructor       
-        '''
+        """
                 
-        if vascularNetwork == None: print "ERROR: No vascularNetwork given!" / exit()
-        assert isinstance(vascularNetwork, VascularNetwork)
-        # the vascular network to solve
+        if vascularNetwork == None: raise ValueError("ERROR: No vascularNetwork given!")
+        assert isinstance(vascularNetwork, VascularNetwork) #TODO asserts get removed automatically
+        # the vascular network to solve                     #TODO when compiled for release
         self.vascularNetwork = vascularNetwork
         self.vascularNetwork.quiet = quiet
         
         self.vessels = self.vascularNetwork.vessels
         self.fields = {}
+        self.dataHandler = None
         # the boundarys of the network { vesselID : [<instance>::classBoundary_02(Characteristics.py), .. ]}
         # 1 boundary for each start/end-vessel except if only 1 vessel in the network
         self.boundarys = {}
@@ -61,11 +66,8 @@ class FlowSolver(object):
               
         # Baroreceptor model
         self.baroreceptors = self.vascularNetwork.baroreceptors
-        baro = False
-        if self.baroreceptors:
-            baro = True
-        vein = baro or False
-        self.venousPool = 0
+       
+        self.venousPool = self.vascularNetwork.venousPool
         #
         
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
@@ -83,7 +85,7 @@ class FlowSolver(object):
         
         self.cycleMode = False
         
-        # Initialize idices to track where in memory the current solution is stored
+        # Initialize indices to track where in memory the current solution is stored
         self.memoryOffset = [0]
         self.currentMemoryIndex = [0]
         
@@ -128,11 +130,13 @@ class FlowSolver(object):
         self.initializeBoundarys()
         self.initializeConnections()
         self.initializeFields()
-        self.initializeCommunicators()
-        if vein == True:
-            self.initializeVenousPool()
+        
+        if self.venousPool:
+            self.venousPool.initializeForSimulation(self,self.vascularNetwork)
         
         self.initializeBaroreceptors()
+        
+        self.initializeCommunicators()
         self.initializeTimers()
         self.initializeNumericalObjectList()
         if quiet==False:
@@ -141,20 +145,20 @@ class FlowSolver(object):
        
         
 
-    '''       
+    """       
     ########################################################################################
     # initialisation Methods
     ########################################################################################
-    '''
+    """
         
     
     def calcTimeStep(self,dz,c,CFL):
         return (CFL*dz)/c
 
     def initializeTimeVariables(self, quiet):
-        '''
+        """
         initialize time variable dt and Tstep
-        '''
+        """
         self.totalTime = self.vascularNetwork.totalTime
                 
         initialValues = self.vascularNetwork.initialValues
@@ -169,7 +173,7 @@ class FlowSolver(object):
             #estimate initial pressure
             p0,p1 = initialValues[vessel.Id]['Pressure']
             
-            initialPressure = np.linspace(p0,p1,vessel.N) 
+            initialPressure = classTimer.np.linspace(p0,p1,vessel.N)
             
             A0_max = max(vessel.A(initialPressure))
             #c_high = vessel.c(A0_max,vessel.initialPressure)
@@ -180,22 +184,22 @@ class FlowSolver(object):
             
             dz_low = min(vessel.dz)
             dt = self.calcTimeStep(dz_low,c_high,self.vascularNetwork.CFL) 
-            c_max = np.append(c_max,c_high)
-            dt_min = np.append(dt_min,dt)
-            dz_min = np.append(dz_min,dz_low)
-            gridNodens = np.append(gridNodens,vessel.N)
+            c_max = classTimer.np.append(c_max,c_high)
+            dt_min = classTimer.np.append(dt_min,dt)
+            dz_min = classTimer.np.append(dz_min,dz_low)
+            gridNodens = classTimer.np.append(gridNodens,vessel.N)
             
             logfileData[vessel.Id] = [max(c_high),min(c_high),min(dt),vessel.dz,vessel.N]
             
         # Set time variables 
         self.dt = min(dt_min)
         # calculate time steps
-        self.nTsteps = int(np.ceil(self.totalTime/self.dt))
+        self.nTsteps = int(classTimer.np.ceil(self.totalTime/self.dt))
         # calculate time steps for initialisation phase
         nTstepsInitPhase = 0
         if self.vascularNetwork.initialisationPhaseExist:
             initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
-            nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
+            nTstepsInitPhase = int(classTimer.np.ceil(initPhaseTimeSpan/self.dt))
         # correct time steps
         self.nTsteps += nTstepsInitPhase
             
@@ -216,8 +220,8 @@ class FlowSolver(object):
         
         automaticGridCorrection = {}
         
-        logfile = open(str(cur+'/../'+'LOGcurrentWaveSpeed.txt'),'wb')
-        logfile2 = open(str(cur+'/../'+'LOGproposedGrid.txt'),'wb')
+        logfile = open(str(topFolder+'LOGcurrentWaveSpeed.txt'),'wb')
+        logfile2 = open(str(topFolder+'LOGproposedGrid.txt'),'wb')
         CFL = self.vascularNetwork.CFL
         for vesselT,data in logfileData.iteritems():
             #number of deltaX
@@ -281,9 +285,9 @@ class FlowSolver(object):
         
                 
     def initializeSolutionMatrices(self):
-        '''
+        """
         initialize solution matrices --> moved to vascularNetwork
-        '''
+        """
         # initialiase solution matrices, gravity and position over space
         self.vascularNetwork.initializeNetworkForSimulation()
         
@@ -357,11 +361,11 @@ class FlowSolver(object):
 #         self.vascularNetwork.initializeVenousGravityPressureTime(self.nTsteps)
                   
     def initializeSystemEquations(self):
-        '''
+        """
         initialize system Equations
-        '''
+        """
         for vesselId,vessel in self.vessels.iteritems():
-            self.systemEquations[vesselId] = System(vessel,
+            self.systemEquations[vesselId] = classSystemEquations.System(vessel,
                                                     self.simplifyEigenvalues,
                                                     self.riemannInvariantUnitBase,
                                                     self.currentTimeStep,
@@ -372,9 +376,9 @@ class FlowSolver(object):
                                                         self.vessels[vesselId].Asol[0])
          
     def initializeBoundarys(self):
-        '''
+        """
         initialize boundarys
-        '''
+        """
         if len(self.vessels) == 1:
             rootId = self.vascularNetwork.root
             bcList0 = []
@@ -413,16 +417,16 @@ class FlowSolver(object):
             self.output['BndrNR'] = len(self.boundarys)
     
     def initializeConnections(self):
-        '''
+        """
         initialize Connections of the network
         by traversing the network tree
-        '''
+        """
         treeList = self.vascularNetwork.treeTraverseList
         
         for leftMother,rightMother,leftDaughter,rightDaughter  in self.vascularNetwork.treeTraverseConnections:  
             ## link
             if rightMother == None and rightDaughter == None:
-                self.connections[leftMother] = Link(  self.vessels[leftMother],
+                self.connections[leftMother] = classConnections.Link(  self.vessels[leftMother],
                                                       self.systemEquations[leftMother],
                                                       self.vessels[leftDaughter],
                                                       self.systemEquations[leftDaughter],
@@ -432,7 +436,7 @@ class FlowSolver(object):
                                                       self.solvingSchemeConnections)
             ## bifurcation
             elif rightMother == None:
-                self.connections[leftMother] = Bifurcation(  self.vessels[leftMother],
+                self.connections[leftMother] = classConnections.Bifurcation(  self.vessels[leftMother],
                                                              self.systemEquations[leftMother],
                                                              self.vessels[leftDaughter],
                                                              self.systemEquations[leftDaughter],
@@ -447,7 +451,7 @@ class FlowSolver(object):
                 anastomosisId = leftMother
                 if treeList.index(leftMother) > treeList.index(rightMother):
                     anastomosisId = rightMother
-                self.connections[anastomosisId] = Anastomosis(self.vessels[leftMother],
+                self.connections[anastomosisId] = classConnections.Anastomosis(self.vessels[leftMother],
                                                              self.systemEquations[leftMother],
                                                              self.vessels[rightMother],
                                                              self.systemEquations[rightMother],
@@ -459,44 +463,31 @@ class FlowSolver(object):
                                                              self.solvingSchemeConnections)
         
     def initializeFields(self):
-        '''
+        """
         creates field numerical objects for each vessel in the network
-        '''
+        """
         for vesselId,vessel in self.vessels.iteritems():    
-            self.fields[vesselId] = Field(  vessel,
+            self.fields[vesselId] = classFields.Field(  vessel,
                                             self.currentMemoryIndex,
                                             self.dt, 
                                             self.systemEquations[vesselId],
-                                            self.rigidAreas)
+                                            self.rigidAreas,
+                                            self.vascularNetwork.solvingSchemeField)
     
 
     def initializeBaroreceptors(self):
-        '''
+        """
         method used to initialize Baroreceptor (baroreflex) objects
-        '''
+        """
         for baroId, baroData in self.baroreceptors.iteritems():
             baroData.initializeForSimulation(self,self.vascularNetwork)
  
-    def initializeVenousPool(self):
-        """
-        method for the initialization of a "venous pool"
-        """
-        
-        VPdict = {}
-        VPdict['currentTimeStep'] = self.currentTimeStep
-        VPdict['currentMemoryIndex'] = self.currentMemoryIndex
-        VPdict['dt'] = self.dt
-        VPdict['nTsteps'] = self.nTsteps
-        VPdict['boundarys'] = self.boundarys
-        
-        self.venousPool = venousPool(VPdict) # call to the constructor of venousPool
-        
     
     def initializeTimers(self):
         
-        '''
+        """
         method used to initialize Timer objects
-        '''
+        """
         for TimerId, TimerData in self.timers.iteritems():
             
             TimerData['currentTimeStep']         = self.currentTimeStep
@@ -514,9 +505,9 @@ class FlowSolver(object):
                     TimerData['VesselsToModify'][i] = self.vessels[i]
                 
                 
-                self.timers[TimerId] = Valsalva(TimerData)
+                self.timers[TimerId] = classTimer.Valsalva(TimerData)
                 
-            else: pass
+#            else: pass
     
     
             
@@ -530,11 +521,13 @@ class FlowSolver(object):
             #try:
             data = {'Pressure': self.vessels[comData['vesselId']].Psol,
                     'Flow'    : self.vessels[comData['vesselId']].Qsol,
-                    'Area'    : self.vessels[comData['vesselId']].Asol
+                    'Area'    : self.vessels[comData['vesselId']].Asol,
                     }
+            try:
+                data['elastance']= self.baroreceptors[1].boundaryConditionII.Elastance
+            except: pass
+            
             comData['data']           = data
-                
-                
             #except: pass
             
             ## not used now
@@ -552,7 +545,7 @@ class FlowSolver(object):
                         for bc in bcs:
                             if bc.type == 1:
                                 comData['boundaryCondition'] = bc                                                            
-            except: pass
+            except Exception: self.warning("old except: pass clause in c1dFlowSolv.initializeCommunicators", oldExceptPass= True)
                         
             comData['currentMemoryIndex'] = self.currentMemoryIndex
             comData['currentTimeStep']    = self.currentTimeStep
@@ -562,15 +555,15 @@ class FlowSolver(object):
             
               
     def initializeNumericalObjectList(self):
-        '''
+        """
         ## fill numObjectList (self.currentTimeStepumericalObjects) traversing the treeList 
         # 1. add root boundary
         # 2  add vessels
         # 3  add connection or distal boundary condition
-        # 4. repeat 2,3 for the hole tree 
+        # 4. repeat 2,3 for the whole tree
         # 5. add communicators
         # 6. add blocking Wait if multiprocessing
-        '''
+        """
         
         # get treetraversing list
         treeList = self.vascularNetwork.treeTraverseList
@@ -585,14 +578,14 @@ class FlowSolver(object):
             try:
                 if vesselId == self.vascularNetwork.root:
                     self.numericalObjects.append(self.boundarys[vesselId][0])
-            except: pass
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
             
             ## add field
             self.numericalObjects.append(self.fields[vesselId])
             
             ## try add Connection
             try: self.numericalObjects.append(self.connections[vesselId])    
-            except: pass
+            except Exception: self.warning("old except: pass #2 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
             
             ## try add distal BC
             try:
@@ -601,12 +594,12 @@ class FlowSolver(object):
                         self.numericalObjects.append(self.boundarys[vesselId][0])
                     else:
                         self.numericalObjects.append(self.boundarys[vesselId][1])
-            except: pass
+            except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
         
         for communicator in self.communicators.itervalues():
             self.numericalObjects.append(communicator) 
             try:    communicator.startRealTimeVisualisation()
-            except: pass
+            except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
             
         for baroreceptor in self.baroreceptors.itervalues():
             self.numericalObjects.append(baroreceptor)
@@ -614,24 +607,23 @@ class FlowSolver(object):
         for timer in self.timers.itervalues():
             self.numericalObjects.append(timer)
                    
-        if self.venousPool != 0:
+        if self.venousPool:
             self.numericalObjects.append(self.venousPool)
-        else: pass
             
-        dataHandler = DataHandler(self.currentTimeStep,
+        self.dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
                                   self.nTsteps,
                                   self.vascularNetwork,
                                   self.currentMemoryIndex,
                                   self.vascularNetwork.memoryArraySizeTime)
         
-        self.numericalObjects.append(dataHandler)
+        self.numericalObjects.append(self.dataHandler)
         
-        self.memoryOffset = dataHandler.memoryOffset
+        self.memoryOffset = self.dataHandler.memoryOffset
                                    
     def initOutput(self):
-        '''
+        """
         initialize solution matrices
-        '''
+        """
         #print '====================================='
         print '___________Time variables ___________'
         print '%-20s %2.3f' % ('totaltime (sec)',self.totalTime)
@@ -641,7 +633,7 @@ class FlowSolver(object):
         print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
         print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
         try: print '%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6)
-        except: pass
+        except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput", oldExceptPass= True)
         print '%-20s %2.1f' % ('CFL init max',self.vascularNetwork.CFL)
         print '%-20s %2.1f' % ('dz min (mm)',self.output['dz_min']*1.0E3)
         print '%-20s %2.1f' % ('c min (m/s)',self.output['c_min'])
@@ -662,7 +654,7 @@ class FlowSolver(object):
         print '===================================== \n'
         
             
-    '''
+    """
     ########################################################################################
     # Solver Methods:
     #
@@ -671,17 +663,17 @@ class FlowSolver(object):
     #    
     #
     ########################################################################################
-    '''
+    """
        
     def MacCormack_Field(self):
-        '''
+        """
         MacCormack solver method with forward-euler time steping,
         Using either Characteristic system 0 or 1 as defined in the XML-file.
         
         This method is solving the system by looping through the defined network
         imposing the boundary conditions based on Riemann Invariants and then solving the vessels, 
         conncetions, bifucations with a predictor-corrector step method
-        '''
+        """
         if self.quiet == False: print "Solving system ..."
         
         reflectionCoefficientCount = 0
@@ -693,12 +685,19 @@ class FlowSolver(object):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 #[no() for no in self.numericalObjects]
+                # TODO: (einar) what is meant to happen with numericalObject here?
+                # TODO: (einar) indentation was all wrong originally, please fix to intended functionality
                 for numericalObject in self.numericalObjects:
-		    try:
-		        numericalObject()
-		    except:
-			print numericalObject
-			numericalObject()
+                    try:
+                        numericalObject()
+                    except Exception:
+                        # Save the Solution data for debugging
+                        print "Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject)
+                        self.dataHandler.emergencyFlush()
+                        self.vascularNetwork.saveSolutionData()
+                        print "Success in saving solution data file. Reraising Exception"
+                        raise # TODO: why does self.exception() not force the program to quit?
+                        # self.exception()
                 
         ## to be concentrated with original cycle mode !!
         else:
@@ -713,9 +712,9 @@ class FlowSolver(object):
                 p0,p1 = initialValues[vesselId]['Pressure']
                 Qm    = initialValues[vesselId]['Flow']
                 
-                P_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
-                Q_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
-                A_lastCycle[vesselId]  = np.ones((self.nTsteps,vessel.N))
+                P_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
+                Q_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
+                A_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
                 
             
             for cycle in xrange(self.numberCycles-1):
@@ -733,9 +732,9 @@ class FlowSolver(object):
                         #Qerror =  np.sum(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))/self.Q[vesselId].size
                         #Aerror =  np.sum(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))/self.A[vesselId].size
                          
-                        Perror =  np.max(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
+                        Perror =  classTimer.np.max(classTimer.np.sqrt((classTimer.np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
                         #Qerror =  np.max(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))
-                        Aerror =  np.max(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
+                        Aerror =  classTimer.np.max(classTimer.np.sqrt((classTimer.np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
                          
                         P_lastCycle[vesselId] = self.P[vesselId].copy()
                         #Q_lastCycle[vesselId] = self.Q[vesselId].copy()
@@ -806,11 +805,11 @@ class FlowSolver(object):
             for vesselId,vessel in self.vessels.iteritems():
                 A1 = self.vessels[vesselId].Asol[0][0:-1]
                 A2 = self.vessels[vesselId].Asol[0][1:]
-                volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+                volumeInit = classTimer.np.sum(vessel.dz*(A1+A2+classTimer.np.sqrt(A1*A2))/3.0)*1.e6
                 
                 A1 = self.vessels[vesselId].Asol[-1][0:-1]
                 A2 = self.vessels[vesselId].Asol[-1][1:]
-                volumeSol  = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+                volumeSol  = classTimer.np.sum(vessel.dz*(A1+A2+classTimer.np.sqrt(A1*A2))/3.0)*1.e6
                 diff = volumeInit-volumeSol
                 vesselsInit += volumeInit
                 vesselsSol  += volumeSol
@@ -844,7 +843,7 @@ class FlowSolver(object):
         ## stop realtime visualisation
         for communicator in self.communicators.itervalues():           
             try: communicator.stopRealtimeViz()
-            except: pass
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field", oldExceptPass= True)
             
         ### garbage collection
         gc.collect()

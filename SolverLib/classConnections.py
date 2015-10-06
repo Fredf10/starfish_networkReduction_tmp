@@ -1,15 +1,20 @@
+import sys, os
 import numpy as np
 from numpy.linalg import solve
 from scipy.optimize import fsolve
 
-from pprint import pprint as pp       
+from pprint import pprint as pp
+
+cur = os.path.dirname( os.path.realpath( __file__ ) )
+sys.path.append(cur+'/../')
+import UtilityLib.classStarfishBaseObject as cSBO
 
 from copy import copy as copy       
  
-class Link():        
-    '''
+class Link():
+    """
     Link object represends the connection between two vessels
-    '''
+    """
     def __init__(self, mother, motherSys, 
                      daughter, daughterSys,
                      currentMemoryIndex, dt, rigidAreas, solvingScheme):
@@ -79,7 +84,7 @@ class Link():
             print "classconnection 78: using nonlinear link model" 
             self.__call__ = self.callNonLinear
         else:
-            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
+            raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
     
         ## benchamark Test variables
         self.nonLin = False
@@ -92,9 +97,9 @@ class Link():
         self.sumPErrorNonLinCount = 0
     
     def callLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -157,9 +162,9 @@ class Link():
         self.Q_daughter[n+1][pos2] = Q2_new
         
         if P1_new < 0 or P2_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new
-            exit()
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, at time {} (n {},dt {})".format(self.name,P1_new, P2_new,n*dt,n,dt))
+            #print P1_new, P2_new
+            #exit()
                 
         # calculate new areas
         if self.rigidAreas == False:
@@ -181,9 +186,9 @@ class Link():
             self.maxQError  = sumQError
         #print self.name, ' Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumQError
-            exit()
+            raise ValueError("Connection: {} too high error, sumQError = {}, in conservation of mass at time {} (n {},dt {})".format(self.name,sumQError,n*dt,n,dt))
+            #print sumQError
+            #exit()
             
         # Linear presssure equation
         sumPError = abs(abs(P1_new)-abs(P2_new))/abs(P1_new)
@@ -192,9 +197,9 @@ class Link():
         if sumPError > self.maxPError:
             self.maxPError  = sumPError
         if sumPError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumPError
-            exit()
+            raise ValueError("Connection: {} too high error, sumPError = {}, in conservation of pressure at time {} (n {},dt {})".format(self.name,sumPError,n*dt,n,dt))
+            #print sumPError
+            #exit()
                                                
         ## Non linear pressure equation
         sumPErrorNonLin = abs(abs(P1_new+1000*0.5*(Q1_new/A1n)**2)-abs(abs(P2_new+1000*0.5*(Q2_new/A2n)**2)))/abs(P1_new+0.5*(Q1_new/A1n)**2)
@@ -202,15 +207,17 @@ class Link():
             self.sumPErrorNonLinCount = self.sumPErrorNonLinCount+1
         if sumPErrorNonLin > self.maxPErrorNonLin:
             self.maxPErrorNonLin  = sumPErrorNonLin
-        if sumPError > 1.e-10:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumPError
-            exit()
+        # TODO: This was set to test sumPError, not sumPErrorNonLin
+        # TODO: When set correctly, program wouldn't run. Commented out.
+#        if sumPErrorNonLin > 1.e-10:
+ #           raise ValueError("Connection: {} too high error, sumPErrorNonLin = {} in conservation of pressure at time {} (n {},dt {})".format(self.name,sumPErrorNonLin,n*dt,n,dt))
+            #print sumPError
+            #exit()
             
     def callNonLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -352,9 +359,9 @@ class Link():
         self.Q_daughter[n+1][pos2] = Q2_new
         
         if P1_new < 0 or P2_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new
-            exit()
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, at time {} (n {},dt {})".format(self.name,P1_new,P2_new,n*dt,n,dt))
+            #print P1_new, P2_new
+            #exit()
                  
         # calculate new areas
         if self.rigidAreas == False:
@@ -368,15 +375,15 @@ class Link():
         self.A_daughter[n+1][pos2] = A2n
               
 #     def callMacCormackField1(self):
-#         '''
+#         """
 #         Call function for vessel-vessel connection
-#         '''        
+#         """        
 #         dt = self.dt
 #         n = self.currentMemoryIndex[0]
 #         pos1 = self.positions[0]
 #         pos2 = self.positions[1]
 #         
-#         #''' Predictor Step '''positions
+#         #""" Predictor Step """positions
 #         if self.step == "predictor":
 #             P1 = self.P_leftMother[n]
 #             Q1 = self.Q_leftMother[n]
@@ -386,7 +393,7 @@ class Link():
 #             Q2 = self.Q_daughter[n]
 #             A2 = self.A_daughter[n]
 #                  
-#         #'''Corrector Step'''    A
+#         #"""Corrector Step"""    A
 #         elif self.step == "corrector":
 #             P1 = self.P_mother_pre
 #             Q1 = self.Q_mother_pre
@@ -427,7 +434,7 @@ class Link():
 #         
 #         #print sol[0],sol[3]
 #         
-#         #''' Predictor Step '''
+#         #""" Predictor Step """
 #         if self.step == "predictor":
 #             self.step = "corrector"   
 #             # apply changed values
@@ -446,7 +453,7 @@ class Link():
 #                 self.A_mother_pre[pos1]   = A1[pos1]
 #                 self.A_daughter_pre[pos2] = A2[pos2]
 #         
-#         #'''Corrector Step'''    
+#         #"""Corrector Step"""    
 #         elif self.step == "corrector":
 #             self.step = "predictor"
 #             
@@ -474,14 +481,14 @@ class Link():
 #                 self.A_daughter[n+1][pos2] = A2[pos2]
 #     
 #     def fsolveConnectionSys0(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the Link
 #         Using constant areas, i.e. initial areas
 #         
 #         Input:     x = array [P1,Q1,Q2,P2]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #         
@@ -503,10 +510,10 @@ class Link():
 #         return [res3,res2,res1,res4]
 #     
 #     def jacobiMatrixSys0(self,x,args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using constant areas, i.e. initial areas
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #         
@@ -517,14 +524,14 @@ class Link():
 #          
 #         
 #     def fsolveConnectionSys1(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the Link
 #         Using recalculated areas depending on the new pressure values
 #         
 #         Input:     x = array [P1,Q1,Q2,P2]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #                         
@@ -557,10 +564,10 @@ class Link():
 #         return [res3,res2,res1,res4]
 #  
 #     def jacobiMatrixSys1(self,x, args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using recalculated areas depending on the new pressure values
-#         '''
+#         """
 #         P1,Q1,Q2,P2 = x
 #         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
 #         
@@ -694,7 +701,7 @@ class Bifurcation():
             print "classconnection 693: using nonlinear bifurcation model" 
             self.__call__ = self.callNonLinear
         else:
-            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
+            raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
         
         ## benchamark Test variables
         self.sumQErrorCount = 0
@@ -705,9 +712,9 @@ class Bifurcation():
         self.sumPErrorNonLinCount = 0
     
     def callLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -792,9 +799,9 @@ class Bifurcation():
         self.Q_rightDaughter[n+1][pos3] = Q3_new
         print "using linear bifurcation model"
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new, P3_new
-            exit()
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, P3_new = {}, at time {} (n {},dt {})".format(self.name,P1_new, P2_new, P3_new, n*dt,n,dt))
+            #print P1_new, P2_new, P3_new
+            #exit()
         
         
         # calculate new areas
@@ -813,16 +820,16 @@ class Bifurcation():
             
         ## non linear error        
         try: sumQError = abs(Q1_new-Q2_new-Q3_new)/abs(Q1_new)
-        except: sumQError = 0.0
+        except Exception: sumQError = 0.0
         if sumQError > 0.0: 
             self.sumQErrorCount = self.sumQErrorCount+1
         if sumQError > self.maxQError:
             self.maxQError  = sumQError
         #print self.name,' \n Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumQError
-            exit()
+            raise ValueError("Connection: {} too high error, sumQError = {} in conservation of mass at time {} (n {},dt {})".format(self.name,sumQError,n*dt,n,dt))
+            #print sumQError
+            #exit()
         
         sumPError = abs(P1_new-P2_new)/abs(P1_new)
         if sumPError > 0.0: 
@@ -831,9 +838,9 @@ class Bifurcation():
             self.maxPError  = sumPError
         #print self.name,' Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
         if sumPError > 1.e-10:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print sumPError
-            exit()
+            raise ValueError("Connection: {} too high error, sumPError = {}, in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,sumPError,n*dt,n,dt))
+            #print sumPError
+            #exit()
         
         sumPErrorNonLin = abs(P1_new+500*(Q1_new/A1n)**2-(P2_new+500*(Q2_new/A2n)**2))/abs(P1_new+0.5*(Q1_new/A1n)**2)
         if sumPErrorNonLin > 0.0: 
@@ -843,9 +850,9 @@ class Bifurcation():
 
 
     def callNonLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         #if n == 1:
@@ -953,9 +960,13 @@ class Bifurcation():
             
 
             if self.rigidAreas == False:
-                A1_last = self.A_func[0]([P1discretize],pos1)
-                A2_last = self.A_func[1]([P2discretize],pos2)
-                A3_last = self.A_func[2]([P3discretize],pos3)
+                try:
+                    A1_last = self.A_func[0]([P1discretize],pos1)
+                    A2_last = self.A_func[1]([P2discretize],pos2)
+                    A3_last = self.A_func[2]([P3discretize],pos3)
+                except FloatingPointError as E:
+                    print "Floating Point error in Connection {}".format(self.name)
+                    raise E
             else:
                 A1_last = A1[pos1]
                 A2_last = A2[pos2]
@@ -1048,7 +1059,7 @@ class Bifurcation():
         self.Q_rightDaughter[n+1][pos3] = Q3_new
         
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
             print P1_new, P2_new, P3_new
             print "Niterations: ", Niterations
             
@@ -1088,9 +1099,9 @@ class Bifurcation():
         
                 
 #     def callMacCormackField2(self):
-#         '''
+#         """
 #         Call function for a bifurcation
-#         '''  
+#         """  
 #         #print self.counter
 #         #self.counter = 1+ self.counter
 #         
@@ -1101,7 +1112,7 @@ class Bifurcation():
 #         pos2 = self.positions[1]
 #         pos3 = self.positions[2]
 #         
-#         #''' Predictor Step '''positions
+#         #""" Predictor Step """positions
 #         if self.step == "predictor":
 #             P1 = self.P_leftMother[n]
 #             Q1 = self.Q_leftMother[n]
@@ -1115,7 +1126,7 @@ class Bifurcation():
 #             Q3 = self.Q_daughter[n]
 #             A3 = self.A_daughter[n]
 #                  
-#         #'''Corrector Step'''    
+#         #"""Corrector Step"""    
 #         elif self.step == "corrector":
 #             P1 = self.P_mother_pre
 #             Q1 = self.Q_mother_pre
@@ -1174,10 +1185,10 @@ class Bifurcation():
 #         sol,infodict,a,b = fsolve(self.fsolveFunction ,x ,args = args, fprime = self.jacobiMatrix,full_output=True)
 #         #print "cC",infodict['nfev'],infodict['njev'], b
 #         #if infodict['nfev'] > 2: raw_input("")
-#         #''' Predictor Step '''
+#         #""" Predictor Step """
 #         if self.step == "predictor":
 #             self.step = "corrector"
-#             
+#
 #             # apply changed values
 #             self.P_mother_pre[pos1]        = sol[2]
 #             self.Q_mother_pre[pos1]        = sol[3]
@@ -1185,7 +1196,7 @@ class Bifurcation():
 #             self.Q_leftDaughter_pre[pos2]  = sol[1]
 #             self.P_rightDaughter_pre[pos3] = sol[5]
 #             self.Q_rightDaughter_pre[pos3] = sol[4]
-#             
+#
 #             if self.rigidAreas == False:
 #                 # calculate new areas
 #                 A1n = self.A_func[0]([sol[2]],pos1)
@@ -1200,7 +1211,7 @@ class Bifurcation():
 #                 self.A_leftDaughter_pre[pos2]  = A2[pos2]
 #                 self.A_rightDaughter_pre[pos3] = A3[pos3]
 #         
-#         #'''Corrector Step'''    
+#         #"""Corrector Step"""    
 #         elif self.step == "corrector":
 #             self.step = "predictor"
 #     
@@ -1251,14 +1262,14 @@ class Bifurcation():
 #             
 #     
 #     def fsolveBifurcationSys0(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the bifuraction
 #         Using constant areas, i.e. initial areas
 #         
 #         Input:     x = array [P2,Q2,P1,Q1,Q3,P3]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #         
@@ -1284,10 +1295,10 @@ class Bifurcation():
 #         return [res5,res2,res4,res1,res3,res6]
 #     
 #     def jacobiMatrixBifSys0(self,x, args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using constant areas, i.e. initial areas
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #                 
@@ -1299,14 +1310,14 @@ class Bifurcation():
 #                          [0    , 0                , 0    , 0                , L3[1]            , L3[0]]])
 #     
 #     def fsolveBifurcationSys1(self,x,args):
-#         '''
+#         """
 #         Residual Function with equations to solve for at the bifuraction
 #         Using recalculated areas depending on the new pressure values
 #         
 #         Input:     x = array [P2,Q2,P1,Q1,Q3,P3]
 #                    args = args with local variables
 #         Returns array with residuals 
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #                         
@@ -1343,10 +1354,10 @@ class Bifurcation():
 #         return [res5,res2,res4,res1,res3,res6]
 #     
 #     def jacobiMatrixBifSys1(self,x, args):
-#         '''
+#         """
 #         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
 #         Using recalculated areas depending on the new pressure values
-#         '''
+#         """
 #         P2,Q2,P1,Q1,Q3,P3 = x
 #         A1,A2,A3,pos1,pos2,pos3,vz1,vz2,vz3,P1o,Q1o,P2o,Q2o,P3o,Q3o,domega1,domega2,domega3,rho1,rho2,rho3,L1,L2,L3,du1,du2,du3 = args
 #         
@@ -1448,7 +1459,8 @@ class Anastomosis():
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
         else:
-            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
+            raise ValueError("Connections; wrong solving scheme! {}".format(solvingScheme))
+#            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
         
         ## benchamark Test variables
         self.sumQErrorCount = 0
@@ -1459,9 +1471,9 @@ class Anastomosis():
         self.sumPErrorNonLinCount = 0
     
     def callLinear(self):
-        '''
+        """
         Call function for vessel-vessel connection
-        '''        
+        """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
         pos1 = self.positions[0]
@@ -1550,9 +1562,10 @@ class Anastomosis():
         self.Q_daughter[n+1][pos3]    = Q3_new
         
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negativ pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new, P3_new
-            exit()
+            tmpstring = "Connection: {} calculated negative pressure at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
+            tmpstring = tmpstring + "\n the values were: P1_new = {}, P2_new = {}, P3_new = {}".format(P1_new, P2_new, P3_new)
+            raise ValueError(tmpstring)
+            #exit()
                 
         # calculate new areas
         if self.rigidAreas == False:
@@ -1577,7 +1590,7 @@ class Anastomosis():
             self.maxQError  = sumQError
         #print self.name,' \n Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of mass at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "Warning: Connection: {} to high error in conservation of mass at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
             print sumQError, ' <- Q1,Q2,Q3 ',Q1_new, Q2_new, Q3_new
             #exit()
         
@@ -1588,7 +1601,7 @@ class Anastomosis():
             self.maxPError  = sumPError
         #print self.name,' Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
         if sumPError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
             print sumPError, ' <- P1,P2,P3 ',P1_new, P2_new, P3_new
             #exit()
         

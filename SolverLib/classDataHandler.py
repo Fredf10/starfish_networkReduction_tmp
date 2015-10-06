@@ -1,22 +1,22 @@
 import sys, os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(cur + '/NetworkLib')
+#sys.path.append(cur + '/NetworkLib')
 
 class DataHandler(object):
     
     def __init__(self, currentTimeStep, nTsteps, network, currentMemoryIndex, memoryArraySize):
-        '''
+        """
         Initialize DataHandler numerical object for solver
     
-        Input:
+        Args:
            currentTimeStep    := the current position of the solver relative to the total solution
            nTsteps            := the total number of time steps required for the solution
            network            := the vascular network object
            currentMemoryIndex := the index in vessel memory buffer corresponding to currentTimeStep
            memoryArraySize    := the number of time steps to be stored in the runtime memory
-        '''
-        
+        """
+                
         self.nTsteps = nTsteps
         
         self.chunkCount = 0
@@ -32,7 +32,10 @@ class DataHandler(object):
         self.currentMemoryIndex = currentMemoryIndex
         
         self.network = network
-        
+    
+    def emergencyFlush(self):
+        self.network.flushSolutionMemory( self.currentTimeStep[0], self.currentMemoryIndex[0],self.chunkCount)
+
     def __call__(self):
         '''
         call function for DataHandler to save the data for each vessel in the network
@@ -52,3 +55,7 @@ class DataHandler(object):
             ## if the simulation is finished but memory not filled
             # initiate flush of memoryArrays
             self.network.flushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
+            
+        
+        
+        
