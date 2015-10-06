@@ -108,7 +108,8 @@ class TestBaseClass(object):
         fileName = filePathName.split('/')[-1].split('.')[0]
         root = etree.Element(fileName, gitHash = getGitHash())
         xmlFile = etree.ElementTree(root)
-        self.writeDataToXmlNode(root)
+        xmlNodeSelf = etree.SubElement(root, self.__class__.__name__, {'class':self.__class__.__name__})  
+        self.writeDataToXmlNode(xmlNodeSelf)
         xmlFile.write(filePathName,encoding='iso-8859-1',pretty_print = True)
        
     def writeDataToXmlNode(self,xmlNode):
@@ -228,7 +229,15 @@ class TestBaseClass(object):
             if isinstance(e, etree.ParseError):
                 raise ValueError(" Error in XML file on line: {}".e.position[0])     
         root = tree.getroot()
-        self.loadDataFromXmlNode(root)
+        
+        # try to get the xmlNodeSelf corresponding to the node of the file
+        for childNode in root.iterchildren():
+            if 'class' in childNode.attrib:
+                if childNode.attrib['class'] == self.__class__.__name__:
+                    self.loadDataFromXmlNode(childNode)
+                    return
+        
+        raise ValueError("No xml root-child tag for class '{}' defined in xml file, could not load xmlFile {}".format(self.__class__.__name__,filePathName))
         
     def loadDataFromXmlNode(self, xmlNode):
         '''
