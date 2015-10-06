@@ -32,13 +32,20 @@ class LocationOfInterestManager(TestBaseClass):
         self.sampleSize = None
                                 
         self.testDict = {}
+            
+    def initialize(self):
+        '''
+        Function to initialize all locations of interest which creates quantity of intertes objects
+        '''
+        for locationOfInterest in self.locationsOfInterest.itervalues():
+            locationOfInterest.initialize()
                 
     def addLocationOfInterest(self,locationId, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):
         '''
         
         '''
         self.locationsOfInterest[locationId] = LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVal, confidenceAlpha)
-            
+                        
     def loadQuantitiyOfInterestData(self):
         '''
         

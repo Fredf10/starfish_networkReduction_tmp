@@ -20,6 +20,7 @@ import VascularPolynomialChaosLib.classDistributionManager as cDistMng
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 import VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
 import VascularPolynomialChaosLib.classLocationOfInterestManager as cLocOfIntrMng
+import VascularPolynomialChaosLib.classConfigurationUQSA as cConfUQSA
 
 import UtilityLib.moduleStartUp as mStartUp
 import UtilityLib.moduleXML as mXML
@@ -61,25 +62,17 @@ def vascularPolyChaos():
     # steps
     # 1. load vpc case and configuration 
     optionsDict = mStartUp.parseOptions(['f','n'],vascularPolynomialChaos=True)
-    networkName           = optionsDict['networkName']
-    dataNumber            = optionsDict['dataNumber']
+    networkName = optionsDict['networkName']
+    dataNumber  = optionsDict['dataNumber']
     
-    
-    print "DB VPC 76 exit"
-    exit()
-    
-    # 1.1 load configuration and locations of interest
-    # TODO: one class UQconfig holding caseConfig (vpcConfiguration) and locationOfInterestManager class
-    vpcConfigXmlFile =  mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
-    loadedClassesFromXML = mXML.loadPolyChaosXML(vpcConfigXmlFile)
-       
-    vpcConfiguration = loadedClassesFromXML['VpcConfiguration']
-    locationOfInterestManager = loadedClassesFromXML['LocationOfInterestManager']
-    
-    
+    # 1.1 load configuration and locations of interest    
+    configurationUQSA         = mFPH_VPC.loadConfigurationUQSAFromXMLFile(networkName, dataNumber)
+    vpcConfiguration          = configurationUQSA.vpcConfiguration
+    locationOfInterestManager = configurationUQSA.locationOfInterestManager
+    locationOfInterestManager.initialize() # initialize the location of interest
     
     # 1.2 load vascular network file polynomial chaos
-    vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')
+    vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'read')
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
     # 1.3 print defined random variables
     assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
