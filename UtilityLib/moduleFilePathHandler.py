@@ -125,7 +125,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                 print "WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath)
                 return None
             elif exception == "No":
-                print "raise no exception"
+                #print "raise no exception"
                 return None
             else:
                 raise ValueError("ERROR: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))
