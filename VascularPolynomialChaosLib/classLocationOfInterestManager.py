@@ -86,8 +86,8 @@ class LocationOfInterestManager(TestBaseClass):
         timeStart = []
         timeEnd = []
         
-        for networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile in evaluationCaseFiles:
-            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
+        for networkName,dataNumber,vpcNetworkXmlEvaluationFileLoad,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile in evaluationCaseFiles:
+            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFileLoad, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
             vascularNetwork.linkSolutionData()
             
             numberOfTimePoints.append(len(vascularNetwork.simulationTime))
@@ -100,8 +100,8 @@ class LocationOfInterestManager(TestBaseClass):
         self.simulationTime = np.linspace(max(timeStart), min(timeEnd), min(numberOfTimePoints))
         
         # pass the data to the locationsOfInterests which will load the information needed
-        for sampleIndex,[networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile] in enumerate(evaluationCaseFiles):
-            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFile, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
+        for sampleIndex,[networkName,dataNumber,vpcNetworkXmlEvaluationFileLoad, vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile] in enumerate(evaluationCaseFiles):
+            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFileLoad, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationsOfInterest.values():
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
