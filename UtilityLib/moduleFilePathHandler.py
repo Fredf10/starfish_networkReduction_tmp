@@ -22,9 +22,7 @@ import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
 
-from copy import copy as copy 
-
-from pprint import pprint as pp
+import ConfigParser
 
 # TODO: (einar) Rename input variable exception and corresponding strings
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
@@ -275,7 +273,7 @@ def readConfigFile(options):
     output:
         configurations = dict with {option: configuration from file}
     """ 
-    import ConfigParser
+    
     config = ConfigParser.ConfigParser()
     config.read(getFilePath('configFile', "", '', 'read'))
         
@@ -292,6 +290,19 @@ def readConfigFile(options):
             if workingDirectory == '':
                 raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined, exit()")
             configurations['WorkingDirectory'] = workingDirectory
+        
+        if option == 'knownWorkingDirectories':
+            try:
+                knownWorkingDirectories = config.get('Directory Paths', option)
+            except:
+                knownWorkingDirectories = None
+                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading knownWorkingDirectories failed ini file corrupted, exit()")
+            if knownWorkingDirectories == '':
+                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading knownWorkingDirectories failed: no path defined, exit()")  
+            knownWorkingDirectories = knownWorkingDirectories.split(',')
+            configurations['knownWorkingDirectories'] = knownWorkingDirectories
+        exit()
+            
             
     return configurations    
 
@@ -307,12 +318,9 @@ def saveConfigFile(configurations):
     # open config to get current states
     existingOptions = ['WorkingDirectory']
     
-    import ConfigParser
     Config = ConfigParser.ConfigParser()
     
     configFilePath = getFilePath('configFile', '','',  'read',exception = 'No')
-    
-    
     
     if configFilePath is not None:  #  file exists
         Config.read(configFilePath)
@@ -321,8 +329,10 @@ def saveConfigFile(configurations):
         
     for option,config in configurations.iteritems(): 
             if option in existingOptions:
-                Config.set('Directory Paths', option, config)   
-            
+                if option == 'WorkingDirectory':
+                    Config.set('Directory Paths', option, config)
+                    #TODO: check if it is already in known working directories if not add it
+                    
     with open(getFilePath('configFile', '','',  'write'), 'wb') as configfile:
         Config.write(configfile)
     
