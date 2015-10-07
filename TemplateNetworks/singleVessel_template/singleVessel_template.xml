@@ -14,7 +14,7 @@
     <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
   </simulationContext>
   <solverCalibration>
-    <namesolvingSchemeField>MacCormack_Flux</namesolvingSchemeField>
+    <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
     <rigidAreas>False</rigidAreas>
     <simplifyEigenvalues>False</simplifyEigenvalues>
     <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
