@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import csv
 from math import exp
 import scipy.optimize as so
@@ -92,7 +92,7 @@ class generalPQ_BC(BoundaryConditionType2):
         # TODO: Generalize residual wrappers?
         # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
         domega_ = so.newton(self.residualW1Newton, x0 = omegaOld_, tol=1e-6, args = (_domegaField,P, Q, dt,n, r11, r12, r21, r22))
-        
+
         self.omegaNew[0] = domega_
         self.omegaNew[1] = _domegaField
 
@@ -108,69 +108,69 @@ class generalPQ_BC(BoundaryConditionType2):
         """
         r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
         _omegaOld = r21*P+r22*Q
-        
+
         # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
         _domega = so.newton(self.residualW2Newton, x0 = _omegaOld,  tol=1e-12, args = (domegaField_,P, Q, dt,n, r11, r12, r21, r22))
-                 
+
         self.omegaNew[0] = domegaField_
         self.omegaNew[1] = _domega
-        
+
         self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
         return np.dot(R, self.omegaNew), self.dQInOut
-    
+
     def residualW1Newton(self,domega_, _domegaField, P, Q, dt,n, r11, r12, r21, r22):
         """
         Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
-        
+
         Args:
             args = [_domegaField,P, Q, dt,n, r11, r12, r21, r22]
-            
+
         """
         dP = r11*domega_+ r12*_domegaField
         dQ = r21*domega_+ r22*_domegaField
         return self.residualPQ(dP,dQ,P,Q,dt,n)
-    
+
     def residualW2Newton(self,_domega, domegaField_,P, Q, dt,n, r11, r12, r21, r22):
         """
         Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
-        
+
         Args:
             args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22]
-            
+
         """
         dP = r11*domegaField_+ r12*_domega
         dQ = r21*domegaField_+ r22*_domega
-        
+
         return self.residualPQ(dP,dQ,P,Q,dt,n)
-    
+
     def residualW1(self,domega_, args):
         """
         Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
-        
+
         Args:
             args = [_domegaField,P, Q, dt,n, r11, r12, r21, r22]
-            
+
         """
         _domegaField,P, Q, dt,n, r11, r12, r21, r22 = args
         dP = r11*domega_+ r12*_domegaField
         dQ = r21*domega_+ r22*_domegaField
-        
-        return self.residualPQ(dP,dQ,P,Q,dt,n)    
-         
+
+        return self.residualPQ(dP,dQ,P,Q,dt,n)
+
     def residualW2(self,_domega, args):
         """
         Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
-        
+
         Args:
             args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22]
-            
+
         """
         domegaField_,P, Q, dt,n, r11, r12, r21, r22 = args
         dP = r11*domegaField_+ r12*_domega
         dQ = r21*domegaField_+ r22*_domega
-        
+
         return self.residualPQ(dP,dQ,P,Q,dt,n)
-        
+
     def residualPQ(self,dP,dQ,P,Q,dt,n):
         raise NotImplementedError('Residual equation residualPQ for omega must be implemented.')
 
@@ -755,7 +755,7 @@ class FlowFromFile(BoundaryConditionType1):
         try:
             # set the path relative to THIS file not the executing file!
             if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
-            
+
             pathAndFilename = '/'.join([self.networkDirectory, self.filePathName])
             reader = csv.DictReader(open(pathAndFilename, 'rb'), delimiter=';')
         except Exception:
@@ -1293,10 +1293,10 @@ class Windkessel2DAE(generalPQ_BC):
 
     def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
         return self.returnFunction(_domegaField_, R, dt, P, Q, n)
-    
+
     def residualPQ(self,dP,dQ,P,Q,dt,n):
         return self.C*dP/dt + (P+dP-self.venousPressure[n])/self.Rc - (Q+dQ)
-    
+
 class Windkessel2(BoundaryConditionType2):
     """
     Boundary profile - type 2
@@ -1406,42 +1406,42 @@ class Windkessel2(BoundaryConditionType2):
         #return np.array([domega_ , _domega])
         """
         r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
-           
-        
+
+
         newScheme = False
         if newScheme == True:
-        
+
             import scipy.optimize as so
             # TODO: replace
             _omegaOld = r21*P+r22*Q
             _domega = so.fsolve(self.solveW2, x0 = _omegaOld, args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22])
-                 
+
         else:
             taudt = self.Rc * self.C / dt
             a = self.Rc * r21 - (1. + 2.*taudt) * r11
             b = (2.*taudt + 1.) * r12 - self.Rc * r22
             _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
-        
-                 
+
+
         self.omegaNew[0] = domegaField_
         self.omegaNew[1] = _domega
-        
+
         self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
-        
+
         return np.dot(R, self.omegaNew), self.dQInOut
-            
+
     def solveW2(self,_domega, args):
-        
+
         domegaField_,P, Q, dt,n, r11, r12, r21, r22 = args
-        
+
         dP = r11*domegaField_+ r12*_domega
         dQ = r21*domegaField_+ r22*_domega
-        
+
         return self.f(dP,dQ,P,Q,dt,n)
-        
+
     def f(self,dP,dQ,P,Q,dt,n):
         return self.C*dP/dt + (P+dP-self.venousPressure[n])/self.Rc - (Q+dQ)
-       
+
 class Windkessel3(BoundaryConditionType2):
     """
     Boundary profile - type 2
@@ -1708,12 +1708,12 @@ class VaryingElastance(BoundaryConditionType2):
 
     """
     An implementation of a time-varying elastance model of the left ventricle
-     based on the modfied varying elastance equation including a source 
-     resistance K (as proposed by Shroff), and a parametrized time varying 
+     based on the modfied varying elastance equation including a source
+     resistance K (as proposed by Shroff), and a parametrized time varying
      elastance function (as given by Stergiopulos).
 
-    The general shape of the elastance function is given by three shape 
-    parameters. Various conditions of heart contractility are then created 
+    The general shape of the elastance function is given by three shape
+    parameters. Various conditions of heart contractility are then created
     by scaling this function using the parameters:
     T - Heart period
     Emax - Maximum elastance
@@ -1724,21 +1724,21 @@ class VaryingElastance(BoundaryConditionType2):
     V0 - Volume axis intercept
     K - Source resistance
 
-    NB! The source resistance (K) was introduced to the implementation as 
-    an experiment. It modifies the elastance curve depending on ventricular 
-    outflow, so that it becomes dependent on the afterload of the heart. 
-    Introducing the source resistance did produce a load dependence (shown 
-    by curved isochrones in p-v loops), however the results are in no way to 
-    be trusted since the modified varying elastance equation was not intended 
-    to be used together with the specific varying elastance curve shape used 
-    here (Stergiopulos). A proper implementation of the source resistance 
-    requires a different curve shape. The parameter K is therefore set to zero 
+    NB! The source resistance (K) was introduced to the implementation as
+    an experiment. It modifies the elastance curve depending on ventricular
+    outflow, so that it becomes dependent on the afterload of the heart.
+    Introducing the source resistance did produce a load dependence (shown
+    by curved isochrones in p-v loops), however the results are in no way to
+    be trusted since the modified varying elastance equation was not intended
+    to be used together with the specific varying elastance curve shape used
+    here (Stergiopulos). A proper implementation of the source resistance
+    requires a different curve shape. The parameter K is therefore set to zero
     by default, but it should perhaps be removed from the code altogether?
 
-    Currently only the return method "def funcPos0" has been implemented so 
-    that the boundary condition can only be put at the proximal end of a blood 
-    vessel. It is fairly straightforward to implement funcPos1 if necessary, 
-    this does however require a lot of duplicated code.   
+    Currently only the return method "def funcPos0" has been implemented so
+    that the boundary condition can only be put at the proximal end of a blood
+    vessel. It is fairly straightforward to implement funcPos1 if necessary,
+    this does however require a lot of duplicated code.
     """
     def __init__(self):
         self.type = 2
@@ -2236,7 +2236,7 @@ class Valve:
         elif A / A_s > 1e4:
             L = None
         else:
-#             L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter 
+#             L = 4*np.pi*self.rho*(1/A_s - 1/A)**0.5 # expression: Masterthesis Knut Petter
             L = self.rho * leff / A_s  # paper Mynard et al. 2012
         return L
 
@@ -2325,12 +2325,12 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.Emax = 2.31 * 133.3e6
         self.Emin = 0.06 * 133.3e6
         self.Tpeak = 0.4
-        
+
         # BRX update variables
         self.T_BRX = self.T
         self.Emax_BRX = self.Emax
         self.Emin_BRX = self.Emin
-        
+
         # Runtime Variables
         self.rt_T = self.T
         self.rt_Emax = self.Emax
@@ -2360,7 +2360,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.atriumPressure = 7.5 * 133.32  # TODO: Fix this: Pressure in the atrium ## venouse pressure?!
 
         self.dQInOut = np.empty((2))
-        
+
         self.dsetHeart = None
 
     def update(self, bcDict):
@@ -2369,7 +2369,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         # BRX update variables
         self.T_BRX = self.T
         self.Emax_BRX = self.Emax
-        self.Emin_BRX = self.Emin      
+        self.Emin_BRX = self.Emin
         # Runtime Variables
         self.rt_T = self.T
         self.rt_Emax = self.Emax
@@ -2378,12 +2378,12 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
 
     def initializeSolutionVectors(self, Tsteps, savedArraySize, solutionDataFile):
-        """Initializes some solution vectors storing pressure, flow and volume 
+        """Initializes some solution vectors storing pressure, flow and volume
         of the ventricle, as well as opening and closing state
 
-        NB! This method is not called from the class constructor, but is 
-        called externally by the initializeSolutionMatrices method in the 
-        solver, this is a bit messy, but was the easiest way to do it since the 
+        NB! This method is not called from the class constructor, but is
+        called externally by the initializeSolutionMatrices method in the
+        solver, this is a bit messy, but was the easiest way to do it since the
         BC is initiated before the number of time steps is known.
         """
 
@@ -2401,8 +2401,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.DtFlow = np.zeros(Tsteps+1)
         self.deltaP = np.zeros(Tsteps+1)
         self.aortaP = np.zeros(Tsteps+1)
-        
-            
+
+
         self.dsetHeart = solutionDataFile.create_group('Heart')
         self.dsetHeart.create_dataset("pressure", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("volume", (savedArraySize,), dtype='float64')
@@ -2412,8 +2412,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.dsetHeart.create_dataset("Flow2", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("deltaP", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("aortaP", (savedArraySize,), dtype='float64')
-        
-            
+
+
         """ Initial conditions in the ventricle"""
         self.pressure[0] = self.atriumPressure
         self.volume[0]   = self.atriumPressure / self.E(0) + self.V0
@@ -2462,8 +2462,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 #         ttemp = t-dt
         E = self.E(t)
         e2 = self.E(t)
-        
-        
+
+
     #     dE= (self.E(t+deltatdiff) -E)/deltatdiff
         Vn = self.volume[n]
         self.R11 = r11
@@ -2562,19 +2562,19 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
     def funcPos1(self, _domega, R, L, n, dt, P, Q, A):
         pass
-    
+
     def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
-        
+
         if saving:
             self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE]
-            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE] 
+            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE]
             self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE]
             self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE]
             self.dsetHeart['Flow'][nDB:nDE] = self.Flow[nSB:nSE]
             self.dsetHeart['Flow2'][nDB:nDE] = self.Flow2[nSB:nSE]
             self.dsetHeart['deltaP'][nDB:nDE] = self.deltaP[nSB:nSE]
             self.dsetHeart['aortaP'][nDB:nDE] = self.aortaP[nSB:nSE]
-    
+
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
            according to Tpeak, T, Emax and Emin. """
@@ -2624,12 +2624,12 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.Emax = 2.31 * 133.3e6
         self.Emin = 0.06 * 133.3e6
         self.Tpeak = 0.4
-        
+
         # BRX update variables
         self.T_BRX = self.T
         self.Emax_BRX = self.Emax
         self.Emin_BRX = self.Emin
-        
+
         # Runtime Variables
         self.rt_T = self.T
         self.rt_Emax = self.Emax
@@ -2654,7 +2654,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.atriumPressure = 7.5 * 133.32  # TODO: Fix this: Pressure in the atrium ## venouse pressure?!
 
         self.dQInOut = np.empty((2))
-        
+
         self.dsetHeart = None
 
         self.pressure = None
@@ -2662,6 +2662,8 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.mitralQ = None
         self.aorticQ = None
         self.Elastance = None
+        self.closeValve = -1
+
 
     def update(self, bcDict):
         super(VaryingElastanceSimpleDAE,self).update(bcDict)
@@ -2669,7 +2671,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         # BRX update variables
         self.T_BRX = self.T
         self.Emax_BRX = self.Emax
-        self.Emin_BRX = self.Emin      
+        self.Emin_BRX = self.Emin
         # Runtime Variables
         self.rt_T = self.T
         self.rt_Emax = self.Emax
@@ -2678,12 +2680,12 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
 
     def initializeSolutionVectors(self, Tsteps, savedArraySize, solutionDataFile):
-        """Initializes some solution vectors storing pressure, flow and volume 
+        """Initializes some solution vectors storing pressure, flow and volume
         of the ventricle, as well as opening and closing state
 
-        NB! This method is not called from the class constructor, but is 
-        called externally by the initializeSolutionMatrices method in the 
-        solver, this is a bit messy, but was the easiest way to do it since the 
+        NB! This method is not called from the class constructor, but is
+        called externally by the initializeSolutionMatrices method in the
+        solver, this is a bit messy, but was the easiest way to do it since the
         BC is initiated before the number of time steps is known.
         """
 
@@ -2692,20 +2694,21 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.mitralQ = np.zeros(Tsteps+1)
         self.aorticQ = np.zeros(Tsteps+1)
         self.Elastance = np.zeros(Tsteps+1)
-        
-            
+
+
         self.dsetHeart = solutionDataFile.create_group('Heart')
         self.dsetHeart.create_dataset("pressure", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("volume", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("mitralQ", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("aorticQ", (savedArraySize,), dtype='float64')
         self.dsetHeart.create_dataset("Elastance", (savedArraySize,), dtype='float64')
-        
+
         """ Initial conditions in the ventricle"""
         self.atriumPressure = self.atriumPressure*np.ones(Tsteps+1)
+        self.Elastance[0] = self.E(0)
         self.pressure[0] = self.atriumPressure[0]
         self.volume[0]   = self.atriumPressure[0] / self.E(0) + self.V0
-        self.Elastance[0] = self.E(0) 
+        print "Inital Heart Volume {} and  Pressure {}".format(self.pressure[0], self.volume[0])
 
     def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 
@@ -2714,10 +2717,10 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.funcPos0(_domegaField_, R, dt, P, Q, n)  # Compute the riemann variant going into the vessel save in omegaNew
 
         self.dQInOut = R[:][1] * self.omegaNew
-        
+
         # Increment time step locally
         self.num = self.num + 1
-        
+
         # calculate du and return this!
         return np.dot(R, self.omegaNew), self.dQInOut
 
@@ -2733,41 +2736,50 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
             self.rt_Tpeak = 0.4*self.rt_T
             self.rt_Emax = self.Emax_BRX
             self.rt_Emin = self.Emin_BRX
-    
+
     def systoleResidual(self,dP,dQ,P,Q,dt,n):
+        dVImposed = -dt*(2*Q + dQ)/2
         # TODO: Verify this equation set
-        self.volume[n+1] = (P+dP)/self.Elastance[n+1] + self.V0
-        self.pressure[n+1] = P + dP
-        # self.volume[n+1] = self.volume[n] - dt*(2*Q + dQ)/2
-        # self.pressure[n+1] = self.Elastance[n+1]*(self.volume[n+1]-self.V0)
+        # 1. Assume Pressure and derive Q
+        # self.volume[n+1] = (P+dP)/self.Elastance[n+1] + self.V0
+        # self.pressure[n+1] = P + dP
+        # residual = self.volume[n+1] - self.volume[n] - dVImposed
+
+        # Assume Flow and derive pressure
+        self.volume[n+1] = self.volume[n] + dVImposed
+        self.pressure[n+1] = self.Elastance[n+1]*(self.volume[n+1]-self.V0)
+        residual = self.pressure[n+1] - (P+dP)
+
+        # Differentiated form
+        # h = 1e-7
+        # t = (n*dt)%self.rt_T
+        # dEdt = (self.E(t+dt+h) - self.E(t+dt))/h
+        # residual = dP - dEdt*((P+dP)/self.Elastance[n+1] + self.V0) + self.Elastance[n+1]*(Q+dQ)
         # residual = self.volume[n+1]-self.volume[n] -(self.pressure[n+1]/self.Elastance[n+1] - self.pressure[n]/self.Elastance[n])*dt
         # residual = self.volume[n+1] - self.V0 - (P+dP)/self.Elastance[n+1]
-        h = 1e-7
-        t = (n*dt)%self.rt_T
-        dEdt = (self.E(t+dt+h) - self.E(t+dt))/h
-        residual = dP - dEdt*((P+dP)/self.Elastance[n+1] + self.V0) + self.Elastance[n+1]*(Q+dQ)
+
         return residual
-    
+
     def diastoleStep(self,dt,n):
         self.volume[n+1] = self.volume[n] + dt*(self.atriumPressure[n]-self.pressure[n])/self.Rv
         self.pressure[n+1] = self.Elastance[n+1]*(self.volume[n+1]-self.V0)
 
-    def isovolumetricSTep(self,dt,n):
+    def isovolumetricStep(self,dt,n):
         self.volume[n+1] = self.volume[n]
-        self.pressure[n+1] = self.Elastance[n+1]*self.volume[n+1]
-    
+        self.pressure[n+1] = self.Elastance[n+1]*(self.volume[n+1]-self.V0)
+
     def residualPQ(self, dP, dQ, P, Q, dt, n):
         # Only Valid during systole
         residual = self.systoleResidual(dP, dQ, P, Q, dt, n)
         return residual
-    
+
     def reflection(self,_domegaField, R, dt, P, Q, n):
-        domegaReflected_ = _domegaField 
+        domegaReflected_ = _domegaField
         self.omegaNew[0] = domegaReflected_
         self.omegaNew[1] = _domegaField
         self.dQInOut = R[:][1] * self.omegaNew
-        
-    
+
+
     def funcPos0(self, _domegaField, R, dt, P, Q, n):
         """return function for position 0 at the start
         of the vessel
@@ -2777,41 +2789,41 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         venoP = self.atriumPressure[n]
         t = self.getCycleTime(n + 1, dt)
         self.Elastance[n + 1] = self.E(t+dt)
-        
         #Check if aortic valve is open
-        if (Q >= -1e-5 and ventrPn - P > (-1)): # Original Condition for Aortic Valve (Q >= -1e-15 and ventrPn - P > (-0.0001))
-            print "Valve Open"
-            # Ignore return values as they are stored as class members 
+        if (ventrPn - P > (-1e-4) and self.closeValve <=0): # Original Condition for Aortic Valve (Q >= -1e-15 and ventrPn - P > (-0.0001))
+        #if (Q >= -1e-15 and ventrPn - P > (-0.0001)):  # sysstolecondition
+            if  Q <= -1e-15:
+                self.closeValve = 1 #10
+            # Ignore return values as they are stored as class members
             u, dQInOut = super(VaryingElastanceSimpleDAE,self).funcPos0(_domegaField, R, dt, P, Q, n)
-            #r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
-            #omegaOld_ = r11*P+r12*Q
-            # TODO: Generalize residual wrappers?
-            # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
-            #domega_ = so.newton(self.residualW1Newton, x0 = omegaOld_, tol=1e-6, args = (_domegaField,P, Q, dt,n, r11, r12, r21, r22))
-            #self.omegaNew[0] = domega_
-            #self.omegaNew[1] = _domegaField
-    
+
         else:
-            
+            #if ( ventrPn - P > (-1e-5)): # Original Condition for Aortic Valve (Q >= -1e-15 and ventrPn - P > (-0.0001))
+            #    print "Valve closed but"
+            #    print "pressure", self.pressure[n]*0.00750075
+            #    print "flow", Q
+            self.closeValve = self.closeValve - 1
+
+
             self.reflection(_domegaField,R,dt,P,Q,n)
-            
+
             if (venoP > ventrPn):
                 self.diastoleStep(dt, n)
             else:
-                self.isovolumetricSTep(dt, n)
+                self.isovolumetricStep(dt, n)
 
         return np.dot(R, self.omegaNew), self.dQInOut
 
-    
+
     def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
-        
+
         if saving:
             self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE]
-            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE] 
+            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE]
             self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE]
             self.dsetHeart['aorticQ'][nDB:nDE] = self.aorticQ[nSB:nSE]
             self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE]
-    
+
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
            according to Tpeak, T, Emax and Emin. """
