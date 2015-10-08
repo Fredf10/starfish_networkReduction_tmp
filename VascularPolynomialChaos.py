@@ -95,15 +95,18 @@ def vascularPolyChaos():
     if dependentCase == True:
         # this enables dependentCase in Distribution Manager
         distributionManager.createDependentDistribution(CorrelationMatrix)
-
+        
     ## do the analysis for all defined polynomial orders:
     for polynomialOrder in vpcConfiguration.polynomialOrders:
         # 4. create samples
         if vpcConfiguration.createSample == True:
-            distributionManager.createSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
-            distributionManager.saveSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
+            distributionManager.createSamples(vpcConfiguration.sampleMethod, expansionOrder = polynomialOrder)
+            
+            vpcSampleFile = mFPH_VPC.getFilePath('vpcSampleFile', networkName, dataNumber, mode = "write", gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder=polynomialOrder)
+            distributionManager.saveSamples(networkName)
         else:
-            distributionManager.loadSamples(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
+            vpcSampleFile = mFPH_VPC.getFilePath('vpcSampleFile', networkName, dataNumber, mode = "read", gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder=polynomialOrder)
+            distributionManager.loadSamples(vpcSampleFile)
 
         # 5. evaluate model / on local machine or on server
         # 5.1 create evaluation case file list
@@ -120,7 +123,9 @@ def vascularPolyChaos():
                 distributionManager.passRealisation(sampleIndex)
                 vpcNetworkXmlEvaluationFile = evaluationCaseFiles[sampleIndex][2]
                 mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
-            vascularNetwork.randomInputManager.saveRealisationLog(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
+            
+            evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder=polynomialOrder)
+            vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, networkName, dataNumber, method = ''.join(['PolynomialChaos-Ord ',str(polynomialOrder)]), samplingScheme = vpcConfiguration.sampleMethod)
         # 5.3 run evaluation simulations
         if vpcConfiguration.simulateEvaluations == True:
             if vpcConfiguration.localEvaluation == True:
@@ -143,26 +148,7 @@ def vascularPolyChaos():
         print "starting Post processing "
         # 6. process quantity of interest
         locationOfInterestManager.sampleSize = distributionManager.samplesSize
-        # Example
-        # quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
-        # queryLocation = 'vessel_1'
-        # xVals = 0.25
-        # confidenceAlpha = 5
-        # # add location of interest to manager
-        # locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
-
-
-        quantitiesOfInterestToProcess = ['n', 'T']
-        queryLocation = 'baroreceptor_1'
-
-        # add location of interest to manager
-        # add additional locations of interest
-        # quantitiesOfInterestToProcess = ['ForwardPressure', 'Pressure','ExtremaPressure']
-        # queryLocation = 'vessel_2'
-        # xVals = 0.25
-        # confidenceAlpha = 5
-        # locationOfInterestManager.addLocationOfInterest(queryLocation, quantitiesOfInterestToProcess, xVals, confidenceAlpha)
-
+        
         if vpcConfiguration.preProcessData == True:
             locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
 
@@ -172,8 +158,9 @@ def vascularPolyChaos():
             distributionManager.calculateOrthogonalPolynomials()
             # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
             locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager)
-            locationOfInterestManager.saveQuantitiyOfInterestData(networkName, dataNumber, vpcConfiguration.sampleMethod, polynomialOrder)
             
+            vpcQuantityOfInterestFile = mFPH_VPC.getFilePath('vpcSolutionDataFile', networkName, dataNumber, mode = "write",  gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder=polynomialOrder)
+            locationOfInterestManager.saveQuantitiyOfInterestData(vpcQuantityOfInterestFile)
             ## if monte carlo
             # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
             #locationOfInterestManager.calculateStatisticsMonteCarlo()

@@ -5,9 +5,6 @@ cur = os.path.dirname(os.path.realpath('__file__'))
 sys.path.append(cur+'/../')
 
 
-#sys.path.append(''.join([cur,'/../NetworkLib']))
-from NetworkLib.classVascularNetwork import VascularNetwork
-
 #sys.path.append(''.join([cur,'/../SolverLib']))
 from SolverLib.class1DflowSolver import FlowSolver
 

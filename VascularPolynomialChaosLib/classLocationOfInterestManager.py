@@ -7,7 +7,6 @@ sys.path.append(''.join([cur,'/../']))
 
 
 from classLocationOfInterest import LocationOfInterest
-import moduleFilePathHandlerVPC as mFPH_VPC
 
 #sys.path.append(''.join([cur,'/../UtilityLib']))
 #import moduleXML as mXML
@@ -55,11 +54,10 @@ class LocationOfInterestManager(TestBaseClass):
         '''
         print "loadQuantitiyOfInterestData() not implemented yet"
         
-    def saveQuantitiyOfInterestData(self,networkName,dataNumber,gPCEmethod,gPCEorder):
+    def saveQuantitiyOfInterestData(self,vpcQuantityOfInterestFile):
         '''
         
         '''
-        vpcQuantityOfInterestFile = mFPH_VPC.getFilePath('vpcSolutionDataFile', networkName, dataNumber, mode = "write", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
         saveFile = h5py.File(vpcQuantityOfInterestFile,'w')
         # add simulation time
         saveFile.create_dataset('simulationTime', data=self.simulationTime)

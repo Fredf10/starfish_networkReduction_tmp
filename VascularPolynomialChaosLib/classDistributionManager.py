@@ -1,6 +1,4 @@
 
-import moduleFilePathHandlerVPC as mFPH_VPC
-
 import chaospy as cp
 import h5py
 
@@ -55,13 +53,13 @@ class DistributionManager(object):
             except StandardError:
                 print "WARNING DistributionManager.updateData Wrong key: {}, could not update varibale".format(self.randomInputId, key)
     
-    def loadSamples(self, networkName, dataNumber, gPCEmethod, gPCEorder):
+    def loadSamples(self, vpcSampleFile):
         '''
         load the current sample to disc so it is available for postprocessing or
         sequencielle working process
         for generation gPCE the sample nodes corresponding to the data are needed.
         '''
-        vpcSampleFile = mFPH_VPC.getFilePath('vpcSampleFile', networkName, dataNumber, mode = "read", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
+        vpcSampleFile
         f = h5py.File(vpcSampleFile,'r')
         dset = f['sampleSpace']
         self.samples = dset[:]
@@ -74,22 +72,22 @@ class DistributionManager(object):
             self.samplesDependent = dset[:]
             
         f.close()
-        # check if data is accordingly to the case
-        if self.sampleMethod != gPCEmethod:
-            raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'sampleMethod',self.sampleMethod,gPCEmethod))
-        if self.expansionOrder != gPCEorder:
-            raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'expansionOrder',self.expansionOrder,gPCEorder))
-        if self.samplesSize != len(self.samples):
-            raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'samplesSize',self.samplesSize,len(self.samples)))
+        ## TODO: think about way to check loaded data
+#         # check if data is accordingly to the case
+#         if self.sampleMethod != gPCEmethod:
+#             raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'sampleMethod',self.sampleMethod,gPCEmethod))
+#         if self.expansionOrder != gPCEorder:
+#             raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'expansionOrder',self.expansionOrder,gPCEorder))
+#         if self.samplesSize != len(self.samples):
+#             raise ValueError("loadSamples for {} - {}: wrong '{}' saved in hdf5 file: {} (file) != {} (vpc)".fromat(networkName, dataNumber,'samplesSize',self.samplesSize,len(self.samples)))
+#       
       
-      
-    def saveSamples(self, networkName, dataNumber, gPCEmethod, gPCEorder):
+    def saveSamples(self, vpcSampleFile):
         '''
         save the current sample to disc so it is available for postprocessing or
         sequencielle working process
         for generation gPCE the sample nodes corresponding to the data are needed.
-        '''
-        vpcSampleFile = mFPH_VPC.getFilePath('vpcSampleFile', networkName, dataNumber, mode = "write", gPCEmethod=gPCEmethod, gPCEorder=gPCEorder)
+        '''        
         f = h5py.File(vpcSampleFile,'w')
         dset = f.create_dataset("sampleSpace", data=self.samples)
         dset.attrs.create('samplesSize', data=self.samplesSize)
@@ -148,7 +146,7 @@ class DistributionManagerChaospy(DistributionManager):
         self.distributionDimension = len(self.jointDistribution)
     
         
-    def createSamples(self,networkName, dataNumber, sampleMethod, sampleSize = 1, expansionOrder = None):
+    def createSamples(self,sampleMethod, sampleSize = 1, expansionOrder = None):
         '''
         create samples for the defined distribution for given samplesSize and sampleMethod
         using the chaospy toolbox
@@ -221,7 +219,6 @@ class DistributionManagerChaospy(DistributionManager):
         TODO: saving/loading og orthogonalPolynomials
         '''
         self.orthogonalPolynomials = cp.orth_ttr(self.expansionOrder,self.jointDistribution)
-        
         #self.orthogonalPolynomils = pc.orth_gs(self.expansionOrder,self.jointDistribution)
         #self.orthogonalPolynomils = pc.orth_chol(self.expansionOrder,self.jointDistribution)
         #self.orthogonalPolynomils = pc.orth_svd(self.expansionOrder,self.jointDistribution)
