@@ -84,11 +84,9 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             parser.add_option("-r", "--resimulate", action="store_true", dest="resimulate", 
                               help = "resimulate case with same network saved in datanumber file, 0 = False, 1 = True")
         elif activeOption == 'w':
-            print "add w"
             parser.add_option("-w", "--workingDirectory", dest="workingDirectory", 
                               help = "set the absolute path of your working Directory where you the networkfiles are stored")
         elif activeOption == 'p':
-            print "add p"
             parser.add_option("-p", "--workingDirectorySettings", action="store_true", dest="workingDirectorySettings", 
                               help = "open working directory settings menu")
 
