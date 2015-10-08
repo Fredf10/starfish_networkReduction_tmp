@@ -397,7 +397,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.initializeVenousGravityPressure()
 
             # # print 3D positions
-            if self.quiet == False: self.print3D()
+            if self.quiet == False: 
+                self.print3D()
 
             # calculate the cumulative network resistances and vessel resistances of the network
             if self.initialsationMethod != 'ConstantPressure':
@@ -406,16 +407,19 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # calculate the initial values of the network
             self.calculateInitialValues()
 
-            # evaluate the total arterial compiance and resistacne
-            self.evaluateNetworkResistanceAndCompliance()
+            if self.quiet == False:
+                # evaluate the total arterial compiance and resistacne
+                self.evaluateNetworkResistanceAndCompliance()
 
-            # show wave speed of network
-            if self.quiet == False: self.showWaveSpeedOfNetwork()
+                # show wave speed of network
+                self.showWaveSpeedOfNetwork()
 
             # optimize tree reflection coefficients BADDDDD
-            if self.optimizeTree: self.optimizeTreeRefelctionCoefficients()
+            if self.optimizeTree: 
+                self.optimizeTreeRefelctionCoefficients()
 
-            if self.quiet == False: self.showReflectionCoefficientsConnectionInitialValues()
+            if self.quiet == False:
+                self.showReflectionCoefficientsConnectionInitialValues()
 
             if self.estimateWindkesselCompliance != 'No' and windkesselExist:
                 # calculate terminal vessel compliance

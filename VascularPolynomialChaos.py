@@ -20,7 +20,7 @@ import VascularPolynomialChaosLib.classDistributionManager as cDistMng
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 import VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
 import VascularPolynomialChaosLib.classLocationOfInterestManager as cLocOfIntrMng
-import VascularPolynomialChaosLib.classConfigurationUQSA
+import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
 
 import UtilityLib.moduleStartUp as mStartUp
 import UtilityLib.moduleXML as mXML
@@ -65,10 +65,11 @@ def vascularPolyChaos():
     networkName = optionsDict['networkName']
     dataNumber  = optionsDict['dataNumber']
     
+    # 1.1 load configuration and locations of interest       
+    configurationUQSA = cConfigUQSA.ConfigurationUQSA()
+    configurationFilePath = mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
+    configurationUQSA.loadXMLFile(configurationFilePath)
     
-    
-    # 1.1 load configuration and locations of interest    
-    configurationUQSA         = mFPH_VPC.loadConfigurationUQSAFromXMLFile(networkName, dataNumber)
     vpcConfiguration          = configurationUQSA.vpcConfiguration
     locationOfInterestManager = configurationUQSA.locationOfInterestManager
     locationOfInterestManager.initialize() # initialize the location of interest
@@ -112,14 +113,16 @@ def vascularPolyChaos():
         # 5.1 create evaluation case file list
         evaluationCaseFiles = [] # list of [ [networkName,dataNumber,xml-filePath(LOAD) ,xml-filePath(SAVE), hdf-filePath] for each evaluation
         for simulationIndex in xrange(distributionManager.samplesSize):
-            vpcNetworkXmlEvaluationFile = mFPH_VPC.getFilePath('vpcEvaluationNetworkXmlFile', networkName, dataNumber, 'write',
+            vpcNetworkXmlEvaluationFileLoad = mFPH_VPC.getFilePath('vpcEvaluationNetworkXmlFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
             vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
                                                                gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFile,vpcNetworkXmlEvaluationFile,vpcEvaluationSolutionDataFile])
+            vpcNetworkXmlEvaluationFileSave = vpcNetworkXmlEvaluationFileLoad
+            evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFileLoad,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile])
         # 5.2 save/create simulation xml files
         if vpcConfiguration.createEvaluationXmlFiles == True:
             for sampleIndex in xrange(distributionManager.samplesSize):
+                # update network with current evaluation number
                 distributionManager.passRealisation(sampleIndex)
                 vpcNetworkXmlEvaluationFile = evaluationCaseFiles[sampleIndex][2]
                 mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)

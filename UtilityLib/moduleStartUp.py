@@ -22,6 +22,7 @@ from pprint import pprint as pp
 
 import UtilityLib.moduleFilePathHandler as mFPH
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
+import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
 
 from optparse import OptionParser
 
@@ -40,6 +41,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             'v' : visualisation type
             'c' : connect visualisations
             'w' : set working directory
+            'p': open workind directory settings
 
             visualisationOnly := bool if True proposal of visualisation cases are made if non is given
 
@@ -47,7 +49,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
 
     Usage e.g., :
 
-        optionsDict = parseOptions(['f','n','d','s','v','r','w'])
+        optionsDict = parseOptions(['f','n','d','s','v','r','w','p'])
 
         networkName           = optionsDict['networkName']
         save                  = optionsDict['save']
@@ -81,10 +83,12 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         elif activeOption == 'r':
             parser.add_option("-r", "--resimulate", action="store_true", dest="resimulate", 
                               help = "resimulate case with same network saved in datanumber file, 0 = False, 1 = True")
-            
         elif activeOption == 'w':
             parser.add_option("-w", "--workingDirectory", dest="workingDirectory", 
                               help = "set the absolute path of your working Directory where you the networkfiles are stored")
+        elif activeOption == 'p':
+            parser.add_option("-p", "--workingDirectorySettings", action="store_true", dest="workingDirectorySettings", 
+                              help = "open working directory settings menu")
 
     (options, args) = parser.parse_args()
     optionsDict = options.__dict__
@@ -140,20 +144,11 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                     resimulate = optionArgument
         elif option == 'workingDirectory':
             if optionArgument != None:
-                print "Setting new working directory"
-                if os.path.isdir(optionArgument):
-                    mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
-                    print "   working directory set!"
-                else:
-                    print "  working directory does not exist! try to create folder"
-                    try:
-                        os.mkdir(optionArgument)
-                        mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
-                        print "   created working directory folder sucessfully"
-                        print "   working directory set!"
-                    except:
-                        print "  WARNING: moduleStartUp.parseOptions() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
+                insertWorkingDirectory(optionArgument)
                 exit()
+        elif option == 'workingDirectorySettings':
+            workingDirectorySettings()
+            exit()
                     
     # catch up non given but necessary options
     ## simulation and visualisation
@@ -185,48 +180,92 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             'connect'               : connect,
             'resimulate'            : resimulate}
 
+def prettyPrintList(title, listToPrint, indexOffSet = 0):
+    """
+    Function to pretty print a list to STDOUT with numbers to choose from
+    """
+    print title
+    for index,listElement in enumerate(listToPrint):
+        print "   [ {:3} ] - {}".format(index+indexOffSet,listElement)
+
+def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
+    '''
+    Question user to isert a integer number between minBound and maxBound
+    '''
+    appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
+    userInput = "NONE"
+    appropriateInputList.append('q')
+    print ""
+    while userInput not in appropriateInputList:
+        userInput = raw_input(question)
+    print ""
+    if userInput == 'q': exit()
+    else: return int(userInput)
+
+
+def workingDirectorySettings():
+    '''
+    working directory settings
+    '''
+    mFPH.updateKnownWorkingDirectories()
+    prettyPrintList(' Working directory settings menue',['insert new working directory','switch to another known working directory'])
+    print "\n current working directory: {} ".format(mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
+    userInput = userInputEvaluationInt(2)
+    if userInput == 0:
+        insertWorkingDirectory(None)
+    elif userInput ==1:
+        knownWorkingDirectories = mFPH.readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
+        prettyPrintList(' List of all known working directories:',knownWorkingDirectories)
+        userInput2 = userInputEvaluationInt(len(knownWorkingDirectories))
+        mFPH.saveConfigFile({'WorkingDirectory': knownWorkingDirectories[userInput2]})
+
+def insertWorkingDirectory(optionArgument):
+    
+    print "Setting new working directory"
+    
+    if optionArgument == None:
+        optionArgument = ""
+        while os.path.isdir(optionArgument) == False:
+            optionArgument = raw_input("Insert new workind directory path: ")
+    
+    if os.path.isdir(optionArgument):
+        mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
+        mFPH.updateKnownWorkingDirectories()
+        print "   working directory set!"
+    else:
+        print "  working directory does not exist! try to create folder"
+        try:
+            os.mkdir(optionArgument)
+            mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
+            mFPH.updateKnownWorkingDirectories()
+            print "   created working directory folder sucessfully"
+            print "   working directory set!"
+        except:
+            print "  WARNING: moduleStartUp.parseOptions() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
+    
 
 def chooseNetwork(showTemplates = True):
     """
     console Interface to choose a VascularNetwork for simulation / vascularPolynomial Chaos
     """
     dirNamesTemplate = []
+    prettyPringOffset = 0
     if showTemplates:
         # network templates
         templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
         dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
-        
-        nTemplates = len(dirNamesTemplate)
-    
-        print "\n Template Networks: \n"
-        for dirName in dirNamesTemplate:
-            print "   [ {:3} ] - {}".format(dirNamesTemplate.index(dirName),dirName)
-    
+        prettyPrintList("\n Template Networks: \n",dirNamesTemplate)
+        prettyPringOffset = len(dirNamesTemplate)
     # working directory
     workingDirectoryPath = mFPH.getDirectory('workingDirectory','','','read')
     dirWorkingDirectory = [d for d in os.listdir(workingDirectoryPath) if '.' not in  d]
+    prettyPrintList("\n WorkingDirectory Networks: \n", dirWorkingDirectory, indexOffSet = prettyPringOffset)
     
-    dirNames = dirNamesTemplate+dirWorkingDirectory
-    
-    
-    print "\n WorkingDirectory Networks: \n"
-    for dirName in dirWorkingDirectory:
-        print "   [ {:3} ] - {}".format(dirNames.index(dirName),dirName)
-        
-    filenameT = str(raw_input("\n  Choose network you want to open according to its number: "))
-    try:
-        filenameT = int(filenameT)
-    except:
-        print "no integer given, system exit"
-        exit()
-    try:
-        networkName = dirNames[filenameT]
-    except:
-        print "given number not in list, system exit"
-        exit()
+    dirNames = dirNamesTemplate+dirWorkingDirectory    
+    userInput = userInputEvaluationInt(len(dirNames), 0)
     print ""
     print '====================================='
-    return networkName
+    return dirNames[userInput]
 
 # TODO: (einar) fix exception variable
 def evaluateDataNumber(dataNumberString, exception = "Error"):
@@ -300,47 +339,41 @@ def chooseSolutionDataCase():
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkCases = [d for d in os.listdir(workingDirectory) if '.' not in  d]
         
-    enumerationIndex = 0
     fileNameDataNumber = []
     
+    indexOffSet = 0
     for networkName in networkCases:
         simulationCaseDict = mFPH.getSimulationCaseDescriptions(networkName )#, exception = 'No')
         networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',networkName,'xxx','read')
         
+        listToPrint = []
         if simulationCaseDict != None:
             first = True
             for root, dirs, files in os.walk(networkDirectory):
                 for file in files:
                     if ".hdf5" in file and "polyChaos" not in file:
-                        if first: 
-                            print "\n        {}".format(networkName)
-                            first = False
-                        file = file.split('.')[0]
-                        dataNumber = file.split('_SolutionData_')[-1]
-                        
+                        solutionDataFile = file.split('.')[0]
+                        dataNumber = solutionDataFile.split('_SolutionData_')[-1]
                         if len(dataNumber) == 3:
                             if dataNumber not in simulationCaseDict:
                                 description =  "'{}' not listed in simulation descriptions of network '{}'.".format(dataNumber,networkName)
-                                # update descriptions
                             else:
                                 description = simulationCaseDict[dataNumber]
-                            print "[ {:3} ]     {} : {}".format(enumerationIndex, dataNumber, description)
+                                
+                            listToPrint.append("{} : {}".format(dataNumber, description))
                             fileNameDataNumber.append([networkName,dataNumber])
-                            enumerationIndex = enumerationIndex+1
-                        
-                       
-    inputInt = str(raw_input("  Choose simulation case you want to open according to its number: "))
-    try:
-        inputInt = int(inputInt)
-        networkName = fileNameDataNumber[inputInt][0]
-        dataNumber = fileNameDataNumber[inputInt][1]
-    except:
-        if inputInt > len(fileNameDataNumber):
-            print " given number to high, system exit"
-            
-        else:    
-            print "no integer given, system exit"
+    
+        prettyPrintList("\n        {}".format(networkName),listToPrint, indexOffSet = indexOffSet)
+        indexOffSet = len(listToPrint)
+        
+    if len(fileNameDataNumber) == 0:
+        print "No solutionCases available, system exit"
         exit()
+    
+    question  = "  Choose simulation case you want to open according to its number, (q)-quit: "
+    userInput = userInputEvaluationInt(len(fileNameDataNumber), 0, question)
+    networkName = fileNameDataNumber[userInput][0]
+    dataNumber  = fileNameDataNumber[userInput][1]
     
     return networkName,dataNumber
 
@@ -370,22 +403,14 @@ def chooseVPCconfigFile(networkName):
             
     print "\n  No dataNumber for Config-File passed, choose between all available Config Files:"
     print "  (NB: use -n dataNumber to define a specific Config-file you want to open)\n"
-    print "   [   0 ] - Create new template Config-File and exit()"
-    #print "   [ 1 ] - Create template Config-File and run vascularPolynomialChaos."
-    index = 1
+    print "   [   0 ] - Create new template Config-File and exit"
     if filenames != []:
-        for i,filename in enumerate(filenames):
-                print "   [ {:3} ]     {}".format(i+1, filename)
-        index = 1+len(filenames)
-    
-    userInput = 'a'
-    while userInput not in [str(i) for i in xrange(index)]:
-        userInput = str(raw_input("\n  Choose Option or Config-File you want to open according to its number: "))
-    try:
-        userInput = int(userInput)
-    except:
-        print "no integer given, system exit"
-    if userInput == 0 :#or userInput == 1:
+        prettyPrintList('',filenames, indexOffSet = 1)
+        
+    question  = "  Choose Option or Config-File you want to open according to its number:, (q)-quit: "
+    userInput = userInputEvaluationInt(1+len(filenames), 0, question)
+        
+    if userInput == 0 :
         
         userInputDataNumber = 'xxxx'
         dataNumber = False
@@ -394,7 +419,11 @@ def chooseVPCconfigFile(networkName):
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         
         # create template configuration
-        mFPH_VPC.createConfigurationUQSAXMLfromTemplate(networkName, dataNumber)
+        configurationFilePathTemplate = mFPH_VPC.getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
+        configurationUQSA = cConfigUQSA.ConfigurationUQSA()
+        configurationUQSA.loadXMLFile(configurationFilePathTemplate)
+        configurationFilePath = mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
+        configurationUQSA.writeXMLFile(configurationFilePath)
         # copy network file
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')

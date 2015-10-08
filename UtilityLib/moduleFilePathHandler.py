@@ -22,9 +22,7 @@ import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
 
-from copy import copy as copy 
-
-from pprint import pprint as pp
+import ConfigParser
 
 # TODO: (einar) Rename input variable exception and corresponding strings
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
@@ -125,7 +123,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                 print "WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath)
                 return None
             elif exception == "No":
-                print "raise no exception"
+                #print "raise no exception"
                 return None
             else:
                 raise ValueError("ERROR: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))
@@ -275,7 +273,7 @@ def readConfigFile(options):
     output:
         configurations = dict with {option: configuration from file}
     """ 
-    import ConfigParser
+    
     config = ConfigParser.ConfigParser()
     config.read(getFilePath('configFile', "", '', 'read'))
         
@@ -292,6 +290,18 @@ def readConfigFile(options):
             if workingDirectory == '':
                 raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined, exit()")
             configurations['WorkingDirectory'] = workingDirectory
+        
+        if option == 'knownWorkingDirectories':
+            try:
+                knownWorkingDirectories = config.get('Directory Paths', option)
+            except:
+                knownWorkingDirectories = None
+                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading <knownWorkingDirectories> failed ini file corrupted, exit()")
+            if knownWorkingDirectories == '':
+                configurations['knownWorkingDirectories'] = []
+            else:
+                knownWorkingDirectories = knownWorkingDirectories.split(',')
+                configurations['knownWorkingDirectories'] = knownWorkingDirectories
             
     return configurations    
 
@@ -305,14 +315,11 @@ def saveConfigFile(configurations):
         
     """ 
     # open config to get current states
-    existingOptions = ['WorkingDirectory']
+    existingOptions = ['WorkingDirectory','knownWorkingDirectories']
     
-    import ConfigParser
     Config = ConfigParser.ConfigParser()
     
     configFilePath = getFilePath('configFile', '','',  'read',exception = 'No')
-    
-    
     
     if configFilePath is not None:  #  file exists
         Config.read(configFilePath)
@@ -321,10 +328,30 @@ def saveConfigFile(configurations):
         
     for option,config in configurations.iteritems(): 
             if option in existingOptions:
-                Config.set('Directory Paths', option, config)   
-            
+                Config.set('Directory Paths', option, config)
+                    
     with open(getFilePath('configFile', '','',  'write'), 'wb') as configfile:
         Config.write(configfile)
+    
+def updateKnownWorkingDirectories():
+    """
+    Function which updates the known working directories by adding the current working directory 
+    list of known working directories
+    """
+    # 1. get known working directories
+    try:
+        knownWorkingDirectories = readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
+    except ValueError:
+        knownWorkingDirectories = []
+    # 2. get current working directory
+    currentWorkingDirectory = readConfigFile(['WorkingDirectory'])['WorkingDirectory']
+    
+    # 3. check if current working directory is not already in known working directories
+    if currentWorkingDirectory not in knownWorkingDirectories:
+        knownWorkingDirectories.append(currentWorkingDirectory)
+        
+        saveConfigFile({'knownWorkingDirectories':','.join(knownWorkingDirectories)})
+    
     
 def updateSimulationDescriptions(networkName, currentDataNumber, currentDescription):
     """

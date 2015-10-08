@@ -22,17 +22,4 @@ class ConfigurationUQSA(TestBaseClass):
         self.vpcConfiguration          = None
         self.locationOfInterestManager = None
         
-    
-        
-        
-    
-        
-    
-        
-        
-        
-        
-        
-        
-        
         

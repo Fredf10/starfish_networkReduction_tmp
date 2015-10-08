@@ -35,7 +35,7 @@ def main():
     print '#     STARFiSh_v0.3_development     #'
     print '====================================='
     
-    optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w'])
+    optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w','p'])
     
     networkName           = optionsDict['networkName']
     save                  = optionsDict['save']
