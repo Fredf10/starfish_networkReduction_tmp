@@ -296,13 +296,12 @@ def readConfigFile(options):
                 knownWorkingDirectories = config.get('Directory Paths', option)
             except:
                 knownWorkingDirectories = None
-                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading knownWorkingDirectories failed ini file corrupted, exit()")
+                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading <knownWorkingDirectories> failed ini file corrupted, exit()")
             if knownWorkingDirectories == '':
-                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading knownWorkingDirectories failed: no path defined, exit()")  
-            knownWorkingDirectories = knownWorkingDirectories.split(',')
-            configurations['knownWorkingDirectories'] = knownWorkingDirectories
-        exit()
-            
+                configurations['knownWorkingDirectories'] = []
+            else:
+                knownWorkingDirectories = knownWorkingDirectories.split(',')
+                configurations['knownWorkingDirectories'] = knownWorkingDirectories
             
     return configurations    
 
@@ -316,7 +315,7 @@ def saveConfigFile(configurations):
         
     """ 
     # open config to get current states
-    existingOptions = ['WorkingDirectory']
+    existingOptions = ['WorkingDirectory','knownWorkingDirectories']
     
     Config = ConfigParser.ConfigParser()
     
@@ -329,12 +328,30 @@ def saveConfigFile(configurations):
         
     for option,config in configurations.iteritems(): 
             if option in existingOptions:
-                if option == 'WorkingDirectory':
-                    Config.set('Directory Paths', option, config)
-                    #TODO: check if it is already in known working directories if not add it
+                Config.set('Directory Paths', option, config)
                     
     with open(getFilePath('configFile', '','',  'write'), 'wb') as configfile:
         Config.write(configfile)
+    
+def updateKnownWorkingDirectories():
+    """
+    Function which updates the known working directories by adding the current working directory 
+    list of known working directories
+    """
+    # 1. get known working directories
+    try:
+        knownWorkingDirectories = readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
+    except ValueError:
+        knownWorkingDirectories = []
+    # 2. get current working directory
+    currentWorkingDirectory = readConfigFile(['WorkingDirectory'])['WorkingDirectory']
+    
+    # 3. check if current working directory is not already in known working directories
+    if currentWorkingDirectory not in knownWorkingDirectories:
+        knownWorkingDirectories.append(currentWorkingDirectory)
+        
+        saveConfigFile({'knownWorkingDirectories':','.join(knownWorkingDirectories)})
+    
     
 def updateSimulationDescriptions(networkName, currentDataNumber, currentDescription):
     """
