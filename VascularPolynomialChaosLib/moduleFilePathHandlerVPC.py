@@ -48,8 +48,9 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                     Error (default): raise error and exit if file is not exiting,
                     Warning: just raise Warning and return with error string,  
     '''
-    existingFileTypes = ['vpcConfigXmlFile',
-                         'vpcConfigTemplateFile',
+    existingFileTypes = ['uqsaCaseXmlFile',
+                         'uqsaCaseTemplatePolynomialChaosFile',
+                         'uqsaCaseTemplateMonteCarloFile',
                          'vpcNetworkXmlFile',
                          'vpcSampleFile',
                          'vpcEvaluationNetworkXmlFile',
@@ -64,8 +65,9 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
         
     # file names
     filenames = {
-                 'vpcConfigTemplateFile'        : 'template_vpcConfig_xxx.xml',
-                 'vpcConfigXmlFile'             : ''.join([networkName,'_vpcConfig_',dataNumber,'.xml']),
+                 'uqsaCaseTemplatePolynomialChaosFile': 'uqsaCase_PC_xxx.xml',
+                 'uqsaCaseTemplateMonteCarloFile':'uqsaCase_MC_xxx.xml',
+                 'uqsaCaseXmlFile'              : ''.join([networkName,'_uqsaCase_',dataNumber,'.xml']),
                  'vpcNetworkXmlFile'            : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
                  'vpcSampleFile'                : ''.join(['samples.hdf5']),
                  'vpcEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
@@ -135,14 +137,15 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     '''
     
     existingDirectoryTypes = {'workingDirectory',
-                              'vpcConfigXmlFileDirectory',
+                              'uqsaCaseXmlFileDirectory',
                               'vpcNetworkXmlFileDirectory',
                               'vpcEvaluationNetworkXmlFileDirectory',
                               'vpcEvaluationSolutionDataFileDirectory',
                               'vpcSampleFileDirectory',
                               'evaluationLogFileDirectory',
                               'vpcSolutionDataFileDirectory',
-                              'vpcConfigTemplateFileDirectory'} 
+                              'uqsaCaseTemplatePolynomialChaosFileDirectory',
+                              'uqsaCaseTemplateMonteCarloFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
@@ -162,14 +165,15 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     directories = {
                    'workingDirectory'                      : workingDirectory,
                    # vascular polynomial chaos
-                   'vpcConfigXmlFileDirectory'             : vpcCaseDirectory,
+                   'uqsaCaseXmlFileDirectory'              : vpcCaseDirectory,
                    'vpcNetworkXmlFileDirectory'            : vpcCaseDirectory,
                    'vpcSampleFileDirectory'                : vpcOrderMethodDirectory,
                    'vpcEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
                    'vpcEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
                    'evaluationLogFileDirectory'            : vpcOrderMethodDirectory,
                    'vpcSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
-                   'vpcConfigTemplateFileDirectory'        : vpcConficTemplateDicrectory,
+                   'uqsaCaseTemplatePolynomialChaosFileDirectory'   : vpcConficTemplateDicrectory,
+                   'uqsaCaseTemplateMonteCarloFileDirectory'   : vpcConficTemplateDicrectory
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

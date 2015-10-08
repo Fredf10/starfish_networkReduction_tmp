@@ -22,7 +22,6 @@ from pprint import pprint as pp
 
 import UtilityLib.moduleFilePathHandler as mFPH
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
-import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
 
 from optparse import OptionParser
 
@@ -167,7 +166,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         if networkName == None:
             networkName = chooseNetwork(showTemplates = False)
         if dataSetNumber == None:
-            dataNumber = chooseVPCconfigFile(networkName)
+            dataNumber = chooseUQSACaseFile(networkName)
         
     del parser
     
@@ -378,7 +377,7 @@ def chooseSolutionDataCase():
     return networkName,dataNumber
 
 
-def chooseVPCconfigFile(networkName):
+def chooseUQSACaseFile(networkName):
     """
     console Interface to choose a vascularPolynomialChaos Config File
      including the possility to create a template Config File
@@ -387,6 +386,8 @@ def chooseVPCconfigFile(networkName):
     Output:
         networkName,dataNumber of the Config File (networkName should be the same)
     """
+    from VascularPolynomialChaosLib import classUqsaCase
+    
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkDirectory = '/'.join([workingDirectory,networkName])
     
@@ -401,16 +402,17 @@ def chooseVPCconfigFile(networkName):
                 if ".xml" in filename and "vpcConfig" in filename:
                     filenames.append(filename)
             
-    print "\n  No dataNumber for Config-File passed, choose between all available Config Files:"
-    print "  (NB: use -n dataNumber to define a specific Config-file you want to open)\n"
-    print "   [   0 ] - Create new template Config-File and exit"
+    print "\n  No dataNumber for UQSAcase file passed, choose between all available UQSAcase files:"
+    print "  (NB: use -n dataNumber to define a specific UQSAcase you want to open)\n"
+    print "   [   0 ] - Create new template case for polynomial chaos and exit"
+    print "   [   1 ] - Create new template case for monte carlo and exit"
     if filenames != []:
-        prettyPrintList('',filenames, indexOffSet = 1)
+        prettyPrintList('',filenames, indexOffSet = 2)
         
     question  = "  Choose Option or Config-File you want to open according to its number:, (q)-quit: "
-    userInput = userInputEvaluationInt(1+len(filenames), 0, question)
+    userInput = userInputEvaluationInt(2+len(filenames), 0, question)
         
-    if userInput == 0 :
+    if userInput in [0,1] :
         
         userInputDataNumber = 'xxxx'
         dataNumber = False
@@ -419,11 +421,15 @@ def chooseVPCconfigFile(networkName):
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         
         # create template configuration
-        configurationFilePathTemplate = mFPH_VPC.getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
-        configurationUQSA = cConfigUQSA.ConfigurationUQSA()
-        configurationUQSA.loadXMLFile(configurationFilePathTemplate)
-        configurationFilePath = mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-        configurationUQSA.writeXMLFile(configurationFilePath)
+        if userInput == 0:
+            configurationFilePathTemplate = mFPH_VPC.getFilePath('uqsaCaseTemplatePolynomialChaosFile', networkName, dataNumber, 'read')
+        elif userInput == 1:
+            configurationFilePathTemplate = mFPH_VPC.getFilePath('uqsaCaseTemplateMonteCarloFile', networkName, dataNumber, 'read')
+
+        uqsaCase = classUqsaCase.UqsaCase()
+        uqsaCase.loadXMLFile(configurationFilePathTemplate)
+        configurationFilePath = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'write')
+        uqsaCase.writeXMLFile(configurationFilePath)
         # copy network file
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
@@ -431,7 +437,7 @@ def chooseVPCconfigFile(networkName):
         print "files created!, exit()"
         exit()
     else:
-        networkName = filenames[userInput-1]
+        networkName = filenames[userInput-2]
         dataNumber = networkName.split('.')[0].split('_')[2]
         
     return dataNumber   

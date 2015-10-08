@@ -15,12 +15,12 @@ cur = os.path.dirname(os.path.realpath('__file__'))
 #from SolverLib.class1DflowSolver import FlowSolver
 ### another
 
-import VascularPolynomialChaosLib.classVpcConfiguration as cVPCConf
+#import VascularPolynomialChaosLib.classVpcConfiguration as cVPCConf
 import VascularPolynomialChaosLib.classDistributionManager as cDistMng
 import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 import VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
-import VascularPolynomialChaosLib.classLocationOfInterestManager as cLocOfIntrMng
-import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
+import VascularPolynomialChaosLib.classUqsaCase as cUqsaCase
+#import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
 
 import UtilityLib.moduleStartUp as mStartUp
 import UtilityLib.moduleXML as mXML
@@ -65,11 +65,13 @@ def vascularPolyChaos():
     networkName = optionsDict['networkName']
     dataNumber  = optionsDict['dataNumber']
     
-    # 1.1 load configuration and locations of interest       
-    configurationUQSA = cConfigUQSA.ConfigurationUQSA()
-    configurationFilePath = mFPH_VPC.getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
-    configurationUQSA.loadXMLFile(configurationFilePath)
-    
+    # 1.1 load configuration and locations of interest      
+    uqsaCase = cUqsaCase.UqsaCase() #cConfigUQSA.ConfigurationUQSA()
+    uqsaCaseFile = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'read')
+    uqsaCase.loadXMLFile(uqsaCaseFile)
+    print uqsaCase
+    exit()
+    configurationUQSA = None
     vpcConfiguration          = configurationUQSA.vpcConfiguration
     locationOfInterestManager = configurationUQSA.locationOfInterestManager
     locationOfInterestManager.initialize() # initialize the location of interest
