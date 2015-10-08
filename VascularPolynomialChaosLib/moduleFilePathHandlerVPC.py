@@ -26,7 +26,7 @@ from pprint import pprint as pp
 import UtilityLib.moduleFilePathHandler as mFPH
 
 
-def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gPCEorder = "None", evaluationNumber = "None", exception = 'Error'):
+def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCEmethod = "None", gPCEorder = "None", evaluationNumber = "None", exception = 'Error'):
     '''
     Function return a requested file path, if this file exists
     
@@ -34,7 +34,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
         fileType (str): 'vpcConfigXmlFile',
                         'vpcConfigTemplateFile',
                         'vpcNetworkXmlFile',
-                        'vpcSampleFile',
+                        'uqsaSampleFile',
                         'vpcEvaluationNetworkXmlFile',
                         'vpcEvaluationSolutionDataFile',
                         'vpcProcessedSolutionDataFile',
@@ -52,7 +52,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                          'uqsaCaseTemplatePolynomialChaosFile',
                          'uqsaCaseTemplateMonteCarloFile',
                          'vpcNetworkXmlFile',
-                         'vpcSampleFile',
+                         'uqsaSampleFile',
                          'vpcEvaluationNetworkXmlFile',
                          'vpcEvaluationSolutionDataFile',
                          'vpcProcessedSolutionDataFile',
@@ -69,7 +69,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                  'uqsaCaseTemplateMonteCarloFile':'uqsaCase_MC_xxx.xml',
                  'uqsaCaseXmlFile'              : ''.join([networkName,'_uqsaCase_',dataNumber,'.xml']),
                  'vpcNetworkXmlFile'            : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
-                 'vpcSampleFile'                : ''.join(['samples.hdf5']),
+                 'uqsaSampleFile'               : ''.join(['samples.hdf5']),
                  'vpcEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
                  'vpcEvaluationSolutionDataFile': ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.hdf5']),
                  'evaluationLogFile'            : ''.join(['evaluationLogFile.txt']),
@@ -83,6 +83,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
                                       networkName, 
                                       dataNumber,
                                       mode,
+                                      caseName = caseName,
                                       gPCEmethod = gPCEmethod, 
                                       gPCEorder= gPCEorder,
                                       exception = exception)
@@ -113,7 +114,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, gPCEmethod = "None", gP
               
     return requestedFilePath
     
-def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', gPCEmethod = 'None', gPCEorder = 'None'):
+def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', caseName = 'None', gPCEmethod = 'None', gPCEorder = 'None'):
     '''
     Function returns a requested directory path, if this directory does not exists
     it is created.
@@ -141,7 +142,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vpcNetworkXmlFileDirectory',
                               'vpcEvaluationNetworkXmlFileDirectory',
                               'vpcEvaluationSolutionDataFileDirectory',
-                              'vpcSampleFileDirectory',
+                              'uqsaSampleFileDirectory',
                               'evaluationLogFileDirectory',
                               'vpcSolutionDataFileDirectory',
                               'uqsaCaseTemplatePolynomialChaosFileDirectory',
@@ -155,7 +156,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     workingDirectory            = mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory']
     networkXmlFileDirectory     = ''.join([workingDirectory,'/',networkName])
     vpcCaseDirectory            = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
-    vpcOrderMethodDirectory     = ''.join([vpcCaseDirectory,'/','method_',gPCEmethod,'_order_',str(gPCEorder).zfill(2)])
+    vpcOrderMethodDirectory     = ''.join([vpcCaseDirectory,'/',caseName])
     vpcEvaluationNetDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationNetworkFiles'])
     vpcEvaluationSolDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationSolutionData'])
     vpcConficTemplateDicrectory = ''.join([starfishHomeDirectory,'/TemplateNetworks','/vascularPolynomialChaos'])
@@ -167,7 +168,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    # vascular polynomial chaos
                    'uqsaCaseXmlFileDirectory'              : vpcCaseDirectory,
                    'vpcNetworkXmlFileDirectory'            : vpcCaseDirectory,
-                   'vpcSampleFileDirectory'                : vpcOrderMethodDirectory,
+                   'uqsaSampleFileDirectory'               : vpcOrderMethodDirectory,
                    'vpcEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
                    'vpcEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
                    'evaluationLogFileDirectory'            : vpcOrderMethodDirectory,

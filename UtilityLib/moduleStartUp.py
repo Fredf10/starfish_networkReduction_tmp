@@ -399,7 +399,7 @@ def chooseUQSACaseFile(networkName):
         if 'vascularPolynomialChaos' in fileNetworkDir:
             allFilenames = os.listdir('/'.join([workingDirectory,networkName,fileNetworkDir]))
             for filename in allFilenames:
-                if ".xml" in filename and "vpcConfig" in filename:
+                if ".xml" in filename and "uqsaCase" in filename:
                     filenames.append(filename)
             
     print "\n  No dataNumber for UQSAcase file passed, choose between all available UQSAcase files:"

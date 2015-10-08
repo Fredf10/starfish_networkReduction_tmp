@@ -4,8 +4,12 @@ sys.path.append(cur+'/../')
 
 from testBaseClass import TestBaseClass 
 
+import moduleFilePathHandlerVPC as mFPH_VPC
+
 import classLocationOfInterestManager
 import classUqsaMethods
+
+import h5py
 
 class UqsaCase(TestBaseClass):
     
@@ -40,6 +44,9 @@ class UqsaCase(TestBaseClass):
     
     def __init__(self):
         
+        self.networkName = None
+        self.dataNumber  = None
+        
         ### data read in from file
         ##control variables
         # create samples ( TRUE == create and save, FALSE == load existing)
@@ -66,10 +73,62 @@ class UqsaCase(TestBaseClass):
         ### data assoziated during run time
         ## samples of Z
         self.samples = None
-        ## dependent samples
-        self.sampleDependent = None
+        self.samplesSize = None
+        self.samplesDependent = None
         
+    def initialize(self,networkName, dataNumber):
+        '''
+        Initialize case class
+        '''
+        self.networkName = networkName
+        self.dataNumber  = dataNumber
         
+        self.locationOfInterestManager.initialize()
         
+    def aquireSamples(self, distributionManager):
+        '''
+        Function that envokes either sample creation of loading depending on the defined control variable        
+        '''
+        if self.createSample == True:
+            self.samples,self.samplesDependent = self.uqsaMethod.createSamples(distributionManager)
+            self.samplesSize = len(self.samples)
+            
+            sampleFile = mFPH_VPC.getFilePath('uqsaSampleFile', self.networkName, self.dataNumber, mode = "write", caseName=self.uqsaMethod.name())
+            self.saveSamples(sampleFile)
+        else:
+            sampleFile = mFPH_VPC.getFilePath('uqsaSampleFile', self.networkName, self.dataNumber, mode = "read", caseName=self.uqsaMethod.name())
+            self.loadSamples(sampleFile)
+
+    
+    def loadSamples(self, sampleFile):
+        '''
+        load the current sample to disc so it is available for postprocessing or
+        sequencielle working process
+        for generation gPCE the sample nodes corresponding to the data are needed.
+        '''
+        f = h5py.File(sampleFile,'r')
+        dset = f['sampleSpace']
+        self.samples = dset[:]
+        self.samplesSize    = dset.attrs.get('samplesSize')
+                
+        if 'sampleSpaceDependent' in f.keys():
+            dset = f['sampleSpaceDependent']
+            self.samplesDependent = dset[:]
+            
+        f.close()
+      
+    def saveSamples(self, sampleFile):
+        '''
+        save the current sample to disc so it is available for postprocessing or
+        sequencielle working process
+        for generation gPCE the sample nodes corresponding to the data are needed.
+        '''        
+        f = h5py.File(sampleFile,'w')
+        dset = f.create_dataset("sampleSpace", data=self.samples)
+        dset.attrs.create('samplesSize', data=self.samplesSize)
+        if self.samplesDependent != None:
+            dset = f.create_dataset("sampleSpaceDependent", data=self.samplesDependent)
         
+        f.flush()
+        f.close()  
         
