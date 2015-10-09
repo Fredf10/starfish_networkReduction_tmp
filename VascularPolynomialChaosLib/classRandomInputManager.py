@@ -135,7 +135,7 @@ class RandomInputManager(object):
             except:
                 print "ERROR RandomInputManager.updateData Wrong key: {}, could not update varibale".format( key)
            
-    def saveRealisationLog(self, evaluationLogFile, networkName, dataNumber, method, samplingScheme): #, networkName, dataNumber, gPCEmethod, gPCEorder):
+    def saveRealisationLog(self, evaluationLogFile, networkName, dataNumber, caseName): 
         '''
         method to save a log file with the realisations passed for each sample iteration
         '''
@@ -144,7 +144,7 @@ class RandomInputManager(object):
         
         logfile = open(evaluationLogFile, "wb")
         logfile.write(''.join(['Stochastic simulation ',str(networkName),' DataNumber ',dataNumber,'\n','\n']))
-        logfile.write(''.join(['method :', method,'  samplingScheme: ',samplingScheme,'  number of evaluations: ',str(len(logData)),'\n','\n']))
+        logfile.write(''.join(['uqsaCase :', caseName,'  number of evaluations: ',str(len(logData)),'\n','\n']))
         
         for info in self.generateInfo():
             logfile.write(''.join([info,'\n']))

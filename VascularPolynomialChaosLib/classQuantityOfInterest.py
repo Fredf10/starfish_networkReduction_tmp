@@ -13,10 +13,9 @@ class QuantityOfInterest(object):
         self.data = data
         
         # statistic properties
-        self.gPCExpansion = None
-        
         self.expectedValue       = None
         self.variance            = None
+        self.standardDeviation   = None 
         
         self.conditionalExpectedValue = None
         self.conditionalVariance      = None
@@ -25,73 +24,15 @@ class QuantityOfInterest(object):
         self.confidenceAlpha     = confidenceAlpha
         
         self.firstOrderSensitivities = None
-        self.totalSensitivities      = None
-        
-        # use saltellis MC method evaluating the gpc-expansion
-        self.firstOrderSensitivitiesMC = None
-        self.totalSensitivitiesMC = None
-        
-    def calculateStatisticsPolynomialChaos(self,distributionManager):
+        self.totalSensitivities      = None       
+    
+    def getData(self):
         '''
-        Function which calculates the gPCExpansion for the given data
+        checks if data defined and returns it
         '''
         assert self.data != None, 'QuantityOfInterest {} : {} cannot calculate gPCExpansion and statistics as there is no data defined'.format(self.queryLocation,self.quantityName)
-                   
-        print "    starting the polychaos polynomial calculation from polychaos simulation result!!"
-        print self.queryLocation,'--',self.quantityName
-                
-        # polynomial chaos expansion
-        self.gPCExpansion = cp.fit_regression(distributionManager.orthogonalPolynomials, distributionManager.samples.T, self.data)
-                 
-        # statistics
-        self.expectedValue       = cp.E(self.gPCExpansion, distributionManager.jointDistribution)
-        self.variance            = cp.Var(self.gPCExpansion, distributionManager.jointDistribution)
-        self.conficenceInterval  = cp.Perc(self.gPCExpansion, [self.confidenceAlpha/2., 100-self.confidenceAlpha/2.], distributionManager.jointDistribution)
-        self.conficenceInterval =  self.conficenceInterval.reshape(2,len(np.atleast_1d(self.expectedValue)))
-        
-        # conditional expected values  and sensitivity coefficients
-        distributionDimension = len(distributionManager.jointDistribution)
-        if distributionDimension > 1:
-            # test dependecy or not
-            if distributionManager.dependentCase == False:
-                # independent case: use analytic expression from polynomial chaos expansion
-                self.conditionalExpectedValue = []
-                self.conditionalVariance      = []
-                # conditional mean and variance
-                for rvIndex in xrange(distributionDimension):
-                    currDistMean = cp.E(distributionManager.jointDistribution)
-                    currDistMean[rvIndex] = np.nan
-                    # reduce polynomials
-                    currPolynomTime = self.gPCExpansion(*currDistMean)
-                    self.conditionalExpectedValue.append(cp.E(currPolynomTime,distributionManager.jointDistribution))
-                    self.conditionalVariance.append(cp.Var(currPolynomTime,distributionManager.jointDistribution))    
-            
-                # sensitivity indices
-                self.firstOrderSensitivities = cp.Sens_m(self.gPCExpansion,distributionManager.jointDistribution)
-                self.totalSensitivities      = cp.Sens_t(self.gPCExpansion,distributionManager.jointDistribution)
-            else:
-                # dependent rancom variables
-                
-                # this method is broken
-                #sensindices = cp.Sens_nataf(distributionManager.expansionOrder, distributionManager.jointDistributionDependent, distributionManager.samplesDependent.T, self.data)
-                #
-                
-                self.firstOrderSensitivities = cp.Sens_m_nataf(distributionManager.expansionOrder,
-                                                               distributionManager.jointDistributionDependent,
-                                                               distributionManager.samplesDependent.T,
-                                                               self.data)
-                
-                self.totalSensitivities      = cp.Sens_t_nataf(distributionManager.expansionOrder,
-                                                               distributionManager.jointDistributionDependent,
-                                                               distributionManager.samplesDependent.T,
-                                                               self.data)
-            
-    def calculateStatisticsMonteCarlo(self):
-        '''
-        Function to calculate statistics
-        '''
-        pass
-                
+        return self.data
+    
     def saveQuantitiyOfInterestData(self, quantitiyGroup):
         '''
         Method to save data and statistics to file
@@ -100,6 +41,7 @@ class QuantityOfInterest(object):
         #quantitiyGroup.create_dataset("gPCExpansion", data=self.gPCExpansion)
         variablesToSave = ["expectedValue",
                            "variance",
+                           "standardDeviation",
                            "conficenceInterval",
                            "conditionalExpectedValue",
                            "conditionalVariance",

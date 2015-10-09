@@ -85,6 +85,8 @@ class UqsaCase(TestBaseClass):
         
         self.locationOfInterestManager.initialize()
         
+        print "Info 88: uqsaCase running ", self.uqsaMethod.name()
+        
     def aquireSamples(self, distributionManager):
         '''
         Function that envokes either sample creation of loading depending on the defined control variable        
@@ -99,6 +101,7 @@ class UqsaCase(TestBaseClass):
             sampleFile = mFPH_VPC.getFilePath('uqsaSampleFile', self.networkName, self.dataNumber, mode = "read", caseName=self.uqsaMethod.name())
             self.loadSamples(sampleFile)
 
+        self.locationOfInterestManager.sampleSize = self.samplesSize
     
     def loadSamples(self, sampleFile):
         '''
@@ -132,3 +135,93 @@ class UqsaCase(TestBaseClass):
         f.flush()
         f.close()  
         
+    def createEvaluationCaseFiles(self): 
+        '''
+        
+        batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
+            batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
+        
+        '''
+        self.evaluationCaseFiles = [] # list of dict:  [ caseFileDict1,caseFileDict2 ..]  for each evaluation
+        
+        for simulationIndex in xrange(self.samplesSize):
+                                    
+            networkXmlFileLoad = mFPH_VPC.getFilePath('uqsaEvaluationNetworkXmlFile', self.networkName, self.dataNumber, 'write',
+                                                       caseName=self.uqsaMethod.name(), evaluationNumber=simulationIndex)
+            networkXmlFileSave = networkXmlFileLoad
+            pathSolutionDataFilename = mFPH_VPC.getFilePath('uqsaEvaluationSolutionDataFile', self.networkName, self.dataNumber, 'write',
+                                                             caseName=self.uqsaMethod.name(), evaluationNumber=simulationIndex)
+            
+            caseFileDict1= {'simulationIndex': simulationIndex,
+                            'networkName': self.networkName,
+                            'dataNumber': self.dataNumber,
+                            'networkXmlFileLoad': networkXmlFileLoad,
+                            'networkXmlFileSave': networkXmlFileSave,
+                            'pathSolutionDataFilename': pathSolutionDataFilename}
+            
+            self.evaluationCaseFiles.append(caseFileDict1)
+            
+    def getSample(self, sampleIndex):
+        '''
+        Returns sample for a certain sampleIndex
+        
+        dependenSample or independenSample is chooses dependent on the case definitions
+        '''
+        if sampleIndex in xrange(self.samplesSize):
+            if self.uqsaMethod.dependentCase == False:
+                sample = self.samples[sampleIndex]
+            else:
+                sample = self.samplesDependent[sampleIndex]
+        else:
+            raise ValueError('sampleIndex {} out of range 0:{}'.format(sampleIndex,self.samplesSize))
+                             
+        return sample
+    
+    def getSimulatioNBatchFileList(self):
+        '''
+        Returns simulation batch file list, as defined in configs
+        '''
+    
+        startIndex = 0
+        endIndex   = int(self.samplesSize)
+        
+        newRange = self.simulateEvaluationNumbers
+        if len(newRange) == 2:
+            # check if the indices are avaliable
+            if all([i in xrange(self.samplesSize) for i in newRange]):
+                if newRange[0] < newRange[1]:
+                    startIndex = newRange[0]
+                    endIndex   = newRange[1]
+                    
+        batchFileList = self.evaluationCaseFiles[startIndex:endIndex+1]
+    
+        return batchFileList
+    
+    def saveCaseSolutionDataFile(self):
+        '''
+        save hdf solution data file
+        '''
+        uqsaSolutionDataFile = mFPH_VPC.getFilePath('uqsaSolutionDataFile', self.networkName, self.dataNumber, mode = "write", caseName = self.uqsaMethod.name() )
+        self.locationOfInterestManager.saveQuantitiyOfInterestData(uqsaSolutionDataFile)
+    
+    def preprocessSolutionData(self):
+        '''
+        envoke preprocessing of solution data
+        '''
+        if self.preProcessData == True:
+            self.locationOfInterestManager.preprocessSolutionData(self.evaluationCaseFiles)
+            self.saveCaseSolutionDataFile()
+            
+            
+    def quantifyUncertaintyAndAnalyseSensitivtiy(self, distributionManager):
+        '''
+        evnoke uq sa process
+        '''
+        if self.postProcessing == True:
+        
+            # loop through data objects
+            for qoi in self.locationOfInterestManager.getQoiIterator():
+                stats = self.uqsaMethod.calculateStatistics(distributionManager, self.samples, self.samplesDependent, qoi.getData(),qoi.confidenceAlpha)
+                qoi.update(stats)
+            self.saveCaseSolutionDataFile()
+    

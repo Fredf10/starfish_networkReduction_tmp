@@ -84,8 +84,14 @@ class LocationOfInterestManager(TestBaseClass):
         timeStart = []
         timeEnd = []
         
-        for networkName,dataNumber,vpcNetworkXmlEvaluationFileLoad,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile in evaluationCaseFiles:
-            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFileLoad, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
+        
+        for batchData in evaluationCaseFiles:
+            networkName              = batchData['networkName']
+            dataNumber               = batchData['dataNumber']
+            networkXmlFileLoad       = batchData['networkXmlFileLoad']
+            pathSolutionDataFilename = batchData['pathSolutionDataFilename']
+            
+            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFileLoad, pathSolutionDataFilename = pathSolutionDataFilename)
             vascularNetwork.linkSolutionData()
             
             numberOfTimePoints.append(len(vascularNetwork.simulationTime))
@@ -98,34 +104,31 @@ class LocationOfInterestManager(TestBaseClass):
         self.simulationTime = np.linspace(max(timeStart), min(timeEnd), min(numberOfTimePoints))
         
         # pass the data to the locationsOfInterests which will load the information needed
-        for sampleIndex,[networkName,dataNumber,vpcNetworkXmlEvaluationFileLoad, vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile] in enumerate(evaluationCaseFiles):
-            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlEvaluationFileLoad, pathSolutionDataFilename = vpcEvaluationSolutionDataFile)
+        for batchData in evaluationCaseFiles:
+            simulationIndex          = batchData['simulationIndex']
+            networkName              = batchData['networkName']
+            dataNumber               = batchData['dataNumber']
+            networkXmlFileLoad       = batchData['networkXmlFileLoad']
+            pathSolutionDataFilename = batchData['pathSolutionDataFilename']
+            
+            vascularNetwork = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFileLoad, pathSolutionDataFilename = pathSolutionDataFilename)
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationsOfInterest.values():
-                locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, sampleIndex)
+                locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, simulationIndex)
         
         # second postprocessing find extrema if needed
         for locationOfInterest in self.locationsOfInterest.values():
             locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
                          
-                        
-    def calculateStatisticsPolynomialChaos(self,distributionManager):
-        '''
-        Calculate statisitcs for each quantity of interest at each location of interest based
-        on the generalized polynomial chaos expansion.
-        '''
-        for locationOfInterest in self.locationsOfInterest.values():
-            for quantity in locationOfInterest.quantitiesOfInterestToProcess:
-                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsPolynomialChaos(distributionManager)
-                
     
-    def calculateStatisticsMonteCarlo(self):
+    def getQoiIterator(self):
         '''
-        Calculate statisitcs for each quantity of interest at each location of interest based
-        on a Monte Carlo simulation
+        Function that creates and iterator element which iterates through all stored qoi data elements
         '''
-        pass
-        for locationOfInterest in self.locationsOfInterest:
-            for quantity in locationOfInterest.quantitiesOfInterestToProcess:
-                locationOfInterest.quantitiesOfInterest[quantity].calculateStatisticsMonteCarlo()
-                        
+        qoiList = []
+        for locationOfInterest in self.locationsOfInterest.values():
+            for qoi in locationOfInterest.quantitiesOfInterest.itervalues():
+                qoiList.append(qoi)
+        return qoiList
+    
+    

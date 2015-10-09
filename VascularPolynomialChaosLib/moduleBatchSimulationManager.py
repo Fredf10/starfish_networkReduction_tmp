@@ -23,7 +23,7 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     
     Input:
         batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
-            batchData <list> := list with [networkName, dataNumber, networkXmlFile, networkXmlFileSave, pathSolutionDataFilename]
+            batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
         
     '''
     timeStartBatch = time.time()
@@ -47,10 +47,15 @@ def runSingleBatchSimulation(batchData):
     Function which runs a single simulation the defined with batchData
     
     Input:
-        batchData <list> := list with [networkName, dataNumber, networkXmlFileLoad, networkXmlFileSave, pathSolutionDataFilename]
+        batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
     '''
     timeStart = time.clock()
-    networkName,dataNumber,networkXmlFileLoad,networkXmlFileSave,pathSolutionDataFilename = batchData
+    #simulationIndex          = batchData['simulationIndex']
+    networkName              = batchData['networkName']
+    dataNumber               = batchData['dataNumber']
+    networkXmlFileLoad       = batchData['networkXmlFileLoad']
+    networkXmlFileSave       = batchData['networkXmlFileSave']
+    pathSolutionDataFilename = batchData['pathSolutionDataFilename']
     vascularNetworkTemp = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFileLoad, pathSolutionDataFilename = pathSolutionDataFilename)
     vascularNetworkTemp.quiet = True
     flowSolver = FlowSolver(vascularNetworkTemp, quiet=True)
@@ -70,7 +75,7 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     
     Input:
         batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
-            batchData <list> := list with [networkName, dataNumber, networkXmlFile, pathSolutionDataFilename]
+            batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
         
     '''
     if numberWorkers == None: numberWorkers = multiprocessing.cpu_count()

@@ -26,7 +26,7 @@ from pprint import pprint as pp
 import UtilityLib.moduleFilePathHandler as mFPH
 
 
-def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCEmethod = "None", gPCEorder = "None", evaluationNumber = "None", exception = 'Error'):
+def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", evaluationNumber = "None", exception = 'Error'):
     '''
     Function return a requested file path, if this file exists
     
@@ -35,8 +35,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCE
                         'vpcConfigTemplateFile',
                         'vpcNetworkXmlFile',
                         'uqsaSampleFile',
-                        'vpcEvaluationNetworkXmlFile',
-                        'vpcEvaluationSolutionDataFile',
+                        'uqsaEvaluationNetworkXmlFile',
+                        'uqsaEvaluationSolutionDataFile',
                         'vpcProcessedSolutionDataFile',
                         'evaluationLogFile',
                         'vpcSolutionDataFile'
@@ -53,11 +53,11 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCE
                          'uqsaCaseTemplateMonteCarloFile',
                          'vpcNetworkXmlFile',
                          'uqsaSampleFile',
-                         'vpcEvaluationNetworkXmlFile',
-                         'vpcEvaluationSolutionDataFile',
+                         'uqsaEvaluationNetworkXmlFile',
+                         'uqsaEvaluationSolutionDataFile',
                          'vpcProcessedSolutionDataFile',
                          'evaluationLogFile',
-                         'vpcSolutionDataFile']
+                         'uqsaSolutionDataFile']
     
     if fileType not in existingFileTypes:
         raise ValueError("ERROR: getFilePath, requested file type {}\
@@ -70,10 +70,10 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCE
                  'uqsaCaseXmlFile'              : ''.join([networkName,'_uqsaCase_',dataNumber,'.xml']),
                  'vpcNetworkXmlFile'            : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
                  'uqsaSampleFile'               : ''.join(['samples.hdf5']),
-                 'vpcEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
-                 'vpcEvaluationSolutionDataFile': ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.hdf5']),
+                 'uqsaEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
+                 'uqsaEvaluationSolutionDataFile': ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.hdf5']),
                  'evaluationLogFile'            : ''.join(['evaluationLogFile.txt']),
-                 'vpcSolutionDataFile'          : ''.join([networkName,'_vpc-SolutionData_',dataNumber,'.hdf5'])
+                 'uqsaSolutionDataFile'          : ''.join([networkName,'_uqsa-SolutionData_',dataNumber,'.hdf5'])
                  }    
         
     ## find requested file name
@@ -84,8 +84,6 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCE
                                       dataNumber,
                                       mode,
                                       caseName = caseName,
-                                      gPCEmethod = gPCEmethod, 
-                                      gPCEorder= gPCEorder,
                                       exception = exception)
     if requestedDirectory == None:
         if exception == "Warning":
@@ -114,7 +112,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", gPCE
               
     return requestedFilePath
     
-def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', caseName = 'None', gPCEmethod = 'None', gPCEorder = 'None'):
+def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', caseName = 'None'):
     '''
     Function returns a requested directory path, if this directory does not exists
     it is created.
@@ -123,8 +121,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         directoryType (str):  'workingDirectory',
                               'vpcConfigXmlFileDirectory',
                               'vpcNetworkXmlFileDirectory',
-                              'vpcEvaluationNetworkXmlFileDirectory',
-                              'vpcEvaluationSolutionDataFileDirectory',
+                              'uqsaEvaluationNetworkXmlFileDirectory',
+                              'uqsaEvaluationSolutionDataFileDirectory',
                               'vpcSampleFileDirectory',
                               'evaluationLogFileDirectory',
                               'vpcSolutionDataFileDirectory',
@@ -140,11 +138,11 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     existingDirectoryTypes = {'workingDirectory',
                               'uqsaCaseXmlFileDirectory',
                               'vpcNetworkXmlFileDirectory',
-                              'vpcEvaluationNetworkXmlFileDirectory',
-                              'vpcEvaluationSolutionDataFileDirectory',
+                              'uqsaEvaluationNetworkXmlFileDirectory',
+                              'uqsaEvaluationSolutionDataFileDirectory',
                               'uqsaSampleFileDirectory',
                               'evaluationLogFileDirectory',
-                              'vpcSolutionDataFileDirectory',
+                              'uqsaSolutionDataFileDirectory',
                               'uqsaCaseTemplatePolynomialChaosFileDirectory',
                               'uqsaCaseTemplateMonteCarloFileDirectory'} 
     
@@ -164,17 +162,17 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     ## look up tables
     # directories
     directories = {
-                   'workingDirectory'                      : workingDirectory,
+                   'workingDirectory'                       : workingDirectory,
                    # vascular polynomial chaos
-                   'uqsaCaseXmlFileDirectory'              : vpcCaseDirectory,
-                   'vpcNetworkXmlFileDirectory'            : vpcCaseDirectory,
-                   'uqsaSampleFileDirectory'               : vpcOrderMethodDirectory,
-                   'vpcEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
-                   'vpcEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
-                   'evaluationLogFileDirectory'            : vpcOrderMethodDirectory,
-                   'vpcSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
-                   'uqsaCaseTemplatePolynomialChaosFileDirectory'   : vpcConficTemplateDicrectory,
-                   'uqsaCaseTemplateMonteCarloFileDirectory'   : vpcConficTemplateDicrectory
+                   'uqsaCaseXmlFileDirectory'               : vpcCaseDirectory,
+                   'vpcNetworkXmlFileDirectory'             : vpcCaseDirectory,
+                   'uqsaSampleFileDirectory'                : vpcOrderMethodDirectory,
+                   'uqsaEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
+                   'uqsaEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
+                   'evaluationLogFileDirectory'             : vpcOrderMethodDirectory,
+                   'uqsaSolutionDataFileDirectory'           : vpcOrderMethodDirectory,
+                   'uqsaCaseTemplatePolynomialChaosFileDirectory' : vpcConficTemplateDicrectory,
+                   'uqsaCaseTemplateMonteCarloFileDirectory' : vpcConficTemplateDicrectory
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])
@@ -189,52 +187,3 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
             requestedDirectory = None
     
     return requestedDirectory
-
-
-
-def createConfigurationUQSAXMLfromTemplate(networkName, dataNumber):
-    '''
-    Function creates configuration file for UQSA for the case defined by given networkName and dataNumber from a template file
-    
-    Args:
-        networkName (str): name of the network
-        dataNumber (str): data number of case
-    '''
-    
-    from classConfigurationUQSA import ConfigurationUQSA
-    
-    configurationFilePathTemplate = getFilePath('vpcConfigTemplateFile', networkName, dataNumber, 'read')
-    configurationUQSA = ConfigurationUQSA()
-    configurationUQSA.loadXMLFile(configurationFilePathTemplate)
-    configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-    configurationUQSA.writeXMLFile(configurationFilePath)
-        
-def loadConfigurationUQSAFromXMLFile(networkName, dataNumber):
-    '''
-    Function loads configuration file for UQSA for the case defined by given networkName and dataNumber from a template file and returns a ConfigurationUQSA class instance
-    
-    Args:
-        networkName (str): name of the network
-        dataNumber (str): data number of case
-    
-    Returns: 
-        configurationUQSA (object): ConfigurationUQSA class instance with loaded data
-    '''
-    from classConfigurationUQSA import ConfigurationUQSA
-    
-    configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'read')
-    configurationUQSA = ConfigurationUQSA()
-    configurationUQSA.loadXMLFile(configurationFilePath)
-    return configurationUQSA
-    
-def writeConfigutationUQSAToXMLFile(networkName, dataNumber, configurationUQSA):
-    '''
-    Function writes a configuration file for a given configurationUQSA class for the case defined by given networkName and dataNumber from a template file
-    
-    Args:
-        networkName (str): name of the network
-        dataNumber (str): data number of case
-        configurationUQSA (object): ConfigurationUQSA class instance with data to write
-    '''
-    configurationFilePath = getFilePath('vpcConfigXmlFile', networkName, dataNumber, 'write')
-    configurationUQSA.writeXMLFile(configurationFilePath)

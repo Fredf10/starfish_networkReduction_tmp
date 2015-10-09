@@ -71,10 +71,6 @@ def vascularPolyChaos():
     uqsaCase.loadXMLFile(uqsaCaseFile)
     uqsaCase.initialize(networkName,dataNumber)
     
-    ### TO BE DELETED AFTER INCLUDING REST
-    vpcConfiguration          = None
-    locationOfInterestManager = None
-    polynomialOrder = 2
     
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'read')
@@ -101,67 +97,47 @@ def vascularPolyChaos():
     # 4. create or load samples
     uqsaCase.aquireSamples(distributionManager)
     
-    exit()
-
     # 5. evaluate model / on local machine or on server
     # 5.1 create evaluation case file list
-    evaluationCaseFiles = [] # list of [ [networkName,dataNumber,xml-filePath(LOAD) ,xml-filePath(SAVE), hdf-filePath] for each evaluation
-    for simulationIndex in xrange(distributionManager.samplesSize):
-        vpcNetworkXmlEvaluationFileLoad = mFPH_VPC.getFilePath('vpcEvaluationNetworkXmlFile', networkName, dataNumber, 'write',
-                                                           gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-        vpcEvaluationSolutionDataFile = mFPH_VPC.getFilePath('vpcEvaluationSolutionDataFile', networkName, dataNumber, 'write',
-                                                           gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder= polynomialOrder, evaluationNumber=simulationIndex)
-        vpcNetworkXmlEvaluationFileSave = vpcNetworkXmlEvaluationFileLoad
-        evaluationCaseFiles.append([networkName,dataNumber,vpcNetworkXmlEvaluationFileLoad,vpcNetworkXmlEvaluationFileSave,vpcEvaluationSolutionDataFile])
+    uqsaCase.createEvaluationCaseFiles()
+    
     # 5.2 save/create simulation xml files
-    if vpcConfiguration.createEvaluationXmlFiles == True:
-        for sampleIndex in xrange(distributionManager.samplesSize):
-            # update network with current evaluation number
-            distributionManager.passRealisation(sampleIndex)
-            vpcNetworkXmlEvaluationFile = evaluationCaseFiles[sampleIndex][2]
-            mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= vpcNetworkXmlEvaluationFile)
+    if uqsaCase.createEvaluationXmlFiles == True:
         
-        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder=polynomialOrder)
-        vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, networkName, dataNumber, method = ''.join(['PolynomialChaos-Ord ',str(polynomialOrder)]), samplingScheme = vpcConfiguration.sampleMethod)
+        for sampleIndex in xrange(uqsaCase.samplesSize):
+            # update network with current evaluation number
+            # get sample
+            sample = uqsaCase.getSample(sampleIndex)            
+            # pass realisation of Z to network
+            distributionManager.passRealisation(sample,sampleIndex)
+            # save evaluation file
+            networkXmlFileSave = uqsaCase.evaluationCaseFiles[sampleIndex]['networkXmlFileSave']
+            mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= networkXmlFileSave)
+        
+        # save evaluation to log file
+        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", caseName = uqsaCase.uqsaMethod.name())
+        vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, networkName, dataNumber, caseName = uqsaCase.uqsaMethod.name())
+        
     # 5.3 run evaluation simulations
-    if vpcConfiguration.simulateEvaluations == True:
-        if vpcConfiguration.localEvaluation == True:
-            startIndex = 0
-            endIndex   = int(distributionManager.samplesSize)
-            newRange = vpcConfiguration.evaluationNumbers
-            if len(newRange) == 2:
-                # check if the indices are avaliable
-                if all([i in xrange(distributionManager.samplesSize) for i in newRange]):
-                    if newRange[0] < newRange[1]:
-                        startIndex = newRange[0]
-                        endIndex   = newRange[1]
-            batchFileList = evaluationCaseFiles[startIndex:endIndex+1]
-            if vpcConfiguration.multiprocessing == False:
+    if uqsaCase.simulateEvaluations == True:
+        batchFileList = uqsaCase.getSimulatioNBatchFileList()
+        if uqsaCase.localEvaluation == True:
+            if uqsaCase.multiprocessing == False:
                 mBSM.runBatchAsSingleProcess(batchFileList, quiet = True)
             else:
-                mBSM.runBatchAsMultiprocessing(batchFileList, vpcConfiguration.numberOfProcessors , quiet = True)
-        else: print "server simulations not implemented yet";exit() # TODO: server simulations not implemented yet
+                mBSM.runBatchAsMultiprocessing(batchFileList, uqsaCase.numberOfProcessors , quiet = True)
+        else:
+            # TODO: server simulations not implemented yet
+            raise NotImplementedError("server simulations not implemented yet")
 
-    print "starting Post processing "
     # 6. process quantity of interest
-    locationOfInterestManager.sampleSize = distributionManager.samplesSize
+    uqsaCase.preprocessSolutionData()
     
-    if vpcConfiguration.preProcessData == True:
-        locationOfInterestManager.preprocessSolutionData(evaluationCaseFiles)
-
-    if vpcConfiguration.postProcessing == True:
-        # if polynomial chaos
-        # 7. create Orthogonal polynomials
-        distributionManager.calculateOrthogonalPolynomials()
-        # 8. uncertainty quantfication, sensitivity analysis based on polynomial chaos expansion
-        locationOfInterestManager.calculateStatisticsPolynomialChaos(distributionManager)
-        
-        vpcQuantityOfInterestFile = mFPH_VPC.getFilePath('vpcSolutionDataFile', networkName, dataNumber, mode = "write",  gPCEmethod=vpcConfiguration.sampleMethod, gPCEorder=polynomialOrder)
-        locationOfInterestManager.saveQuantitiyOfInterestData(vpcQuantityOfInterestFile)
-        ## if monte carlo
-        # 9. uncertainty quantfication, sensitivity analysis based on Monte Carlo simulation
-        #locationOfInterestManager.calculateStatisticsMonteCarlo()
-        
-    # 10. plotting of variables
+    # 7. uncertainty quantification and sensitivty analysis
+    uqsaCase.quantifyUncertaintyAndAnalyseSensitivtiy(distributionManager)
+    
+    exit()
+            
+    # 8. plotting of variables
 if __name__ == '__main__':
     vascularPolyChaos()

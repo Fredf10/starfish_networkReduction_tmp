@@ -13,24 +13,12 @@ class DistributionManager(object):
         self.jointDistributionDependent = None
         self.distributionDimension = None
         self.dependentCase = False
-        # samples
-        self.expansionOrder  = 0
-        self.samples         = None
-        self.samplesDependent = None
-        self.samplesSize     = 0
-        self.sampleMethod    = None
-        # orthogonalPolynomials
-        self.orthogonalPolynomials = None
         
-    def passRealisation(self, sampleIndex):
+    def passRealisation(self, sample, sampleIndex):
         '''
         Function to pass samples of the random variables to
         the random inputs
         '''
-        if self.dependentCase == False:
-            sample = self.samples[sampleIndex]
-        else:
-            sample = self.samplesDependent[sampleIndex]
             
         print sample         
         if len(sample) == len(self.randomInputVector):
@@ -54,7 +42,6 @@ class DistributionManager(object):
                 print "WARNING DistributionManager.updateData Wrong key: {}, could not update varibale".format(self.randomInputId, key)
     
  
-        
     ## methods created by the toolbox-child class implementation
     def createRandomVariables(self):
         '''
