@@ -3,7 +3,6 @@
 
 from classRandomInput import RandomInput
 import numpy as np
-import moduleFilePathHandlerVPC as mFPH_VPC
 
 import itertools
 

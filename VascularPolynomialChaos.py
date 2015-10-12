@@ -135,9 +135,7 @@ def vascularPolyChaos():
     
     # 7. uncertainty quantification and sensitivty analysis
     uqsaCase.quantifyUncertaintyAndAnalyseSensitivtiy(distributionManager)
-    
-    exit()
-            
+                
     # 8. plotting of variables
 if __name__ == '__main__':
     vascularPolyChaos()
