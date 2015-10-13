@@ -70,8 +70,35 @@
       </_Windkessel-3Elements>
     </boundaryCondition>
   </boundaryConditions>
-  <generalRandomInputs>
-  </generalRandomInputs>
+  <randomInputManager class='RandomInputManager'>
+      <randomInputs>
+          <randomInput Id='Z1' class= 'ParametricRandomInput'>
+            <parameter>vessel_1_betaHayashi</parameter>
+            <distributionType>Uniform</distributionType>
+            <a>1.6</a>
+            <b>0.4</b>
+          </randomInput>
+          <randomInput Id='Z2' class= 'ParametricRandomInput'>
+            <parameter>vessel_1_Ps</parameter>
+            <distributionType>Uniform</distributionType>
+            <a>13000.0</a>
+            <b>632.0</b>
+          </randomInput>
+          <randomInput Id='age' class= 'GeneralRandomInput'>
+            <distributionType>Uniform</distributionType>
+            <a>0</a>
+            <b>1</b>
+          </randomInput>
+      </randomInputs>
+      <correlation class = 'CorrelationMatrix'>
+          <bases>Z1 age Z2</bases>
+          <data>
+              1   0.5 0 
+              0.5 1   0.5
+              0   0.5 1                
+          </data>          
+      </correlation>
+  </randomInputManager>
   <vessels>
     <vessel Id="1" name="Ascending aorta 1">
       <topology>
