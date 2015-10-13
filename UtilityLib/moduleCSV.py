@@ -129,7 +129,7 @@ def writeRandomInputstoCSV(networkName, randomInputManager, delimiter = ';'):
     firstRow = {key: key for key in variablesToSaveTags}
     writer.writerow(firstRow)
     
-    for randomInput in randomInputManager.randomInputs:
+    for randomInput in randomInputManager.randomInputsList:
         rowDict = {}
         for variablesToSaveTag in variablesToSaveTags:
             rowDict[variablesToSaveTag] = randomInput.getVariableValue(variablesToSaveTag)

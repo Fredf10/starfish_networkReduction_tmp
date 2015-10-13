@@ -278,7 +278,7 @@ xmlElements  = [ 'simulationContext',
                  'baroreceptors',
                  'communicators',
                  'boundaryConditions',
-                 'generalRandomInputs',
+                 'randomInputManager',
                  'vessels' ]
 
 xmlElementsReference = {'simulationContext'     : simulationContextElements,
@@ -289,6 +289,7 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'externalStimuli'       : externalStimulusElements,
                         'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference, #TODO why is this Reference?
+                        'randomInputManager'    : None,
                         'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
 

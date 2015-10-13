@@ -7,7 +7,7 @@ class DistributionManager(object):
     
     def __init__(self, randomInputVector = None):
         # distribution
-        self.randomInputVector     = randomInputVector
+        self.randomInputsExtDist     = randomInputVector
         self.marginalDistributions = []
         self.jointDistribution     = None
         self.jointDistributionDependent = None
@@ -21,27 +21,14 @@ class DistributionManager(object):
         '''
             
         print sample         
-        if len(sample) == len(self.randomInputVector):
+        if len(sample) == len(self.randomInputsExtDist):
             print "\nSample number {}".format(sampleIndex)
             print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","realisation")
             print "--------------------------------------------------------------------"          
-            for randomInput,sample_i in zip(self.randomInputVector,sample):
-                print "random variable {} with realisation {}".format(randomInput.randomInputId,sample_i)
+            for randomInput,sample_i in zip(self.randomInputsExtDist,sample):
+                print "random variable {} with realisation {}".format(randomInput.name,sample_i)
                 randomInput.passRealisationToAssosiatedObj(sample_i)
     
-    def update(self, dataDict):
-        '''
-        updates the data using a dictionary in from of 
-        dataDict = {'variableName': value}
-        '''
-        for key,value in dataDict.iteritems():
-            try:
-                self.__getattribute__(key)
-                self.__setattr__(key,value)
-            except StandardError:
-                print "WARNING DistributionManager.updateData Wrong key: {}, could not update varibale".format(self.randomInputId, key)
-    
- 
     ## methods created by the toolbox-child class implementation
     def createRandomVariables(self):
         '''
@@ -69,15 +56,15 @@ class DistributionManagerChaospy(DistributionManager):
         for the random input variables in the random input variable vector
         and the joint distribution 
         '''
-        if self.randomInputVector == None:
-            print "WARNING: DistributionManager.createRandomVariablesChaospy() no randomInputVector are defined"
+        if self.randomInputsExtDist == None:
+            print "WARNING: DistributionManager.createRandomVariablesChaospy() no randomInputsExtDist are defined"
             return
         
         evalDistDict = {'Uniform': cp.Uniform, 
                         'Normal' : cp.Normal}
         
         # create marignal distributions
-        for randomInput in self.randomInputVector:
+        for randomInput in self.randomInputsExtDist:
             distType = randomInput.distributionType
             if distType in evalDistDict.keys():
                 marginalDistribution = evalDistDict[distType]() #eval(distType,{"__builtins__":None},evalDistDict)()

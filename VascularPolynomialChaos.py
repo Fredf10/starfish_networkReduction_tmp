@@ -71,16 +71,17 @@ def vascularPolyChaos():
     uqsaCase.loadXMLFile(uqsaCaseFile)
     uqsaCase.initialize(networkName,dataNumber)
     
-    
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'read')
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
-    # 1.3 print defined random variables
-    assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
-    vascularNetwork.randomInputManager.printOutInfo()
     
+    # 1.3 initialized defined random inputs
+    vascularNetwork.randomInputManager.initialize(vascularNetwork)
+    assert len(vascularNetwork.randomInputManager.randomInputs.keys()) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
+    vascularNetwork.randomInputManager.printOutInfo()
+        
     # 2. create distributions
-    distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputVector)
+    distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputsExtDist)
     distributionManager.createRandomVariables()
 
     # 3. add dependentCase if existent 
