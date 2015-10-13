@@ -9,6 +9,7 @@ import itertools
 from testBaseClass import TestBaseClass 
 
 import classRandomInput 
+import classCorrelationMatrices
 
 class RandomInputManager(TestBaseClass):
     '''
@@ -17,17 +18,18 @@ class RandomInputManager(TestBaseClass):
     
     externVariables      = {'randomInputs' : TestBaseClass.ExtDict('randomInput',TestBaseClass.ExtObject({'ParametricRandomInput':classRandomInput.ParametricRandomInput,
                                                                                                           'GeneralRandomInput':classRandomInput.GeneralRandomInput})),
-                            'correlationMatrix': TestBaseClass.ExtValue([float], multiVar=True, strCases = ['anything'])
+                            'correlation'  : TestBaseClass.ExtObject({'CorrelationMatrix':classCorrelationMatrices.CorrelationMatrix})
                            } 
     externXmlAttributes  = []
     externXmlElements    = ['randomInputs',
-                            'correlationMatrix']
+                            'correlation']
     
     def __init__(self):        
         
         
         self.randomInputs = {} # randomInput as they stand in xml
         
+        self.correlation       = None
         self.correlationMatrix = None
         
         self.randomInputsExtDist = [] # randomInput which have a external distribution assosiated
@@ -51,6 +53,20 @@ class RandomInputManager(TestBaseClass):
                 raise ValueError("assoziated parameter <{}> of randomInput {} is doubled defined!".format(randomInput.location,randomInput.name))
             
         self.linkRandomInputUpdateFunctions(vascularNetwork)
+            
+        self.checkCorrelationMatrix()
+            
+    def checkCorrelationMatrix(self):
+        '''
+        Check if defined correlation matrix is consistent and could be possible
+        '''
+        
+        # get extern random input name list
+        definedBases = []
+        for randomInput in self.randomInputsExtDist:
+            definedBases.append(randomInput.name) 
+        
+        self.correlationMatrix = self.correlation.assembleCorrelationMatrix(definedBases)
             
     def linkRandomInputUpdateFunctions(self, vascularNetwork):
         '''
@@ -116,7 +132,6 @@ class RandomInputManager(TestBaseClass):
                     generalRandomInput = self.randomInputs[randomInputName]
                     generalRandomInput.updateMethods = updateMethods
                     generalRandomInput.variableName = updateMethods.keys()
-                    print updateMethods.keys(), 
                     #self.randomInputsExtDist.append(generalRandomInput)
         
         self.randomInputDimension = len(self.randomInputsExtDist)

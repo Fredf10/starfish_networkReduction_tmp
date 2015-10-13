@@ -84,16 +84,10 @@ def vascularPolyChaos():
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputsExtDist)
     distributionManager.createRandomVariables()
 
-    # 3. add dependentCase if existent 
-    # TODO: add correlation matrix to xml definitions and variable dependentCase to definitions
-    a = 0.5
-    CorrelationMatrix = np.array([[1.,a,a],
-                                  [a,1.,a],
-                                  [a,a,1.]])
-       
+    # 3. add dependentCase if existent        
     if uqsaCase.uqsaMethod.dependentCase == True:
         # this enables dependentCase in Distribution Manager
-        distributionManager.createDependentDistribution(CorrelationMatrix)
+        distributionManager.createDependentDistribution(vascularNetwork.randomInputManager.correlationMatrix)
         
     # 4. create or load samples
     uqsaCase.aquireSamples(distributionManager)
