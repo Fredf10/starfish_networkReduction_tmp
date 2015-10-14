@@ -429,10 +429,7 @@ def loadNetworkFromXML(networkName ,
     vascularNetwork.update({'name': networkName,
                             'dataNumber':dataNumber,
                             'pathSolutionDataFilename': pathSolutionDataFilename})
-    ## create random vector
-    randomInputManager = RandomInputManager()
-    vascularNetwork.randomInputManager = randomInputManager
-
+    
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
         tree = etree.parse(''.join([networkXmlFile]), parser)
@@ -708,6 +705,9 @@ def loadNetworkFromXML(networkName ,
 #                                            None)
 
             elif xmlElementName == 'randomInputManager':
+                ## create random vector
+                randomInputManager = RandomInputManager()
+                vascularNetwork.randomInputManager = randomInputManager
                 vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
 
             elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork

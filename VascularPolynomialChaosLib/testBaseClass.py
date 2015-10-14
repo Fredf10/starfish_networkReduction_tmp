@@ -30,8 +30,9 @@ class TestBaseClass(object):
             ValueError: raise error if an unappropriate variableType is passed
             ValueError: raise error if no strCases is passed, when variableType includes str
         '''
-        def __init__(self, variableType, unit = None, strCases = None, multiVar = False):
+        def __init__(self, variableType, unit = None, strCases = None, multiVar = False, optional = False):
             
+            self.optional = optional 
             if type(variableType) is not list:
                 variableType = [variableType]
                 
@@ -62,8 +63,9 @@ class TestBaseClass(object):
         Raises:
             ValueError: (TODO: NOT IMPLEMENTED) raise error if an unappropriate dictObjType is passed
         '''
-        def __init__(self, dictObjName, dictObjType):
+        def __init__(self, dictObjName, dictObjType, optional = False):
             
+            self.optional = optional 
             self.variableType = ['dict']
             self.dictObjName = dictObjName
             
@@ -85,9 +87,9 @@ class TestBaseClass(object):
         Raises:
             ValueError: raise error if an classCases is not of dype dict
         '''
-        def __init__(self, classCases):
+        def __init__(self, classCases, optional = False):
             
-            
+            self.optional = optional 
             self.variableType = ['object']
             
             if type(classCases) is dict:            
@@ -134,16 +136,23 @@ class TestBaseClass(object):
                 externVariable  = self.externVariables[externXmlElement]
                 # create xml node
                 externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  
-                ## find out what type the externXmlElement variable is:
-                # 2.1 if dict variable -> writeExtValueXml
-                if isinstance(externVariable,self.ExtDict): 
-                    self.writeExtDictXml(externXmlNode, self.getVariable(externXmlElement), externVariable)
-                # 2.2 if object variable -> writeExtDictXml       
-                elif isinstance(externVariable,self.ExtObject):
-                    self.writeExtObjectXml(externXmlNode, self.getVariable(externXmlElement), externVariable)
-                # 2.3 if value variable -> writeExtObjectXml
-                elif isinstance(externVariable,self.ExtValue):
-                    self.writeExtValueXml(externXmlNode, self.getVariable(externXmlElement), externVariable)
+                
+                variableValue = self.getVariable(externXmlElement)
+                if variableValue != None:
+                    ## find out what type the externXmlElement variable is:
+                    # 2.1 if dict variable -> writeExtValueXml
+                    if isinstance(externVariable,self.ExtDict):
+                        self.writeExtDictXml(externXmlNode,  variableValue, externVariable)
+                    # 2.2 if object variable -> writeExtDictXml       
+                    elif isinstance(externVariable,self.ExtObject):
+                        self.writeExtObjectXml(externXmlNode, variableValue, externVariable)
+                    # 2.3 if value variable -> writeExtObjectXml
+                    elif isinstance(externVariable,self.ExtValue):
+                        self.writeExtValueXml(externXmlNode, variableValue, externVariable)
+                else:
+                    if externVariable.optional == False:
+                        raise ValueError("""ERROR: try to write <<{}>> to xml-node {},
+               however the value of <<{}>> is None""".format(externXmlElement, xmlNode, externXmlElement))
                     
             else: raise KeyError("""ERROR: try to write <<{}>> to xml-node {},
                however <<{}>> is not defined in self.externVariables""".format(externXmlElement, xmlNode, externXmlElement))
@@ -273,23 +282,27 @@ class TestBaseClass(object):
                                 
                 # try to get the corresponding xml element:
                 try: externXmlNode = xmlNode.findall(''.join(['.//',externXmlElement]))[0]
-                except IndexError:                 
-                    if externXmlElement in self.externVariables: variableType = self.externVariables[externXmlElement].variableType
-                    else: variableType = "No entry defined for This element"
-                    raise ValueError("""ERROR loadNetworkFromXML():
-                                  variable "{}" of {} is not defined.
-                                  (Hint:{}) , system exit!""".format(externXmlElement, xmlNode, variableType))
-                
-                
-                ## find out what type the externXmlElement variable is:
-                if isinstance(externVariable,self.ExtDict): 
-                    newData[externXmlElement] = self.loadExtDictXml(externXmlNode, externXmlElement, externVariable)
-                        
-                elif isinstance(externVariable,self.ExtObject):
-                    newData[externXmlElement] = self.loadExtObjectXml(externXmlNode, externXmlElement, externVariable)
+                except IndexError:
+                    if externVariable.optional == False:
+                        if externXmlElement in self.externVariables: variableType = self.externVariables[externXmlElement].variableType
+                        else: variableType = "No entry defined for This element"
+                        raise ValueError("""ERROR loadNetworkFromXML():
+                                      variable "{}" of {} is not defined.
+                                      (Hint:{}) , system exit!""".format(externXmlElement, xmlNode, variableType))
+                    else: 
+                        # if the element is optional then continue without reading it!
+                        externXmlNode = None
                     
-                elif isinstance(externVariable,self.ExtValue):
-                    newData[externXmlElement] = self.loadExtValueXml(externXmlNode, externXmlElement, externVariable)
+                if externXmlNode != None:
+                    ## find out what type the externXmlElement variable is:
+                    if isinstance(externVariable,self.ExtDict): 
+                        newData[externXmlElement] = self.loadExtDictXml(externXmlNode, externXmlElement, externVariable)
+                            
+                    elif isinstance(externVariable,self.ExtObject):
+                        newData[externXmlElement] = self.loadExtObjectXml(externXmlNode, externXmlElement, externVariable)
+                        
+                    elif isinstance(externVariable,self.ExtValue):
+                        newData[externXmlElement] = self.loadExtValueXml(externXmlNode, externXmlElement, externVariable)
                     
             else: raise KeyError("""ERROR: try to read <<{}>> of xml-node {},
                however <<{}>> is not defined in self.externVariables""".format(externXmlElement, xmlNode, externXmlElement))

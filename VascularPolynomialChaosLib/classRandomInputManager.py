@@ -18,7 +18,7 @@ class RandomInputManager(TestBaseClass):
     
     externVariables      = {'randomInputs' : TestBaseClass.ExtDict('randomInput',TestBaseClass.ExtObject({'ParametricRandomInput':classRandomInput.ParametricRandomInput,
                                                                                                           'GeneralRandomInput':classRandomInput.GeneralRandomInput})),
-                            'correlation'  : TestBaseClass.ExtObject({'CorrelationMatrix':classCorrelationMatrices.CorrelationMatrix})
+                            'correlation'  : TestBaseClass.ExtObject({'CorrelationMatrix':classCorrelationMatrices.CorrelationMatrix}, optional = True)
                            } 
     externXmlAttributes  = []
     externXmlElements    = ['randomInputs',
