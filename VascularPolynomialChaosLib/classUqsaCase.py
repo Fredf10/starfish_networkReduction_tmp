@@ -72,6 +72,7 @@ class UqsaCase(TestBaseClass):
         
         ### data assoziated during run time
         ## samples of Z
+        self.randomVariableNames = []
         self.samples = None
         self.samplesSize = None
         self.samplesDependent = None
@@ -87,14 +88,19 @@ class UqsaCase(TestBaseClass):
         
         print "Info 88: uqsaCase running ", self.uqsaMethod.name()
         
-    def aquireSamples(self, distributionManager):
+    def aquireSamples(self, distributionManager, randomInputsExtDist):
         '''
         Function that envokes either sample creation of loading depending on the defined control variable        
         '''
+        self.randomVariableNames = []
+        for randomInput in randomInputsExtDist:
+            self.randomVariableNames.append(randomInput.name) 
+        
         if self.createSample == True:
             self.samples,self.samplesDependent = self.uqsaMethod.createSamples(distributionManager)
             self.samplesSize = len(self.samples)
-            
+            if len(self.randomVariableNames) != len(self.samples[0]):
+                raise ValueError("Created sample matrix does not match with defined random variable vector {}".format(self.randomVariableNames))
             sampleFile = mFPH_VPC.getFilePath('uqsaSampleFile', self.networkName, self.dataNumber, mode = "write", caseName=self.uqsaMethod.name())
             self.saveSamples(sampleFile)
         else:
@@ -113,6 +119,13 @@ class UqsaCase(TestBaseClass):
         dset = f['sampleSpace']
         self.samples = dset[:]
         self.samplesSize    = dset.attrs.get('samplesSize')
+        randomVariableNames = dset.attrs.get('randomVariableNames')
+        
+        if randomVariableNames != self.randomVariableNames:
+            raise ValueError("Loaded randomVariableNames {} for samples does not match with defined random variable vector {}".format(randomVariableNames, self.randomVariableNames))
+                    
+        if len(self.randomVariableNames) != len(self.samples[0]):
+            raise ValueError("Created sample matrix does not match with defined random variable vector {}".format(self.randomVariableNames))
                 
         if 'sampleSpaceDependent' in f.keys():
             dset = f['sampleSpaceDependent']
@@ -129,6 +142,7 @@ class UqsaCase(TestBaseClass):
         f = h5py.File(sampleFile,'w')
         dset = f.create_dataset("sampleSpace", data=self.samples)
         dset.attrs.create('samplesSize', data=self.samplesSize)
+        dset.attrs.create('randomVariableNames', data = self.randomVariableNames)
         if self.samplesDependent != None:
             dset = f.create_dataset("sampleSpaceDependent", data=self.samplesDependent)
         

@@ -90,7 +90,7 @@ def vascularPolyChaos():
         distributionManager.createDependentDistribution(vascularNetwork.randomInputManager.correlationMatrix)
         
     # 4. create or load samples
-    uqsaCase.aquireSamples(distributionManager)
+    uqsaCase.aquireSamples(distributionManager, vascularNetwork.randomInputManager.randomInputsExtDist)
     
     # 5. evaluate model / on local machine or on server
     # 5.1 create evaluation case file list
