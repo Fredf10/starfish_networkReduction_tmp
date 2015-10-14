@@ -146,8 +146,9 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                 insertWorkingDirectory(optionArgument)
                 exit()
         elif option == 'workingDirectorySettings':
-            workingDirectorySettings()
-            exit()
+            if optionArgument != None:
+                workingDirectorySettings()
+                exit()
                     
     # catch up non given but necessary options
     ## simulation and visualisation

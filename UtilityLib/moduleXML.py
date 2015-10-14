@@ -212,6 +212,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 #                     writeRandomInputElement(xmlFileElement, None, randomInputManager, randomInput.location)
 
         elif xmlElementName == 'randomInputManager':
+            if vascularNetwork.randomInputManager != None:
                 vascularNetwork.randomInputManager.writeDataToXmlNode(xmlFileElement)
 
         elif xmlElementName == "externalStimuli":
