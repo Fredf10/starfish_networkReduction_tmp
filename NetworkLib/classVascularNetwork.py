@@ -506,8 +506,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # # initialize boundary condition type 1: initial phase
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple']:
+                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
                     Qm = self.initialValues[vesselId]['Flow']
+                    # TODO: Figure out what this is supposed to be doing
                     bC.update({'aorticFlowPreviousTimestep':Qm})
                     bC.initializeSolutionVectors(self.nTsteps, self.savedArraySize,self.solutionDataFile)
                 if bC.type == 1:
@@ -681,17 +682,19 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple']:
+                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
                     bC.flushSolutionData(saving,nDB,nDE,nSB,nSE)
             
         for baro in self.baroreceptors.itervalues():
             baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            
+        
+        # TODO: if saving/ Rolling of data
         if self.venousPool: 
             self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
-        
-        self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
+            if saving:
+                self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
+        if saving:
+            self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
         
 
     def saveSolutionData(self):
@@ -2011,7 +2014,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # update bc
             for bc in self.boundaryConditions[vesselId]:
                 # update venous pressure at boundary nodes
-                if bc.name in ['_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
+                if bc.name in ['_Windkessel-2ElementsDAE', 'Windkessel-2ElementsDAE','_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
                     bc.update({'venousPressure':relativeVenousPressure})
                 
                     
