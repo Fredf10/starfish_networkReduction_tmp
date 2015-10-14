@@ -208,7 +208,7 @@ def workingDirectorySettings():
     working directory settings
     '''
     mFPH.updateKnownWorkingDirectories()
-    prettyPrintList(' Working directory settings menue',['insert new working directory','switch to another known working directory'])
+    prettyPrintList(' Working directory settings menu',['insert new working directory','switch to another known working directory'])
     print "\n current working directory: {} ".format(mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
     userInput = userInputEvaluationInt(2)
     if userInput == 0:
@@ -226,7 +226,7 @@ def insertWorkingDirectory(optionArgument):
     if optionArgument == None:
         optionArgument = ""
         while os.path.isdir(optionArgument) == False:
-            optionArgument = raw_input("Insert new workind directory path: ")
+            optionArgument = raw_input("Insert new working directory path: ")
     
     if os.path.isdir(optionArgument):
         mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
@@ -238,7 +238,7 @@ def insertWorkingDirectory(optionArgument):
             os.mkdir(optionArgument)
             mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
             mFPH.updateKnownWorkingDirectories()
-            print "   created working directory folder sucessfully"
+            print "   created working directory folder successfully"
             print "   working directory set!"
         except:
             print "  WARNING: moduleStartUp.parseOptions() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
@@ -293,10 +293,10 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                     dataSetNumber.append(dataNum.zfill(3))
                 else:
                     if exception == "Error":
-                        raise ValueError('moduleStartUp.evaluateDataNumber. Datanumer {} to high! system exit'.format(dataSetNumber))
+                        raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
                         exit()
                     elif exception == 'Warning':
-                        print 'moduleStartUp.evaluateDataNumber. Datanumer {} to high'.format(dataSetNumber)
+                        print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
                         return False,False
                     else:
                         raise Exception
@@ -307,10 +307,10 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
             dataNumber = dataNumber.zfill(3)
             if len(dataNumber) > 3:
                 if exception == "Error":
-                    raise ValueError('moduleStartUp.evaluateDataNumber. Datanumer {} to high! system exit'.format(dataSetNumber))
+                    raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
                     exit()
                 elif exception == 'Warning':
-                    print 'moduleStartUp.evaluateDataNumber. Datanumer {} to high'.format(dataSetNumber)
+                    print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
                     return False,False
                 else:
                     raise Exception   
@@ -331,7 +331,7 @@ def defineSimulationDescription():
     
 def chooseSolutionDataCase():
     """
-    console Interface to choose a vascular1DFlow simualtion case for e.g. Visualisation
+    console Interface to choose a vascular1DFlow simulation case for e.g. Visualisation
     Output:
         networkName <string>
         dataNumber  <string>
@@ -364,7 +364,7 @@ def chooseSolutionDataCase():
                             fileNameDataNumber.append([networkName,dataNumber])
     
         prettyPrintList("\n        {}".format(networkName),listToPrint, indexOffSet = indexOffSet)
-        indexOffSet = len(listToPrint)
+        indexOffSet = indexOffSet+len(listToPrint)
         
     if len(fileNameDataNumber) == 0:
         print "No solutionCases available, system exit"
