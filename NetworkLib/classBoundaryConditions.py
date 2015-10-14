@@ -2576,8 +2576,10 @@ class VaryingElastanceSimple(BoundaryConditionType2):
             self.dsetHeart['aortaP'][nDB:nDE] = self.aortaP[nSB:nSE]
 
     def E(self, t):
-        """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
-           according to Tpeak, T, Emax and Emin. """
+        """
+        Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
+        according to Tpeak, T, Emax and Emin. 
+        """
         a1 = 0.708 * self.rt_Tpeak
         a2 = 1.677 * a1
 
@@ -2588,6 +2590,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
 class VaryingElastanceSimpleDAE(generalPQ_BC):
     """
+    TODO: Convert this to Napoleon compliant docstring
     An implementation of a time-varying elastance model of the left ventricle,ing based on the modfied varying elastance equation including a source resistance K
     (as proposed by Shroff), and a parametrized time varying elastance function (as given by Stergiopulos).
 
@@ -2598,9 +2601,8 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
     Emin - Minimum elastance
     Tpeak - Time to peak elastance
 
-    The equation also requires the two constants:
+    The equation also requires:
     V0 - Volume axis intercept
-    K - Source resistance
 
     NB! The source resistance (K) was introduced to the implementation as an experiment. It modifies the elastance curve depending on ventricular outflow,
     so that it bself.mitral = None # mitral valve
@@ -2638,8 +2640,6 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
         self.V0 = 20e-6
 
-        self.K = 0.0
-        # self.Rv = 0.00007500616 * 133 / (10 ** -6) # From Lau and Figueroa paper
         self.Rv = 0.003*133.32*1e6 #0.005 * 133 / (10 ** -6)
 
         ## Shape parameters
@@ -2662,7 +2662,6 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.mitralQ = None
         self.aorticQ = None
         self.Elastance = None
-        self.closeValve = -1
 
 
     def update(self, bcDict):
@@ -2708,7 +2707,6 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.Elastance[0] = self.E(0)
         self.pressure[0] = self.atriumPressure[0]
         self.volume[0]   = self.atriumPressure[0] / self.E(0) + self.V0
-        print "Inital Heart Volume {} and  Pressure {}".format(self.pressure[0], self.volume[0])
 
     def __call__(self, _domegaField_, duPrescribed, R, L, n, dt, P, Q, A, Z1, Z2):
 
@@ -2718,7 +2716,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
         self.dQInOut = R[:][1] * self.omegaNew
 
-        # Increment time step locally
+        # Increment period time step
         self.num = self.num + 1
 
         # calculate du and return this!
@@ -2739,6 +2737,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
     def systoleResidual(self,dP,dQ,P,Q,dt,n):
         dVImposed = -dt*(2*Q + dQ)/2
+        # TODO: Create separate functions for each discretization type
         # TODO: Verify this equation set
         # 1. Assume Pressure and derive Q
         # self.volume[n+1] = (P+dP)/self.Elastance[n+1] + self.V0
@@ -2778,6 +2777,15 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.omegaNew[0] = domegaReflected_
         self.omegaNew[1] = _domegaField
         self.dQInOut = R[:][1] * self.omegaNew
+    
+    def dampedReflection(self,_domegaField, R, dt, P, Q, n):
+        """
+        TODO: What is the physical interpretation of this? Is it nonconservative in volume? momentum?
+        """
+        domegaReflected_ = (-0.5 * Q - R[1][1] * _domegaField) / R[1][0]
+        self.omegaNew[0] = domegaReflected_
+        self.omegaNew[1] = _domegaField
+        self.dQInOut = R[:][1] * self.omegaNew
 
 
     def funcPos0(self, _domegaField, R, dt, P, Q, n):
@@ -2789,24 +2797,16 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         venoP = self.atriumPressure[n]
         t = self.getCycleTime(n + 1, dt)
         self.Elastance[n + 1] = self.E(t+dt)
-        #Check if aortic valve is open
-        if (ventrPn - P > (-1e-4) and self.closeValve <=0): # Original Condition for Aortic Valve (Q >= -1e-15 and ventrPn - P > (-0.0001))
-        #if (Q >= -1e-15 and ventrPn - P > (-0.0001)):  # sysstolecondition
-            if  Q <= -1e-15:
-                self.closeValve = 1 #10
-            # Ignore return values as they are stored as class members
+        
+        # TODO: fix how this inherits from generalizedPQ_BC
+        if (Q >= -1e-15 and ventrPn - P > (-0.0001)):  # systolecondition
+
+            # TODO: Ignore return values as they are stored as class members
             u, dQInOut = super(VaryingElastanceSimpleDAE,self).funcPos0(_domegaField, R, dt, P, Q, n)
 
         else:
-            #if ( ventrPn - P > (-1e-5)): # Original Condition for Aortic Valve (Q >= -1e-15 and ventrPn - P > (-0.0001))
-            #    print "Valve closed but"
-            #    print "pressure", self.pressure[n]*0.00750075
-            #    print "flow", Q
-            self.closeValve = self.closeValve - 1
-
-
-            self.reflection(_domegaField,R,dt,P,Q,n)
-
+            self.dampedReflection(_domegaField,R,dt,P,Q,n)
+            # TODO: Anyway to factor these functions so they are only active when the heart is "coupled" to the arteries?
             if (venoP > ventrPn):
                 self.diastoleStep(dt, n)
             else:
