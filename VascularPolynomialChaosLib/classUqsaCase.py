@@ -119,7 +119,7 @@ class UqsaCase(TestBaseClass):
         dset = f['sampleSpace']
         self.samples = dset[:]
         self.samplesSize    = dset.attrs.get('samplesSize')
-        randomVariableNames = dset.attrs.get('randomVariableNames')
+        randomVariableNames = dset.attrs.get('randomVariableNames').tolist()
         
         if randomVariableNames != self.randomVariableNames:
             raise ValueError("Loaded randomVariableNames {} for samples does not match with defined random variable vector {}".format(randomVariableNames, self.randomVariableNames))

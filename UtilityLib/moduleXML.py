@@ -706,9 +706,11 @@ def loadNetworkFromXML(networkName ,
 
             elif xmlElementName == 'randomInputManager':
                 ## create random vector
-                randomInputManager = RandomInputManager()
-                vascularNetwork.randomInputManager = randomInputManager
-                vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
+                xmlElementChildren = xmlElement.getchildren()
+                if len(xmlElementChildren) != 0:
+                    randomInputManager = RandomInputManager()
+                    vascularNetwork.randomInputManager = randomInputManager
+                    vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
 
             elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork
                 vascularNetworkData = {}

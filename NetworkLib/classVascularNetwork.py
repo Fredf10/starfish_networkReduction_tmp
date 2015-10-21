@@ -825,7 +825,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         return inputsAreValid
 
 
-    def getSolutionData(self,vesselId, variables, tvals, xvals):
+    def getSolutionData(self,vesselId, variables, tvals, xvals, dx = None):
         """
         Get interpolated solution data
         Inputs:
@@ -843,12 +843,16 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             'Compliance'
         tvals - a numpy array (or python list) of times at which the values are desired
         xvals - a numpy array (or python list) of positions at which the values are desired
+                
 
         Returns: A dictionary with keys corresponding to the input variables, and values are
             numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals)
         """
         tspan = [np.min(tvals),np.max(tvals)]
         mindt=None
+
+        if dx != None:
+            xvals = np.linspace(0, self.vessels[vesselId].length,dx) 
 
         if "ForwardPressure" in variables or "BackwardPressure" in variables or "ForwardFlow" in variables or  "BackwardFlow" in variables:
             variables.append('linearWavesplit')
@@ -938,7 +942,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         elif 'WaveSpeed' in values:
             values.update(['Pressure', 'Area'])
         elif 'MeanVelocity' in values:
-            values.update(['Pressure','Flow'])
+            values.update(['Flow','Area'])
         elif "linearWavesplit" in values:
             values.update(['Pressure','Flow','Area',"WaveSpeed"])
         elif 'Compliance' in values:
@@ -969,7 +973,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     vessel = self.vessels[vesselId]
                     dsetGroup = self.vesselsToSave[vesselId]
                     if dsetGroup['Pressure'].shape[1] == vessel.N:
-                        del vessel.Psol, vessel.Qsol, vessel.Asol
+                        try: # TODO: check why this sometimes fails
+                            del vessel.Psol, vessel.Qsol, vessel.Asol
+                        except: pass
                         # TODO Implement h5py direct_read method to improve speed
                         if 'Pressure' in values:
                             vessel.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces]

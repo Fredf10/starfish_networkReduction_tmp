@@ -697,6 +697,7 @@ class Bifurcation():
         # Define the call function depending on the solving Scheme
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
+            
         elif solvingScheme == "NonLinear":
             print "classconnection 693: using nonlinear bifurcation model" 
             self.__call__ = self.callNonLinear

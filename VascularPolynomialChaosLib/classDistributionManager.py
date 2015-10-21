@@ -83,6 +83,7 @@ class DistributionManagerChaospy(DistributionManager):
         '''
         # TODO: check size of correlation and distributions
         self.dependentCase = True
+        print CorrelationMatrix
         self.jointDistributionDependent = cp.Nataf(self.jointDistribution, CorrelationMatrix)
     
          

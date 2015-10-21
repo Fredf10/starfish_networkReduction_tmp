@@ -116,11 +116,13 @@ class LocationOfInterestManager(TestBaseClass):
             for locationOfInterest in self.locationsOfInterest.values():
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, simulationIndex)
         
-        # second postprocessing find extrema if needed
+        # second postprocessing find extrema if needed also for variables defined over space
         for locationOfInterest in self.locationsOfInterest.values():
             locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
-                         
     
+        for locationOfInterest in self.locationsOfInterest.values():
+            locationOfInterest.preprocessSolutionDataTrajectory(self.simulationTime, self.sampleSize)
+        
     def getQoiIterator(self):
         '''
         Function that creates and iterator element which iterates through all stored qoi data elements
