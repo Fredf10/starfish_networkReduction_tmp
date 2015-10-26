@@ -66,7 +66,10 @@ class RandomInputManager(TestBaseClass):
         for randomInput in self.randomInputsExtDist:
             definedBases.append(randomInput.name) 
         
-        self.correlationMatrix = self.correlation.assembleCorrelationMatrix(definedBases)
+        if self.correlation != None:
+            self.correlationMatrix = self.correlation.assembleCorrelationMatrix(definedBases)
+        else:
+            self.correlationMatrix = np.ones(len(definedBases))
             
     def linkRandomInputUpdateFunctions(self, vascularNetwork):
         '''

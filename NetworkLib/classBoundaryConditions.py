@@ -663,12 +663,8 @@ class expVelocity(BoundaryConditionType1):
         self.gaussC = 5000
         self.area = 1
 
-        # # set to duMatrix
-        self.duMatrix[1] = 1
-
-
     def function1(self, t, t0, pulsNum):
-        return self.amp * exp(-self.gaussC * (t - t0 + 0.5 / self.freq) ** 2) * self.area
+        return self.amp * exp(-self.gaussC * (t - t0 + 0.5 / self.freq) ** 2) * self.area[0]
 
 class Fourier(BoundaryConditionType1):
     """

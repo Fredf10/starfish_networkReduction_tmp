@@ -134,11 +134,11 @@ class TestBaseClass(object):
             if externXmlElement in self.externVariables:
                 # get the extern variable definition class
                 externVariable  = self.externVariables[externXmlElement]
-                # create xml node
-                externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  
-                
+                # check if variable exists
                 variableValue = self.getVariable(externXmlElement)
                 if variableValue != None:
+                    # create xml node
+                    externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  
                     ## find out what type the externXmlElement variable is:
                     # 2.1 if dict variable -> writeExtValueXml
                     if isinstance(externVariable,self.ExtDict):

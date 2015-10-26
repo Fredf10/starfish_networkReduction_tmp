@@ -56,6 +56,10 @@ class Vessel(cSBO.StarfishBaseObject):
         self.radiusDistal       = 0.01              # radius at vessel end
         self.length             = 0.1               # length of the vessel
         self.N                  = 5                 # number of gridpoints
+        ## for stenosed vessel
+        self.position           = 0.1
+        self.constriction       = 0.2
+        self.stenosisLength     = 0.01
 
         ## compliance properties
         self.complianceType     = 'Hayashi'         # type of the compliance see classCompliance
@@ -154,7 +158,10 @@ class Vessel(cSBO.StarfishBaseObject):
 
         # initialize grid
         try:
-            self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N)
+            if self.geometryType == "stenosed":
+                self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N, self.position, self.constriction, self.stenosisLength)
+            else:
+                self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N)
         except Exception:
             self.exception("classVessel.initialize(): Grid calculation of vessel {} failed!".format(self.Id))
 #            print "ERROR: classVessel.initialize(): Grid calculation of vessel {}!".format(self.Id)
@@ -178,6 +185,9 @@ class Vessel(cSBO.StarfishBaseObject):
                 self.AsVector = np.linspace(AsProximal,As_distal,self.N)
                 #self.AsVector = np.linspace(AsAveraged,AsAveraged,self.N)
                 #print "WARNING: no reference Area for the Compliance As is given for vessel {} ! \n         As is now calculatet with given radiusA and radiusB".format(self.Id)
+            
+            elif self.geometryType == 'stenosed':
+                self.AsVector = self.A0
             else:
                 raise ValueError("classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id))
 #                print "WARNING: classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id)
@@ -220,6 +230,10 @@ class Vessel(cSBO.StarfishBaseObject):
                 self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
             elif self.geometryType == "cone":
                 self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
+
+            elif self.geometryType == "stenosed":
+                self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
+
 
         except Exception:
             self.exception("classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id))

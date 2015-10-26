@@ -23,7 +23,8 @@ class UqsaCase(TestBaseClass):
                              'numberOfProcessors'       : TestBaseClass.ExtValue(int),
                              'simulateEvaluationNumbers': TestBaseClass.ExtValue(int, multiVar=True),
                              'uqsaMethod'               : TestBaseClass.ExtObject({'uqsaMethodPolynomialChaos':classUqsaMethods.uqsaMethodPolynomialChaos,
-                                                                                   'uqsaMethodMonteCarlo'     :classUqsaMethods.uqsaMethodMonteCarlo}),
+                                                                                   'uqsaMethodMonteCarlo'     :classUqsaMethods.uqsaMethodMonteCarlo,
+                                                                                   'uqsaMethodPolynomialChaosDepDir': classUqsaMethods.uqsaMethodPolynomialChaosDepDir}),
                              'locationOfInterestManager' : TestBaseClass.ExtObject({'LocationOfInterestManager':classLocationOfInterestManager.LocationOfInterestManager}),
                            } 
     
