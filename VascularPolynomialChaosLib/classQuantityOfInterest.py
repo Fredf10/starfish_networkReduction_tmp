@@ -12,10 +12,6 @@ class QuantityOfInterest(object):
         self.quantityName = quantityName
         self.data = data
         
-        # trajectory object
-        
-        self.trajectoryData = None
-        
         # statistic properties
         self.expectedValue       = None
         self.variance            = None

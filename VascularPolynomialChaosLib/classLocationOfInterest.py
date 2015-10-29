@@ -45,7 +45,6 @@ class LocationOfInterest(TestBaseClass):
         self.confidenceAlpha               = 1 #confidence Alpha
         
         self.pointEvaluationQuantities = []
-        self.trajectoryEvaluationQuantities = []
         
     def initialize(self):
                         
@@ -58,15 +57,12 @@ class LocationOfInterest(TestBaseClass):
                 quantitiesOfInterestToCreate.extend([quantityNamePure])
                 quantitiesOfInterestToCreate = list(set(quantitiesOfInterestToCreate))
                 self.pointEvaluationQuantities.append(quantity)
-                                    
+                
             if 'InflectionPoint' in quantity:
                 quantityNamePure = quantity.split('InflectionPoint')[-1]
                 quantitiesOfInterestToCreate.extend([quantityNamePure])
                 quantitiesOfInterestToCreate = list(set(quantitiesOfInterestToCreate))
                 self.pointEvaluationQuantities.append(quantity)
-                
-            if 'Trajectory' in quantity:
-                self.trajectoryEvaluationQuantities.append(quantity)
         
         for quantity in quantitiesOfInterestToCreate:
             self.quantitiesOfInterest[quantity] = QuantityOfInterest(quantity, self.queryLocation, self.confidenceAlpha)
@@ -82,68 +78,9 @@ class LocationOfInterest(TestBaseClass):
             dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xVal])
             for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
                 # normal quantity of interest
-                if 'Extrema' not in quantitiyName and 'InflectionPoint' not in quantitiyName and 'Trajectory' not in quantitiyName:    
+                if 'Extrema' not in quantitiyName and 'InflectionPoint' not in quantitiyName:    
                     if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,len(simulationTime)))
                     quantityObject.data[sampleIndex] = dataDict[quantitiyName][:,0]
-                
-                if 'Trajectory' in quantitiyName:
-                    # allocates data for a vessel over space and saves the raw data in quantityObject.dataSpace
-                    #TODO: create own class tha xVal is not missued as number of space points per vessel
-                    vesselIds = [int(i) for i in self.queryLocation.split('vessel')[-1].split('_') if i != '']
-                    data = None
-                    
-                    maxLength = self.xVal
-                    
-                    maxNumberPoints = 20
-                    nPointsUsed = 0
-                    position = 0
-                    
-                    lastVessel = False
-                    
-                    trajectory = None                   
-                    
-                    for vesselId in vesselIds:
-                        quantitiyPure = quantitiyName.split('Trajectory')[-1] 
-                        
-                        length = vascularNetwork.vessels[vesselId].length
-                        remainingLength = maxLength-position
-                       
-                        if length < remainingLength:
-                            # get number of points the solution in x
-                            nPoints = int(maxNumberPoints*length/maxLength)
-                        
-                        if length >= remainingLength:
-                            length = remainingLength
-                            lastVessel = True
-                            nPoints = maxNumberPoints - nPointsUsed
-                       
-                        xvals = np.linspace(0,length,nPoints)
-                        dataTemp = vascularNetwork.getSolutionData(vesselId, [quantitiyPure], simulationTime, xvals = xvals)[quantitiyPure]
-                        
-                        if data == None:
-                            data = dataTemp.T
-                        else:
-                            data = np.vstack([data,dataTemp.T])
-                        
-                        if trajectory == None:
-                            trajectory = xvals
-                        else:
-                            trajectory = np.append(trajectory,xvals+position)
-                        
-                        position = position+length
-                        nPointsUsed = nPointsUsed + nPoints
-                        
-                        if lastVessel: 
-                            print "reached end of trajectory breaking"
-                            break
-                       
-                    if quantityObject.trajectoryData == None:
-                        quantityObject.trajectoryData =  np.empty((sampleSize,maxNumberPoints))   
-                    quantityObject.trajectoryData[sampleIndex] = trajectory
-                          
-                    if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,maxNumberPoints,len(simulationTime)))
-                    quantityObject.data[sampleIndex] = data
-                    
                 
         elif "baroreceptor" in self.queryLocation:
             baroId = int(self.queryLocation.split('_')[-1])
@@ -170,6 +107,8 @@ class LocationOfInterest(TestBaseClass):
         for quantityName in self.pointEvaluationQuantities:
             quantityObject = self.quantitiesOfInterest[quantityName]
             
+            # TODO: outsource peak selection method
+            
             if 'InflectionPoint' in quantityName:
                 quantityNamePure = quantityName.split('InflectionPoint')[-1]
                 searchPointOfInflection = True                
@@ -178,10 +117,118 @@ class LocationOfInterest(TestBaseClass):
                 quantityNamePure = quantityName.split('Extrema')[-1]
                 searchPointOfInflection = False
                 
+                
             dataPure = self.quantitiesOfInterest[quantityNamePure].data
                   
-            selectedPoints, amplitudeData, timingData = self.extremaFinderFunction(dataPure, quantityNamePure, sampleSize, simulationTime, searchPointOfInflection)
+            allDesieredPointsDetected = False
+            delta = 0.005
+            
+            colordef  = ['r','g','b','m','k','c']
+            markerdef = ['o','d','x','s','*','v']
+            colors       = colordef*len(markerdef)
+            markerstyles = [item for sublist in [ [i]*len(colordef) for i in markerdef] for item in sublist]
+                
+                                            
+            while allDesieredPointsDetected == False:   
+                amplitudesList = []
+                timingList = []
+                numberOfPointsFirst = None
+                for sampleIndex in xrange(sampleSize):
+                    
+                    dataPureCurr = dataPure[sampleIndex]
+                    
+                    if searchPointOfInflection == True:
                         
+                        pointInfAmp,pointInfTime = mProc.calculatePointOfInflection(dataPureCurr, simulationTime, simulationTime[0])
+                        minMaxPoints = [[pointInfAmp],[pointInfTime]]
+                        numberOfPointsCurrent = len(minMaxPoints[0])
+                        if numberOfPointsFirst == None: numberOfPointsFirst = numberOfPointsCurrent
+                        
+                    else:
+                        minMaxPoints = mProc.minMaxFunction(dataPureCurr,timeValues=simulationTime,delta=delta, seperateMinMax = False ) 
+                        
+                        numberOfPointsCurrent = len(minMaxPoints[0])
+                        if numberOfPointsFirst == None: numberOfPointsFirst = numberOfPointsCurrent
+                        
+                        deltaAltered = delta
+                        while numberOfPointsCurrent != numberOfPointsFirst:
+                            if numberOfPointsCurrent < numberOfPointsFirst:
+                                deltaAltered -= delta*0.1
+                            elif numberOfPointsCurrent > numberOfPointsFirst:
+                                deltaAltered += delta*0.1
+                            dataPureCurr = dataPure[sampleIndex]
+                            minMaxPoints = mProc.minMaxFunction(dataPureCurr,timeValues=simulationTime,delta=deltaAltered, seperateMinMax = False ) 
+                            numberOfPointsCurrent = len(minMaxPoints[0])
+                    
+                                                                        
+                    amplitudesList.append(minMaxPoints[0])
+                    timingList.append(minMaxPoints[1])
+                    
+                    for c,m,t,x in zip(colors,markerstyles,minMaxPoints[1],minMaxPoints[0]):
+                        plt.plot(t,x,'o',color = c,marker=m, markersize = 5)
+                    
+                    if numberOfPointsCurrent == numberOfPointsFirst:
+                        plt.plot(simulationTime,dataPureCurr,'g', alpha = 0.2)
+                    elif numberOfPointsCurrent < numberOfPointsFirst:
+                        plt.plot(simulationTime,dataPureCurr,'m', alpha = 1.0)
+                    elif numberOfPointsCurrent > numberOfPointsFirst:
+                        plt.plot(simulationTime,dataPureCurr,'k', alpha = 1.0)
+                
+                # break for inflection point
+                if searchPointOfInflection == True:
+                    allDesieredPointsDetected = True
+                    break
+                        
+                plt.title(quantityNamePure)
+                plt.show(block = False)
+                
+                print '\n    Extrema detection all simulations are evaluated:'
+                print '      [0] - Analyse all points'
+                print '      [1] - Choose points for analysis'
+                print '      [2] - Not all desiered peaks are detected (redo and adjust search-delta)'
+                suggestions = [str(i) for i in xrange(3)]
+                answer = "nothing"
+                while answer not in suggestions:
+                    answer = raw_input("What do you want to do: ")
+                    
+                if answer == '0':
+                    answerSelectionSplit = [str(i) for i in xrange(numberOfPointsFirst)]
+                    allDesieredPointsDetected = True
+                                    
+                if answer == '1':
+                    allDesieredPointsDetected = True
+                    print "\n    points found for analysis:"
+                    for i in xrange(numberOfPointsFirst):
+                        print "      [{}] - color: {}, marker style {}".format(i,colors[i],markerstyles[i])
+                    answerSelectionSplit = ['']
+                    while sum([item in [str(i) for i in xrange(numberOfPointsFirst)] for item in answerSelectionSplit]) != len(answerSelectionSplit):
+                        answerSelection = raw_input("    please enter the numbers of the points (separated with comma): ")
+                        if ',' in answerSelection:
+                            answerSelectionSplit = answerSelection.split(',')
+                        elif ' ' in answerSelection:
+                            answerSelectionSplit = answerSelection.split(' ')
+                        else:
+                            answerSelectionSplit = [answerSelection]
+                                       
+                elif answer == '2':
+                    answer2 = "haha"
+                    convertableToFloat = False
+                    while convertableToFloat == False:
+                        answer2 = raw_input("please redefine delta, current delta value == {} ".format(delta))
+                        try:
+                            delta = float(answer2)
+                            convertableToFloat = True
+                        except ValueError as v:
+                            print "{} not convertable to float!!".format(v)
+                            
+                #TODO: save the figures and close ..
+                plt.close()
+                
+            # get the data of the selected points
+            selectedPoints = np.array([int(i) for i in answerSelectionSplit])    
+            amplitudeData =  np.array(amplitudesList)
+            timingData    =  np.array(timingList)
+            
             for selectedPoint in selectedPoints:
                 # create Names
                 qOINameAmplitude = ''.join([quantityNamePure,'Extremum',str(selectedPoint),'Amplitude'])
@@ -203,182 +250,6 @@ class LocationOfInterest(TestBaseClass):
             # remove the old one        
             del self.quantitiesOfInterest[quantityName]
             self.quantitiesOfInterestToProcess.remove(quantityName)
-            
-    def preprocessSolutionDataTrajectory(self, simulationTime, sampleSize):
-        
-        
-        import matplotlib.pyplot as plt
-                
-        for quantityName in self.trajectoryEvaluationQuantities:
-            quantityObject = self.quantitiesOfInterest[quantityName]
-            
-            trajectoryData = quantityObject.trajectoryData
-            
-            data = np.swapaxes(quantityObject.data, 0, 1)
-            
-            useMax = True
-            
-            
-            if useMax == True:
-                # find maxima of the data
-                maxValue = np.amax(data,axis=2)
-                ## currently not used as qoI for gpc
-                
-                # find indices where the data has maximums
-                maxIndices =  np.argmax(data, axis=2)
-                
-                # get time points of the maximums
-                maxTimes = simulationTime[maxIndices].T
-                
-                xN = 50
-                xInt = np.linspace(0, self.xVal, xN)
-                maxTimeMatched = np.empty((sampleSize,xN))
-                for i in xrange(sampleSize): 
-                    maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
-                
-                
-                fig = plt.figure()
-                fig.canvas.set_window_title(quantityName)
-                plt.plot(trajectoryData[0],maxTimes[0])
-                plt.plot(xInt,maxTimeMatched[0])
-                
-                
-                fig = plt.figure()
-                fig.canvas.set_window_title(''.join([quantityName,'PC']))
-                for t,x in zip(maxTimes,trajectoryData):
-                    plt.plot(x,t)
-                    
-                fig = plt.figure()
-                fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
-                for t in maxTimeMatched:
-                    plt.plot(xInt,t)
-                    
-                print len(simulationTime)
-                    
-                
-                
-                #plt.plot(maxTimes.T, np.repeat(trajectory.reshape((len(trajectory),1)), sampleSize, axis=1).T)
-                
-                
-            else:
-                # find peaks                
-                for dataOfSpacePoint in xrange(len(data)):
-                    self.extremaFinderFunction(dataOfSpacePoint, quantityName, sampleSize, simulationTime, searchPointOfInflection = False)
-        plt.show()          
-        exit()      
-                        
-    def extremaFinderFunction(self, dataPure, quantityNamePure, sampleSize, simulationTime, searchPointOfInflection):
-        
-        allDesieredPointsDetected = False
-        delta = 0.005
-        
-        colordef  = ['r','g','b','m','k','c']
-        markerdef = ['o','d','x','s','*','v']
-        colors       = colordef*len(markerdef)
-        markerstyles = [item for sublist in [ [i]*len(colordef) for i in markerdef] for item in sublist]
-            
-                                        
-        while allDesieredPointsDetected == False:   
-            amplitudesList = []
-            timingList = []
-            numberOfPointsFirst = None
-            for sampleIndex in xrange(sampleSize):
-                
-                dataPureCurr = dataPure[sampleIndex]
-                
-                if searchPointOfInflection == True:
-                    
-                    pointInfAmp,pointInfTime = mProc.calculatePointOfInflection(dataPureCurr, simulationTime, simulationTime[0])
-                    minMaxPoints = [[pointInfAmp],[pointInfTime]]
-                    numberOfPointsCurrent = len(minMaxPoints[0])
-                    if numberOfPointsFirst == None: numberOfPointsFirst = numberOfPointsCurrent
-                    
-                else:
-                    minMaxPoints = mProc.minMaxFunction(dataPureCurr,timeValues=simulationTime,delta=delta, seperateMinMax = False ) 
-                    
-                    numberOfPointsCurrent = len(minMaxPoints[0])
-                    if numberOfPointsFirst == None: numberOfPointsFirst = numberOfPointsCurrent
-                    
-                    deltaAltered = delta
-                    while numberOfPointsCurrent != numberOfPointsFirst:
-                        if numberOfPointsCurrent < numberOfPointsFirst:
-                            deltaAltered -= delta*0.1
-                        elif numberOfPointsCurrent > numberOfPointsFirst:
-                            deltaAltered += delta*0.1
-                        dataPureCurr = dataPure[sampleIndex]
-                        minMaxPoints = mProc.minMaxFunction(dataPureCurr,timeValues=simulationTime,delta=deltaAltered, seperateMinMax = False ) 
-                        numberOfPointsCurrent = len(minMaxPoints[0])
-                
-                                                                    
-                amplitudesList.append(minMaxPoints[0])
-                timingList.append(minMaxPoints[1])
-                
-                for c,m,t,x in zip(colors,markerstyles,minMaxPoints[1],minMaxPoints[0]):
-                    plt.plot(t,x,'o',color = c,marker=m, markersize = 5)
-                
-                if numberOfPointsCurrent == numberOfPointsFirst:
-                    plt.plot(simulationTime,dataPureCurr,'g', alpha = 0.2)
-                elif numberOfPointsCurrent < numberOfPointsFirst:
-                    plt.plot(simulationTime,dataPureCurr,'m', alpha = 1.0)
-                elif numberOfPointsCurrent > numberOfPointsFirst:
-                    plt.plot(simulationTime,dataPureCurr,'k', alpha = 1.0)
-            
-            # break for inflection point
-            if searchPointOfInflection == True:
-                allDesieredPointsDetected = True
-                break
-                    
-            plt.title(quantityNamePure)
-            plt.show(block = False)
-            
-            print '\n    Extrema detection all simulations are evaluated:'
-            print '      [0] - Analyse all points'
-            print '      [1] - Choose points for analysis'
-            print '      [2] - Not all desiered peaks are detected (redo and adjust search-delta)'
-            suggestions = [str(i) for i in xrange(3)]
-            answer = "nothing"
-            while answer not in suggestions:
-                answer = raw_input("What do you want to do: ")
-                
-            if answer == '0':
-                answerSelectionSplit = [str(i) for i in xrange(numberOfPointsFirst)]
-                allDesieredPointsDetected = True
-                                
-            if answer == '1':
-                allDesieredPointsDetected = True
-                print "\n    points found for analysis:"
-                for i in xrange(numberOfPointsFirst):
-                    print "      [{}] - color: {}, marker style {}".format(i,colors[i],markerstyles[i])
-                answerSelectionSplit = ['']
-                while sum([item in [str(i) for i in xrange(numberOfPointsFirst)] for item in answerSelectionSplit]) != len(answerSelectionSplit):
-                    answerSelection = raw_input("    please enter the numbers of the points (separated with comma): ")
-                    if ',' in answerSelection:
-                        answerSelectionSplit = answerSelection.split(',')
-                    elif ' ' in answerSelection:
-                        answerSelectionSplit = answerSelection.split(' ')
-                    else:
-                        answerSelectionSplit = [answerSelection]
-                                   
-            elif answer == '2':
-                answer2 = "haha"
-                convertableToFloat = False
-                while convertableToFloat == False:
-                    answer2 = raw_input("please redefine delta, current delta value == {} ".format(delta))
-                    try:
-                        delta = float(answer2)
-                        convertableToFloat = True
-                    except ValueError as v:
-                        print "{} not convertable to float!!".format(v)
-                        
-            #TODO: save the figures and close ..
-            plt.close()
-            
-        # get the data of the selected points
-        selectedPoints = np.array([int(i) for i in answerSelectionSplit])    
-        amplitudeData =  np.array(amplitudesList)
-        timingData    =  np.array(timingList)
-            
-        return selectedPoints, amplitudeData, timingData
             
     def saveQuantitiyOfInterestData(self, locationGroup):
         '''

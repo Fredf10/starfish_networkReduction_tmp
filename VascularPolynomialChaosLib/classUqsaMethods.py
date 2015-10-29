@@ -125,7 +125,7 @@ class uqsaMethodPolynomialChaos(TestBaseClass):
         Create dependen samples if dependen case = True and dependent random variables true
         '''
         if distributionManager.jointDistributionDependent != None:
-            samplesDependent = distributionManager.jointDistributionDependent.inv(distributionManager.jointDistribution.fwd(samples.T)).transpose()
+            samplesDependent = distributionManager.jointDistributionDependent.inv(distributionManager.jointDistribution.fwd(samples))
         else:
             raise ValueError("uqsaMethodPolynomialChaos.createDependentSamples(), cannot create dependent samples as distributionManager.jointDistributionDependent is not defined!")
         return samplesDependent
