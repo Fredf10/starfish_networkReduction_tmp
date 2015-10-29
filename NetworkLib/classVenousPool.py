@@ -85,15 +85,15 @@ class StaticVenousPool(cSBO.StarfishBaseObject):
         self.Qout_vector = np.zeros(self.nTsteps+1)
         self.dsetGroup.create_dataset("Qout", (vascularNetwork.savedArraySize,), dtype='float64')
         
-    def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
+    def flushSolutionData(self,saving, nDB,nDE,nSB,nSE,nSkip):
 
         if saving:
-            self.dsetGroup["V"][nDB:nDE]  = self.Vvector[nSB:nSE]
-            self.dsetGroup["Vus"][nDB:nDE]  = self.Vusvvector[nSB:nSE]
-            self.dsetGroup["CVP"][nDB:nDE]  = self.Pvector[nSB:nSE]
-            self.dsetGroup["LAP"][nDB:nDE] = self.P_LAvector[nSB:nSE]
-            self.dsetGroup["Qin"][nDB:nDE] = self.Qin_vector[nSB:nSE]
-            self.dsetGroup["Qout"][nDB:nDE] = self.Qout_vector[nSB:nSE]
+            self.dsetGroup["V"][nDB:nDE]  = self.Vvector[nSB:nSE:nSkip]
+            self.dsetGroup["Vus"][nDB:nDE]  = self.Vusvvector[nSB:nSE:nSkip]
+            self.dsetGroup["CVP"][nDB:nDE]  = self.Pvector[nSB:nSE:nSkip]
+            self.dsetGroup["LAP"][nDB:nDE] = self.P_LAvector[nSB:nSE:nSkip]
+            self.dsetGroup["Qin"][nDB:nDE] = self.Qin_vector[nSB:nSE:nSkip]
+            self.dsetGroup["Qout"][nDB:nDE] = self.Qout_vector[nSB:nSE:nSkip]
 
 
              
@@ -238,15 +238,15 @@ class venousPool(cSBO.StarfishBaseObject):
 #         
 #         exit()
         
-    def flushSolutionData(self,saving, nDB,nDE,nSB,nSE):
+    def flushSolutionData(self,saving, nDB,nDE,nSB,nSE,nSkip):
 
         if saving:
-            self.dsetGroup["V"][nDB:nDE]  = self.Vvector[nSB:nSE]
-            self.dsetGroup["Vus"][nDB:nDE]  = self.Vusvvector[nSB:nSE]
-            self.dsetGroup["CVP"][nDB:nDE]  = self.Pvector[nSB:nSE]
-            self.dsetGroup["LAP"][nDB:nDE] = self.P_LAvector[nSB:nSE]
-            self.dsetGroup["Qin"][nDB:nDE] = self.Qin_vector[nSB:nSE]
-            self.dsetGroup["Qout"][nDB:nDE] = self.Qout_vector[nSB:nSE]
+            self.dsetGroup["V"][nDB:nDE]  = self.Vvector[nSB:nSE:nSkip]
+            self.dsetGroup["Vus"][nDB:nDE]  = self.Vusvvector[nSB:nSE:nSkip]
+            self.dsetGroup["CVP"][nDB:nDE]  = self.Pvector[nSB:nSE:nSkip]
+            self.dsetGroup["LAP"][nDB:nDE] = self.P_LAvector[nSB:nSE:nSkip]
+            self.dsetGroup["Qin"][nDB:nDE] = self.Qin_vector[nSB:nSE:nSkip]
+            self.dsetGroup["Qout"][nDB:nDE] = self.Qout_vector[nSB:nSE:nSkip]
             
     def estimateInflow(self):
         """

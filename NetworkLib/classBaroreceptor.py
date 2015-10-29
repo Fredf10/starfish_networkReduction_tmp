@@ -99,7 +99,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         self.venousPool = flowSolver.venousPool  # venous pool object for the update of Vusv
 
  
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
         pass
     
     def update(self, baroDict):
@@ -328,18 +328,18 @@ class AorticBaroreceptor(Baroreceptor):
 
 
 
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE,nSkip):
         
-        super(AorticBaroreceptor, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
+        super(AorticBaroreceptor, self).flushSolutionData(saving, nDB, nDE, nSB, nSE,nSkip)
         if saving:
             # ## quantities of the Baroreflex loop
-            self.dsetGroup["MStrain"][nDB:nDE] = self.MStrain[nSB:nSE]
-            self.dsetGroup['T'][nDB:nDE] = self.T[nSB:nSE]
-            self.dsetGroup["n"][nDB:nDE] = self.n[nSB:nSE]
-            self.dsetGroup["Tsym"][nDB:nDE] = self.Tsym[nSB:nSE]
-            self.dsetGroup["Tparasym"][nDB:nDE] = self.Tparasym[nSB:nSE]
-            self.dsetGroup["c_nor"][nDB:nDE] = self.c_nor[nSB:nSE]
-            self.dsetGroup["c_ach"][nDB:nDE] = self.c_ach[nSB:nSE]
+            self.dsetGroup["MStrain"][nDB:nDE] = self.MStrain[nSB:nSE:nSkip]
+            self.dsetGroup['T'][nDB:nDE] = self.T[nSB:nSE:nSkip]
+            self.dsetGroup["n"][nDB:nDE] = self.n[nSB:nSE:nSkip]
+            self.dsetGroup["Tsym"][nDB:nDE] = self.Tsym[nSB:nSE:nSkip]
+            self.dsetGroup["Tparasym"][nDB:nDE] = self.Tparasym[nSB:nSE:nSkip]
+            self.dsetGroup["c_nor"][nDB:nDE] = self.c_nor[nSB:nSE:nSkip]
+            self.dsetGroup["c_ach"][nDB:nDE] = self.c_ach[nSB:nSE:nSkip]
 
 
     def estimateUnstretchedRadius(self):
@@ -477,15 +477,15 @@ class bugenhagenAorticBR(AorticBaroreceptor):
         self.HR_p[n + 1] = self.algebraic[-1][10]
         self.HR_s[n + 1] = self.algebraic[-1][9]
 
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE,nSkip):
 
-        super(bugenhagenAorticBR, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
+        super(bugenhagenAorticBR, self).flushSolutionData(saving, nDB, nDE, nSB, nSE,nSkip)
         if saving:
 
             # ## quantities of the Baroreflex loop
-            self.dsetGroup["delta"][nDB:nDE] = self.delta[nSB:nSE]
-            self.dsetGroup["HR_s"][nDB:nDE] = self.HR_s[nSB:nSE]
-            self.dsetGroup["HR_p"][nDB:nDE] = self.HR_p[nSB:nSE]
+            self.dsetGroup["delta"][nDB:nDE] = self.delta[nSB:nSE:nSkip]
+            self.dsetGroup["HR_s"][nDB:nDE] = self.HR_s[nSB:nSE:nSkip]
+            self.dsetGroup["HR_p"][nDB:nDE] = self.HR_p[nSB:nSE:nSkip]
 
 
 
@@ -598,13 +598,13 @@ class pettersenAorticBR(AorticBaroreceptor):
         self.HR_p[n_step + 1] = self.algebraic[-1][11]
         self.HR_s[n_step + 1] = self.algebraic[-1][8]
 
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
-        super(pettersenAorticBR, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
+        super(pettersenAorticBR, self).flushSolutionData(saving, nDB, nDE, nSB, nSE, nSkip)
         if saving:
-            self.dsetGroup["HR_s"][nDB:nDE] = self.HR_s[nSB:nSE]
-            self.dsetGroup["HR_p"][nDB:nDE] = self.HR_p[nSB:nSE]
-            self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE]
-            self.dsetGroup["Rp"][nDB:nDE] = self.Rp[nSB:nSE]
+            self.dsetGroup["HR_s"][nDB:nDE] = self.HR_s[nSB:nSE:nSkip]
+            self.dsetGroup["HR_p"][nDB:nDE] = self.HR_p[nSB:nSE:nSkip]
+            self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE:nSkip]
+            self.dsetGroup["Rp"][nDB:nDE] = self.Rp[nSB:nSE:nSkip]
 
 class CarotidBaroreceptor(Baroreceptor):
     """
@@ -779,22 +779,22 @@ class CarotidBaroreceptor(Baroreceptor):
         self.dsetGroup.create_dataset("delta_T", (vascularNetwork.savedArraySize,), dtype='float64')
 
 
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
-        super(CarotidBaroreceptor, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
+        super(CarotidBaroreceptor, self).flushSolutionData(saving, nDB, nDE, nSB, nSE, nSkip)
         if saving:
             
            
-            self.dsetGroup["Ptild"][nDB:nDE] = 0.5*(self.PtildLeft[nSB:nSE] + self.PtildLeft[nSB:nSE])
+            self.dsetGroup["Ptild"][nDB:nDE] = 0.5*(self.PtildLeft[nSB:nSE:nSkip] + self.PtildLeft[nSB:nSE:nSkip])
             # save solution for carotid baroreceptor type
-            self.dsetGroup["F_cs"][nDB:nDE] = self.F_cs[nSB:nSE]
+            self.dsetGroup["F_cs"][nDB:nDE] = self.F_cs[nSB:nSE:nSkip]
 
             # efferent part
-            self.dsetGroup["F_efferent"][nDB:nDE] = self.F_efferent[nSB:nSE]
-            self.dsetGroup["T"][nDB:nDE] = self.delta_T[nSB:nSE] + self.T0
-            self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE]
-            self.dsetGroup["delta_Emax"][nDB:nDE] = self.delta_Emax[nSB:nSE]
-            self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE]
-            self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE]
+            self.dsetGroup["F_efferent"][nDB:nDE] = self.F_efferent[nSB:nSE:nSkip]
+            self.dsetGroup["T"][nDB:nDE] = self.delta_T[nSB:nSE:nSkip] + self.T0
+            self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE:nSkip]
+            self.dsetGroup["delta_Emax"][nDB:nDE] = self.delta_Emax[nSB:nSE:nSkip]
+            self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE:nSkip]
+            self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE:nSkip]
 
 
     #############################################################################
@@ -1183,18 +1183,18 @@ class CombinedBaroreflex(Baroreceptor):
         self.dsetGroup.create_dataset("delta_T", (vascularNetwork.savedArraySize,), dtype='float64')
 
     
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
-        super(CombinedBaroreflex, self).flushSolutionData(saving, nDB, nDE, nSB, nSE)
-        self.carotid.flushSolutionData(saving, nDB, nDE, nSB, nSE)
-        self.aortic.flushSolutionData(saving, nDB, nDE, nSB, nSE)
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
+        super(CombinedBaroreflex, self).flushSolutionData(saving, nDB, nDE, nSB, nSE, nSkip)
+        self.carotid.flushSolutionData(saving, nDB, nDE, nSB, nSE, nSkip)
+        self.aortic.flushSolutionData(saving, nDB, nDE, nSB, nSE, nSkip)
         
         if saving:
             # save solution for carotid baroreceptor type
-            self.dsetGroup["T"][nDB:nDE] = self.delta_T[nSB:nSE] + self.T0
-            self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE]
-            self.dsetGroup["delta_Emax"][nDB:nDE] = self.delta_Emax[nSB:nSE]
-            self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE]
-            self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE]
+            self.dsetGroup["T"][nDB:nDE] = self.delta_T[nSB:nSE:nSkip] + self.T0
+            self.dsetGroup["delta_TPR"][nDB:nDE] = self.delta_TPR[nSB:nSE:nSkip]
+            self.dsetGroup["delta_Emax"][nDB:nDE] = self.delta_Emax[nSB:nSE:nSkip]
+            self.dsetGroup["delta_Vusv"][nDB:nDE] = self.delta_Vusv[nSB:nSE:nSkip]
+            self.dsetGroup["delta_T"][nDB:nDE] = self.delta_T[nSB:nSE:nSkip]
 
     def resistanceEffector(self, n):
         """

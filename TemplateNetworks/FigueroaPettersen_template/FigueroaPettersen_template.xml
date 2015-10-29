@@ -4,10 +4,9 @@
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">25.0</totalTime>
     <CFL>0.60</CFL>
-    <timeSaveBegin unit="s">10.0</timeSaveBegin>
-    <timeSaveEnd unit="s">25.0</timeSaveEnd>
+    <timeSaveBegin unit="s">10.0</timeSaveBegin>    
+    <minSaveDt>-1</minSaveDt>
     <maxMemory unit="MB">5000</maxMemory>
-    <saveInitialisationPhase>True</saveInitialisationPhase>
     <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
     <gravitationalField>True</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>

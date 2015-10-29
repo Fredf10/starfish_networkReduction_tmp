@@ -1,12 +1,11 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleAorta.xml id="xxx" version="4.1">
+<singleAorta.xml id="xxx" version="4.2">
   <simulationContext>
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">1.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+    <minSaveDt unit="s">-1</minSaveDt>
 	<maxMemory unit="MB">0.500</maxMemory>
-	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>

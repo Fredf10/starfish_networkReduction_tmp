@@ -45,11 +45,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # saving options
         self.pathSolutionDataFilename = None
         self.timeSaveBegin = 0.0  # time when to start saving
-        self.timeSaveEnd = 2.0  # time when to end saving
+        self.timeSaveEnd = None # time when to end saving
         self.maxMemory = 20  # maximum memory in MB
-        self.saveInitialisationPhase = False  # bool to enable saving of the initPhase
+        self.saveInitialisationPhase = True  # bool to enable saving of the initPhase
 
         self.vesselsToSave = {}
+        self.nSaveSkip = 1
+        self.nSkipShift = 0
+        self.minSaveDt = -1
+        self.saveDt = None
         self.nSaveBegin = None
         self.nSaveEnd  = None
         self.savedArraySize = None
@@ -434,22 +438,31 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
 
         # initialize saving indices
-        if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
-            raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime]")
+        self.timeSaveEnd = self.totalTime
 
         if self.timeSaveBegin < 0 or self.timeSaveBegin > self.timeSaveEnd:
-            raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd]")
+            raise ValueError("VascularNetwork.initializeNetworkForSimulation(): timeSaveBegin not in [0, timeSaveEnd]")
 
+        self.nSaveSkip = max(int(np.ceil(self.minSaveDt/self.dt)),1)
+        self.saveDt = self.nSaveSkip*self.dt
+        
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
+        
+        
+        
         # set save counter to the correct parts
         if self.initialisationPhaseExist:
             self.nSaveEnd += self.nTstepsInitPhase
-            if self.saveInitialisationPhase:
-                self.nSaveBegin = 0
-            else:
+            if self.timeSaveBegin > 0:
                 self.nSaveBegin += self.nTstepsInitPhase
-        self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1
+                self.saveInitialisationPhase = False
+            else:
+                self.saveInitialisationPhase = True
+                self.nSaveBegin += self.nTstepsInitPhase
+        
+        self.savedArraySize = (self.nSaveEnd-self.nSaveBegin)//self.nSaveSkip + 1
+        
         self.nDCurrent = 0
 
         # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime
@@ -498,6 +511,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     dsetQ[0] = vessel.Qsol[0]
                     dsetA[0] = vessel.Asol[0]
                     self.nDCurrent = 1
+                    self.nSkipShift = self.nSaveSkip-1
 
                 self.vesselsToSave[vesselId] =  dsetGroup
                 
@@ -535,14 +549,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
 
             # TODO: Verify that numpy's index range protocal... it seems to cutoff the final value in the range selected.
-            dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1]
-            dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1]
+            dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+            dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
             del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
             #TODO: do this nicer way
             vessel.positionStart  = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
             vessel.positionEnd    = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
             vessel.rotToGlobalSys = np.array([np.eye(3)])
-            dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
+            dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
             
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
         
@@ -604,15 +618,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
 
     def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
+       
         """
-        saving utility function to determine if solution data needs to be sent to the outputfile,
+        saving utility function to determine if solution data needs to be sent to the output file,
         and to calculate the correct indices between solution memory and the data output file.
-        """
-
-        """
+       
         Explanation of index variables
         nCB,nCE where the beginning and end of the current solution data in memory would lie
-         in a full time history of the solution.
+         in a full time history of the solution. These are position indices
         nMB,nME what indices of the current memory mark the beginning and end of what should be saved
          nME is a slice index, i.e. position + 1
         nSB,nSE where the beginning and end of the current data to save would lie in the whole of the
@@ -624,7 +637,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         offset = (memoryArraySize - 1) * chunkCount
         # indices mapping beginning and end of memory to the absolute number time steps in solution
         nCB = offset+1
-        nCE = offset+memoryArraySize-1 # nCE == currentTimeStep+1
+        nCE = (memoryArraySize - 1) * (chunkCount + 1)# nCE == currentTimeStep+1
         nDB = None
         nDE = None
         nSB = None
@@ -633,69 +646,79 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         saving = not(nCE < self.nSaveBegin or nCB > self.nSaveEnd) # not(not saving)
 
         if saving:
-            ## memory indices
-            nMB = 1
-            nSB = nCB
-            if (self.nSaveBegin-nCB)>0:
-                nMB = 1+(self.nSaveBegin-nCB)
+            
+            nMB = 1   + self.nSkipShift
+            nSB = nCB + self.nSkipShift
+            if self.nSaveBegin > nCB:
+                nMB = 1 + (self.nSaveBegin-nCB)
                 nSB = self.nSaveBegin
-
+                
             #determine length to write
-            # assume we write out through the end of memory
-            lengthToWrite = self.memoryArraySizeTime - nMB
-
+            # 1. assume we write out through the end of memory
+            # 1.a Accounting for skipping write first value, then as many values as remain divisible by the skip
             nME = memoryArraySize
-            nSE = nCE + 1
+            nSE = nCE + 1 # Add one to get the last slice index... 
+            
+            
+            
             # correct this if save index is less than the current time step
-            if (self.nSaveEnd-nCE)<0:
+            if self.nSaveEnd < nCE:
                 # set the index to end saving
                 nME -= (nCE - self.nSaveEnd)
-                nSE -= (nCE - self.nSaveEnd)
-                lengthToWrite -= (nCE - self.nSaveEnd) # -(-nME) as nME is negative
-
+                nSE = self.nSaveEnd + 1
+            
+            numWrittenAfterFirst = ((nME - nMB) -1)//self.nSaveSkip
+            lengthToWrite = 1 + numWrittenAfterFirst
+            
+            # How many to skip on the next round?
+            self.nSkipShift = (self.nSaveSkip - (nME-nMB)%self.nSaveSkip)%self.nSaveSkip
+            
+            # Where in the data file to put the data    
             nDB = self.nDCurrent
-            nDE = self.nDCurrent+lengthToWrite
-
+            nDE = self.nDCurrent + lengthToWrite
             self.nDCurrent += lengthToWrite
-            # zero out arterial volume if flushing data
-            self.arterialVolume = self.arterialVolume*0.0    
+
+            # TODO: implement flushing interface for each data set to be saved.
+            
+        # zero out arterial volume if flushing data
+        self.arterialVolume = self.arterialVolume*0.0    
 
         for vesselId,dsetGroup in self.vesselsToSave.iteritems():
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
             vessel = self.vessels[vesselId]
             
-            # calc vessel volume
+            # calculate vessel volume
             A1 = self.vessels[vesselId].Asol[:,0:-1]
             A2 = self.vessels[vesselId].Asol[:,1:]
             volume = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0,axis=1)
             self.arterialVolume += volume
                 
             if saving:
-                dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
-                dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
-                dsetGroup["Area"][nDB:nDE] = vessel.Asol[nMB:nME]
+                dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME:self.nSaveSkip]
+                dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME:self.nSaveSkip]
+                dsetGroup["Area"][nDB:nDE] = vessel.Asol[nMB:nME:self.nSaveSkip]
             # roll the end of the buffer
             vessel.Psol[0] = vessel.Psol[-1]
             vessel.Qsol[0] = vessel.Qsol[-1]
             vessel.Asol[0] = vessel.Asol[-1]
-            
+                
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
                 if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
-                    bC.flushSolutionData(saving,nDB,nDE,nSB,nSE)
+                    bC.flushSolutionData(saving,nDB,nDE,nSB,nSE,self.nSaveSkip)
             
         for baro in self.baroreceptors.itervalues():
-            baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-        
-        # TODO: if saving/ Rolling of data
+            baro.flushSolutionData(saving,nDB,nDE,nSB,nSE,self.nSaveSkip)
+            
+            # TODO: if saving/ Rolling of data
         if self.venousPool: 
-            self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            if saving:
-                self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
+            self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE,self.nSaveSkip)
+                #if saving:
+                #    self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME:self.nSaveSkip] + self.venousPool.dsetGroup['V'][nDB:nDE]
         if saving:
-            self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
-        
+            self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME:self.nSaveSkip]
+            
 
     def saveSolutionData(self):
         """
@@ -708,9 +731,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         globalData.attrs['nTstepsInitPhase'] = self.nTstepsInitPhase
         globalData.attrs['simulationDescription'] = self.description
 
-        savedArraySize = self.nSaveEnd - self.nSaveBegin + 1
+        savedArraySize = self.savedArraySize # self.nSaveEnd - self.nSaveBegin + 1
         dsetTime = globalData.create_dataset('Time', (savedArraySize,), dtype='float64')
-
+        
+        # TODO: Integrate this better with the chunking mechanism
         # find start and end time of the time vector of the solution data
         if self.initialisationPhaseExist:
             if self.saveInitialisationPhase:
@@ -723,7 +747,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             startTime = self.nSaveBegin * self.dt
             endTime = self.dt * self.nSaveEnd
 
-        dsetTime[:] = np.linspace(startTime, endTime, savedArraySize).reshape(savedArraySize,)
+        # dsetTime[:] = np.linspace(startTime, endTime, savedArraySize).reshape(savedArraySize,)
+        
+        dsetTime[:] = startTime + self.saveDt*np.arange(savedArraySize).reshape(savedArraySize,)
+        # np.arange(self.nSaveBegin, (self.nSaveEnd+1)*self.dt, self.saveDt)
 
         self.solutionDataFile.close()
     

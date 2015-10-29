@@ -5,9 +5,8 @@
     <totalTime unit="s">20.0</totalTime>
     <CFL>0.65</CFL>
     <timeSaveBegin unit="s">5.0</timeSaveBegin>
-    <timeSaveEnd unit="s">20.0</timeSaveEnd>
+    <minSaveDt>-1</minSaveDt>
     <maxMemory unit="MB">5000</maxMemory>
-    <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
     <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
