@@ -92,113 +92,50 @@ class LocationOfInterest(TestBaseClass):
                     vesselIds = [int(i) for i in self.queryLocation.split('vessel')[-1].split('_') if i != '']
                     data = None
                     
-                    quantitiyPure = quantitiyName.split('Trajectory')[-1] 
+                    maxLength = self.xVal
                     
-                    if "FB_" in quantitiyPure:
-                        
-                        quantitiyPure = quantitiyPure.split('FB_')[-1]
-                        
-                        maxLength = self.xVal
-                        
-                        maxNumberPoints = 20
-                        nPointsUsed = 0
-                        position = 0
-                        
-                        lastVessel = False
-                        trajectory = None                   
-                        
-                        if len(vesselIds) == 1:
-                            vesselId = vesselIds[0]
-                            length = vascularNetwork.vessels[vesselId].length
-                            
-                            maxLength = length*2
-                            # do it twice once forward and once backward
-                            for direction in ['Forward','Backward']:
-                            
-                                
-                                remainingLength = maxLength-position
-                                if length < remainingLength:
-                                    # get number of points the solution in x
-                                    nPoints = int(maxNumberPoints*length/maxLength)
-                                    xValEnd = length
-                                    
-                                if length >= remainingLength:
-                                    xValEnd = remainingLength
-                                    lastVessel = True
-                                    nPoints = maxNumberPoints - nPointsUsed
-                                
-                                xvals = np.linspace(0,xValEnd,nPoints)
-                                
-                                dataTemp = vascularNetwork.getSolutionData(vesselId, [''.join([direction,quantitiyPure])], simulationTime, xvals = xvals)[''.join([direction,quantitiyPure])]
-                                
-                                if data == None: data = dataTemp.T
-                                else:
-                                    if direction == 'Forward':  
-                                        data = np.vstack([data,dataTemp.T])
-                                    else:
-                                        data = np.vstack([data,dataTemp.T[::-1]])
-                                
-                                if trajectory == None: trajectory = xvals
-                                else: 
-                                    trajectory = np.append(trajectory,xvals+position)
-                                    
-                                    #if direction == 'Forward':                                    
-                                    #    trajectory = np.append(trajectory,xvals+position)
-                                    #else:
-                                    #    trajectory = np.append(trajectory,xvals[::-1])
-                                
-                                position = position+xValEnd
-                                nPointsUsed = nPointsUsed + nPoints
-                                
-                                if lastVessel: 
-                                    print "reached end of trajectory breaking"
-                                    break
+                    maxNumberPoints = 20
+                    nPointsUsed = 0
+                    position = 0
                     
+                    lastVessel = False
                     
-                    else:                    
+                    trajectory = None                   
                     
-                        maxLength = self.xVal
+                    for vesselId in vesselIds:
+                        quantitiyPure = quantitiyName.split('Trajectory')[-1] 
                         
-                        maxNumberPoints = 20
-                        nPointsUsed = 0
-                        position = 0
-                        
-                        lastVessel = False
-                        trajectory = None                   
-                        
-                        
-                        
-                        for vesselId in vesselIds:
-                                
-                            length = vascularNetwork.vessels[vesselId].length
-                            remainingLength = maxLength-position
-                           
-                            if length < remainingLength:
-                                # get number of points the solution in x
-                                nPoints = int(maxNumberPoints*length/maxLength)
-                                
-                            if length >= remainingLength:
-                                length = remainingLength
-                                lastVessel = True
-                                nPoints = maxNumberPoints - nPointsUsed
-                                
-                            xvals = np.linspace(0,length,nPoints)
-                            dataTemp = vascularNetwork.getSolutionData(vesselId, [quantitiyPure], simulationTime, xvals = xvals)[quantitiyPure]
-                            
-                            if data == None: data = dataTemp.T
-                            else: data = np.vstack([data,dataTemp.T])
-                            
-                            if trajectory == None: trajectory = xvals
-                            else: trajectory = np.append(trajectory,xvals+position)
-                            
-                            position = position+length
-                            nPointsUsed = nPointsUsed + nPoints
-                            
-                            if lastVessel: 
-                                print "reached end of trajectory breaking"
-                                break
+                        length = vascularNetwork.vessels[vesselId].length
+                        remainingLength = maxLength-position
                        
-                    
+                        if length < remainingLength:
+                            # get number of points the solution in x
+                            nPoints = int(maxNumberPoints*length/maxLength)
+                        
+                        if length >= remainingLength:
+                            length = remainingLength
+                            lastVessel = True
+                            nPoints = maxNumberPoints - nPointsUsed
+                       
+                        xvals = np.linspace(0,length,nPoints)
+                        dataTemp = vascularNetwork.getSolutionData(vesselId, [quantitiyPure], simulationTime, xvals = xvals)[quantitiyPure]
+                        
+                        if data == None:
+                            data = dataTemp.T
+                        else:
+                            data = np.vstack([data,dataTemp.T])
+                        
+                        if trajectory == None:
+                            trajectory = xvals
+                        else:
+                            trajectory = np.append(trajectory,xvals+position)
+                        
+                        position = position+length
+                        nPointsUsed = nPointsUsed + nPoints
+                        
+                        if lastVessel: 
+                            print "reached end of trajectory breaking"
+                            break
                        
                     if quantityObject.trajectoryData == None:
                         quantityObject.trajectoryData =  np.empty((sampleSize,maxNumberPoints))   
@@ -283,8 +220,6 @@ class LocationOfInterest(TestBaseClass):
             
             
             if useMax == True:
-                
-                
                 # find maxima of the data
                 maxValue = np.amax(data,axis=2)
                 ## currently not used as qoI for gpc
@@ -295,69 +230,43 @@ class LocationOfInterest(TestBaseClass):
                 # get time points of the maximums
                 maxTimes = simulationTime[maxIndices].T
                 
+                xN = 50
+                xInt = np.linspace(0, self.xVal, xN)
+                maxTimeMatched = np.empty((sampleSize,xN))
+                for i in xrange(sampleSize): 
+                    maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
+                
+                
+                fig = plt.figure()
+                fig.canvas.set_window_title(quantityName)
+                plt.plot(trajectoryData[0],maxTimes[0])
+                plt.plot(xInt,maxTimeMatched[0])
+                
+                
                 fig = plt.figure()
                 fig.canvas.set_window_title(''.join([quantityName,'PC']))
-                for x,t in zip(trajectoryData,maxTimes):
-                    plt.plot(t,x)       
-                plt.show()
+                for t,x in zip(maxTimes,trajectoryData):
+                    plt.plot(x,t)
+                    
+                fig = plt.figure()
+                fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
+                for t in maxTimeMatched:
+                    plt.plot(xInt,t)
+                    
+                print len(simulationTime)
+                    
                 
-                fixSpace = True
                 
-                if fixSpace == True:
+                #plt.plot(maxTimes.T, np.repeat(trajectory.reshape((len(trajectory),1)), sampleSize, axis=1).T)
                 
-                    xN = 200
-                    xInt = np.linspace(0, self.xVal, xN)
-                    maxTimeMatched = np.empty((sampleSize,xN))
-                    
-                    
-                    for i in xrange(sampleSize): 
-                        maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
-                    quantityObject.trajectoryData = xInt
-                    quantityObject.data = maxTimeMatched
-                    print "Approximated error in forward wave jump: as a multiple of timesteps"
-                    print np.abs(np.min(maxTimes[:,1::]-maxTimes[:,0:-1], axis=1))/(simulationTime[1]-simulationTime[0])
-                    
-                                         
-                    fig = plt.figure()
-                    fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
-                    for t in maxTimeMatched:
-                        plt.plot(xInt,t)
-                
-                else:
-                    #fix time
-                    
-                    #find the minimum of all return times
-                    startTimes = np.min(maxTimes,axis=1)
-                    maxStartTime = np.max(startTimes)
-                    
-                    endTimes = np.max(maxTimes,axis=1)
-                    minEndTime = np.min(endTimes)
-                    
-                    tN = 50
-                    tInt = np.linspace(maxStartTime,minEndTime,tN)
-                    
-                    spacePointMatched = np.empty((sampleSize,tN))
-                    
-                    for i in xrange(sampleSize): 
-                        spacePointMatched[i] = np.interp(tInt, maxTimes[i], trajectoryData[i])
-                        
-                    quantityObject.trajectoryData = tInt
-                    quantityObject.data = spacePointMatched
-                    
-                    fig = plt.figure()
-                    fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
-                    for x in spacePointMatched:
-                        plt.plot(tInt,x)
-                    
-                    
-                plt.show()
                 
             else:
                 # find peaks                
                 for dataOfSpacePoint in xrange(len(data)):
                     self.extremaFinderFunction(dataOfSpacePoint, quantityName, sampleSize, simulationTime, searchPointOfInflection = False)
-                      
-              
+        plt.show()          
+        exit()      
+                        
     def extremaFinderFunction(self, dataPure, quantityNamePure, sampleSize, simulationTime, searchPointOfInflection):
         
         allDesieredPointsDetected = False

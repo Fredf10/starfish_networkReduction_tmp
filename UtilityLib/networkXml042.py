@@ -233,10 +233,7 @@ vesselGeometryElements = ['geometryType',
                           'length',
                           'radiusProximal',
                           'radiusDistal',
-                          'N', ] ## for gpcs jonathan paper stenosis case
-                          #'position',
-                          #'constriction',
-                          #'stenosisLength']
+                          'N']
 
 vesselComplianceElements = {'Laplace'     :['complianceType','constantCompliance','externalPressure','Ps','As','betaLaplace'],
                             'Laplace2'    :['complianceType','constantCompliance','externalPressure','Ps','As','wallThickness','youngModulus'],

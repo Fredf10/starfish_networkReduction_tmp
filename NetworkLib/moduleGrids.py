@@ -49,32 +49,3 @@ def constriction(length, radiusA, radiusB, N):
     A0 = np.pi*R0**2
     print "WARNING: constricted vessel geometry was never verified and vaildated!"
     return z,dz,A0
-
-def stenosed(length, radiusA, radiusB, N, position, constriction, stenosisLength):
-    """
-    Function to calculate a Cone grid 
-    with a radiusA at the proximal end and radiusB at the distal end
-    
-    In addition a stenoses is inserted with a defined stenoses level, length and position
-    
-    Input:  vessel-length, radiusA, radiusB, number of Gridpoints
-    Output:  z  = gridpoint-array 
-             dz = spacing array
-             A0 = area-array with given radius
-    """         
-    z  = np.linspace(0.,length,N)
-    dz = np.diff(z)
-    A0 = np.pi*(radiusA + ((radiusB-radiusA)*np.linspace(0.0,1.0,N)))**2
-    
-    # find indices where the stenoses is
-    target = [position,position+stenosisLength]
-    idx = z.searchsorted(target)
-    idx = np.clip(idx, 1, len(z)-1)
-    left = z[idx-1]
-    right = z[idx]
-    idx -= target - left < right - target
-    
-    
-    A0[idx[0]:idx[1]+1] = A0[idx[0]:idx[1]+1] * constriction
-    
-    return z,dz,A0
