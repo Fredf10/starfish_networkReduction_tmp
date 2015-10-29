@@ -4,9 +4,8 @@
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">8.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+    <minSaveDt>-1</minSaveDt>
 	<maxMemory unit="MB">0.500</maxMemory>
-	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
@@ -21,7 +20,7 @@
     <automaticGridAdaptation>True</automaticGridAdaptation>
   </solverCalibration>
   <initialisationControls>
-    <initialsationMethod>ConstantPressure</initialsationMethod>
+    <initialsationMethod>Auto</initialsationMethod>
     <initMeanFlow unit="m3 s-1">0.000125</initMeanFlow>
     <initMeanPressure unit="mmHg">187.1</initMeanPressure>
     <estimateWindkesselCompliance>Tree</estimateWindkesselCompliance>

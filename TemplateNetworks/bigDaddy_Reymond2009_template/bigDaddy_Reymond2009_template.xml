@@ -2,11 +2,11 @@
 <bigDaddy_Reymond2009.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">4.0</totalTime>
+    <totalTime unit="s">4.0</totalTime>    
+    <minSaveDt>-1</minSaveDt>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
 	<timeSaveEnd unit="s">4.0</timeSaveEnd>
 	<maxMemory unit="MB">500</maxMemory>
-	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>0.45</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>

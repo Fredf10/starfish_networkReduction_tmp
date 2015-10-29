@@ -288,6 +288,7 @@ variablesDict = {## class Vascular Network
                  'totalTime'                : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
                  'timeSaveBegin'            : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
                  'timeSaveEnd'              : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
+                 'minSaveDt'               : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
                  'maxMemory'                : {'type':'float', 'unitSI': 'MB',  'strCases': None, 'multiVar': False},
                  'saveInitialisationPhase'  : {'type':'bool',  'unitSI': None,      'strCases': None, 'multiVar': False},
                  'CFL'                      : {'type':'float', 'unitSI': None, 'strCases': None, 'multiVar': False},

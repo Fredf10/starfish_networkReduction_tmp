@@ -2565,17 +2565,17 @@ class VaryingElastanceSimple(BoundaryConditionType2):
     def funcPos1(self, _domega, R, L, n, dt, P, Q, A):
         pass
 
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
 
         if saving:
-            self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE]
-            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE]
-            self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE]
-            self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE]
-            self.dsetHeart['Flow'][nDB:nDE] = self.Flow[nSB:nSE]
-            self.dsetHeart['Flow2'][nDB:nDE] = self.Flow2[nSB:nSE]
-            self.dsetHeart['deltaP'][nDB:nDE] = self.deltaP[nSB:nSE]
-            self.dsetHeart['aortaP'][nDB:nDE] = self.aortaP[nSB:nSE]
+            self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE:nSkip]
+            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE:nSkip]
+            self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE:nSkip]
+            self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE:nSkip]
+            self.dsetHeart['Flow'][nDB:nDE] = self.Flow[nSB:nSE:nSkip]
+            self.dsetHeart['Flow2'][nDB:nDE] = self.Flow2[nSB:nSE:nSkip]
+            self.dsetHeart['deltaP'][nDB:nDE] = self.deltaP[nSB:nSE:nSkip]
+            self.dsetHeart['aortaP'][nDB:nDE] = self.aortaP[nSB:nSE:nSkip]
 
     def E(self, t):
         """
@@ -2817,14 +2817,14 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         return np.dot(R, self.omegaNew), self.dQInOut
 
 
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE):
+    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
 
         if saving:
-            self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE]
-            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE]
-            self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE]
-            self.dsetHeart['aorticQ'][nDB:nDE] = self.aorticQ[nSB:nSE]
-            self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE]
+            self.dsetHeart['pressure'][nDB:nDE] = self.pressure[nSB:nSE:nSkip]
+            self.dsetHeart['volume'][nDB:nDE] = self.volume[nSB:nSE:nSkip]
+            self.dsetHeart['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE:nSkip]
+            self.dsetHeart['aorticQ'][nDB:nDE] = self.aorticQ[nSB:nSE:nSkip]
+            self.dsetHeart['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE:nSkip]
 
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
