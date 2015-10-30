@@ -28,6 +28,8 @@ import pprint
 import h5py
 from classBoundaryConditions import *
 
+from SolverLib import classDataHandler
+
 class VascularNetwork(cSBO.StarfishBaseObject):
     """
     Class representing a vascular Network
@@ -42,24 +44,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.dataNumber = 'xxx'  # data number of the network
         self.quiet = quiet  # bool to suppress output
 
-        # saving options
-        self.pathSolutionDataFilename = None
-        self.timeSaveBegin = 0.0  # time when to start saving
-        self.timeSaveEnd = None # time when to end saving
-        self.maxMemory = 20  # maximum memory in MB
-        self.saveInitialisationPhase = True  # bool to enable saving of the initPhase
-
-        self.vesselsToSave = {}
-        self.nSaveSkip = 1
-        self.nSkipShift = 0
-        self.minSaveDt = -1
-        self.saveDt = None
-        self.nSaveBegin = None
-        self.nSaveEnd  = None
-        self.savedArraySize = None
-        self.nDCurrent = None
-        self.memoryArraySizeTime = None  # memory array size for the time arrays
-        self.solutionDataFile = None  # file name of the solution data
+     
         self.globalData = None
         self.tiltAngle = None # Angle the network is tilted relative to supine position
         # keep track of time points loaded in memory
@@ -76,7 +61,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.dt = None  # time step of the simulation determined by the solver
         self.nTsteps = None  # number of timesteps of the simulation case determined by the solver
         self.simulationTime = None  # array with simulation Time
-
+        
+        # TODO: Remove when refactored
+        self.initDataManagement()
 
         # self.motion         = {'keyframe': [0, 0.1, 1.0],
         #                        'X1'     : [0, 45, 90]}
@@ -143,7 +130,31 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
 #         ### random variables TODO: move out of here to global class
         self.randomInputManager = None
+        
+    def initDataManagement(self):
+        """
+        Refactoring all "data management" code and variables into "independent functions"
+        """
+        self.pathSolutionDataFilename = None
+        self.timeSaveBegin = 0.0  # time when to start saving
+        self.timeSaveEnd = None # time when to end saving
+        self.maxMemory = 20  # maximum memory in MB
+        self.saveInitialisationPhase = True  # bool to enable saving of the initPhase
 
+        self.vesselsToSave = {}
+        self.nSaveSkip = 1
+        self.nSkipShift = 0
+        self.minSaveDt = -1
+        self.saveDt = None
+        self.nSaveBegin = None
+        self.nSaveEnd  = None
+        self.savedArraySize = None
+        self.nDCurrent = None
+        self.memoryArraySizeTime = None  # memory array size for the time arrays
+        self.solutionDataFile = None  # file name of the solution data
+        
+        self.runTimeMemoryManager = None
+        
     # all classes concerning vessel
     def addVessel(self, vesselId=None, dataDict=False):
         """
@@ -465,15 +476,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         self.nDCurrent = 0
 
-        # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime
-        estimatedMemorySolutionDataSpace = 0
+        self.runTimeMemoryManager = classDataHandler.RuntimeMemoryManager(self.nSaveBegin, self.nSaveEnd, self.nTsteps, self)
+        
+        
+        # Register all objects with the memory manager
         for vessel in self.vessels.itervalues():
-            estimatedMemorySolutionDataSpace += vessel.N * 8 * 3  # byte
+            self.runTimeMemoryManager.registerDataSize(3*[vessel.N])
 
-        self.memoryArraySizeTime = int(np.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))
-        # Don't allocate more memory than needed
-        if self.memoryArraySizeTime > (self.nTsteps + 1):
-            self.memoryArraySizeTime = self.nTsteps + 1
+        self.memoryArraySizeTime = self.runTimeMemoryManager.memoryArraySizeTime
 
 
         # Initialize solution file and data set groups
@@ -490,32 +500,17 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.arterialVolume = np.zeros(self.memoryArraySizeTime)
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
-
-        # initialize for simulation
+        # initialize objects for simulation
         for vesselId, vessel in self.vessels.iteritems():
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
                                            self.memoryArraySizeTime,
-                                           self.nTsteps)
-            # Put a reference to the dsetGroup into the saving dictionary if needed
-            if vessel.save == True:
-                # create a new group in the data file
-                dsetGroup = self.vesselDataGroup.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
-                nGridPoints =  vessel.N
-                dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
-                dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
-                dsetA = dsetGroup.create_dataset("Area", (self.savedArraySize,nGridPoints), dtype='float64')
-
-                if self.nSaveBegin==0:
-                    dsetP[0] = vessel.Psol[0]
-                    dsetQ[0] = vessel.Qsol[0]
-                    dsetA[0] = vessel.Asol[0]
-                    self.nDCurrent = 1
-                    self.nSkipShift = self.nSaveSkip-1
-
-                self.vesselsToSave[vesselId] =  dsetGroup
-                
-
+                                           self.nTsteps,
+                                           self.savedArraySize, 
+                                           self.vesselDataGroup,
+                                           self.runTimeMemoryManager)
+            
+                            
         # # initialize varying elastance model
         # # initialize boundary condition type 1: initial phase
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
@@ -541,24 +536,26 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # # calculate venous pressure for windkessel
         self.initializeVenousGravityPressureTime(self.nTsteps)
         
-        ##
+        # Save gravity data if appropriate
         for vesselId, vessel in self.vessels.iteritems():
-            dsetGroup = self.vesselsToSave[vesselId]
-            dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
-            dsetRot = dsetGroup.create_dataset("RotationToGlobal", (self.savedArraySize,3,3), dtype='float64')
-            dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
+            dsetGroup = vessel.dsetGroup
+            if dsetGroup:
+                dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
+                dsetRot = dsetGroup.create_dataset("RotationToGlobal", (self.savedArraySize,3,3), dtype='float64')
+                dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
 
-            # TODO: Verify that numpy's index range protocal... it seems to cutoff the final value in the range selected.
-            dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
-            dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
-            del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
-            #TODO: do this nicer way
-            vessel.positionStart  = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
-            vessel.positionEnd    = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
+                dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+                dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+                dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+            
+            # TODO: WTF am I doing here?
+            vessel.positionStart  = np.zeros((1,3))         # instantaneous position of vessel start point in the global system
+            vessel.positionEnd    = np.zeros((1,3))         # instantaneous position of vessel end point in the global system
             vessel.rotToGlobalSys = np.array([np.eye(3)])
-            dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
             
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
+ 
+ 
         
     
     class WholeBodyTilt(cSBO.StarfishBaseObject):
@@ -683,26 +680,19 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # zero out arterial volume if flushing data
         self.arterialVolume = self.arterialVolume*0.0    
 
-        for vesselId,dsetGroup in self.vesselsToSave.iteritems():
+        for vesselId,vessel in self.vessels.iteritems():
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
-            vessel = self.vessels[vesselId]
+            # vessel = self.vessels[vesselId]
             
             # calculate vessel volume
             A1 = self.vessels[vesselId].Asol[:,0:-1]
             A2 = self.vessels[vesselId].Asol[:,1:]
             volume = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0,axis=1)
             self.arterialVolume += volume
-                
-            if saving:
-                dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME:self.nSaveSkip]
-                dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME:self.nSaveSkip]
-                dsetGroup["Area"][nDB:nDE] = vessel.Asol[nMB:nME:self.nSaveSkip]
-            # roll the end of the buffer
-            vessel.Psol[0] = vessel.Psol[-1]
-            vessel.Qsol[0] = vessel.Qsol[-1]
-            vessel.Asol[0] = vessel.Asol[-1]
-                
+            
+        self.runTimeMemoryManager.flushSolutionMemory()
+        
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
                 if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
@@ -1028,9 +1018,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         self.warning("this is a very bad warning text, as it is raised if the saved number of gridpoints is different from the xml file", noException= True)
 
         else:
-            raise ImportError("classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here")
-#            print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
-#            exit()
+            raise ValueError("classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here")
 
 
 
@@ -1076,7 +1064,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         except Exception:
             self.exception("vascularNetwork.findRootVessel(): could not find a root node")
         if len(roots) > 1:
-            raise ImportError("vascularNetwork.searchRoot(): found several roots: {}, check network again!".format(roots))
+            raise ValueError("vascularNetwork.searchRoot(): found several roots: {}, check network again!".format(roots))
 
     def checkDaughterDefinition(self):
         """

@@ -121,6 +121,7 @@ class Vessel(cSBO.StarfishBaseObject):
 
         ## flag to indicate vessel data should be saved
         self.save         = True
+        self.dsetGroup    = None
 
         # pointers to solutionData objects
         self.Psol         = None  # pressure
@@ -231,7 +232,7 @@ class Vessel(cSBO.StarfishBaseObject):
         #set hooks waveSpeed function
         if self.c == None: self.c = self.waveSpeed
 
-    def initializeForSimulation(self,initialValues, memoryArraySizeTime, nTsteps):
+    def initializeForSimulation(self,initialValues, memoryArraySizeTime, nTsteps, savedArraySize, vesselsDataGroup, runtimeMemoryManager):
         """
         Initialize the solution data and allocates memory for it
 
@@ -243,6 +244,19 @@ class Vessel(cSBO.StarfishBaseObject):
         self.Psol = np.ones((memoryArraySizeTime,numberOfGridPoints))
         self.Qsol = np.zeros((memoryArraySizeTime,numberOfGridPoints))
         self.Asol = np.zeros((memoryArraySizeTime,numberOfGridPoints))
+        
+        if self.save == True:
+            # create a new group in the data file
+            self.dsetGroup = vesselsDataGroup.create_group(' '.join([self.name, ' - ', str(self.Id)]))
+            dsetP = self.dsetGroup.create_dataset("Pressure", (savedArraySize,numberOfGridPoints), dtype='float64')
+            dsetQ = self.dsetGroup.create_dataset("Flow", (savedArraySize,numberOfGridPoints), dtype='float64')
+            dsetA = self.dsetGroup.create_dataset("Area", (savedArraySize,numberOfGridPoints), dtype='float64')
+        else:
+            dsetP = None
+            dsetQ = None
+            dsetA = None
+        
+        runtimeMemoryManager.registerSimulationData([self.Psol,self.Qsol,self.Asol], [dsetP,dsetQ,dsetA])
 
         # set initial values
         try:
