@@ -301,10 +301,10 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                         else:
                             variableValue = variableValue*unitsDict[variableUnit]
                     except KeyError:
-                        print """ Warning: Can't find {} in unitsDict""".format(variableUnit)
+                        print """ Warning: Can't find {} in unitsDict Key""".format(variableUnit)
                         pass
                     except TypeError:
-                        print """ Warning: Can't find {} in unitsDict""".format(variableUnit)
+                        #print """ Warning: Can't find {} in unitsDict Type""".format(variableUnit)
                         pass
 
                 if variableType == 'int':

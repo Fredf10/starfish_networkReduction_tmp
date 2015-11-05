@@ -15,7 +15,7 @@
           <samplingMethod>M</samplingMethod>
           <sampleFactor>2</sampleFactor>
           <dependentCase>False</dependentCase>
-          </uqsaMethod>
+      </uqsaMethod>
       <locationOfInterestManager class="LocationOfInterestManager">
           <locationsOfInterest>
             <locationOfInterest class="LocationOfInterest" Id="exampleLocation"> 

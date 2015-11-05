@@ -140,18 +140,18 @@ class LocationOfInterest(TestBaseClass):
                                 
                                 if trajectory == None: trajectory = xvals
                                 else: 
-                                    trajectory = np.append(trajectory,xvals+position)
+                                    #trajectory = np.append(trajectory,xvals+position)
                                     
-                                    #if direction == 'Forward':                                    
-                                    #    trajectory = np.append(trajectory,xvals+position)
-                                    #else:
-                                    #    trajectory = np.append(trajectory,xvals[::-1])
+                                    if direction == 'Forward':                                    
+                                        trajectory = np.append(trajectory,xvals+position)
+                                    else:
+                                        trajectory = np.append(trajectory,xvals[::-1])
                                 
                                 position = position+xValEnd
                                 nPointsUsed = nPointsUsed + nPoints
                                 
                                 if lastVessel: 
-                                    print "reached end of trajectory breaking"
+                                    #print "reached end of trajectory breaking"
                                     break
                     
                     
@@ -204,6 +204,7 @@ class LocationOfInterest(TestBaseClass):
                         quantityObject.trajectoryData =  np.empty((sampleSize,maxNumberPoints))   
                     quantityObject.trajectoryData[sampleIndex] = trajectory
                           
+                    print sampleSize,maxNumberPoints,len(simulationTime)
                     if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,maxNumberPoints,len(simulationTime)))
                     quantityObject.data[sampleIndex] = data
                     
@@ -299,9 +300,9 @@ class LocationOfInterest(TestBaseClass):
                 fig.canvas.set_window_title(''.join([quantityName,'PC']))
                 for x,t in zip(trajectoryData,maxTimes):
                     plt.plot(t,x)       
-                plt.show()
+                #plt.show()
                 
-                fixSpace = True
+                fixSpace = False
                 
                 if fixSpace == True:
                 
@@ -333,7 +334,7 @@ class LocationOfInterest(TestBaseClass):
                     endTimes = np.max(maxTimes,axis=1)
                     minEndTime = np.min(endTimes)
                     
-                    tN = 50
+                    tN = 200
                     tInt = np.linspace(maxStartTime,minEndTime,tN)
                     
                     spacePointMatched = np.empty((sampleSize,tN))
@@ -471,20 +472,71 @@ class LocationOfInterest(TestBaseClass):
             
         return selectedPoints, amplitudeData, timingData
             
-    def saveQuantitiyOfInterestData(self, locationGroup):
+    def saveDataHdf5(self, hdf5SaveGroup):
         '''
         method to save the data of the location and all quantities of interest to file
         '''
-        locationGroup.attrs.create('quantitiesOfInterestToProcess', data=self.quantitiesOfInterestToProcess)
-        locationGroup.attrs.create('xVal', data=self.xVal)
-        locationGroup.attrs.create('confidenceAlpha', data=self.confidenceAlpha)
+        # pure variables
         
-        for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
-                quantitiyGroup = locationGroup.create_group(quantitiyName)
-                quantityObject.saveQuantitiyOfInterestData(quantitiyGroup)
+        # in class definition
+        variablesToSave = ["quantitiesOfInterestToProcess",
+                           'xVal',
+                           'confidenceAlpha']
+        # functionality
+        for variableName in variablesToSave:
+            variableValue = self.getVariable(variableName)
+            if variableValue != None: 
+                hdf5SaveGroup.create_dataset(variableName, data=variableValue)
+        
+        # dict of objects
+        
+        dictsToSave = ["quantitiesOfInterest"]
+        # functionality
+        for dictName in dictsToSave:
+            dictValue = self.getVariable(dictName)
+            dictGroup = hdf5SaveGroup.create_group(dictName)
+            if dictValue != None or dictValue == {}:
+                # if dict is contains objects
+                for dictObjectName,dictObject in dictValue.iteritems():
+                    dictEntryGroup = dictGroup.create_group(dictObjectName)
+                    dictObject.saveDataHdf5(dictEntryGroup)
                 
-    def loadQuantitiyOfInterestData(self, saveFile):
+    def loadDataHdf5(self, hdf5SaveGroup):
         '''
+        method to load data from hdf5
+        '''
+        loadedData = {}
+        ## pure variables
+        # in class definition
+        variablesToLoad = ["quantitiesOfInterestToProcess",
+                           'xVal',
+                           'confidenceAlpha']
+        # functionality
+        for variableName in variablesToLoad:
+            if variableName in hdf5SaveGroup.keys(): 
+                variableData = (hdf5SaveGroup[variableName])
+                # TODO: use externalVariable definitions dictionary ... #
+                # check for shape 
+                if np.shape(variableData)== ():
+                    loadedData[variableName] = variableData[()] # for scalar data sets!!
+                else:
+                    loadedData[variableName] = variableData[:]
         
-        '''
+        ## dictionary to load
+        dictsToLoad = ["quantitiesOfInterest"]
+        
+        # functionality
+        for dictName in dictsToLoad:
+            # check if dictionary not none and not empty
+            dictL = self.getVariable(dictName) 
+            if dictL != {} and dictL != None:
+                # serach for dict group node for the dictionary
+                if dictName in hdf5SaveGroup.keys():
+                    dictGroup = hdf5SaveGroup[dictName]
+                    for dictObjectName,dictObject in dictL.iteritems():
+                        if dictObjectName in dictGroup.keys():
+                            dictObjectGroup = dictGroup[dictObjectName]
+                            dictObject.loadDataHdf5(dictObjectGroup)
+        
+        self.setVariablesDict(loadedData)
         

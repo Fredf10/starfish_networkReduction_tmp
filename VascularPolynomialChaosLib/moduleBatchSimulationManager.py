@@ -49,24 +49,31 @@ def runSingleBatchSimulation(batchData):
     Input:
         batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
     '''
-    timeStart = time.clock()
-    #simulationIndex          = batchData['simulationIndex']
+    
     networkName              = batchData['networkName']
     dataNumber               = batchData['dataNumber']
     networkXmlFileLoad       = batchData['networkXmlFileLoad']
     networkXmlFileSave       = batchData['networkXmlFileSave']
     pathSolutionDataFilename = batchData['pathSolutionDataFilename']
-    vascularNetworkTemp = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFileLoad, pathSolutionDataFilename = pathSolutionDataFilename)
-    vascularNetworkTemp.quiet = True
-    flowSolver = FlowSolver(vascularNetworkTemp, quiet=True)
-    flowSolver.solve()
-    vascularNetworkTemp.saveSolutionData()
-    moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFileSave)
-    del flowSolver
-    gc.collect()
-    timeSolverSolve = time.clock()-timeStart
-    minutesSolve = int(timeSolverSolve/60.)
-    secsSolve = timeSolverSolve-minutesSolve*60.
+    try:
+        timeStart = time.clock()
+        #simulationIndex          = batchData['simulationIndex']
+        
+        vascularNetworkTemp = moduleXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = networkXmlFileLoad, pathSolutionDataFilename = pathSolutionDataFilename)
+        vascularNetworkTemp.quiet = True
+        flowSolver = FlowSolver(vascularNetworkTemp, quiet=True)
+        flowSolver.solve()
+        vascularNetworkTemp.saveSolutionData()
+        moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFileSave)
+        del flowSolver
+        gc.collect()
+        timeSolverSolve = time.clock()-timeStart
+        minutesSolve = int(timeSolverSolve/60.)
+        secsSolve = timeSolverSolve-minutesSolve*60.
+    except:
+        minutesSolve= 0
+        secsSolve = 0
+        print "Error in running {}".format(networkXmlFileLoad)
     return minutesSolve,secsSolve
 
 def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):

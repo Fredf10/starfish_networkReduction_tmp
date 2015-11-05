@@ -6,130 +6,43 @@ cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur+'/../')
 
 from testBaseClass import TestBaseClass 
+from classUqsaMeasures import UqsaMeasures
 
 import chaospy as cp
 import numpy as np
 
-class uqsaMethodPolynomialChaos(TestBaseClass):
+class UqsaMethodPolynomialChaos(TestBaseClass):
     
     '''
     Configuration class of a vascular polynomial chaos class
     '''
     #----External Variables -------------------------------------------------------------#
     externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
-                         'samplingMethod'  : TestBaseClass.ExtValue(str, strCases = ['K','R','L','S','H','M','C','NC','G','RG']),
                          'sampleFactor'    : TestBaseClass.ExtValue(int),
-                         'dependentCase'   : TestBaseClass.ExtValue(bool), 
                          }
                 
     externXmlAttributes  = []
     
     externXmlElements    = ['polynomialOrder', 
-                            'samplingMethod',
-                            'sampleFactor',
-                            'dependentCase']
+                            'sampleFactor']
     
     def __init__(self):
         '''
         
-        '''
-        
-        
-        self.methodType = 'polynomialChaos'
-        
-        #----POLYNOMIAL CHAOS DEFINITIONS -------------------------------------------------------------#
-        self.dependentCase = False
-        
+        '''                
         self.sampleFactor = 2
         #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
         self.polynomialOrder = 3
-        # method of the spares grid collocation 
-        self.samplingMethod = 'M'
-        #Parameters
-        #----------
-        #sample : str
-        #         Normal sampling schemes
-        #         Key     Name                Nested
-        #         ----    ----------------    ------
-        #         "K"     Korobov             no
-        #         "R"     (Pseudo-)Random     no
-        #         "L"     Latin hypercube     no
-        #         "S"     Sobol               yes
-        #         "H"     Halton              yes
-        #         "M"     Hammersley          yes
-        #     
-        #         Grided sampling schemes
-        #         Key     Name                Nested
-        #         ----    ----------------    ------
-        #         "C"     Chebyshev nodes     no
-        #         "NC"    Nested Chebyshev    yes
-        #         "G"     Gaussian quadrTrueature no
-        #         "RG"    Regular grid        no
-        # 
-        #  
-        
-    def name(self):
+                   
+    def evaluateSamplesSize(self, distributionDimension):
         '''
-        returns name of the case
-        '''
-        return '_'.join(['polynomialChaos',self.samplingMethod,'Ord',str(self.polynomialOrder),'sf',str(self.sampleFactor)])
-  
-    def createSamples(self, distributionManager):
-        '''
-        create samples for the defined distribution for given samplesSize and sampleMethod
-        using the chaospy toolbox
-        Input
-            samplesSize : int,array_like
-        
-            sampleMethod : str
-                (from chaospy)
-                Alternative sampling techniques
-            
-                Normal sampling schemes
-                Key     Name                Nested
-                ----    ----------------    ------
-                "K"     Korobov             no
-                "R"     (Pseudo-)Random     no
-                "L"     Latin hypercube     no
-                "S"     Sobol               yes
-                "H"     Halton              yes
-                "M"     Hammersley          yes
-            
-                Grided sampling schemes
-                Key     Name                Nested
-                ----    ----------------    ------
-                "C"     Chebyshev nodes     maybe
-                "G"     Gaussian quadrature no
-                "E"     Gauss-Legendre      no
-            
-            expansionOrder: float
-                calculate optimal samplesSize for gPC with the following rule
-                    samplesSize =  2* number gPC-expansion terms
-            
+        function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionManager.distributionDimension))
-        # creating samples
-        samples = distributionManager.jointDistribution.sample(samplesSize,self.samplingMethod).transpose()   
-        # reshape samples
-        if distributionManager.distributionDimension == 1:
-            samples = samples.reshape(samplesSize,1)
-        # create dependent samples if correlation exists
-        samplesDependent = None
-        if self.dependentCase == True:
-            samplesDependent = self.createDependentSamples(distributionManager, samples)
-        return samples, samplesDependent
-  
-    def createDependentSamples(self,distributionManager, samples):
-        '''
-        Create dependen samples if dependen case = True and dependent random variables true
-        '''
-        if distributionManager.jointDistributionDependent != None:
-            samplesDependent = distributionManager.jointDistributionDependent.inv(distributionManager.jointDistribution.fwd(samples.T)).transpose()
-        else:
-            raise ValueError("uqsaMethodPolynomialChaos.createDependentSamples(), cannot create dependent samples as distributionManager.jointDistributionDependent is not defined!")
-        return samplesDependent
-                
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+                    
     def calculateOrthogonalPolynomials(self,distributionManager):
         '''
         Method to calculate orthogonal polynomials
@@ -140,7 +53,14 @@ class uqsaMethodPolynomialChaos(TestBaseClass):
         #self.orthogonalPolynomils = pc.orth_chol(self.expansionOrder,self.jointDistribution)
         #self.orthogonalPolynomils = pc.orth_svd(self.expansionOrder,self.jointDistribution)
   
-    def calculateStatistics(self, distributionManager, samples, samplesDependent, data, confidenceAlpha):
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        dependentCase = sampleManager.dependentCase
+        confidenceAlpha = qoi.confidenceAlpha
         '''
         Function which calculates the gPCExpansion for the given data
         '''
@@ -165,12 +85,13 @@ class uqsaMethodPolynomialChaos(TestBaseClass):
         statsDict['standardDeviation']   = np.sqrt(statsDict['variance'])
         conficenceInterval  = cp.Perc(gPCExpansion, [confidenceAlpha/2., 100-confidenceAlpha/2.], distributionManager.jointDistribution)
         statsDict['conficenceInterval']  =  conficenceInterval.reshape(2,len(np.atleast_1d(statsDict['expectedValue'])))
+        statsDict['confidenceAlpha'] = confidenceAlpha
         
         # conditional expected values  and sensitivity coefficients
         distributionDimension = len(distributionManager.jointDistribution)
         if distributionDimension > 1:
             # test dependecy or not
-            if self.dependentCase == False:
+            if dependentCase == False:
                 # independent case: use analytic expression from polynomial chaos expansion
                 conditionalExpectedValue = []
                 conditionalVariance      = []
@@ -206,98 +127,40 @@ class uqsaMethodPolynomialChaos(TestBaseClass):
                                                                samplesDependent.T,
                                                                data)
         
-        return statsDict
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures
          
          
-class uqsaMethodPolynomialChaosDepDir(TestBaseClass):
+class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
     '''
     Configuration class of a vascular polynomial chaos class
     '''
     #----External Variables -------------------------------------------------------------#
     externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
-                         'samplingMethod'  : TestBaseClass.ExtValue(str, strCases = ['K','R','L','S','H','M','C','NC','G','RG']),
                          'sampleFactor'    : TestBaseClass.ExtValue(int),
                          }
                 
     externXmlAttributes  = []
     
     externXmlElements    = ['polynomialOrder', 
-                            'samplingMethod',
                             'sampleFactor']
     
     def __init__(self):  
-  
-        self.methodType = 'polynomialChaosDepDir'
-                
         self.sampleFactor = 2
         #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
         self.polynomialOrder = 3
-        # method of the spares grid collocation 
-        self.samplingMethod = 'M'
-    
-        self.dependentCase = False
-    def name(self):
-        '''
-        returns name of the case
-        '''
-        return '_'.join(['polynomialChaos',self.samplingMethod,'Ord',str(self.polynomialOrder),'sf',str(self.sampleFactor)])
-  
-    def createSamples(self, distributionManager):
-        '''
-        create samples for the defined distribution for given samplesSize and sampleMethod
-        using the chaospy toolbox
-        Input
-            samplesSize : int,array_like
         
-            sampleMethod : str
-                (from chaospy)
-                Alternative sampling techniques
-            
-                Normal sampling schemes
-                Key     Name                Nested
-                ----    ----------------    ------
-                "K"     Korobov             no
-                "R"     (Pseudo-)Random     no
-                "L"     Latin hypercube     no
-                "S"     Sobol               yes
-                "H"     Halton              yes
-                "M"     Hammersley          yes
-            
-                Grided sampling schemes
-                Key     Name                Nested
-                ----    ----------------    ------
-                "C"     Chebyshev nodes     maybe
-                "G"     Gaussian quadrature no
-                "E"     Gauss-Legendre      no
-            
-            expansionOrder: float
-                calculate optimal samplesSize for gPC with the following rule
-                    samplesSize =  2* number gPC-expansion terms
-            
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionManager.distributionDimension))
-        # creating samples
-        samples = distributionManager.jointDistribution.sample(samplesSize,self.samplingMethod).transpose()   
-        # reshape samples
-        if distributionManager.distributionDimension == 1:
-            samples = samples.reshape(samplesSize,1)
-        # create dependent samples if correlation exists
-        samplesDependent = None
-        if self.dependentCase == True:
-            samplesDependent = self.createDependentSamples(distributionManager, samples)
-        return samples, samplesDependent
-  
-    def createDependentSamples(self,distributionManager, samples):
-        '''
-        Create dependen samples if dependen case = True and dependent random variables true
-        '''
-        if distributionManager.jointDistributionDependent != None:
-            samplesDependent = distributionManager.jointDistributionDependent.inv(distributionManager.jointDistribution.fwd(samples.T)).transpose()
-        else:
-            raise ValueError("uqsaMethodPolynomialChaos.createDependentSamples(), cannot create dependent samples as distributionManager.jointDistributionDependent is not defined!")
-        return samplesDependent
-                
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+              
     def calculateOrthogonalPolynomials(self,distributionManager):
         '''
         Method to calculate orthogonal polynomials
@@ -305,7 +168,17 @@ class uqsaMethodPolynomialChaosDepDir(TestBaseClass):
         
         return cp.orth_ttr(self.polynomialOrder,distributionManager.jointDistribution)
     
-    def calculateStatistics(self, distributionManager, samples, samplesDependent, data, confidenceAlpha):
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        dependentCase = sampleManager.dependentCase
+        confidenceAlpha = qoi.confidenceAlpha
+        
         
         q = samples.T
         
@@ -385,126 +258,57 @@ class uqsaMethodPolynomialChaosDepDir(TestBaseClass):
         statsDict['expectedValue']      = E
         statsDict['variance']           = V
         
-        return statsDict
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures
   
-class uqsaMethodMonteCarlo(TestBaseClass):
+class UqsaMethodMonteCarlo(TestBaseClass):
     '''
     Configuration class of a vascular polynomial chaos class
     '''
     #----External Variables -------------------------------------------------------------#
     externVariables = {  'sensitivityAnalysis'   : TestBaseClass.ExtValue(bool), 
-                         'samplingMethod'        : TestBaseClass.ExtValue(str, strCases = ['K','R','L','S','H','M','C','NC','G','RG']),
                          'sampleSize'            : TestBaseClass.ExtValue(int)
                          }
                 
     externXmlAttributes  = []
     
     externXmlElements    = ['sampleSize', 
-                            'samplingMethod',
                             'sensitivityAnalysis']
     
     def __init__(self):
         '''
         
         '''
-        self.methodType = 'MonteCarlo'        
-        #
-        self.dependentCase = False # not implemented yet!
-        #
         self.sampleSize = 10
         #
-        self.sensitivityAnalysis = True
-        # method of the spares grid collocation 
-        self.samplingMethod = 'M'
-        #Parameters
-        #----------
-        #sample : str
-        #         Normal sampling schemes
-        #         Key     Name                Nested
-        #         ----    ----------------    ------
-        #         "K"     Korobov             no
-        #         "R"     (Pseudo-)Random     no
-        #         "L"     Latin hypercube     no
-        #         "S"     Sobol               yes
-        #         "H"     Halton              yes
-        #         "M"     Hammersley          yes
-        #     
-        #         Grided sampling schemes
-        #         Key     Name                Nested
-        #         ----    ----------------    ------
-        #         "C"     Chebyshev nodes     no
-        #         "NC"    Nested Chebyshev    yes
-        #         "G"     Gaussian quadrTrueature no
-        #         "RG"    Regular grid        no
-        # 
-    def name(self):
-        '''
-        returns name of the case
-        '''
-        return '_'.join(['MonteCarlo',self.samplingMethod,str(self.sampleSize)])
-    
-    def createSamples(self, distributionManager):
-        '''
-        create samples
+        self.sensitivityAnalysis = False
         
-        samplesA, samplesB and samplesC
+         
+    def evaluateSamplesSize(self, distributionDimension):
         '''
-        
-        distDim = distributionManager.distributionDimension
-        
-        if distDim == 1:
-            print "WARNING: random distribution dimension == 1, no sensitivity analysis possible!"
-            self.sensitivityAnalysis = False
-        
-        ## if sensitivityAnalysis is false, only UQ is done with one matrix
-        if self.sensitivityAnalysis == False:
-            samples = distributionManager.jointDistribution.sample(self.sampleSize,self.samplingMethod).transpose()   
-            # reshape samples
-            if distDim == 1:
-                samples = samples.reshape(self.sampleSize,1)
-                
-            return samples,None
-        else:
-            # createHash table
-            self.createSampleMatixHashTable(distDim)
-            
-            samples = distributionManager.jointDistribution.sample(self.sampleSize*2,self.samplingMethod).transpose()
-            
-            samplesA = samples[self.matrixHash['A'][0]:self.matrixHash['A'][1]]
-            samplesB = samples[self.matrixHash['B'][0]:self.matrixHash['B'][1]]
-                
-            samplesTest = np.sum((samplesA-samplesB).ravel())
-            if samplesTest == 0:
-                print "WARNING: samplesA and samplesB are the same!"
-        
-            for i in xrange(distDim):
-                samplesC = samplesB.copy()
-                samplesC[:,i] = samplesA[:,i].copy()
-                
-                samples = np.vstack([samples,samplesC])
-            
-            return samples,None
-    
-    def createSampleMatixHashTable(self, distDim):
+        function to evaluate the sample size
         '''
-        Creates hash table for the sample matrix
-        '''
-        self.matrixHash = {}
-        self.matrixHash['A'] = [0,self.sampleSize]
-        self.matrixHash['B'] = [self.sampleSize,2*self.sampleSize]
-        for d in xrange(distDim):
-            self.matrixHash[''.join(['C',str(d)])] = [self.sampleSize*(d),self.sampleSize*(d+1),self.sampleSize*(d+2),self.sampleSize*(d+3)]
-          
-    def calculateStatistics(self, distributionManager, samples, samplesDependent, data, confidenceAlpha):
+        # calculate samplesSize from expansion order 
+        abcSample = self.sensitivityAnalysis
+        return self.sampleSize,abcSample
+         
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
         '''
         Function which calculates the gPCExpansion for the given data
         '''
                 
-        # statistics
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
         
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+                
+        dependentCase = sampleManager.dependentCase
+        confidenceAlpha = qoi.confidenceAlpha
+                
         statsDict = {}
-        
-        if self.dependentCase == False:
+        if dependentCase == False:
             
             
             # check if samples, and data have the right format
@@ -515,14 +319,13 @@ class uqsaMethodMonteCarlo(TestBaseClass):
                 
             if self.sensitivityAnalysis == False:
             
-                statsDict['expectedValue']       = np.sum(data,axis=0)/self.sampleSize
+                statsDict['expectedValue']       = np.sum(data,axis=0)/len(samples)
                 # variance = (data**2-mean)/len(samples)
                 statsDict['variance']            = np.sum(data**2-statsDict['expectedValue']**2,axis=0)/len(samples)
-                statsDict['standardDeviation']   = np.sqrt(statsDict['variance'])
                 
                 quantiles = [confidenceAlpha/2, 100.-confidenceAlpha/2]
                 statsDict['conficenceInterval']  = np.percentile(data,quantiles, axis=0)
-            
+                statsDict['confidenceAlpha'] = confidenceAlpha
             else:
                       
                 self.createSampleMatixHashTable(distDim)
@@ -572,6 +375,7 @@ class uqsaMethodMonteCarlo(TestBaseClass):
                 
                 quantiles = [confidenceAlpha/2, 100.-confidenceAlpha/2]
                 statsDict['conficenceInterval'] = np.percentile(data,quantiles, axis=0) 
+                statsDict['confidenceAlpha'] = confidenceAlpha
                 
                 statsDict['conditionalExpectedValue'] = None
                 statsDict['conditionalVariance']      = np.array(conditionalVarianceGivenQ)
@@ -584,5 +388,9 @@ class uqsaMethodMonteCarlo(TestBaseClass):
             # TODO: implement dependent dist methods for MC
             raise NotImplementedError("NO MC methods for dependet distributions implemented")
         
-        return statsDict  
+        
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures
             

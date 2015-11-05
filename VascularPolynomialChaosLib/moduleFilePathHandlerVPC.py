@@ -40,6 +40,8 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
                         'vpcProcessedSolutionDataFile',
                         'evaluationLogFile',
                         'vpcSolutionDataFile'
+                        'simulationTime'
+                        'preprocessedDataFile'
         
         networkName (str):name of the network file
         dataNumber (str):data number of solution file or xml file
@@ -57,7 +59,9 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
                          'uqsaEvaluationSolutionDataFile',
                          'vpcProcessedSolutionDataFile',
                          'evaluationLogFile',
-                         'uqsaSolutionDataFile']
+                         'uqsaSolutionDataFile',
+                         'simulationTime',
+                         'preprocessedDataFile']
     
     if fileType not in existingFileTypes:
         raise ValueError("ERROR: getFilePath, requested file type {}\
@@ -67,13 +71,15 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
     filenames = {
                  'uqsaCaseTemplatePolynomialChaosFile': 'uqsaCase_PC_xxx.xml',
                  'uqsaCaseTemplateMonteCarloFile':'uqsaCase_MC_xxx.xml',
-                 'uqsaCaseXmlFile'              : ''.join([networkName,'_uqsaCase_',dataNumber,'.xml']),
-                 'vpcNetworkXmlFile'            : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
-                 'uqsaSampleFile'               : ''.join(['samples.hdf5']),
+                 'uqsaCaseXmlFile'               : ''.join([networkName,'_uqsaCase_',dataNumber,'.xml']),
+                 'vpcNetworkXmlFile'             : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
+                 'uqsaSampleFile'                : ''.join(['samples_',caseName,'.hdf5']),
+                 'simulationTime'                : ''.join(['simulationTime_',caseName,'.hdf5']),
                  'uqsaEvaluationNetworkXmlFile'  : ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.xml']),
                  'uqsaEvaluationSolutionDataFile': ''.join([networkName,'_evaluation_',str(evaluationNumber).zfill(7),'.hdf5']),
-                 'evaluationLogFile'            : ''.join(['evaluationLogFile.txt']),
-                 'uqsaSolutionDataFile'          : ''.join([networkName,'_uqsa-SolutionData_',dataNumber,'.hdf5'])
+                 'evaluationLogFile'             : ''.join(['evaluationLogFile.txt']),
+                 'uqsaSolutionDataFile'          : ''.join([networkName,'_uqsa-SolutionData_',dataNumber,'.hdf5']),
+                 'preprocessedDataFile'          : ''.join(['preprocessedData_',caseName,'.hdf5']),
                  }    
         
     ## find requested file name
@@ -126,7 +132,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vpcSampleFileDirectory',
                               'evaluationLogFileDirectory',
                               'vpcSolutionDataFileDirectory',
-                              'vpcConfigTemplateFileDirectory'
+                              'vpcConfigTemplateFileDirectory',
+                              'simulationTimeDirectory'
         networkName (str): name of the network file
         dataNumber (str): data number of solution file or xml file
         mode (str): read or write
@@ -144,7 +151,9 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'evaluationLogFileDirectory',
                               'uqsaSolutionDataFileDirectory',
                               'uqsaCaseTemplatePolynomialChaosFileDirectory',
-                              'uqsaCaseTemplateMonteCarloFileDirectory'} 
+                              'uqsaCaseTemplateMonteCarloFileDirectory',
+                              'simulationTimeDirectory',
+                              'preprocessedDataFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
         raise ValueError("ERROR: getDirectory, requested directoryType {}\
@@ -154,7 +163,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     workingDirectory            = mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory']
     networkXmlFileDirectory     = ''.join([workingDirectory,'/',networkName])
     vpcCaseDirectory            = ''.join([networkXmlFileDirectory,'/vascularPolynomialChaos_',str(dataNumber)]) 
-    vpcOrderMethodDirectory     = ''.join([vpcCaseDirectory,'/',caseName])
+    vpcOrderMethodDirectory     = ''.join([vpcCaseDirectory,'/','samplingMethod',caseName])
     vpcEvaluationNetDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationNetworkFiles'])
     vpcEvaluationSolDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationSolutionData'])
     vpcConficTemplateDicrectory = ''.join([starfishHomeDirectory,'/TemplateNetworks','/vascularPolynomialChaos'])
@@ -169,8 +178,10 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'uqsaSampleFileDirectory'                : vpcOrderMethodDirectory,
                    'uqsaEvaluationNetworkXmlFileDirectory'  : vpcEvaluationNetDirectory,
                    'uqsaEvaluationSolutionDataFileDirectory': vpcEvaluationSolDirectory,
+                   'simulationTimeDirectory'                : vpcOrderMethodDirectory,
                    'evaluationLogFileDirectory'             : vpcOrderMethodDirectory,
-                   'uqsaSolutionDataFileDirectory'           : vpcOrderMethodDirectory,
+                   'preprocessedDataFileDirectory'          : vpcOrderMethodDirectory,
+                   'uqsaSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
                    'uqsaCaseTemplatePolynomialChaosFileDirectory' : vpcConficTemplateDicrectory,
                    'uqsaCaseTemplateMonteCarloFileDirectory' : vpcConficTemplateDicrectory
                    }

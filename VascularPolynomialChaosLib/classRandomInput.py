@@ -51,12 +51,12 @@ class RandomInput(TestBaseClass):
         if sample_i != None:
             realisation = self.evaluateRealisationFromSample(sample_i)
             if self.updateMethods != {}:
-                for i,loc in enumerate(self.parameter.split('_')):
-                    if i == 0:
-                        print '{:3} | {:20} | {:21} | {:.4} '.format(self.name,self.variableName,loc, realisation)
-                    else:
-                        print '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
-                print  
+                #for i,loc in enumerate(self.parameter.split('_')):
+                #    if i == 0:
+                #        print '{:3} | {:20} | {:21} | {:.4} '.format(self.name,self.variableName,loc, realisation)
+                #    else:
+                #        print '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
+                #print  
                 for variableIdentifier,updateMethod in self.updateMethods.iteritems():                    
                     updateMethod({variableIdentifier : realisation})
                 self.updateLog.append(realisation)

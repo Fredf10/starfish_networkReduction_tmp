@@ -502,5 +502,5 @@ class TestBaseClass(object):
         try:
             return self.__getattribute__(variableName)
         except: 
-            # TODO: exchange with appropriate warning exception
-            print "ERROR Vessel.getVariable() : vessel has no variable {}".format(variableName)
+            name = self.__class__.__name__
+            print "ERROR {}.getVariable() : {} has no variable {}".format(name,name,variableName)

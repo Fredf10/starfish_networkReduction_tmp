@@ -10,11 +10,28 @@
       <simulateEvaluationNumbers>0</simulateEvaluationNumbers>
       <preProcessData>True</preProcessData> 
       <postProcessing>True</postProcessing>
-      <uqsaMethod class="uqsaMethodMonteCarlo">
-          <samplingMethod>M</samplingMethod>
-          <sampleSize>10</sampleSize>
-          <sensitivityAnalysis>False</sensitivityAnalysis>
-      </uqsaMethod>
+      <sampleManager class="sampleManager">
+        <samplingMethod>M</samplingMethod>
+        <dependentCase>False</dependentCase>
+      </sampleManager>
+      <uqsaMethods>
+          <uqsaMethod class="uqsaMethodMonteCarlo" Id="MC-2">
+              <sampleSize>2</sampleSize>
+              <sensitivityAnalysis>False</sensitivityAnalysis>
+          </uqsaMethod>
+          <uqsaMethod class="uqsaMethodMonteCarlo" Id="MC-4">
+              <sampleSize>4</sampleSize>
+              <sensitivityAnalysis>False</sensitivityAnalysis>
+          </uqsaMethod>
+          <uqsaMethod class="uqsaMethodMonteCarlo" Id="MC-10">
+              <sampleSize>10</sampleSize>
+              <sensitivityAnalysis>False</sensitivityAnalysis>
+          </uqsaMethod>
+          <uqsaMethod class="uqsaMethodPolynomialChaos" Id="PC-1">
+              <polynomialOrder>1</polynomialOrder>
+              <sampleFactor>2</sampleFactor>
+          </uqsaMethod>
+      </uqsaMethods>      
       <locationOfInterestManager class="LocationOfInterestManager">
     	  <locationsOfInterest>
     	  	<locationOfInterest class="LocationOfInterest" Id="exampleLocation"> 

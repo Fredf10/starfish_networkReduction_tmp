@@ -85,7 +85,7 @@ def vascularPolyChaos():
     distributionManager.createRandomVariables()
 
     # 3. add dependentCase if existent        
-    if uqsaCase.uqsaMethod.dependentCase == True:
+    if uqsaCase.sampleManager.dependentCase == True:
         # this enables dependentCase in Distribution Manager
         distributionManager.createDependentDistribution(vascularNetwork.randomInputManager.correlationMatrix)
         
@@ -99,10 +99,10 @@ def vascularPolyChaos():
     # 5.2 save/create simulation xml files
     if uqsaCase.createEvaluationXmlFiles == True:
         
-        for sampleIndex in xrange(uqsaCase.samplesSize):
+        for sampleIndex in xrange(uqsaCase.sampleManager.currentSampleSize):
             # update network with current evaluation number
             # get sample
-            sample = uqsaCase.getSample(sampleIndex)            
+            sample = uqsaCase.sampleManager.getSample(sampleIndex)            
             # pass realisation of Z to network
             distributionManager.passRealisation(sample,sampleIndex)
             # save evaluation file
@@ -110,8 +110,8 @@ def vascularPolyChaos():
             mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= networkXmlFileSave)
         
         # save evaluation to log file
-        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", caseName = uqsaCase.uqsaMethod.name())
-        vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, networkName, dataNumber, caseName = uqsaCase.uqsaMethod.name())
+        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", caseName = uqsaCase.sampleManager.samplingMethod)
+        vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, networkName, dataNumber, caseName = uqsaCase.sampleManager.samplingMethod)
         
     # 5.3 run evaluation simulations
     if uqsaCase.simulateEvaluations == True:

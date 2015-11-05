@@ -196,9 +196,11 @@ class Hayashi(Compliance):
         
         #self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
         Amm = self.As*1e6 
-        print "DB using area relation for beta", 
+        #print "DB using area relation for beta", 
         self.betaHayashi = (13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*self.betaHayashi 
-        
+        #print "DB betaHayashi", self.betaHayashi
+        #self.betaHayashi     = np.ones(len(self.As))*np.mean(self.betaHayashi)
+        #print self.betaHayashi
         self.C0preCalculated = self.C(self.Ps)
     
     def A(self, P):

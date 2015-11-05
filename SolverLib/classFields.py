@@ -41,9 +41,9 @@ class Field():
                        
         if solvingSchemeField == 'MacCormack_Matrix':
             self.__call__ = self.MacCormackMatrix
-            print "Classfields49: using Matrix based formulation in field calculation"
+            #print "Classfields49: using Matrix based formulation in field calculation"
         elif solvingSchemeField == 'MacCormack_Flux':
-            print "Classfields51: using Flux based formulation in field calculation"
+            #print "Classfields51: using Flux based formulation in field calculation"
             self.__call__ = self.MacCormackFlux
         else:
             raise ValueError('Classfields51: error, scheme for solving field not correct')

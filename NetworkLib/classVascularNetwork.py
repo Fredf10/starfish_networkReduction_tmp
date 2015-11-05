@@ -116,7 +116,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
         
         # self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
-        self.venousPool = classVenousPool.StaticVenousPool({}) # TODO add to xml
+        self.venousPool = None #classVenousPool.StaticVenousPool({}) # TODO add to xml
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
@@ -661,6 +661,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.arterialVolume = self.arterialVolume*0.0    
 
         for vesselId,dsetGroup in self.vesselsToSave.iteritems():
+            
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
             vessel = self.vessels[vesselId]
@@ -1446,8 +1447,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             constantPressure = self.initMeanPressure
             try:
                 constantPressure = self.initMeanPressure
-                if inflowBoundaryCondition != None:
-                    xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
+                ## TODO: uncomment again after MC simulations are done
+                #if inflowBoundaryCondition != None:
+                    #xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
 
                 self.initialisationPhaseExist = False
                 if self.initPhaseTimeSpan > 0:
