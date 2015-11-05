@@ -261,6 +261,7 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         cbType.append_text('Plot CFL, wave speed')
         cbType.append_text('Plot Area, Compliance')
         cbType.append_text('Plot netGravity')
+        cbType.append_text('Plot P,Q ws - m v - centeroids')
         cbType.set_active(0) 
         cbType.connect("changed", self.on_changePlotType)
         
@@ -844,7 +845,115 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
                     
+                    print sum(Psol_b)/len(Psol_b)
+                    
                     xData = vascularNetwork.tsol
+                    
+                    self.lines[i]['axis1']['-'].set_data(xData,     yData00)
+                    self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
+                    self.lines[i]['axis1Twin'][':'].set_data(xData[1:], yData02)
+                    
+                    self.lines[i]['axis2']['-'].set_data(xData,     yData10)
+                    self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
+                    self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
+                                        
+                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Time'])
+                    self.axis['axis2'].set_xlim(self.limits['Time'])
+                 except:
+                    self.lines[i]['axis1']['-'].set_data(-1,0)
+                    self.lines[i]['axis2']['-'].set_data(-1,0)
+            
+            elif self.axisX == "Space":
+                try:                     
+                    Psol = vascularNetwork.vessels[vesselId].Psol[gridNode]
+                    Qsol = vascularNetwork.vessels[vesselId].Qsol[gridNode]   
+                    Asol = vascularNetwork.vessels[vesselId].Asol[gridNode]   
+                    csol = vascularNetwork.vessels[vesselId].csol[gridNode]  
+                    
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
+                    
+                    yData00 = Psol / 133.32
+                    yData01 = Psol_f / 133.32
+                    yData02 = Psol_b / 133.32
+                    yData10 = Qsol * 1.e6   
+                    yData11 = Qsol_f * 1.e6  
+                    yData12 = Qsol_b * 1.e6  
+                    
+                    xData = np.linspace(0, vascularNetwork.vessels[vesselId].length, len(yData00)) * 100.
+                    
+                    self.lines[i]['axis1']['-'].set_data(xData,     yData00)
+                    self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
+                    self.lines[i]['axis1Twin'][':'].set_data(xData[1:], yData02)
+                    
+                    self.lines[i]['axis2']['-'].set_data(xData,     yData10)
+                    self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
+                    self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
+                                        
+                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis1'].set_xlim(self.limits['Space'])
+                    self.axis['axis2'].set_xlim(self.limits['Space']) 
+                                 
+                except:
+                    self.lines[i]['axis1']['-'].set_data([-1], [0])
+                    self.lines[i]['axis2']['-'].set_data([-1], [0])
+                    
+        
+        self.axis['axis1'].set_ylim(self.limits['PfbLev'])
+        self.axis['axis2'].set_ylim(self.limits['QfbLev'])
+        
+        self.axis['axis1Twin'].set_ylim(self.limits['PfbLev'])
+        self.axis['axis2Twin'].set_ylim(self.limits['QfbLev'])
+        self.axis['axis1Twin'].get_yaxis().set_ticks([])
+        self.axis['axis2Twin'].get_yaxis().set_ticks([])
+        
+    def updateLinesPQsplitSubMeanNonLinear(self):
+        gridNode = self.sliderValue
+        # 1. set axis label
+        self.axis['axis1'].set_ylabel('Pressure ' + self.unitPtext, fontsize=self.fontSizeLabel)
+        self.axis['axis1Twin'].set_ylabel('')
+        self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
+        self.axis['axis2Twin'].set_ylabel('')
+        
+        # 2. update lines for P and Q over time for grid node 0
+        
+        self.axis['axis1Twin'].set_visible(True)
+        self.axis['axis2Twin'].set_visible(True) 
+        
+        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+            
+            if self.axisX == 'Time':               
+                 try:
+                    Psol = vascularNetwork.vessels[vesselId].Psol[:, [gridNode]]
+                    Qsol = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]]   
+                    Asol = vascularNetwork.vessels[vesselId].Asol[:, [gridNode]]   
+                    csol = vascularNetwork.vessels[vesselId].csol[:, [gridNode]]  
+                    
+                    Csol = vascularNetwork.vessels[vesselId].C(Psol)[:, [gridNode]]  
+                    
+                    Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.nonLinearWaveSplitting(Psol, Qsol, Asol, csol, Csol, vascularNetwork.vessels[vesselId].rho)
+                                  
+                    yData00 = Psol / 133.32 - Psol[0]/ 133.32
+                    yData01 = Psol_f / 133.32
+                    yData02 = Psol_b / 133.32 
+                    yData10 = Qsol * 1.e6   - Qsol[0]* 1.e6
+                    yData11 = Qsol_f * 1.e6  
+                    yData12 = Qsol_b * 1.e6  
+                    
+                    print sum(Psol_b)/len(Psol_b)
+                    xData = vascularNetwork.tsol
+#                     
+#                     # calculate centeroid of Psol_f
+#                     A = np.trapz(yData01)
+#                     t = xData[1:]
+#                     x = np.trapz(yData01*t)/A            
+#                     y = np.trapz(yData01**2./2)/A
+#                     print "DB cernteroids start"
+#                     print "A", A
+#                     print x,y
+#                     print "DB cernteroids end"
+#                     
+#                     self.points[i]['axis1Twin']['--'].set_data(x, y)
                     
                     self.lines[i]['axis1']['-'].set_data(xData,     yData00)
                     self.lines[i]['axis1Twin']['--'].set_data(xData[1:], yData01)
@@ -1301,6 +1410,8 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             self.plot = self.updateLinesAreaComp
         elif cbIndex == 5:
             self.plot = self.updateLinesGravity
+        elif cbIndex == 6:
+            self.plot = self.updateLinesPQsplitSubMeanNonLinear
         self.plot()
         
     def on_changedPlotMinMax(self, widget):
