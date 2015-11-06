@@ -7,6 +7,50 @@ cur = os.path.dirname(os.path.realpath( __file__ ))
 sys.path.append(cur+'/../')
 import UtilityLib.classStarfishBaseObject as cSBO
 
+class StaticVenousPressure(cSBO.StarfishBaseObject):
+    """
+    A venous pool model with only fixed values. Mimics the venousPool class
+    Very simple model of the venous side, considering the veins as one big compliant reservoir,
+    and assuming a pure pressure gain between CVP and LAP
+    The Baroreflex regulates the unstretched volume of the venous side, through which the CVP and ultimately
+    the LAP are changed
+
+    self.V is the blood volume in the veins
+    self.Vusv: unstretched Volume of Veins with zero external pressure
+    self.P0: constant
+    self.k: constant
+    self.pressureGain: pressure gain from CVP (right atrial) to LAP (left atrial) --> a pure gain is used, value according to Bell
+    self.P: Central Venouse Pressure i.e. right atrial pressure
+    self.P_LA: pressure in left atrium (LAP)
+    self.Qin: inflow
+    self.Qout: outflow
+    """
+
+    def __init__(self, dataDict):
+        self.update(dataDict)
+        self.veinId  = 0
+
+        self.pressureGain = 3. #1.0/0.228 # pressure gain between CVP and LAP - Bell paper
+        self.P = [2.0*133.32]
+        self.P_LA =[self.pressureGain*self.P[0]]
+
+        
+    def __call__(self):
+        pass
+    
+    def update(self,dataDict):
+        """
+        updates the data
+        Dict = {'variableName': value}
+        """
+        for key,value in dataDict.iteritems():
+            try:
+                self.__getattribute__(key)
+                self.__setattr__(key,value)
+            except Exception:
+                self.warning("StaticVenousPool.update(): wrong key: %s, could not set up venousPool" %key)
+
+
 class StaticVenousPool(cSBO.StarfishBaseObject):
     """
     A venous pool model with only fixed values. Mimics the venousPool class
@@ -45,8 +89,8 @@ class StaticVenousPool(cSBO.StarfishBaseObject):
         self.pressureGain = 3. #1.0/0.228 # pressure gain between CVP and LAP - Bell paper
 
         self.Vusv = 3400e-6 #3037.0e-6 # initial states for Vus, CVP and LAP
-        self.P = self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))
-        self.P_LA = self.pressureGain*self.P
+        self.P = [self.P0*(math.exp(self.k*math.pow((self.V*1e6-self.Vusv*1e6),1.5)/(self.V*1e6)))]
+        self.P_LA =[self.pressureGain*self.P[0]]
 
         self.Qin = 0.0 # in and outflow to the Venous pool
         self.Qout = 0.0

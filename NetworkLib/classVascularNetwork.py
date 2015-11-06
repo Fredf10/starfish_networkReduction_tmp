@@ -76,6 +76,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.gravityConstant = -9.81  # earth gravity
 
         # venous system
+        # TODO: Refactor into venous pool class
         self.centralVenousPressure = 0.0  # central venous pressure
         self.minimumVenousPressure = 0.0  # minimum allowed venous pressure
 
@@ -102,19 +103,22 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.optimizeTree = False  # optimize areas of vessels to minimize reflections in root direction
 
-        # # dictionaries for network components
+        #dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
-        self.venousPool = classVenousPool.StaticVenousPool({}) # classVenousPool.venousPool({}) 
+        self.venousPool = classVenousPool.StaticVenousPressure({}) # classVenousPool.venousPool({}) 
+        
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
+        
         self.externalStimuli = {}
+        
         self.baroreceptors = {}  # dictionary with baroreceptors
 
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data}
 
-        # # internal calculated variables
+        # internally calculated variables
         self.root = None  # the root vessel (mother of the mothers)
         self.boundaryVessels = []  # includes all vessels with terminal boundaryConditions (except start of root)
         self.treeTraverseList = []  # tree traverse list
@@ -126,7 +130,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.totalTerminalAreaCompliance = None  # the sum of all Cends
         self.TotalVolumeComplianceTree = None  # total volume compliance of all vessels
 
-#         ### random variables TODO: move out of here to global class
+        # random variables TODO: move out of here to global class
         self.randomInputManager = None
 
     def initDataManagement(self):
@@ -398,7 +402,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         bc.aortic.rho = self.globalFluid['rho']
                     except Exception:
                         self.warning("VascularNetwork.initialize(): could not set blood density for aortic valve!")
-
+        
+        self.venousPool.P[0] = self.centralVenousPressure
 
         # # initialize 3d positions of the vascularNetwork
         self.calculate3DpositionsAndGravity(nSet=0)
@@ -1505,8 +1510,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # adjust pressure with venous pressure
             # TODO: this needs to work with the venousPool object/component
             for initialArray in initialValues.itervalues():
-                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.centralVenousPressure
-                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.centralVenousPressure
+                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
 
             # # Check if gravity is on and if user wants to correct for hydrostatic pressure
             if self.gravitationalField == True:
@@ -1591,8 +1596,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         # # adjust pressure with venous pressure
         for initialArray in initialValues.itervalues():
-            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.centralVenousPressure
-            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.centralVenousPressure
+            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
 
         # # adjust pressure for gravity pressure
         initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)
@@ -1949,7 +1954,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
 
-            relativeVenousPressure = self.centralVenousPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[0][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
+            relativeVenousPressure = self.venousPool.P[0] + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[0][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 
             if self.minimumVenousPressure != None:
                 if round(relativeVenousPressure, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
@@ -1966,7 +1971,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if self.quiet == False:
             print '\n============================================================='
             print '_______________Venous Pressures _____________________________'
-            print '%s %36.1f' % ('Central venous pressure:', round(self.centralVenousPressure, 2))
+            print '%s %36.1f' % ('Central venous pressure:', round(self.venousPool.P[0], 2))
 
 #            if self.gravitationalField == True:
                 # for vesselId in sorted(self.boundaryVessels):
@@ -2041,7 +2046,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             relativeVenousPressure = np.empty(nTsteps+1)
             for n in xrange(nTsteps+1):
 
-                relativeVP = self.centralVenousPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
+                relativeVP = self.venousPool.P[0] + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 
                 if self.minimumVenousPressure != None:
                     if round(relativeVP, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
@@ -2060,7 +2065,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 # TODO REMOVE THIS HACK
                 if vesselId == 27 and False:
                     abdominalVenuosHeight = -0.45*np.cos(self.tiltAngle)
-                    abdominalVenousPressure = self.centralVenousPressure + self.globalFluid['rho'] * abdominalVenuosHeight* self.gravityConstant - self.vessels[vesselId].externalPressure
+                    abdominalVenousPressure = self.venousPool.P[0] + self.globalFluid['rho'] * abdominalVenuosHeight* self.gravityConstant - self.vessels[vesselId].externalPressure
                     # from matplotlib import pyplot as plt
                     # plt.plot(self.tiltAngle)
                     # plt.show()
