@@ -67,12 +67,8 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         self.nTSteps = vascularNetwork.nTSteps
 
         self.dsetGroup = vascularNetwork.BrxDataGroup.create_group('Baroreflex - ' + str(self.baroId))
-
-        # TODO: How does this work with inheritance?
-        self.createSolutionMemory(vascularNetwork.memoryArraySizeTime)
-        self.createFileDataBuffers(vascularNetwork.savedArraySize, self.dsetGroup)
-        solMemory, dsets = self.getSolutionMemory()
-        vascularNetwork.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
+        # TODO: is this safe with inheritance?
+        self.allocate(vascularNetwork.runtimeMemoryManager)
 
         # TODO: Extract to link Boundary condtions
         bc2out = {}
@@ -308,38 +304,10 @@ class AorticBaroreceptor(Baroreceptor):
             timeArray = np.linspace(0, self.dt, 2)
             self.voi, self.states, self.algebraic = baroreceptorCellML.solver2(timeArray, iniStates, self.constants)
 
-#
-#         self.dsetGroup.create_dataset("MStrain", (vascularNetwork.savedArraySize,), dtype='float64')
-#         self.dsetGroup.create_dataset("T", (vascularNetwork.savedArraySize,), dtype='float64')
-#         self.dsetGroup.create_dataset("n", (vascularNetwork.savedArraySize,), dtype='float64')
-#         self.dsetGroup.create_dataset("Tsym", (vascularNetwork.savedArraySize,), dtype='float64')
-#         self.dsetGroup.create_dataset("Tparasym", (vascularNetwork.savedArraySize,), dtype='float64')
-#         self.dsetGroup.create_dataset("c_nor", (vascularNetwork.savedArraySize,), dtype='float64')
-#         self.dsetGroup.create_dataset("c_ach", (vascularNetwork.savedArraySize,), dtype='float64')
-
-
-
         # update Time for the period of the inflow function (type 1 BC's)
         self.oldUpdateTime = 0
         if self.boundaryCondition  is not None:
             self.newUpdateTime = round(self.boundaryCondition.Tperiod / self.dt)
-
-
-
-
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE,nSkip):
-
-        super(AorticBaroreceptor, self).flushSolutionData(saving, nDB, nDE, nSB, nSE,nSkip)
-        if saving:
-            # ## quantities of the Baroreflex loop
-            self.dsetGroup["MStrain"][nDB:nDE] = self.MStrain[nSB:nSE:nSkip]
-            self.dsetGroup['T'][nDB:nDE] = self.T[nSB:nSE:nSkip]
-            self.dsetGroup["n"][nDB:nDE] = self.n[nSB:nSE:nSkip]
-            self.dsetGroup["Tsym"][nDB:nDE] = self.Tsym[nSB:nSE:nSkip]
-            self.dsetGroup["Tparasym"][nDB:nDE] = self.Tparasym[nSB:nSE:nSkip]
-            self.dsetGroup["c_nor"][nDB:nDE] = self.c_nor[nSB:nSE:nSkip]
-            self.dsetGroup["c_ach"][nDB:nDE] = self.c_ach[nSB:nSE:nSkip]
-
 
     def estimateUnstretchedRadius(self):
         """

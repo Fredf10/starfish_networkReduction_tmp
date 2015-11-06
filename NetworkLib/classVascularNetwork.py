@@ -459,11 +459,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.nSaveSkip = max(int(np.ceil(self.minSaveDt/self.dt)),1)
         self.saveDt = self.nSaveSkip*self.dt
-
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
-
-
 
         # set save counter to the correct parts
         if self.initialisationPhaseExist:
@@ -477,7 +474,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.savedArraySize = (self.nSaveEnd-self.nSaveBegin)//self.nSaveSkip + 1
 
-        self.runtimeMemoryManager = classRuntimeMemoryManager.RuntimeMemoryManager(self.nSaveBegin, self.nSaveEnd, self.nTSteps, self)
+        self.runtimeMemoryManager = classRuntimeMemoryManager.RuntimeMemoryManager(self.nSaveBegin, 
+                                                                                   self.nSaveEnd, 
+                                                                                   self.nSaveSkip, 
+                                                                                   self.nTSteps, 
+                                                                                   self.maxMemory)
 
 
         # Register all objects with the memory manager
@@ -515,12 +516,17 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.dsetGroup.create_dataset('TiltAngle', (self.savedArraySize,),dtype='float64')
         self.tiltAngle = np.zeros(self.nTSteps)
         
-        self.createSolutionMemory(self.memoryArraySizeTime)
+        self.allocate(self.runtimeMemoryManager)
+#         self.createSolutionMemory(self.memoryArraySizeTime)
+#         self.createFileDataBuffers(self.savedArraySize, self.dsetGroup)
+#         solMemory, dsets = self.getSolutionMemory()
+#         self.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
+#         
+
         self.simulationTime[0] = -self.nTstepsInitPhase*self.dt
+        
+        print "cVN::InitializeNetworkForSimulation"
         print "nTSteps", self.nTSteps, "nSave ={},{},{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
-        self.createFileDataBuffers(self.savedArraySize, self.dsetGroup)
-        solMemory, dsets = self.getSolutionMemory()
-        self.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
         
 
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
@@ -529,24 +535,18 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for vesselId, vessel in self.vessels.iteritems():
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
-                                           self.memoryArraySizeTime,
+                                           self.runtimeMemoryManager,
                                            self.nTSteps,
-                                           self.savedArraySize,
                                            self.vesselDataGroup)
 
-            solMemory, dsets = vessel.getSolutionMemory()
-            self.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
 
 
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
                 try:
-                    bC.initializeSolutionVectors(self.memoryArraySizeTime, self.savedArraySize, self.solutionDataFile)
+                    bC.initializeSolutionVectors(self.runtimeMemoryManager, self.solutionDataFile)
                 except AttributeError:
                     pass # bC doesn't have solution vector data
-
-                self.runtimeMemoryManager.registerSimulationData(*bC.getSolutionMemory())
-
                 bC.update({'initialisationPhaseExist': self.initialisationPhaseExist,
                                      'nTstepsInitPhase': self.nTstepsInitPhase})
 

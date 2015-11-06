@@ -25,18 +25,19 @@ class RuntimeMemoryManager(object):
 
     """
     
-    def __init__(self, nSaveBegin, nSaveEnd, nTsteps, network):
+    def __init__(self, nSaveBegin, nSaveEnd, nSaveSkip, nTsteps, maxMemory):
         self.nTSteps = nTsteps
         self.memoryArraySizeTime = None
         self.totalDataPointsPerTimeStep = 0
         self.registeredData = []
         self.chunkCount = 0
         self.nDCurrent = 0 
-        self.nSaveBegin= network.nSaveBegin
-        self.nSaveEnd = network.nSaveEnd
-        self.nSkipShift = network.nSkipShift
-        self.nSaveSkip = network.nSaveSkip
-        self.maxMemory = network.maxMemory
+        self.nSaveBegin= nSaveBegin
+        self.nSaveEnd = nSaveEnd
+        self.nSkipShift = 0
+        self.nSaveSkip = nSaveSkip
+        self.maxMemory = maxMemory
+        self.savedArraySize =  (nSaveEnd-nSaveBegin)//nSaveSkip + 1
         # Updated when called by flow solver
         self.memoryOffset = [0]
         self.currentMemoryIndex = [0]

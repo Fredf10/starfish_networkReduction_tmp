@@ -224,26 +224,23 @@ class Vessel(cSBO.StarfishBaseObject):
         #set hooks waveSpeed function
         if self.c == None: self.c = self.waveSpeed
 
-    def initializeForSimulation(self,initialValues, memoryArraySizeTime, nTsteps, savedArraySize, vesselsDataGroup):
+    def initializeForSimulation(self,initialValues, runtimeMemoryManager, nTsteps, vesselsDataGroup):
         """
         Initialize the solution data and allocates memory for it
 
         Input:
             memoryArraySize := number of time points of one array in memory
         """
+        # TODO: THESE MUST BE CORRECTED TO THE RIGHT SHAPE AS THE ADAPTIVE GRID DOESN'T RESIZE WHEN CHANGING N
+        # TODO: The memory estimate is therefore off as well
         numberOfGridPoints = self.N
-        # allocate memory for solution
         self.Psol = np.ones((0,numberOfGridPoints))
         self.Qsol = np.zeros((0,numberOfGridPoints))
         self.Asol = np.zeros((0,numberOfGridPoints))
-        self.createSolutionMemory(memoryArraySizeTime)
-        # TODO: whenever self.N is changed these matrices should be updated
         
         # create a new group in the data file
         self.dsetGroup = vesselsDataGroup.create_group(' '.join([self.name, ' - ', str(self.Id)]))
-        if self.save == True:
-            self.createFileDataBuffers(savedArraySize, self.dsetGroup)
-        
+        self.allocate(runtimeMemoryManager)
         # set initial values
         try:
             p0,p1 = initialValues["Pressure"]

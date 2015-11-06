@@ -146,11 +146,7 @@ class venousPool(cSBO.StarfishBaseObject):
         self.dt = vascularNetwork.dt
         self.nTSteps = vascularNetwork.nTSteps
         self.dsetGroup = vascularNetwork.solutionDataFile.create_group('Venous')
-        self.createSolutionMemory(vascularNetwork.memoryArraySizeTime)     
-        self.createFileDataBuffers(vascularNetwork.runtimeMemoryManager.memoryArraySizeTime, self.dsetGroup)
-        
-        solMemory, dsets = self.getSolutionMemory()
-        vascularNetwork.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
+        self.allocate(vascularNetwork.runtimeMemoryManager)
         
         self.boundaryCondtions = vascularNetwork.boundaryConditions
         self.Vusv[:] = self.Vusv0

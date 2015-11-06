@@ -2394,7 +2394,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.rt_Tpeak = self.Tpeak
 
 
-    def initializeSolutionVectors(self, memoryArraySizeTime, savedArraySize, solutionDataFile):
+    def initializeSolutionVectors(self, runtimeMemoryManager, solutionDataFile):
         """Initializes some solution vectors storing pressure, flow and volume
         of the ventricle, as well as opening and closing state
 
@@ -2408,10 +2408,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
         print """ Initialize Solution Vectors """
 
-        self.createSolutionMemory(memoryArraySizeTime)
-
         self.dsetGroup = solutionDataFile.create_group('Heart')
-        self.createFileDataBuffers(savedArraySize, self.dsetGroup )
+        self.allocate(runtimeMemoryManager)
 
         """ Initial conditions in the ventricle"""
         self.pressure[0] = self.atriumPressure
@@ -2678,7 +2676,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.rt_Tpeak = self.Tpeak
 
 
-    def initializeSolutionVectors(self, memoryArraySizeTime, savedArraySize, solutionDataFile):
+    def initializeSolutionVectors(self, runtimeMemoryManager, solutionDataFile):
         """Initializes some solution vectors storing pressure, flow and volume
         of the ventricle, as well as opening and closing state
 
@@ -2688,9 +2686,8 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         BC is initiated before the number of time steps is known.
         """
 
-        self.createSolutionMemory(memoryArraySizeTime)
         self.dsetGroup = solutionDataFile.create_group('Heart')
-        self.createFileDataBuffers(savedArraySize, self.dsetGroup)
+        self.allocate(runtimeMemoryManager)
         
         """ Initial conditions in the ventricle"""
         self.Elastance[0] = self.E(0)

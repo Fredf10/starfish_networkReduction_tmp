@@ -21,11 +21,16 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
     Global Update function for dictionaries.
     """
     
-    
-
     # BEGIN Time Series Memory Management Interface 
     solutionMemoryFields    = []
     solutionMemoryFieldsToSave = []
+    
+    def allocate(self, runtimeMemoryManager):
+        self.createSolutionMemory(runtimeMemoryManager.memoryArraySizeTime)
+        self.createFileDataBuffers(runtimeMemoryManager.savedArraySize)
+        solMemory, dsets = self.getSolutionMemory()
+        runtimeMemoryManager.registerSimulationData(solMemory, dsets)
+        
 
     def getSolutionMemorySizes(self):
         sizes = []
@@ -41,15 +46,15 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
             shape = (memorySize,) + self.__dict__[key].shape[1::]
             self.__dict__[key] = np.zeros(shape)
 
-    def createFileDataBuffers(self, savedArraySize, dsetGroup):
+    def createFileDataBuffers(self, savedArraySize):
         for key in self.solutionMemoryFields:
             data = self.__dict__[key]
             if key in self.solutionMemoryFieldsToSave:
                 try:
                     size = data.shape[1]
-                    dsetGroup.create_dataset(key,(savedArraySize,size))
+                    self.dsetGroup.create_dataset(key,(savedArraySize,size))
                 except IndexError:
-                    dsetGroup.create_dataset(key,(savedArraySize,))
+                    self.dsetGroup.create_dataset(key,(savedArraySize,))
     
     def loadFileDataBuffers(self,dsetGroup,nSelectedBegin,nSelectedEnd,nTStepSpaces):
         for key in self.solutionMemoryFields:

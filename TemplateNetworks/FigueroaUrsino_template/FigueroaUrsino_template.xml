@@ -5,7 +5,7 @@
     <totalTime unit="s">4.0</totalTime>
     <CFL>0.65</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <minSaveDt>-1</minSaveDt>
+    <minSaveDt unit="s"> 0.01 </minSaveDt>
     <maxMemory unit="MB">5000</maxMemory>
     <gravitationalField>True</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
