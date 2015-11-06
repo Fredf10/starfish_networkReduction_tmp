@@ -50,7 +50,14 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
                     dsetGroup.create_dataset(key,(savedArraySize,size))
                 except IndexError:
                     dsetGroup.create_dataset(key,(savedArraySize,))
-
+    
+    def loadFileDataBuffers(self,dsetGroup,nSelectedBegin,nSelectedEnd,nTStepSpaces):
+        for key in self.solutionMemoryFields:
+            if key in dsetGroup:
+                self.__dict__[key] = dsetGroup[key][nSelectedBegin:nSelectedEnd:nTStepSpaces]
+            else:
+                self.warning("No data set found for {}".format(key))
+                
     def getSolutionMemory(self):
         solutionMemory = []
         dataBuffers = []
