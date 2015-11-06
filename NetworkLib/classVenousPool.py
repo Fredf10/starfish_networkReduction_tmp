@@ -1,8 +1,6 @@
 import sys
 import os
 import numpy as np
-import math
-
 cur = os.path.dirname(os.path.realpath( __file__ ))
 sys.path.append(cur+'/../')
 import UtilityLib.classStarfishBaseObject as cSBO
@@ -13,16 +11,17 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
     """
     """
     # defined external data
-    externVariables      = {'P0' : cCOB.TestBaseClass.ExtValue(float,  unit = 'Pa'),
-                             'pressureGain'                : cCOB.TestBaseClass.ExtValue(float,  unit = 'unitless')}
+    externVariables      = {'P0' : cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'Pa'),
+                             'pressureGain'                : cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'unitless')}
     externXmlAttributes  = []
     externXmlElements    = ['P0', 'pressureGain']
             
     def __init__(self):
         self.veinId  = 0
 
-        self.pressureGain = 3. #1.0/0.228 # pressure gain between CVP and LAP - Bell paper
+        self.pressureGain = 3. # pressure gain between CVP and LAP - Bell paper
         self.P0 = 2.0*133.32
+        self.Pmin = 0.0
         self.P = [self.P0]
         self.P_LA =[self.pressureGain*self.P[0]]
 
@@ -61,13 +60,12 @@ class venousPool(cSBO.StarfishBaseObject):
     self.Qin: inflow
     self.Qout: outflow
     """
-    
-        # defined external data
-    externVariables      = {'P0' : cCOB.TestBaseClass.ExtValue(float,  unit = 'Pa'),
-                            'V0' :  cCOB.TestBaseClass.ExtValue(float,  unit = 'm^3'),
-                            'Vusv0' :  cCOB.TestBaseClass.ExtValue(float,  unit = 'm^3'),
-                            'k' :  cCOB.TestBaseClass.ExtValue(float,  unit = 'unitless'),
-                             'pressureGain': cCOB.TestBaseClass.ExtValue(float,  unit = 'unitless')}
+    # defined external data
+    externVariables      = {'P0' : cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'Pa'),
+                            'V0' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'm^3'),
+                            'Vusv0' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'm^3'),
+                            'k' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'unitless'),
+                             'pressureGain': cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'unitless')}
     externXmlAttributes  = []
     externXmlElements    = externVariables.keys()
     
@@ -80,7 +78,7 @@ class venousPool(cSBO.StarfishBaseObject):
         self.dt = 0 #will be updated with update method
         self.currentTimeStep = 0 # current time step
         self.currentMemoryIndex = 0
-        self.nTsteps = 0
+        self.nTSteps = 0
 
         self.boundarys = {} # make it a dictionary/needs to be initialized in FlowSolver
         self.veinId  = 0
@@ -125,7 +123,7 @@ class venousPool(cSBO.StarfishBaseObject):
 
 
         self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
-
+        self.Pmin = 0.0
         self.k = 0.1124 #0.1124e-9 # constant
 
         self.pressureGain = 1.0/0.228 # pressure gain between CVP and LAP - Bell paper
@@ -146,15 +144,13 @@ class venousPool(cSBO.StarfishBaseObject):
 
     def initializeForSimulation(self, vascularNetwork):
         self.dt = vascularNetwork.dt
-        self.nTsteps = vascularNetwork.nTsteps
+        self.nTSteps = vascularNetwork.nTSteps
         self.dsetGroup = vascularNetwork.solutionDataFile.create_group('Venous')
         self.createSolutionMemory(vascularNetwork.memoryArraySizeTime)     
-        self.createDSets(vascularNetwork.runTimeMemoryManager.memoryArraySizeTime, self.dsetGroup)
+        self.createFileDataBuffers(vascularNetwork.runtimeMemoryManager.memoryArraySizeTime, self.dsetGroup)
         
-        
-
         solMemory, dsets = self.getSolutionMemory()
-        vascularNetwork.runTimeMemoryManager.registerSimulationData(solMemory, dsets)
+        vascularNetwork.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
         
         self.boundaryCondtions = vascularNetwork.boundaryConditions
         self.Vusv[:] = self.Vusv0
@@ -168,7 +164,6 @@ class venousPool(cSBO.StarfishBaseObject):
         """
         calculate the inflow to the venous side, from terminal boundaries
         """
-
         nmem = self.currentMemoryIndex[0]
         Qin = 0
 
@@ -180,11 +175,7 @@ class venousPool(cSBO.StarfishBaseObject):
                     if bcCondition.name == 'Windkessel-3Elements':
                         deltaP = self.boundarys[key][x].P[nmem,-1] - bcCondition.venousPressure[nmem]
                         Qin = Qin + deltaP/bcCondition.Rtotal
-
-
-
         self.Qin[nmem] = Qin
-
 
     def estimateOutflow(self):
         """
@@ -226,7 +217,6 @@ class venousPool(cSBO.StarfishBaseObject):
                 raise
 
         self.P_LA[nmem+1] = self.pressureGain*self.P[nmem+1]
-
 
 
     def updateBoundaryConditions(self):
@@ -285,10 +275,9 @@ class venousPool(cSBO.StarfishBaseObject):
             except Exception:
                 self.warning("venousPool.update(): wrong key: %s, could not set up venousPool" %key)
 
-
 class VenousPoolXMLWrapper(cSBO.StarfishBaseObject):
     # TODO: This is a hack until the top level structure is resolved fully
-    externVariables      = {'venousPoolContent':cCOB.TestBaseClass.ExtObject({'StaticVenousPressure':StaticVenousPressure,
+    externVariables      = {'venousPoolContent':cCOB.ConfigurableObjectBase.ExtObject({'StaticVenousPressure':StaticVenousPressure,
                                          'venousPool':venousPool})}
     externXmlAttributes  = []
     externXmlElements    = ['venousPoolContent']

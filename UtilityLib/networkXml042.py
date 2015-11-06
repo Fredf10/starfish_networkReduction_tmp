@@ -10,9 +10,7 @@ simulationContextElements = ['description',
                              'minSaveDt',
                              'maxMemory',
                              'gravitationalField',
-                             'gravityConstant',
-                             'centralVenousPressure',
-                             'minimumVenousPressure']
+                             'gravityConstant']
 
 # initialisation controls
 solverCalibrationElements =  [

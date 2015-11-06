@@ -29,7 +29,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         self.dt = 0
         self.currentTimeStep = 0
         self.currentMemoryIndex = 0
-        self.nTsteps = 0
+        self.nTSteps = 0
 
         # Configuration and solution data variables
         self.modelName = ''
@@ -64,15 +64,15 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         """
 
         self.dt = vascularNetwork.dt
-        self.nTsteps = vascularNetwork.nTsteps
+        self.nTSteps = vascularNetwork.nTSteps
 
         self.dsetGroup = vascularNetwork.BrxDataGroup.create_group('Baroreflex - ' + str(self.baroId))
 
         # TODO: How does this work with inheritance?
         self.createSolutionMemory(vascularNetwork.memoryArraySizeTime)
-        self.createDSets(vascularNetwork.savedArraySize, self.dsetGroup)
+        self.createFileDataBuffers(vascularNetwork.savedArraySize, self.dsetGroup)
         solMemory, dsets = self.getSolutionMemory()
-        vascularNetwork.runTimeMemoryManager.registerSimulationData(solMemory, dsets)
+        vascularNetwork.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
 
         # TODO: Extract to link Boundary condtions
         bc2out = {}
@@ -285,10 +285,10 @@ class AorticBaroreceptor(Baroreceptor):
         epsilon = np.concatenate((epsilon1, epsilon2), axis=0)
         epsMean = np.mean(epsilon)  # calculate one mean strain for the input to the Baroreceptor model
 
-        self.Strain = np.zeros([self.nTsteps + 1, np.shape(self.Area1)[1] + np.shape(self.Area2)[1]])
-        # self.MStrain = np.zeros(self.nTsteps + 1)
+        self.Strain = np.zeros([self.nTSteps + 1, np.shape(self.Area1)[1] + np.shape(self.Area2)[1]])
+        # self.MStrain = np.zeros(self.nTSteps + 1)
         self.MStrain[0] = epsMean
-        # self.T = np.zeros(self.nTsteps + 1)
+        # self.T = np.zeros(self.nTSteps + 1)
 
 
         # initialize the CellML Baroreceptor model if given
@@ -394,7 +394,7 @@ class AorticBaroreceptor(Baroreceptor):
 
 
         # update the strain and the mean strain
-        if n < self.nTsteps - 1:
+        if n < self.nTSteps - 1:
             self.Strain[n_mem + 1] = epsilon
             self.MStrain[n_mem + 1] = epsMean
 
@@ -694,7 +694,7 @@ class CarotidBaroreceptor(Baroreceptor):
         """
         # Do basic stuff
         super(CarotidBaroreceptor, self).initializeForSimulation(vascularNetwork)
-        self.F_efferentDelayed = np.zeros(vascularNetwork.nTsteps+1)
+        self.F_efferentDelayed = np.zeros(vascularNetwork.nTSteps+1)
 
         # New Solver Initialization
         self.pressureLeft = vascularNetwork.vessels[self.vesselIdLeft].Psol
@@ -1112,17 +1112,17 @@ class CombinedBaroreflex(Baroreceptor):
 
 
         # effector parts: initilized with the initial value of the respective quantities
-        self.delta_TPR = np.zeros(self.nTsteps + 1) * self.dTPRin
+        self.delta_TPR = np.zeros(self.nTSteps + 1) * self.dTPRin
         self.dsetGroup.create_dataset("delta_TPR", (vascularNetwork.savedArraySize,), dtype='float64')
 
         self.dsetGroup.create_dataset("T", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Emax = np.zeros(self.nTsteps + 1)
+        self.delta_Emax = np.zeros(self.nTSteps + 1)
         self.delta_Emax[0] = self.dEmaxin
         self.dsetGroup.create_dataset("delta_Emax", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_Vusv = np.zeros(self.nTsteps + 1)
+        self.delta_Vusv = np.zeros(self.nTSteps + 1)
         self.delta_Vusv[0] = self.dVusvin
         self.dsetGroup.create_dataset("delta_Vusv", (vascularNetwork.savedArraySize,), dtype='float64')
-        self.delta_T = np.zeros(self.nTsteps + 1)
+        self.delta_T = np.zeros(self.nTSteps + 1)
         self.delta_T[0] = self.dTin
         self.dsetGroup.create_dataset("delta_T", (vascularNetwork.savedArraySize,), dtype='float64')
 

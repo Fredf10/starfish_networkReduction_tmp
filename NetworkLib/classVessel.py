@@ -242,7 +242,7 @@ class Vessel(cSBO.StarfishBaseObject):
         # create a new group in the data file
         self.dsetGroup = vesselsDataGroup.create_group(' '.join([self.name, ' - ', str(self.Id)]))
         if self.save == True:
-            self.createDSets(savedArraySize, self.dsetGroup)
+            self.createFileDataBuffers(savedArraySize, self.dsetGroup)
         
         # set initial values
         try:

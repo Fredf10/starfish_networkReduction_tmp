@@ -16,14 +16,13 @@ import UtilityLib.classStarfishBaseObject as cSBO
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
 from NetworkLib.classVascularNetwork import VascularNetwork
 
-
 from classBoundarys import Boundary
 
 import classSystemEquations
 import classConnections
 import classFields
 from classCommunicators import *
-import classDataHandler
+from UtilityLib import classRuntimeMemoryManager
 import classTimer
 
 #sys.path.append(cur+'/UtilityLib/')
@@ -45,6 +44,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # the vascular network to solve                     #TODO when compiled for release
         self.vascularNetwork = vascularNetwork
         self.vascularNetwork.quiet = quiet
+        self.quiet = quiet
 
         self.vessels = self.vascularNetwork.vessels
         self.fields = {}
@@ -75,7 +75,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # time step
         self.dt = None
         # number of Timesteps
-        self.nTsteps = None
+        self.nTSteps = None
 
         # total Simulation time
         self.totalTime = None
@@ -120,6 +120,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.solve = self.MacCormack_Field
 
         # initialize system
+        self.vascularNetwork.currentMemoryIndex = self.currentMemoryIndex
         self.vascularNetwork.initialize(initializeForSimulation = True)
 
         self.initializeTimeVariables(quiet)
@@ -130,21 +131,17 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeBoundarys()
         self.initializeConnections()
         self.initializeFields()
-
         try:
             self.venousPool.initializeWithFlowSolver(self)
         except AttributeError:
-            pass # venousPool not a numerical object
-                
-
+            pass # StaticVenousPressure
         self.initializeBaroreceptors()
-
         self.initializeCommunicators()
         self.initializeTimers()
         self.initializeNumericalObjectList()
-        if quiet==False:
+
+        if self.quiet==False:
             self.initOutput() # feedback
-        self.quiet = quiet
 
 
 
@@ -197,18 +194,18 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # Set time variables
         self.dt = min(dt_min)
         # calculate time steps
-        self.nTsteps = int(classTimer.np.ceil(self.totalTime/self.dt))
+        self.nTSteps = int(classTimer.np.ceil(self.totalTime/self.dt))
         # calculate time steps for initialisation phase
         nTstepsInitPhase = 0
         if self.vascularNetwork.initialisationPhaseExist:
             initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
             nTstepsInitPhase = int(classTimer.np.ceil(initPhaseTimeSpan/self.dt))
         # correct time steps
-        self.nTsteps += nTstepsInitPhase
+        self.nTSteps += nTstepsInitPhase
 
         # update vascular network variables
         self.vascularNetwork.update({'dt':self.dt,
-                                     'nTsteps': self.nTsteps,
+                                     'nTSteps': self.nTSteps,
                                      'nTstepsInitPhase': nTstepsInitPhase})
 
         self.output['dz_min']     = min(dz_min)
@@ -326,7 +323,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                                                 self.dt,
                                                 self.currentMemoryIndex,
                                                 self.currentTimeStep,
-                                                self.nTsteps,
+                                                self.nTSteps,
                                                 self.systemEquations[rootId]),
                                       Boundary( self.vessels[rootId],
                                                 bcList1,
@@ -334,7 +331,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                                                 self.dt,
                                                 self.currentMemoryIndex,
                                                 self.currentTimeStep,
-                                                self.nTsteps,
+                                                self.nTSteps,
                                                 self.systemEquations[rootId])]
             self.output['BndrNR'] = 2
         else:
@@ -345,7 +342,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                                                         self.dt,
                                                         self.currentMemoryIndex,
                                                         self.currentTimeStep,
-                                                        self.nTsteps,
+                                                        self.nTSteps,
                                                         self.systemEquations[vesselId])]
 
             self.output['BndrNR'] = len(self.boundarys)
@@ -428,7 +425,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             TimerData['currentTimeStep']         = self.currentTimeStep
             TimerData['currentMemoryIndex']      = self.currentMemoryIndex
             TimerData['dt']                      = self.dt
-            TimerData['nTsteps']                 = self.nTsteps
+            TimerData['nTSteps']                 = self.nTSteps
 
 
             if TimerData['type'] == 'valsalva':
@@ -500,7 +497,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # 6. add blocking Wait if multiprocessing
         """
 
-        # get treetraversing list
+        # get tree traversing list
         treeList = self.vascularNetwork.treeTraverseList
 
         singleVesselNetwork = False
@@ -545,15 +542,16 @@ class FlowSolver(cSBO.StarfishBaseObject):
         if self.venousPool:
             self.numericalObjects.append(self.venousPool)
 
-        self.dataHandler = classDataHandler.DataHandler(self.currentTimeStep,
-                                  self.nTsteps,
-                                  self.vascularNetwork,
-                                  self.currentMemoryIndex,
-                                  self.vascularNetwork.memoryArraySizeTime)
+        self.vascularNetwork.runtimeMemoryManager.registerGlobalTimeSteps(self.currentMemoryIndex,self.currentTimeStep)
 
-        self.numericalObjects.append(self.dataHandler)
+        
+        
+        self.numericalObjects.append(self.vascularNetwork)
 
-        self.memoryOffset = self.dataHandler.memoryOffset
+        # TODO: This depends on sequential iteration through the numerical objects list!!!!
+        self.numericalObjects.append(self.vascularNetwork.runtimeMemoryManager)
+        
+        self.memoryOffset = self.vascularNetwork.runtimeMemoryManager.memoryOffset
 
     def initOutput(self):
         """
@@ -563,7 +561,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         print '___________Time variables ___________'
         print '%-20s %2.3f' % ('totaltime (sec)',self.totalTime)
         print '%-20s %2.3f' % ('dt (ms)',self.dt*1.0E3)
-        print '%-20s %4d' % ('nTsteps',self.nTsteps)
+        print '%-20s %4d' % ('nTSteps',self.nTSteps)
         print '___________Div variables ____________'
         print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
         print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
@@ -581,7 +579,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         print '%-20s %4d' % ('NumBoundarys',len(self.boundarys))
         print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
         print '%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors))
-        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTsteps)
+        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTSteps)
         print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
         #print self.communicators[0]
         #print np.shape(self.communicators[0].data['Strain'])
@@ -616,7 +614,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         if self.cycleMode == False:
             # original
-            for n in xrange(self.nTsteps):
+            for n in xrange(self.nTSteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 for numericalObject in self.numericalObjects:
@@ -625,7 +623,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                     except Exception:
                         # Save the Solution data for debugging
                         print "Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject)
-                        self.dataHandler.emergencyFlush()
+                        self.vascularNetwork.runtimeMemoryManager.flushSolutionMemory()
                         self.vascularNetwork.saveSolutionData()
                         print "Success in saving solution data file. Reraising Exception"
                         raise # TODO: why does self.exception() not force the program to quit?
@@ -644,15 +642,15 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 p0,p1 = initialValues[vesselId]['Pressure']
                 Qm    = initialValues[vesselId]['Flow']
 
-                P_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
-                Q_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
-                A_lastCycle[vesselId]  = classTimer.np.ones((self.nTsteps,vessel.N))
+                P_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
+                Q_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
+                A_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
 
 
             for cycle in xrange(self.numberCycles-1):
                 print ' solving cycle {}'.format(cycle+1)
                 # 1. solve cycle
-                for n in xrange(self.nTsteps-1):
+                for n in xrange(self.nTSteps-1):
 
                     self.currentTimeStep[0] = n
                     for numericalObject in self.numericalObjects:

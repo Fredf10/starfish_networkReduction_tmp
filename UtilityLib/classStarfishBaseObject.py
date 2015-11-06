@@ -8,7 +8,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 root = ''.join([cur,'/../'])
 logFilePath = root + 'warninglog.txt'
 
-class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
+class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
     """Super class every other class in STARFiSh
     will inherit from.
 
@@ -20,7 +20,10 @@ class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
     Planned features:
     Global Update function for dictionaries.
     """
+    
+    
 
+    # BEGIN Time Series Memory Management Interface 
     solutionMemoryFields    = []
     solutionMemoryFieldsToSave = []
 
@@ -38,8 +41,7 @@ class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
             shape = (memorySize,) + self.__dict__[key].shape[1::]
             self.__dict__[key] = np.zeros(shape)
 
-
-    def createDSets(self, savedArraySize, dsetGroup):
+    def createFileDataBuffers(self, savedArraySize, dsetGroup):
         for key in self.solutionMemoryFields:
             data = self.__dict__[key]
             if key in self.solutionMemoryFieldsToSave:
@@ -52,7 +54,6 @@ class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
     def getSolutionMemory(self):
         solutionMemory = []
         dataBuffers = []
-
         for key in self.solutionMemoryFields:
             solutionMemory.append(self.__dict__[key])
             try:
@@ -63,8 +64,8 @@ class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
         # Ensure the correct number of entries in both tuples
         assert len(self.solutionMemoryFields) == len(solutionMemory), "Number of fields doesn't match number of arrays"
         assert(len(self.solutionMemoryFields) == len(dataBuffers)), "Number of fields doesn't match number of data sets"
-
         return solutionMemory, dataBuffers
+    # END Time Series Memory Management Interface
 
 
 
@@ -87,7 +88,6 @@ class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
                 Will save info in STARFiSh/warninglog.txt
                 Defaults to False.
         """
-        quiet = True
         if oldExceptPass:
             quiet = True
             saveToFile = False

@@ -2411,7 +2411,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.createSolutionMemory(memoryArraySizeTime)
 
         self.dsetGroup = solutionDataFile.create_group('Heart')
-        self.createDSets(savedArraySize, self.dsetGroup )
+        self.createFileDataBuffers(savedArraySize, self.dsetGroup )
 
         """ Initial conditions in the ventricle"""
         self.pressure[0] = self.atriumPressure
@@ -2690,7 +2690,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
         self.createSolutionMemory(memoryArraySizeTime)
         self.dsetGroup = solutionDataFile.create_group('Heart')
-        self.createDSets(savedArraySize, self.dsetGroup)
+        self.createFileDataBuffers(savedArraySize, self.dsetGroup)
         
         """ Initial conditions in the ventricle"""
         self.Elastance[0] = self.E(0)

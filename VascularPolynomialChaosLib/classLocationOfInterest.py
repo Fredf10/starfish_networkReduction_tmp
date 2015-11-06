@@ -7,18 +7,18 @@ from classQuantityOfInterest import QuantityOfInterest
 import UtilityLib.processing as mProc
 import matplotlib.pyplot as plt
 
-from testBaseClass import TestBaseClass 
+from testBaseClass import ConfigurableObjectBase 
 
-class LocationOfInterest(TestBaseClass):
+class LocationOfInterest(ConfigurableObjectBase):
     '''
     
     '''
     
     # defined external data
-    externVariables      = {'quantitiesOfInterestToProcess' : TestBaseClass.ExtValue(str, strCases = ['anything'], multiVar = True),
-                             'queryLocation'                : TestBaseClass.ExtValue(str, strCases = ['anything']),
-                             'xVal'                         : TestBaseClass.ExtValue(float,  unit = 'm'),
-                             'confidenceAlpha'              : TestBaseClass.ExtValue(float)}
+    externVariables      = {'quantitiesOfInterestToProcess' : ConfigurableObjectBase.ExtValue(str, strCases = ['anything'], multiVar = True),
+                             'queryLocation'                : ConfigurableObjectBase.ExtValue(str, strCases = ['anything']),
+                             'xVal'                         : ConfigurableObjectBase.ExtValue(float,  unit = 'm'),
+                             'confidenceAlpha'              : ConfigurableObjectBase.ExtValue(float)}
     
     externXmlAttributes  = []
     
