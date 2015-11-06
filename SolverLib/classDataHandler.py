@@ -41,7 +41,6 @@ class RuntimeMemoryManager(object):
              the value None if the corresponding vector doesn't need to be saved.
         """
         self.registeredData.extend(zip(solutionMemory,dataBuffers))
-        print self.registeredData
         # Each simulation object registers itself here by passing in a tuple of spatial dimensions
         # The
     
@@ -178,7 +177,7 @@ class DataHandler(object):
         elif currentTimeStep == self.nTsteps - 1:
             ## if the simulation is finished but memory not filled
             # initiate flush of memoryArrays
-            self.network.flushSolutionMemory(currentTimeStep, currentMemoryIndex,self.chunkCount)
+            self.network.flushSolutionMemory(currentTimeStep, currentMemoryIndex, self.chunkCount)
             # self.flushSolutionMemory(self.currentTimeStep[0], self.currentMemoryIndex[0],self.chunkCount)
             
         

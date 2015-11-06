@@ -2,36 +2,84 @@
 import sys, os
 import traceback
 import time
+import numpy as np
 
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 root = ''.join([cur,'/../'])
 logFilePath = root + 'warninglog.txt'
 
 class StarfishBaseObject(object):
-    """Super class every other class in STARFiSh 
-    will inherit from. 
-    
+    """Super class every other class in STARFiSh
+    will inherit from.
+
     Contains:
         Global Warning function; warn()
 
         Global Error Appending function; appendException()
-    
-    Planned features: 
+
+    Planned features:
     Global Update function for dictionaries.
     """
+
+    solutionMemoryFields    = []
+    solutionMemoryFieldsToSave = []
+
+    def getSolutionMemorySizes(self):
+        sizes = []
+        for key in self.solutionMemoryFields:
+            try:
+                sizes.append(self.__dict__[key].shape[1])
+            except IndexError:
+                sizes.append(1)
+        return sizes
+
+    def createSolutionMemory(self,memorySize):
+        for key in self.solutionMemoryFields:
+            shape = (memorySize,) + self.__dict__[key].shape[1::]
+            self.__dict__[key] = np.zeros(shape)
+
+
+    def createDSets(self, savedArraySize, dsetGroup):
+        for key in self.solutionMemoryFields:
+            data = self.__dict__[key]
+            if key in self.solutionMemoryFieldsToSave:
+                try:
+                    size = data.shape[1]
+                    dsetGroup.create_dataset(key,(savedArraySize,size))
+                except IndexError:
+                    dsetGroup.create_dataset(key,(savedArraySize,))
+
+    def getSolutionMemory(self):
+        solutionMemory = []
+        dataBuffers = []
+
+        for key in self.solutionMemoryFields:
+            solutionMemory.append(self.__dict__[key])
+            try:
+                dataBuffers.append(self.dsetGroup[key])
+            except (KeyError, TypeError)  as e:
+                dataBuffers.append(None)
+
+        # Ensure the correct number of entries in both tuples
+        assert len(self.solutionMemoryFields) == len(solutionMemory), "Number of fields doesn't match number of arrays"
+        assert(len(self.solutionMemoryFields) == len(dataBuffers)), "Number of fields doesn't match number of data sets"
+
+        return solutionMemory, dataBuffers
+
+
 
     def warning(self, infoString = None, noException = False,
                 quiet = False, verbose = False, saveToFile = False,
                 oldExceptPass = False):
-        """ 
+        """
         Global Warning Function
-        
-        Args: 
+
+        Args:
             infoString (String): String describing why the warning was made.
             noException (Optional Bool): Boolean determining if it
                 should use the last exception's info or not.
                 Defaults to False.
-            quiet (Opt. Bool): Whether to print warning at all. 
+            quiet (Opt. Bool): Whether to print warning at all.
                 Defaults to False.
             verbose (Opt. Bool): Whether or not to print full traceback.
                 Defaults to False.
@@ -39,6 +87,7 @@ class StarfishBaseObject(object):
                 Will save info in STARFiSh/warninglog.txt
                 Defaults to False.
         """
+        quiet = True
         if oldExceptPass:
             quiet = True
             saveToFile = False
@@ -46,7 +95,7 @@ class StarfishBaseObject(object):
         completeString = "Warning: "
         if infoString != None:
             completeString = completeString + infoString
-        else: 
+        else:
             completeString = completeString + "no string passed to warn()"
 
         if not noException:
@@ -57,9 +106,9 @@ class StarfishBaseObject(object):
         if verbose:
             completeString = completeString + exceptionInfo
 
-        if not quiet:
-            print completeString
-        
+        #if not quiet:
+            # print completeString
+
         if saveToFile:
             if not verbose: completeString = completeString + exceptionInfo
             try: f = open(logFilePath, 'a')
@@ -73,11 +122,11 @@ class StarfishBaseObject(object):
             f.close()
 
     def exception(self, infoString = None):
-        """ 
-        The exception appending function. 
-       
+        """
+        The exception appending function.
+
         Args:
-            infoString (string): A string with the information you 
+            infoString (string): A string with the information you
                 wish to append to the exception's message
 
         """

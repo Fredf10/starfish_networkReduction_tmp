@@ -223,7 +223,7 @@ class Boundary(cSBO.StarfishBaseObject):
         duPrescribed = self.duFunctionRuntime(currentTimeStep, dt, Z1, Z2, position)
         
         #calculate the dp and dq using given boundaryConditions of type 2
-        dPQ_calc,dBloodVolumen = self.omegaFunction(_omega_field, duPrescribed, R, L, currentTimeStep, dt, P[position], Q[position], A[position],Z1, Z2)      
+        dPQ_calc,dBloodVolumen = self.omegaFunction(_omega_field, duPrescribed, R, L, currentMemoryIndex, currentTimeStep, dt, P[position], Q[position], A[position],Z1, Z2)      
 
         # calculate new values for p and q
         P_calc = dPQ_calc[0]+ P[position]
