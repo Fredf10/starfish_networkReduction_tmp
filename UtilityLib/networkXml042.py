@@ -284,7 +284,8 @@ xmlElements  = [ 'simulationContext',
                  'communicators',
                  'boundaryConditions',
                  'randomInputManager',
-                 'vessels' ]
+                 'vessels',
+                 "venousPool"]
 
 xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'solverCalibration'     : solverCalibrationElements,
@@ -296,7 +297,8 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'communicators'         : communicatorReference, #TODO why is this Reference?
                         'randomInputManager'    : None,
                         'generalRandomInputs'   : randomInputDistributionElements, 
-                        'vessels'               : vesselElements }
+                        'vessels'               : vesselElements,
+                        'venousPool' : None }
 
 
 

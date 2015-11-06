@@ -106,7 +106,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         #dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
-        self.venousPool = classVenousPool.StaticVenousPressure({}) # classVenousPool.venousPool({}) 
+        self.venousPool = None # classVenousPool.StaticVenousPressure({}) # classVenousPool.venousPool({}) 
         
         self.boundaryConditions = {}
 
@@ -403,12 +403,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     except Exception:
                         self.warning("VascularNetwork.initialize(): could not set blood density for aortic valve!")
         
-        self.venousPool.P[0] = self.centralVenousPressure
-
         # # initialize 3d positions of the vascularNetwork
         self.calculate3DpositionsAndGravity(nSet=0)
 
         # ## initialize for simulation
+        # TODO: Can this be moved?
         if initializeForSimulation == True:
 
             # # initialize venous pressure and checks central venous pressure

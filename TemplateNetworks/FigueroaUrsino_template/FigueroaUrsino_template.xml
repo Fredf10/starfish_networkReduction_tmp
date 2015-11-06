@@ -53,6 +53,21 @@
 	      
 	    -->
   </externalStimuli>
+<venousPool>
+<!--
+<venousPoolContent class="StaticVenousPressure">
+<P0 unit="mmHg">5</P0>
+<pressureGain>3</pressureGain>
+</venousPoolContent>
+-->
+<venousPoolContent class="venousPool">
+<P0 unit="mmHg">2</P0>
+<pressureGain>1/0.228</pressureGain>
+<Vusv0 unit="ml">3440</Vusv0>
+<V0 unit="ml">3700</V0>
+<k>0.1124</k>
+</venousPoolContent>
+</venousPool>
 <baroreceptors>
   <baroreceptor Id="1">
       <topology>

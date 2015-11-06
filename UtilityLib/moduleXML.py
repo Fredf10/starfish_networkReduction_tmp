@@ -1,3 +1,4 @@
+from NetworkLib import classVenousPool
 
 try:
     from lxml import etree
@@ -210,7 +211,13 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 #             for randomInput in randomInputManager():
 #                 if randomInput.randomInputType == 'generalRandomInput':
 #                     writeRandomInputElement(xmlFileElement, None, randomInputManager, randomInput.location)
-
+        
+        elif xmlElementName == 'venousPool':
+            if vascularNetwork.venousPool != None:
+                venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
+                venousPoolWrapper.venousPoolContent = vascularNetwork.venousPool
+                venousPoolWrapper.writeDataToXmlNode(xmlFileElement)
+                
         elif xmlElementName == 'randomInputManager':
             if vascularNetwork.randomInputManager != None:
                 vascularNetwork.randomInputManager.writeDataToXmlNode(xmlFileElement)
@@ -703,6 +710,11 @@ def loadNetworkFromXML(networkName ,
 #                                            None,
 #                                            randomInputManager,
 #                                            None)
+            
+            elif xmlElementName == "venousPool":
+                venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
+                venousPoolWrapper.loadDataFromXmlNode(xmlElement)
+                vascularNetwork.venousPool = venousPoolWrapper.venousPoolContent
 
             elif xmlElementName == 'randomInputManager':
                 ## create random vector

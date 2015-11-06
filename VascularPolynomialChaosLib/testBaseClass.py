@@ -27,7 +27,7 @@ class TestBaseClass(object):
             multiVar (bool): if True: variable is treated as a list of variables of the given type, values can be both separated wiht ' ', and ',' in the XML-file
             
         Raises:
-            ValueError: raise error if an unappropriate variableType is passed
+            ValueError: raise error if an inappropriate variableType is passed
             ValueError: raise error if no strCases is passed, when variableType includes str
         '''
         def __init__(self, variableType, unit = None, strCases = None, multiVar = False, optional = False):
@@ -71,7 +71,7 @@ class TestBaseClass(object):
             
             self.dictObjType = dictObjType
             
-            #TODO: approptiate testing for dictObjType  
+            #TODO: appropriate testing for dictObjType  
 #             print type(dictObjType)
 #             if type(dictObjType) is type(object):
 #             else: raise ValueError("ERROR: ExtDict in {}, dictObjType is not a class instance: <<{}>>".format(self.__class__.__name__,dictObjType))

@@ -3,12 +3,12 @@ import sys, os
 import traceback
 import time
 import numpy as np
-
+import classConfigurableObjectBase
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 root = ''.join([cur,'/../'])
 logFilePath = root + 'warninglog.txt'
 
-class StarfishBaseObject(object):
+class StarfishBaseObject(classConfigurableObjectBase.TestBaseClass):
     """Super class every other class in STARFiSh
     will inherit from.
 
