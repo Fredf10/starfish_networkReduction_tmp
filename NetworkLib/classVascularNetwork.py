@@ -1,24 +1,17 @@
-import sys, os
-from reportlab.lib.validators import isNumber
-
-# from UtilityLib.saveSimulationDataToCSV import vesselId
+import sys
+import os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
 
-#sys.path.append(cur + '/../NetworkLib')
-#sys.path.append(cur+'/../SolverLib')
 import UtilityLib.classStarfishBaseObject as cSBO
 
 import classVessel as cVes
 import classBaroreceptor as cBRX
 import classVenousPool as classVenousPool
 
-#sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
 
-
-#sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 import numpy as np
 import math
@@ -35,11 +28,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     The vascular network consists out of vessels defined in classVessel::Vessel()
     Additional Topology, BoundaryConditions and the SimulationContext are saved.
     """
-    
-    
+
+
     solutionMemoryFields    = ["simulationTime", "arterialVolume"]
     solutionMemoryFieldsToSave = ["simulationTime", "arterialVolume"]
-    
+
     def __init__(self, quiet=False):
 
         # # vascularNetwork variables to set via XML
@@ -58,8 +51,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         # running options
         self.cycleMode = False
-        
-        
+
+
         # simulation Context
         self.totalTime = 1.0  # simulation time in seconds
         self.CFL = 0.85  # maximal initial CFL number
@@ -107,14 +100,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         #dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
-        self.venousPool = classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({}) 
-        
+        self.venousPool = classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({})
+
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
-        
+
         self.externalStimuli = {}
-        
+
         self.baroreceptors = {}  # dictionary with baroreceptors
 
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data}
@@ -403,7 +396,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         bc.aortic.rho = self.globalFluid['rho']
                     except Exception:
                         self.warning("VascularNetwork.initialize(): could not set blood density for aortic valve!")
-        
+
         # # initialize 3d positions of the vascularNetwork
         self.calculate3DpositionsAndGravity(nSet=0)
 
@@ -474,17 +467,17 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.savedArraySize = (self.nSaveEnd-self.nSaveBegin)//self.nSaveSkip + 1
 
-        self.runtimeMemoryManager = classRuntimeMemoryManager.RuntimeMemoryManager(self.nSaveBegin, 
-                                                                                   self.nSaveEnd, 
-                                                                                   self.nSaveSkip, 
-                                                                                   self.nTSteps, 
+        self.runtimeMemoryManager = classRuntimeMemoryManager.RuntimeMemoryManager(self.nSaveBegin,
+                                                                                   self.nSaveEnd,
+                                                                                   self.nSaveSkip,
+                                                                                   self.nTSteps,
                                                                                    self.maxMemory)
 
 
         # Register all objects with the memory manager
         sizes = self.getSolutionMemorySizes()
         self.runtimeMemoryManager.registerDataSize(sizes)
-        
+
         for vessel in self.vessels.itervalues():
             sizes = vessel.getSolutionMemorySizes()
             self.runtimeMemoryManager.registerDataSize(sizes)
@@ -496,10 +489,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for baroData in self.baroreceptors.itervalues():
             sizes = baroData.getSolutionMemorySizes()
             self.runtimeMemoryManager.registerDataSize(sizes)
-        
+
         sizes = self.venousPool.getSolutionMemorySizes()
         self.runtimeMemoryManager.registerDataSize(sizes)
-        
+
         self.memoryArraySizeTime = self.runtimeMemoryManager.memoryArraySizeTime
 
 
@@ -511,23 +504,23 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
 
         self.dsetGroup = self.solutionDataFile.create_group('VascularNetwork')
-        
+
         # TODO: Integrate precalculated data into data saving framework
         self.dsetGroup.create_dataset('TiltAngle', (self.savedArraySize,),dtype='float64')
         self.tiltAngle = np.zeros(self.nTSteps)
-        
+
         self.allocate(self.runtimeMemoryManager)
 #         self.createSolutionMemory(self.memoryArraySizeTime)
 #         self.createFileDataBuffers(self.savedArraySize, self.dsetGroup)
 #         solMemory, dsets = self.getSolutionMemory()
 #         self.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
-#         
+#
 
         self.simulationTime[0] = -self.nTstepsInitPhase*self.dt
-        
+
         print "cVN::InitializeNetworkForSimulation"
         print "nTSteps", self.nTSteps, "nSave ={},{},{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
-        
+
 
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
@@ -653,8 +646,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.simulationTime[nmem+1] = self.simulationTime[nmem] + self.dt
         # TODO: Volume calculation assumes all other objects have been updated for the current time step!!!!
         self.arterialVolume[nmem+1] = self.calculateNetworkVolume(nmem+1)
-        
-        
+
+
     def calculateNetworkVolume(self, n):
         # Adds the volume of all compartments in the network
         cumVolume = 0.0
@@ -672,7 +665,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             cumVolume += self.venousPool.V[n]
         except AttributeError:
             pass # venous pool has no volume
-        
+
         # TODO: add heart handling
         # cumVolume += self.heart.V[n]
         return cumVolume
@@ -782,7 +775,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             raise ValueError("ERROR:Invalid end time t2=%f after end of saved data t=%f" % (t2, endTime))
             inputsAreValid = False
 
-        if isNumber(mindt) and mindt > endTime - startTime:
+        if mindt is not None and mindt > endTime - startTime:
             inputsAreValid = False
             raise ValueError("ERROR: Invalid minimum time step %f larger than solution time span." % (mindt))
 
@@ -923,7 +916,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if self._checkAccessInputs(t1, t2, mindt):
             nSelectedBegin, nSelectedEnd =self.getFileAccessIndices(t1, t2)
 
-            if isNumber(mindt):
+            if mindt is not None:
                 nTStepSpaces = int(np.ceil(mindt / self.dt))
             else:
                 nTStepSpaces = 1

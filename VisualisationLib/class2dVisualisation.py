@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import gtk
 import gobject
-
+import matplotlib
+matplotlib.use('GTKAgg')
 import matplotlib.pyplot as plt   
 from matplotlib.figure import Figure
 # uncomment to select /GTK/GTKAgg/GTKCairo

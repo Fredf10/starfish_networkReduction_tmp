@@ -12,7 +12,7 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
     """
     # defined external data
     externVariables      = {'P0' : cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'Pa'),
-                             'pressureGain'                : cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'unitless')}
+                             'pressureGain'                : cCOB.ConfigurableObjectBase.ExtValue(float,  unit =None )}
     externXmlAttributes  = []
     externXmlElements    = ['P0', 'pressureGain']
             
@@ -65,7 +65,7 @@ class venousPool(cSBO.StarfishBaseObject):
                             'V0' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'm^3'),
                             'Vusv0' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'm^3'),
                             'k' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'unitless'),
-                             'pressureGain': cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'unitless')}
+                             'pressureGain': cCOB.ConfigurableObjectBase.ExtValue(float,  unit = None )}
     externXmlAttributes  = []
     externXmlElements    = externVariables.keys()
     

@@ -1,8 +1,8 @@
 from NetworkLib import classVenousPool
-
 try:
     from lxml import etree
 except:
+    # TODO: This produces an error!! with the pretty_print argument
     from xml.etree import ElementTree as etree
 
 import os,sys
@@ -72,7 +72,7 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
 # def writeRandomInputElement(subElement, variable, randomInputManager,randomInputLocation):
 #     """
 #     writes a random variable in xml file
-# 
+#
 #     input:
 #         subElement := mother xml element where the randomInputElement should be added
 #         variable   := name of the deterministic random variable
@@ -81,9 +81,9 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
 #     """
 #     ## import current network xml description as nxmlW(rite) to avoid version clash
 #     from constants import newestNetworkXml as nxmlW
-# 
+#
 #     randomInput = randomInputManager(randomInputManager.map[randomInputLocation])
-# 
+#
 #     if 'generalRandomInput' in randomInputLocation:
 #         attributes = {}
 #         for attribute in nxmlW.generalRandomInputsAttributes:
@@ -91,7 +91,7 @@ def writeXMLsaveValues(xmlElement, variable, variableValues, polychaos = False):
 #         subsubElement = etree.SubElement(subElement,'generalRandomInput',attributes)
 #     else:
 #         subsubElement = etree.SubElement(subElement, "-".join([variable,'randomInput']))
-# 
+#
 #     for randomInputElement in nxmlW.randomInputDistributionElements:
 #         subsubsubElement = etree.SubElement(subsubElement, randomInputElement)
 #         value = randomInput.getVariableValue(randomInputElement)
@@ -211,13 +211,13 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 #             for randomInput in randomInputManager():
 #                 if randomInput.randomInputType == 'generalRandomInput':
 #                     writeRandomInputElement(xmlFileElement, None, randomInputManager, randomInput.location)
-        
+
         elif xmlElementName == 'venousPool':
             if vascularNetwork.venousPool != None:
                 venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
                 venousPoolWrapper.venousPoolContent = vascularNetwork.venousPool
                 venousPoolWrapper.writeDataToXmlNode(xmlFileElement)
-                
+
         elif xmlElementName == 'randomInputManager':
             if vascularNetwork.randomInputManager != None:
                 vascularNetwork.randomInputManager.writeDataToXmlNode(xmlFileElement)
@@ -373,7 +373,7 @@ def loadingErrorMessageVariableError(variableName, element, elementName):
 # def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, randomInputLocation):
 #     """
 #     Function to load random variable xml element
-# 
+#
 #     Args:
 #         xmlElement
 #         xmlElementReferences
@@ -381,19 +381,19 @@ def loadingErrorMessageVariableError(variableName, element, elementName):
 #         randomInputManager
 #         randomInputLocation
 #     """
-# 
+#
 #     dataDict = {'location'        : randomInputLocation,
 #                 'variableName'    : [variableName],
 #                 'randomInputType' : 'parametricRandomInput'}
-# 
+#
 #     if variableName == None: dataDict['randomInputType'] = 'generalRandomInput'
-# 
+#
 #     if variableName == None:
 #         for attribute in nxml.generalRandomInputsAttributes:
 #             try: dataDict[attribute]  = loadVariablesConversion(attribute, xmlElement.attrib[attribute], '')
 #             except: loadingErrorMessageVariableError(attribute, 'generalRandomInput', '')
 #             dataDict['location'] = '_'.join(['generalRandomInput',dataDict['name']])
-# 
+#
 #     for variable in nxml.randomInputDistributionElements:
 #         try: element = xmlElement.findall(''.join(['.//',variable]))[0]
 #         except: loadingErrorMessageVariableError(variable, 'randomInput', variableName)
@@ -436,7 +436,7 @@ def loadNetworkFromXML(networkName ,
     vascularNetwork.update({'name': networkName,
                             'dataNumber':dataNumber,
                             'pathSolutionDataFilename': pathSolutionDataFilename})
-    
+
     try:
         parser = etree.XMLParser(encoding='iso-8859-1')
         tree = etree.parse(''.join([networkXmlFile]), parser)
@@ -710,7 +710,7 @@ def loadNetworkFromXML(networkName ,
 #                                            None,
 #                                            randomInputManager,
 #                                            None)
-            
+
             elif xmlElementName == "venousPool":
                 venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
                 venousPoolWrapper.loadDataFromXmlNode(xmlElement)
@@ -746,4 +746,4 @@ def loadNetworkFromXML(networkName ,
 
 
 
-    
+

@@ -15,7 +15,8 @@ sys.path.append(cur+'/../')
 
 import UtilityLib.classStarfishBaseObject as cSBO
 
-from VisualisationLib.classRealTimeVisualisation import realTimeVisualisation
+# This isn't refrenced directly anywhere
+# from VisualisationLib.classRealTimeVisualisation import realTimeVisualisation
 
 class CommunicatorBaseClass(cSBO.StarfishBaseObject):
     """
@@ -146,7 +147,7 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         This function starts the realtime visualisation in a subprocess
         """
         # start the visualisation
-        visualisationProcess = ' '.join(['python',cur+'/../VisualisationLib/classRealTimeVisualisation.py',
+        visualisationProcess = ' '.join(['/usr/local/bin/python',cur+'/../VisualisationLib/classRealTimeVisualisation.py',
                                          '-f',str(self.filenameWrite),
                                          '-t',str(self.dt*self.dn),
                                          '-q','-'.join(self.quantitiesToPlot),
