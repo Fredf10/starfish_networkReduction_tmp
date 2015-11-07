@@ -761,6 +761,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         endTime = self.simulationTime[-1]
 
 
+        # TODO: should these be errors?
         # Assume inputs are valid, otherwise flag invalid inputs
         inputsAreValid = True
         if t1>t2 :
@@ -810,8 +811,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         tspan = [np.min(tvals),np.max(tvals)]
         mindt=None
-
-        if "ForwardPressure" in variables or "BackwardPressure" in variables or "ForwardFlow" in variables or  "BackwardFlow" in variables:
+        waveSplittingVariables =  ["ForwardPressure","BackwardPressure", "ForwardFlow","BackwardFlow"]
+        if any(i in variables for i in waveSplittingVariables):
+        # if "ForwardPressure" in variables or "BackwardPressure" in variables or "ForwardFlow" in variables or  "BackwardFlow" in variables:
             variables.append('linearWavesplit')
 
         self.loadSolutionDataRange([vesselId], tspan, mindt, variables)
