@@ -691,6 +691,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.solutionDataFile.close()
 
 
+
     def linkSolutionData(self):
         """
         This function prepares the solution data when the network is loaded
@@ -884,28 +885,21 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         # Update loaded data tracking if inputs are valid
         # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
-
+        validValues = ["All", "Pressure", "Flow", "Area", "WaveSpeed",
+                       "Compliance", "MeanVelocity", "Gravity", "Position",
+                       "Rotation", "linearWavesplit"]
         values = set(values)
         if 'All' in values:
-            values.update(["All",
-                        "Pressure",
-                        "Flow",
-                        "Area",
-                        "WaveSpeed",
-                        'Compliance',
-                        "MeanVelocity",
-                        "linearWavesplit",
-                        "Gravity",
-                        "Position",
-                        "Rotation"])
-        elif 'WaveSpeed' in values:
-            values.update(['Pressure', 'Area'])
-        elif 'MeanVelocity' in values:
-            values.update(['Pressure','Flow'])
-        elif "linearWavesplit" in values:
-            values.update(['Pressure','Flow','Area',"WaveSpeed"])
-        elif 'Compliance' in values:
-            values.update(['Pressure', 'Compliance'])
+            values.update(validValues)
+        else:
+            if "WaveSpeed" in values:
+                values.update(["Pressure", "Area"])
+            elif "MeanVelocity" in values:
+                values.update(["Pressure","Flow"])
+            elif "linearWavesplit" in values:
+                values.update(["Pressure","Flow","Area","WaveSpeed"])
+            elif "Compliance" in values:
+                values.update(["Pressure", "Compliance"])
 
         if tspan is not None:
             t1 = tspan[0]
