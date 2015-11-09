@@ -910,7 +910,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
 
         if self._checkAccessInputs(t1, t2, mindt):
-            nSelectedBegin, nSelectedEnd =self.getFileAccessIndices(t1, t2)
+            nSelectedBegin, nSelectedEnd = self.getFileAccessIndices(t1, t2)
 
             if mindt is not None:
                 nTStepSpaces = int(np.ceil(mindt / self.dt))
