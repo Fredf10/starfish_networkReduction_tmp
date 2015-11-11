@@ -30,7 +30,7 @@ initialisationControlsElements = ['initialsationMethod',
                                   'compPercentageTree',
                                   'compTotalSys']
 
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 # global fluid
 globalFluidElements = ['my',
                        'rho',
@@ -56,7 +56,7 @@ externalStimuliElementReference = {'externalStimulus':externalStimulusElements}
 
 
 ##
-# TODO what's the deal with this? 
+# TODO what's the deal with this?
 vascularNetworkElements = ['simulationContext',
                           'solverCalibration',
                           'initialisationControls']
@@ -64,13 +64,13 @@ vascularNetworkElements = ['simulationContext',
 ##########################################################################################
 
 ## Baroreceptor objects
-#### new 
+#### new
 
 baroreceptorTopologyElements = ['cellMLBaroreceptorModel','vesselIds']
 
 CombinedBaroreflexElements = [ 'baroId', 'modelName',
                                'cR', 'cE','cT', 'cVusv','pn','ka','tau_z',
-                               'aortic_G_R', 'aortic_G_T', 'aortic_G_Emax', 'aortic_G_Vusv', 
+                               'aortic_G_R', 'aortic_G_T', 'aortic_G_Emax', 'aortic_G_Vusv',
                                'carotid_G_R', 'carotid_G_T', 'carotid_G_Emax', 'carotid_G_Vusv']
 baroreceptorModelElements = {'bugenhagenAorticBR' : [],
                              'pettersenAorticBR'  : ['L0', 'n0', 'g','tau1','tau2','Gp','Gs','HR0', 'HRmax','HRmin'],
@@ -101,14 +101,14 @@ communicatorReference = {'CommunicatorRealTimeViz' : communicatorRealTimeViz,
 ##########################################################################################
 ## class BoundaryConditions
 
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 # Dictionary with boundary class references! Name_in_xml : class in classBoundaryConditions.py
 bcTagsClassReferences = { # BoundaryConditions normal
                           'Flow-PhysiologicalFunction'       :'PhysiologicalFunction',
                           'Flow-Sinus'                       :'Sinus',
                           'Flow-Sinus2'                      :'Sinus2',
                           'Flow-ExpFunc'                     :'ExpFunc',
-                          'Flow-CCAInflow'                   :'CCAInflow',   
+                          'Flow-CCAInflow'                   :'CCAInflow',
                           'Flow-AortaInflow'                 :'AortaInflow',
                           'Flow-AoBifInflow'                 :'AoBifInflow',
                           'Flow-ExperimentalInflow'          :'ExperimentalInflow',
@@ -125,18 +125,19 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           'ReflectionCoefficientTimeVarying' :'ReflectionCoefficientTimeVarying',
                           'Resistance'                       :'Resistance',
                           'Windkessel-2ElementsDAE'          :'Windkessel2DAE',
+                          'Windkessel-3ElementsDAE'          :'Windkessel3DAE',
                           'Windkessel-2Elements'             :'Windkessel2',
                           'Windkessel-3Elements'             :'Windkessel3',
                           'L-network'                        :'L_network',
                           'VaryingElastanceHeart'            :'VaryingElastance',
-                          'VaryingElastanceSimple'           :'VaryingElastanceSimple',     
-                          'VaryingElastanceSimpleDAE'        :'VaryingElastanceSimpleDAE',                          
-                          # BoundaryCondition names if 1 Vessel '_' == end-positionreference 
+                          'VaryingElastanceSimple'           :'VaryingElastanceSimple',
+                          'VaryingElastanceSimpleDAE'        :'VaryingElastanceSimpleDAE',
+                          # BoundaryCondition names if 1 Vessel '_' == end-positionreference
                           '_Flow-PhysiologicalFunction'       :'PhysiologicalFunction',
                           '_Flow-Sinus'                       :'Sinus',
                           '_Flow-Sinus2'                      :'Sinus2',
                           '_Flow-ExpFunc'                     :'ExpFunc',
-                          '_Flow-CCAInflow'                   :'CCAInflow',   
+                          '_Flow-CCAInflow'                   :'CCAInflow',
                           '_Flow-AortaInflow'                 :'AortaInflow',
                           '_Flow-AoBifInflow'                 :'AoBifInflow',
                           '_Flow-ExperimentalInflow'          :'ExperimentalInflow',
@@ -153,12 +154,13 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           '_ReflectionCoefficientTimeVarying' :'ReflectionCoefficientTimeVarying',
                           '_Resistance'                       :'Resistance',
                           '_Windkessel-2ElementsDAE'          :'Windkessel2DAE',
+                          '_Windkessel-3ElementsDAE'          :'Windkessel3DAE',
                           '_Windkessel-2Elements'             :'Windkessel2',
                           '_Windkessel-3Elements'             :'Windkessel3',
                           '_L-network'                        :'L_network',
                           }
 
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 # Tag dictionary defines the variables a boundaryCondition needs as input via xml!
 boundaryConditionElements = {
           # Type 1 attribute
@@ -167,6 +169,7 @@ boundaryConditionElements = {
           'ReflectionCoefficientTimeVarying' : ['RtOpen','Topen1','Topen2','RtClosed','Tclosed1','Tclosed2'],
           'Resistance'                  :['Rc'],
           'Windkessel-2ElementsDAE'     :['Rc','C'],
+          'Windkessel-3ElementsDAE'     :['Rc','Rtotal','C','Z'],
           'Windkessel-2Elements'        :['Rc','C'],
           'Windkessel-3Elements'        :['Rc','Rtotal','C','Z'],
           'Flow-PhysiologicalFunction'  :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
@@ -190,7 +193,7 @@ boundaryConditionElements = {
           'VaryingElastanceHeart'       :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'K'],
           'VaryingElastanceSimple'      :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'K'],
           'VaryingElastanceSimpleDAE'   :['T', 'Emax', 'Emin', 'Tpeak', 'V0'],
-          # BoundaryCondition names if 1 Vessel '_' == end-positionreference 
+          # BoundaryCondition names if 1 Vessel '_' == end-positionreference
           '_Flow-PhysiologicalFunction' :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
           '_Flow-Sinus'                 :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
           '_Flow-Sinus2'                :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
@@ -213,9 +216,10 @@ boundaryConditionElements = {
           '_Resistance'                 :['Rc'],
           '_Windkessel-2ElementsDAE'    :['Rc','C'],
           '_Windkessel-2Elements'       :['Rc','C'],
+          '_Windkessel-3ElementsDAE'    :['Rc','Rtotal','C','Z'],
           '_Windkessel-3Elements'       :['Rc','Rtotal','C','Z'],
           '_L-network'                  :['Z','C'],
-          'None'                        :['']} 
+          'None'                        :['']}
 ##########################################################################################
 ## class Vessel
 
@@ -225,7 +229,7 @@ vesselAttributes = ['Id',
 vesselTopologyElements = ['leftDaughter',
                           'rightDaughter',
                           'angleYMother']
-   
+
 vesselGeometryElements = ['geometryType',
                           'length',
                           'radiusProximal',
@@ -294,7 +298,7 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference, #TODO why is this Reference?
                         'randomInputManager'    : None,
-                        'generalRandomInputs'   : randomInputDistributionElements, 
+                        'generalRandomInputs'   : randomInputDistributionElements,
                         'vessels'               : vesselElements,
                         'venousPool' : None }
 

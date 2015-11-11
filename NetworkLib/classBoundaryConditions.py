@@ -82,6 +82,7 @@ class generalPQ_BC(BoundaryConditionType2):
     returns the domega-vector with (domega_ , _domega) based on the input values
     and its returnFunction
     """
+    NEWTON_TOL = 1e-6 # This is the accuracy of the estimate of omega, i.e. order of pascals
     def funcPos0(self, _domegaField, R, dt, P, Q, nmem, n):
         """return function for position 0 at the start
         of the vessel
@@ -91,7 +92,7 @@ class generalPQ_BC(BoundaryConditionType2):
         omegaOld_ = r11*P+r12*Q
         # TODO: Generalize residual wrappers?
         # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
-        domega_ = so.newton(self.residualW1Newton, x0 = omegaOld_, tol=1e-6, args = (_domegaField,P, Q, dt, nmem,n, r11, r12, r21, r22))
+        domega_ = so.newton(self.residualW1Newton, x0 = omegaOld_, tol=self.NEWTON_TOL, args = (_domegaField,P, Q, dt, nmem,n, r11, r12, r21, r22))
 
         self.omegaNew[0] = domega_
         self.omegaNew[1] = _domegaField
@@ -99,7 +100,6 @@ class generalPQ_BC(BoundaryConditionType2):
         self.dQInOut = R[:][1] * self.omegaNew
 
         return np.dot(R, self.omegaNew), self.dQInOut
-
 
     def funcPos1(self, domegaField_, R, dt, P, Q,nmem, n):
         """
@@ -110,7 +110,7 @@ class generalPQ_BC(BoundaryConditionType2):
         _omegaOld = r21*P+r22*Q
 
         # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
-        _domega = so.newton(self.residualW2Newton, x0 = _omegaOld,  tol=1e-12, args = (domegaField_,P, Q, dt, nmem,n, r11, r12, r21, r22))
+        _domega = so.newton(self.residualW2Newton, x0 = _omegaOld,  tol=self.NEWTON_TOL, args = (domegaField_, P, Q, dt, nmem, n, r11, r12, r21, r22))
 
         self.omegaNew[0] = domegaField_
         self.omegaNew[1] = _domega
@@ -140,7 +140,6 @@ class generalPQ_BC(BoundaryConditionType2):
         """
         dP = r11*domegaField_+ r12*_domega
         dQ = r21*domegaField_+ r22*_domega
-
         return self.residualPQ(dP,dQ,P,Q,dt,nmem,n)
 
     def residualW1(self,domega_, args):
@@ -1338,6 +1337,97 @@ class Windkessel2DAE(generalPQ_BC):
 
     def residualPQ(self, dP, dQ, P, Q, dt,nmem, n):
         return self.C*dP/dt + (P+dP-self.venousPressure[n])/self.Rc - (Q+dQ)
+
+class Windkessel3DAE(generalPQ_BC):
+    """
+    Boundary profile - type 2
+
+    3 Element Windkessel solved using as a DAE using Backwards Euler
+
+    """
+
+    solutionMemoryFields    = ["pressure", "volume", "Qin", "Qout"]
+    solutionMemoryFieldsToSave = ["pressure", "volume", "Qin", "Qout"]
+
+    def __init__(self):
+        self.type = 2
+        self.Z0 = None
+        self.Z = 'VesselImpedance'
+        self.Zrt = self.Z0
+        self.firstRun = False
+        self.Rc = None
+        self.Rcrt = 1.0
+        self.Rtotal = None
+        self.firstRun = False
+        self.C = 0
+
+        self.venousPressure = 7.*133.32
+        self.Pv = self.venousPressure
+        self.pressure = np.zeros(0)
+        self.volume = np.zeros(0)
+        self.Qout = np.zeros(0)
+        self.Qin = np.zeros(0)
+        self.vesselId = None
+        self.returnFunction = None
+        self.omegaNew = np.empty((2))
+        self.dQInOut = np.empty((2))
+
+    def initializeSolutionVectors(self, runtimeMemoryManager, solutionDataFile):
+        """
+        Initializes the solutionMemoryFields
+        """
+        self.dsetGroup = solutionDataFile.create_group('WK3-'+str(self.vesselId))
+        self.allocate(runtimeMemoryManager)
+
+        self.pressure[0] = 100.*133.32
+        self.volume[0] = 0.0
+
+        if isinstance(self.venousPressure, float):
+            self.Pv = self.venousPressure
+        else:
+            self.Pv = self.venousPressure[0]
+
+        self.Qout[0] = 0.0
+
+        self.Qin[0] = 0.0
+
+    def __call__(self, _domegaField_, duPrescribed, R, L,nmem,  n, dt, P, Q, A, Z1, Z2):
+
+
+        if self.Z == 'VesselImpedance' and self.firstRun == False:
+            self.Zrt = Z1
+            # # Z not time-varying activate this lines:
+            self.Z0 = Z1
+            self.firstRun = True
+        elif self.firstRun == True:
+            self.Zrt = self.Z0
+        else:
+            self.Zrt= self.Z
+
+        self.Rcrt = self.Rc
+        if self.Rc == None:
+            self.Rcrt = self.Rtotal - self.Zrt
+            # # Rc not time-varying activate this line:
+            # self.Rc = Rc
+
+        self.pressure[nmem] = P - Q*self.Zrt
+        self.Qin[nmem] = Q
+
+        # TODO: Polymorphic scalar/array variables?
+        if isinstance(self.venousPressure, float):
+            self.Pv = self.venousPressure
+        else:
+            self.Pv = self.venousPressure[nmem]
+
+        self.Qout[nmem] = (P-Q*self.Zrt - self.Pv)/self.Rcrt
+        self.volume[nmem] = self.volume[nmem-1] + (Q - self.Qout[nmem])*dt
+
+        return self.returnFunction(_domegaField_, R, dt, P, Q, nmem, n)
+
+    def residualPQ(self, dP, dQ, P, Q, dt,nmem, n):
+        dPW = P + dP - self.pressure[nmem] - (Q+dQ)*self.Zrt
+        return self.C*dPW/dt + (self.pressure[nmem]+dPW-self.Pv)/self.Rcrt - (Q+dQ)
+
 
 class Windkessel2(BoundaryConditionType2):
     """
