@@ -502,24 +502,18 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
 
         self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
-
         self.dsetGroup = self.solutionDataFile.create_group('VascularNetwork')
+        self.allocate(self.runtimeMemoryManager)
 
         # TODO: Integrate precalculated data into data saving framework
         self.dsetGroup.create_dataset('TiltAngle', (self.savedArraySize,),dtype='float64')
         self.tiltAngle = np.zeros(self.nTSteps)
 
-        self.allocate(self.runtimeMemoryManager)
-#         self.createSolutionMemory(self.memoryArraySizeTime)
-#         self.createFileDataBuffers(self.savedArraySize, self.dsetGroup)
-#         solMemory, dsets = self.getSolutionMemory()
-#         self.runtimeMemoryManager.registerSimulationData(solMemory, dsets)
-#
-
         self.simulationTime[0] = -self.nTstepsInitPhase*self.dt
 
         print "cVN::InitializeNetworkForSimulation"
-        print "nTSteps", self.nTSteps, "nSave ={},{},{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
+        print "nTSteps", self.nTSteps
+        print "Saving ={}:{}:{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
 
 
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
