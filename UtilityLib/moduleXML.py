@@ -213,13 +213,13 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 #                     writeRandomInputElement(xmlFileElement, None, randomInputManager, randomInput.location)
 
         elif xmlElementName == 'venousPool':
-            if vascularNetwork.venousPool != None:
+            if vascularNetwork.venousPool is not None:
                 venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
                 venousPoolWrapper.venousPoolContent = vascularNetwork.venousPool
                 venousPoolWrapper.writeDataToXmlNode(xmlFileElement)
 
         elif xmlElementName == 'randomInputManager':
-            if vascularNetwork.randomInputManager != None:
+            if vascularNetwork.randomInputManager is not None:
                 vascularNetwork.randomInputManager.writeDataToXmlNode(xmlFileElement)
 
         elif xmlElementName == "externalStimuli":
@@ -479,7 +479,7 @@ def loadNetworkFromXML(networkName ,
                         # find all bcs of this type
                         for bcElements in boundaryConditionElement.findall(''.join(['.//',boundaryType])):
                             boundaryInstance = eval(nxml.bcTagsClassReferences[boundaryType])()
-                            boundaryDataDict = {}
+                            boundaryDataDict = {"vesselId":vesselId}
                             boundaryDataDict['name'] = boundaryType
                             # loop through all variables of this type, convert and save values of these
                             for variable in nxml.xmlElementsReference[xmlElementName][boundaryType]:
@@ -712,15 +712,17 @@ def loadNetworkFromXML(networkName ,
 #                                            None)
 
             elif xmlElementName == "venousPool":
-                venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
-                venousPoolWrapper.loadDataFromXmlNode(xmlElement)
-                vascularNetwork.venousPool = venousPoolWrapper.venousPoolContent
+                if xmlElement:
+                    venousPoolWrapper = classVenousPool.VenousPoolXMLWrapper()
+                    venousPoolWrapper.loadDataFromXmlNode(xmlElement)
+                    vascularNetwork.venousPool = venousPoolWrapper.venousPoolContent
 
             elif xmlElementName == 'randomInputManager':
                 ## create random vector
-                randomInputManager = RandomInputManager()
-                vascularNetwork.randomInputManager = randomInputManager
-                vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
+                if xmlElement:
+                    randomInputManager = RandomInputManager()
+                    vascularNetwork.randomInputManager = randomInputManager
+                    vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
 
             elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork
                 vascularNetworkData = {}

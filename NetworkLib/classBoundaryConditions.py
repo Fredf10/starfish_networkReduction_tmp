@@ -753,7 +753,7 @@ class FlowFromFile(BoundaryConditionType1):
         self.loadedFile = False
 
     def loadFile(self):
-		
+
         try:
             # set the path relative to THIS file not the executing file!
             if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
@@ -1282,21 +1282,61 @@ class Windkessel2DAE(generalPQ_BC):
     returns the domega-vector with (domega_ , _domega) based on the input values
     and its returnFunction
     """
+
+    solutionMemoryFields    = ["pressure", "volume", "Qin", "Qout"]
+    solutionMemoryFieldsToSave = ["pressure", "volume", "Qin", "Qout"]
+
     def __init__(self):
         self.type = 2
         self.Rc = 1
         self.C = 0
 
-        self.venousPressure = 7.*133
-
+        self.venousPressure = 7.*133.32
+        self.pressure = np.zeros(0)
+        self.volume = np.zeros(0)
+        self.Qout = np.zeros(0)
+        self.Qin = np.zeros(0)
+        self.vesselId = None
         self.returnFunction = None
         self.omegaNew = np.empty((2))
         self.dQInOut = np.empty((2))
 
-    def __call__(self, _domegaField_, duPrescribed, R, L,nmem,  n, dt, P, Q, A, Z1, Z2):
-        return self.returnFunction(_domegaField_, R, dt, P, Q, n)
+    def initializeSolutionVectors(self, runtimeMemoryManager, solutionDataFile):
+        """
+        Initializes the solutionMemoryFields
+        """
+        self.dsetGroup = solutionDataFile.create_group('WK2-'+str(self.vesselId))
+        self.allocate(runtimeMemoryManager)
 
-    def residualPQ(self,dP,dQ,P,Q,dt,n):
+        self.pressure[0] = 100.*133.32
+        self.volume[0] = 0.0
+
+        if isinstance(self.venousPressure, float):
+            Pv = self.venousPressure
+        else:
+            Pv = self.venousPressure[0]
+
+        self.Qout[0] = (self.pressure[0]-Pv)/self.Rc
+
+        self.Qin[0] = 0.0
+
+    def __call__(self, _domegaField_, duPrescribed, R, L,nmem,  n, dt, P, Q, A, Z1, Z2):
+
+        self.pressure[nmem] = P
+        self.Qin[nmem] = Q
+
+        # TODO: Polymorphic scalar/array variables?
+        if isinstance(self.venousPressure, float):
+            Pv = self.venousPressure
+        else:
+            Pv = self.venousPressure[nmem]
+
+        self.Qout[nmem] = (P - Pv)/self.Rc
+        self.volume[nmem] = self.volume[nmem-1] + (Q - self.Qout[nmem])*dt
+
+        return self.returnFunction(_domegaField_, R, dt, P, Q, nmem, n)
+
+    def residualPQ(self, dP, dQ, P, Q, dt,nmem, n):
         return self.C*dP/dt + (P+dP-self.venousPressure[n])/self.Rc - (Q+dQ)
 
 class Windkessel2(BoundaryConditionType2):
@@ -1409,20 +1449,10 @@ class Windkessel2(BoundaryConditionType2):
         """
         r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
 
-
-        newScheme = False
-        if newScheme == True:
-
-            import scipy.optimize as so
-            # TODO: replace
-            _omegaOld = r21*P+r22*Q
-            _domega = so.fsolve(self.solveW2, x0 = _omegaOld, args = [domegaField_,P, Q, dt,n, r11, r12, r21, r22])
-
-        else:
-            taudt = self.Rc * self.C / dt
-            a = self.Rc * r21 - (1. + 2.*taudt) * r11
-            b = (2.*taudt + 1.) * r12 - self.Rc * r22
-            _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
+        taudt = self.Rc * self.C / dt
+        a = self.Rc * r21 - (1. + 2.*taudt) * r11
+        b = (2.*taudt + 1.) * r12 - self.Rc * r22
+        _domega = (2 * (self.Rc * Q - (P - self.venousPressure[n])) + a * domegaField_) / b
 
 
         self.omegaNew[0] = domegaField_
@@ -2315,10 +2345,10 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
     Currently only the return method "def funcPos0" has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
     It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.   """
-    
+
     solutionMemoryFields    = ["pressure", "volume", "mitralQ", "Elastance", "Flow", "Flow2", "deltaP", "aortaP"]
     solutionMemoryFieldsToSave = ["pressure", "volume", "mitralQ", "Elastance", "Flow", "Flow2", "deltaP", "aortaP"]
-    
+
     def __init__(self):
         self.type = 2
 
@@ -2368,7 +2398,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.dQInOut = np.empty((2))
 
         self.dsetGroup = None
-        
+
         self.pressure = np.zeros(0)
         self.volume = np.zeros(0)
         self.mitralQ = np.zeros(0)
@@ -2378,7 +2408,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.DtFlow = np.zeros(0)
         self.deltaP = np.zeros(0)
         self.aortaP = np.zeros(0)
-        
+
 
     def update(self, bcDict):
         super(VaryingElastanceSimple,self).update(bcDict)
@@ -2572,7 +2602,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
     def E(self, t):
         """
         Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
-        according to Tpeak, T, Emax and Emin. 
+        according to Tpeak, T, Emax and Emin.
         """
         a1 = 0.708 * self.rt_Tpeak
         a2 = 1.677 * a1
@@ -2608,7 +2638,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
     Currently only the return method "def funcPos0" has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
     It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.   """
-    
+
     solutionMemoryFields    = ["pressure", "volume", "mitralQ", "aorticQ","Elastance","atriumPressure"]
     solutionMemoryFieldsToSave = ["pressure", "volume", "mitralQ", "aorticQ","Elastance","atriumPressure"]
 
@@ -2688,7 +2718,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
 
         self.dsetGroup = solutionDataFile.create_group('Heart')
         self.allocate(runtimeMemoryManager)
-        
+
         """ Initial conditions in the ventricle"""
         self.Elastance[0] = self.E(0)
         self.atriumPressure[::] = 7.5*133.32
@@ -2763,7 +2793,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.omegaNew[0] = domegaReflected_
         self.omegaNew[1] = _domegaField
         self.dQInOut = R[:][1] * self.omegaNew
-    
+
     def dampedReflection(self,_domegaField, R, dt, P, Q, nmem, n):
         """
         TODO: What is the physical interpretation of this? Is it nonconservative in volume? momentum?
@@ -2783,7 +2813,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         venoP = self.atriumPressure[nmem]
         t = self.getCycleTime(nmem + 1, dt)
         self.Elastance[nmem + 1] = self.E(t+dt)
-        
+
         # TODO: fix how this inherits from generalizedPQ_BC
         if (Q >= -1e-15 and ventrPn - P > (-0.0001)):  # systolecondition
 
@@ -2799,15 +2829,6 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
                 self.isovolumetricStep(dt,nmem)
 
         return np.dot(R, self.omegaNew), self.dQInOut
-
-
-    def flushSolutionData(self, saving, nDB, nDE, nSB, nSE, nSkip):
-        if saving:
-            self.dsetGroup['pressure'][nDB:nDE] = self.pressure[nSB:nSE:nSkip]
-            self.dsetGroup['volume'][nDB:nDE] = self.volume[nSB:nSE:nSkip]
-            self.dsetGroup['mitralQ'][nDB:nDE] = self.mitralQ[nSB:nSE:nSkip]
-            self.dsetGroup['aorticQ'][nDB:nDE] = self.aorticQ[nSB:nSE:nSkip]
-            self.dsetGroup['Elastance'][nDB:nDE] = self.Elastance[nSB:nSE:nSkip]
 
     def E(self, t):
         """Computes the value of the elastance at time t, according to the shape parameters given by Stergiopolus and scaled
