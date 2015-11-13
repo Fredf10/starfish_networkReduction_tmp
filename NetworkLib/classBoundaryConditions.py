@@ -1397,8 +1397,8 @@ class Windkessel3DAE(generalPQ_BC):
         if self.Z == 'VesselImpedance' and self.firstRun == False:
             self.Zrt = Z1
             # # Z not time-varying activate this lines:
-            self.Z0 = Z1
-            self.firstRun = True
+            # self.Z0 = Z1
+            # self.firstRun = True
         elif self.firstRun == True:
             self.Zrt = self.Z0
         else:
@@ -1407,8 +1407,6 @@ class Windkessel3DAE(generalPQ_BC):
         self.Rcrt = self.Rc
         if self.Rc == None:
             self.Rcrt = self.Rtotal - self.Zrt
-            # # Rc not time-varying activate this line:
-            # self.Rc = Rc
 
         self.pressure[nmem] = P - Q*self.Zrt
         self.Qin[nmem] = Q
