@@ -722,7 +722,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             elif groupName == 'Vein':
                 pass
 
-            elif groupName == 'vessels' or '-' in groupName: # '-' is loads older hdf5 data files
+            elif groupName == 'vessels': # or '-' in groupName: # '-' is loads older hdf5 data files
                 for subGroupName, subGroup in group.iteritems():
                     vesselId = int(subGroupName.split(' - ')[-1])
                     # try:
