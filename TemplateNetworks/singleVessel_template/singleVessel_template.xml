@@ -33,12 +33,6 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-  <baroreceptors>
-  	<BaroreceptorCellML version='1.2'>
-  		<vesselId>1</vesselId>
-  		<baroId>1</baroId>
-  	</BaroreceptorCellML>  		
-  </baroreceptors>
   <communicators>
   	<CommunicatorRealTimeViz>
   		<comType>CommunicatorRealTimeViz</comType>
