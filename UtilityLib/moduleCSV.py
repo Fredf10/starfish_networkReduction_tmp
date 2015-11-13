@@ -179,11 +179,11 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     """
     # find all polychaos tags
     # TODO: read write polynomial chaos variables
-    polyChaosTags = {}
-    for id,bcPolyChaosList in boundaryConditionPolyChaos.iteritems():
-        for bcPolyChaosDict in bcPolyChaosList:
-            for variable,interval in bcPolyChaosDict.iteritems():
-                if variable != 'name': polyChaosTags[variable] = len(interval)     
+#     polyChaosTags = {}
+#     for id,bcPolyChaosList in boundaryConditionPolyChaos.iteritems():
+#         for bcPolyChaosDict in bcPolyChaosList:
+#             for variable,interval in bcPolyChaosDict.iteritems():
+#                 if variable != 'name': polyChaosTags[variable] = len(interval)     
                 
     # find all tags which are known for all boundary conditions
     tagsBCType1 = ['Id','boundaryType']
@@ -197,15 +197,15 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
                 if bcType == 1:
                     if elementTag not in tagsBCType1:
                         tagsBCType1.append(elementTag)
-                        if elementTag in polyChaosTags.keys():
-                            for count in range(polyChaosTags[elementTag]):
-                                tagsBCType1.append(''.join([elementTag,'-pC',str(int(count)+1)]))
+#                         if elementTag in polyChaosTags.keys():
+#                             for count in range(polyChaosTags[elementTag]):
+#                                 tagsBCType1.append(''.join([elementTag,'-pC',str(int(count)+1)]))
                 elif bcType == 2:
                     if elementTag not in tagsBCType2:
                         tagsBCType2.append(elementTag)
-                        if elementTag in polyChaosTags.keys():
-                            for count in range(polyChaosTags[elementTag]):
-                                tagsBCType2.append(''.join([elementTag,'-pC',str(int(count)+1)]))
+#                         if elementTag in polyChaosTags.keys():
+#                             for count in range(polyChaosTags[elementTag]):
+#                                 tagsBCType2.append(''.join([elementTag,'-pC',str(int(count)+1)]))
         
     tagsBCType1.extend(tagsBCType2)
     tags = tagsBCType1
@@ -241,13 +241,13 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
             dataRow['boundaryType'] = boundaryType
             for variable in nxml.boundaryConditionElements[boundaryType]:
                 dataRow[variable] = boundaryCondition.getVariableValue(variable)
-            try:
-                for bcPolyChaosDict in boundaryConditionPolyChaos[Id]:
-                    bcPolyChaosDict.pop('name')
-                    for variable,interval in bcPolyChaosDict.iteritems():
-                        for count,value in enumerate(interval): 
-                            dataRow[''.join([variable,'-pC',str(int(count)+1)])] = value
-            except: pass               
+#             try:
+#                 for bcPolyChaosDict in boundaryConditionPolyChaos[Id]:
+#                     bcPolyChaosDict.pop('name')
+#                     for variable,interval in bcPolyChaosDict.iteritems():
+#                         for count,value in enumerate(interval): 
+#                             dataRow[''.join([variable,'-pC',str(int(count)+1)])] = value
+#             except: pass               
                     
             writer.writerow(dataRow) 
     
