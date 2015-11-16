@@ -728,6 +728,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     # try:
                     # link data
                     self.vesselsToSave[vesselId] = subGroup
+                    self.vessels[vesselId].dsetGroup = subGroup
                         # except:
                             # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                     # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
@@ -848,16 +849,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         return data_dict
 
     def loadSolutionDataRange(self, vesselIds = None, tspan=None, mindt=None,
-                                  values=["All",
-                                  "Pressure",
-                                  "Flow",
-                                  "Area",
-                                  "WaveSpeed",
-                                  'Compliance',
-                                  "MeanVelocity",
-                                  "Gravity",
-                                  "Position",
-                                  "Rotation"]):
+                                  values=["All"]):
         """
         loads the solution data of the vessels specified into memory for the times
             specified and drops any other previously loaded data.
@@ -866,7 +858,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if vesselIds = None, data of all vessels is loaded
             tspan=[t1,t2] - a time range to load into memory t2 must be greater than t1.
                 if tspan=None, all times are loaded
-            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll',
+            values = a list specifying which quantities to load entries keys are booleans and may be 'loadAll',
                 'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All'
                 is in the list all quantities are loaded. Inputs are case insensitive.
             mindt := the minimum spacing in time between successively loaded points if
@@ -877,24 +869,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             solution values corresponding to the time points in vascularNetwork.tsol.
             Accessing vessels and values not set to be loaded will produce errors.
         """
-        # Update loaded data tracking if inputs are valid
-        # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
-        validValues = ["All", "Pressure", "Flow", "Area", "WaveSpeed",
-                       "Compliance", "MeanVelocity", "Gravity", "Position",
-                       "Rotation", "linearWavesplit"]
-        values = set(values)
-        if 'All' in values:
-            values.update(validValues)
-        else:
-            if "WaveSpeed" in values:
-                values.update(["Pressure", "Area"])
-            elif "MeanVelocity" in values:
-                values.update(["Pressure","Flow"])
-            elif "linearWavesplit" in values:
-                values.update(["Pressure","Flow","Area","WaveSpeed"])
-            elif "Compliance" in values:
-                values.update(["Pressure", "Compliance"])
-
         if tspan is not None:
             t1 = tspan[0]
             t2 = tspan[1]
@@ -911,45 +885,16 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             else:
                 nTStepSpaces = 1
 
-            self.tsol = self.simulationTime[nSelectedBegin:nSelectedEnd:nTStepSpaces]
+            tSlice = np.s_[nSelectedBegin:nSelectedEnd:nTStepSpaces]
+
+            self.tsol = self.simulationTime[tSlice]
             # check if all vessels should be loaded
             if vesselIds == None: vesselIds = self.vessels.keys()
             # Update selected vessels
             for vesselId in vesselIds:
                 if vesselId in self.vesselsToSave:
                     vessel = self.vessels[vesselId]
-                    dsetGroup = self.vesselsToSave[vesselId]
-                    if dsetGroup['Psol'].shape[1] == vessel.N:
-                        del vessel.Psol, vessel.Qsol, vessel.Asol
-                        # TODO Implement h5py direct_read method to improve speed
-                        if 'Pressure' in values:
-                            vessel.Psol = dsetGroup['Psol'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if 'Flow' in values:
-                            vessel.Qsol = dsetGroup['Qsol'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if  'Area' in values:
-                            vessel.Asol = dsetGroup['Asol'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if 'WaveSpeed' in values:
-                            #vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
-                            vessel.postProcessing(['WaveSpeed'])
-                        if 'MeanVelocity' in values:
-                            #vessel.vsol = vessel.Qsol/vessel.Asol
-                            vessel.postProcessing(["MeanVelocity"])
-                        if 'Compliance' in values:
-                            vessel.postProcessing(['Compliance'])
-                        if "linearWavesplit" in values:
-                            vessel.postProcessing(["linearWavesplit"])
-                        if 'Gravity' in values:
-                            try: vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file")
-                        if 'Rotation' in values:
-                            try: vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file")
-                        if 'Position' in values:
-                            try: vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file")
-                    else:
-                        self.warning("classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel {} not in saved data".format(vesselId), noException= True)
-                        self.warning("this is a very bad warning text, as it is raised if the saved number of gridpoints is different from the xml file", noException= True)
+                    vessel.loadSolutionDataRange(tSlice,values)
 
         else:
             raise ValueError("classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here")

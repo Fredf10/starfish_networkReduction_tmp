@@ -29,7 +29,7 @@ class Vessel(cSBO.StarfishBaseObject):
 
     solutionMemoryFields = ["Psol", "Asol", "Qsol"]
     solutionMemoryFieldsToSave = ["Psol", "Asol", "Qsol"]
-    
+
     def __init__(self, Id= None, name = None):
         """
         Constructor
@@ -47,7 +47,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.rightDaughter      = None              # id of right daughter vessel
         self.leftMother         = None              # id of left mother
         self.rightMother        = None              # id of right mother
-        
+
         # Coordinate system is RHS with Z along vessel axis. Origin is at the center of area of
         # the vessel, with Z+ pointing towards the distal end
         self.angleXMother       = 0                 # rotation angle in rad around x-axis relative to mother vessel
@@ -89,7 +89,7 @@ class Vessel(cSBO.StarfishBaseObject):
         # vascular Polynomial chaos data dictionary with uncertainty variables
 
         ### Calculated properties
-        # positions in space 
+        # positions in space
         # realtive to global system
         self.positionStart  = np.zeros((1,3))         # instantaneous position of vessel start point in the global system
         self.positionEnd    = np.zeros((1,3))         # instantaneous position of vessel start point in the global system
@@ -100,7 +100,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.angleYMotherTime   = []                # describes angular motion over time; set up by flow solver
         self.angleZMotherTime   = []                # describes angular motion over time; set up by flow solver
 
-        # gravity 
+        # gravity
         self.netGravity         = [0.0]             # net gravity on the vessel
         self.gravityConstant    = -9.81             # gravity constant of the gravitational field
 
@@ -110,7 +110,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.A0                 = None              # initial Area
         self.AsVector           = None              # vector for the total grid containing area at state S
 
-        # SOLID properties   
+        # SOLID properties
         self.compliance         = None              # the compliance class reference
         self.P_Cexp             = None              # pressuer P0 for the ComplianceType exponential
         self.C                  = None              # Compliance function C(P) for all nodes
@@ -138,7 +138,7 @@ class Vessel(cSBO.StarfishBaseObject):
 
         self.quiet = False
         Vessel.number += 1
-    
+
 
     def initialize(self, globalFluid):
         """
@@ -155,7 +155,6 @@ class Vessel(cSBO.StarfishBaseObject):
             except Exception:
                 if key != 'venousPressure':
                     self.exception("classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id))
-#                    print "ERROR: classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id)
 
         # initialize grid
         try:
@@ -237,7 +236,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.Psol = np.ones((0,numberOfGridPoints))
         self.Qsol = np.zeros((0,numberOfGridPoints))
         self.Asol = np.zeros((0,numberOfGridPoints))
-        
+
         # create a new group in the data file
         self.dsetGroup = vesselsDataGroup.create_group(' '.join([self.name, ' - ', str(self.Id)]))
         self.allocate(runtimeMemoryManager)
@@ -260,12 +259,87 @@ class Vessel(cSBO.StarfishBaseObject):
 
     #### Functions for to calculate dependent solution variables (also used for simulations)
 
+    def loadSolutionDataRange(self, tSliceToLoad,
+                                  values=["All",
+                                  "Pressure",
+                                  "Flow",
+                                  "Area",
+                                  "WaveSpeed",
+                                  'Compliance',
+                                  "MeanVelocity",
+                                  "Gravity",
+                                  "Position",
+                                  "Rotation"]
+                              ):
+        """
+        loads the solution data of the vessels specified into memory for the times
+            specified and drops any other previously loaded data.
+        Inputs:
+            tSliceToLoad - a numpy slice object of the form np.s_[nBegin:nEnd:nSteps]
+            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll',
+                'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All'
+                is in the list all quantities are loaded. Inputs are case insensitive.
+        Effects and Usage:
+            loads the specified values into memory such that they may be accessed as
+            vascularNetwork.vessels[vesselId].Pressure, etc, returning a matrix of
+            solution values corresponding to the time points in vascularNetwork.tsol.
+            Accessing vessels and values not set to be loaded will produce errors.
+        """
+        # Update loaded data tracking if inputs are valid
+        # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
+        validValues = ["All", "Pressure", "Flow", "Area", "WaveSpeed",
+                       "Compliance", "MeanVelocity", "Gravity", "Position",
+                       "Rotation", "linearWavesplit"]
+        values = set(values)
+        if 'All' in values:
+            values.update(validValues)
+        else:
+            if "WaveSpeed" in values:
+                values.update(["Pressure", "Area"])
+            elif "MeanVelocity" in values:
+                values.update(["Pressure","Flow"])
+            elif "linearWavesplit" in values:
+                values.update(["Pressure","Flow","Area","WaveSpeed"])
+            elif "Compliance" in values:
+                values.update(["Pressure", "Compliance"])
+
+        dsetGroup = self.dsetGroup
+
+        # TODO Implement h5py direct_read method to improve speed
+        # i.e. dsetGroup["Psol"].read_direct(self.Psol,
+        # np.s_[nselectedBegin:nSelectedEnd:nTStepSpace], None)
+        # reads the selected values into the already allocated array Psol.
+        # Psol probably needs to be allocated already though.
+        if 'Pressure' in values:
+            self.Psol = dsetGroup['Psol'][tSliceToLoad]
+        if 'Flow' in values:
+            self.Qsol = dsetGroup['Qsol'][tSliceToLoad]
+        if  'Area' in values:
+            self.Asol = dsetGroup['Asol'][tSliceToLoad]
+        if 'WaveSpeed' in values:
+            #self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
+            self.postProcessing(['WaveSpeed'])
+        if 'MeanVelocity' in values:
+            #self.vsol = self.Qsol/self.Asol
+            self.postProcessing(["MeanVelocity"])
+        if 'Compliance' in values:
+            self.postProcessing(['Compliance'])
+        if "linearWavesplit" in values:
+            self.postProcessing(["linearWavesplit"])
+        if 'Gravity' in values:
+            try: self.netGravity = dsetGroup['NetGravity'][tSliceToLoad]
+            except Exception: self.warning("vessel.loadSolutionDataRange():  no netGravity stored in solutiondata file for vessel {}".format(self.Id))
+        if 'Rotation' in values:
+            try: self.rotToGlobalSys = dsetGroup['RotationToGlobal'][tSliceToLoad]
+            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file for vessel {}".format(self.Id))
+        if 'Position' in values:
+            try: self.positionStart = dsetGroup['PositionStart'][tSliceToLoad]
+            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file for vessel {}".format(self.Id))
+
     def postProcessing(self, variablesToProcess):
         """
-
         Input:
             variablesToProcess <list>: [ <str>, ...] variables to process
-
         """
         for variableToProcess in variablesToProcess:
             if variableToProcess == "WaveSpeed":
@@ -347,7 +421,7 @@ class Vessel(cSBO.StarfishBaseObject):
         dP_div_Z = self.Psol[:,[gridNode]][1::]/Zo[1::] - self.Psol[:,[gridNode]][0:-1]/Zo[0:-1]
         dQ_multi_Z = self.Qsol[:,[gridNode]][1::]*Zo[1::] - self.Qsol[:,[gridNode]][0:-1]*Zo[0:-1]
 
-        ## calculate dp_f, dp_b and dQ_f, dq_b     
+        ## calculate dp_f, dp_b and dQ_f, dq_b
         dp_f = (dP + dQ_multi_Z)/2.0
         dp_b = (dP - dQ_multi_Z)/2.0
         dQ_f = (dQ + dP_div_Z)/2.0
@@ -377,7 +451,7 @@ class Vessel(cSBO.StarfishBaseObject):
         dP_div_Z = pressureArray[1::]/Zo[1::] - pressureArray[0:-1]/Zo[0:-1]
         dQ_multi_Z = flowArray[1::]*Zo[1::] - flowArray[0:-1]*Zo[0:-1]
 
-        ## calculate dp_f, dp_b and dQ_f, dq_b     
+        ## calculate dp_f, dp_b and dQ_f, dq_b
         dp_f = (dP + dQ_multi_Z)/2.0
         dp_b = (dP - dQ_multi_Z)/2.0
         dQ_f = (dQ + dP_div_Z)/2.0
@@ -401,7 +475,6 @@ class Vessel(cSBO.StarfishBaseObject):
                 self.__setattr__(key,value)
             except Exception:
                 self.warning("Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key))
-#                print "ERROR Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key)
 
     def getVariableValue(self,variableName):
         """
@@ -438,7 +511,7 @@ class Vessel(cSBO.StarfishBaseObject):
 
         Initializing net gravity on the vessels.
         """
-       
+
         if hasattr(self, "angleXMotherTime") and len(self.angleXMotherTime)>0:
             angleXMother = self.angleXMotherTime[n]
         else:
@@ -453,7 +526,7 @@ class Vessel(cSBO.StarfishBaseObject):
         rotToGlobalSys = rotToGlobalSysMother
 
         # 2. assemble rotation matrices,
-        ## 2.1 calculate local rotation matrix to mother depending on 
+        ## 2.1 calculate local rotation matrix to mother depending on
         ### x axis, angleXMother
         if angleXMother != 0:
             rotDaughterMotherX = np.array([[1, 0                     , 0                     ],
