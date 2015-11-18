@@ -127,6 +127,7 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
                                                                samplesDependent.T,
                                                                data)
         
+        statsDict['numberOfSamples'] = sampleSize
         # statistics
         uqsaMeasures = UqsaMeasures()
         uqsaMeasures.setVariablesDict(statsDict)
@@ -258,6 +259,8 @@ class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
         statsDict['expectedValue']      = E
         statsDict['variance']           = V
         
+        statsDict['numberOfSamples'] = sampleSize
+        
         # statistics
         uqsaMeasures = UqsaMeasures()
         uqsaMeasures.setVariablesDict(statsDict)
@@ -314,7 +317,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
             # check if samples, and data have the right format
             distDim = distributionManager.distributionDimension
             if len(samples) != (distDim+2)*self.sampleSize:
-                print 'WARNING: Not simulated as sensitivity analysis case as len(samples) != (distDim+2)*self.sampleSize'
+                #print 'WARNING: Not simulated as sensitivity analysis case as len(samples) != (distDim+2)*self.sampleSize'
                 self.sensitivityAnalysis = False
                 
             if self.sensitivityAnalysis == False:
@@ -327,7 +330,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
                 statsDict['conficenceInterval']  = np.percentile(data,quantiles, axis=0)
                 statsDict['confidenceAlpha'] = confidenceAlpha
             else:
-                      
+                print "Monte Carlo Sensitivity Analysis"  
                 self.createSampleMatixHashTable(distDim)
                 
                 dataA = data[self.matrixHash['A'][0]:self.matrixHash['A'][1]]
@@ -391,6 +394,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
         
         # statistics
         uqsaMeasures = UqsaMeasures()
+        statsDict['numberOfSamples'] = sampleSize
         uqsaMeasures.setVariablesDict(statsDict)
         return uqsaMeasures
             

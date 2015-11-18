@@ -10,7 +10,7 @@ import classLocationOfInterestManager
 import classUqsaMethods
 import classSampleManager
 
-import h5py
+import shutil
 
 class UqsaCase(TestBaseClass):
     
@@ -182,40 +182,71 @@ class UqsaCase(TestBaseClass):
         envoke preprocessing of solution data
         '''
         if self.preProcessData == True:
-            
-            uqsaSolutionDataFileSave = mFPH_VPC.getFilePath('preprocessedDataFile', self.networkName, self.dataNumber, 
-                                                     mode = "write", caseName = self.sampleManager.samplingMethod )
+            #TODO rename caseName!!
+            caseName = '_'.join([self.sampleManager.samplingMethod])
+            preprocessedSolutionData = mFPH_VPC.getFilePath('preprocessedDataFile', self.networkName, self.dataNumber, 
+                                                     mode = "write", caseName = caseName )
             
             simulationTimeFileSave  = mFPH_VPC.getFilePath('simulationTime', self.networkName, self.dataNumber, 
-                                                     mode = "write", caseName =  self.sampleManager.samplingMethod)
-            simulationTimeaFileLoad = mFPH_VPC.getFilePath('simulationTime', self.networkName, self.dataNumber, 
-                                                     mode = "read", caseName = self.sampleManager.samplingMethod, exception = 'No')
+                                                     mode = "write", caseName =  caseName)
+            simulationTimeFileLoad = mFPH_VPC.getFilePath('simulationTime', self.networkName, self.dataNumber, 
+                                                     mode = "read", caseName = caseName, exception = 'No')
             
             self.locationOfInterestManager.preprocessSolutionData(self.evaluationCaseFiles,
-                                                                  uqsaSolutionDataFileSave,
+                                                                  preprocessedSolutionData,
                                                                   simulationTimeFileSave,
-                                                                  simulationTimeaFileLoad)
-        else:
-            
-            uqsaSolutionDataFileLoad = mFPH_VPC.getFilePath('preprocessedDataFile', self.networkName, self.dataNumber, 
-                                                     mode = "write", caseName = self.sampleManager.samplingMethod )
-            
-            self.locationOfInterestManager.loadQuantitiyOfInterestData(uqsaSolutionDataFileLoad)
-            
+                                                                  simulationTimeFileLoad)
+                    
     def quantifyUncertaintyAndAnalyseSensitivtiy(self, distributionManager):
         '''
         evnoke uq sa process
         '''
         if self.postProcessing == True:
-        
+            
+            # copy of preprocessed data file 
+            caseName = '_'.join([self.sampleManager.samplingMethod])
+            preprocessedSolutionData = mFPH_VPC.getFilePath('preprocessedDataFile', self.networkName, self.dataNumber, 
+                                                     mode = "read", caseName = caseName)
+            uqsaSolutionDataFile = mFPH_VPC.getFilePath('uqsaSolutionDataFile', self.networkName, self.dataNumber, 
+                                                     mode = "write", caseName = caseName)
+            shutil.copy(preprocessedSolutionData,uqsaSolutionDataFile)
+            
+            # open solution file
+            self.locationOfInterestManager.openQuantityOfInterestFile(uqsaSolutionDataFile, mode = 'r+')
+            
             # loop through data objects
             for qoi in self.locationOfInterestManager.getQoiIterator():
+                
+                import time
+                timeStartBatch = time.time()
+                
+                basis = 0.285
+                print "hashDataForGivenBases {}".format(basis)
+                qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
+                
+                timeBatchJob= time.time()-timeStartBatch
+                minutesBatch = int(timeBatchJob/60.)
+                secsBatch = timeBatchJob-minutesBatch*60.
+                print '====================================='
+                print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
+                print '====================================='
+                print
+                
                 for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
+                    
+                    timeStartBatch = time.time()
+                    print "calculate uqsa measure for {}".format(uqsaMethodName)
+                    
                     uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
                     qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
+                    
+                    timeBatchJob= time.time()-timeStartBatch
+                    minutesBatch = int(timeBatchJob/60.)
+                    secsBatch = timeBatchJob-minutesBatch*60.
+                    print '====================================='
+                    print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
+                    print '====================================='
+                    print
             
-            uqsaSolutionDataFile = mFPH_VPC.getFilePath('uqsaSolutionDataFile', self.networkName, self.dataNumber, 
-                                                     mode = "write", caseName = self.sampleManager.samplingMethod )
-            
-            self.locationOfInterestManager.saveQuantitiyOfInterestData(uqsaSolutionDataFile)
+            self.locationOfInterestManager.closeAndSaveQuantityOfInterestFile()
     

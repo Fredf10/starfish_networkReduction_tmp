@@ -88,7 +88,7 @@ class SampleManager(TestBaseClass):
                 "L"     Latin hypercube     no
                 "S"     Sobol               yes
                 "H"     Halton              yes
-                "M"     Hammersley          yes
+                "M"     Hammersley          yes / (nested only in the
             
                 Grided sampling schemes
                 Key     Name                Nested

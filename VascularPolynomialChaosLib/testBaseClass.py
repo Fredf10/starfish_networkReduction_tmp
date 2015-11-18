@@ -10,11 +10,20 @@ try:
 except:
     from xml.etree import ElementTree as etree
         
+import h5py
+import numpy as np
+
 class TestBaseClass(object):
      
     externVariables      = {}
     externXmlAttributes  = []
     externXmlElements    = []
+    
+    # in class definition
+    ## pure variables
+    variablesHdf5Memory = []
+    ## dictionary with objects to load
+    objectDictsHdf5Memory = []
     
     class ExtValue(object):
         '''
@@ -473,7 +482,119 @@ class TestBaseClass(object):
         
         return variableValues   
     
+    ### hdf5 options
+    ## File associated functions 
+    def openHdf5File(self, hdf5File, mode):
+        '''
+        opens an hdf5 file and stores it as self.hdf5File
         
+        '''
+        self.hdf5File = h5py.File(hdf5File,mode)
+        
+    def closeHdf5File(self):
+        '''
+        closes the hdf5 File
+        '''
+        self.hdf5File.close()
+    
+    def updateHdf5Groups(self, baseGroupName):
+        '''
+        traverses the group structure of and open hdf5 file in self.hdf5File and compares it to the 
+        structure of the current classes
+        in case of existing class hdf5Group is added as self.hdf5Group variable
+        which is used for loading and saving data
+        '''        
+        if baseGroupName not in self.hdf5File.keys():
+            hdf5Group = self.hdf5File.create_group(baseGroupName)
+        else:
+            hdf5Group = self.hdf5File[baseGroupName]
+        
+        self.assignHdf5Group(hdf5Group)
+    
+    ## Group/memory data associated functions
+    def assignHdf5Group(self, hdf5Group):    
+        '''
+        
+        '''
+        self.hdf5Group = hdf5Group
+                
+        for dictName in self.objectDictsHdf5Memory:
+            # check if dictionary not none and not empty
+            dictL = self.getVariable(dictName) 
+            if dictL != {} and dictL != None:
+                # serach for dict group node for the dictionary create if needed
+                if dictName not in self.hdf5Group.keys():
+                    dictGroup = self.hdf5Group.create_group(dictName)
+                else:
+                    dictGroup = self.hdf5Group[dictName]
+                # go through all dictionary entries
+                for dictObjectName,dictObject in dictL.iteritems():
+                    # check if object node exists or not
+                    if dictObjectName not in dictGroup.keys():
+                        dictObjectGroup = dictGroup.create_group(dictObjectName)
+                    else:
+                        dictObjectGroup = dictGroup[dictObjectName]
+                    # run the of assign hdf5 objects in the dict object element
+                    dictObject.assignHdf5Group(dictObjectGroup)
+        
+    def loadDataHdf5(self):
+        '''
+        
+        '''
+        loadedData = {}
+        ## pure variables
+        # functionality
+        for variableName in self.variablesHdf5Memory:
+            if variableName in self.hdf5Group.keys(): 
+                variableData = self.hdf5Group[variableName]
+                
+                # TODO: use externalVariable definitions dictionary ... #
+                # check for shape 
+                if np.shape(variableData)== ():
+                    loadedData[variableName] = variableData[()]
+                else:
+                    loadedData[variableName] = variableData[:]
+            
+        
+        ## dictionary with objects to load
+        # functionality
+        for dictName in self.objectDictsHdf5Memory:
+            # check if dictionary not none and not empty
+            dictL = self.getVariable(dictName) 
+            if dictL != {} and dictL != None:
+                # serach for dict group node for the dictionary
+                if dictName in self.hdf5Group.keys():
+                    dictGroup = self.hdf5Group[dictName]
+                    for dictObjectName,dictObject in dictL.iteritems():
+                        if dictObjectName in dictGroup.keys():
+                            dictObject.loadDataHdf5()
+                        else: print "Warning: loadDataHdf5 {} could not save dict {} as not a sub-group node of {}".format(self.hdf5Group, dictObjectName, dictName) 
+                
+        self.setVariablesDict(loadedData)
+        
+    def saveDataHdf5(self):
+        '''
+        
+        '''
+        
+        
+        # pure variables
+        # functionality
+        for variableName in self.variablesHdf5Memory:
+            variableValue = self.getVariable(variableName)
+            if variableValue != None: 
+                if variableName in self.hdf5Group.keys():
+                    del self.hdf5Group[variableName]
+                self.hdf5Group.create_dataset(variableName, data=variableValue)
+            
+        # functionality
+        for dictName in self.objectDictsHdf5Memory:
+            dictValue = self.getVariable(dictName)
+            if dictValue != None or dictValue == {}:
+                for dictObjectName,dictObject in dictValue.iteritems():
+                    dictObject.saveDataHdf5()
+    
+    ### getter and setter
     def setVariablesDict(self, dataDict):
         '''
         updates the class data using a dictionary in from of dataDict = {'variableName': value}

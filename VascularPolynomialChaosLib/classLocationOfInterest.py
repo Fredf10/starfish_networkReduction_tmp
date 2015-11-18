@@ -36,6 +36,14 @@ class LocationOfInterest(TestBaseClass):
 #                           'xVal',
 #                           'quantitiesOfInterestToProcess']
         
+    # in class definition
+    ## pure variables
+    variablesHdf5Memory = ["quantitiesOfInterestToProcess",
+                           'xVal',
+                           'confidenceAlpha']
+    ## dictionary with objects to load
+    objectDictsHdf5Memory = ["quantitiesOfInterest"]
+        
     def __init__(self):
         
         self.queryLocation                 = "queryLocation"
@@ -83,8 +91,10 @@ class LocationOfInterest(TestBaseClass):
             for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
                 # normal quantity of interest
                 if 'Extrema' not in quantitiyName and 'InflectionPoint' not in quantitiyName and 'Trajectory' not in quantitiyName:    
-                    if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,len(simulationTime)))
-                    quantityObject.data[sampleIndex] = dataDict[quantitiyName][:,0]
+                    totalDataShape = (sampleSize,len(simulationTime))
+                    dataRow = dataDict[quantitiyName][:,0]
+                    
+                    quantityObject.retainDsetRowData('data', dataRow, sampleIndex, totalDataShape)
                 
                 if 'Trajectory' in quantitiyName:
                     # allocates data for a vessel over space and saves the raw data in quantityObject.dataSpace
@@ -100,7 +110,12 @@ class LocationOfInterest(TestBaseClass):
                         
                         maxLength = self.xVal
                         
-                        maxNumberPoints = 20
+                        interpolateX = False
+                        if vascularNetwork.vessels[vesselId].N != 50:
+                            print "DB: SampleNumebr {} not gridSize 50 but {}".format(sampleIndex,vascularNetwork.vessels[vesselId].N)
+                            interpolateX = True
+                        
+                            maxNumberPoints = 100 # if this is changed peak index in data saving must be changed
                         nPointsUsed = 0
                         position = 0
                         
@@ -111,32 +126,37 @@ class LocationOfInterest(TestBaseClass):
                             vesselId = vesselIds[0]
                             length = vascularNetwork.vessels[vesselId].length
                             
+                            currentSimulationTime = vascularNetwork.simulationTime
+                            
                             maxLength = length*2
                             # do it twice once forward and once backward
                             for direction in ['Forward','Backward']:
-                            
                                 
-                                remainingLength = maxLength-position
-                                if length < remainingLength:
-                                    # get number of points the solution in x
-                                    nPoints = int(maxNumberPoints*length/maxLength)
-                                    xValEnd = length
+                                
+                                if interpolateX == True:
+                                    remainingLength = maxLength-position
+                                    if length < remainingLength:
+                                        # get number of points the solution in x
+                                        nPoints = int(maxNumberPoints*length/maxLength)
+                                        xValEnd = length
+                                        
+                                    if length >= remainingLength:
+                                        xValEnd = remainingLength
+                                        lastVessel = True
+                                        nPoints = maxNumberPoints - nPointsUsed
                                     
-                                if length >= remainingLength:
-                                    xValEnd = remainingLength
-                                    lastVessel = True
-                                    nPoints = maxNumberPoints - nPointsUsed
-                                
-                                xvals = np.linspace(0,xValEnd,nPoints)
-                                
-                                dataTemp = vascularNetwork.getSolutionData(vesselId, [''.join([direction,quantitiyPure])], simulationTime, xvals = xvals)[''.join([direction,quantitiyPure])]
+                                    xvals = np.linspace(0,xValEnd,nPoints)
+                                else:
+                                    xvals = vascularNetwork.vessels[vesselId].z
+                                    
+                                dataTemp = vascularNetwork.getSolutionData(vesselId, [''.join([direction,quantitiyPure])], currentSimulationTime, xvals = xvals)[''.join([direction,quantitiyPure])]
                                 
                                 if data == None: data = dataTemp.T
                                 else:
                                     if direction == 'Forward':  
                                         data = np.vstack([data,dataTemp.T])
                                     else:
-                                        data = np.vstack([data,dataTemp.T[::-1]])
+                                        data = np.vstack([data,dataTemp.T[::-1][1::]])
                                 
                                 if trajectory == None: trajectory = xvals
                                 else: 
@@ -145,68 +165,117 @@ class LocationOfInterest(TestBaseClass):
                                     if direction == 'Forward':                                    
                                         trajectory = np.append(trajectory,xvals+position)
                                     else:
-                                        trajectory = np.append(trajectory,xvals[::-1])
+                                        trajectory = np.append(trajectory,xvals[::-1][1::])
                                 
-                                position = position+xValEnd
-                                nPointsUsed = nPointsUsed + nPoints
+                                if interpolateX == True:
+                                    position = position+xValEnd
+                                    nPointsUsed = nPointsUsed + nPoints
                                 
                                 if lastVessel: 
                                     #print "reached end of trajectory breaking"
                                     break
                     
                     
-                    else:                    
+#                     else:                    
+#                     
+#                         maxLength = self.xVal
+#                         
+#                         maxNumberPoints = 20
+#                         nPointsUsed = 0
+#                         position = 0
+#                         
+#                         lastVessel = False
+#                         trajectory = None                   
+#                         
+#                         
+#                         
+#                         for vesselId in vesselIds:
+#                                 
+#                             length = vascularNetwork.vessels[vesselId].length
+#                             remainingLength = maxLength-position
+#                            
+#                             if length < remainingLength:
+#                                 # get number of points the solution in x
+#                                 nPoints = int(maxNumberPoints*length/maxLength)
+#                                 
+#                             if length >= remainingLength:
+#                                 length = remainingLength
+#                                 lastVessel = True
+#                                 nPoints = maxNumberPoints - nPointsUsed
+#                                 
+#                             xvals = np.linspace(0,length,nPoints)
+#                             dataTemp = vascularNetwork.getSolutionData(vesselId, [quantitiyPure], simulationTime, xvals = xvals)[quantitiyPure]
+#                             
+#                             if data == None: data = dataTemp.T
+#                             else: data = np.vstack([data,dataTemp.T])
+#                             
+#                             if trajectory == None: trajectory = xvals
+#                             else: trajectory = np.append(trajectory,xvals+position)
+#                             
+#                             position = position+length
+#                             nPointsUsed = nPointsUsed + nPoints
+#                             
+#                             if lastVessel: 
+#                                 break
                     
-                        maxLength = self.xVal
-                        
-                        maxNumberPoints = 20
-                        nPointsUsed = 0
-                        position = 0
-                        
-                        lastVessel = False
-                        trajectory = None                   
-                        
-                        
-                        
-                        for vesselId in vesselIds:
-                                
-                            length = vascularNetwork.vessels[vesselId].length
-                            remainingLength = maxLength-position
-                           
-                            if length < remainingLength:
-                                # get number of points the solution in x
-                                nPoints = int(maxNumberPoints*length/maxLength)
-                                
-                            if length >= remainingLength:
-                                length = remainingLength
-                                lastVessel = True
-                                nPoints = maxNumberPoints - nPointsUsed
-                                
-                            xvals = np.linspace(0,length,nPoints)
-                            dataTemp = vascularNetwork.getSolutionData(vesselId, [quantitiyPure], simulationTime, xvals = xvals)[quantitiyPure]
-                            
-                            if data == None: data = dataTemp.T
-                            else: data = np.vstack([data,dataTemp.T])
-                            
-                            if trajectory == None: trajectory = xvals
-                            else: trajectory = np.append(trajectory,xvals+position)
-                            
-                            position = position+length
-                            nPointsUsed = nPointsUsed + nPoints
-                            
-                            if lastVessel: 
-                                print "reached end of trajectory breaking"
-                                break
-                       
                     
-                       
-                    if quantityObject.trajectoryData == None:
-                        quantityObject.trajectoryData =  np.empty((sampleSize,maxNumberPoints))   
-                    quantityObject.trajectoryData[sampleIndex] = trajectory
-                          
-                    print sampleSize,maxNumberPoints,len(simulationTime)
-                    if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,maxNumberPoints,len(simulationTime)))
-                    quantityObject.data[sampleIndex] = data
+                    # find maxima of the data
+                    # find indices where the data has maximums
+                    maxIndices =  np.argmax(data, axis=1)
+                    ## maybe different method
+                    # interpolation between the times
+                    #yinterp = np.empty(len(maxIndices))
+                    t = np.empty(len(maxIndices))
+                    for i,imax in enumerate(maxIndices):
+                        #print imax
+                        y = data[i]
+                        c = y[imax]
+                        b = (y[imax+1]-y[imax-1])/2.0
+                        a = (y[imax+1]+y[imax-1])/2.0 - c
+                        #yinterp[i] = c - b*b/4.0/a
+                        
+                        tindexShift = -b/(2*a)
+                                                
+                        t0 = currentSimulationTime[imax-1]
+                        t1 = currentSimulationTime[imax]
+                        t2 = currentSimulationTime[imax+1]
+                        #print currentSimulationTime[imax]
+                        t[i] = np.interp(tindexShift, [-1,0,1], [t0,t1,t2])
+                        
+                        #print t[i], yinterp[i]
+                        
+                    #print t,yinterp
+                    # get time points of the maximums
+                    #maxTimes = currentSimulationTime[maxIndices].T
+                    
+#                     fig = plt.figure()
+#                     plt.plot(t,yinterp)  
+#                     
+#                     fig = plt.figure()
+#                     plt.plot(maxTimes,trajectory)    
+#                     plt.plot(t,trajectory)  
+#                        
+#                     
+#                     fig = plt.figure()
+#                     for i,p in enumerate(data):
+#                        
+#                         plt.plot(currentSimulationTime,p)
+#                         plt.plot(maxTimes[i],data[i,maxIndices[i]],'k-',linewidth=2, marker='o')    
+#                     plt.plot(t, yinterp,'r-',linewidth=2, marker='d')    
+#                         
+#                     plt.show()
+                    
+                    totalDataShape = (sampleSize,len(maxIndices))
+                    
+                    totalDataShapeMinMaxIndices = (sampleSize,3)
+                    
+                    quantityObject.retainDsetRowData('data',trajectory, sampleIndex, totalDataShape)
+                    quantityObject.retainDsetRowData('dataBasis',t, sampleIndex, totalDataShape)
+                    quantityObject.retainDsetRowData('dataBasisMinMaxPeak',np.array([min(t),max(t),t[50]]), sampleIndex, totalDataShapeMinMaxIndices)
+                    
+                    
+                    #if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,maxNumberPoints,len(simulationTime)))
+                    #quantityObject.data[sampleIndex] = data
                     
                 
         elif "baroreceptor" in self.queryLocation:
@@ -268,96 +337,96 @@ class LocationOfInterest(TestBaseClass):
             del self.quantitiesOfInterest[quantityName]
             self.quantitiesOfInterestToProcess.remove(quantityName)
             
-    def preprocessSolutionDataTrajectory(self, simulationTime, sampleSize):
-        
-        
-        import matplotlib.pyplot as plt
-                
-        for quantityName in self.trajectoryEvaluationQuantities:
-            quantityObject = self.quantitiesOfInterest[quantityName]
-            
-            trajectoryData = quantityObject.trajectoryData
-            
-            data = np.swapaxes(quantityObject.data, 0, 1)
-            
-            useMax = True
-            
-            
-            if useMax == True:
-                
-                
-                # find maxima of the data
-                maxValue = np.amax(data,axis=2)
-                ## currently not used as qoI for gpc
-                
-                # find indices where the data has maximums
-                maxIndices =  np.argmax(data, axis=2)
-                
-                # get time points of the maximums
-                maxTimes = simulationTime[maxIndices].T
-                
-                fig = plt.figure()
-                fig.canvas.set_window_title(''.join([quantityName,'PC']))
-                for x,t in zip(trajectoryData,maxTimes):
-                    plt.plot(t,x)       
-                #plt.show()
-                
-                fixSpace = False
-                
-                if fixSpace == True:
-                
-                    xN = 200
-                    xInt = np.linspace(0, self.xVal, xN)
-                    maxTimeMatched = np.empty((sampleSize,xN))
-                    
-                    
-                    for i in xrange(sampleSize): 
-                        maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
-                    quantityObject.trajectoryData = xInt
-                    quantityObject.data = maxTimeMatched
-                    print "Approximated error in forward wave jump: as a multiple of timesteps"
-                    print np.abs(np.min(maxTimes[:,1::]-maxTimes[:,0:-1], axis=1))/(simulationTime[1]-simulationTime[0])
-                    
-                                         
-                    fig = plt.figure()
-                    fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
-                    for t in maxTimeMatched:
-                        plt.plot(xInt,t)
-                
-                else:
-                    #fix time
-                    
-                    #find the minimum of all return times
-                    startTimes = np.min(maxTimes,axis=1)
-                    maxStartTime = np.max(startTimes)
-                    
-                    endTimes = np.max(maxTimes,axis=1)
-                    minEndTime = np.min(endTimes)
-                    
-                    tN = 200
-                    tInt = np.linspace(maxStartTime,minEndTime,tN)
-                    
-                    spacePointMatched = np.empty((sampleSize,tN))
-                    
-                    for i in xrange(sampleSize): 
-                        spacePointMatched[i] = np.interp(tInt, maxTimes[i], trajectoryData[i])
-                        
-                    quantityObject.trajectoryData = tInt
-                    quantityObject.data = spacePointMatched
-                    
-                    fig = plt.figure()
-                    fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
-                    for x in spacePointMatched:
-                        plt.plot(tInt,x)
-                    
-                    
-                plt.show()
-                
-            else:
-                # find peaks                
-                for dataOfSpacePoint in xrange(len(data)):
-                    self.extremaFinderFunction(dataOfSpacePoint, quantityName, sampleSize, simulationTime, searchPointOfInflection = False)
-                      
+#     def preprocessSolutionDataTrajectory(self, simulationTime, sampleSize):
+#         
+#         
+#         import matplotlib.pyplot as plt
+#                 
+#         for quantityName in self.trajectoryEvaluationQuantities:
+#             quantityObject = self.quantitiesOfInterest[quantityName]
+#             
+#             trajectoryData = quantityObject.trajectoryData
+#             
+#             data = np.swapaxes(quantityObject.data, 0, 1)
+#             
+#             useMax = True
+#             
+#             
+#             if useMax == True:
+#                 
+#                 
+#                 # find maxima of the data
+#                 maxValue = np.amax(data,axis=2)
+#                 ## currently not used as qoI for gpc
+#                 
+#                 # find indices where the data has maximums
+#                 maxIndices =  np.argmax(data, axis=2)
+#                 
+#                 # get time points of the maximums
+#                 maxTimes = simulationTime[maxIndices].T
+#                 
+#                 fig = plt.figure()
+#                 fig.canvas.set_window_title(''.join([quantityName,'PC']))
+#                 for x,t in zip(trajectoryData,maxTimes):
+#                     plt.plot(t,x)       
+#                 #plt.show()
+#                 
+#                 fixSpace = False
+#                 
+#                 if fixSpace == True:
+#                 
+#                     xN = 200
+#                     xInt = np.linspace(0, self.xVal, xN)
+#                     maxTimeMatched = np.empty((sampleSize,xN))
+#                     
+#                     
+#                     for i in xrange(sampleSize): 
+#                         maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
+#                     quantityObject.trajectoryData = xInt
+#                     quantityObject.data = maxTimeMatched
+#                     print "Approximated error in forward wave jump: as a multiple of timesteps"
+#                     print np.abs(np.min(maxTimes[:,1::]-maxTimes[:,0:-1], axis=1))/(simulationTime[1]-simulationTime[0])
+#                     
+#                                          
+#                     fig = plt.figure()
+#                     fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
+#                     for t in maxTimeMatched:
+#                         plt.plot(xInt,t)
+#                 
+#                 else:
+#                     #fix time
+#                     
+#                     #find the minimum of all return times
+#                     startTimes = np.min(maxTimes,axis=1)
+#                     maxStartTime = np.max(startTimes)
+#                     
+#                     endTimes = np.max(maxTimes,axis=1)
+#                     minEndTime = np.min(endTimes)
+#                     
+#                     tN = 200
+#                     tInt = np.linspace(maxStartTime,minEndTime,tN)
+#                     
+#                     spacePointMatched = np.empty((sampleSize,tN))
+#                     
+#                     for i in xrange(sampleSize): 
+#                         spacePointMatched[i] = np.interp(tInt, maxTimes[i], trajectoryData[i])
+#                         
+#                     quantityObject.trajectoryData = tInt
+#                     quantityObject.data = spacePointMatched
+#                     
+#                     fig = plt.figure()
+#                     fig.canvas.set_window_title(''.join([quantityName,'PC_interp']))
+#                     for x in spacePointMatched:
+#                         plt.plot(tInt,x)
+#                     
+#                     
+#                 plt.show()
+#                 
+#             else:
+#                 # find peaks                
+#                 for dataOfSpacePoint in xrange(len(data)):
+#                     self.extremaFinderFunction(dataOfSpacePoint, quantityName, sampleSize, simulationTime, searchPointOfInflection = False)
+#                       
               
     def extremaFinderFunction(self, dataPure, quantityNamePure, sampleSize, simulationTime, searchPointOfInflection):
         
@@ -471,72 +540,4 @@ class LocationOfInterest(TestBaseClass):
         timingData    =  np.array(timingList)
             
         return selectedPoints, amplitudeData, timingData
-            
-    def saveDataHdf5(self, hdf5SaveGroup):
-        '''
-        method to save the data of the location and all quantities of interest to file
-        '''
-        # pure variables
-        
-        # in class definition
-        variablesToSave = ["quantitiesOfInterestToProcess",
-                           'xVal',
-                           'confidenceAlpha']
-        # functionality
-        for variableName in variablesToSave:
-            variableValue = self.getVariable(variableName)
-            if variableValue != None: 
-                hdf5SaveGroup.create_dataset(variableName, data=variableValue)
-        
-        # dict of objects
-        
-        dictsToSave = ["quantitiesOfInterest"]
-        # functionality
-        for dictName in dictsToSave:
-            dictValue = self.getVariable(dictName)
-            dictGroup = hdf5SaveGroup.create_group(dictName)
-            if dictValue != None or dictValue == {}:
-                # if dict is contains objects
-                for dictObjectName,dictObject in dictValue.iteritems():
-                    dictEntryGroup = dictGroup.create_group(dictObjectName)
-                    dictObject.saveDataHdf5(dictEntryGroup)
-                
-    def loadDataHdf5(self, hdf5SaveGroup):
-        '''
-        method to load data from hdf5
-        '''
-        loadedData = {}
-        ## pure variables
-        # in class definition
-        variablesToLoad = ["quantitiesOfInterestToProcess",
-                           'xVal',
-                           'confidenceAlpha']
-        # functionality
-        for variableName in variablesToLoad:
-            if variableName in hdf5SaveGroup.keys(): 
-                variableData = (hdf5SaveGroup[variableName])
-                # TODO: use externalVariable definitions dictionary ... #
-                # check for shape 
-                if np.shape(variableData)== ():
-                    loadedData[variableName] = variableData[()] # for scalar data sets!!
-                else:
-                    loadedData[variableName] = variableData[:]
-        
-        ## dictionary to load
-        dictsToLoad = ["quantitiesOfInterest"]
-        
-        # functionality
-        for dictName in dictsToLoad:
-            # check if dictionary not none and not empty
-            dictL = self.getVariable(dictName) 
-            if dictL != {} and dictL != None:
-                # serach for dict group node for the dictionary
-                if dictName in hdf5SaveGroup.keys():
-                    dictGroup = hdf5SaveGroup[dictName]
-                    for dictObjectName,dictObject in dictL.iteritems():
-                        if dictObjectName in dictGroup.keys():
-                            dictObjectGroup = dictGroup[dictObjectName]
-                            dictObject.loadDataHdf5(dictObjectGroup)
-        
-        self.setVariablesDict(loadedData)
-        
+                    
