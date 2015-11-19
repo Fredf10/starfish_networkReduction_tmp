@@ -150,9 +150,9 @@ class Field():
 
         #TODO: Please explain this if statement in a comment.
         if (self.P[n+1] < 0).any():
-            print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print self.P[n+1]
-            exit()   
+            raise ValueError("ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
+            #print self.P[n+1]
+            #exit()   
         
     def MacCormackMatrix(self):
         """

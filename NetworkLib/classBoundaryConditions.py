@@ -83,7 +83,7 @@ class generalPQ_BC(BoundaryConditionType2):
     and its returnFunction
     """
     NEWTON_TOL = 1e-6 # This is the accuracy of the estimate of omega, i.e. order of pascals
-    def funcPos0(self, _domegaField, R, dt, P, Q, nmem, n):
+    def funcPos0(self, _domegaField, R, dt, P, Q,A, nmem, n):
         """return function for position 0 at the start
         of the vessel
         """
@@ -92,7 +92,7 @@ class generalPQ_BC(BoundaryConditionType2):
         omegaOld_ = r11*P+r12*Q
         # TODO: Generalize residual wrappers?
         # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
-        domega_ = so.newton(self.residualW1Newton, x0 = omegaOld_, tol=self.NEWTON_TOL, args = (_domegaField,P, Q, dt, nmem,n, r11, r12, r21, r22))
+        domega_ = so.newton(self.residualW1Newton, x0 = omegaOld_, tol=self.NEWTON_TOL, args = (_domegaField,P, Q,A, dt, nmem,n, r11, r12, r21, r22))
 
         self.omegaNew[0] = domega_
         self.omegaNew[1] = _domegaField
@@ -101,7 +101,7 @@ class generalPQ_BC(BoundaryConditionType2):
 
         return np.dot(R, self.omegaNew), self.dQInOut
 
-    def funcPos1(self, domegaField_, R, dt, P, Q,nmem, n):
+    def funcPos1(self, domegaField_, R, dt, P, Q,A, nmem, n):
         """
         return function for position -1 at the end
         of the vessel
@@ -110,7 +110,7 @@ class generalPQ_BC(BoundaryConditionType2):
         _omegaOld = r21*P+r22*Q
 
         # Compared Brentq, fsolve and newton, and newton seems to be the most efficient.
-        _domega = so.newton(self.residualW2Newton, x0 = _omegaOld,  tol=self.NEWTON_TOL, args = (domegaField_, P, Q, dt, nmem, n, r11, r12, r21, r22))
+        _domega = so.newton(self.residualW2Newton, x0 = _omegaOld,  tol=self.NEWTON_TOL, args = (domegaField_, P, Q,A, dt, nmem, n, r11, r12, r21, r22))
 
         self.omegaNew[0] = domegaField_
         self.omegaNew[1] = _domega
@@ -118,7 +118,7 @@ class generalPQ_BC(BoundaryConditionType2):
         self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
         return np.dot(R, self.omegaNew), self.dQInOut
 
-    def residualW1Newton(self,domega_, _domegaField, P, Q, dt, nmem, n, r11, r12, r21, r22):
+    def residualW1Newton(self,domega_, _domegaField, P, Q,A, dt, nmem, n, r11, r12, r21, r22):
         """
         Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
 
@@ -128,9 +128,9 @@ class generalPQ_BC(BoundaryConditionType2):
         """
         dP = r11*domega_+ r12*_domegaField
         dQ = r21*domega_+ r22*_domegaField
-        return self.residualPQ(dP,dQ,P,Q,dt,nmem,n)
+        return self.residualPQ(dP,dQ,P,Q,A,dt,nmem,n)
 
-    def residualW2Newton(self,_domega, domegaField_,P, Q, dt, nmem, n, r11, r12, r21, r22):
+    def residualW2Newton(self,_domega, domegaField_,P, Q,A, dt, nmem, n, r11, r12, r21, r22):
         """
         Maps the input state of omega_1 and omega_2 to dP and dQ for the PQ residual equaition.
 
@@ -140,7 +140,7 @@ class generalPQ_BC(BoundaryConditionType2):
         """
         dP = r11*domegaField_+ r12*_domega
         dQ = r21*domegaField_+ r22*_domega
-        return self.residualPQ(dP,dQ,P,Q,dt,nmem,n)
+        return self.residualPQ(dP,dQ,P,Q,A,dt,nmem,n)
 
     def residualW1(self,domega_, args):
         """
@@ -150,11 +150,11 @@ class generalPQ_BC(BoundaryConditionType2):
             args = [_domegaField,P, Q, dt,nmem,n, r11, r12, r21, r22]
 
         """
-        _domegaField,P, Q, dt,n, r11, r12, r21, r22 = args
+        _domegaField,P, Q, A, dt, nmem, n, r11, r12, r21, r22 = args
         dP = r11*domega_+ r12*_domegaField
         dQ = r21*domega_+ r22*_domegaField
 
-        return self.residualPQ(dP,dQ,P,Q,dt,nmem,n)
+        return self.residualPQ(dP, dQ, P, Q, A, dt, nmem, n)
 
     def residualW2(self,_domega, args):
         """
@@ -164,13 +164,13 @@ class generalPQ_BC(BoundaryConditionType2):
             args = [domegaField_,P, Q, dt,nmem,n, r11, r12, r21, r22]
 
         """
-        domegaField_,P, Q, dt,n, r11, r12, r21, r22 = args
+        domegaField_,P, Q, A, dt, nmem, n, r11, r12, r21, r22 = args
         dP = r11*domegaField_+ r12*_domega
         dQ = r21*domegaField_+ r22*_domega
 
-        return self.residualPQ(dP,dQ,P,Q,dt,nmem,n)
+        return self.residualPQ(dP, dQ, P, Q, A, dt, nmem, n)
 
-    def residualPQ(self,dP,dQ,P,Q,dt,nmem,n):
+    def residualPQ(self,dP,dQ,P,Q,A,dt,nmem,n):
         raise NotImplementedError('Residual equation residualPQ for omega must be implemented.')
 
 ########################################################################################
@@ -2816,7 +2816,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
     def __call__(self, _domegaField_, duPrescribed, R, L, nmem, n, dt, P, Q, A, Z1, Z2):
         self.newCycle = False                     # Update the state of the mitral and aortic valve at timestep n + 1
         self.startNewCycleIfCriteriaIsMet(n, dt)
-        self.funcPos0(_domegaField_, R, dt, P, Q, nmem, n)  # Compute the riemann variant going into the vessel save in omegaNew
+        self.funcPos0(_domegaField_, R, dt, P, Q, A, nmem, n)  # Compute the riemann variant going into the vessel save in omegaNew
 
         self.dQInOut = R[:][1] * self.omegaNew
 
@@ -2839,7 +2839,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
             self.rt_Emax = self.Emax_BRX
             self.rt_Emin = self.Emin_BRX
 
-    def systoleResidual(self,dP,dQ,P,Q,dt, nmem, n):
+    def systoleResidual(self,dP,dQ,P,Q, A, dt, nmem, n):
         dVImposed = -dt*(2*Q + dQ)/2
         # TODO: Create separate functions for each discretization type
         # TODO: Verify this equation set
@@ -2849,9 +2849,9 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         # residual = self.volume[n+1] - self.volume[n] - dVImposed
 
         # Assume Flow and derive pressure
-        self.volume[nmem+1] = self.volume[nmem] + dVImposed
-        self.pressure[nmem+1] = self.Elastance[nmem+1]*(self.volume[nmem+1]-self.V0)
-        residual = self.pressure[nmem+1] - (P+dP)
+#         self.volume[nmem+1] = self.volume[nmem] + dVImposed
+#         self.pressure[nmem+1] = self.Elastance[nmem+1]*(self.volume[nmem+1]-self.V0)
+#         residual = self.pressure[nmem+1] - (P+dP)
 
         # Differentiated form
         # h = 1e-7
@@ -2860,7 +2860,22 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         # residual = dP - dEdt*((P+dP)/self.Elastance[n+1] + self.V0) + self.Elastance[n+1]*(Q+dQ)
         # residual = self.volume[n+1]-self.volume[n] -(self.pressure[n+1]/self.Elastance[n+1] - self.pressure[n]/self.Elastance[n])*dt
         # residual = self.volume[n+1] - self.V0 - (P+dP)/self.Elastance[n+1]
-
+        
+        
+        ##
+        # P,dP are P2
+        dVImposed = -dt*(2*Q + dQ)/2
+        Vh = self.volume[nmem] + dVImposed
+        self.volume[nmem+1] =Vh
+        Ph = self.Elastance[nmem+1]*(self.volume[nmem+1]-self.V0)
+        self.pressure[nmem+1] = Ph
+        a = 4.5e-2 # length of left ventricle in cm
+        h = 0.2*a
+        Ah = 3*Vh*(2*a-h)*h/(4*a**3)
+        rho = 1050.0
+        q2 =  (Q+dQ)**2
+        residual = (P+dP - Ph)  +rho*q2/2*(1./Ah -1./A)
+        
         return residual
 
     def diastoleStep(self,dt,nmem):
@@ -2871,9 +2886,9 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.volume[nmem+1] = self.volume[nmem]
         self.pressure[nmem+1] = self.Elastance[nmem+1]*(self.volume[nmem+1]-self.V0)
 
-    def residualPQ(self, dP, dQ, P, Q, dt, nmem, n):
+    def residualPQ(self, dP, dQ, P, Q, A, dt, nmem, n):
         # Only Valid during systole
-        residual = self.systoleResidual(dP, dQ, P, Q, dt, nmem, n)
+        residual = self.systoleResidual(dP, dQ, P, Q, A, dt, nmem, n)
         return residual
 
     def reflection(self,_domegaField, R, dt, P, Q, n):
@@ -2892,7 +2907,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         self.dQInOut = R[:][1] * self.omegaNew
 
 
-    def funcPos0(self, _domegaField, R, dt, P, Q, nmem, n):
+    def funcPos0(self, _domegaField, R, dt, P, Q, A, nmem, n):
         """return function for position 0 at the start
         of the vessel
         """
@@ -2901,12 +2916,12 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         venoP = self.atriumPressure[nmem]
         t = self.getCycleTime(nmem + 1, dt)
         self.Elastance[nmem + 1] = self.E(t+dt)
+        
 
         # TODO: fix how this inherits from generalizedPQ_BC
         if (Q >= -1e-15 and ventrPn - P > (-0.0001)):  # systolecondition
-
             # TODO: Ignore return values as they are stored as class members
-            u, dQInOut = super(VaryingElastanceSimpleDAE,self).funcPos0(_domegaField, R, dt, P, Q, nmem, n)
+            u, dQInOut = super(VaryingElastanceSimpleDAE,self).funcPos0(_domegaField, R, dt, P, Q, A, nmem, n)
 
         else:
             self.dampedReflection(_domegaField,R,dt,P,Q,nmem,n)

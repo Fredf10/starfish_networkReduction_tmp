@@ -101,6 +101,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
         self.venousPool = classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({})
+        self.heart = None
 
         self.boundaryConditions = {}
 
@@ -347,6 +348,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     if vesselId == self.root:
                         for bc in bcs:
                             bc.setPosition(0)
+                            if "Elastance" in bc.name:
+                                self.heart = bc
 
                     elif vesselId in self.boundaryVessels:
                         for bc in bcs:
@@ -638,6 +641,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # Global Impedance?
         nmem = self.currentMemoryIndex[0]
         self.simulationTime[nmem+1] = self.simulationTime[nmem] + self.dt
+        # TODO: Pressure update assumes happening last
+        if self.heart:
+            if len(self.venousPool.P_LA)>1:
+                self.heart.atriumPressure[nmem+1] = self.venousPool.P_LA[nmem+1]
+            else:
+                self.heart.atriumPressure[nmem+1] = self.venousPool.pressureGain*self.venousPool.P[0]
         # TODO: Volume calculation assumes all other objects have been updated for the current time step!!!!
         self.arterialVolume[nmem+1] = self.calculateNetworkVolume(nmem+1)
 

@@ -11,8 +11,8 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
     """
     """
     # defined external data
-    externVariables      = {'P0' : cCOB.ConfigurableObjectBase.ExtValue(float,  unit = 'Pa'),
-                             'pressureGain'                : cCOB.ConfigurableObjectBase.ExtValue(float,  unit =None )}
+    externVariables      = {'P0':cCOB.ConfigurableObjectBase.ExtValue(float, unit='Pa'),
+                             'pressureGain':cCOB.ConfigurableObjectBase.ExtValue(float, unit=None )}
     externXmlAttributes  = []
     externXmlElements    = ['P0', 'pressureGain']
             
@@ -27,7 +27,9 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
 
         
     def __call__(self):
-        pass
+        # TODO: Make this more efficient
+        self.P[0] = self.P0
+        self.P_LA[0] = self.pressureGain*self.P[0]
     
     def update(self,dataDict):
         """
@@ -40,7 +42,7 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
                 self.__setattr__(key,value)
             except Exception:
                 self.warning("StaticVenousPool.update(): wrong key: %s, could not set up venousPool" %key)
-
+        
 
 
 class venousPool(cSBO.StarfishBaseObject):
