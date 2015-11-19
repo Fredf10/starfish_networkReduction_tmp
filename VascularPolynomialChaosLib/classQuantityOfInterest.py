@@ -14,9 +14,7 @@ class QuantityOfInterest(TestBaseClass):
     
     ## dictionary with objects to load
     objectDictsHdf5Memory = ['uqsaMeasures']
-    
-    
-    
+        
     def __init__(self,quantityName, locationName, confidenceAlpha, data = None):
         
         self.queryLocation = locationName
@@ -50,7 +48,8 @@ class QuantityOfInterest(TestBaseClass):
         '''
         
         '''
-        self.data = np.empty((sampleSize,1))
+        
+        self.data = np.empty((sampleSize,len(basis)))
         
         for n in xrange(sampleSize):
             

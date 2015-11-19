@@ -263,9 +263,11 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 
             if automaticGridCorrection != {}:
                 gridCorrection = 'ohYesDoItPlease'
-                if self.automaticGridAdaptation == True: gridCorrection = 'y'
-                while  gridCorrection not in (' ','','y','Y','n','N'): 
-                    gridCorrection = raw_input('Do you whish to adapt grid? (yes [<ENTER>,<y>,<Y>]/no [<n>,<N>])')
+                
+                # TODO: comment grid correction in again !!
+                #if self.automaticGridAdaptation == True: gridCorrection = 'y'
+                #while  gridCorrection not in (' ','','y','Y','n','N'): 
+                #    gridCorrection = raw_input('Do you whish to adapt grid? (yes [<ENTER>,<y>,<Y>]/no [<n>,<N>])')
                 
                 if gridCorrection in (' ','','y','Y'):
                     #if quiet == False: print ' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys())

@@ -219,8 +219,8 @@ class UqsaCase(TestBaseClass):
                 
                 import time
                 timeStartBatch = time.time()
-                
-                basis = 0.285
+                import numpy as np
+                basis = np.linspace(0.27,0.29,100)
                 print "hashDataForGivenBases {}".format(basis)
                 qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
                 
