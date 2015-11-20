@@ -135,33 +135,36 @@ class UqsaCase(TestBaseClass):
         '''
         self.evaluationCaseFiles = [] # list of dict:  [ caseFileDict1,caseFileDict2 ..]  for each evaluation
         
-        for simulationIndex in xrange(self.sampleManager.currentSampleSize):
-                                    
-            networkXmlFileLoad = mFPH_VPC.getFilePath('uqsaEvaluationNetworkXmlFile', self.networkName, 
-                                                       self.dataNumber, 'write',
-                                                       caseName = self.sampleManager.samplingMethod, 
-                                                       evaluationNumber=simulationIndex)
-            networkXmlFileSave = networkXmlFileLoad
-            pathSolutionDataFilename = mFPH_VPC.getFilePath('uqsaEvaluationSolutionDataFile', 
-                                                            self.networkName, self.dataNumber, 'write',
-                                                             caseName = self.sampleManager.samplingMethod, 
-                                                             evaluationNumber=simulationIndex)
-            
-            caseFileDict1= {'simulationIndex': simulationIndex,
-                            'networkName': self.networkName,
-                            'dataNumber': self.dataNumber,
-                            'networkXmlFileLoad': networkXmlFileLoad,
-                            'networkXmlFileSave': networkXmlFileSave,
-                            'pathSolutionDataFilename': pathSolutionDataFilename}
-            
-            self.evaluationCaseFiles.append(caseFileDict1)
+        
+        if self.createEvaluationXmlFiles == True and self.simulateEvaluations == True:
+        
+            for simulationIndex in xrange(self.sampleManager.currentSampleSize):
+                                        
+                networkXmlFileLoad = mFPH_VPC.getFilePath('uqsaEvaluationNetworkXmlFile', self.networkName, 
+                                                           self.dataNumber, 'write',
+                                                           caseName = self.sampleManager.samplingMethod, 
+                                                           evaluationNumber=simulationIndex)
+                networkXmlFileSave = networkXmlFileLoad
+                pathSolutionDataFilename = mFPH_VPC.getFilePath('uqsaEvaluationSolutionDataFile', 
+                                                                self.networkName, self.dataNumber, 'write',
+                                                                 caseName = self.sampleManager.samplingMethod, 
+                                                                 evaluationNumber=simulationIndex)
+                
+                caseFileDict1= {'simulationIndex': simulationIndex,
+                                'networkName': self.networkName,
+                                'dataNumber': self.dataNumber,
+                                'networkXmlFileLoad': networkXmlFileLoad,
+                                'networkXmlFileSave': networkXmlFileSave,
+                                'pathSolutionDataFilename': pathSolutionDataFilename}
+                
+                self.evaluationCaseFiles.append(caseFileDict1)
             
         
     def getSimulatioNBatchFileList(self):
         '''
         Returns simulation batch file list, as defined in configs
         '''
-    
+        
         startIndex = 0
         endIndex   = int(self.sampleManager.currentSampleSize)
         
@@ -220,7 +223,21 @@ class UqsaCase(TestBaseClass):
                 import time
                 timeStartBatch = time.time()
                 import numpy as np
-                basis = np.linspace(0.27,0.29,100)
+                
+                ## ranges 
+                
+                ## last wave start to first discontinuity
+                ## 0.2572545014772901 - 0.2709600872555526
+                
+                basis = np.linspace(0.258,0.269,100)
+                
+                ## first discontinuity to first wave return
+                ## 0.2709600872555526 - 0.29017871810043244
+                
+                #basis = np.linspace(0.271,0.29,100)
+                
+                
+                
                 print "hashDataForGivenBases {}".format(basis)
                 qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
                 

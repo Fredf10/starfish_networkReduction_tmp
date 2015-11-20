@@ -15,12 +15,11 @@ class QuantityOfInterest(TestBaseClass):
     ## dictionary with objects to load
     objectDictsHdf5Memory = ['uqsaMeasures']
         
-    def __init__(self,quantityName, locationName, confidenceAlpha, data = None):
+    def __init__(self,quantityName, locationName, confidenceAlpha):
         
         self.queryLocation = locationName
         self.quantityName = quantityName
         self.confidenceAlpha = confidenceAlpha
-        self.data = data # dset
         self.hdf5Group = None
         # trajectory object
         self.simulationTime = None # link to simulation time
@@ -34,9 +33,9 @@ class QuantityOfInterest(TestBaseClass):
         '''
         if abcSample == False:
             # check for trajectory stuff TODO: do it nicer
-            if 'dataBasis' in self.hdf5Group.keys():
+            if 'trajectoryData' in self.hdf5Group.keys():
                 # get min max of all basis saved
-                return self.data[:sampleSize]
+                return self.hdf5Group['trajectoryData'][:sampleSize]
             
             elif 'data' in self.hdf5Group.keys():
                 return self.hdf5Group['data'][:sampleSize]
@@ -48,18 +47,15 @@ class QuantityOfInterest(TestBaseClass):
         '''
         
         '''
-        
-        self.data = np.empty((sampleSize,len(basis)))
+        self.hdf5Group.create_dataset('trajectoryData', (sampleSize,len(basis)) , dtype='float64')
+        self.hdf5Group.create_dataset('trajectoryBasis', data = basis, dtype='float64')
         
         for n in xrange(sampleSize):
             
             data      = self.hdf5Group['data'][n]
             dataBasis = self.hdf5Group['dataBasis'][n]
             
-            self.data[n] = np.interp(basis, dataBasis, data)
-            
-        return self.data
-        
+            self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
         
     def addUqsaMeasures(self,uqsaMeasureName,uqsaMeasure):
         '''
