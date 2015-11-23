@@ -720,7 +720,7 @@ class PhysiologicalData(BoundaryConditionType1):
         self.timeSim = np.linspace(0.0, 1. / self.freq, 2000)
         tReset = t - t0
         tInter = np.interp(tReset, self.timeSim, self.timeData)
-        Q = np.interp(tInter, self.data.t, self.data.Q) * 1.e6
+        Q = np.interp(tInter, self.data.t, self.data.Q)
         # P = np.interp(t-pulseNumber*self.tmax,self.data.t,self.data.P)
         return Q * self.duMatrix
 
