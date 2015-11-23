@@ -612,16 +612,17 @@ class FlowSolver(cSBO.StarfishBaseObject):
         reflectionCoefficientCount = 0
         maxRef = 0
         
-        #initialize loading bar
-        write = sys.stdout.write
-        nElements = 35
-        loadingBarElementCount = 1
-        spaces = ''.join([' ' for i in xrange(nElements)])
-        loadingBar = ''.join(['[',spaces,']'])
-        write(loadingBar)
-        sys.stdout.flush()
-        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-        write(backspacing)
+        if self.quiet == False:
+            #initialize loading bar
+            write = sys.stdout.write
+            nElements = 35
+            loadingBarElementCount = 1
+            spaces = ''.join([' ' for i in xrange(nElements)])
+            loadingBar = ''.join(['[',spaces,']'])
+            write(loadingBar)
+            sys.stdout.flush()
+            backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+            write(backspacing)
         
         if self.cycleMode == False:
             # original
@@ -640,9 +641,10 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         raise # TODO: why does self.exception() not force the program to quit?
                         # self.exception()
                 
-                if divmod(n,(self.nTSteps/nElements))[0] == loadingBarElementCount:
-                    loadingBarElementCount=loadingBarElementCount+1
-                    write("#")
+                if self.quiet == False:
+                    if divmod(n,(self.nTSteps/nElements))[0] == loadingBarElementCount:
+                        loadingBarElementCount=loadingBarElementCount+1
+                        write("#")
                     sys.stdout.flush()
                 
         ## to be concentrated with original cycle mode !!
