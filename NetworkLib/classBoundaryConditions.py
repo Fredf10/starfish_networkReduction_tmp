@@ -2434,8 +2434,8 @@ class VaryingElastanceSimple(BoundaryConditionType2):
     Currently only the return method "def funcPos0" has been implemented so that the boundary condition can only be put at the proximal end of a blood vessel.
     It is fairly straightforward to implement funcPos1 if necessary, this does however require a lot of duplicated code.   """
 
-    solutionMemoryFields    = ["pressure", "volume", "mitralQ", "Elastance", "Flow", "Flow2", "deltaP", "aortaP"]
-    solutionMemoryFieldsToSave = ["pressure", "volume", "mitralQ", "Elastance", "Flow", "Flow2", "deltaP", "aortaP"]
+    solutionMemoryFields    = ["pressure","atriumPressure", "volume", "mitralQ", "Elastance", "Flow", "Flow2", "deltaP", "aortaP"]
+    solutionMemoryFieldsToSave = ["pressure","atriumPressure", "volume", "mitralQ", "Elastance", "Flow", "Flow2", "deltaP", "aortaP"]
 
     def __init__(self):
         self.type = 2
@@ -2481,13 +2481,14 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.newCycle = False
         self.cycleNumber = 0
         self.num = 0
-        self.atriumPressure = 7.5 * 133.32  # TODO: Fix this: Pressure in the atrium ## venouse pressure?!
+        self.atriumPressureZero = 7.5 * 133.32  # TODO: Fix this: Pressure in the atrium ## venouse pressure?!
 
         self.dQInOut = np.empty((2))
 
         self.dsetGroup = None
 
         self.pressure = np.zeros(0)
+        self.atriumPressure =  np.zeros(0)
         self.volume = np.zeros(0)
         self.mitralQ = np.zeros(0)
         self.Elastance = np.zeros(0)
@@ -2496,7 +2497,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.DtFlow = np.zeros(0)
         self.deltaP = np.zeros(0)
         self.aortaP = np.zeros(0)
-
 
     def update(self, bcDict):
         super(VaryingElastanceSimple,self).update(bcDict)
@@ -2530,8 +2530,9 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.allocate(runtimeMemoryManager)
 
         """ Initial conditions in the ventricle"""
-        self.pressure[0] = self.atriumPressure
-        self.volume[0]   = self.atriumPressure / self.E(0) + self.V0
+        self.pressure[0] = self.atriumPressureZero
+        self.volume[0]   = self.atriumPressureZero / self.E(0) + self.V0
+        self.atriumPressure[0] = self.atriumPressureZero
 
     def __call__(self, _domegaField_, duPrescribed, R, L, nmem,  n, dt, P, Q, A, Z1, Z2):
 
@@ -2571,7 +2572,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
     #     deltatdiff = 0.00001
 #         mitrQn = self.mitralQ[n]
 #         mitrQn1 = self.mitralQ[n-1]
-        venoP = self.atriumPressure
+        venoP = self.atriumPressure[nmem]
         t = self.getCycleTime(n + 1, dt)
         t2 = self.getCycleTime(n, dt)
 #         ttemp = t-dt

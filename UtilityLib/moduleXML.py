@@ -294,29 +294,24 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
     # start conversion loop over variable and types
     for variableValueString in variableValueStrings:
         for variableType in variableTypes:
-
+            
             if variableType in ['float','int']:
-                try: variableValue = float(eval(variableValueString))
-                except (ValueError, TypeError, NameError): convertError.append('float')
-
-                if variablesDict[variable][unit]:
-                    try:
+                continueConversion = False
+                try:
+                    variableValue = float(eval(variableValueString))
+                    continueConversion = True
+                except (ValueError, TypeError, NameError): convertError.append('float') 
+                
+                if continueConversion == True:
+                    if variablesDict[variable][unit] != None and variableUnit != None:
                         if ' ' in variableUnit:
                             variableUnits = variableUnit.split(' ')
-                            for variableUnit in variableUnits:
-                                variableValue = variableValue*unitsDict[variableUnit]
-                        else:
-                            variableValue = variableValue*unitsDict[variableUnit]
-                    except KeyError:
-                        print """ Warning: Can't find {} in unitsDict""".format(variableUnit)
-                        pass
-                    except TypeError:
-                        print """ Warning: Can't find {} in unitsDict""".format(variableUnit)
-                        pass
-
-                if variableType == 'int':
-                    try: variableValue = int(variableValue)
-                    except (ValueError, TypeError): convertError.append('int')
+                            for variableUnit in variableUnits: variableValue = variableValue*unitsDict[variableUnit]
+                        else: variableValue = variableValue*unitsDict[variableUnit]
+                        
+                    if variableType == 'int': 
+                        try: variableValue = int(variableValue)
+                        except ValueError: convertError.append('int') 
 
             elif variableType == 'bool':
                 try:
