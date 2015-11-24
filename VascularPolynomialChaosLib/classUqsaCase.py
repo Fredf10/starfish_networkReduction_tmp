@@ -226,17 +226,22 @@ class UqsaCase(TestBaseClass):
                 
                 ## ranges 
                 
+                ### Normal distribution
                 ## last wave start to first discontinuity
                 ## 0.2572545014772901 - 0.2709600872555526
-                
-                basis = np.linspace(0.258,0.269,100)
+                #basis = np.linspace(0.258,0.269,100)
                 
                 ## first discontinuity to first wave return
                 ## 0.2709600872555526 - 0.29017871810043244
-                
                 #basis = np.linspace(0.271,0.29,100)
                 
+                ### Uniform distribution
                 
+                ## last wave start to first discontinuity
+                #basis = np.linspace(0.258,0.277,100)
+                
+                ## first discontinuity to last discontinuity
+                basis = np.linspace(0.278,0.289,100)
                 
                 print "hashDataForGivenBases {}".format(basis)
                 qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)

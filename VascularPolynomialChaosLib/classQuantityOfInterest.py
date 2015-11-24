@@ -50,12 +50,32 @@ class QuantityOfInterest(TestBaseClass):
         self.hdf5Group.create_dataset('trajectoryData', (sampleSize,len(basis)) , dtype='float64')
         self.hdf5Group.create_dataset('trajectoryBasis', data = basis, dtype='float64')
         
+        
+        
+        import sys
+        write = sys.stdout.write
+        loadingBarElementCount = 1
+        nElements = 50
+        spaces = ''.join([' ' for i in xrange(nElements)])
+        loadingBar = ''.join(['[',spaces,']'])
+        write(loadingBar)
+        sys.stdout.flush()
+        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+        write(backspacing)
+        
         for n in xrange(sampleSize):
             
             data      = self.hdf5Group['data'][n]
             dataBasis = self.hdf5Group['dataBasis'][n]
             
             self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
+        
+            if divmod(n,sampleSize/nElements) == loadingBarElementCount:
+                loadingBarElementCount = loadingBarElementCount+1
+                write("#")
+                sys.stdout.flush()
+        
+        write("\n")
         
     def addUqsaMeasures(self,uqsaMeasureName,uqsaMeasure):
         '''
