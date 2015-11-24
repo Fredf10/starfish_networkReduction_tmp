@@ -241,7 +241,7 @@ class UqsaCase(TestBaseClass):
                 #basis = np.linspace(0.258,0.277,100)
                 
                 ## first discontinuity to last discontinuity
-                basis = np.linspace(0.278,0.289,100)
+                basis = np.linspace(0.27890,0.28824,100)
                 
                 print "hashDataForGivenBases {}".format(basis)
                 qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)

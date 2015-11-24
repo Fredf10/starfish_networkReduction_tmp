@@ -50,8 +50,6 @@ class QuantityOfInterest(TestBaseClass):
         self.hdf5Group.create_dataset('trajectoryData', (sampleSize,len(basis)) , dtype='float64')
         self.hdf5Group.create_dataset('trajectoryBasis', data = basis, dtype='float64')
         
-        
-        
         import sys
         write = sys.stdout.write
         loadingBarElementCount = 1
@@ -70,7 +68,7 @@ class QuantityOfInterest(TestBaseClass):
             
             self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
         
-            if divmod(n,sampleSize/nElements) == loadingBarElementCount:
+            if divmod(n,sampleSize/nElements)[0] == loadingBarElementCount:
                 loadingBarElementCount = loadingBarElementCount+1
                 write("#")
                 sys.stdout.flush()

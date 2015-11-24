@@ -185,74 +185,37 @@ class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
         
         data = data.T
         
-        space = True
+        nSpacePoints = len(data)
         
-        if space == True:
-            nSpacePoints = len(data)
-            
-            X = np.linspace(0, 0.8, nSpacePoints)
-            
-            E,V = np.empty((2,nSpacePoints))
-            
-            # loop over all places x in the trajectory 
-            for j,x in enumerate(X[1:-1]):
-                print "calculate number {} from {} at position {}".format(j,nSpacePoints-2,x)
-                i = j+1
-                #z == Xvalue we are right now ... 
-                trans = lambda q: \
-                    [q[1], q[2],
-                     (x-q[0])*(x>q[0]),
-                     (q[0]-x)*(x<=q[0])]
-                    
-                dist = cp.Dist(_length=4)
-                dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                        composit=[x,.5,.5])
+        X = np.linspace(0, 0.8, nSpacePoints)
         
-                orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
+        E,V = np.empty((2,nSpacePoints))
+        
+        # loop over all places x in the trajectory 
+        for j,x in enumerate(X[1:-1]):
+            print "calculate number {} from {} at position {}".format(j,nSpacePoints-2,x)
+            i = j+1
+            #z == Xvalue we are right now ... 
+            trans = lambda q: \
+                [q[1], q[2],
+                 (x-q[0])*(x>q[0]),
+                 (q[0]-x)*(x<=q[0])]
                 
-                #y = np.array(map(solver, q.T))
-                y = data[i]
-                
-                approx = cp.fit_regression(orth, trans(q), y,
-                        rule="T", order=1)
-        
-                # save exp and var for this x value
-                E[i]   = cp.E(approx, dist)
-                V[i]   = cp.Var(approx, dist)
+            dist = cp.Dist(_length=4)
+            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
+                    composit=[x,.5,.5])
+    
+            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
             
-        else:
-            # TODO!!
-            nSpacePoints = len(data)
+            #y = np.array(map(solver, q.T))
+            y = data[i]
             
-            X = np.linspace(0, 0.8, nSpacePoints)
-            
-            E,V = np.empty((2,nSpacePoints))
-            
-            # loop over all places x in the trajectory 
-            for j,x in enumerate(X[1:-1]):
-                print "calculate number {} from {} at position {}".format(j,nSpacePoints-2,x)
-                i = j+1
-                #z == Xvalue we are right now ... 
-                trans = lambda q: \
-                    [q[1], q[2],
-                     (x-q[0])*(x>q[0]),
-                     (q[0]-x)*(x<=q[0])]
-                    
-                dist = cp.Dist(_length=4)
-                dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                        composit=[x,.5,.5])
-        
-                orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
-                
-                #y = np.array(map(solver, q.T))
-                y = data[i]
-                
-                approx = cp.fit_regression(orth, trans(q), y,
-                        rule="T", order=1)
-        
-                # save exp and var for this x value
-                E[i]   = cp.E(approx, dist)
-                V[i]   = cp.Var(approx, dist)
+            approx = cp.fit_regression(orth, trans(q), y,
+                    rule="T", order=1)
+    
+            # save exp and var for this x value
+            E[i]   = cp.E(approx, dist)
+            V[i]   = cp.Var(approx, dist)
             
         # collect data for return
         statsDict = {}
