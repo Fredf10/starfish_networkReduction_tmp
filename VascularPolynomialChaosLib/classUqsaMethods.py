@@ -177,45 +177,89 @@ class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
         samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
         data                     = qoi.getData(sampleSize,abcSample)
         
+        trajectoryBasis = qoi.hdf5Group['trajectoryBasis']
+        
+        print qoi.hdf5Group['dataBasisMinMaxPeak'][:]
+        peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
+        peakTime = peakTime.T[2][:sampleSize]
+        print peakTime
+                
+                
         dependentCase = sampleManager.dependentCase
         confidenceAlpha = qoi.confidenceAlpha
         
-        
-        q = samples.T
-        
+        samples = samples.T        
         data = data.T
         
-        nSpacePoints = len(data)
+        # TODO!!
+        nTimePoints = len(data)
         
-        X = np.linspace(0, 0.8, nSpacePoints)
+        E,V = np.empty((2,nTimePoints))
         
-        E,V = np.empty((2,nSpacePoints))
-        
-        # loop over all places x in the trajectory 
-        for j,x in enumerate(X[1:-1]):
-            print "calculate number {} from {} at position {}".format(j,nSpacePoints-2,x)
-            i = j+1
-            #z == Xvalue we are right now ... 
+#         # loop over all places x in the trajectory 
+#         for j,x in enumerate(X[1:-1]):
+#             print "calculate number {} from {} at position {}".format(j,nSpacePoints-2,x)
+#             i = j+1
+#             #z == Xvalue we are right now ... 
+#             trans = lambda q: \
+#                 [q[1], q[2],
+#                  (x-q[0])*(x>q[0]),
+#                  (q[0]-x)*(x<=q[0])]
+#                 
+#             dist = cp.Dist(_length=4)
+#             dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
+#                     composit=[x,.5,.5])
+#     
+#             orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
+#             
+#             #y = np.array(map(solver, q.T))
+#             y = data[i]
+#             
+#             approx = cp.fit_regression(orth, trans(q), y,
+#                     rule="T", order=1)
+#     
+#             # save exp and var for this x value
+#             E[i]   = cp.E(approx, dist)
+#             V[i]   = cp.Var(approx, dist)
+            
+        alphas = np.empty(nTimePoints)
+    
+        for j in xrange(nTimePoints):
+    
+            t_ = t[j]
+            
             trans = lambda q: \
-                [q[1], q[2],
-                 (x-q[0])*(x>q[0]),
-                 (q[0]-x)*(x<=q[0])]
-                
-            dist = cp.Dist(_length=4)
+                    np.array([q[0], q[1], (t_-q[1])*(q[1]<=t_)])
+            dist = cp.Dist(_length=3)
             dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                    composit=[x,.5,.5])
+                    composit=[.5, .5, t_])
     
+            y = data[j]
             orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
-            
-            #y = np.array(map(solver, q.T))
-            y = data[i]
-            
-            approx = cp.fit_regression(orth, trans(q), y,
-                    rule="T", order=1)
+            poly = cp.fit_regression(orth, trans(samples)[:,:N], y,
+                    rule="T", order=1, alpha=None, retall=2)
+            alpha = poly[3]
+            alphas[j] = alpha
     
-            # save exp and var for this x value
-            E[i]   = cp.E(approx, dist)
-            V[i]   = cp.Var(approx, dist)
+        alpha = np.median(alphas)
+    
+        for j in xrange(len(nTimePoints)):
+    
+            t_ = t[j]
+            trans = lambda q: \
+                    np.array([q[0], q[1], (t_-q[1])*(q[1]<=t_)])
+            dist = cp.Dist(_length=3)
+            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
+                    composit=[.5, .5, t_])
+    
+            y = data[j]
+            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
+            poly = cp.fit_regression(orth, trans(samples)[:,:N], y,
+                    rule="T", order=1, alpha=alpha)
+            
+            E[i]   = cp.E(poly, dist)
+            V[i]   = cp.Var(poly, dist)
+            
             
         # collect data for return
         statsDict = {}

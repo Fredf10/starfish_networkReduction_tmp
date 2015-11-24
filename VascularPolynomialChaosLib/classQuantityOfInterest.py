@@ -42,7 +42,7 @@ class QuantityOfInterest(TestBaseClass):
         else:
             #TODO: implement abc sampling hash if monte carlo is used
             raise NotImplementedError("MC sensitivity, abc-sample hash case not implemented yet, exit")
-        
+     
     def hashDataForGivenBases(self, basis, sampleSize):
         '''
         
@@ -53,13 +53,18 @@ class QuantityOfInterest(TestBaseClass):
         import sys
         write = sys.stdout.write
         loadingBarElementCount = 1
+        
         nElements = 50
+        if sampleSize < nElements:
+            nElements = sampleSize
+        
         spaces = ''.join([' ' for i in xrange(nElements)])
         loadingBar = ''.join(['[',spaces,']'])
         write(loadingBar)
         sys.stdout.flush()
         backspacing = ''.join(['\b' for i in xrange(nElements+1)])
         write(backspacing)
+        
         
         for n in xrange(sampleSize):
             
@@ -68,7 +73,7 @@ class QuantityOfInterest(TestBaseClass):
             
             self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
         
-            if divmod(n,sampleSize/nElements)[0] == loadingBarElementCount:
+            if divmod(n+1,sampleSize/nElements)[0] == loadingBarElementCount:
                 loadingBarElementCount = loadingBarElementCount+1
                 write("#")
                 sys.stdout.flush()
