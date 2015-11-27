@@ -2,12 +2,12 @@
 <singleBifurcation.xml id="1.0" version="4.2">
   <simulationContext>
     <description>my STARFiSh simulation</description>
-    <totalTime unit="s">5.0</totalTime>
-    <timeSaveBegin unit="s">3.0</timeSaveBegin>
+    <totalTime unit="s">0.5</totalTime>
+    <timeSaveBegin unit="s">0.5</timeSaveBegin>
 	<timeSaveEnd unit="s">5.0</timeSaveEnd>
 	<maxMemory unit="MB">500</maxMemory>
 	<saveInitialisationPhase>True</saveInitialisationPhase>
-    <CFL>0.9</CFL>
+    <CFL>1.1</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
     <centralVenousPressure unit="mmHg">0.0</centralVenousPressure>
@@ -34,15 +34,7 @@
     <rho unit="kg m-3">1050.0</rho>
     <gamma>2.0</gamma>
   </globalFluid>
-  <communicators>
-  	<CommunicatorRealTimeViz>
-  		<comType>CommunicatorRealTimeViz</comType>
-  		<comId>1</comId>
-  		<vesselId>1</vesselId>
-  		<node>0</node>
-  		<dn>20</dn>
-  		<quantitiesToPlot>Pressure Flow</quantitiesToPlot>
-  	</CommunicatorRealTimeViz>  		
+  <communicators>		
   </communicators>
   <boundaryConditions>
     <boundaryCondition vesselId="0">
@@ -51,7 +43,7 @@
         <ampConst unit="m3 s-1">0.0</ampConst>
         <Npulse>25.0</Npulse>
         <Tpulse unit="s">0.0</Tpulse>
-        <freq unit="s-1">2.0</freq>
+        <freq unit="s-1">8.0</freq>
         <Tspace unit="s">0.5</Tspace>
         <runtimeEvaluation>False</runtimeEvaluation>
         <prescribe>influx</prescribe>
@@ -66,7 +58,7 @@
        <ReflectionCoefficient>
        	<Rt>0</Rt>
        </ReflectionCoefficient>
-    </boundaryCondition>
+    </boundaryCondition><!--
     <Windkessel-3Elements>
         <Rc unit="Pa s m-3">None</Rc>
         <Rtotal>133000000.0</Rtotal>
@@ -78,7 +70,7 @@
         <Rtotal>133000000.0</Rtotal>
         <C unit="m3 Pa-1">3.52355288029e-8</C>
         <Z unit="Pa s m-3">VesselImpedance</Z>
-      </Windkessel-3Elements>
+    </Windkessel-3Elements> -->
   </boundaryConditions>
   <generalRandomInputs>
   </generalRandomInputs>

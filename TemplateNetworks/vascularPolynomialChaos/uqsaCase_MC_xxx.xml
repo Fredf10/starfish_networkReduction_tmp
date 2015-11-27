@@ -33,10 +33,11 @@
           </uqsaMethod>
       </uqsaMethods>      
       <locationOfInterestManager class="LocationOfInterestManager">
+          <evaluateSimulationTime>False</evaluateSimulationTime>
     	  <locationsOfInterest>
     	  	<locationOfInterest class="LocationOfInterest" Id="exampleLocation"> 
-    	  		<quantitiesOfInterestToProcess>Pressure Flow</quantitiesOfInterestToProcess>
-    	  		<queryLocation>vessel_1</queryLocation>
+    	  		<quantitiesOfInterestToProcess>Pressure</quantitiesOfInterestToProcess>
+    	  		<queryLocation>vessel_1_3</queryLocation>
     	  		<xVal unit="m">0.05</xVal>
     	  		<confidenceAlpha>5</confidenceAlpha>
     	  	</locationOfInterest>

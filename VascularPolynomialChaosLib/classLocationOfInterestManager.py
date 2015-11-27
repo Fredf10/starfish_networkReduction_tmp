@@ -77,8 +77,27 @@ class LocationOfInterestManager(TestBaseClass):
         timeS = 0
         timeE = 1e32
         
+        
+        
+        
+        
         if self.evaluateSimulationTime == True:
+            
+            iterations = len(evaluationCaseFiles)
+        
             print "estimate simulation time of all simulations"
+            write = sys.stdout.write
+            loadingBarElementCount = 1
+            nElements = 50
+            if iterations < nElements:
+                nElements = iterations
+            spaces = ''.join([' ' for i in xrange(nElements)])
+            loadingBar = ''.join(['[',spaces,']'])
+            write(loadingBar)
+            sys.stdout.flush()
+            backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+            write(backspacing)
+            
             for batchData in evaluationCaseFiles:
                 networkName              = batchData['networkName']
                 dataNumber               = batchData['dataNumber']
@@ -102,7 +121,14 @@ class LocationOfInterestManager(TestBaseClass):
                 vascularNetwork.solutionDataFile.close()
                 del vascularNetwork
             
-            print 
+                n = evaluationCaseFiles.index(batchData)
+                if divmod(n+1,iterations/nElements)[0] == loadingBarElementCount:
+                    loadingBarElementCount = loadingBarElementCount+1
+                    write("#")
+                    sys.stdout.flush()
+            
+            write("\n\n")  
+            
             self.simulationTime = np.linspace(timeS, timeE, nPoints)
             # save the simulationTime
             self.saveQuantitiyOfInterestData(simulationTimeFileSave) 
@@ -114,9 +140,23 @@ class LocationOfInterestManager(TestBaseClass):
             else:
                 raise ValueError('simulationTime hdf5 file for case does not exist! {}'.format(simulationTimeFileLoad))
         
-        print "load data for quantities of interest"
+        print "estimate solution data for quantities of interest"
         
         self.openQuantityOfInterestFile(preprocessedSolutionData)
+        
+        iterations = len(evaluationCaseFiles)
+        
+        write = sys.stdout.write
+        loadingBarElementCount = 1
+        nElements = 50
+        if iterations < nElements:
+            nElements = iterations
+        spaces = ''.join([' ' for i in xrange(nElements)])
+        loadingBar = ''.join(['[',spaces,']'])
+        write(loadingBar)
+        sys.stdout.flush()
+        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+        write(backspacing)
         
         # pass the data to the locationsOfInterests which will load the information needed
         for batchData in evaluationCaseFiles:
@@ -130,7 +170,14 @@ class LocationOfInterestManager(TestBaseClass):
             vascularNetwork.linkSolutionData()
             for locationOfInterest in self.locationsOfInterest.values():
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, simulationIndex)
-                    
+        
+            n = evaluationCaseFiles.index(batchData)
+            if divmod(n+1,iterations/nElements)[0] == loadingBarElementCount:
+                loadingBarElementCount = loadingBarElementCount+1
+                write("#")
+                sys.stdout.flush()
+        
+        write("\n\n")       
         # save hdf5 file
         
         # second postprocessing find extrema if needed also for variables defined over space

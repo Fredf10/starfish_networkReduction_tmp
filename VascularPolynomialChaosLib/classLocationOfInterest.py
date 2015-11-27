@@ -96,84 +96,80 @@ class LocationOfInterest(TestBaseClass):
                     
                     quantityObject.retainDsetRowData('data', dataRow, sampleIndex, totalDataShape)
                 
-                if 'Trajectory' in quantitiyName:
+                if 'TrajectoryFB' in quantitiyName:
                     # allocates data for a vessel over space and saves the raw data in quantityObject.dataSpace
                     #TODO: create own class tha xVal is not missued as number of space points per vessel
                     vesselIds = [int(i) for i in self.queryLocation.split('vessel')[-1].split('_') if i != '']
                     data = None
                     
-                    quantitiyPure = quantitiyName.split('Trajectory')[-1] 
+                    quantitiyPure = quantitiyName.split('TrajectoryFB_')[-1] 
                     
-                    if "FB_" in quantitiyPure:
+                    maxLength = self.xVal
+                    
+                    interpolateX = False
+                    if vascularNetwork.vessels[vesselId].N != 50:
+                        print "DB: SampleNumebr {} not gridSize 50 but {}".format(sampleIndex,vascularNetwork.vessels[vesselId].N)
+                        interpolateX = True
+                    
+                        maxNumberPoints = 100 # if this is changed peak index in data saving must be changed
+                    nPointsUsed = 0
+                    position = 0
+                    
+                    lastVessel = False
+                    trajectory = None                   
+                    
+                    if len(vesselIds) == 1:
+                        vesselId = vesselIds[0]
+                        length = vascularNetwork.vessels[vesselId].length
                         
-                        quantitiyPure = quantitiyPure.split('FB_')[-1]
+                        currentSimulationTime = vascularNetwork.simulationTime
                         
-                        maxLength = self.xVal
-                        
-                        interpolateX = False
-                        if vascularNetwork.vessels[vesselId].N != 50:
-                            print "DB: SampleNumebr {} not gridSize 50 but {}".format(sampleIndex,vascularNetwork.vessels[vesselId].N)
-                            interpolateX = True
-                        
-                            maxNumberPoints = 100 # if this is changed peak index in data saving must be changed
-                        nPointsUsed = 0
-                        position = 0
-                        
-                        lastVessel = False
-                        trajectory = None                   
-                        
-                        if len(vesselIds) == 1:
-                            vesselId = vesselIds[0]
-                            length = vascularNetwork.vessels[vesselId].length
+                        maxLength = length*2
+                        # do it twice once forward and once backward
+                        for direction in ['Forward','Backward']:
                             
-                            currentSimulationTime = vascularNetwork.simulationTime
                             
-                            maxLength = length*2
-                            # do it twice once forward and once backward
-                            for direction in ['Forward','Backward']:
-                                
-                                
-                                if interpolateX == True:
-                                    remainingLength = maxLength-position
-                                    if length < remainingLength:
-                                        # get number of points the solution in x
-                                        nPoints = int(maxNumberPoints*length/maxLength)
-                                        xValEnd = length
-                                        
-                                    if length >= remainingLength:
-                                        xValEnd = remainingLength
-                                        lastVessel = True
-                                        nPoints = maxNumberPoints - nPointsUsed
+                            if interpolateX == True:
+                                remainingLength = maxLength-position
+                                if length < remainingLength:
+                                    # get number of points the solution in x
+                                    nPoints = int(maxNumberPoints*length/maxLength)
+                                    xValEnd = length
                                     
-                                    xvals = np.linspace(0,xValEnd,nPoints)
+                                if length >= remainingLength:
+                                    xValEnd = remainingLength
+                                    lastVessel = True
+                                    nPoints = maxNumberPoints - nPointsUsed
+                                
+                                xvals = np.linspace(0,xValEnd,nPoints)
+                            else:
+                                xvals = vascularNetwork.vessels[vesselId].z
+                                
+                            dataTemp = vascularNetwork.getSolutionData(vesselId, [''.join([direction,quantitiyPure])], currentSimulationTime, xvals = xvals)[''.join([direction,quantitiyPure])]
+                            
+                            if data == None: data = dataTemp.T
+                            else:
+                                if direction == 'Forward':  
+                                    data = np.vstack([data,dataTemp.T])
                                 else:
-                                    xvals = vascularNetwork.vessels[vesselId].z
-                                    
-                                dataTemp = vascularNetwork.getSolutionData(vesselId, [''.join([direction,quantitiyPure])], currentSimulationTime, xvals = xvals)[''.join([direction,quantitiyPure])]
+                                    data = np.vstack([data,dataTemp.T[::-1][1::]])
+                            
+                            if trajectory == None: trajectory = xvals
+                            else: 
+                                #trajectory = np.append(trajectory,xvals+position)
                                 
-                                if data == None: data = dataTemp.T
+                                if direction == 'Forward':                                    
+                                    trajectory = np.append(trajectory,xvals+position)
                                 else:
-                                    if direction == 'Forward':  
-                                        data = np.vstack([data,dataTemp.T])
-                                    else:
-                                        data = np.vstack([data,dataTemp.T[::-1][1::]])
-                                
-                                if trajectory == None: trajectory = xvals
-                                else: 
-                                    #trajectory = np.append(trajectory,xvals+position)
-                                    
-                                    if direction == 'Forward':                                    
-                                        trajectory = np.append(trajectory,xvals+position)
-                                    else:
-                                        trajectory = np.append(trajectory,xvals[::-1][1::])
-                                
-                                if interpolateX == True:
-                                    position = position+xValEnd
-                                    nPointsUsed = nPointsUsed + nPoints
-                                
-                                if lastVessel: 
-                                    #print "reached end of trajectory breaking"
-                                    break
+                                    trajectory = np.append(trajectory,xvals[::-1][1::])
+                            
+                            if interpolateX == True:
+                                position = position+xValEnd
+                                nPointsUsed = nPointsUsed + nPoints
+                            
+                            if lastVessel: 
+                                #print "reached end of trajectory breaking"
+                                break
                     
                     
 #                     else:                    
@@ -277,6 +273,49 @@ class LocationOfInterest(TestBaseClass):
                     #if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,maxNumberPoints,len(simulationTime)))
                     #quantityObject.data[sampleIndex] = data
                     
+            if 'Trajectory' in quantitiyName:
+                    # allocates data for a vessel over space and saves the raw data in quantityObject.dataSpace
+                    #TODO: create own class tha xVal is not missued as number of space points per vessel
+                    vesselIds = [int(i) for i in self.queryLocation.split('vessel')[-1].split('_') if i != '']
+                    data = None
+                    
+                    quantitiyPure = quantitiyName.split('Trajectory_')[-1] 
+                     
+                    lastVessel = False
+                    trajectory = None                   
+                                         
+                    for vesselId in vesselIds:
+                        
+                        xvals = vascularNetwork.vessels[vesselId].z
+                        dataTemp = vascularNetwork.getSolutionData(vesselId, [quantitiyPure], vascularNetwork.simulationTime, xvals = xvals)[quantitiyPure]
+                        
+                        if data == None: data = dataTemp.T
+                        else: data = np.vstack([data,dataTemp.T])
+                         
+                        if trajectory == None: trajectory = xvals
+                        else: trajectory = np.append(trajectory,xvals+trajectory[-1])
+                                             
+                    # 1. find pressures for time t on simulation grid
+                    maxNumberPoints = len(trajectory)
+                    t0 = 0.131075224759
+                    dataTo = np.empty(maxNumberPoints)
+                    
+                    for i,dataX in enumerate(data):
+                        dataTo[i] = np.interp(t0, vascularNetwork.simulationTime, dataX)
+                                        
+                    totalDataShape = (sampleSize,maxNumberPoints)
+                     
+                    totalDataShapeMinMaxIndices = (sampleSize,3)
+                     
+                    quantityObject.retainDsetRowData('data',dataTo, sampleIndex, totalDataShape)
+                    quantityObject.retainDsetRowData('dataBasis',trajectory, sampleIndex, totalDataShape)
+                    quantityObject.retainDsetRowData('dataBasisMinMaxPeak',np.array([min(trajectory),max(trajectory),trajectory[(trajectory[:-1]-trajectory[1:])==0]]), sampleIndex, totalDataShapeMinMaxIndices)
+                     
+#                     
+                    #if quantityObject.data == None: quantityObject.data = np.empty((sampleSize,maxNumberPoints,len(simulationTime)))
+                    #quantityObject.data[sampleIndex] = data
+            
+            
                 
         elif "baroreceptor" in self.queryLocation:
             baroId = int(self.queryLocation.split('_')[-1])

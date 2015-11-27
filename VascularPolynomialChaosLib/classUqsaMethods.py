@@ -55,7 +55,7 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
   
     def calculateStatistics(self, distributionManager, sampleManager, qoi):
         
-        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        sampleSize,abcSample     = self.evaluateSamplesSize(distributionManager.distributionDimension)
         samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
         data                     = qoi.getData(sampleSize,abcSample)
         
@@ -134,7 +134,7 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
         return uqsaMeasures
          
          
-class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
+class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
     '''
     Configuration class of a vascular polynomial chaos class
     '''
@@ -179,11 +179,8 @@ class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
         
         trajectoryBasis = qoi.hdf5Group['trajectoryBasis']
         
-        print qoi.hdf5Group['dataBasisMinMaxPeak'][:]
         peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
         peakTime = peakTime.T[2][:sampleSize]
-        print peakTime
-                
                 
         dependentCase = sampleManager.dependentCase
         confidenceAlpha = qoi.confidenceAlpha
@@ -193,79 +190,259 @@ class UqsaMethodPolynomialChaosDepDir(TestBaseClass):
         
         # TODO!!
         nTimePoints = len(data)
-        
         E,V = np.empty((2,nTimePoints))
+            
+        v = cp.orth_ttr(self.polynomialOrder, distributionManager.jointDistribution)
         
-#         # loop over all places x in the trajectory 
-#         for j,x in enumerate(X[1:-1]):
-#             print "calculate number {} from {} at position {}".format(j,nSpacePoints-2,x)
-#             i = j+1
-#             #z == Xvalue we are right now ... 
-#             trans = lambda q: \
-#                 [q[1], q[2],
-#                  (x-q[0])*(x>q[0]),
-#                  (q[0]-x)*(x<=q[0])]
-#                 
-#             dist = cp.Dist(_length=4)
-#             dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-#                     composit=[x,.5,.5])
-#     
-#             orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
-#             
-#             #y = np.array(map(solver, q.T))
-#             y = data[i]
-#             
-#             approx = cp.fit_regression(orth, trans(q), y,
-#                     rule="T", order=1)
-#     
-#             # save exp and var for this x value
-#             E[i]   = cp.E(approx, dist)
-#             V[i]   = cp.Var(approx, dist)
-            
         alphas = np.empty(nTimePoints)
-    
+        
+        # move to jonathans namespace
+        t = trajectoryBasis
+        Q = distributionManager.jointDistribution
+        order = self.polynomialOrder
+        t_max = peakTime
+        
+        # high resolution for tracking
+        top = cp.fit_regression(v, samples, peakTime)
+        
+        # loading bar
+        import sys
+        write = sys.stdout.write
+        loadingBarElementCount = 1
+        nElements = 50
+        if nTimePoints < nElements:
+            nElements = nTimePoints
+        spaces = ''.join([' ' for i in xrange(nElements)])
+        loadingBar = ''.join(['[',spaces,']'])
+        write(loadingBar)
+        sys.stdout.flush()
+        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+        write(backspacing)
+                    
+        ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in xrange(nTimePoints):
-    
             t_ = t[j]
+    
+            samples_left = samples[:,t_>t_max]
+            samples_right = samples[:,t_<=t_max]
+            f_vals_left = data[j][t_>t_max]
+            f_vals_right = data[j][t_<=t_max]
+    
+            N_left = len(f_vals_left)
+            N_right = len(f_vals_right)
+    
+            nu = N_left*1./(N_left+N_right)
+            n_left = int(nu*len(v))
+            n_right = int((1-nu)*len(v))
+    
+            if n_left:
+                v_left = cp.orth_ttr(int(order*nu)+1, Q)
+                poly_left = cp.fit_regression(v_left, samples_left, f_vals_left)
+            if n_right:
+                v_right = cp.orth_ttr(int(order*(1-nu))+1, Q)
+                poly_right = cp.fit_regression(v_right, samples_right, f_vals_right)
+    
+            if not n_right:
+                poly = poly_left
+                dist = Q
+    
+            elif not n_left:
+                poly = poly_right
+                dist = Q
+    
+            else:
+                trans = lambda q: \
+                        np.array([poly_left(*q)*(top(*q)<=t_), poly_right(*q)*(top(*q)>t_)])
+                dist = cp.Dist(_length=2)
+                dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                        composit=[t_, t_])
+    
+                orth = cp.orth_chol(1, dist, normed=0)
+                poly = cp.fit_regression(orth, trans(samples), data[j],
+                        rule="T", order=1, alpha=None, retall=2)[0]
             
-            trans = lambda q: \
-                    np.array([q[0], q[1], (t_-q[1])*(q[1]<=t_)])
-            dist = cp.Dist(_length=3)
-            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                    composit=[.5, .5, t_])
-    
-            y = data[j]
-            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
-            poly = cp.fit_regression(orth, trans(samples)[:,:N], y,
-                    rule="T", order=1, alpha=None, retall=2)
-            alpha = poly[3]
-            alphas[j] = alpha
-    
-        alpha = np.median(alphas)
-    
-        for j in xrange(len(nTimePoints)):
-    
-            t_ = t[j]
-            trans = lambda q: \
-                    np.array([q[0], q[1], (t_-q[1])*(q[1]<=t_)])
-            dist = cp.Dist(_length=3)
-            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                    composit=[.5, .5, t_])
-    
-            y = data[j]
-            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
-            poly = cp.fit_regression(orth, trans(samples)[:,:N], y,
-                    rule="T", order=1, alpha=alpha)
             
-            E[i]   = cp.E(poly, dist)
-            V[i]   = cp.Var(poly, dist)
+            E[j] = cp.E(poly, dist)
+            V[j]   = cp.Var(poly, dist)
             
+            
+            if divmod(j+1,nTimePoints/nElements)[0] == loadingBarElementCount:
+                loadingBarElementCount = loadingBarElementCount+1
+                write("#")
+                sys.stdout.flush()
+        
+        write("\n")
             
         # collect data for return
         statsDict = {}
         statsDict['expectedValue']      = E
         statsDict['variance']           = V
+        statsDict['numberOfSamples'] = sampleSize
         
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures
+    
+class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
+    '''
+    Configuration class of a vascular polynomial chaos class
+    '''
+    #----External Variables -------------------------------------------------------------#
+    externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
+                         'sampleFactor'    : TestBaseClass.ExtValue(int),
+                         }
+                
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['polynomialOrder', 
+                            'sampleFactor']
+    
+    def __init__(self):  
+        self.sampleFactor = 2
+        #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
+        self.polynomialOrder = 3
+        
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
+        '''
+        # calculate samplesSize from expansion order 
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+              
+    def calculateOrthogonalPolynomials(self,distributionManager):
+        '''
+        Method to calculate orthogonal polynomials
+        '''
+        
+        return cp.orth_ttr(self.polynomialOrder,distributionManager.jointDistribution)
+    
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension+1)
+        
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        trajectoryBasis = qoi.hdf5Group['trajectoryBasis']
+        
+        peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
+        peakTime = peakTime.T[2][:sampleSize]
+                
+        dependentCase = sampleManager.dependentCase
+        confidenceAlpha = qoi.confidenceAlpha
+        
+        samples = samples.T        
+        data = data.T
+        
+        # TODO!!
+        nTimePoints = len(data)
+        E,V = np.empty((2,nTimePoints))
+            
+        v = cp.orth_ttr(self.polynomialOrder, distributionManager.jointDistribution)
+        
+        alphas = np.empty(nTimePoints)
+        
+        # move to jonathans namespace
+        t = trajectoryBasis
+        Q = distributionManager.jointDistribution
+        order = self.polynomialOrder
+        t_max = peakTime
+        
+        # high resolution for tracking
+        top = cp.fit_regression(v, samples, peakTime)
+        
+        # loading bar
+        import sys
+        
+        print "estimate alphas"
+        
+        write = sys.stdout.write
+        loadingBarElementCount = 1
+        nElements = 50
+        if nTimePoints < nElements:
+            nElements = nTimePoints
+        spaces = ''.join([' ' for i in xrange(nElements)])
+        loadingBar = ''.join(['[',spaces,']'])
+        write(loadingBar)
+        sys.stdout.flush()
+        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+        write(backspacing)
+        
+        
+        ## FIRST TRY
+        for j in xrange(nTimePoints):
+             
+            t_ = trajectoryBasis[j]
+            #trans = lambda q: \
+            #        np.array([(t_-top(*q))*(top(*q)>t_), (t_-top(*q))*(top(*q)<=t_)])
+            trans = lambda q: \
+                    np.array([q[0], q[1],q[2], (t_-top(*q))*(top(*q)<=t_)])
+            dist = cp.Dist(_length=4)
+            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
+                    composit=[0.5,0.5,0.5,t_]) #composit=[.5, .5, t_])
+     
+            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
+            poly = cp.fit_regression(orth, trans(samples), data[j],
+                    rule="T", order=1, alpha=None, retall=2)
+            alphas[j] = poly[3]
+            #mean[j] = cp.E(poly[0], dist)
+     
+            if divmod(j+1,nTimePoints/nElements)[0] == loadingBarElementCount:
+                loadingBarElementCount = loadingBarElementCount+1
+                write("#")
+                sys.stdout.flush()
+        
+        write("\n")
+     
+        alpha = np.median(alphas)
+        print "alpha", alphas
+        
+        
+        print "calculate gpce expansion"
+        
+        write = sys.stdout.write
+        loadingBarElementCount = 1
+        nElements = 50
+        if nTimePoints < nElements:
+            nElements = nTimePoints
+        spaces = ''.join([' ' for i in xrange(nElements)])
+        loadingBar = ''.join(['[',spaces,']'])
+        write(loadingBar)
+        sys.stdout.flush()
+        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+        write(backspacing)
+        
+        for j in xrange(nTimePoints):
+     
+            t_ = trajectoryBasis[j]
+            
+            trans = lambda q: \
+                    np.array([q[0], q[1],q[2], (t_-top(*q))*(top(*q)<=t_)])
+            dist = cp.Dist(_length=4)
+            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
+                    composit=[0.5,0.5,0.5,t_])
+            
+            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
+            poly = cp.fit_regression(orth, trans(samples), data[j],
+                    rule="T", order=1, alpha=alpha)
+            E[j] = cp.E(poly, dist)
+            V[j]   = cp.Var(poly, dist)
+            
+            if divmod(j+1,nTimePoints/nElements)[0] == loadingBarElementCount:
+                loadingBarElementCount = loadingBarElementCount+1
+                write("#")
+                sys.stdout.flush()
+        
+        write("\n")
+            
+        # collect data for return
+        statsDict = {}
+        statsDict['expectedValue']      = E
+        statsDict['variance']           = V
         statsDict['numberOfSamples'] = sampleSize
         
         # statistics

@@ -135,10 +135,27 @@ class UqsaCase(TestBaseClass):
         '''
         self.evaluationCaseFiles = [] # list of dict:  [ caseFileDict1,caseFileDict2 ..]  for each evaluation
         
+        #TODO: replace create evaluation files or save them to disc!!!
+        if self.simulateEvaluations == True or self.preProcessData == True or self.createEvaluationXmlFiles == True:
         
-        if self.createEvaluationXmlFiles == True and self.simulateEvaluations == True:
-        
-            for simulationIndex in xrange(self.sampleManager.currentSampleSize):
+            sampleSize = self.sampleManager.currentSampleSize
+            
+            print "Create evaluation case file list"
+            
+            write = sys.stdout.write
+            loadingBarElementCount = 1
+            nElements = 50
+            if sampleSize < nElements:
+                nElements = sampleSize
+            spaces = ''.join([' ' for i in xrange(nElements)])
+            loadingBar = ''.join(['[',spaces,']'])
+            write(loadingBar)
+            sys.stdout.flush()
+            backspacing = ''.join(['\b' for i in xrange(nElements+1)])
+            write(backspacing)
+            
+            
+            for simulationIndex in xrange(sampleSize):
                                         
                 networkXmlFileLoad = mFPH_VPC.getFilePath('uqsaEvaluationNetworkXmlFile', self.networkName, 
                                                            self.dataNumber, 'write',
@@ -158,6 +175,13 @@ class UqsaCase(TestBaseClass):
                                 'pathSolutionDataFilename': pathSolutionDataFilename}
                 
                 self.evaluationCaseFiles.append(caseFileDict1)
+            
+                if divmod(simulationIndex+1,sampleSize/nElements)[0] == loadingBarElementCount:
+                        loadingBarElementCount = loadingBarElementCount+1
+                        write("#")
+                        sys.stdout.flush()
+            
+            write("\n\n")  
             
         
     def getSimulatioNBatchFileList(self):
@@ -241,7 +265,11 @@ class UqsaCase(TestBaseClass):
                 #basis = np.linspace(0.258,0.277,100)
                 
                 ## first discontinuity to last discontinuity
-                basis = np.linspace(0.27890,0.28824,100)
+                #basis = np.linspace(0.27890,0.28824,100)
+                
+                #basis = np.array([0.280])
+                
+                basis = np.linspace(0.025,0.045,100)
                 
                 print "hashDataForGivenBases {}".format(basis)
                 qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)

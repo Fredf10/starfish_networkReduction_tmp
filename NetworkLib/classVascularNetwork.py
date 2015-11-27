@@ -849,6 +849,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         Returns: A dictionary with keys corresponding to the input variables, and values are
             numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals)
         """
+        "TODO: return full non interpolated solution"
+        
         tspan = [np.min(tvals),np.max(tvals)]
         mindt=None
 
