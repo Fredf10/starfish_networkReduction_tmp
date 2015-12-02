@@ -12,6 +12,8 @@ sys.path.append(cur+'/../')
 
 import UtilityLib.classStarfishBaseObject as cSBO
 
+import UtilityLib.progressBar as cPB
+
 #sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
 from NetworkLib.classVascularNetwork import VascularNetwork
@@ -607,23 +609,13 @@ class FlowSolver(cSBO.StarfishBaseObject):
         imposing the boundary conditions based on Riemann Invariants and then solving the vessels,
         conncetions, bifucations with a predictor-corrector step method
         """
-        if self.quiet == False: print "Solving system ..."
+        if self.quiet == False:
+            print "Solving system ..."
+            progressBar = cPB.ProgressBar(35,self.nTSteps)
 
         reflectionCoefficientCount = 0
         maxRef = 0
-        
-        if self.quiet == False:
-            #initialize loading bar
-            write = sys.stdout.write
-            nElements = 35
-            loadingBarElementCount = 1
-            spaces = ''.join([' ' for i in xrange(nElements)])
-            loadingBar = ''.join(['[',spaces,']'])
-            write(loadingBar)
-            sys.stdout.flush()
-            backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-            write(backspacing)
-        
+    
         if self.cycleMode == False:
             # original
             for n in xrange(self.nTSteps):
@@ -642,10 +634,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         # self.exception()
                 
                 if self.quiet == False:
-                    if divmod(n,(self.nTSteps/nElements))[0] == loadingBarElementCount:
-                        loadingBarElementCount=loadingBarElementCount+1
-                        write("#")
-                    sys.stdout.flush()
+                    progressBar.progress(n)
                 
         ## to be concentrated with original cycle mode !!
         else:
