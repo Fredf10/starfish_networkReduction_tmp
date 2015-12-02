@@ -12,6 +12,8 @@ sys.path.append(cur+'/../')
 
 import UtilityLib.classStarfishBaseObject as cSBO
 
+import UtilityLib.progressBar as mPB
+
 #sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
 from NetworkLib.classVascularNetwork import VascularNetwork
@@ -607,19 +609,26 @@ class FlowSolver(cSBO.StarfishBaseObject):
         imposing the boundary conditions based on Riemann Invariants and then solving the vessels, 
         conncetions, bifucations with a predictor-corrector step method
         """
-        if self.quiet == False: print "Solving system ..."
+        if self.quiet == False: 
+            print "Solving system ..."
+            progressBar = mPB.ProgressBar(50,self.nTsteps)
         
         reflectionCoefficientCount = 0
         maxRef = 0
                
         if self.cycleMode == False:
             # original
+            
             for n in xrange(self.nTsteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 #[no() for no in self.numericalObjects]
                 # TODO: (einar) what is meant to happen with numericalObject here?
                 # TODO: (einar) indentation was all wrong originally, please fix to intended functionality
+                
+                if self.quiet == False:
+                    progressBar.progress(n)
+                
                 for numericalObject in self.numericalObjects:
                     try:
                         numericalObject()

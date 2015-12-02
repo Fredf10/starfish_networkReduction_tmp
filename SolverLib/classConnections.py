@@ -698,7 +698,6 @@ class Bifurcation():
             self.__call__ = self.callLinear
             
         elif solvingScheme == "NonLinear":
-            print "classconnection 693: using nonlinear bifurcation model" 
             self.__call__ = self.callNonLinear
         else:
             raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
