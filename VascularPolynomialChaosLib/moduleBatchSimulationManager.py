@@ -10,6 +10,7 @@ from SolverLib.class1DflowSolver import FlowSolver
 
 #sys.path.append(''.join([cur,'/../UtilityLib']))
 from UtilityLib import moduleXML
+import UtilityLib.progressBar as cPB
 
 import gc,time
 
@@ -30,7 +31,9 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     print '====================================='
     print '------Single Process Batch Job-------'
     print 'numberOfEval.:   {}'.format(len(batchDataList))
-    for batchData in batchDataList:
+    progressBar = cPB.ProgressBar(35, len(batchDataList))
+    for completed,batchData in enumerate(batchDataList):
+        progressBar.progress(completed)
         minutesSolve,secsSolve = runSingleBatchSimulation(batchData)
         if quiet == False:
             print '____________Batch   {:5} ___________'.format(batchDataList.index(batchData)) 
@@ -85,8 +88,13 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     print 'numberWorkers:   {}'.format(numberWorkers)
     print 'numberOfEval.:   {}'.format(len(batchDataList))
     pool = multiprocessing.Pool(numberWorkers)
-    results = pool.map(runSingleBatchSimulation,batchDataList)
+    results = pool.imap(runSingleBatchSimulation,batchDataList)
     pool.close() 
+    progressBar = cPB.ProgressBar(35, len(batchDataList))
+    while (True):
+        completed = results._index
+        if (completed == len(batchDataList)): break
+        progressBar.progress(completed)
     pool.join()
     if quiet == False:
         print '====================================='
