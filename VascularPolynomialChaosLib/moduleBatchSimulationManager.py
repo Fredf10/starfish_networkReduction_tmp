@@ -11,6 +11,8 @@ from SolverLib.class1DflowSolver import FlowSolver
 #sys.path.append(''.join([cur,'/../UtilityLib']))
 from UtilityLib import moduleXML
 
+import UtilityLib.progressBar as cPB
+
 import gc,time
 
 import multiprocessing,resource
@@ -30,11 +32,13 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     print '====================================='
     print '------Single Process Batch Job-------'
     print 'numberOfEval.:   {}'.format(len(batchDataList))
-    for batchData in batchDataList:
+    progressBar = cPB.ProgressBar(35, len(batchDataList))
+    for completed,batchData in enumerate(batchDataList):
         minutesSolve,secsSolve = runSingleBatchSimulation(batchData)
         if quiet == False:
             print '____________Batch   {:5} ___________'.format(batchDataList.index(batchData)) 
             print 'Runtime:        {} min {} sec'.format(minutesSolve,secsSolve)
+        progressBar.progress(completed)
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
@@ -75,12 +79,8 @@ def runSingleBatchSimulation(batchData):
         secsSolve = 0
         print "Error in running {}".format(networkXmlFileLoad)
     
-    print('\tWorker maximum memory usage: %.2f (mb)' % (current_mem_usage()))
-    
     return minutesSolve,secsSolve
 
-def current_mem_usage():
-    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.
 
 def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
     '''
@@ -92,14 +92,20 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
         
     '''
     if numberWorkers == None: numberWorkers = multiprocessing.cpu_count()
+    
     timeStartBatch = time.time()
     print '====================================='
     print '------Multiprocessing Batch Job------'
     print 'numberWorkers:   {}'.format(numberWorkers)
     print 'numberOfEval.:   {}'.format(len(batchDataList))
+    progressBar = cPB.ProgressBar(35, len(batchDataList))
     pool = multiprocessing.Pool(numberWorkers, maxtasksperchild = None)
-    results = pool.map(runSingleBatchSimulation,batchDataList)
+    results = pool.imap(runSingleBatchSimulation,batchDataList)
     pool.close() 
+    while (True):
+        completed = results._index
+        if (completed == len(batchDataList)): break
+        progressBar.progress(completed)
     pool.join()
     if quiet == False:
         print '====================================='

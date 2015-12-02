@@ -3,6 +3,7 @@
 from testBaseClass import TestBaseClass 
 
 import numpy as np
+import UtilityLib.progressBar as cPB
 
 class QuantityOfInterest(TestBaseClass):
     '''
@@ -50,21 +51,7 @@ class QuantityOfInterest(TestBaseClass):
         self.hdf5Group.create_dataset('trajectoryData', (sampleSize,len(basis)) , dtype='float64')
         self.hdf5Group.create_dataset('trajectoryBasis', data = basis, dtype='float64')
         
-        import sys
-        write = sys.stdout.write
-        loadingBarElementCount = 1
-        
-        nElements = 50
-        if sampleSize < nElements:
-            nElements = sampleSize
-        
-        spaces = ''.join([' ' for i in xrange(nElements)])
-        loadingBar = ''.join(['[',spaces,']'])
-        write(loadingBar)
-        sys.stdout.flush()
-        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-        write(backspacing)
-        
+        progressBar = cPB.ProgressBar(35, sampleSize)
         
         for n in xrange(sampleSize):
             
@@ -73,12 +60,7 @@ class QuantityOfInterest(TestBaseClass):
             
             self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
         
-            if divmod(n+1,sampleSize/nElements)[0] == loadingBarElementCount:
-                loadingBarElementCount = loadingBarElementCount+1
-                write("#")
-                sys.stdout.flush()
-        
-        write("\n")
+            progressBar.progress(n)
         
     def addUqsaMeasures(self,uqsaMeasureName,uqsaMeasure):
         '''

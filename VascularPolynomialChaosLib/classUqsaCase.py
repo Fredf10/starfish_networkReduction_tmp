@@ -6,6 +6,8 @@ from testBaseClass import TestBaseClass
 
 import moduleFilePathHandlerVPC as mFPH_VPC
 
+import UtilityLib.progressBar as cPB
+
 import classLocationOfInterestManager
 import classUqsaMethods
 import classSampleManager
@@ -26,7 +28,7 @@ class UqsaCase(TestBaseClass):
                              'sampleManager'            : TestBaseClass.ExtObject({'sampleManager':classSampleManager.SampleManager}),
                              'uqsaMethods'              : TestBaseClass.ExtDict('uqsaMethod', TestBaseClass.ExtObject({'uqsaMethodPolynomialChaos':classUqsaMethods.UqsaMethodPolynomialChaos,
                                                                                                                        'uqsaMethodMonteCarlo'     :classUqsaMethods.UqsaMethodMonteCarlo,
-                                                                                                                       'uqsaMethodPolynomialChaosDepDir': classUqsaMethods.UqsaMethodPolynomialChaosDepDir})),
+                                                                                                                       'uqsaMethodPolynomialChaosDepDir': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLR})),
                              'locationOfInterestManager' : TestBaseClass.ExtObject({'LocationOfInterestManager':classLocationOfInterestManager.LocationOfInterestManager}),
                            } 
     
@@ -141,19 +143,7 @@ class UqsaCase(TestBaseClass):
             sampleSize = self.sampleManager.currentSampleSize
             
             print "Create evaluation case file list"
-            
-            write = sys.stdout.write
-            loadingBarElementCount = 1
-            nElements = 50
-            if sampleSize < nElements:
-                nElements = sampleSize
-            spaces = ''.join([' ' for i in xrange(nElements)])
-            loadingBar = ''.join(['[',spaces,']'])
-            write(loadingBar)
-            sys.stdout.flush()
-            backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-            write(backspacing)
-            
+            progressBar = cPB.ProgressBar(35, sampleSize)
             
             for simulationIndex in xrange(sampleSize):
                                         
@@ -176,12 +166,7 @@ class UqsaCase(TestBaseClass):
                 
                 self.evaluationCaseFiles.append(caseFileDict1)
             
-                if divmod(simulationIndex+1,sampleSize/nElements)[0] == loadingBarElementCount:
-                        loadingBarElementCount = loadingBarElementCount+1
-                        write("#")
-                        sys.stdout.flush()
-            
-            write("\n\n")  
+                progressBar.progress(simulationIndex) 
             
         
     def getSimulatioNBatchFileList(self):

@@ -8,6 +8,8 @@ sys.path.append(cur+'/../')
 from testBaseClass import TestBaseClass 
 from classUqsaMeasures import UqsaMeasures
 
+import UtilityLib.progressBar as cPB
+
 import chaospy as cp
 import numpy as np
 
@@ -206,18 +208,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        import sys
-        write = sys.stdout.write
-        loadingBarElementCount = 1
-        nElements = 50
-        if nTimePoints < nElements:
-            nElements = nTimePoints
-        spaces = ''.join([' ' for i in xrange(nElements)])
-        loadingBar = ''.join(['[',spaces,']'])
-        write(loadingBar)
-        sys.stdout.flush()
-        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-        write(backspacing)
+        progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in xrange(nTimePoints):
@@ -266,12 +257,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
             V[j]   = cp.Var(poly, dist)
             
             
-            if divmod(j+1,nTimePoints/nElements)[0] == loadingBarElementCount:
-                loadingBarElementCount = loadingBarElementCount+1
-                write("#")
-                sys.stdout.flush()
-        
-        write("\n")
+            progressBar.progress(j)
             
         # collect data for return
         statsDict = {}
@@ -359,20 +345,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         import sys
         
         print "estimate alphas"
-        
-        write = sys.stdout.write
-        loadingBarElementCount = 1
-        nElements = 50
-        if nTimePoints < nElements:
-            nElements = nTimePoints
-        spaces = ''.join([' ' for i in xrange(nElements)])
-        loadingBar = ''.join(['[',spaces,']'])
-        write(loadingBar)
-        sys.stdout.flush()
-        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-        write(backspacing)
-        
-        
+        progressBar = cPB.ProgressBar(35, nTimePoints)
         ## FIRST TRY
         for j in xrange(nTimePoints):
              
@@ -391,30 +364,14 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
             alphas[j] = poly[3]
             #mean[j] = cp.E(poly[0], dist)
      
-            if divmod(j+1,nTimePoints/nElements)[0] == loadingBarElementCount:
-                loadingBarElementCount = loadingBarElementCount+1
-                write("#")
-                sys.stdout.flush()
-        
-        write("\n")
+            progressBar.progress(j)
      
         alpha = np.median(alphas)
         print "alpha", alphas
         
         
         print "calculate gpce expansion"
-        
-        write = sys.stdout.write
-        loadingBarElementCount = 1
-        nElements = 50
-        if nTimePoints < nElements:
-            nElements = nTimePoints
-        spaces = ''.join([' ' for i in xrange(nElements)])
-        loadingBar = ''.join(['[',spaces,']'])
-        write(loadingBar)
-        sys.stdout.flush()
-        backspacing = ''.join(['\b' for i in xrange(nElements+1)])
-        write(backspacing)
+        progressBar = cPB.ProgressBar(35, nTimePoints)
         
         for j in xrange(nTimePoints):
      
@@ -432,12 +389,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
             E[j] = cp.E(poly, dist)
             V[j]   = cp.Var(poly, dist)
             
-            if divmod(j+1,nTimePoints/nElements)[0] == loadingBarElementCount:
-                loadingBarElementCount = loadingBarElementCount+1
-                write("#")
-                sys.stdout.flush()
-        
-        write("\n")
+            progressBar.progress(j)
             
         # collect data for return
         statsDict = {}
