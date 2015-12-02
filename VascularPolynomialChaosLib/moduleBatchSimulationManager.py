@@ -13,7 +13,7 @@ from UtilityLib import moduleXML
 
 import gc,time
 
-import multiprocessing
+import multiprocessing,resource
 
 ## module to run simulations as a batch jobs
 
@@ -74,7 +74,13 @@ def runSingleBatchSimulation(batchData):
         minutesSolve= 0
         secsSolve = 0
         print "Error in running {}".format(networkXmlFileLoad)
+    
+    print('\tWorker maximum memory usage: %.2f (mb)' % (current_mem_usage()))
+    
     return minutesSolve,secsSolve
+
+def current_mem_usage():
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.
 
 def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
     '''
@@ -91,7 +97,7 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     print '------Multiprocessing Batch Job------'
     print 'numberWorkers:   {}'.format(numberWorkers)
     print 'numberOfEval.:   {}'.format(len(batchDataList))
-    pool = multiprocessing.Pool(numberWorkers)
+    pool = multiprocessing.Pool(numberWorkers, maxtasksperchild = None)
     results = pool.map(runSingleBatchSimulation,batchDataList)
     pool.close() 
     pool.join()

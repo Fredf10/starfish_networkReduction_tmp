@@ -81,7 +81,6 @@ class Link():
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
         elif solvingScheme == "NonLinear":
-            print "classconnection 78: using nonlinear link model" 
             self.__call__ = self.callNonLinear
         else:
             raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
