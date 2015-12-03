@@ -7,9 +7,9 @@ import numpy as np
 network xml version definition
 """
 newestNetworkXmlVersion = '4.2'
-import networkXml042 as newestNetworkXml 
+import networkXml042 as newestNetworkXml
 ##########################################################################################
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 #convert unit to SI system
 unitsDictSI = {'m':1.0,
             'cm':1.0E-2,
@@ -50,12 +50,12 @@ unitsDictSI = {'m':1.0,
             'e6':1.E6,
             'e5':1.E5,
             'e4':1.E4,
-            'e3':1.0E3, 
+            'e3':1.0E3,
             'e2':1.0E2,
             'e-6':1.E-6,
             'e-5':1.E-5,
             'e-4':1.E-4,
-            'e-3':1.0E-3, 
+            'e-3':1.0E-3,
             'e-2':1.0E-2,
             '' : 1.0,
             ' ':1.0,
@@ -69,7 +69,7 @@ unitsDictSI = {'m':1.0,
             'GB': 1024.,
             }
 
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 #convert unit to medical system  Medical
 unitsDictMed = {'m':1.0E2,
                 'cm':1.0,
@@ -108,12 +108,12 @@ unitsDictMed = {'m':1.0E2,
                 'e6':1.E6,
                 'e5':1.E5,
                 'e4':1.E4,
-                'e3':1.0E3, 
+                'e3':1.0E3,
                 'e2':1.0E2,
                 'e-6':1.E-6,
                 'e-5':1.E-5,
                 'e-4':1.E-4,
-                'e-3':1.0E-3, 
+                'e-3':1.0E-3,
                 'e-2':1.0E-2,
                 '' : 1.0,
                 ' ':1.0,
@@ -127,7 +127,7 @@ unitsDictMed = {'m':1.0E2,
                 'GB': 1024.,
                 }
 
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 # units dict for all variables in the system
 # based in SI units
 variableUnitsSI = { # SimulationContext
@@ -181,16 +181,16 @@ variableUnitsSI = { # SimulationContext
                     'leftDaughter': '',
                     'rightDaughter': '',
                     'angleYMother': '',
-                    'geom': '', 
+                    'geom': '',
                     'length': 'm',
                     'radiusA': 'm',
                     'radiusB': 'm',
                     'N': '',
-                    'complianceType': '', 
+                    'complianceType': '',
                     'Pfunc': '',
                     'Ps': 'Pa',
                     'As': 'm2',
-                    'wallThickness': 'm', 
+                    'wallThickness': 'm',
                     'youngModulus': 'Pa',
                     #'beta': 'Pa m-1',
                     'beta': '',
@@ -202,7 +202,7 @@ variableUnitsSI = { # SimulationContext
                     'Flow': 'm3 s-1',
                     'Pressure':'Pa'}
 
-#----------------------------------------------------------------------------------------# 
+#----------------------------------------------------------------------------------------#
 # based on medical units
 variableUnitsMed  = {
                     # SimulationContext
@@ -256,16 +256,16 @@ variableUnitsMed  = {
                     'leftDaughter': '',
                     'rightDaughter': '',
                     'angleYMother': '',
-                    'geom': '', 
+                    'geom': '',
                     'length': 'cm',
                     'radiusA': 'cm',
                     'radiusB': 'cm',
                     'N': '',
-                    'complianceType': '', 
+                    'complianceType': '',
                     'Pfunc': '',
                     'Ps': 'mmHg',
                     'As': 'cm2',
-                    'wallThickness': 'cm', 
+                    'wallThickness': 'cm',
                     'youngModulus': 'mmHg',
                     'beta': 'mmHg cm-1',
                     # Fluid properties
@@ -303,7 +303,7 @@ variablesDict = {## class Vascular Network
                  'simplifyEigenvalues'      : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},
                  'riemannInvariantUnitBase' : {'type':'str',   'unitSI': None, 'strCases': ['Flow', 'Pressure'], 'multiVar': False},
                  'automaticGridAdaptation'  : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},
-                 # initialisationControl    
+                 # initialisationControl
                  'initialsationMethod'          : {'type':'str',        'unitSI': None,      'strCases': ['Auto','MeanFlow','MeanPressure','ConstantPressure'], 'multiVar': False},
                  'initMeanFlow'                 : {'type':'float',      'unitSI': 'm3 s-1',  'strCases': None, 'multiVar': False},
                  'initMeanPressure'             : {'type':'float',      'unitSI': 'Pa',      'strCases': None, 'multiVar': False},
@@ -347,7 +347,7 @@ variablesDict = {## class Vascular Network
                  'RtClosed'          : {'type':'float',  'unitSI': None,        'strCases': None, 'multiVar': False},
                  'Tclosed1'          : {'type':'float',  'unitSI': 's',         'strCases': None, 'multiVar': False},
                  'Tclosed2'          : {'type':'float',  'unitSI': 's',         'strCases': None, 'multiVar': False},
-                 # windkessel 
+                 # windkessel
                  'Rtotal'            : {'type':'float None',      'unitSI': 'Pa s m-3', 'strCases': None, 'multiVar': False},
                  'Rc'                : {'type':'float str None',  'unitSI': 'Pa s m-3', 'strCases': ['VesselImpedance'],  'multiVar': False},
                  'Z'                 : {'type':'float str',       'unitSI': 'Pa s m-3', 'strCases': ['VesselImpedance'], 'multiVar': False},
@@ -359,6 +359,7 @@ variablesDict = {## class Vascular Network
                  'Tpeak'             : {'type':'float',  'unitSI': 's',         'strCases': None, 'multiVar': False},
                  'V0'                : {'type':'float',  'unitSI': 'm3',        'strCases': None, 'multiVar': False},
                  'K'                 : {'type':'float',  'unitSI': 's m-3',     'strCases': None, 'multiVar': False},
+                 'residualName'      : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
                  ## class vessel
                  # attributes
                  'name'              : {'type':'str',  'unitSI': None,     'strCases': ['anything'], 'multiVar': False},
@@ -390,7 +391,7 @@ variablesDict = {## class Vascular Network
                  'Pwidth'            : {'type':'float',  'unitSI':  'Pa',     'strCases': None, 'multiVar': False},
                  'a1'                : {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'b1'                : {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 # fluid 
+                 # fluid
                  'applyGlobalFluid'  : {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
                  # baroreceptors
                  'baroId'            : {'type':'int',  'unitSI': None,     'strCases': None, 'multiVar': False},
@@ -411,9 +412,9 @@ variablesDict = {## class Vascular Network
                  'Gs': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  'HR0': {'type':'float',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  'HRmax': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
-                 'HRmin': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False}, 
+                 'HRmin': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  ## Bugenhagen pars
-                 'bgh': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},    
+                 'bgh': {'type':'float',  'unitSI':  None,     'strCases': None, 'multiVar': False},
                  ## Combined pars
                  'pn':  {'type':'float',  'unitSI':  "Pa",     'strCases': None, 'multiVar': False},
                  'ka':  {'type':'float',  'unitSI':  "Pa",     'strCases': None, 'multiVar': False},

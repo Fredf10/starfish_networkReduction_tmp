@@ -192,7 +192,7 @@ boundaryConditionElements = {
           'L-network'                   :['Z','C'],
           'VaryingElastanceHeart'       :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'K'],
           'VaryingElastanceSimple'      :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'K'],
-          'VaryingElastanceSimpleDAE'   :['T', 'Emax', 'Emin', 'Tpeak', 'V0'],
+          'VaryingElastanceSimpleDAE'   :['T', 'Emax', 'Emin', 'Tpeak', 'V0', 'residualName'],
           # BoundaryCondition names if 1 Vessel '_' == end-positionreference
           '_Flow-PhysiologicalFunction' :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
           '_Flow-Sinus'                 :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
