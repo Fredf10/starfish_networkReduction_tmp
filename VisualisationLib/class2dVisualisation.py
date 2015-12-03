@@ -676,7 +676,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
         
                     self.axis['axis1'].set_xlim(self.limits['Time'])
-                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Time $s$', fontsize=self.fontSizeLabel)
                     self.axis['axis2'].set_xlim(self.limits['Time'])
                     
                 except:
@@ -707,7 +707,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
                                         
                     self.axis['axis1'].set_xlim(self.limits['Space'])
-                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Space $cm$', fontsize=self.fontSizeLabel)
                     self.axis['axis2'].set_xlim(self.limits['Space'])                                  
                 except:
                     self.lines[i]['axis1']['-'].set_data([-1], [0])
@@ -766,7 +766,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
                     self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
                                         
-                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Time $s$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Time'])
                     self.axis['axis2'].set_xlim(self.limits['Time'])
                  except:
@@ -799,7 +799,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
                     self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
                                         
-                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Space $cm$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Space'])
                     self.axis['axis2'].set_xlim(self.limits['Space']) 
                                  
@@ -855,7 +855,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
                     self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
                                         
-                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Time $', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Time'])
                     self.axis['axis2'].set_xlim(self.limits['Time'])
                  except:
@@ -888,7 +888,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2Twin']['--'].set_data(xData[1:], yData11)
                     self.lines[i]['axis2Twin'][':'].set_data(xData[1:], yData12)
                                         
-                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Space $cm$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Space'])
                     self.axis['axis2'].set_xlim(self.limits['Space']) 
                                  
@@ -926,7 +926,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
                     
-                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Time $s$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Time'])
                     self.axis['axis2'].set_xlim(self.limits['Time'])
                 except:
@@ -949,7 +949,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
                     
-                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Space $cm$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Space'])
                     self.axis['axis2'].set_xlim(self.limits['Space'])     
                 except:
@@ -979,7 +979,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)
                     
-                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Time $s$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Time'])
                     self.axis['axis2'].set_xlim(self.limits['Time'])
                 except:
@@ -997,7 +997,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
                     
-                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Space $cm$', fontsize=self.fontSizeLabel)
                     self.axis['axis1'].set_xlim(self.limits['Space'])
                     self.axis['axis2'].set_xlim(self.limits['Space'])              
                 except:
@@ -1034,7 +1034,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
         
                     self.axis['axis1'].set_xlim(self.limits['Time'])
-                    self.axis['axis2'].set_xlabel('Time $s$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Time $s$', fontsize=self.fontSizeLabel)
                     self.axis['axis2'].set_xlim(self.limits['Time'])
                     
                 except:
@@ -1052,7 +1052,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
                                              
                     self.axis['axis1'].set_xlim(self.limits['Space'])
-                    self.axis['axis2'].set_xlabel('Space $cm$}', fontsize=self.fontSizeLabel)
+                    self.axis['axis2'].set_xlabel('Space $cm$', fontsize=self.fontSizeLabel)
                     self.axis['axis2'].set_xlim(self.limits['Space'])             
                     
                 except:
