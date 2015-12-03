@@ -12,6 +12,8 @@ sys.path.append(cur+'/../')
 
 import UtilityLib.classStarfishBaseObject as cSBO
 
+import UtilityLib.progressBar as cPB
+
 #sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
 from NetworkLib.classVascularNetwork import VascularNetwork
@@ -607,11 +609,13 @@ class FlowSolver(cSBO.StarfishBaseObject):
         imposing the boundary conditions based on Riemann Invariants and then solving the vessels,
         conncetions, bifucations with a predictor-corrector step method
         """
-        if self.quiet == False: print "Solving system ..."
+        if self.quiet == False:
+            print "Solving system ..."
+            progressBar = cPB.ProgressBar(35,self.nTSteps)
 
         reflectionCoefficientCount = 0
         maxRef = 0
-
+    
         if self.cycleMode == False:
             # original
             for n in xrange(self.nTSteps):
@@ -628,7 +632,10 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         print "Success in saving solution data file. Reraising Exception"
                         raise # TODO: why does self.exception() not force the program to quit?
                         # self.exception()
-
+                
+                if self.quiet == False:
+                    progressBar.progress(n)
+                
         ## to be concentrated with original cycle mode !!
         else:
             # steady state variables

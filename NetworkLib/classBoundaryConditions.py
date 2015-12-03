@@ -2486,6 +2486,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.newCycle = False
         self.cycleNumber = 0
         self.num = 0
+
         self.atriumPressure0 = 7.5 * 133.32  # TODO: Fix this: Pressure in the atrium ## venouse pressure?!
 
         self.dQInOut = np.empty((2))
@@ -2493,7 +2494,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.dsetGroup = None
 
         self.pressure = np.zeros(0)
-        self.atriumPressure = np.zeros(0)
+        self.atriumPressure =  np.zeros(0)
         self.volume = np.zeros(0)
         self.mitralQ = np.zeros(0)
         self.Elastance = np.zeros(0)
@@ -2502,7 +2503,6 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         self.DtFlow = np.zeros(0)
         self.deltaP = np.zeros(0)
         self.aortaP = np.zeros(0)
-
 
     def update(self, bcDict):
         super(VaryingElastanceSimple,self).update(bcDict)
@@ -2538,6 +2538,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
         """ Initial conditions in the ventricle"""
         self.pressure[0] = self.atriumPressure0
         self.volume[0]   = self.atriumPressure0 / self.E(0) + self.V0
+        self.atriumPressure[0] = self.atriumPressure0
 
     def __call__(self, _domegaField_, duPrescribed, R, L, nmem,  n, dt, P, Q, A, Z1, Z2):
 
