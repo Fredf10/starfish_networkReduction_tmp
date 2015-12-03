@@ -309,10 +309,8 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                             variableValue = variableValue*unitsDict[variableUnit]
                     except KeyError:
                         print """ Warning: Can't find {} in unitsDict""".format(variableUnit)
-                        pass
                     except TypeError:
-                        print """ Warning: Can't find {} in unitsDict""".format(variableUnit)
-                        pass
+                        print """ Warning: Can't find {} in unitsDict for variable {}""".format(variableUnit, variable)
 
                 if variableType == 'int':
                     try: variableValue = int(variableValue)
