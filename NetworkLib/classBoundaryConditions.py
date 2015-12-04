@@ -2866,15 +2866,15 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         dVImposed = -dt*(2*Q + dQ)/2
         self.volume[nmem+1] = self.volume[nmem] + dVImposed
         self.pressure[nmem+1] = (self.Elastance[nmem+1])*(self.volume[nmem+1]-self.V0)
-        residual = self.pressure[nmem+1] - (P+dP)
+        residual = self.pressure[nmem+1] - (self.pressure[nmem]+dP)
         return residual
 
     def FlowResidual(self, dP, dQ, P, Q, A, dt, nmem, n):
         # Assume Pressure and derive Q
         dVImposed = -dt*(2*Q + dQ)/2
-        self.volume[n+1] = (P+dP)/self.Elastance[n+1] + self.V0
-        self.pressure[n+1] = P + dP
-        residual = self.volume[n+1] - self.volume[n] - dVImposed
+        self.pressure[nmem+1] = P + dP
+        self.volume[nmem+1] = (P+dP)/self.Elastance[nmem+1] + self.V0
+        residual = self.volume[nmem+1] - self.volume[nmem] - dVImposed
         return residual
 
     def EllipsoidalPressureResidual(self, dP, dQ, P, Q, A, dt, nmem, n):
@@ -2946,8 +2946,7 @@ class VaryingElastanceSimpleDAE(generalPQ_BC):
         ventrPn = self.pressure[nmem]
         venoP = self.atriumPressure[nmem]
         t = self.getCycleTime(nmem + 1, dt)
-        self.Elastance[nmem + 1] = self.E(t+dt)
-
+        self.Elastance[nmem + 1] = self.E(t)
 
         # TODO: fix how this inherits from generalizedPQ_BC
         if (Q >= -1e-15 and ventrPn - P > (-0.0001)):  # systolecondition
