@@ -28,7 +28,9 @@ class UqsaCase(TestBaseClass):
                              'sampleManager'            : TestBaseClass.ExtObject({'sampleManager':classSampleManager.SampleManager}),
                              'uqsaMethods'              : TestBaseClass.ExtDict('uqsaMethod', TestBaseClass.ExtObject({'uqsaMethodPolynomialChaos':classUqsaMethods.UqsaMethodPolynomialChaos,
                                                                                                                        'uqsaMethodMonteCarlo'     :classUqsaMethods.UqsaMethodMonteCarlo,
-                                                                                                                       'uqsaMethodPolynomialChaosDepDir': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLR})),
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirLR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLR,
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirQR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirQR},
+                                                                                                                        )),
                              'locationOfInterestManager' : TestBaseClass.ExtObject({'LocationOfInterestManager':classLocationOfInterestManager.LocationOfInterestManager}),
                            } 
     
