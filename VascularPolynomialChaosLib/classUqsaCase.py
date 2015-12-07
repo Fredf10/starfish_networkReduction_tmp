@@ -259,11 +259,11 @@ class UqsaCase(TestBaseClass):
                 #basis = np.array([0.280])
                 
                 # all
-                basis = np.linspace(0.025,0.045,100)
+                #basis = np.linspace(0.025,0.045,100)
                 
                 # just discontinuity
                 
-                basis = np.linspace(0.025,0.045,50)
+                basis = np.linspace(0.031,0.039,50)
                 
                 
                 
@@ -285,11 +285,7 @@ class UqsaCase(TestBaseClass):
                 
                 else:
                     
-<<<<<<< HEAD
-                    #self.locationOfInterestManager.flushQuantityOfInterestFile()
-=======
                     timeStartTotal = time.time()
->>>>>>> 4dcfeffa7e9e7d049bf576f338e34dd32ac8dcb5
                     
                     for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
                         
@@ -298,8 +294,6 @@ class UqsaCase(TestBaseClass):
                         
                         uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
                         qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
-                        
-                        self.locationOfInterestManager.flushQuantityOfInterestFile()
                         
                         timeBatchJob= time.time()-timeStartBatch
                         minutesBatch = int(timeBatchJob/60.)

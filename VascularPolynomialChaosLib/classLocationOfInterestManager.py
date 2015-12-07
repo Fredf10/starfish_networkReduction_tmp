@@ -138,7 +138,6 @@ class LocationOfInterestManager(TestBaseClass):
         
             progressBar.progress(evaluationCaseFiles.index(batchData))    
             
-            #self.flushQuantityOfInterestFile()
         # save hdf5 file
         
         # second postprocessing find extrema if needed also for variables defined over space
@@ -190,10 +189,6 @@ class LocationOfInterestManager(TestBaseClass):
         baseGroupName = 'LocationOfInterestManager' 
         self.updateHdf5Groups(baseGroupName)
         
-    def flushQuantityOfInterestFile(self):
-        baseGroupName = 'LocationOfInterestManager' 
-        self.updateHdf5Groups(baseGroupName)
-        self.saveDataHdf5()
         
     def closeAndSaveQuantityOfInterestFile(self):
         
