@@ -14,6 +14,10 @@ import classSampleManager
 
 import shutil
 
+import time
+import numpy as np
+import multiprocessing
+
 class UqsaCase(TestBaseClass):
     
     externVariables      = { 'createSample'             : TestBaseClass.ExtValue(bool),
@@ -229,9 +233,7 @@ class UqsaCase(TestBaseClass):
             # loop through data objects
             for qoi in self.locationOfInterestManager.getQoiIterator():
                 
-                import time
                 timeStartBatch = time.time()
-                import numpy as np
                 
                 ## ranges 
                 
@@ -267,21 +269,38 @@ class UqsaCase(TestBaseClass):
                 print '====================================='
                 print
                 
-                for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
+                multiprocessingUQSA = True
+                
+                if multiprocessingUQSA == True:
+                    self.multiprocessingUQSA(qoi, distributionManager)
+                
+                else:
                     
-                    timeStartBatch = time.time()
-                    print "calculate uqsa measure for {}".format(uqsaMethodName)
+                    timeStartTotal = time.time()
                     
-                    uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
-                    qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
-                    
-                    self.locationOfInterestManager.flushQuantityOfInterestFile()
-                    
-                    timeBatchJob= time.time()-timeStartBatch
-                    minutesBatch = int(timeBatchJob/60.)
-                    secsBatch = timeBatchJob-minutesBatch*60.
+                    for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
+                        
+                        timeStartBatch = time.time()
+                        print "calculate uqsa measure for {}".format(uqsaMethodName)
+                        
+                        uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
+                        qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
+                        
+                        self.locationOfInterestManager.flushQuantityOfInterestFile()
+                        
+                        timeBatchJob= time.time()-timeStartBatch
+                        minutesBatch = int(timeBatchJob/60.)
+                        secsBatch = timeBatchJob-minutesBatch*60.
+                        print '====================================='
+                        print 'runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
+                        print '====================================='
+                        print
+            
+                    timeTotal= time.time()-timeStartTotal
+                    minutesTotal = int(timeTotal/60.)
+                    secsTotal = timeTotal-minutesTotal*60.
                     print '====================================='
-                    print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
+                    print 'total runtime:  {} min {} sec'.format(minutesTotal,secsTotal)
                     print '====================================='
                     print
             
@@ -289,18 +308,44 @@ class UqsaCase(TestBaseClass):
     
     
     
-    def multiprocessingUQSA(self):
+    def multiprocessingUQSA(self,qoi, distributionManager):
         '''
         Run all uqsa methods in as a local multiprocess
         '''
-        pass
+        print "running Multiprocessing UQSA"
+        timeStartBatch = time.time()
+        
+        # create batch list for all jobs    
+        batchList = []
+        for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
+            batchList.append([uqsaMethodName,uqsaMethod,distributionManager,self.sampleManager,qoi])         
+        # run jobs
+        pool = multiprocessing.Pool( multiprocessing.cpu_count())
+        pool.imap(self.batchJobUQSA,batchList)
+        pool.close() 
+        pool.join()
+        
+        timeBatchJob= time.time()-timeStartBatch
+        minutesBatch = int(timeBatchJob/60.)
+        secsBatch = timeBatchJob-minutesBatch*60.
+        print '====================================='
+        print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
+        print '====================================='
+        print
+        
+        
+        
     
-    def batchJobUQSA(self):
+    def batchJobUQSA(self, args):
         '''
         batch job for local uqsa multiprocessing
         '''
         
-        pass
+        uqsaMethodName,uqsaMethod,distributionManager,sampleManager,qoi = args
+        
+        uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, sampleManager, qoi)
+        qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
+            
         
         
     
