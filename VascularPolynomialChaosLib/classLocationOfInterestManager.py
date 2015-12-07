@@ -138,7 +138,7 @@ class LocationOfInterestManager(TestBaseClass):
         
             progressBar.progress(evaluationCaseFiles.index(batchData))    
             
-            self.flushQuantityOfInterestFile()
+            #self.flushQuantityOfInterestFile()
         # save hdf5 file
         
         # second postprocessing find extrema if needed also for variables defined over space

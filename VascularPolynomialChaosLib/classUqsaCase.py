@@ -256,7 +256,14 @@ class UqsaCase(TestBaseClass):
                 
                 #basis = np.array([0.280])
                 
+                # all
                 basis = np.linspace(0.025,0.045,100)
+                
+                # just discontinuity
+                
+                basis = np.linspace(0.025,0.045,50)
+                
+                
                 
                 print "hashDataForGivenBases {}".format(basis)
                 qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
@@ -277,7 +284,7 @@ class UqsaCase(TestBaseClass):
                     uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
                     qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
                     
-                    self.locationOfInterestManager.flushQuantityOfInterestFile()
+                    #self.locationOfInterestManager.flushQuantityOfInterestFile()
                     
                     timeBatchJob= time.time()-timeStartBatch
                     minutesBatch = int(timeBatchJob/60.)
