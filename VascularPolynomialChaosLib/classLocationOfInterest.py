@@ -300,6 +300,7 @@ class LocationOfInterest(TestBaseClass):
                     t0 = 0.131075224759
                     dataTo = np.empty(maxNumberPoints)
                     
+                    
                     for i,dataX in enumerate(data):
                         dataTo[i] = np.interp(t0, vascularNetwork.simulationTime, dataX)
                                         
@@ -307,6 +308,31 @@ class LocationOfInterest(TestBaseClass):
                      
                     totalDataShapeMinMaxIndices = (sampleSize,3)
                      
+                     
+#                     plt.rc("figure", figsize=[8,4])
+#                     plt.rc("figure.subplot", left=.1)
+#                     plt.rc("axes.formatter", useoffset=False)
+#                     
+#                     plt.figure() 
+#                      
+#                     plt.plot(trajectory*100, dataTo/133.32)
+#                     plt.xlabel(r"trajectory [cm]")
+#                     plt.ylabel(r"Pressure [mmHg]")
+#                     
+#                     ax = plt.gca()
+#                     ax.get_xaxis().get_major_formatter().set_useOffset(False)
+#                     ax.get_xaxis().get_major_formatter().set_scientific(False)
+#                     
+#                     ax.set_ylim([126.8,128])
+#                     #ax.spines['right'].set_visible(False)
+#                     #ax.spines['top'].set_visible(False)
+#                     #ax.tick_params(axis='y',right='off')
+#                     
+#                     
+#                     plt.savefig("pressureDiscontinuity.pdf")
+#                     
+#                     exit()
+                    
                     quantityObject.retainDsetRowData('data',dataTo, sampleIndex, totalDataShape)
                     quantityObject.retainDsetRowData('dataBasis',trajectory, sampleIndex, totalDataShape)
                     quantityObject.retainDsetRowData('dataBasisMinMaxPeak',np.array([min(trajectory),max(trajectory),trajectory[(trajectory[:-1]-trajectory[1:])==0]]), sampleIndex, totalDataShapeMinMaxIndices)

@@ -137,13 +137,15 @@ class LocationOfInterestManager(TestBaseClass):
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, simulationIndex)
         
             progressBar.progress(evaluationCaseFiles.index(batchData))    
+            
+            self.flushQuantityOfInterestFile()
         # save hdf5 file
         
         # second postprocessing find extrema if needed also for variables defined over space
         ## TODO: fix data saving methods as it will not work now
         for locationOfInterest in self.locationsOfInterest.values():
             locationOfInterest.preprocessSolutionDataExtremaAndInflectionPoints(self.simulationTime, self.sampleSize)
-    
+            
         #for locationOfInterest in self.locationsOfInterest.values():
         #    locationOfInterest.preprocessSolutionDataTrajectory(self.simulationTime, self.sampleSize)
         
@@ -187,6 +189,11 @@ class LocationOfInterestManager(TestBaseClass):
         self.openHdf5File(uqsaSolutionDataFileSave, mode)
         baseGroupName = 'LocationOfInterestManager' 
         self.updateHdf5Groups(baseGroupName)
+        
+    def flushQuantityOfInterestFile(self):
+        baseGroupName = 'LocationOfInterestManager' 
+        self.updateHdf5Groups(baseGroupName)
+        self.saveDataHdf5()
         
     def closeAndSaveQuantityOfInterestFile(self):
         

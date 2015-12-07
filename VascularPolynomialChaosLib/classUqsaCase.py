@@ -275,6 +275,8 @@ class UqsaCase(TestBaseClass):
                     uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
                     qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
                     
+                    self.locationOfInterestManager.flushQuantityOfInterestFile()
+                    
                     timeBatchJob= time.time()-timeStartBatch
                     minutesBatch = int(timeBatchJob/60.)
                     secsBatch = timeBatchJob-minutesBatch*60.
@@ -284,4 +286,22 @@ class UqsaCase(TestBaseClass):
                     print
             
             self.locationOfInterestManager.closeAndSaveQuantityOfInterestFile()
+    
+    
+    
+    def multiprocessingUQSA(self):
+        '''
+        Run all uqsa methods in as a local multiprocess
+        '''
+        pass
+    
+    def batchJobUQSA(self):
+        '''
+        batch job for local uqsa multiprocessing
+        '''
+        
+        pass
+        
+        
+    
     
