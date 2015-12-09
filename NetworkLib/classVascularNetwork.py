@@ -1376,7 +1376,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # Check if gravity is on and if user wants to correct for hydrostatic pressure
             if self.gravitationalField == True:
 
-                input = ['K']
+                input = 'K'
                 while input not in ['y', 'Y', 'yes', 'Yes', 'n', 'no', 'No', 'NO']:
                     input = str(raw_input("\n Adjust for hydrostatic pressure(y/n): "))
 

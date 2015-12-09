@@ -91,6 +91,7 @@ def test_singleVessel():
                 TooHighError = True
                 print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
 
+    assert(not TooHighError)
     if not TooHighError:
         print "\nAll values below error threshold"
         print "Test Successful!"
@@ -200,6 +201,7 @@ def test_saveSkipping():
                 TooHighError = True
                 print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
 
+    assert(not TooHighError)
     if not TooHighError:
         print "\nAll values below error threshold"
         print "Test Successful!"
@@ -295,16 +297,11 @@ def test_memoryChunking():
             if testDict[key] < RMSEDict[vesselId][key] :
                 TooHighError = True
                 print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
+    assert(not TooHighError)
 
     if not TooHighError:
         print "\nAll values below error threshold"
         print "Test Successful!"
-
-#        print dataDictNew
-#        print dataDictNew
-#        print dataDictRef
-# root mean square
-
 
 if __name__ == "__main__":
     test_singleVessel()
