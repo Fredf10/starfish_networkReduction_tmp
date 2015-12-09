@@ -6,32 +6,32 @@ cur = os.path.dirname(os.path.realpath(__file__))
 
 class RuntimeMemoryManager(object):
     """
-    This class implements a system to limit memory needed to run simulations, 
+    This class implements a system to limit memory needed to run simulations,
     and to synchronize saving the results of the simulation to data files.
-    
+
         Initialize RuntimeMemoryManager object for all components.
-    
+
         Args:
            nSaveBegin := the index in the solution time series where saving begins
            nSaveEnd := the index in the solution time series where saving ends
            nTSteps := the total number of time steps required for the solution
            network := the vascular network object
-        
+
         Attributes:
            memoryArraySize    := the number of time steps to be stored in the runtime memory
            currentMemoryIndex := the index in vessel memory buffer corresponding to currentTimeStep
            currentTimeStep    := the current position of the solver relative to the total solution
-           
+
 
     """
-    
+
     def __init__(self, nSaveBegin, nSaveEnd, nSaveSkip, nTsteps, maxMemory):
         self.nTSteps = nTsteps
         self.memoryArraySizeTime = None
         self.totalDataPointsPerTimeStep = 0
         self.registeredData = []
         self.chunkCount = 0
-        self.nDCurrent = 0 
+        self.nDCurrent = 0
         self.nSaveBegin= nSaveBegin
         self.nSaveEnd = nSaveEnd
         self.nSkipShift = 0
@@ -42,12 +42,12 @@ class RuntimeMemoryManager(object):
         self.memoryOffset = [0]
         self.currentMemoryIndex = [0]
         self.currentTimeStep = [0]
-    
+
     def registerGlobalTimeSteps(self, currentMemoryIndex, currentTimeStep):
         # Interface method to link solver time step to memory manager
         self.currentMemoryIndex = currentMemoryIndex
         self.currentTimeStep = currentTimeStep
-        
+
     def registerDataSize(self,dataSizes):
         """
         Args:
@@ -55,16 +55,18 @@ class RuntimeMemoryManager(object):
         """
         self.totalDataPointsPerTimeStep += sum(dataSizes)
         estimatedMemorySolutionDataSpace = self.totalDataPointsPerTimeStep*8
-        self.memoryArraySizeTime = int(math.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))
+        optimalMemorySize = int(math.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))
+        self.memoryArraySizeTime = max(2, optimalMemorySize)
+
         # Don't allocate more memory than needed
         if self.memoryArraySizeTime > (self.nTSteps + 1):
             self.memoryArraySizeTime = self.nTSteps + 1
-    
+
     # Based on the interface implemented in StarfishObjectBase
     def registerSimulationObject(self,simObject):
         solutionMemory, dataBuffers = simObject.getSolutionMemory()
         self.registerSimulationData(solutionMemory, dataBuffers)
-    
+
     def registerSimulationData(self, solutionMemory, dataBuffers):
         """
         Args:
@@ -75,20 +77,20 @@ class RuntimeMemoryManager(object):
         self.registeredData.extend(zip(solutionMemory,dataBuffers))
         # Each simulation object registers itself here by passing in a tuple of spatial dimensions
         # The
-    
+
     def registerSaveData(self, solutionMemory,  dataBuffers):
         pass
-    
+
     def rollSimulationData(self):
         for solutionMemory, dataBuffer in self.registeredData:
             solutionMemory[0] = solutionMemory[-1]
-        
-    
+
+
     def flushSolutionMemory(self):
         """
         saving utility function to determine if solution data needs to be sent to the output file,
         and to calculate the correct indices between solution memory and the data output file.
-       
+
         Explanation of index variables
         nCB,nCE where the beginning and end of the current solution data in memory would lie
          in a full time history of the solution. These are position indices
@@ -116,40 +118,40 @@ class RuntimeMemoryManager(object):
             elif self.nSaveBegin > nCB:
                 nMB = 1 + (self.nSaveBegin-nCB)
             else:
-                nMB = 1   + self.nSkipShift  
-                
+                nMB = 1   + self.nSkipShift
+
             #determine length to write
             # 1. assume we write out through the end of memory
             # 1.a Accounting for skipping write first value, then as many values as remain divisible by the skip
             nME = memoryArraySize
-            
+
             # 2. correct assumption 1 if save index is less than the current time step
             if self.nSaveEnd < nCE:
                 # set the index to end saving, and include the final time point
                 nME -= (nCE - (self.nSaveEnd))
-                
-            
+
+
             numWrittenAfterFirst = ((nME - nMB) -1)//self.nSaveSkip
             lengthToWrite = 1 + numWrittenAfterFirst
-            
+
             # 3. how many entries are skipped after rolling memory
             self.nSkipShift = (self.nSaveSkip - (nME-nMB)%self.nSaveSkip)%self.nSaveSkip
-            
-            # Where in the data file to put the data    
+
+            # Where in the data file to put the data
             nDB = self.nDCurrent
             nDE = self.nDCurrent + lengthToWrite
             self.nDCurrent += lengthToWrite
-        
-        
+
+
         for solutionMemory, dataBuffer in self.registeredData:
             if saving and dataBuffer:
                 dataBuffer[nDB:nDE] = solutionMemory[nMB:nME:self.nSaveSkip]
             solutionMemory[0] = solutionMemory[-1]
         self.chunkCount += 1
-            
+
     def runtimeUpdate(self):
         currentMemoryIndex = self.currentMemoryIndex[0]
-        
+
         if currentMemoryIndex == self.memoryArraySizeTime - 2:
             self.flushSolutionMemory()
             self.memoryOffset[0] = (self.memoryArraySizeTime - 1) * self.chunkCount
@@ -162,7 +164,7 @@ class RuntimeMemoryManager(object):
         call function for DataHandler to save the data for each vessel in the network
         '''
         self.runtimeUpdate()
-            
-        
-        
-        
+
+
+
+
