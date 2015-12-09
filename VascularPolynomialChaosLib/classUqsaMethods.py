@@ -183,10 +183,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
         
         peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
         peakTime = peakTime.T[2][:sampleSize]
-                
-        dependentCase = sampleManager.dependentCase
-        confidenceAlpha = qoi.confidenceAlpha
-        
+                        
         samples = samples.T        
         data = data.T
         
@@ -216,6 +213,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
     
             samples_left = samples[:,t_>t_max]
             samples_right = samples[:,t_<=t_max]
+            
             f_vals_left = data[j][t_>t_max]
             f_vals_right = data[j][t_<=t_max]
     
@@ -263,7 +261,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
         statsDict = {}
         statsDict['expectedValue']      = E
         statsDict['variance']           = V
-        statsDict['numberOfSamples'] = sampleSize
+        statsDict['numberOfSamples']    = sampleSize
         
         # statistics
         uqsaMeasures = UqsaMeasures()

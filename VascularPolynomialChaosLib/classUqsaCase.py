@@ -263,8 +263,12 @@ class UqsaCase(TestBaseClass):
                 
                 # just discontinuity
                 
-                basis = np.linspace(0.031,0.039,50)
+                #basis = np.linspace(0.031,0.039,50)
                 
+                basis = np.linspace(0.031,0.035,25)
+                
+                # no sicontinuity
+                basis = np.linspace(0.025,0.03,25)
                 
                 
                 print "hashDataForGivenBases {}".format(basis)
@@ -278,7 +282,7 @@ class UqsaCase(TestBaseClass):
                 print '====================================='
                 print
                 
-                multiprocessingUQSA = True
+                multiprocessingUQSA = False
                 
                 if multiprocessingUQSA == True:
                     self.multiprocessingUQSA(qoi, distributionManager)
