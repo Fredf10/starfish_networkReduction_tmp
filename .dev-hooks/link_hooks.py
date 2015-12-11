@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 # Symlinks the hooks to the local git directory
-
+ret_val = 0 
 import os
 import stat
 import errno
@@ -30,14 +30,31 @@ valid_hooks = ["pre-commit", "post-commit", "prepare-commit-msg", "commit-msg",
 for filename in filenames:
     hook_name = filename.split(".py")[0]
     if hook_name in valid_hooks:
-        source_path = os.path.join(git_hooks_path, hook_name)
         target_path = os.path.join(local_hooks_path, filename)
+       
+        st = os.stat(target_path)
+        os.chmod(target_path, st.st_mode | stat.S_IEXEC)
+        st = os.stat(target_path)
+        # TODO: Python ize this ?
+        bash_exec = "if [ -x "+  target_path + " ]; then true else false; fi"
+        exec_stat = os.system(bash_exec)
+        if exec_stat != 0:
+            print "Unable to set hook as an executable" 
+            ret_val = 1
+
+        source_path = os.path.join(git_hooks_path, hook_name)
         try:
             os.symlink(target_path, source_path)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                raise
+               ret_val = 1
+               raise
             else:
-                print hook_name, "hook already exists in ", git_hooks_path
+                current_target = os.path.realpath(os.readlink(source_path))
+                linkIsGood = os.path.samefile(current_target,target_path)
 
+                if linkIsGood is not True:
+                    print hook_name, "hook already exists in ", git_hooks_path
+                    ret_val = 1
+sys.exit(ret_val)
 
