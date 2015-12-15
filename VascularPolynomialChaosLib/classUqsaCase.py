@@ -33,7 +33,8 @@ class UqsaCase(TestBaseClass):
                              'uqsaMethods'              : TestBaseClass.ExtDict('uqsaMethod', TestBaseClass.ExtObject({'uqsaMethodPolynomialChaos':classUqsaMethods.UqsaMethodPolynomialChaos,
                                                                                                                        'uqsaMethodMonteCarlo'     :classUqsaMethods.UqsaMethodMonteCarlo,
                                                                                                                        'uqsaMethodPolynomialChaosDepDirLR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLR,
-                                                                                                                       'uqsaMethodPolynomialChaosDepDirQR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirQR},
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirQR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirQR,
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirLRorder': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLRorder},
                                                                                                                         )),
                              'locationOfInterestManager' : TestBaseClass.ExtObject({'LocationOfInterestManager':classLocationOfInterestManager.LocationOfInterestManager}),
                            } 
@@ -72,6 +73,7 @@ class UqsaCase(TestBaseClass):
         self.numberOfProcessors     = 12
         self.simulateEvaluationNumbers = []
         # pre process data for all quantitiy of interest
+        self.preProcessData   = True
         self.preProcessData   = True
         # post processing - uncertainty quantification and sensitivity analysis
         self.postProcessing  = True
@@ -259,16 +261,37 @@ class UqsaCase(TestBaseClass):
                 #basis = np.array([0.280])
                 
                 # all
-                #basis = np.linspace(0.025,0.045,100)
+                #basis = np.linspace(0.025,0.045,500)
                 
                 # just discontinuity
                 
                 #basis = np.linspace(0.031,0.039,50)
                 
-                basis = np.linspace(0.031,0.035,25)
+                numerOfSamples = 100
+                
+                # called now
+                #lowerEnd = 0.031 
+                
+                # called now2
+                lowerEnd = 0.0318
+                
+                upperEnd = 0.035
+                
+                import chaospy as cp
+                u = cp.Uniform()
+                basis = lowerEnd+(upperEnd-lowerEnd)*np.sort(u.sample(numerOfSamples,'H'))
+                                
+                #basis = np.linspace(0.03170,0.035,22)
+                
+                #basis = np.linspace(0.034,0.035,25)
+                
+                
+                # half
+                
+                #basis = np.linspace(0.025,0.035,100)
                 
                 # no sicontinuity
-                basis = np.linspace(0.025,0.03,25)
+                #basis = np.linspace(0.025,0.03,25)
                 
                 
                 print "hashDataForGivenBases {}".format(basis)
