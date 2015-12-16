@@ -34,7 +34,8 @@ class UqsaCase(TestBaseClass):
                                                                                                                        'uqsaMethodMonteCarlo'     :classUqsaMethods.UqsaMethodMonteCarlo,
                                                                                                                        'uqsaMethodPolynomialChaosDepDirLR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLR,
                                                                                                                        'uqsaMethodPolynomialChaosDepDirQR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirQR,
-                                                                                                                       'uqsaMethodPolynomialChaosDepDirLRorder': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLRorder},
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirLRorder': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLRorder,
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirFLR' : classUqsaMethods.UqsaMethodPolynomialChaosDepDirFLR},
                                                                                                                         )),
                              'locationOfInterestManager' : TestBaseClass.ExtObject({'LocationOfInterestManager':classLocationOfInterestManager.LocationOfInterestManager}),
                            } 
@@ -267,13 +268,13 @@ class UqsaCase(TestBaseClass):
                 
                 #basis = np.linspace(0.031,0.039,50)
                 
-                numerOfSamples = 100
+                numerOfSamples = 20
                 
                 # called now
-                #lowerEnd = 0.031 
+                lowerEnd = 0.031 
                 
                 # called now2
-                lowerEnd = 0.0318
+                #lowerEnd = 0.0318
                 
                 upperEnd = 0.035
                 
