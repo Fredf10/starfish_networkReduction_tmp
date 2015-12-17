@@ -34,8 +34,12 @@ class UqsaCase(TestBaseClass):
                                                                                                                        'uqsaMethodMonteCarlo'     :classUqsaMethods.UqsaMethodMonteCarlo,
                                                                                                                        'uqsaMethodPolynomialChaosDepDirLR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLR,
                                                                                                                        'uqsaMethodPolynomialChaosDepDirQR': classUqsaMethods.UqsaMethodPolynomialChaosDepDirQR,
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirQL': classUqsaMethods.UqsaMethodPolynomialChaosDepDirQL,
                                                                                                                        'uqsaMethodPolynomialChaosDepDirLRorder': classUqsaMethods.UqsaMethodPolynomialChaosDepDirLRorder,
-                                                                                                                       'uqsaMethodPolynomialChaosDepDirFLR' : classUqsaMethods.UqsaMethodPolynomialChaosDepDirFLR},
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirFLR' : classUqsaMethods.UqsaMethodPolynomialChaosDepDirFLR,
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirFR' : classUqsaMethods.UqsaMethodPolynomialChaosDepDirFR,
+                                                                                                                       'uqsaMethodPolynomialChaosDepDirFL' : classUqsaMethods.UqsaMethodPolynomialChaosDepDirFL,
+                                                                                                                       'uqsaMethodMonteCarloParametrizedBootstrapping' : classUqsaMethods.UqsaMethodMonteCarloParametrizedBootstrapping},
                                                                                                                         )),
                              'locationOfInterestManager' : TestBaseClass.ExtObject({'LocationOfInterestManager':classLocationOfInterestManager.LocationOfInterestManager}),
                            } 
@@ -271,12 +275,16 @@ class UqsaCase(TestBaseClass):
                 numerOfSamples = 20
                 
                 # called now
-                lowerEnd = 0.031 
+                #lowerEnd = 0.031 
                 
                 # called now2
                 #lowerEnd = 0.0318
                 
-                upperEnd = 0.035
+                #upperEnd = 0.035
+                
+                #called full
+                lowerEnd = 0.032
+                upperEnd = 0.038
                 
                 import chaospy as cp
                 u = cp.Uniform()

@@ -28,7 +28,7 @@ class QuantityOfInterest(TestBaseClass):
         self.uqsaMeasures = None
         
     
-    def getData(self, sampleSize, abcSample):
+    def getData(self, sampleSize, abcSample, offset = 0):
         '''
         checks if data defined and returns it
         '''
@@ -36,10 +36,10 @@ class QuantityOfInterest(TestBaseClass):
             # check for trajectory stuff TODO: do it nicer
             if 'trajectoryData' in self.hdf5Group.keys():
                 # get min max of all basis saved
-                return self.hdf5Group['trajectoryData'][:sampleSize]
+                return self.hdf5Group['trajectoryData'][offset:sampleSize+offset]
             
             elif 'data' in self.hdf5Group.keys():
-                return self.hdf5Group['data'][:sampleSize]
+                return self.hdf5Group['data'][offset:sampleSize+offset]
         else:
             #TODO: implement abc sampling hash if monte carlo is used
             raise NotImplementedError("MC sensitivity, abc-sample hash case not implemented yet, exit")

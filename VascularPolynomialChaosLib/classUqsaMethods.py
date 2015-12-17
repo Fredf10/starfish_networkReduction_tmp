@@ -550,6 +550,288 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
         uqsaMeasures.setVariablesDict(statsDict)
         return uqsaMeasures  
     
+class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
+    '''
+    Configuration class of a vascular polynomial chaos class
+    '''
+    #----External Variables -------------------------------------------------------------#
+    externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
+                         'sampleFactor'    : TestBaseClass.ExtValue(int),
+                         }
+                
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['polynomialOrder', 
+                            'sampleFactor']
+    
+    def __init__(self):  
+        self.sampleFactor = 2
+        #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
+        self.polynomialOrder = 3
+        
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
+        '''
+        # calculate samplesSize from expansion order 
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+              
+    def calculateOrthogonalPolynomials(self,distributionManager):
+        '''
+        Method to calculate orthogonal polynomials
+        '''
+        
+        return cp.orth_ttr(self.polynomialOrder,distributionManager.jointDistribution)
+    
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        trajectoryBasis = qoi.hdf5Group['trajectoryBasis']
+        
+        peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
+        peakTime = peakTime.T[2][:sampleSize]
+                        
+        samples = samples.T        
+        data = data.T
+        
+        # TODO!!
+        nTimePoints = len(data)
+        E,V = np.empty((2,nTimePoints))
+            
+        v = cp.orth_ttr(self.polynomialOrder, distributionManager.jointDistribution)
+        
+        alphas = np.empty(nTimePoints)
+        
+        # move to jonathans namespace
+        t = trajectoryBasis
+        Q = distributionManager.jointDistribution
+        order = self.polynomialOrder
+        t_max = peakTime
+        
+        # high resolution for tracking
+        top = cp.fit_regression(v, samples, peakTime)
+        
+        # loading bar
+        progressBar = cPB.ProgressBar(35, nTimePoints)
+                    
+        ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
+        for j in xrange(nTimePoints):
+            t_ = t[j]
+    
+            samples_left = samples[:,t_>=t_max]
+            samples_right = samples[:,t_<t_max]
+            
+            f_vals_left = data[j][t_>=t_max]
+            f_vals_right = data[j][t_<t_max]
+    
+            N_left = len(f_vals_left)
+            N_right = len(f_vals_right)
+    
+            nu = N_left*1./(N_left+N_right)
+            n_left = int(nu*len(v))
+            n_right = int((1-nu)*len(v))
+    
+            o = 0
+            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.terms(o, 4) <= len(samples_right[0]):
+                o += 1
+            o = (o or 1)-1
+            o = (o or 1)
+            
+            orth = cp.orth_ttr(o, Q)
+            if n_left:
+                poly_left = cp.fit_regression(orth, samples_left, f_vals_left)
+            if n_right:
+                poly_right = cp.fit_regression(orth, samples_right, f_vals_right)
+    
+            if not n_right:
+                poly = poly_left
+                dist = Q
+    
+            elif not n_left:
+                poly = poly_right
+                dist = Q
+    
+            else:
+        
+                poly = cp.fit_regression(orth, samples, data[j])
+                
+                def trans(q):
+                    return np.array([poly_left(*q)*(top(*q)<t_), poly(*q)])
+                
+                dist = cp.Dist(_length=2)
+                dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                            composit=[t_, t_])
+                orth = cp.orth_chol(o, dist, normed=0)
+                poly = cp.fit_regression(orth, trans(samples), data[j],
+                        rule="T", order=1, alpha=1e-5, retall=2)[0]
+        
+            
+            E[j]  = cp.E(poly, dist)
+            V[j]  = cp.Var(poly, dist)
+            
+            
+            progressBar.progress(j)
+            
+        # collect data for return
+        statsDict = {}
+        statsDict['expectedValue']      = E
+        statsDict['variance']           = V
+        statsDict['numberOfSamples']    = sampleSize
+        
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures     
+ 
+class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
+    '''
+    Configuration class of a vascular polynomial chaos class
+    '''
+    #----External Variables -------------------------------------------------------------#
+    externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
+                         'sampleFactor'    : TestBaseClass.ExtValue(int),
+                         }
+                
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['polynomialOrder', 
+                            'sampleFactor']
+    
+    def __init__(self):  
+        self.sampleFactor = 2
+        #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
+        self.polynomialOrder = 3
+        
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
+        '''
+        # calculate samplesSize from expansion order 
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+              
+    def calculateOrthogonalPolynomials(self,distributionManager):
+        '''
+        Method to calculate orthogonal polynomials
+        '''
+        
+        return cp.orth_ttr(self.polynomialOrder,distributionManager.jointDistribution)
+    
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        trajectoryBasis = qoi.hdf5Group['trajectoryBasis']
+        
+        peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
+        peakTime = peakTime.T[2][:sampleSize]
+                        
+        samples = samples.T        
+        data = data.T
+        
+        # TODO!!
+        nTimePoints = len(data)
+        E,V = np.empty((2,nTimePoints))
+            
+        v = cp.orth_ttr(self.polynomialOrder, distributionManager.jointDistribution)
+        
+        alphas = np.empty(nTimePoints)
+        
+        # move to jonathans namespace
+        t = trajectoryBasis
+        Q = distributionManager.jointDistribution
+        order = self.polynomialOrder
+        t_max = peakTime
+        
+        # high resolution for tracking
+        top = cp.fit_regression(v, samples, peakTime)
+        
+        # loading bar
+        progressBar = cPB.ProgressBar(35, nTimePoints)
+                    
+        ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
+        for j in xrange(nTimePoints):
+            t_ = t[j]
+    
+            samples_left = samples[:,t_>=t_max]
+            samples_right = samples[:,t_<t_max]
+            
+            f_vals_left = data[j][t_>=t_max]
+            f_vals_right = data[j][t_<t_max]
+    
+            N_left = len(f_vals_left)
+            N_right = len(f_vals_right)
+    
+            nu = N_left*1./(N_left+N_right)
+            n_left = int(nu*len(v))
+            n_right = int((1-nu)*len(v))
+    
+            o = 0
+            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.terms(o, 4) <= len(samples_right[0]):
+                o += 1
+            o = (o or 1)-1
+            o = (o or 1)
+            
+            orth = cp.orth_ttr(o, Q)
+            if n_left:
+                poly_left = cp.fit_regression(orth, samples_left, f_vals_left)
+            if n_right:
+                poly_right = cp.fit_regression(orth, samples_right, f_vals_right)
+    
+            if not n_right:
+                poly = poly_left
+                dist = Q
+    
+            elif not n_left:
+                poly = poly_right
+                dist = Q
+    
+            else:
+        
+                poly = cp.fit_regression(orth, samples, data[j])
+                
+                def trans(q):
+                    return np.array([poly(*q), poly_right(*q)*(top(*q)>=t_)])
+                
+                dist = cp.Dist(_length=2)
+                dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                            composit=[t_, t_])
+                orth = cp.orth_chol(o, dist, normed=0)
+                poly = cp.fit_regression(orth, trans(samples), data[j],
+                        rule="T", order=1, alpha=1e-5, retall=2)[0]
+        
+            
+            E[j]  = cp.E(poly, dist)
+            V[j]  = cp.Var(poly, dist)
+            
+            
+            progressBar.progress(j)
+            
+        # collect data for return
+        statsDict = {}
+        statsDict['expectedValue']      = E
+        statsDict['variance']           = V
+        statsDict['numberOfSamples']    = sampleSize
+        
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures      
+    
 class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
     '''
     Configuration class of a vascular polynomial chaos class
@@ -588,7 +870,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
     def calculateStatistics(self, distributionManager, sampleManager, qoi):
         
         
-        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension+1)
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
         
         samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
         data                     = qoi.getData(sampleSize,abcSample)
@@ -597,10 +879,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         
         peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
         peakTime = peakTime.T[2][:sampleSize]
-                
-        dependentCase = sampleManager.dependentCase
-        confidenceAlpha = qoi.confidenceAlpha
-        
+                        
         samples = samples.T        
         data = data.T
         
@@ -622,52 +901,40 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        import sys
-        
-        print "estimate alphas"
         progressBar = cPB.ProgressBar(35, nTimePoints)
-        ## FIRST TRY
+                    
+        ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in xrange(nTimePoints):
-             
-            t_ = trajectoryBasis[j]
-            #trans = lambda q: \
-            #        np.array([(t_-top(*q))*(top(*q)>t_), (t_-top(*q))*(top(*q)<=t_)])
-            trans = lambda q: \
-                    np.array([q[0], q[1],q[2], (t_-top(*q))*(top(*q)<=t_)])
-            dist = cp.Dist(_length=4)
-            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                    composit=[0.5,0.5,0.5,t_]) #composit=[.5, .5, t_])
-     
-            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
-            poly = cp.fit_regression(orth, trans(samples), data[j],
-                    rule="T", order=1, alpha=None, retall=2)
-            alphas[j] = poly[3]
-            #mean[j] = cp.E(poly[0], dist)
-     
-            progressBar.progress(j)
-     
-        alpha = np.median(alphas)
-        print "alpha", alphas
-        
-        
-        print "calculate gpce expansion"
-        progressBar = cPB.ProgressBar(35, nTimePoints)
-        
-        for j in xrange(nTimePoints):
-     
-            t_ = trajectoryBasis[j]
+            t_ = t[j]
+    
+            samples_left = samples[:,t_>=t_max]
+            samples_right = samples[:,t_<t_max]
             
-            trans = lambda q: \
-                    np.array([q[0], q[1],q[2], (t_-top(*q))*(top(*q)<=t_)])
-            dist = cp.Dist(_length=4)
-            dist._mom = cp.momgen(100, distributionManager.jointDistribution, trans=trans, rule="C",
-                    composit=[0.5,0.5,0.5,t_])
+            f_vals_left = data[j][t_>=t_max]
+    
+            o = 0
+            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.terms(o, 4) <= len(samples_right[0]):
+                o += 1
+            o = (o or 1)-1
+            o = (o or 1)
             
-            orth = cp.orth_chol(self.polynomialOrder, dist, normed=0)
+            orth = cp.orth_ttr(o, Q)
+            
+            poly_left = cp.fit_regression(orth, samples_left, f_vals_left)
+    
+                
+            trans = lambda q: \
+                np.array([q[0], q[1], q[2], poly_left(*q)*(top(*q)<t_)])
+            dist = cp.Dist(_length=4)
+            dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                        composit=[t_, t_, t_, t_])
+            orth = cp.orth_chol(o, dist, normed=0)
             poly = cp.fit_regression(orth, trans(samples), data[j],
-                    rule="T", order=1, alpha=alpha)
-            E[j] = cp.E(poly, dist)
-            V[j]   = cp.Var(poly, dist)
+                    rule="T", order=1, alpha=1e-5, retall=2)[0]
+            
+            E[j]  = cp.E(poly, dist)
+            V[j]  = cp.Var(poly, dist)
             
             progressBar.progress(j)
             
@@ -675,12 +942,131 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         statsDict = {}
         statsDict['expectedValue']      = E
         statsDict['variance']           = V
-        statsDict['numberOfSamples'] = sampleSize
+        statsDict['numberOfSamples']    = sampleSize
         
         # statistics
         uqsaMeasures = UqsaMeasures()
         uqsaMeasures.setVariablesDict(statsDict)
-        return uqsaMeasures
+        return uqsaMeasures     
+  
+class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
+    '''
+    Configuration class of a vascular polynomial chaos class
+    '''
+    #----External Variables -------------------------------------------------------------#
+    externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
+                         'sampleFactor'    : TestBaseClass.ExtValue(int),
+                         }
+                
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['polynomialOrder', 
+                            'sampleFactor']
+    
+    def __init__(self):  
+        self.sampleFactor = 2
+        #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
+        self.polynomialOrder = 3
+        
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
+        '''
+        # calculate samplesSize from expansion order 
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+              
+    def calculateOrthogonalPolynomials(self,distributionManager):
+        '''
+        Method to calculate orthogonal polynomials
+        '''
+        
+        return cp.orth_ttr(self.polynomialOrder,distributionManager.jointDistribution)
+    
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        trajectoryBasis = qoi.hdf5Group['trajectoryBasis']
+        
+        peakTime = qoi.hdf5Group['dataBasisMinMaxPeak'][:]
+        peakTime = peakTime.T[2][:sampleSize]
+                        
+        samples = samples.T        
+        data = data.T
+        
+        # TODO!!
+        nTimePoints = len(data)
+        E,V = np.empty((2,nTimePoints))
+            
+        v = cp.orth_ttr(self.polynomialOrder, distributionManager.jointDistribution)
+        
+        alphas = np.empty(nTimePoints)
+        
+        # move to jonathans namespace
+        t = trajectoryBasis
+        Q = distributionManager.jointDistribution
+        order = self.polynomialOrder
+        t_max = peakTime
+        
+        # high resolution for tracking
+        top = cp.fit_regression(v, samples, peakTime)
+        
+        # loading bar
+        progressBar = cPB.ProgressBar(35, nTimePoints)
+                    
+        ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
+        for j in xrange(nTimePoints):
+            t_ = t[j]
+    
+            samples_left = samples[:,t_>=t_max]
+            samples_right = samples[:,t_<t_max]
+            
+            f_vals_right = data[j][t_<t_max]
+    
+            o = 0
+            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.terms(o, 4) <= len(samples_right[0]):
+                o += 1
+            o = (o or 1)-1
+            o = (o or 1)
+            
+            orth = cp.orth_ttr(o, Q)
+            
+            poly_right = cp.fit_regression(orth, samples_right, f_vals_right)
+    
+                
+            trans = lambda q: \
+                np.array([q[0], q[1], q[2], poly_right(*q)*(top(*q)>=t_)])
+            dist = cp.Dist(_length=4)
+            dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                        composit=[t_, t_, t_, t_])
+            orth = cp.orth_chol(o, dist, normed=0)
+            poly = cp.fit_regression(orth, trans(samples), data[j],
+                    rule="T", order=1, alpha=1e-5, retall=2)[0]
+            
+            E[j]  = cp.E(poly, dist)
+            V[j]  = cp.Var(poly, dist)
+            
+            progressBar.progress(j)
+            
+        # collect data for return
+        statsDict = {}
+        statsDict['expectedValue']      = E
+        statsDict['variance']           = V
+        statsDict['numberOfSamples']    = sampleSize
+        
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures     
+  
+  
   
 class UqsaMethodMonteCarlo(TestBaseClass):
     '''
@@ -808,6 +1194,103 @@ class UqsaMethodMonteCarlo(TestBaseClass):
             raise NotImplementedError("NO MC methods for dependet distributions implemented")
         
         
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        statsDict['numberOfSamples'] = sampleSize
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures
+    
+    
+class UqsaMethodMonteCarloParametrizedBootstrapping(TestBaseClass):
+    '''
+    Configuration class of a 
+    '''
+    #----External Variables -------------------------------------------------------------#
+    externVariables = {  'sensitivityAnalysis'   : TestBaseClass.ExtValue(bool), 
+                         'sampleSize'            : TestBaseClass.ExtValue(int),
+                         "chunkSize"             : TestBaseClass.ExtValue(int),
+                         "averageNumber"         : TestBaseClass.ExtValue(int)
+                         }
+                
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['sampleSize', 
+                            'sensitivityAnalysis',
+                            "averageNumber",
+                            "chunkSize"]
+    
+    def __init__(self):
+        '''
+        
+        '''
+        self.sampleSize = 10
+        #
+        self.sensitivityAnalysis = False
+        self.averageNumber = 10
+        self.chunkSize = 100
+         
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
+        '''
+        # calculate samplesSize from expansion order 
+        abcSample = self.sensitivityAnalysis
+        return self.sampleSize+self.chunkSize*self.averageNumber,abcSample
+         
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        '''
+        Function which calculates the gPCExpansion for the given data
+        '''
+        statsDict = {}  
+        sampleSize,abcSample = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        
+        abcSample = self.sensitivityAnalysis
+        sampleSize = self.sampleSize
+        
+        data                     = qoi.getData(1,abcSample, 0)
+        expectedValue = np.empty((self.averageNumber,np.shape(data)[1]))
+        variance      = np.empty((self.averageNumber,np.shape(data)[1]))
+        
+        for aNX in xrange(self.averageNumber):
+            
+                    
+            offset = int(aNX * self.chunkSize) 
+            
+            samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample, offset)
+            data                     = qoi.getData(sampleSize,abcSample, offset)
+            
+                    
+            dependentCase = sampleManager.dependentCase
+                
+            if dependentCase == False:
+                
+                
+                # check if samples, and data have the right format
+                distDim = distributionManager.distributionDimension
+                if len(samples) != (distDim+2)*self.sampleSize:
+                    #print 'WARNING: Not simulated as sensitivity analysis case as len(samples) != (distDim+2)*self.sampleSize'
+                    self.sensitivityAnalysis = False
+                    
+                if self.sensitivityAnalysis == False:
+                
+                    expectedValue[aNX] = np.sum(data,axis=0)/len(samples)
+                    # variance = (data**2-mean)/len(samples)
+                    variance[aNX] = np.sum(data**2-expectedValue[aNX]**2,axis=0)/len(samples)
+                    
+#                     quantiles = [confidenceAlpha/2, 100.-confidenceAlpha/2]
+#                     statsDict['conficenceInterval']  = np.percentile(data,quantiles, axis=0)
+#                     statsDict['confidenceAlpha'] = confidenceAlpha
+                else:
+                    
+                    raise NotImplementedError("NO MC averaged methods for SA implemented")
+            
+            else:
+                # TODO: implement dependent dist methods for MC
+                raise NotImplementedError("NO MC methods for dependet distributions implemented")
+        
+        
+        statsDict['expectedValue'] = expectedValue
+        statsDict['variance'] = variance
         # statistics
         uqsaMeasures = UqsaMeasures()
         statsDict['numberOfSamples'] = sampleSize

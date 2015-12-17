@@ -56,15 +56,16 @@ class SampleManager(TestBaseClass):
                              
         return sample
     
-    def getSampleMatrices(self, sampleSize, abcSample):
+    def getSampleMatrices(self, sampleSize, abcSample, offset=0):
         '''
         Function which returns the samples, and abcSamples as defined by the input
         '''
+        #TODO: check if samplesSize and offsett+sampleSize is within range of samples
         if abcSample == False:
             dependentSamples = False
             if self.dependentCase == True:
-                dependentSamples = self.samplesDependent[:sampleSize]
-            return self.samples[:sampleSize], dependentSamples
+                dependentSamples = self.samplesDependent[offset:sampleSize+offset]
+            return self.samples[offset:sampleSize+offset], dependentSamples
         else:
             #TODO: implement abc sampling hash if monte carlo is used
             raise NotImplementedError("MC sensitivity, abc-sample hash case not implemented yet, exit")
