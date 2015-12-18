@@ -376,7 +376,7 @@ variablesDict = {## class Vascular Network
                  'constriction'      : {'type':'float',  'unitSI': None,    'strCases': None, 'multiVar': False},
                  'stenosisLength'    : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
                  # compliances
-                 'complianceType'    : {'type':'str',    'unitSI': None,   'strCases': ['Laplace', 'Laplace2', 'Exponential', 'Hayashi', 'Reymond'], 'multiVar': False},
+                 'complianceType'    : {'type':'str',    'unitSI': None,   'strCases': ['Laplace', 'Laplace2', 'Exponential', 'Hayashi', 'HayashiEmpirical', 'Reymond'], 'multiVar': False},
                  'constantCompliance': {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
                  'externalPressure'  : {'type':'float',  'unitSI': 'Pa',   'strCases': None, 'multiVar': False},
                  'Ps'                : {'type':'float',  'unitSI': 'Pa',   'strCases': None, 'multiVar': False},
