@@ -134,6 +134,126 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
         uqsaMeasures = UqsaMeasures()
         uqsaMeasures.setVariablesDict(statsDict)
         return uqsaMeasures
+    
+class UqsaMethodPolynomialChaosPseudoSpectral(TestBaseClass):
+    
+    '''
+    Configuration class of a vascular polynomial chaos class
+    '''
+    #----External Variables -------------------------------------------------------------#
+    externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
+                         'sampleFactor'    : TestBaseClass.ExtValue(int),
+                         }
+                
+    externXmlAttributes  = []
+    
+    externXmlElements    = ['polynomialOrder', 
+                            'sampleFactor']
+    
+    def __init__(self):
+        '''
+        
+        '''                
+        self.sampleFactor = 2
+        #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
+        self.polynomialOrder = 3
+                   
+    def evaluateSamplesSize(self, distributionDimension):
+        '''
+        function to evaluate the sample size
+        '''
+        # calculate samplesSize from expansion order 
+        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        abcSample = False
+        return samplesSize,abcSample
+                    
+    def evaluateSamples(self,dist):
+        #'g' just for independent; dependent use 'c'
+        quatraturePoints,self.weights = cp.generate_quadrature(self.polynomialOrder, dist, rule="g")
+        
+                    
+    def calculateOrthogonalPolynomials(self,distributionManager):
+        '''
+        Method to calculate orthogonal polynomials
+        '''
+        
+        return cp.orth_ttr(self.polynomialOrder,distributionManager.jointDistribution)
+        #self.orthogonalPolynomils = pc.orth_gs(self.expansionOrder,self.jointDistribution)
+        #self.orthogonalPolynomils = pc.orth_chol(self.expansionOrder,self.jointDistribution)
+        #self.orthogonalPolynomils = pc.orth_svd(self.expansionOrder,self.jointDistribution)
+  
+    def calculateStatistics(self, distributionManager, sampleManager, qoi):
+        
+        sampleSize,abcSample     = self.evaluateSamplesSize(distributionManager.distributionDimension)
+        samples,samplesDependent = sampleManager.getSampleMatrices(sampleSize,abcSample)
+        data                     = qoi.getData(sampleSize,abcSample)
+        
+        dependentCase = sampleManager.dependentCase
+        confidenceAlpha = qoi.confidenceAlpha
+        '''
+        Function which calculates the gPCExpansion for the given data
+        '''
+                
+        orthogonalPolynomials, norms = self.calculateOrthogonalPolynomials(distributionManager, retall = True)
+        
+        # add this polynomial chaos method psudo spectral ... # 
+        gPCExpansion = cp.fit_quadrature(orthogonalPolynomials, samples, self.weights, data, norms)
+        
+        # statistics
+        statsDict = {}
+                     
+        statsDict['expectedValue']  = cp.E(gPCExpansion, distributionManager.jointDistribution)
+        statsDict['variance']       = cp.Var(gPCExpansion, distributionManager.jointDistribution)
+        statsDict['standardDeviation']   = np.sqrt(statsDict['variance'])
+        conficenceInterval  = cp.Perc(gPCExpansion, [confidenceAlpha/2., 100-confidenceAlpha/2.], distributionManager.jointDistribution)
+        statsDict['conficenceInterval']  =  conficenceInterval.reshape(2,len(np.atleast_1d(statsDict['expectedValue'])))
+        statsDict['confidenceAlpha'] = confidenceAlpha
+        
+        # conditional expected values  and sensitivity coefficients
+        distributionDimension = len(distributionManager.jointDistribution)
+        if distributionDimension > 1:
+            # test dependecy or not
+            if dependentCase == False:
+                # independent case: use analytic expression from polynomial chaos expansion
+                conditionalExpectedValue = []
+                conditionalVariance      = []
+                # conditional mean and variance
+                for rvIndex in xrange(distributionDimension):
+                    currDistMean = cp.E(distributionManager.jointDistribution)
+                    currDistMean[rvIndex] = np.nan
+                    # reduce polynomials
+                    currPolynomTime = gPCExpansion(*currDistMean)
+                    conditionalExpectedValue.append(cp.E(currPolynomTime,distributionManager.jointDistribution))
+                    conditionalVariance.append(cp.Var(currPolynomTime,distributionManager.jointDistribution))    
+                
+                statsDict['conditionalExpectedValue'] = conditionalExpectedValue
+                statsDict['conditionalVariance']      = conditionalVariance
+                
+                # sensitivity indices
+                statsDict['firstOrderSensitivities'] = cp.Sens_m(gPCExpansion,distributionManager.jointDistribution)
+                statsDict['totalSensitivities']      = cp.Sens_t(gPCExpansion,distributionManager.jointDistribution)
+            else:
+                # dependent rancom variables
+                
+                # this method is broken
+                #sensindices = cp.Sens_nataf(distributionManager.expansionOrder, distributionManager.jointDistributionDependent, distributionManager.samplesDependent.T, self.data)
+                #
+                
+                statsDict['firstOrderSensitivities'] = cp.Sens_m_nataf(self.polynomialOrder,
+                                                               distributionManager.jointDistributionDependent,
+                                                               samplesDependent.T,
+                                                               data)
+                
+                statsDict['totalSensitivities']      = cp.Sens_t_nataf(self.polynomialOrder,
+                                                               distributionManager.jointDistributionDependent,
+                                                               samplesDependent.T,
+                                                               data)
+        
+        statsDict['numberOfSamples'] = sampleSize
+        # statistics
+        uqsaMeasures = UqsaMeasures()
+        uqsaMeasures.setVariablesDict(statsDict)
+        return uqsaMeasures
          
          
 class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
@@ -629,14 +749,6 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
             samples_right = samples[:,t_<t_max]
             
             f_vals_left = data[j][t_>=t_max]
-            f_vals_right = data[j][t_<t_max]
-    
-            N_left = len(f_vals_left)
-            N_right = len(f_vals_right)
-    
-            nu = N_left*1./(N_left+N_right)
-            n_left = int(nu*len(v))
-            n_right = int((1-nu)*len(v))
     
             o = 0
             while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
@@ -646,32 +758,20 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
             o = (o or 1)
             
             orth = cp.orth_ttr(o, Q)
-            if n_left:
-                poly_left = cp.fit_regression(orth, samples_left, f_vals_left)
-            if n_right:
-                poly_right = cp.fit_regression(orth, samples_right, f_vals_right)
-    
-            if not n_right:
-                poly = poly_left
-                dist = Q
-    
-            elif not n_left:
-                poly = poly_right
-                dist = Q
-    
-            else:
-        
-                poly = cp.fit_regression(orth, samples, data[j])
+            
+            poly_left = cp.fit_regression(orth, samples_left, f_vals_left)
                 
-                def trans(q):
-                    return np.array([poly_left(*q)*(top(*q)<t_), poly(*q)])
-                
-                dist = cp.Dist(_length=2)
-                dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
-                            composit=[t_, t_])
-                orth = cp.orth_chol(o, dist, normed=0)
-                poly = cp.fit_regression(orth, trans(samples), data[j],
-                        rule="T", order=1, alpha=1e-5, retall=2)[0]
+            poly = cp.fit_regression(orth, samples, data[j])
+            
+            def trans(q):
+                return np.array([poly_left(*q)*(top(*q)<t_), poly(*q)])
+            
+            dist = cp.Dist(_length=2)
+            dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                        composit=[t_, t_])
+            orth = cp.orth_chol(o, dist, normed=0)
+            poly = cp.fit_regression(orth, trans(samples), data[j],
+                    rule="T", order=1, alpha=1e-5, retall=2)[0]
         
             
             E[j]  = cp.E(poly, dist)
@@ -769,15 +869,9 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
             samples_left = samples[:,t_>=t_max]
             samples_right = samples[:,t_<t_max]
             
-            f_vals_left = data[j][t_>=t_max]
             f_vals_right = data[j][t_<t_max]
     
-            N_left = len(f_vals_left)
-            N_right = len(f_vals_right)
     
-            nu = N_left*1./(N_left+N_right)
-            n_left = int(nu*len(v))
-            n_right = int((1-nu)*len(v))
     
             o = 0
             while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
@@ -787,32 +881,21 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
             o = (o or 1)
             
             orth = cp.orth_ttr(o, Q)
-            if n_left:
-                poly_left = cp.fit_regression(orth, samples_left, f_vals_left)
-            if n_right:
-                poly_right = cp.fit_regression(orth, samples_right, f_vals_right)
+            
+            poly_right = cp.fit_regression(orth, samples_right, f_vals_right)
     
-            if not n_right:
-                poly = poly_left
-                dist = Q
-    
-            elif not n_left:
-                poly = poly_right
-                dist = Q
-    
-            else:
         
-                poly = cp.fit_regression(orth, samples, data[j])
-                
-                def trans(q):
-                    return np.array([poly(*q), poly_right(*q)*(top(*q)>=t_)])
-                
-                dist = cp.Dist(_length=2)
-                dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
-                            composit=[t_, t_])
-                orth = cp.orth_chol(o, dist, normed=0)
-                poly = cp.fit_regression(orth, trans(samples), data[j],
-                        rule="T", order=1, alpha=1e-5, retall=2)[0]
+            poly = cp.fit_regression(orth, samples, data[j])
+            
+            def trans(q):
+                return np.array([poly(*q), poly_right(*q)*(top(*q)>=t_)])
+            
+            dist = cp.Dist(_length=2)
+            dist._mom = cp.momgen(100, Q, trans=trans, rule="C",
+                        composit=[t_, t_])
+            orth = cp.orth_chol(o, dist, normed=0)
+            poly = cp.fit_regression(orth, trans(samples), data[j],
+                    rule="T", order=1, alpha=1e-5, retall=2)[0]
         
             
             E[j]  = cp.E(poly, dist)
@@ -832,7 +915,7 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
         uqsaMeasures.setVariablesDict(statsDict)
         return uqsaMeasures      
     
-class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
+class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
     '''
     Configuration class of a vascular polynomial chaos class
     '''
@@ -949,7 +1032,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         uqsaMeasures.setVariablesDict(statsDict)
         return uqsaMeasures     
   
-class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
+class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
     '''
     Configuration class of a vascular polynomial chaos class
     '''
