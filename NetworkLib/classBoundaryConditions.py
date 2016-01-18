@@ -402,11 +402,12 @@ class BoundaryConditionType1(BoundaryCondition):
         totalTime = period+self.Tpulse
 
         MeanFlow = 123221.00
-        dt = 1e-5 #0.1ms
+        dt = 1e-5*2 #0.1ms
         tolerance = 5.e-10
 
         notConverged = True
         while notConverged == True:
+            dt = dt/2.
             nTsteps = int(np.round(totalTime/dt, 0))
             nTstepsStart = int(np.round(self.Tpulse/dt, 0))
             evaluatedFlow = np.zeros(nTsteps-nTstepsStart-1)
@@ -424,7 +425,7 @@ class BoundaryConditionType1(BoundaryCondition):
                 exit()
             if abs(MeanFlow-evaluatedMeanFlow) < tolerance:
                 notConverged = False
-            dt = dt/2.
+            
             MeanFlow = evaluatedMeanFlow
 
         if givenMeanFlow == None:
@@ -442,6 +443,8 @@ class BoundaryConditionType1(BoundaryCondition):
 #                The difference is {} ml s-1 \n""".format(givenMeanFlow*1.e6,evaluatedMeanFlow*1.e6,difference*1.e6)
 # TODO wrote this before convert to spaces
 
+
+        
         self.TmeanFlow = 0
         self.initPhaseTimeSpan = 0
         # find mean flow time
@@ -471,7 +474,7 @@ class BoundaryConditionType1(BoundaryCondition):
             print 'meanFlow evaluated (ml/s)  {:.6}'.format(str(evaluatedMeanFlow*1.e6).ljust(5))
             print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
             print 'initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5))
-            print 'total volume/period (ml)   {:.6}'.format(str(np.sum(evaluatedFlow)).ljust(5))
+            print 'total volume/period (ml)   {:.6}'.format(str(np.sum(evaluatedFlow*1.e6)*dt).ljust(5))
 
         return  self.MeanFlow, self.initPhaseTimeSpan
 

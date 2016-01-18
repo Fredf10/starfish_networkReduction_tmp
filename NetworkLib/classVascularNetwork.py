@@ -1467,30 +1467,43 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     def evaluateNetworkResistanceAndCompliance(self):
 
         arterialCompliance = 0
-
         arterialCompliance120 = 0
         arterialCompliance80  = 0
         arterialCompliancePmean = 0
+        arterialVolume = 0
+        arterialVolume120 = 0
+        arterialVolume80  = 0
+        arterialVolumePmean = 0
+
         for vesselId, vessel_i in self.vessels.iteritems():
 
             p0, p1 = self.initialValues[vesselId]['Pressure']
             initialPressure = np.linspace(p0, p1, int(vessel_i.N))
             C = vessel_i.C(initialPressure)
             Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
-
+            A = vessel_i.A(np.linspace(p0, p1, int(vessel_i.N)))
+            Avol = sum((A[1::] + A[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            arterialVolume = arterialVolume + Avol
             arterialCompliance = arterialCompliance + Cvol
 
             p0 = 120*133.32
             p1 = p0
             C = vessel_i.C(np.linspace(p0, p1, int(vessel_i.N)))
             Cvol120 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]
+            A = vessel_i.A(np.linspace(p0, p1, int(vessel_i.N)))
+            Avol120 = sum((A[1::] + A[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            arterialVolume120 = arterialVolume120 + Avol120
             arterialCompliance120 = arterialCompliance120 + Cvol120
 
             p0 = 75*133.32
             p1 = p0
             C = vessel_i.C(np.linspace(p0, p1, int(vessel_i.N)))
             Cvol80 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]
+            A = vessel_i.A(np.linspace(p0, p1, int(vessel_i.N)))
+            Avol80 = sum((A[1::] + A[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            arterialVolume80 = arterialVolume80 + Avol80
             arterialCompliance80 = arterialCompliance80 + Cvol80
+            
 
             numberEstimates = 20
             complianceEstimates = np.empty(numberEstimates)
@@ -1507,6 +1520,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if "Windkessel" in bc.name:
                     windkesselCompliance = windkesselCompliance + bc.C
 
+        print "{:6} - arterial Volume initPressure".format(arterialVolume*1e6)
+        print "{:6} - arterial Volume 120".format(arterialVolume120*1e6)
+        print "{:6} - arterial Volume 80".format(arterialVolume80*1e6)
+        print
+        print "--------------------------"
         print "{:6} - arterial compliance initPressure".format(arterialCompliance*133.32*1e6)
         print "{:6} - arterial compliance 120".format(arterialCompliance120*133.32*1e6)
         print "{:6} - arterial compliance 80".format(arterialCompliance80*133.32*1e6)
