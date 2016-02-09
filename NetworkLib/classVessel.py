@@ -55,7 +55,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.angleZMother       = 0                 # rotation angle in rad around z-axis relative to mother vessel
 
         ## geometry properties
-        self.geometryType       = 'uniform'         # #TODO: fix this geometry type: 'uniform', 'Cone', 'Cons'
+        self.geometryType       = 'uniform'         # #TODO: fix this geometry type: 'uniform', 'cone', 'Cons'
         self.radiusProximal     = 0.01              # radius at vessel begin // in hole Vessel if radiusB = 0
         self.radiusDistal       = 0.01              # radius at vessel end
         self.length             = 0.1               # length of the vessel
@@ -177,6 +177,10 @@ class Vessel(cSBO.StarfishBaseObject):
                 AsProximal = self.radiusProximal**2.0*np.pi
                 As_distal = self.radiusDistal**2.0*np.pi
                 self.AsVector = np.linspace(AsProximal,As_distal,self.N)
+            elif self.geometryType == 'constriction':
+                AsProximal = self.radiusProximal**2.0*np.pi
+                As_distal = self.radiusDistal**2.0*np.pi
+                self.AsVector = self.A0.copy() 
             else:
                 raise ValueError("classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id))
         except Exception:
@@ -214,6 +218,9 @@ class Vessel(cSBO.StarfishBaseObject):
                 self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
             elif self.geometryType == "cone":
                 self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
+            elif self.geometryType == "constriction":
+                #TODO: Not sure if this is important for anything.
+                self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
         except Exception:
             self.exception("classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id))
 
