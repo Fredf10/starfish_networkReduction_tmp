@@ -13,6 +13,7 @@ if [ $OS == "Ubuntu" ]; then
     apt-get -y install python-matplotlib
     apt-get -y install graphviz
     apt-get -y install libhdf5-dev
+    apt-get -y install python-h5py
     apt-get -y install libxml2-dev
     apt-get -y install libxslt-dev
 
@@ -28,6 +29,7 @@ elif [ $OS == "Fedora" ]; then
         yum -y install python-matplotlib
         yum -y install graphviz
         yum -y install hdf5-devel
+	yum -y install h5py
         yum -y install libxml-devel
         yum -y install libxslt-devel
 
@@ -42,6 +44,7 @@ elif [ $OS == "Fedora" ]; then
         dnf -y install python-matplotlib
         dnf -y install graphviz
         dnf -y install hdf5-devel
+	dnf -y install h5py
         dnf -y install libxml-devel
         dnf -y install libxslt-devel
 fi
