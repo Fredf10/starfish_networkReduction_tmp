@@ -2,7 +2,7 @@
 import gtk
 import gobject
 import matplotlib
-matplotlib.use('GTKAgg')
+matplotlib.use(u'GTKAgg')
 import matplotlib.pyplot as plt   
 from matplotlib.figure import Figure
 # uncomment to select /GTK/GTKAgg/GTKCairo
@@ -251,7 +251,9 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         self.fig = Figure(figsize=(5, 4), dpi=100)
         # self.plot(0)
         self.canvas = FigureCanvas(self.fig)  # a gtk.DrawingArea
-        self.canvas.set_size_request(640, 690)
+        width = 640
+        height = 500 #690
+        self.canvas.set_size_request(width, height)
         
         toolbar = NavigationToolbar(self.canvas, self)
         
@@ -423,11 +425,11 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         '''
         create graph with 2 subplots and all necessary lines 
         '''
-        self.fig = plt.figure(figsize=(6, 4), dpi=100, edgecolor='k')
+        self.fig = plt.figure(figsize=(5, 4), dpi=100, edgecolor='k')
         self.fig.subplots_adjust(right=0.86)
         self.fig.subplots_adjust(left=0.17)
         self.fig.subplots_adjust(top=0.95)
-        self.fig.subplots_adjust(bottom=0.35)
+        self.fig.subplots_adjust(bottom=0.15)
         self.fig.subplots_adjust(hspace=0.18)
         
         fontLegend = FontProperties()
