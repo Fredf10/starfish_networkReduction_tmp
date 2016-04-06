@@ -114,8 +114,7 @@ class TestBaseClass(object):
         
         Args:
              filePathName (str): path and filename to xml file
-        '''
-        
+        '''        
         fileName = filePathName.split('/')[-1].split('.')[0]
         root = etree.Element(fileName, gitHash = getGitHash())
         xmlFile = etree.ElementTree(root)

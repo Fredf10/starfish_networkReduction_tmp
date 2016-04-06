@@ -1502,7 +1502,7 @@ class Visualisation2DMainCase(object):
         self.currentVesselId = None
                 
         # description of the dataSet
-        self.networkDescription = gtk.Label(' here is the description what can be rather long')
+        self.networkDescription = gtk.Label(' here is the description that can be rather long')
         self.networkDescription.set_size_request(400, 35)
         # # Combo boxes
         # vessel chooser

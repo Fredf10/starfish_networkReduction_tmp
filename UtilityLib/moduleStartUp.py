@@ -190,7 +190,7 @@ def prettyPrintList(title, listToPrint, indexOffSet = 0):
 
 def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
     '''
-    Question user to isert a integer number between minBound and maxBound
+    Question user to isert an integer number between minBound and maxBound
     '''
     appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
     userInput = "NONE"
