@@ -3,13 +3,32 @@
 from testBaseClass import TestBaseClass 
 
 class RandomInput(TestBaseClass):
-    '''
-    class decription of a random input of STARFiSh
-    '''
-    
     def __init__(self):
+        '''
+        class decription of a random input to STARFiSh
         
-        self.variableName     = [] # list of variable names (e.g. betaHayashi, Z1) which are assoziated with random input
+        nomenclature: 
+            a <random input> is the describtion of a random variable Y, composed in the form of
+            Y = a + b X, where a,b are parameter of choice, and X can be:
+                i.) another random input variable
+                ii.) a random variable with a propability distribution Normal(0,1) or Uniform(0,1)
+                    on a normalized support.
+                
+        The random input class is base class for the 2 types of random inputs defined by i.) and ii.)
+        named GeneralRandomInput (i) and ParametricRandomInput (ii).
+        
+        From this defintions, it follows that a GeneralRandomInput can be only connected to other random inputs, where as
+        ParametricRandomInput is only connected a variable in the starfish base code.
+                
+        Every random input is defined in the network xml file and as such these classes are 
+        also data objects, created by reading the xml file.
+        
+        After a random input has calculated its realisation, it can forward this to all connected
+        other random inputs, or variables in the starfish base code with the updateMethods defined
+        in the updateMethods dictionary, this dictionary is set up by the randomInputManager. 
+        
+        '''
+        self.variableName     = [] # list of variable names (e.g. betaHayashi, Z1) which are associated with the random input
         ##        
         self.name             = None # name of the random input
         ##
@@ -17,7 +36,7 @@ class RandomInput(TestBaseClass):
         self.a                = 0 # 
         self.b                = 0 #
         ##
-        self.updateMethods    = {} 
+        self.updateMethods    = {} # method to update connected random inputs or variables in starfish base code
         self.updateLog        = [] # list to save the passed realisations
                 
         self.printOutDistributions = {'Uniform': 'U(0,1)',
@@ -25,21 +44,31 @@ class RandomInput(TestBaseClass):
         
     def evaluateRealisationFromSample(self,sample_i):
         '''
-        calculate the realisation of the random variable defined as
-        realisation =  a + b sample_i
+        Function to calculate the realisation of the random input defined Y = a + b X,
+        the realisation becomes y_i =  a + b x_i
+                
+        where the x_i (sample_i) comes from the governing distribution: eg. Uniform, Normal or another RandomInput 
         
-        where the sample_i comes from the governing distribution: eg. Uniform, Normal or another RandomInput 
+        Args:
+            sample_i (float): realisation x_i of the random variable X
+            
+        Returns:
+            realisation (float): realisation of the random input Y; y_i =  a + b x_i
         '''
         realisation = self.a + self.b * sample_i
         return realisation
         
     def passRealisationToAssosiatedObj(self, input):
         '''
-        methods update connected deterministic variable value from given
-        'sample' drawn from random vector 
+        This function evlauates a given input, a realisation x_i, 
+        calculates it's realisation y_i with the evaluateRealisationFromSample function.
+        Then it passes the realisation to all connected random inputs or variables in the
+        starfish base code with the defined update methods in the updateMethods dictionary.
         
-        input:
-            sample:  <float> 'sample' drawn from random vector 
+        Args:
+            input (float) or (dict):
+                if the input is of type float, the 'sample' comes from the distribution manager
+                elif the input is of type dict the sample comes from another random input
         '''
         sample_i = None      
         # if input comes from other random Input
@@ -63,7 +92,10 @@ class RandomInput(TestBaseClass):
                     
     def generateInfo(self):
         '''
-        Function to print random input information to console
+        Function to create a log-string with random input information.
+        
+        Returns:
+            randomInputInfo (str): information about the random input definitions
         '''
         if self.distributionType in self.printOutDistributions:
             dist = self.printOutDistributions[self.distributionType]
@@ -98,6 +130,10 @@ class ParametricRandomInput(RandomInput):
                             ]    
     
     def __init__(self):
+        '''
+        Class for a parametric random input variable defined as Y = a + b X which is connected to 
+        a variable in the starfish base code, e.g. betaHayashi of the hayashi compliance model.
+        '''
         super(ParametricRandomInput,self).__init__()
         
         self.randomInputType = 'parametricRandomInput'
@@ -118,6 +154,9 @@ class GeneralRandomInput(RandomInput):
                             ]
     
     def __init__(self):
+        '''
+        Class for a general random input variable Y = a + b X which can be the random variable X of other random inputs.
+        '''
         super(GeneralRandomInput,self).__init__()
         
         self.randomInputType = 'generalRandomInput'

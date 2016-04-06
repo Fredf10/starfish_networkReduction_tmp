@@ -14,6 +14,12 @@ class DistributionManager(object):
         The distribution manager defined as base class and super classes to
         account for different stochstic packages handeling the distributions.
         
+        Nomenclature: 
+            as <marginalDistributions> we define the marginal distributions all X in the 
+            random inputs which are defined with an actual propability distribution.
+        
+            the <jointDistribution> is the joint distributions of all marginal distributions.
+                                                
         Args:
             randomInputVector (Optional (list)): 
                 Defaults to None. The list should contain instances of class RandomInputs
