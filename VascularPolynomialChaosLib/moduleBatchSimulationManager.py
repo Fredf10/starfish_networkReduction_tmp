@@ -15,7 +15,7 @@ import UtilityLib.progressBar as cPB
 
 import gc,time
 
-import multiprocessing,resource
+import multiprocessing
 
 ## module to run simulations as a batch jobs
 
@@ -23,9 +23,11 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     '''
     Run a set of simulations on one core without multiprocessing
     
-    Input:
-        batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
-            batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
+    Args:
+        batchDataList (list) :
+            with data for each batch job [batchData1, batchData .. ]
+        batchData (dict) :
+             dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
         
     '''
     timeStartBatch = time.time()
@@ -50,8 +52,9 @@ def runSingleBatchSimulation(batchData):
     '''
     Function which runs a single simulation the defined with batchData
     
-    Input:
-        batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
+    Args:
+        batchData (dict):
+             dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
     '''
     
     networkName              = batchData['networkName']
@@ -86,10 +89,11 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     '''
     Run a set of simulations on one core without multiprocessing
     
-    Input:
-        batchDataList <list> := with data for each batch job [batchData1, batchData .. ]
-            batchData <dict> := dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
-        
+    Args:
+        batchDataList (list) :
+            with data for each batch job [batchData1, batchData .. ]
+        batchData (dict) :
+             dict with {simulationIndex: , networkName: , dataNumber: , networkXmlFile: , pathSolutionDataFilename: }
     '''
     if numberWorkers == None: numberWorkers = multiprocessing.cpu_count()
     
