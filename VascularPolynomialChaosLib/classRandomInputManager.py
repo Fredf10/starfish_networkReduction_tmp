@@ -12,9 +12,6 @@ import classRandomInput
 import classCorrelationMatrices
 
 class RandomInputManager(TestBaseClass):
-    '''
-    
-    '''
     
     externVariables      = {'randomInputs' : TestBaseClass.ExtDict('randomInput',TestBaseClass.ExtObject({'ParametricRandomInput':classRandomInput.ParametricRandomInput,
                                                                                                           'GeneralRandomInput':classRandomInput.GeneralRandomInput})),
@@ -25,8 +22,13 @@ class RandomInputManager(TestBaseClass):
                             'correlation']
     
     def __init__(self):        
-        
-        
+        '''
+        The RandomInputManager class is as in the network xml file
+        the container of correlation matrix and random inputs.
+        In addition it has methods to sorts out the connection between random inputs
+        and connects the random inputs via the update functions to the vascular network variables
+        or other random inputs. (see method: linkRandomInputUpdateFunctions)
+        '''        
         self.randomInputs = {} # randomInput as they stand in xml
         
         self.correlation       = None
@@ -39,6 +41,11 @@ class RandomInputManager(TestBaseClass):
         '''
         Method to initialize the random inputs and
         defined them into the different types
+        
+        Args:
+            vascularNetwork (instance of VascularNetwork): 
+                An instance of the vascular network class to link the 
+                random inputs to the corresponding update functions
         '''
         
         randomInputParameters = []
@@ -58,9 +65,10 @@ class RandomInputManager(TestBaseClass):
             
     def checkCorrelationMatrix(self):
         '''
-        Check if defined correlation matrix is consistent and could be possible
+        This functions initiates the assembly of the correlation matrix and 
+        ensures that the defined correlation matrix is consistent and matches with
+        the defined random inputs.
         '''
-        
         # get extern random input name list
         definedBases = []
         for randomInput in self.randomInputsExtDist:
@@ -73,17 +81,38 @@ class RandomInputManager(TestBaseClass):
             
     def linkRandomInputUpdateFunctions(self, vascularNetwork):
         '''
-        link update functions and create randomInputvector
+        This function establisehes the links of the random inputs.
         
-        input vascularNetwork 
+        ParametricRandomInputs can be in the form of:
         
-        only 1 level of nested self.randomInputs.values() is currently implemented
-        
-        parametricRandomInputs can be in the form of:
             a+b*Uniform(0,1) / a+b*Normal(0,1)
             or
-            a+b*Z1 where Z1 is a general random input defined as 
+            a+b*Z1 where Z1 must be a separate defined general random input 
         
+        In addition this function creates a randomInputvector
+        which holds all random inputs, with a propability denistiy function 
+        which is modeled in stochastic sense.
+        
+        eg. 4 defined random inputs:
+        Z1 (parametric input): target(vessel_1_betaHayashi), 2 + 0.5*Z4
+        Z2 (parametric input): target(vessel_2_betaHayashi), 6 + 0.5*Z4
+        Z3 (parametric input): target(vessel_1_radiusA), 2 + 0.5* Uniform(0,1)
+        Z4 (general random input): 4 + 5.5* Normal(0,1)
+        
+        The random variables have the connection:
+        
+        vessel_1_betaHayashi    <-- Z1 <-- Z4
+        vessel_2_betaHayashi    <-- Z2 <-- Z4
+        vessel_1_radiusA        <-- Z3
+        
+        the randomInputvector would now be [Z3, Z4], as Z1 and Z2 are dependent on
+        Z4 and have no independet distibution which is stochstically modelled.
+        In this way many parameters can be controlled by 1 random variable, e.g. age.
+        
+        Args:
+            vascularNetwork (instance of VascularNetwork): 
+                An instance of the vascular network class to link the 
+                random inputs to the corresponding update functions
         '''
         
         randomInputMap = {}
@@ -141,7 +170,13 @@ class RandomInputManager(TestBaseClass):
                     
     def saveRealisationLog(self, evaluationLogFile, networkName, dataNumber, caseName): 
         '''
-        method to save a log file with the realisations passed for each sample iteration
+        This Function saves a log file with the realisations passed for each sample iteration
+        
+        Args:
+            evaluationLogFile (file): the file in which the log should be saved
+            networkName (str) : name of the current network
+            dataNumber (str) : data number of the current simulation case
+            caseName (str) : case name of the current stochastic case
         '''
         
         logData = np.array([randomInput.updateLog for randomInput in self.randomInputs.values()]).transpose()
@@ -169,7 +204,9 @@ class RandomInputManager(TestBaseClass):
     def generateInfo(self):
         '''
         Function which generates info of the random inputs
-        and returns it in a list
+        
+        Returns:
+            randomInputManagerInfo (list): combined info of all random inputs as str
         '''
         randomInputManagerInfo = []
         randomInputManagerInfo.append("\n Defined Random Inputs\n")

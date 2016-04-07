@@ -4,10 +4,6 @@ from testBaseClass import TestBaseClass
 import numpy as np
 
 class UqsaMeasures(TestBaseClass):
-    '''
-    
-    '''
-    
     # in class definition
     ## pure variables
     variablesHdf5Memory = ["expectedValue",
@@ -23,7 +19,11 @@ class UqsaMeasures(TestBaseClass):
     objectDictsHdf5Memory = []
     
     def __init__(self):
-        
+        '''
+        This class is a pure data container class
+        for all kind of uncertinaty measures.
+        It is connected to the baseclass hdf5 reader.
+        '''
         # statistic properties
         self.expectedValue            = None
         self.variance                 = None
