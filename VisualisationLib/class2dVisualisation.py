@@ -1720,12 +1720,6 @@ class Visualisation2DMainGUI(gtk.Window):
         
     def on_clickedLoadExternal(self):
         pass
-        
-    def on_clickedLoad(self):
-        pass
-    
-    def on_clickedLoadExternal(self):
-        pass
     
 class Visualisation2DMain(Visualisation2DMainGUI):
     '''
@@ -1788,6 +1782,25 @@ class Visualisation2DMain(Visualisation2DMainGUI):
             for networkID in loadVesselIDdict.iterkeys():
                 vesselIds = loadVesselIDdict[networkID]
                 self.networks[networkID].loadSolutionDataRange(vesselIds, values=["All"])
+                
+                
+                saveWaveSpeedData = False
+                if saveWaveSpeedData == True:
+                    import h5py
+                    print 'saveWaveSpeedData'
+                    fileName = "/home/Vinz/Daten/StrafishWorkingDir2/paper4/preprocessing/wavespeedData.hdf5"
+                    f = h5py.File(fileName, "w")
+                    
+                    allVessels = self.networks[networkID].vessels.keys()
+                    self.networks[networkID].loadSolutionDataRange(allVessels, values=["All"])
+                    
+                    for vesselId,vesselData in self.networks[networkID].vessels.iteritems():
+                        
+                        
+                        dset = f.create_dataset(' '.join(["wavespeed",str(vesselId)]),  shape = np.shape(vesselData.csol))
+                        dset[:] = vesselData.csol
+                
+                    f.close()
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
     def loadVascularNetwork(self, networkName, dataNumber, networkXmlFile = None, pathSolutionDataFilename = None):
@@ -1799,6 +1812,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         # load vascular network
         vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber = dataNumber, networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
         vascularNetwork.linkSolutionData()
+        
         # # save it and refresh GUi setup
         networkSolutionName = '_'.join([networkName, dataNumber])  
         # # add data name and corresponding network

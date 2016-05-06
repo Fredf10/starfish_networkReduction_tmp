@@ -304,7 +304,7 @@ class UqsaCase(TestBaseClass):
                 
                 
                 print "hashDataForGivenBases {}".format(basis)
-                qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
+                #qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
                 
                 timeBatchJob= time.time()-timeStartBatch
                 minutesBatch = int(timeBatchJob/60.)

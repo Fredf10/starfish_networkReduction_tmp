@@ -15,9 +15,6 @@ import numpy as np
 
 class UqsaMethodPolynomialChaos(TestBaseClass):
     
-    '''
-    Configuration class of a vascular polynomial chaos class
-    '''
     #----External Variables -------------------------------------------------------------#
     externVariables = {  'polynomialOrder' : TestBaseClass.ExtValue(int), 
                          'sampleFactor'    : TestBaseClass.ExtValue(int),
@@ -30,8 +27,8 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
     
     def __init__(self):
         '''
-        
-        '''                
+        Configuration class of a vascular polynomial chaos class
+        '''             
         self.sampleFactor = 2
         #polynomialOrders of the polynomial chaos expansion || if more then one given they are processed consecutevely
         self.polynomialOrder = 3
@@ -136,7 +133,6 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
         return uqsaMeasures
     
 class UqsaMethodPolynomialChaosPseudoSpectral(TestBaseClass):
-    
     '''
     Configuration class of a vascular polynomial chaos class
     '''

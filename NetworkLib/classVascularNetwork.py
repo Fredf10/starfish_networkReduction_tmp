@@ -1413,7 +1413,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for bc in self.boundaryConditions[root]:
             if bc.type == 1:
                 inflowBoundaryCondition = bc
-
+                
         if self.venousSystemCollaps == True and self.initialsationMethod != 'ConstantPressure':
             raise NotImplementedError("Auto, MeanFlow, Mean Pressure: initialization not implemented for collapsing venous system! \n")
             #exit()
@@ -1516,6 +1516,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if meanInflow != None:
             p0 = self.Rcum[root] * meanInflow
             p1 = p0 - self.vessels[root].resistance * meanInflow
+            print "DB cVN 1519: root init pressure", p0,p1, self.Rcum[root], meanInflow
 
         elif meanInPressure != None:
             meanInflow = meanInPressure / self.Rcum[root]  # calculate mean flow
@@ -1845,7 +1846,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     def showWaveSpeedOfNetwork(self, Pressure=None, Flow=None):
         print '====================================='
         print '__________initial wave speed_________'
-        print ' vessel    wave speed c(Pinit)   A(Pinit)    As(Pinit)      Dw(Pinit)      Re(Pinit)'
+        print ' vessel    wave speed c(P_init)   A(P_init)    As_init      Dw(P_init)      Re(P_init)'
         for vesselId, vessel in self.vessels.iteritems():
             if Pressure == None:
                 # calc initial pressure

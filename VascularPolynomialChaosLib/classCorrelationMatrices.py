@@ -32,7 +32,6 @@ class CorrelationMatrix(Correlation):
         self.bases = None
         self.data  = None 
     
-    
     def assembleCorrelationMatrix(self, definedBases):
         '''
         Function assemble a numpy array corresponding to the values given in the xml correlation matrix.

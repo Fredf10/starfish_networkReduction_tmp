@@ -49,6 +49,9 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
         exception (str): (for read mode),
                     Error (default): raise error and exit if file is not exiting,
                     Warning: just raise Warning and return with error string,  
+                    
+    Returns:
+        requestedFilePath (str): path to the requested file 
     '''
     existingFileTypes = ['uqsaCaseXmlFile',
                          'uqsaCaseTemplatePolynomialChaosFile',
@@ -140,6 +143,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         exception (str): (for read mode) 
                     Error (default): raise error and exit if file is not exiting-
                     Warning: just raise Warning and return with error string      
+    Returns:
+        requestedDirectory (str): path to the requested directory
     '''
     
     existingDirectoryTypes = {'workingDirectory',
