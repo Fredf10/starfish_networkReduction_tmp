@@ -140,6 +140,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 #         ### random variables TODO: move out of here to global class
         self.randomInputManager = None
 
+        self.measurmentRoutine = None
+
     # all classes concerning vessel
     def addVessel(self, vesselId=None, dataDict=False):
         """
@@ -320,6 +322,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             vessel.initialize(self.globalFluid)
             vessel.update({'gravityConstant': self.gravityConstant})
 
+        # ## update wall models from measurment data
+        if self.measurmentRoutine != None:
+            self.measurmentRoutine.adaptationToPatientSpecificCondition(self)
 
         # ## check and initialize boundary conditions
         if self.boundaryConditions != {}:

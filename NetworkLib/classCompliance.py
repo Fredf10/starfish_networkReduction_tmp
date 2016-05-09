@@ -87,6 +87,15 @@ class Compliance(cSBO.StarfishBaseObject):
             except Exception:
                 self.warning("compliance.updateData Wrong key: {}, could not update varibale".format(key))
 #                print "ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key)
+    
+    def adaptMaterialCoefficient(self, alpha_c):
+        """
+        Function which updates the specific stiffness/compliance coefficient of
+        the wall model by a coefficient alpha_c
+        
+        Args alpha_c (float): correction factor alpha_c to update the wall model coefficient
+        """
+        raise NotImplementedError("adaptMaterialCoefficient is not implemented for this wall model type")
 
 class Exponential(Compliance):
     """
@@ -124,6 +133,7 @@ class Exponential(Compliance):
         P = P[node]-self.externalPressure
         return self.As[node] / (self.betaExponential[node] * P)    
 
+   
 class Laplace(Compliance):
     """
     Laplace Compliance Model actually Hookean Model
@@ -154,6 +164,19 @@ class Laplace(Compliance):
     def C_Node(self, P, node):
         P = P[node]-self.externalPressure-self.Ps
         return (2.*(P / self.betaLaplace[node] + np.sqrt(self.As[node]))) / self.betaLaplace[node]
+
+    def adaptMaterialCoefficient(self, alpha_c):
+        """
+        Function which updates the specific stiffness/compliance coefficient of
+        the wall model by a coefficient alpha_c
+        
+        Args alpha_c (float): correction factor alpha_c to update the wall model coefficient
+        """
+        if type(alpha_c) in [float,int]:
+            self.betaLaplace = self.betaLaplace*np.sqrt(alpha_c)
+        else:
+            raise TypeError("wall model Laplace.adaptMaterialCoefficient() got alpha_c of wrong format, should be float/int")
+            
 
 class Laplace2(Laplace):
     """
@@ -195,7 +218,6 @@ class Hayashi(Compliance):
         self.update(complianceDataDict)
         
         self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
-        Amm = self.As*1e6 
         self.C0preCalculated = self.C(self.Ps)
     
     def A(self, P):
@@ -212,9 +234,23 @@ class Hayashi(Compliance):
         P = P[node]-self.externalPressure
         return 2.0* self.As[node] / self.betaHayashi[node] * ( 1.0 + np.log( P/self.Ps ) / self.betaHayashi[node] ) / P
     
+    def adaptMaterialCoefficient(self, alpha_c):
+        """
+        Function which updates the specific stiffness/compliance coefficient of
+        the wall model by a coefficient alpha_c
+        
+        Args alpha_c (float): correction factor alpha_c to update the wall model coefficient
+        """
+        if type(alpha_c) in [float,int,np.float64]:
+            self.betaHayashi = self.betaHayashi*np.sqrt(alpha_c)
+        else:
+            raise TypeError("wall model Hayashi.adaptMaterialCoefficient() got alpha_c of wrong format, should be float/int")
+            
+    
 class HayashiEmpirical(Compliance):
     """
     Compliance model found in Hayashi et al. 1993
+    modified with diameter wavespeed equation found in Reymond et al. 2009
     """
     def __init__(self, rho, As):
         Compliance.__init__(self, rho, As)
@@ -318,3 +354,16 @@ class Reymond(Compliance):
         Pnode = P[node]-self.externalPressure
         return self.Cs[node]* (a1 + b1/(1.0+((Pnode-PmaxC)/Pwidth)**2.0))
         
+    def adaptMaterialCoefficient(self, alpha_c):
+        """
+        Function which updates the specific stiffness/compliance coefficient of
+        the wall model by a coefficient alpha_c
+        
+        Args alpha_c (float): correction factor alpha_c to update the wall model coefficient
+        """
+        if type(alpha_c) in [float,int,np.float64]:
+            self.Cs = self.Cs/np.sqrt(alpha_c)
+        else:
+            raise TypeError("wall model Reymond.adaptMaterialCoefficient() got alpha_c of wrong format, should be float/int")
+      
+    

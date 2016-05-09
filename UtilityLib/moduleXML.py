@@ -28,6 +28,8 @@ import moduleFilePathHandler as mFPH
 #sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 
+from NetworkLib.classMeasurments import MeasurmentRoutine
+
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
 #from constants import unitsDictMed as unitsDict
@@ -118,9 +120,6 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
     from constants import newestNetworkXml as nxmlW
 
     xmlFile = etree.ElementTree(root)
-
-    ### polynomial chaos distributionstuff
-    randomInputManager = vascularNetwork.randomInputManager
 
     for xmlElementName in nxmlW.xmlElements:
         xmlFileElement = etree.SubElement(root, xmlElementName)
@@ -214,7 +213,13 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
         elif xmlElementName == 'randomInputManager':
             if vascularNetwork.randomInputManager != None:
                 vascularNetwork.randomInputManager.writeDataToXmlNode(xmlFileElement)
-
+                xmlFileElement.set('class', 'RandomInputManager')
+                
+        elif xmlElementName == 'measurmentRoutine':
+            if vascularNetwork.measurmentRoutine != None:
+                vascularNetwork.measurmentRoutine.writeDataToXmlNode(xmlFileElement)
+                xmlFileElement.set('class', 'MeasurmentRoutine')
+                
         elif xmlElementName == "externalStimuli":
             for stimulusId, stimulus in vascularNetwork.externalStimuli.iteritems():
                 stimulusType = stimulus['type']
@@ -711,6 +716,15 @@ def loadNetworkFromXML(networkName ,
                     randomInputManager = RandomInputManager()
                     vascularNetwork.randomInputManager = randomInputManager
                     vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
+
+            elif xmlElementName == 'measurmentRoutine':
+                ## create measurmentRoutine
+                xmlElementChildren = xmlElement.getchildren()
+                if len(xmlElementChildren) != 0:
+                    measurmentRoutine = MeasurmentRoutine()
+                    vascularNetwork.measurmentRoutine = measurmentRoutine
+                    vascularNetwork.measurmentRoutine.loadDataFromXmlNode(xmlElement)
+                                
 
             elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork
                 vascularNetworkData = {}

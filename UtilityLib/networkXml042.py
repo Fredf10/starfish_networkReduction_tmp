@@ -261,21 +261,21 @@ vesselElements = ['topology',
                   'compliance',
                   'fluid']
 
-###########################################################################################
-## Random variables
-randomInputDistributionElements = ['distributionType',
-                                   'a',
-                                   'b']
-
-randomInputCorrelationElements = []
-
-randomInputsReference = {'distribution':randomInputDistributionElements,
-                         'correlation' :randomInputCorrelationElements}
-
-randomInputsElements = ['distribution',
-                        'correlation']
-
-generalRandomInputsAttributes = ['name']
+# ###########################################################################################
+# ## Random variables
+# randomInputDistributionElements = ['distributionType',
+#                                    'a',
+#                                    'b']
+# 
+# randomInputCorrelationElements = []
+# 
+# randomInputsReference = {'distribution':randomInputDistributionElements,
+#                          'correlation' :randomInputCorrelationElements}
+# 
+# randomInputsElements = ['distribution',
+#                         'correlation']
+# 
+# generalRandomInputsAttributes = ['name']
 
 ##########################################################################################
 ## XML file elements
@@ -289,6 +289,7 @@ xmlElements  = [ 'simulationContext',
                  'communicators',
                  'boundaryConditions',
                  'randomInputManager',
+                 'measurmentRoutine',
                  'vessels' ]
 
 xmlElementsReference = {'simulationContext'     : simulationContextElements,
@@ -300,18 +301,19 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference, #TODO why is this Reference?
                         'randomInputManager'    : None,
-                        'generalRandomInputs'   : randomInputDistributionElements, 
+                        'measurmentRoutine'     : None,
+                        #'generalRandomInputs'   : randomInputDistributionElements, 
                         'vessels'               : vesselElements }
 
 
-
-
-##########################################################################################
-##########################################################################################
-### uncertainty quantification and sensitivity analysis
-
-locationOfInterest = ['quantitiesOfInterestToProcess',
-                      'queryLocation',
-                      'xVals',
-                      'confidenceAlpha']
+# 
+# 
+# ##########################################################################################
+# ##########################################################################################
+# ### uncertainty quantification and sensitivity analysis
+# 
+# locationOfInterest = ['quantitiesOfInterestToProcess',
+#                       'queryLocation',
+#                       'xVals',
+#                       'confidenceAlpha']
 
