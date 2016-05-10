@@ -434,8 +434,8 @@ def chooseUQSACaseFile(networkName):
         print "files created!, exit()"
         exit()
     else:
-        networkName = filenames[userInput-2]
-        dataNumber = networkName.split('.')[0].split('_')[2]
+        networkName = filenames[userInput-1]
+        dataNumber = networkName.split('.')[0].split('_')[-1]
         
     return dataNumber   
     

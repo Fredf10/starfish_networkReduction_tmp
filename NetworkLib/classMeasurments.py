@@ -27,7 +27,7 @@ class MeasurmentRoutine(TestBaseClass):
     externVariables      = {'vesselId': TestBaseClass.ExtValue([int],    unit = ''),
                             'diastolicPressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa'),
                             'diastolicArea'      : TestBaseClass.ExtValue([float], unit = 'm2' ),
-                            'waveSpeed_ff_carotidFemoral'    : TestBaseClass.ExtValue([float],  unit = 'm s-1' ),
+                            'waveSpeedCarotidFemoral'    : TestBaseClass.ExtValue([float],  unit = 'm s-1' ),
                             #'carotidArteryId': TestBaseClass.ExtValue([int],    unit = ''),
                             #'gemoralArteryId': TestBaseClass.ExtValue([int],    unit = ''),
                             'vesselIdsAorticToCarotid' : TestBaseClass.ExtValue([int],   multiVar=True, unit = ''),
@@ -38,7 +38,7 @@ class MeasurmentRoutine(TestBaseClass):
     externXmlElements    = ['vesselId',
                             'diastolicPressure',
                             'diastolicArea',
-                            'waveSpeed_ff_carotidFemoral',
+                            'waveSpeedCarotidFemoral',
                             #'carotidArteryId',
                             #'gemoralArteryId',
                             'vesselIdsAorticToCarotid',
@@ -58,7 +58,7 @@ class MeasurmentRoutine(TestBaseClass):
             vesselId (int): vessel id of the measurement side 
             diastolicPressure (float): diastolic pressure measured at the measurement location
             diastolicArea (float): diastolic area measured at the measurement location
-            waveSpeed_ff_carotidFemoral (float): foot-to-foot wave speed measured from caritid to femoral artery
+            waveSpeedCarotidFemoral (float): foot-to-foot wave speed measured from caritid to femoral artery
             carotidArteryId (int): vesselId of the carotid artery
             gemoralArteryId (int): vesselId of the femoral artery
             aorticToCarotidVesselIds (list) of (int): vesselIds from aortic arch to carotid artery used to calculate the distance for c_ff
@@ -68,7 +68,7 @@ class MeasurmentRoutine(TestBaseClass):
         self.vesselId                    = None
         self.diastolicPressure           = None
         self.diastolicArea               = None
-        self.waveSpeed_ff_carotidFemoral = None
+        self.waveSpeedCarotidFemoral     = None
         #self.carotidArteryId             = None
         #self.gemoralArteryId             = None
         self.vesselIdsAorticToCarotid    = None
@@ -83,7 +83,7 @@ class MeasurmentRoutine(TestBaseClass):
         
         1. adapt Ps in all vessels relative to vessel where diastolicPressure is measurement 
         and adapt As in all vessels relative to vessel where diastolicArea is measurement 
-        2. adapt "wall stiffness coefficients" such that measured waveSpeed_ff_carotidFemoral matches with
+        2. adapt "wall stiffness coefficients" such that measured waveSpeedCarotidFemoral matches with
         the intial c_ff given by c(Ps,As) in the carotid to femoral artery.
         
         
@@ -109,9 +109,9 @@ class MeasurmentRoutine(TestBaseClass):
             if vesselId not in existingVessels:
                 raise ValueError('MeasurmentRoutine_Pd_Ad_pvwff.adaptationToPatientSpecificCondition(): vesselId {} connecting carotid and femoral artery is not represented as a vessel in the netowrk'.format(vesselId))
         
-        # 2.1 evaluate alpha_c iteratively such that c_ff from network matches with measurment waveSpeed_ff_carotidFemoral
+        # 2.1 evaluate alpha_c iteratively such that c_ff from network matches with measurment waveSpeedCarotidFemoral
         alpha_c = 1.0
-        args = [self.waveSpeed_ff_carotidFemoral,vascularNetwork.vessels]
+        args = [self.waveSpeedCarotidFemoral,vascularNetwork.vessels]
         #args = [c_ff_analytic,wallModelType,dataDict]
         sol = optimize.root(self.estimateCff, alpha_c, args)
         alpha_c = sol.x[0]

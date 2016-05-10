@@ -575,8 +575,6 @@ class TestBaseClass(object):
         '''
         
         '''
-        
-        
         # pure variables
         # functionality
         for variableName in self.variablesHdf5Memory:
