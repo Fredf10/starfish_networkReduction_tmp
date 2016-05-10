@@ -172,7 +172,7 @@ class Laplace(Compliance):
         
         Args alpha_c (float): correction factor alpha_c to update the wall model coefficient
         """
-        if type(alpha_c) in [float,int]:
+        if type(alpha_c) in [float,int,np.float64]:
             self.betaLaplace = self.betaLaplace*np.sqrt(alpha_c)
         else:
             raise TypeError("wall model Laplace.adaptMaterialCoefficient() got alpha_c of wrong format, should be float/int")
