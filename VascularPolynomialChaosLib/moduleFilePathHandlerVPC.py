@@ -54,8 +54,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
         requestedFilePath (str): path to the requested file 
     '''
     existingFileTypes = ['uqsaCaseXmlFile',
-                         'uqsaCaseTemplatePolynomialChaosFile',
-                         'uqsaCaseTemplateMonteCarloFile',
+                         'uqsaCaseTemplateFile',
                          'vpcNetworkXmlFile',
                          'uqsaSampleFile',
                          'uqsaEvaluationNetworkXmlFile',
@@ -72,8 +71,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
         
     # file names
     filenames = {
-                 'uqsaCaseTemplatePolynomialChaosFile': 'uqsaCase_PC_xxx.xml',
-                 'uqsaCaseTemplateMonteCarloFile':'uqsaCase_MC_xxx.xml',
+                 'uqsaCaseTemplateFile'          : 'uqsaCase_xxx.xml',
                  'uqsaCaseXmlFile'               : ''.join([networkName,'_uqsaCase_',dataNumber,'.xml']),
                  'vpcNetworkXmlFile'             : ''.join([networkName,'_vpc_',dataNumber,'.xml']),
                  'uqsaSampleFile'                : ''.join(['samples_',caseName,'.hdf5']),
@@ -135,7 +133,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vpcSampleFileDirectory',
                               'evaluationLogFileDirectory',
                               'vpcSolutionDataFileDirectory',
-                              'vpcConfigTemplateFileDirectory',
+                              'uqsaCaseTemplateFile',
                               'simulationTimeDirectory'
         networkName (str): name of the network file
         dataNumber (str): data number of solution file or xml file
@@ -155,8 +153,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'uqsaSampleFileDirectory',
                               'evaluationLogFileDirectory',
                               'uqsaSolutionDataFileDirectory',
-                              'uqsaCaseTemplatePolynomialChaosFileDirectory',
-                              'uqsaCaseTemplateMonteCarloFileDirectory',
+                              'uqsaCaseTemplateFileDirectory',
                               'simulationTimeDirectory',
                               'preprocessedDataFileDirectory'} 
     
@@ -187,8 +184,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'evaluationLogFileDirectory'             : vpcOrderMethodDirectory,
                    'preprocessedDataFileDirectory'          : vpcOrderMethodDirectory,
                    'uqsaSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
-                   'uqsaCaseTemplatePolynomialChaosFileDirectory' : vpcConficTemplateDicrectory,
-                   'uqsaCaseTemplateMonteCarloFileDirectory' : vpcConficTemplateDicrectory
+                   'uqsaCaseTemplateFileDirectory'          : vpcConficTemplateDicrectory
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

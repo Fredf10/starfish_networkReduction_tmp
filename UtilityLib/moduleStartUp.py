@@ -405,15 +405,14 @@ def chooseUQSACaseFile(networkName):
             
     print "\n  No dataNumber for UQSAcase file passed, choose between all available UQSAcase files:"
     print "  (NB: use -n dataNumber to define a specific UQSAcase you want to open)\n"
-    print "   [   0 ] - Create new template case for polynomial chaos and exit"
-    print "   [   1 ] - Create new template case for monte carlo and exit"
+    print "   [   0 ] - Create new template uqsa case file and exit"
     if filenames != []:
-        prettyPrintList('',filenames, indexOffSet = 2)
+        prettyPrintList('',filenames, indexOffSet = 1)
         
     question  = "  Choose Option or Config-File you want to open according to its number:, (q)-quit: "
-    userInput = userInputEvaluationInt(2+len(filenames), 0, question)
+    userInput = userInputEvaluationInt(1+len(filenames), 0, question)
         
-    if userInput in [0,1] :
+    if userInput in [0] :
         
         userInputDataNumber = 'xxxx'
         dataNumber = False
@@ -422,11 +421,8 @@ def chooseUQSACaseFile(networkName):
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         
         # create template configuration
-        if userInput == 0:
-            configurationFilePathTemplate = mFPH_VPC.getFilePath('uqsaCaseTemplatePolynomialChaosFile', networkName, dataNumber, 'read')
-        elif userInput == 1:
-            configurationFilePathTemplate = mFPH_VPC.getFilePath('uqsaCaseTemplateMonteCarloFile', networkName, dataNumber, 'read')
-
+        configurationFilePathTemplate = mFPH_VPC.getFilePath('uqsaCaseTemplateFile', networkName, dataNumber, 'read')
+        
         uqsaCase = classUqsaCase.UqsaCase()
         uqsaCase.loadXMLFile(configurationFilePathTemplate)
         configurationFilePath = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'write')
