@@ -369,7 +369,7 @@ variablesDict = {## class Vascular Network
                  'rightDaughter'     : {'type':'int None',  'unitSI': None,     'strCases': None, 'multiVar': False},
                  'angleYMother'      : {'type':'float None', 'unitSI': 'rad',    'strCases': None, 'multiVar': False},
                  # geometry
-                 'geometryType'      : {'type':'str',    'unitSI': None,    'strCases': ['uniform','cone','constriction'], 'multiVar': False},
+                 'geometryType'      : {'type':'str',    'unitSI': None,    'strCases': ['uniform','cone','constriction','mtStig2016'], 'multiVar': False},
                  'length'            : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
                  'radiusProximal'    : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
                  'radiusDistal'      : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},

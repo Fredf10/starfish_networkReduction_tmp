@@ -49,3 +49,29 @@ def constriction(length, radiusA, radiusB, N):
     A0 = np.pi*R0**2
     print "WARNING: constricted vessel geometry was never verified and vaildated!"
     return z,dz,A0
+
+
+def mtStig2016(length, radiusA, radiusB, N):
+    """
+    Function to calculate a gird based on measured values.
+    More details of the values see masterthesis of Stig 2016.
+    
+    Args:  length (float): vessel-length
+           N (int): number of grid points 
+    Returns:  z  = gridpoint-array 
+             dz = spacing array
+             A0 = area-array with given radius
+    """  
+    
+    print "we use this model yes! mtStig2016 gird"
+    exit()
+    z  = np.linspace(0.,length,N)
+    dz = np.diff(z)
+    
+    zg = np.array([0.,1.,2.,3.])
+    rg = np.array([10.,12.,13.,14.])
+    
+    #r = np.interp(z, xp, fp, left, right)
+    A0 = rg**2.0 * np.pi
+    
+    return z,dz,A0

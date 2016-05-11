@@ -181,6 +181,9 @@ class Vessel(cSBO.StarfishBaseObject):
                 AsProximal = self.radiusProximal**2.0*np.pi
                 As_distal = self.radiusDistal**2.0*np.pi
                 self.AsVector = self.A0.copy() 
+                
+            elif self.geometryType == 'mtStig2016':
+                self.AsVector = self.A0.copy() 
             else:
                 raise ValueError("classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id))
         except Exception:
