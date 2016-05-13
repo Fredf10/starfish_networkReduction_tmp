@@ -111,7 +111,26 @@ class MeasurmentRoutine(TestBaseClass):
         
         # 2.1 evaluate alpha_c iteratively such that c_ff from network matches with measurment waveSpeedCarotidFemoral
         alpha_c = 1.0
-        args = [self.waveSpeedCarotidFemoral,vascularNetwork.vessels]
+        # get initial values for the coefficients
+        initialMaterialCoefficients = {}
+        for vesselId,vessel in vascularNetwork.vessels.iteritems():
+            
+            
+            
+            # use empirical betas
+            vessel.compliance.estimateMaterialCoefficientEmpiricalAreaRel()
+            
+            
+            initialMC = vessel.compliance.getMaterialCoefficient()
+            
+            # use averaged empirical betas
+            #initialMC = np.mean(initialMC)*np.ones(vessel.N)
+            
+            initialMaterialCoefficients[vesselId] = initialMC
+            
+            
+            
+        args = [initialMaterialCoefficients,vascularNetwork.vessels]
         #args = [c_ff_analytic,wallModelType,dataDict]
         sol = optimize.root(self.estimateCff, alpha_c, args)
         alpha_c = sol.x[0]
@@ -144,7 +163,7 @@ class MeasurmentRoutine(TestBaseClass):
         c2 = c_wallModel(Ps)
         are the same!
         '''
-        c_ff,vessels = args
+        initialMaterialCoefficients,vessels = args
             
         distanceAorticBifFemoralRight = 0
         distanceCarotidAorticBif = 0
@@ -153,20 +172,39 @@ class MeasurmentRoutine(TestBaseClass):
         timeCarotid_analytic = 0
         for i in self.vesselIdsAorticToCarotid:
             # use the mean c
-            vessel = vessels[i]
-            pressure = np.ones(vessel.N) * vessel.compliance.Ps
-            c_i = alpha_c*np.mean(vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure)))
-            x_i = vessel.length
             
-            timeCarotid_analytic = timeCarotid_analytic + x_i/c_i
+            
+            vessel = vessels[i]
+            
+            #print alpha_c
+            #print initialMaterialCoefficients[i]*alpha_c[0]
+            
+            vessel.compliance.adaptMaterialCoefficient(alpha_c[0],initialMaterialCoefficients[i])
+            pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            
+            c = vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure))
+            
+            c_dist = (c[0:-1]+c[1::])*0.5
+            t_dist = sum(vessel.dz/c_dist)
+            
+            c_i = np.mean(c)
+            x_i = vessel.length
+            t_i = x_i/c_i
+            
+            timeCarotid_analytic = timeCarotid_analytic + t_dist #t_i
             distanceCarotidAorticBif = distanceCarotidAorticBif + x_i
             
         timeFemoral_analytic = 0
         for i in self.vesselIdsAorticToFemoral:
             # use the mean c
             vessel = vessels[i]
+            
+            
+            vessel.compliance.adaptMaterialCoefficient(alpha_c[0],initialMaterialCoefficients[i])
             pressure = np.ones(vessel.N) * vessel.compliance.Ps
-            c_i = alpha_c*np.mean(vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure)))
+            
+            c_i = np.mean(vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure)))
+            
             x_i = vessel.length
             
             timeFemoral_analytic = timeFemoral_analytic + x_i/c_i
@@ -174,7 +212,7 @@ class MeasurmentRoutine(TestBaseClass):
             
         c_ff_model = (distanceAorticBifFemoralRight-distanceCarotidAorticBif)/(timeFemoral_analytic-timeCarotid_analytic)
 
-        return abs(c_ff_model-c_ff)
+        return self.waveSpeedCarotidFemoral-c_ff_model
                 
                 
     
