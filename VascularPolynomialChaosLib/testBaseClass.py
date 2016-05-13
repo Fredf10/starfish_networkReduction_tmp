@@ -439,9 +439,12 @@ class TestBaseClass(object):
             for variableType in variableTypes:
                 
                 if variableType in [float,int]:
-                    try: variableValue = float(eval(variableValueString))
-                    except ValueError: convertError.append('float') 
-                    
+                    try:
+                        evaluated = eval(variableValueString)
+                        variableValue = float(evaluated)
+                    except ValueError and NameError:
+                        convertError.append('float')
+                                                                   
                     if externVariable.unit != None and variableUnit != None:
                         if ' ' in variableUnit:
                             variableUnits = variableUnit.split(' ')

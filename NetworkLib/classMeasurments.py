@@ -27,7 +27,7 @@ class MeasurmentRoutine(TestBaseClass):
     externVariables      = {'vesselId': TestBaseClass.ExtValue([int],    unit = ''),
                             'referencePressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa'),
                             'referenceArea'      : TestBaseClass.ExtValue([float], unit = 'm2' ),
-                            'waveSpeedPressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa'),
+                            'waveSpeedPressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa' ),
                             'waveSpeedCarotidFemoral'    : TestBaseClass.ExtValue([float],  unit = 'm s-1' ),
                             'vesselIdsAorticToCarotid' : TestBaseClass.ExtValue([int],   multiVar=True, unit = ''),
                             'vesselIdsAorticToFemoral' : TestBaseClass.ExtValue([int],   multiVar=True, unit = '')
@@ -180,9 +180,10 @@ class MeasurmentRoutine(TestBaseClass):
             
             vessel.compliance.adaptMaterialCoefficient(alpha_c[0],initialMaterialCoefficients[i])
             
-            
-            pressure = np.ones(vessel.N) *self.waveSpeedPressure
-            #pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            if self.waveSpeedPressure == 0:
+                pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            else:
+                pressure = np.ones(vessel.N) *self.waveSpeedPressure
             
             c = vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure))
             
@@ -204,8 +205,10 @@ class MeasurmentRoutine(TestBaseClass):
             
             vessel.compliance.adaptMaterialCoefficient(alpha_c[0],initialMaterialCoefficients[i])
             
-            #pressure = np.ones(vessel.N) * vessel.compliance.Ps
-            pressure = np.ones(vessel.N) *self.waveSpeedPressure
+            if self.waveSpeedPressure == 0:
+                pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            else:
+                pressure = np.ones(vessel.N) *self.waveSpeedPressure
             
             c_i = np.mean(vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure)))
             
