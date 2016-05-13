@@ -25,22 +25,20 @@ from scipy import optimize
 class MeasurmentRoutine(TestBaseClass):
    
     externVariables      = {'vesselId': TestBaseClass.ExtValue([int],    unit = ''),
-                            'diastolicPressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa'),
-                            'diastolicArea'      : TestBaseClass.ExtValue([float], unit = 'm2' ),
+                            'referencePressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa'),
+                            'referenceArea'      : TestBaseClass.ExtValue([float], unit = 'm2' ),
+                            'waveSpeedPressure'      : TestBaseClass.ExtValue([float],  unit = 'Pa'),
                             'waveSpeedCarotidFemoral'    : TestBaseClass.ExtValue([float],  unit = 'm s-1' ),
-                            #'carotidArteryId': TestBaseClass.ExtValue([int],    unit = ''),
-                            #'gemoralArteryId': TestBaseClass.ExtValue([int],    unit = ''),
                             'vesselIdsAorticToCarotid' : TestBaseClass.ExtValue([int],   multiVar=True, unit = ''),
                             'vesselIdsAorticToFemoral' : TestBaseClass.ExtValue([int],   multiVar=True, unit = '')
                             }
     
     externXmlAttributes  = []
     externXmlElements    = ['vesselId',
-                            'diastolicPressure',
-                            'diastolicArea',
+                            'referencePressure',
+                            'referenceArea',
+                            'waveSpeedPressure',
                             'waveSpeedCarotidFemoral',
-                            #'carotidArteryId',
-                            #'gemoralArteryId',
                             'vesselIdsAorticToCarotid',
                             'vesselIdsAorticToFemoral']
     
@@ -56,8 +54,8 @@ class MeasurmentRoutine(TestBaseClass):
         
         Attributes:
             vesselId (int): vessel id of the measurement side 
-            diastolicPressure (float): diastolic pressure measured at the measurement location
-            diastolicArea (float): diastolic area measured at the measurement location
+            referencePressure (float): diastolic pressure measured at the measurement location
+            referenceArea (float): diastolic area measured at the measurement location
             waveSpeedCarotidFemoral (float): foot-to-foot wave speed measured from caritid to femoral artery
             carotidArteryId (int): vesselId of the carotid artery
             gemoralArteryId (int): vesselId of the femoral artery
@@ -66,8 +64,9 @@ class MeasurmentRoutine(TestBaseClass):
             
         '''
         self.vesselId                    = None
-        self.diastolicPressure           = None
-        self.diastolicArea               = None
+        self.referencePressure           = None
+        self.referenceArea               = None
+        self.waveSpeedPressure           = None
         self.waveSpeedCarotidFemoral     = None
         #self.carotidArteryId             = None
         #self.gemoralArteryId             = None
@@ -81,8 +80,8 @@ class MeasurmentRoutine(TestBaseClass):
         defined by the measurments.
         Algorithm:
         
-        1. adapt Ps in all vessels relative to vessel where diastolicPressure is measurement 
-        and adapt As in all vessels relative to vessel where diastolicArea is measurement 
+        1. adapt Ps in all vessels relative to vessel where referencePressure is measurement 
+        and adapt As in all vessels relative to vessel where referenceArea is measurement 
         2. adapt "wall stiffness coefficients" such that measured waveSpeedCarotidFemoral matches with
         the intial c_ff given by c(Ps,As) in the carotid to femoral artery.
         
@@ -95,8 +94,8 @@ class MeasurmentRoutine(TestBaseClass):
             raise ValueError('MeasurmentRoutine_Pd_Ad_pvwff.adaptationToPatientSpecificCondition(): the measurement side defined vesselId {} is not represented as a vessel in the netowrk'.format(self.vesselId))
         # 1.1 find out ratios alpha_p and alpha_a Ps and As is changed in the measurement vessel
         measurmentVessel = vascularNetwork.vessels[self.vesselId]
-        alpha_p  = self.diastolicPressure / measurmentVessel.compliance.Ps
-        alpha_a  = self.diastolicArea / np.mean(measurmentVessel.compliance.As)        
+        alpha_p  = self.referencePressure / measurmentVessel.compliance.Ps
+        alpha_a  = self.referenceArea / np.mean(measurmentVessel.compliance.As)        
         # 1.2 loop through vessels and adjust Ps, and As with alpha_1 and alpha_2
         for vessel in vascularNetwork.vessels.itervalues():
             vessel.compliance.Ps = vessel.compliance.Ps*alpha_p
@@ -118,7 +117,7 @@ class MeasurmentRoutine(TestBaseClass):
             
             
             # use empirical betas
-            vessel.compliance.estimateMaterialCoefficientEmpiricalAreaRel()
+            #vessel.compliance.estimateMaterialCoefficientEmpiricalAreaRel()
             
             
             initialMC = vessel.compliance.getMaterialCoefficient()
@@ -180,18 +179,21 @@ class MeasurmentRoutine(TestBaseClass):
             #print initialMaterialCoefficients[i]*alpha_c[0]
             
             vessel.compliance.adaptMaterialCoefficient(alpha_c[0],initialMaterialCoefficients[i])
-            pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            
+            
+            pressure = np.ones(vessel.N) *self.waveSpeedPressure
+            #pressure = np.ones(vessel.N) * vessel.compliance.Ps
             
             c = vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure))
             
-            c_dist = (c[0:-1]+c[1::])*0.5
-            t_dist = sum(vessel.dz/c_dist)
+            #c_dist = (c[0:-1]+c[1::])*0.5
+            #t_dist = sum(vessel.dz/c_dist)
             
             c_i = np.mean(c)
             x_i = vessel.length
             t_i = x_i/c_i
             
-            timeCarotid_analytic = timeCarotid_analytic + t_dist #t_i
+            timeCarotid_analytic = timeCarotid_analytic + t_i
             distanceCarotidAorticBif = distanceCarotidAorticBif + x_i
             
         timeFemoral_analytic = 0
@@ -201,7 +203,9 @@ class MeasurmentRoutine(TestBaseClass):
             
             
             vessel.compliance.adaptMaterialCoefficient(alpha_c[0],initialMaterialCoefficients[i])
-            pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            
+            #pressure = np.ones(vessel.N) * vessel.compliance.Ps
+            pressure = np.ones(vessel.N) *self.waveSpeedPressure
             
             c_i = np.mean(vessel.waveSpeed(vessel.A(pressure),vessel.C(pressure)))
             
