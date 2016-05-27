@@ -23,6 +23,7 @@ class Link():
         self.name = ' '.join(['Link',str(mother.Id),str(daughter.Id)])
         
         self.rho             = []
+        self.my              = []
         self.systemEquations = []
         self.z               = []
         self.A_func          = []
@@ -41,6 +42,7 @@ class Link():
         #initialize Vessels
         # mother vessel
         self.rho.append(mother.rho)
+        self.my.append(mother.my)
         self.z.append(mother.z)
         self.systemEquations.append(motherSys)
         self.positions.append(-1)
@@ -54,6 +56,7 @@ class Link():
                
         # daughter vessel
         self.rho.append(daughter.rho)
+        self.my.append(daughter.my)
         self.z.append(daughter.z)
         self.systemEquations.append(daughterSys)
         self.positions.append(0)
@@ -76,13 +79,18 @@ class Link():
 #            exit()
 
         self.rigidAreas = rigidAreas
-        #solvingScheme = "NonLinear"
+        #solvingScheme = "Stenosis"
+        solvingScheme = "NonLinear"
         # Define the call function depending on the solving Scheme
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
+            print "classconnection 86: using linear link model"
         elif solvingScheme == "NonLinear":
-            print "classconnection 78: using nonlinear link model" 
+            print "classconnection 88: using nonlinear link model" 
             self.__call__ = self.callNonLinear
+        elif solvingScheme == "Stenosis":
+            print "classconnection 92: using Stenosis link model" 
+            self.__call__ = self.callStenosisYoungAndTsai
         else:
             raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
     
@@ -210,10 +218,12 @@ class Link():
         # TODO: This was set to test sumPError, not sumPErrorNonLin
         # TODO: When set correctly, program wouldn't run. Commented out.
 #        if sumPErrorNonLin > 1.e-10:
- #           raise ValueError("Connection: {} too high error, sumPErrorNonLin = {} in conservation of pressure at time {} (n {},dt {})".format(self.name,sumPErrorNonLin,n*dt,n,dt))
+#           raise ValueError("Connection: {} too high error, sumPErrorNonLin = {} in conservation of pressure at time {} (n {},dt {})".format(self.name,sumPErrorNonLin,n*dt,n,dt))
             #print sumPError
             #exit()
             
+        
+
     def callNonLinear(self):
         """
         Call function for vessel-vessel connection
@@ -344,6 +354,185 @@ class Link():
                 break
             Xold = Xnew
             #exit()
+        
+        
+        Q1_new = Q1discretize
+        Q2_new = Q2discretize
+        
+        
+        P1_new = P1discretize
+        P2_new = P2discretize
+        
+        self.P_mother[n+1][pos1]   = P1_new
+        self.Q_mother[n+1][pos1]   = Q1_new
+        self.P_daughter[n+1][pos2] = P2_new
+        self.Q_daughter[n+1][pos2] = Q2_new
+        
+        if P1_new < 0 or P2_new < 0:
+            raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, at time {} (n {},dt {})".format(self.name,P1_new,P2_new,n*dt,n,dt))
+            #print P1_new, P2_new
+            #exit()
+                 
+        # calculate new areas
+        if self.rigidAreas == False:
+            A1n = self.A_func[0]([P1_new],pos1)
+            A2n = self.A_func[1]([P2_new],pos2)          
+        else:
+            A1n = A1[pos1]
+            A2n = A2[pos2]
+        # apply Areas
+        self.A_mother[n+1][pos1]   = A1n
+        self.A_daughter[n+1][pos2] = A2n
+        
+
+    def callStenosisYoungAndTsai(self):
+        """
+        Call function for vessel-vessel connection
+        """        
+        dt = self.dt
+        n = self.currentMemoryIndex[0]
+        pos1 = self.positions[0]
+        pos2 = self.positions[1]
+        #if n == 1:
+            #print "using nonlinear link model"
+        P1 = self.P_mother[n]
+        Q1 = self.Q_mother[n]
+        A1 = self.A_mother[n]
+        
+        P2 = self.P_daughter[n]
+        Q2 = self.Q_daughter[n]
+        A2 = self.A_daughter[n]
+        
+        rho1 = self.rho[0]
+        rho2 = self.rho[1]
+        
+        my1 = self.my[0]
+        my2 = self.my[1]
+        
+        P1o = P1[pos1]
+        Q1o = Q1[pos1]
+        A1o = A1[pos1]
+        P2o = P2[pos2]
+        Q2o = Q2[pos2]
+        A2o = A2[pos2]
+        # update system equation and store L1
+        L,R1,LMBD,Z1,Z2,domega1_1 = self.systemEquations[0].updateLARL(P1,Q1,A1,pos1)
+        L,R2,LMBD,Z1,Z2,domega2_2 = self.systemEquations[1].updateLARL(P2,Q2,A2,pos2)
+            
+        # local R matrices
+        R1_11 = R1[0][0]
+        R1_12 = R1[0][1]
+        R1_21 = R1[1][0]
+        R1_22 = R1[1][1]
+        
+        R2_11 = R2[0][0]
+        R2_12 = R2[0][1]
+        R2_21 = R2[1][0]
+        R2_22 = R2[1][1]
+        
+        
+        # apply calculated values to next time step
+                
+        domega1_2_init = -R1_11*domega1_1/R1_12 #result if pressure is constant- could be optimized
+        domega2_1_init = -R2_12*domega2_2/R2_11 #result if pressure is constant
+        
+ 
+        epsilonvalues = np.array([1,1])
+        epsilonlimit = 1e-10
+        domega1_2_last = domega1_2_init
+        domega2_1_last = domega2_1_init
+
+        Niterations = 0
+        Xold = np.array([domega1_2_last, domega2_1_last])
+#         print "\n"
+#         print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
+#         print "\n"
+        while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.0001 :
+            """iterative Newton Rahpson solver
+                domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
+            each iteration. A1, A2, A3 are also changing, but the value from the previous iteration is used. (should actually be for the next timestep, but this should converge to the correct solution)
+            R1_11, R1_12, R1_21, R1_22, ,R2_11, R2_12, R2_21, R2_22, ,R3_11, R3_12, R3_21, R3_22, domega1_1, domega2_2, domega3_2, Q1o, Q2o, Q2o 
+            are constant for each timestep, and are taken from previous timestep. domega1_1, domega2_2, domega3_2 are the field domegas.
+            """
+            domega1_2_last = Xold[0]
+            domega2_1_last = Xold[1]
+
+            
+            Q1discretize = Q1o + R1_21*domega1_1 + R1_22*domega1_2_last
+            Q2discretize = Q2o + R2_21*domega2_1_last + R2_22*domega2_2
+
+            
+            P1discretize = P1o + R1_11*domega1_1 + R1_12*domega1_2_last
+            P2discretize = P2o + R2_11*domega2_1_last + R2_12*domega2_2
+            
+            if self.rigidAreas == False:
+                A1_last = self.A_func[0]([P1discretize],pos1)
+                A2_last = self.A_func[1]([P2discretize],pos2)         
+            else:
+                A1_last = A1o
+                A2_last = A2o
+#             print "\n"
+#             print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
+#             print "\n"
+            
+            f1 = Q1discretize - Q2discretize#R1_21*domega1_1 + R1_22*domega1_2_last  - R2_21*domega2_1_last - R2_22*domega2_2 - R3_21*domega3_1_last - R3_22*domega3_2
+            
+            U1 = Q1discretize/A1_last
+            U2 = Q2discretize/A2_last
+            D1 = np.sqrt(4*A1_last/np.pi)
+            Re1 = rho1*U1*D1/my1
+            
+            Astenosis = A1_last*0.56
+            
+            Kv = 500. # pouseille friction correction coeficient
+            Kt = 0.9 # expansion coefficient
+            if abs(Re1<0.01):
+                deltaPstenosis = 0
+            else:
+                deltaPstenosis = rho1*U1**2*(Kv/Re1 + (Kt/2.)*(A1_last/Astenosis - 1)**2)
+            
+            
+            f2 = P1discretize + 0.5*rho1*(Q1discretize/A1_last)**2 - P2discretize - 0.5*rho2*(Q2discretize/A2_last)**2 - deltaPstenosis
+            
+
+            
+            F = np.array([f1, f2])
+            """Inverse Jacobi elements: """
+            a = R1_22
+            b = -R2_21
+
+            d = R1_12 + rho1*R1_22*(Q1discretize)/(A1_last**2)
+            e = - R2_11 - rho2*R2_21*(Q2discretize)/(A2_last**2)
+            
+            Determinant = a*e -b*d
+            
+            J_inv = np.array([[ e, -b],
+                          [ -d, a]]) / (Determinant)
+            
+            Xnew = Xold - np.dot(J_inv,F)
+
+            epsilonvalues = np.abs(F)
+            Niterations = Niterations + 1
+            
+#             print "Xold.shape, Xold ", Xold.shape, Xold
+#             print "Xnew.shape, Xnew ", Xnew.shape, Xnew
+#             print "f.shape, f: ", F.shape, F
+#             print "J_inv.shape, J_inv", J_inv.shape, J_inv
+#             print "epsilonvalues", epsilonvalues
+            
+            if Niterations > 30:
+                
+                print "Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations
+                print "f1,f2: ", f1, f2
+                
+                
+                
+
+                
+                break
+            Xold = Xnew
+            #exit()
+
         
         
         Q1_new = Q1discretize
