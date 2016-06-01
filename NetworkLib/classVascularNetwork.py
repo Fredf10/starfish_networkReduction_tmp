@@ -95,7 +95,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.riemannInvariantUnitBase = 'Pressure'  # 'Pressure' or 'Flow'
         self.automaticGridAdaptation = True  # False True
         self.solvingSchemeField       = 'MacCormack_Flux' # MacCormack_Flux or MacCormack_Matrix
-        self.solvingSchemeConnections = 'Linear'  # 'Linear'
+        self.solvingSchemeConnections = 'NonLinear'  # 'Linear'
 
         # initialization controls
         self.initialsationMethod = 'Auto'  # 'Auto', 'MeanFlow', 'MeanPressure', 'ConstantPressure'

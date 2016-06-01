@@ -49,12 +49,12 @@ class RandomInputManager(TestBaseClass):
         for name,randomInput in self.randomInputs.iteritems():
             # set name            
             randomInput.name = name
-            
-            if randomInput.parameter not in randomInputParameters:
-                randomInputParameters.append(randomInput.parameter)
-            else:
-                raise ValueError("assoziated parameter <{}> of randomInput {} is doubled defined!".format(randomInput.location,randomInput.name))
-            
+            if randomInput.randomInputType == 'parametricRandomInput':
+                if randomInput.parameter not in randomInputParameters:
+                    randomInputParameters.append(randomInput.parameter)
+                else:
+                    raise ValueError("assoziated parameter <{}> of randomInput {} is doubled defined!".format(randomInput.location,randomInput.name))
+                
         self.linkRandomInputUpdateFunctions(vascularNetwork)
             
         self.checkCorrelationMatrix()
