@@ -611,7 +611,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             print "Solving system ..."
-            progressBar = cPB.ProgressBar(35,self.nTSteps)
+            progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
