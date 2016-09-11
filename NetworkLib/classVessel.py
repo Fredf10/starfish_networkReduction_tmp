@@ -3,6 +3,7 @@ from copy import deepcopy
 import sys, os
 from math import pi, cos, sin
 import numpy as np
+from scipy.integrate import simps
 
 ## TODO: needsto be imported as modules
 from moduleGrids import *
@@ -218,9 +219,9 @@ class Vessel(cSBO.StarfishBaseObject):
         try:
             # calculate peuisell resistance R = (8*mu*L) / (pi*r**4)
             if self.geometryType == "uniform":
-                self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
+                self.resistance = 2(self.gamma + 2)*self.my*self.length / (pi*self.radiusProximal**4)
             elif self.geometryType == "cone":
-                self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
+                self.resistance = self.calkResistance()
             elif self.geometryType == "constriction":
                 #TODO: Not sure if this is important for anything.
                 self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
@@ -389,6 +390,28 @@ class Vessel(cSBO.StarfishBaseObject):
         Area = self.A(Pressure)
         c = self.waveSpeed(Area, Compliance)
         return 1.0/(c*Compliance)
+
+
+    def calkResistance(self, Nintegration=101):
+        """ calculate the vessel resistance:
+            Rv = 2(gamma + 2)*pi*my*K3, where
+            K3 = int(1/Ad**2)dx
+            """
+        
+        x = np.linspace(0, self.length, Nintegration)
+        
+        areaProx, areaDist = pi*self.radiusProximal**2, pi*self.radiusDistal**2
+        
+        Ad = np.linspace(areaProx, areaDist, Nintegration)
+        
+        f = 1./(Ad**2)
+        
+        K3 = simps(f, x)
+        
+        Rv = 2*(self.gamma + 2)*pi*self.my*K3
+        
+        return Rv
+
 
     def linearWaveSplitting(self):
         """
