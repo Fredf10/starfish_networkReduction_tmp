@@ -219,9 +219,9 @@ class Vessel(cSBO.StarfishBaseObject):
         try:
             # calculate peuisell resistance R = (8*mu*L) / (pi*r**4)
             if self.geometryType == "uniform":
-                self.resistance = 2(self.gamma + 2)*self.my*self.length / (pi*self.radiusProximal**4)
+                self.resistance = 2*(self.gamma + 2)*self.my*self.length / (pi*self.radiusProximal**4)
             elif self.geometryType == "cone":
-                self.resistance = self.calkResistance()
+                self.resistance = self.calcResistance()
             elif self.geometryType == "constriction":
                 #TODO: Not sure if this is important for anything.
                 self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
@@ -392,7 +392,7 @@ class Vessel(cSBO.StarfishBaseObject):
         return 1.0/(c*Compliance)
 
 
-    def calkResistance(self, Nintegration=101):
+    def calcResistance(self, Nintegration=101):
         """ calculate the vessel resistance:
             Rv = 2(gamma + 2)*pi*my*K3, where
             K3 = int(1/Ad**2)dx
