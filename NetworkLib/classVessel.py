@@ -250,6 +250,9 @@ class Vessel(cSBO.StarfishBaseObject):
 
         # create a new group in the data file
         self.dsetGroup = vesselsDataGroup.create_group(' '.join([self.name, ' - ', str(self.Id)]))
+        self.dsetGroup.attrs['dz'] = self.length/self.N
+        self.dsetGroup.attrs['N'] = self.N
+        self.dsetGroup.attrs['length'] = self.length
         self.allocate(runtimeMemoryManager)
         # set initial values
         try:
