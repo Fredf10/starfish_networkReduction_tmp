@@ -423,7 +423,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.print3D()
 
             # calculate the cumulative network resistances and vessel resistances of the network
-            if self.initialsationMethod not in ['ConstantPressure', 'AutoLinearSystem', 'AutoLinearSystem2']:
+            if self.initialsationMethod not in ['ConstantPressure', 'AutoLinearSystem']:
                 print self.initialsationMethod
                 self.calculateNetworkResistance()
 
@@ -1789,11 +1789,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         print "{:6} - total arterial compliance".format(totalArterialCompliance*133.32*1e6)
         print "{:6} - ration between arterial/total compliance".format(arterialCompliancePmean/totalArterialCompliance)
         #self.calculateNetworkResistance()
-        rootVesselResistance = self.vessels[self.root].resistance
-        print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
-        print "{:6} - root vessel resistance".format(rootVesselResistance/133.32*1e-6)
-        print "{:6} - total-root vessel resistance".format((self.Rcum[self.root]-rootVesselResistance)/133.32*1e-6)
-        print "{:6} - ratio root vessel / total".format(rootVesselResistance/self.Rcum[self.root])
+        if self.initialsationMethod != 'ConstantPressure':
+            
+            rootVesselResistance = self.vessels[self.root].resistance
+            print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
+            print "{:6} - root vessel resistance".format(rootVesselResistance/133.32*1e-6)
+            print "{:6} - total-root vessel resistance".format((self.Rcum[self.root]-rootVesselResistance)/133.32*1e-6)
+            print "{:6} - ratio root vessel / total".format(rootVesselResistance/self.Rcum[self.root])
 
 
     def evaluateWindkesselCompliance(self):
