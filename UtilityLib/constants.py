@@ -304,7 +304,7 @@ variablesDict = {## class Vascular Network
                  'riemannInvariantUnitBase' : {'type':'str',   'unitSI': None, 'strCases': ['Flow', 'Pressure'], 'multiVar': False},
                  'automaticGridAdaptation'  : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},
                  # initialisationControl
-                 'initialsationMethod'          : {'type':'str',        'unitSI': None,      'strCases': ['Auto', 'AutoLinearSystem', 'AutoLinearSystem2', 'MeanFlow','MeanPressure','ConstantPressure'], 'multiVar': False},
+                 'initialsationMethod'          : {'type':'str',        'unitSI': None,      'strCases': ['Auto', 'AutoLinearSystem', 'MeanFlow','MeanPressure','ConstantPressure'], 'multiVar': False},
                  'initMeanFlow'                 : {'type':'float',      'unitSI': 'm3 s-1',  'strCases': None, 'multiVar': False},
                  'initMeanPressure'             : {'type':'float',      'unitSI': 'Pa',      'strCases': None, 'multiVar': False},
                  'estimateWindkesselCompliance' : {'type':'str',        'unitSI': None,      'strCases': ['Tree','Wk3','System','No'], 'multiVar': False},

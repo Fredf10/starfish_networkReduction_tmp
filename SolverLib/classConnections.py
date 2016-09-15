@@ -1645,11 +1645,14 @@ class Anastomosis():
         self.rigidAreas = rigidAreas
     
         # Define the call function depending on the solving Scheme
+        solvingScheme = "NonLinear"
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
+        elif solvingScheme == "NonLinear":
+            print "classconnection 1652: using nonlinear anastomosis model: {0}".format(self.name) 
+            self.__call__ = self.callNonLinear
         else:
             raise ValueError("Connections; wrong solving scheme! {}".format(solvingScheme))
-#            print "ERROR Connections wrong solving scheme!", solvingScheme; exit()
         
         ## benchamark Test variables
         self.sumQErrorCount = 0
@@ -1804,3 +1807,247 @@ class Anastomosis():
         print self.name,'dynamic Pressures',1050./2.*(Q1_new/A1n)**2,1050./2.*(Q2_new/A2n)**2,1050./2.*(Q3_new/A3n)**2, '--',1050./2.*(Q1_new/A1n)**2+-1050./2.*(Q3_new/A3n)**2
         
         
+    def callNonLinear(self):
+        """
+        Call function for vessel-vessel connection
+        """        
+        dt = self.dt
+        n = self.currentMemoryIndex[0]
+        #if n == 1:
+            #print "using nonlinear bifurcation model"
+        #print "using nonlinear bifurcation model"
+        pos1 = self.positions[0]
+        pos2 = self.positions[1]
+        pos3 = self.positions[2]
+        
+        P1 = self.P_leftMother[n]
+        Q1 = self.Q_leftMother[n]
+        A1 = self.A_leftMother[n]
+        
+        P2 = self.P_rightMother[n]
+        Q2 = self.Q_rightMother[n]
+        A2 = self.A_rightMother[n]
+        
+        P3 = self.P_daughter[n]
+        Q3 = self.Q_daughter[n]
+        A3 = self.A_daughter[n]
+        
+        rho1 = self.rho[0]
+        rho2 = self.rho[1]
+        rho3 = self.rho[2]
+        
+        P1o = P1[pos1]
+        Q1o = Q1[pos1]
+        A1o = A1[pos1]
+        P2o = P2[pos2]
+        Q2o = Q2[pos2]
+        A2o = A2[pos2]
+        P3o = P3[pos3]
+        Q3o = Q3[pos3]
+        A3o = A3[pos3]
+
+        ## update LARL
+        L,R1,LMBD,Z1,Z2,domega1_1 = self.systemEquations[0].updateLARL(P1,Q1,A1,pos1)
+        L,R2,LMBD,Z1,Z2,domega2_1 = self.systemEquations[1].updateLARL(P2,Q2,A2,pos2)
+        L,R3,LMBD,Z1,Z2,domega3_2 = self.systemEquations[2].updateLARL(P3,Q3,A3,pos3)
+        
+        # local R matrices
+        R1_11 = R1[0][0]
+        R1_12 = R1[0][1]
+        R1_21 = R1[1][0]
+        R1_22 = R1[1][1]
+        
+        R2_11 = R2[0][0]
+        R2_12 = R2[0][1]
+        R2_21 = R2[1][0]
+        R2_22 = R2[1][1]
+        
+        R3_11 = R3[0][0]
+        R3_12 = R3[0][1]
+        R3_21 = R3[1][0]
+        R3_22 = R3[1][1]
+        
+        if n>0:
+            P1o2 = self.P_leftMother[n-1][pos1]
+            P2o2 = self.P_rightMother[n-1][pos2]
+            P3o2 = self.P_daughter[n-1][pos3]
+            
+            deltaP1_last = P1o - P1o2
+            deltaP2_last = P2o - P2o2
+            deltaP3_last = P3o - P3o2
+            
+            domega1_2_init = (deltaP1_last - R1_11*domega1_1)/R1_12 #same omega as previous timestep
+            domega2_2_init = (deltaP2_last - R2_11*domega2_1)/R2_12 #same omega as previous timestep
+            domega3_1_init = (deltaP3_last - R3_12*domega3_2)/R3_11 #same omega as previous timestep
+        else:
+            domega1_2_init = 0#-R1_11*domega1_1/R1_12 #result if pressure is constant- could be optimized
+            domega2_2_init = 0#-R2_12*domega2_1/R2_11 #result if pressure is constant
+            domega3_1_init = 0#-R3_12*domega3_2/R3_11 #result if pressure is constant
+
+        epsilonvalues = np.array([1,1,1])
+        epsilonlimit = 1e-10
+        domega1_2_last = domega1_2_init
+        domega2_2_last = domega2_2_init
+        domega3_1_last = domega3_1_init
+        A1_last = A1o
+        A2_last = A2o
+        A3_last = A3o
+        Niterations = 0
+        Xold = np.array([domega1_2_last, domega2_2_last, domega3_1_last])
+#         print "\n"
+#         print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2
+#         print "\n"
+        while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.001 or epsilonvalues[2]>0.001:
+            """iterative Newton Rahpson solver
+                domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
+            each iteration. A1, A2, A3 are also changing, but the value from the previous iteration is used. (should actually be for the next timestep, but this should converge to the correct solution)
+            R1_11, R1_12, R1_21, R1_22, ,R2_11, R2_12, R2_21, R2_22, ,R3_11, R3_12, R3_21, R3_22, domega1_1, domega2_1, domega3_2, Q1o, Q2o, Q2o 
+            are constant for each timestep, and are taken from previous timestep. domega1_1, domega2_1, domega3_2 are the field domegas.
+            """
+            domega1_2_last = Xold[0]
+            domega2_2_last = Xold[1]
+            domega3_1_last = Xold[2]
+            
+            Q1discretize = Q1o + R1_21*domega1_1 + R1_22*domega1_2_last
+            Q2discretize = Q2o + R2_21*domega2_1 + R2_22*domega2_2_last
+            Q3discretize = Q3o + R3_21*domega3_1_last + R3_22*domega3_2
+            
+            P1discretize = P1o + R1_11*domega1_1 + R1_12*domega1_2_last
+            P2discretize = P2o + R2_11*domega2_1 + R2_12*domega2_2_last
+            P3discretize = P3o + R3_11*domega3_1_last + R3_12*domega3_2
+            
+
+            if self.rigidAreas == False:
+                try:
+                    A1_last = self.A_func[0]([P1discretize],pos1)
+                    A2_last = self.A_func[1]([P2discretize],pos2)
+                    A3_last = self.A_func[2]([P3discretize],pos3)
+                except FloatingPointError as E:
+                    print "Floating Point error in Connection {}".format(self.name)
+                    raise E
+            else:
+                A1_last = A1[pos1]
+                A2_last = A2[pos2]
+                A3_last = A3[pos3] 
+#             print "\n"
+#             print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2
+#             print "\n"
+            
+            f1 = Q1discretize + Q2discretize - Q3discretize#R1_21*domega1_1 + R1_22*domega1_2_last  - R2_21*domega2_1_last - R2_22*domega2_1 - R3_21*domega3_1_last - R3_22*domega3_2
+            
+            f2 = P1discretize + 0.5*rho1*((Q1discretize/A1_last)**2) - P3discretize - 0.5*rho3*((Q3discretize/A3_last)**2)
+            
+            f3 = P2discretize + 0.5*rho2*((Q2discretize/A2_last)**2) - P3discretize - 0.5*rho3*((Q3discretize/A3_last)**2)
+            
+            F = np.array([f1, f2, f3])
+            """Inverse Jacobi elements: """
+            a = R1_22
+            b = R2_22
+            c = -R3_21
+            d = R1_12 + rho1*R1_22*(Q1discretize)/(A1_last**2)
+            e = - R3_11 - rho3*R3_21*(Q3discretize)/(A3_last**2)
+            f = R2_12 + rho2*R2_22*(Q2discretize)/(A2_last**2)
+            
+            
+            Determinant = a*e*f + b*d*e -c*d*f
+            
+            J_inv = np.array([[ e*f, b*e - c*f, -b*e  ],
+                          [ -d*e, -a*e, a*e - c*d ],
+                          [  -d*f, a*f, b*d ]]) / (Determinant)
+            
+            Xnew = Xold - np.dot(J_inv,F)
+
+            epsilonvalues = np.abs(F)
+            Niterations = Niterations + 1
+            
+#             print "Xold.shape, Xold ", Xold.shape, Xold
+#             print "Xnew.shape, Xnew ", Xnew.shape, Xnew
+#             print "f.shape, f: ", F.shape, F
+#             print "J_inv.shape, J_inv", J_inv.shape, J_inv43
+#             print "epsilonvalues", epsilonvalues
+            
+            if Niterations > 50:
+                print "\n"
+                print "Niterations excedded in anastomosis calculation in vessel, Niterations: ", self.names[0], Niterations
+                
+#                 print "trouble with convergence in bifurcations: Niterations: ", Niterations
+#                 print "epsilonvalues: ", epsilonvalues
+#                 print "np.dot(J_inv,f): ", np.dot(J_inv,f.T)
+#                 print "Xnew: ", Xnew
+#                 print "Xnew.shape: ", Xnew.shape
+#                 print "np.dot(J_inv,f).shape: ", np.dot(J_inv,f.T).shape
+#                 print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2
+#                 print "f1: ", f1
+#                 print "f2: ", f2
+#                 print "f3: ", f3
+
+                print "Xnew: ", Xnew
+                print "Xold: ", Xold
+                
+                print "f1: ", f1
+                print "f2: ", f2
+                print "f3: ", f3
+                print "epsilonvalues: ", epsilonvalues
+                print "Q1discretize, Q1o: ", Q1discretize, Q1o
+                print "Q2discretize, Q2o: ", Q2discretize, Q2o
+                print "Q3discretize, Q3o: ", Q3discretize, Q3o
+                print "P1discretize, P1o: ", P1discretize, P1o
+                print "P2discretize, P2o: ", P2discretize, P2o
+                print "P3discretize, P3o: ",P3discretize, P3o
+                #exit()
+                break
+            Xold = Xnew
+            #exit()
+        
+        
+        Q1_new = Q1discretize
+        Q2_new = Q2discretize
+        Q3_new = Q3discretize
+        
+        P1_new = P1discretize
+        P2_new = P2discretize
+        P3_new = P3discretize
+        
+        # apply calculated values to next time step
+        self.P_leftMother[n+1][pos1]    = P1_new
+        self.Q_leftMother[n+1][pos1]    = Q1_new
+        self.P_rightMother[n+1][pos2]  = P2_new
+        self.Q_rightMother[n+1][pos2]  = Q2_new
+        self.P_daughter[n+1][pos3] = P3_new
+        self.Q_daughter[n+1][pos3] = Q3_new
+        
+        if P1_new < 0 or P2_new < 0 or P3_new < 0:
+            print "ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
+            print P1_new, P2_new, P3_new
+            print "Niterations: ", Niterations
+            
+            print "solving nonlinear/total pressure anastomosis"
+            print "domega1_2_init: ", domega1_2_init
+            print "domega1_1: ", domega1_1
+                    
+            print "f1: ", f1
+            print "f2: ", f2
+            print "f3: ", f3
+            print "epsilonvalues: ", epsilonvalues
+            print "Q1discretize, Q1o: ", Q1discretize, Q1o
+            print "Q2discretize, Q2o: ", Q2discretize, Q2o
+            print "Q3discretize, Q3o: ", Q3discretize, Q3o
+            print "P1discretize, P1o: ", P1discretize, P1o
+            print "P2discretize, P2o: ", P2discretize, P2o
+            print "P3discretize, P3o: ",P3discretize, P3o
+            exit()
+        
+        
+        # calculate new areas
+        if self.rigidAreas == False:
+            A1n = self.A_func[0]([P1_new],pos1)
+            A2n = self.A_func[1]([P2_new],pos2)
+            A3n = self.A_func[2]([P3_new],pos3)
+        else:
+            A1n = A1[pos1]
+            A2n = A2[pos2]
+            A3n = A3[pos3] 
+           
+        self.A_leftMother[n+1][pos1]       = A1n
+        self.A_rightMother[n+1][pos2]     = A2n       
+        self.A_daughter[n+1][pos3]    = A3n

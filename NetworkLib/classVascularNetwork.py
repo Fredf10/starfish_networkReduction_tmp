@@ -1334,7 +1334,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.warning("no method for resistance calculation for anastomosis is implemented!!! \n")
 
 
-    def calculateInitialValuesLinearSystem(self, Qmean, Pdiastolic=None, PdiastolicCorrection=False):
+    def calculateInitialValuesLinearSystem(self, Qmean):
         """
         This function convert the system to a lumped model of resistors in series and paralell and calculate average pressure and flow values
         to be used as initial conditions. The system is reduced to a set of linear equations. For every vessel there is an equation for
@@ -1513,22 +1513,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.Rcum[vesselId] = p0/qm
 
         
-        if PdiastolicCorrection:
-            if Pdiastolic != None:
-                PmeanPdiastolicDifference = initialValues[self.root]['Pressure'][0] - Pdiastolic
-            else:
-                PmeanPdiastolicDifference = 10*133.32
-        else:
-            PmeanPdiastolicDifference = 0
-        
         # # adjust pressure with venous pressure and difference between mean and diastolic pressure
         for initialArray in initialValues.itervalues():
-            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0] - PmeanPdiastolicDifference
-            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0] - PmeanPdiastolicDifference
+            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
             
-            if PdiastolicCorrection:
-                # if PdiastolicCorrection is true, the network is initialized with 0 flow and diastolic pressures
-                initialArray[vesselId]['Flow'] = 0
                 
         # # adjust pressure for gravity pressure
         initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, self.root)
@@ -1600,26 +1589,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.calculateInitialValuesLinearSystem(meanInflow)
             
             return
-                
-        elif self.initialsationMethod == 'AutoLinearSystem2':
-
-            diastolicPressure = self.initMeanPressure
-            try:
-                import time
-                if inflowBoundaryCondition != None:
-                    cpuStart = time.time()
-                    xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
-                    
-                    cpuEnd = time.time()
-                    print "Found tShift: {0}, and meanflow: {1} in {2} sec".format(self.initPhaseTimeSpan, xxx, cpuEnd - cpuStart)
-                    exit()
-                self.initialisationPhaseExist = False
-                if self.initPhaseTimeSpan > 0:
-                    self.initialisationPhaseExist = True
-
-            except Exception:
-                self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
-
 
                 
         elif self.initialsationMethod == 'ConstantPressure':
