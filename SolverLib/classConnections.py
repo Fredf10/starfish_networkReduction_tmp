@@ -281,9 +281,7 @@ class Link():
 
         Niterations = 0
         Xold = np.array([domega1_2_last, domega2_1_last])
-#         print "\n"
-#         print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#         print "\n"
+
         while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.0001 :
             """iterative Newton Rahpson solver
                 domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
@@ -308,9 +306,6 @@ class Link():
             else:
                 A1_last = A1o
                 A2_last = A2o
-#             print "\n"
-#             print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#             print "\n"
             
             f1 = Q1discretize - Q2discretize#R1_21*domega1_1 + R1_22*domega1_2_last  - R2_21*domega2_1_last - R2_22*domega2_2 - R3_21*domega3_1_last - R3_22*domega3_2
             
@@ -336,20 +331,11 @@ class Link():
             epsilonvalues = np.abs(F)
             Niterations = Niterations + 1
             
-#             print "Xold.shape, Xold ", Xold.shape, Xold
-#             print "Xnew.shape, Xnew ", Xnew.shape, Xnew
-#             print "f.shape, f: ", F.shape, F
-#             print "J_inv.shape, J_inv", J_inv.shape, J_inv
-#             print "epsilonvalues", epsilonvalues
             
             if Niterations > 30:
                 
                 print "Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations
                 print "f1,f2: ", f1, f2
-                
-                
-                
-
                 
                 break
             Xold = Xnew
@@ -471,9 +457,6 @@ class Link():
             else:
                 A1_last = A1o
                 A2_last = A2o
-#             print "\n"
-#             print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#             print "\n"
             
             f1 = Q1discretize - Q2discretize#R1_21*domega1_1 + R1_22*domega1_2_last  - R2_21*domega2_1_last - R2_22*domega2_2 - R3_21*domega3_1_last - R3_22*domega3_2
             
@@ -514,20 +497,11 @@ class Link():
             epsilonvalues = np.abs(F)
             Niterations = Niterations + 1
             
-#             print "Xold.shape, Xold ", Xold.shape, Xold
-#             print "Xnew.shape, Xnew ", Xnew.shape, Xnew
-#             print "f.shape, f: ", F.shape, F
-#             print "J_inv.shape, J_inv", J_inv.shape, J_inv
-#             print "epsilonvalues", epsilonvalues
             
             if Niterations > 30:
                 
                 print "Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations
                 print "f1,f2: ", f1, f2
-                
-                
-                
-
                 
                 break
             Xold = Xnew
@@ -1125,9 +1099,7 @@ class Bifurcation():
         A3_last = A3o
         Niterations = 0
         Xold = np.array([domega1_2_last, domega2_1_last, domega3_1_last])
-#         print "\n"
-#         print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#         print "\n"
+
         while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.001 or epsilonvalues[2]>0.001:
             """iterative Newton Rahpson solver
                 domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
@@ -1160,9 +1132,7 @@ class Bifurcation():
                 A1_last = A1[pos1]
                 A2_last = A2[pos2]
                 A3_last = A3[pos3] 
-#             print "\n"
-#             print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#             print "\n"
+
             
             f1 = Q1discretize - Q2discretize - Q3discretize#R1_21*domega1_1 + R1_22*domega1_2_last  - R2_21*domega2_1_last - R2_22*domega2_2 - R3_21*domega3_1_last - R3_22*domega3_2
             
@@ -1191,26 +1161,9 @@ class Bifurcation():
             epsilonvalues = np.abs(F)
             Niterations = Niterations + 1
             
-#             print "Xold.shape, Xold ", Xold.shape, Xold
-#             print "Xnew.shape, Xnew ", Xnew.shape, Xnew
-#             print "f.shape, f: ", F.shape, F
-#             print "J_inv.shape, J_inv", J_inv.shape, J_inv43
-#             print "epsilonvalues", epsilonvalues
-            
             if Niterations > 30:
                 print "\n"
                 print "Niterations excedded in Bifurcation calculation in vessel, Niterations: ", self.names[0], Niterations
-                
-#                 print "trouble with convergence in bifurcations: Niterations: ", Niterations
-#                 print "epsilonvalues: ", epsilonvalues
-#                 print "np.dot(J_inv,f): ", np.dot(J_inv,f.T)
-#                 print "Xnew: ", Xnew
-#                 print "Xnew.shape: ", Xnew.shape
-#                 print "np.dot(J_inv,f).shape: ", np.dot(J_inv,f.T).shape
-#                 print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#                 print "f1: ", f1
-#                 print "f2: ", f2
-#                 print "f3: ", f3
 
                 print "Xnew: ", Xnew
                 print "Xold: ", Xold
@@ -1929,9 +1882,6 @@ class Anastomosis():
                 A1_last = A1[pos1]
                 A2_last = A2[pos2]
                 A3_last = A3[pos3] 
-#             print "\n"
-#             print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2
-#             print "\n"
             
             f1 = Q1discretize + Q2discretize - Q3discretize#R1_21*domega1_1 + R1_22*domega1_2_last  - R2_21*domega2_1_last - R2_22*domega2_1 - R3_21*domega3_1_last - R3_22*domega3_2
             
@@ -1960,26 +1910,9 @@ class Anastomosis():
             epsilonvalues = np.abs(F)
             Niterations = Niterations + 1
             
-#             print "Xold.shape, Xold ", Xold.shape, Xold
-#             print "Xnew.shape, Xnew ", Xnew.shape, Xnew
-#             print "f.shape, f: ", F.shape, F
-#             print "J_inv.shape, J_inv", J_inv.shape, J_inv43
-#             print "epsilonvalues", epsilonvalues
-            
             if Niterations > 50:
                 print "\n"
                 print "Niterations excedded in anastomosis calculation in vessel, Niterations: ", self.names[0], Niterations
-                
-#                 print "trouble with convergence in bifurcations: Niterations: ", Niterations
-#                 print "epsilonvalues: ", epsilonvalues
-#                 print "np.dot(J_inv,f): ", np.dot(J_inv,f.T)
-#                 print "Xnew: ", Xnew
-#                 print "Xnew.shape: ", Xnew.shape
-#                 print "np.dot(J_inv,f).shape: ", np.dot(J_inv,f.T).shape
-#                 print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2
-#                 print "f1: ", f1
-#                 print "f2: ", f2
-#                 print "f3: ", f3
 
                 print "Xnew: ", Xnew
                 print "Xold: ", Xold
