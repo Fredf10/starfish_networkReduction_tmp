@@ -238,6 +238,7 @@ vesselGeometryElements = ['geometryType',
 
 vesselComplianceElements = {'Laplace'     :['complianceType','constantCompliance','externalPressure','Ps','As','betaLaplace'],
                             'Laplace2'    :['complianceType','constantCompliance','externalPressure','Ps','As','wallThickness','youngModulus'],
+                            'Laplace3'    :['complianceType','constantCompliance','externalPressure','Ps','As','wallThickness','youngModulus'],
                             'Exponential' :['complianceType','constantCompliance','externalPressure','Ps','As','betaExponential'],
                             'Hayashi'     :['complianceType','constantCompliance','externalPressure','Ps','As','betaHayashi'],
                             'Reymond'     :['complianceType','constantCompliance','externalPressure','Ps','As','Cs','PmaxC','Pwidth','a1','b1']

@@ -2,6 +2,7 @@ import numpy as np
 import csv
 from math import exp
 import scipy.optimize as so
+from scipy.integrate import simps
 import ODESolver as OD
 
 import os, sys
@@ -390,6 +391,34 @@ class BoundaryConditionType1(BoundaryCondition):
         except Exception:          #TODO This should get some comment to explain what is happening.
             return ampT * self.duMatrix
 
+    def findMeanFlow(self, N=10000):
+        import matplotlib.pylab as plt
+        import time as timeModule
+        self.initialize({})
+        cpustart = timeModule.time()
+        freq = self.freq
+        period = 1/self.freq
+        
+        time = np.linspace(0, period, N +1)
+        
+        dt = time[1] - time[0]
+
+        Q_array = np.array([0])
+        for n, t in enumerate(time[:-1]):
+            Q = self.calculateOneStep(n, dt)[1]
+            Q_array = np.append(Q_array, Q)
+        
+                
+        F = simps(Q_array, time)
+        
+        Q_mean = F/(time[-1] - time[0])
+
+        self.TmeanFlow = 0
+        self.initPhaseTimeSpan = 0
+        cpuend = timeModule.time()
+        print "cpu-time: ", cpuend - cpustart
+        return Q_mean, self.initPhaseTimeSpan
+
     def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
         """
         This function calculates the mean flow of the signal self.MeanFlow
@@ -475,6 +504,8 @@ class BoundaryConditionType1(BoundaryCondition):
             print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
             print 'initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5))
             print 'total volume/period (ml)   {:.6}'.format(str(np.sum(evaluatedFlow*1.e6)*dt).ljust(5))
+        
+        
 
         return  self.MeanFlow, self.initPhaseTimeSpan
 

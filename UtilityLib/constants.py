@@ -304,7 +304,7 @@ variablesDict = {## class Vascular Network
                  'riemannInvariantUnitBase' : {'type':'str',   'unitSI': None, 'strCases': ['Flow', 'Pressure'], 'multiVar': False},
                  'automaticGridAdaptation'  : {'type':'bool',  'unitSI': None, 'strCases': None, 'multiVar': False},
                  # initialisationControl
-                 'initialsationMethod'          : {'type':'str',        'unitSI': None,      'strCases': ['Auto', 'AutoLinearSystem', 'MeanFlow','MeanPressure','ConstantPressure'], 'multiVar': False},
+                 'initialsationMethod'          : {'type':'str',        'unitSI': None,      'strCases': ['Auto', 'AutoLinearSystem', 'MeanFlow','MeanPressure','ConstantPressure','FromSolution'], 'multiVar': False},
                  'initMeanFlow'                 : {'type':'float',      'unitSI': 'm3 s-1',  'strCases': None, 'multiVar': False},
                  'initMeanPressure'             : {'type':'float',      'unitSI': 'Pa',      'strCases': None, 'multiVar': False},
                  'estimateWindkesselCompliance' : {'type':'str',        'unitSI': None,      'strCases': ['Tree','Wk3','System','No'], 'multiVar': False},
@@ -375,7 +375,7 @@ variablesDict = {## class Vascular Network
                  'radiusDistal'      : {'type':'float',  'unitSI': 'm',     'strCases': None, 'multiVar': False},
                  'N'                 : {'type':'int',    'unitSI': None,    'strCases': None, 'multiVar': False},
                  # compliances
-                 'complianceType'    : {'type':'str',    'unitSI': None,   'strCases': ['Laplace', 'Laplace2', 'Exponential', 'Hayashi', 'Reymond'], 'multiVar': False},
+                 'complianceType'    : {'type':'str',    'unitSI': None,   'strCases': ['Laplace', 'Laplace2', 'Laplace3', 'Exponential', 'Hayashi', 'Reymond'], 'multiVar': False},
                  'constantCompliance': {'type':'bool',   'unitSI': None,   'strCases': None, 'multiVar': False},
                  'externalPressure'  : {'type':'float',  'unitSI': 'Pa',   'strCases': None, 'multiVar': False},
                  'Ps'                : {'type':'float',  'unitSI': 'Pa',   'strCases': None, 'multiVar': False},
