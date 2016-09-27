@@ -256,14 +256,14 @@ class Vessel(cSBO.StarfishBaseObject):
         self.allocate(runtimeMemoryManager)
         # set initial values
         try:
-            p0,p1 = initialValues["Pressure"]
-            Qm    = initialValues["Flow"]
-            self.Psol[0] = np.linspace(p0,p1,self.N)
-            self.Qsol[0] = np.ones((1,self.N))*Qm
+            p0, p1 = initialValues["Pressure"]
+            Q0, Q1    = initialValues["Flow"]
+            self.Psol[0] = np.linspace(p0, p1, self.N)
+            self.Qsol[0] = np.linspace(Q0, Q1, self.N) #np.ones((1,self.N))*Qm
         except Exception:
             self.warning("vessel could not use initial values from network")
 
-        self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
+        self.Asol[0] = np.ones((1, self.N))*self.A(self.Psol[0])
 
         # init these should have a value for each time point not each time step
         self.positionStart    = np.zeros((nTsteps+1,3))

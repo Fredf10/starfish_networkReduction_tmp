@@ -423,7 +423,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.print3D()
 
             # calculate the cumulative network resistances and vessel resistances of the network
-            if self.initialsationMethod not in ['ConstantPressure', 'AutoLinearSystem']:
+            if self.initialsationMethod not in ['ConstantPressure', 'AutoLinearSystem', 'FromSolution']:
                 print self.initialsationMethod
                 self.calculateNetworkResistance()
 
@@ -435,7 +435,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.evaluateNetworkResistanceAndCompliance()
 
                 # show wave speed of network
-                self.showWaveSpeedOfNetwork()
+                #self.showWaveSpeedOfNetwork()
 
             # optimize tree reflection coefficients BADDDDD
             if self.optimizeTree:
@@ -1334,6 +1334,46 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.warning("no method for resistance calculation for anastomosis is implemented!!! \n")
 
 
+    def calculateInitialValuesFromSolution(self):
+        
+        """ This function calculates initialValues based on values saved from previous simulations
+            The initialvalues are stored in subfolder InitialValues of the network. In this folder 
+            there are files for each vesselId e.g. 1.txt with format:
+            
+                    Qin, Qout, Pin, Pout
+                    value, value, value, value
+        """
+        
+        
+        initialValuePath = mFPH.getDirectory('initialValueFileDirectory', self.name, self.dataNumber, 'write')
+        
+        initialValues =  {}
+        for vesselId in self.treeTraverseList:
+            
+            strvesselId = str(vesselId)
+            initialValueFile = ''.join([initialValuePath,'/',strvesselId,'.txt'])
+            try:
+                f = open(initialValueFile, 'r')
+            except:
+                print "ERROR: could not open file '{0}' for reading initialValue. Line 1350 classVascularNetwork".format(initialValueFile)
+            
+            try:
+                for n, line in enumerate(f):
+                    if n == 1:
+                        Qin, Qout, Pin, Pout = line.split(',')
+                        Qin, Qout = float(Qin), float(Qout)
+                        Pin, Pout = float(Pin), float(Pout)
+            
+            except:
+                print "ERROR: format of file '{0}' is wrong! Not possible to set initialValues.  Line 1360 classVascularNetwork".format(initialValueFile)
+            
+            
+            initialValues[vesselId] = {}
+            initialValues[vesselId]['Pressure'] = [Pin, Pout]
+            initialValues[vesselId]['Flow'] = [Qin, Qout]
+        
+        self.initialValues = initialValues
+        
     def calculateInitialValuesLinearSystem(self, Qmean):
         """
         This function convert the system to a lumped model of resistors in series and paralell and calculate average pressure and flow values
@@ -1509,8 +1549,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             initialValues[vesselId] = {}
             initialValues[vesselId]['Pressure'] = [p0, p1]
-            initialValues[vesselId]['Flow'] = qm
-            self.Rcum[vesselId] = p0/qm
+            initialValues[vesselId]['Flow'] = [qm, qm]
+            self.Rcum[vesselId] = (p0)/qm
 
         
         # # adjust pressure with venous pressure and difference between mean and diastolic pressure
@@ -1579,7 +1619,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         elif self.initialsationMethod == 'AutoLinearSystem':
 
             try:
+                print self.dt
+                #inflowBoundaryCondition.findMeanFlow()
                 meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
+                exit()
                 self.initialisationPhaseExist = True
 
             except Exception:
@@ -1587,6 +1630,25 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
             self.calculateInitialValuesLinearSystem(meanInflow)
+            
+            return
+
+        elif self.initialsationMethod == 'FromSolution':
+
+            try:
+                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlow()
+                #meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
+                self.initialisationPhaseExist = False
+                if self.initPhaseTimeSpan > 0:
+                    self.initialisationPhaseExist
+
+            except Exception:
+                self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
+            
+            self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+            self.calculateInitialValuesLinearSystem(meanInflow)
+            self.lumpedValues = self.initialValues
+            self.calculateInitialValuesFromSolution()
             
             return
 
@@ -1609,7 +1671,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             #############################Inititalisation Method constant pressure #############
             initialValues[root] = {}
             initialValues[root]['Pressure'] = [constantPressure, constantPressure]
-            initialValues[root]['Flow'] = 0
+            initialValues[root]['Flow'] = [0, 0]
 
             # # set initial values of the vessels by traversing the connections
             for leftMother, rightMother, leftDaughter, rightDaughter in self.treeTraverseConnections:
@@ -1618,7 +1680,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 for daughter in calcDaughters:
                     initialValues[daughter] = {}
                     initialValues[daughter]['Pressure'] = [constantPressure, constantPressure]
-                    initialValues[daughter]['Flow'] = 0
+                    initialValues[daughter]['Flow'] = [0, 0]
 
             # # adjust pressure with venous pressure
             # TODO: this needs to work with the venousPool object/component
@@ -1700,7 +1762,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
                     initialValues[daughter] = {}
                     initialValues[daughter]['Pressure'] = [p0, p1]
-                    initialValues[daughter]['Flow'] = qm
+                    initialValues[daughter]['Flow'] = [qm, qm]
 
             # # anastomosis
             elif rightDaughter == None:
@@ -1789,7 +1851,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         print "{:6} - total arterial compliance".format(totalArterialCompliance*133.32*1e6)
         print "{:6} - ration between arterial/total compliance".format(arterialCompliancePmean/totalArterialCompliance)
         #self.calculateNetworkResistance()
-        if self.initialsationMethod != 'ConstantPressure':
+        if self.initialsationMethod not in ['ConstantPressure', 'FromSolution']:
             
             rootVesselResistance = self.vessels[self.root].resistance
             print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
@@ -2028,7 +2090,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             As = np.max(vessel.compliance.As)
 
             if Flow == None:
-                v = self.initialValues[vesselId]['Flow'] / A
+                v = self.initialValues[vesselId]['Flow'][0] / A
             else:
                 v = Flow / A
 
