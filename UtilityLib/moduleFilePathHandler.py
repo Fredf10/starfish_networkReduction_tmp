@@ -37,6 +37,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
             'boundaryCSVFile',
             'networkXmlFileTemplate',
             'networkXmlFile',
+            'networkLogFile',
             'solutionFile',
             'configFile',
             'simulationDescriptionFile',
@@ -63,6 +64,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                          'boundaryCSVFile',
                          'networkXmlFileTemplate',
                          'networkXmlFile',
+                         'networkLogFile',
                          'solutionFile',
                          'configFile',
                          'simulationDescriptionFile',
@@ -85,6 +87,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                  'networkXmlFileTemplate'    : ''.join([networkName,'.xml']),
                  'networkXmlFileXXX'         : ''.join([networkName,'.xml']),
                  'networkXmlFileSim'         : ''.join([networkName,'_SolutionData_',dataNumber,'.xml']),
+                 'networkLogFile'            : ''.join([networkName,'_SolutionData_',dataNumber,'.tex']),
                  'solutionFile'              : ''.join([networkName,'_SolutionData_',dataNumber,'.hdf5']),
                  'simulationDescriptionFile' : ''.join(['simulationCaseDescriptions.txt']),
                  'vncRescentNetworksFile'    : '.recentNetworkNames.pickle',
@@ -146,6 +149,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         'networkXmlFileXXXDirectory',
         'networkXmlFileSimDirectory',
         'solutionFileDirectory',
+        'initialValueFileDirectory',
         'screenshotDirectory',
         'movieDirectory',
         'simulationDescriptionFileDirectory',
@@ -180,6 +184,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'networkXmlFileXXXDirectory',
                               'networkXmlFileSimDirectory',
                               'solutionFileDirectory',
+                              'networkLogFileDirectory',
+                              'initialValueFileDirectory',
                               'screenshotDirectory',
                               'movieDirectory',
                               'simulationDescriptionFileDirectory',
@@ -202,6 +208,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     networkXmlFileTemplateDirectory = ''.join([starfishHomeDirectory,'/TemplateNetworks/',networkName])
     networkXmlFileDirectory         = ''.join([workingDirectory,'/',networkName])
     solutionFileDirectory           = ''.join([networkXmlFileDirectory,'/SolutionData_',str(dataNumber)])
+    initialValueFileDirectory           = ''.join([networkXmlFileDirectory,'/InitialValues'])
     movieDirectory              = ''.join([solutionFileDirectory,'/Movies'])
     screenshotDirectory         = ''.join([solutionFileDirectory,'/Screenshots'])
     ## look up tables
@@ -216,6 +223,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'networkXmlFileXXXDirectory'         : networkXmlFileDirectory,
                    'networkXmlFileSimDirectory'         : solutionFileDirectory,
                    'solutionFileDirectory'              : solutionFileDirectory,
+                   'networkLogFileDirectory'            : solutionFileDirectory,
+                   'initialValueFileDirectory'          : initialValueFileDirectory,
                    'simulationDescriptionFileDirectory' : networkXmlFileDirectory,
                    # 3d viz
                    'screenshotDirectory'                : screenshotDirectory,
@@ -226,7 +235,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])
-    
+
     # if mode write
     if mode == 'write':
         ## ensure that the directory exists
