@@ -3,6 +3,8 @@ import h5py
 import numpy as np
 from scipy.integrate import simps
 
+import subprocess
+
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -16,7 +18,7 @@ import moduleFilePathHandler as mFPH
 
 class NetworkLogFile:
     
-    def __init__(self, vascularNetwork, dataNumber = "xxx", networkLogFile = None):
+    def __init__(self, vascularNetwork, dataNumber = "xxx", networkLogFile = None, dt=None, CpuTimeInit=[None, None], CpuTimeSolve=[None, None]):
         
         self.networkName = vascularNetwork.getVariableValue('name')
         self.dataNumber = dataNumber
@@ -25,6 +27,9 @@ class NetworkLogFile:
             #print networkLogFile
         else:
             self.networkLogFile = networkLogFile
+        
+        self.solutionFileDirectory = mFPH.getDirectory('solutionFileDirectory', self.networkName, dataNumber, 'r')
+        
         TemplateLogFileDirectory = mFPH.getDirectory('networkXmlFileTemplateDirectory', 'singleVessel_template', dataNumber, 'read')
         #print TemplateLogFileDirectory
         self.templateFile = ''.join([TemplateLogFileDirectory,'/logFile_template.tex'])
@@ -39,9 +44,21 @@ class NetworkLogFile:
         self.treeTraverseList_sorted = treeTraverseList_sorted
         self.boundaryVessels = vascularNetwork.boundaryVessels
         self.vascularNetwork = vascularNetwork
-        print vascularNetwork.tsol
+        
+        self.CpuTimeInit = CpuTimeInit
+        self.CpuTimeSolve = CpuTimeSolve
+
+        self.totalTime = vascularNetwork.totalTime
+        self.timeSaveBegin = vascularNetwork.timeSaveBegin
+        self.globalFluid = vascularNetwork.globalFluid
+        self.dt = dt
+        print self.dt
+        self.CpuTimeInit = CpuTimeInit
+        self.CpuTimeSolve = CpuTimeSolve
+        self.venousPressure = vascularNetwork.venousPool.P[0]
+
     
-    def writeNetworkLogfile(self):
+    def writeNetworkLogfile(self, compileLogFile=False, deleteAuxiliary=False):
         
         fTemplate = open(self.templateFile, 'r')
         fLogFile = open(self.networkLogFile, 'w')
@@ -49,9 +66,15 @@ class NetworkLogFile:
             
             if "% Fill in title here" in line:
                 self.writeTitle(fLogFile)
-                            
+
             elif "% Fill model parameters here" in line:
                 self.writeModelParameters(fLogFile)
+
+            elif "% Fill solving data here" in line:
+                self.writeSolvingData(fLogFile)
+
+            elif "% Fill total vlues here" in line:
+                self.writeTotalValues(fLogFile)
 
             elif "% Fill lumped values here" in line:
                 if self.vascularNetwork.initialsationMethod not in ['ConstantPressure']:
@@ -64,13 +87,113 @@ class NetworkLogFile:
         fTemplate.close()
         fLogFile.close()
         
-
-    def writeTitle(self, fLogFile):
-        titleLine = ''.join([r'\section{Network : ',self.networkName, ', Datanumber: ', self.dataNumber, '}'])
-        fLogFile.write(titleLine)
-        fLogFile.write('\n')        
+        if compileLogFile:
+            self.compilePdf(deleteAuxiliary=deleteAuxiliary)
     
+    def compilePdf(self, deleteAuxiliary=False):
+        
+        filesInDirBefore = os.listdir(self.solutionFileDirectory)
+        print filesInDirBefore
+        compileString = ''.join(['pdflatex -output-directory=',self.solutionFileDirectory, ' ', self.networkLogFile])
+        os.system(compileString)
+        #subprocess.Popen(compileString, shell=True)
+        filesInDirAfter = os.listdir(self.solutionFileDirectory)
+        
+        if deleteAuxiliary:
+            for filex in filesInDirAfter:
+                if filex not in filesInDirBefore and 'pdf' not in filex:
+                    completeFilePath = ''.join([self.solutionFileDirectory, '/', filex])
+                    os.remove(completeFilePath)
+                
+        
+    def writeTitle(self, fLogFile):
+        #titleLine = ''.join([r'\section{Network : ',self.networkName, ', Datanumber: ', self.dataNumber, '}'])
+        titleLine =''.join([r'\Large Network : ',self.networkName, ', Datanumber: ', self.dataNumber, r'\\'])
+        fLogFile.write(titleLine)
+        fLogFile.write('\n')
 
+
+    def writeSolvingData(self, fLogFile):
+        
+        fLogFile.write("dt (ms): & {0}".format(self.dt*1000))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Number of domains: & {0}".format(len(self.treeTraverseList_sorted)))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Simulation time: & {0}".format(self.totalTime))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Time save begin: & {0}".format(self.timeSaveBegin))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("CPU time solving: & {0} min, {1} sec".format(self.CpuTimeSolve[0], self.CpuTimeSolve[1]))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("CPU time initialization: & {0} min, {1} sec".format(self.CpuTimeInit[0], self.CpuTimeInit[1]))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Velocity profile parameter: & {0}".format(self.globalFluid['gamma']))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Density ($Kg/m^3$): & {0}".format(self.globalFluid['rho']))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Blood viscosity (mPa s): & {0}".format(self.globalFluid['my']*1000))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("Outflow Windkessel pressure (Pa): & {0}".format(self.venousPressure))
+        fLogFile.write('\n')
+    
+    def writeTotalValues(self, fLogFile):
+        root = self.vascularNetwork.root
+        R_total = self.vascularNetwork.Rcum[root]
+        _R_total_bc = 0
+        
+        C_total = 0
+        C_bc = 0
+        C_vessels = 0
+        
+        
+        for n, vesselId in enumerate(self.treeTraverseList_sorted):
+            
+            if vesselId in self.boundaryVessels:
+                bc = self.boundaryConditions[vesselId]
+                if len(bc)>1:
+                    bc = bc[1]
+                else:
+                    bc = bc[0]
+                R = bc.Rc
+                Z = bc.Z
+                C = bc.C
+                
+                Rt = R + Z
+                C_total += C
+                C_bc += C
+                
+                _R_total_bc += 1./Rt
+            
+            Cv = self.vessels[vesselId].Cv
+            C_vessels += Cv
+            C_total += Cv
+        
+        R_total_bc = 1./_R_total_bc
+        
+        fLogFile.write(r"Total arterial resistance ($Pa \, s \, m^{-3}$): & " + str(R_total))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write(r"Total peripheral resistance ($Pa \, s \, m^{-3}$): & " + str(R_total_bc))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write(r"Total arterial Compliance ($ m^{3} \, s^{-1}$): &  " + str(C_total))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write(r"Total peripheral Compliance ($ m^{3} \, s^{-1}$): &  " + str(C_bc))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write(r"Total vessel Compliance ($ m^{3} \, s^{-1}$): &  " + str(C_vessels))
+        fLogFile.write('\n')
+                
     def writeModelParameters(self, fLogFile):
         
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
@@ -92,25 +215,33 @@ class NetworkLogFile:
                 R = ""
                 Z = ""
                 C = ""
+            
+            
+            Rv = round(self.vessels[vesselId].resistance/1e9, 5)
+            Cv = round(self.vessels[vesselId].Cv*1e10, 3)
+            cd_in = round(self.vessels[vesselId].cd_in, 2)
+            cd_out =round(self.vessels[vesselId].cd_out, 2)
+
                 
             name = self.vessels[vesselId].name
-            l = round(self.vessels[vesselId].length*100, 3)
-            rProx = round(self.vessels[vesselId].radiusProximal*100, 3)
-            rDist = round(self.vessels[vesselId].radiusDistal*100, 3)
+            l = round(self.vessels[vesselId].length*100, 2)
+            rProx = round(self.vessels[vesselId].radiusProximal*1000, 2)
+            rDist = round(self.vessels[vesselId].radiusDistal*1000, 2)
             
-            tableLine = " {0} & {1} & {2} & {3} & {4} & {5} & {6} & {7} ".format(vesselId, name, l, rProx, rDist, Z, R, C)
             
+            tableLine = "{0} & {1} & {2} & {3} $\\rightarrow$ {4} & {5} $\\rightarrow$ {6} & {7} & {8} & {9} & {10} & {11}"
+            tableLine = tableLine.format(vesselId, name, l, rProx, rDist, cd_in, cd_out, Cv, Rv, Z, R, C)
             fLogFile.write(tableLine)
             fLogFile.write(r'\\')
             fLogFile.write('\n')
             
             
             if n == 54 and len(self.treeTraverseList_sorted)>55:
-                startNewtableLine1 = r"\begin{tabular}{ll*6{c}}"
+                startNewtableLine1 = r"\begin{tabular}{ll*8{c}}"
                 startNewtableLine2 = r"\hline"
-                startNewtableLine3 = r"Id & Name & Length & p. Radius & d. Radius & R1/Z & R2 & C \\"
-                startNewtableLine4 = r" & & [$cm$] & [$cm$] & [$cm$] & [$Pa\, s\, m^{-3}$] & [$Pa\, s\, m^{-3}$] &  [$m^{3}\, {Pa}^{-1}$] \\"
-                startNewtableLine5 = r" & &  &  &  & $\cdot 10^{-9}$& $\cdot 10^{-9}$ & $\cdot 10^{10}$  \\"
+                startNewtableLine3 = r"Id & Name & Length & $R_{in} \rightarrow R_{out} $  & $c_{in} \rightarrow c_{out} $ & $C_v$ & $R_v$ & R1/Z & R2 & C \\"
+                startNewtableLine4 = r" & & [$cm$] & [$mm$] & [$m/s$] &  [$m^{3}\, {Pa}^{-1}$] & [$Pa\, s\, m^{-3}$] & [$Pa\, s\, m^{-3}$] & [$Pa\, s\, m^{-3}$] &  [$m^{3}\, {Pa}^{-1}$] \\"
+                startNewtableLine5 = r" & &  &  &  & $\cdot 10^{10}$ & $\cdot 10^{-9}$ & $\cdot 10^{-9}$ & $\cdot 10^{-9}$ & $\cdot 10^{10}$  \\"
                 startNewtableLine6 = r"\hline"
                 
                 spesificLines = [startNewtableLine1, startNewtableLine2, startNewtableLine3, startNewtableLine4, startNewtableLine5, startNewtableLine6]
@@ -153,7 +284,7 @@ class NetworkLogFile:
 
                 spesificLines = [startNewtableLine1, startNewtableLine2, startNewtableLine3, startNewtableLine4, startNewtableLine5, startNewtableLine6]
                 
-                self.endAndStartTable(fLogFile, spesificLines)
+                self.endAndStartTable(fLogFile, spesificLines, resizeTable=True)
     
              
     def writeLumpedAndSolutionValues(self, fLogFile):
@@ -203,11 +334,14 @@ class NetworkLogFile:
 
                 spesificLines = [startNewtableLine1, startNewtableLine2, startNewtableLine3, startNewtableLine4, startNewtableLine5, startNewtableLine6]
                 
-                self.endAndStartTable(fLogFile, spesificLines)
+                self.endAndStartTable(fLogFile, spesificLines, resizeTable=False)
     
                 
-    def endAndStartTable(self, fLogFile, spesificLines):
-        lineList = [r"\end{tabular}", r"\end{table}", r"\begin{table}"]
+    def endAndStartTable(self, fLogFile, spesificLines, resizeTable):
+        if resizeTable==True:
+            lineList = [r"\end{tabular}}", r"\end{table}", r"\begin{table}", r"\resizebox{\textwidth}{!}{"]
+        else:
+            lineList = [r"\end{tabular}", r"\end{table}", r"\begin{table}"]
         
         for line in spesificLines:
             lineList.append(line)
