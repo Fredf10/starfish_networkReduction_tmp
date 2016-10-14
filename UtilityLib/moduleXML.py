@@ -114,7 +114,8 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
     except: #TODO: find out what errors etree.Element raises and fix this except statement.
         print " Error: path / file does not exist"
         return
-
+    
+    print networkXmlFile
     ## import current network xml description as nxmlW(rite) to avoid version clash
     from constants import newestNetworkXml as nxmlW
 

@@ -119,7 +119,11 @@ class Vessel(cSBO.StarfishBaseObject):
         self.A                  = None              # Area function A(P) for all nodes
         self.A_nID              = None              # Area function A(P,NodeId) for specific Node with NodeID
         self.c                  = self.waveSpeed    # wave speed function c(rho,A,C) for all nodes /single if given single values
-
+        
+        self.cd_in              = None              # wavespeed at inlet at Ps
+        self.cd_out             = None              # wavespeed at outlet at Ps
+        self.Cv                 = None              # vessel compliance at Ps
+        
         self.resistance         = None              # vessel resistance
         self.womersleyNumber    = None              # Womersley number
 
@@ -227,7 +231,12 @@ class Vessel(cSBO.StarfishBaseObject):
                 self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
         except Exception:
             self.exception("classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id))
-
+            
+        # calculate vessel compliance (CV) at Ps 
+        try:
+            self.calcCompliance()
+        except Exception:
+            self.exception("classVessel.initialize(): in calculating compliance Cv of vessel {}!".format(self.Id))
         # calculate Womersley number
 
 
@@ -414,6 +423,37 @@ class Vessel(cSBO.StarfishBaseObject):
         Rv = 2*(self.gamma + 2)*pi*self.my*K3
         
         return Rv
+    
+    
+    def calcCompliance(self, Nintegration=101):
+        """ calculate the vessel compliance at Ps :
+            Cv = K1/rho, where
+            K1 = int(Ad/cd**2)dx
+            """
+        
+        # TODO: make it possible to have more integrations than self.N
+        x = np.linspace(0, self.length, self.N)
+        
+        areaProx, areaDist = pi*self.radiusProximal**2, pi*self.radiusDistal**2
+        
+        Ad = np.linspace(areaProx, areaDist, self.N)
+        
+        Pd = self.Ps*np.ones(self.N)
+        
+        C = self.C(Pd)
+        cd = self.waveSpeed(Ad, C)
+        
+        self.cd_in, self.cd_out = cd[0], cd[-1]
+        f = Ad/(cd**2)
+        
+        K1 = simps(f, x)
+        
+        Cv = K1/self.rho
+        
+        self.Cv = Cv
+        
+        
+
 
 
     def linearWaveSplitting(self):

@@ -1383,10 +1383,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         
         Qmean = Qmean*10**6
+        print Qmean
         
         initialValues = {}
         
         Nunknowns = len(self.connectionNodes) + len(self.treeTraverseList_sorted) - 1
+        
+        vesselRangeList = range(1, len(self.treeTraverseList_sorted) + 1) # list of same length as number of vessels, but starting from 1 and ending at N (number of vessels)
         
         M = np.zeros((Nunknowns, Nunknowns)) #system Matrix
         
@@ -1444,7 +1447,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 nodeToNodeResistance = self.vessels[vesselId].resistance
                 boundaryVessel = False
             
-            
+
             Pstart_index = None # index in Matrix for startnode
             Pend_index = None # index in Matrix for endnode
             
@@ -1460,7 +1463,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 elif item == endNode:
                     Pend_index = pos
                     
-            Q_index = int(vesselId) - 1 + len(self.connectionNodes) - 1 # -1 due to Q1 is known and python index start at 0
+            vesselindex = self.treeTraverseList_sorted.index(vesselId) # find index of vesselID in rangeList
+            Q_index = vesselindex + len(self.connectionNodes) - 1 # -1 due to Q1 is known and python index start at 0
             
             # TODO: 1) both flow and pressure BC at inlet
             if vesselId != self.root and boundaryVessel == False:
@@ -1498,22 +1502,22 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 Qout = [leftDaughter, rightDaughter]
             
             
-            for vesselid in Qin:
-                Q_index = int(vesselid) - 1 + len(self.connectionNodes) - 1
+            for vesselId in Qin:
+                vesselindex = self.treeTraverseList_sorted.index(vesselId)
+                Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
                 
-                if vesselid == self.root:
+                if vesselId == self.root:
                     RHS[n] = - Qmean
                 else:
                     M[n, Q_index] = 1
         
-            for vesselid in Qout:
-                Q_index = int(vesselid) - 1 + len(self.connectionNodes) - 1
+            for vesselId in Qout:
+                vesselindex = self.treeTraverseList_sorted.index(vesselId)
+                Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
                 
                 M[n, Q_index] = - 1
                 
-        
         meanPandQ = np.linalg.solve(M, RHS)
-        
                 
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
             # post processing to assign initialvalues
@@ -1534,7 +1538,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     Pend_index = pos
             
             if vesselId != self.root:
-                Q_index = int(vesselId) - 1 + len(self.connectionNodes) - 1
+                vesselindex = self.treeTraverseList_sorted.index(vesselId)
+                Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
                 qm = meanPandQ[Q_index]*1e-6
             else:
                 qm = Qmean*1e-6

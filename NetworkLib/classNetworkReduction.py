@@ -76,31 +76,36 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.boundaryConditions = vascularNetwork.boundaryConditions
         
         self.boundaryVessels = vascularNetwork.boundaryVessels
+        self.lumpedValues = vascularNetwork.lumpedValues
+        
+        self.useVesselsImpedance = False
+        self.useAverageValues = False
         
         #print self.vessels
         #print self.boundaryConditions
-        self.test()
+        #self.test()
     
-    def test(self):
+    
+    def reduceNetwork(self, truncateFile):
         
-        self.truncate(7)
-        self.truncate(21)
-        self.truncate(29)
-        self.truncate(43)
-        self.truncate(42)
-#         self.truncate(3)
-#         self.truncate(15)
-#         self.truncate(19)
-#         self.truncate(29)
-#         self.truncate(42)
-#         self.truncate(43)
-        print len(self.vessels)
+        f = open(truncateFile)
+        for n, line in enumerate(f):
+            if n==1:
+                line = line.replace('\n', '')
+                strTruncateList = line.split(',')
+        print strTruncateList
+        #exit()
+        if len(strTruncateList) == 1 and strTruncateList[0] == "None":
+            print "not reducing anything"
         
-        #self.reduceTerminal(10)
-        #self.reduceTerminal(11)
-        #self.reduceTerminalBifurcation(9)
-        #print self.OldVascularNetwork.treeTraverseConnections
-        #print [4, None, 6, 7] in self.OldVascularNetwork.treeTraverseConnections
+        else:     
+            for vesselId in strTruncateList:
+            
+                self.truncate(int(vesselId))
+        
+        if self.useVesselsImpedance:
+            self.setToVesselImpedance()
+                    
         
 
 
@@ -202,8 +207,17 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         
         C = self.boundaryConditions[vesselId][0].C
         
-        radiusProximal = self.vessels[vesselId].radiusProximal
-        radiusDistal = self.vessels[vesselId].radiusDistal
+        if self.useAverageValues:
+            [p0, p1] = self.lumpedValues[vesselId]['Pressure']
+            #print p0, p1
+            areaProximal = self.vessels[vesselId].A_nID([p0, p1], 0)
+            areaDistal = self.vessels[vesselId].A_nID([p0, p1], -1)
+            radiusProximal, radiusDistal = np.sqrt(areaProximal/np.pi), np.sqrt(areaDistal/np.pi)
+            #exit()
+            
+        else:
+            radiusProximal = self.vessels[vesselId].radiusProximal
+            radiusDistal = self.vessels[vesselId].radiusDistal
         
         h = self.vessels[vesselId].wallThickness
         E = self.vessels[vesselId].youngModulus
@@ -233,21 +247,6 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         
         Rnew = Z + R + Rv
         Cnew = (Cv*R + Cv*Z + C*R + Rv*Cv)/Rnew
-        if vesselId == 1:
-            print "\n"
-            print "my = {0}".format(my)
-            print "gamma = {0}".format(gamma)
-            print "rho = {0}".format(rho)
-            print "radiusProximal = {0}".format(radiusProximal)
-            print "Beta = {0}".format(Beta)
-            print "K1 = {0}".format(K1)
-            print "K3 = {0}".format(K3)
-            print "Rv = {0}".format(Rv)
-            print "Cv = {0}".format(Cv)
-            print "Rnew = {0}".format(Rnew)
-            print "Cnew = {0}".format(Cnew)
-            print "cd[-1] = {0}".format(cd[-1])
-            print "\n"
 
         
         self.vessels[vesselId].Rnew = Rnew
@@ -288,10 +287,6 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         Z_0 = rho*c_distal/Ad_distal
         
         R = Rnew - Z_0
-#         print "\n"
-#         print "#### Test results: ####"
-#         print "     R1 = {0} ".format(Z_0)
-#         print "     C = {0} ".format(Cnew)
 #         print "     R2 = {0} ".format(R)
         
         # todo fix so one can reduce all the way down to self.root
@@ -299,11 +294,13 @@ class NetworkReduction(cSBO.StarfishBaseObject):
             self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
             self.boundaryConditions[vesselId][1].Z = Z_0
             self.boundaryConditions[vesselId][1].Rc = R
+            self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
             self.boundaryConditions[vesselId][1].C = Cnew
         else:
             self.boundaryConditions[vesselId] = self.boundaryConditions[leftDaughter][:]
             self.boundaryConditions[vesselId][0].Z = Z_0
             self.boundaryConditions[vesselId][0].Rc = R
+            self.boundaryConditions[vesselId][0].Rtotal = Z_0 + R
             self.boundaryConditions[vesselId][0].C = Cnew
         self.deleteWK3(leftDaughter)
         self.deleteWK3(rightDaughter)
@@ -322,7 +319,19 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.boundaryVessels.remove(rightDaughter)
         
         self.boundaryVessels.append(vesselId)
+
+    def setToVesselImpedance(self):
         
+        for vesselId in self.treeTraverseList_sorted:
+            if vesselId in self.boundaryVessels:
+                bc = self.boundaryConditions[vesselId] 
+                if len(bc)>1:
+                    bc = bc[1]
+                else:
+                    bc = bc[0]
+            
+                bc.Z = 'VesselImpedance'
+                bc.Rtotal = None
         
     def deleteVessel(self, inputId):
         """

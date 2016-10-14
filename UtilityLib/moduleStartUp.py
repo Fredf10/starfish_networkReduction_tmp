@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 
 
 #############################################################################
@@ -64,6 +63,9 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         if activeOption == 'f':
             parser.add_option("-f", "--file", dest='networkName',
                               help = "open file with given network name")
+        elif activeOption == 'e':
+            parser.add_option("-e", "--reducedFile", dest='NewNetworkName',
+                              help = "name of reduced network name")
         elif activeOption == 'n':
                 parser.add_option("-n", "--dataNumber", dest='dataNumber',
                                   help = "number of the solution data (last number in filename), default = 999, max 999;")
@@ -93,6 +95,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
     optionsDict = options.__dict__
         
     networkName = None
+    NewNetworkName = None
     save        = False
     dataNumber  = False
     dataSetNumber = False
@@ -107,6 +110,9 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         if option == 'networkName':
             if optionArgument != None:
                 networkName = optionArgument
+        elif option == 'NewNetworkName':
+            if optionArgument != None:
+                NewNetworkName = optionArgument
         # -n dataNumber
         elif option == 'dataNumber':
             dataNumber,dataSetNumber = evaluateDataNumber(optionArgument)  
@@ -172,6 +178,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
     del parser
     
     return {'networkName'           : networkName,
+            'NewNetworkName'        : NewNetworkName,
             'save'                  : save,
             'dataNumber'            : dataNumber,
             'dataSetNumber'         : dataSetNumber,

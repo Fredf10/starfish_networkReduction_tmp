@@ -9,6 +9,8 @@
 #---------------------------------------------------------------------------------------#
 import time 
 import sys,os
+import shutil
+import subprocess
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
 
@@ -31,9 +33,10 @@ def main():
     print '#     STARFiSh_v0.3_development     #'
     print '====================================='
     
-    optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w','p'])
+    optionsDict = mStartUp.parseOptions(['f', 'e', 'n','d','s','v','r','w','p'])
     
     networkName           = optionsDict['networkName']
+    newNetworkName        = optionsDict['NewNetworkName']
     save                  = optionsDict['save']
     dataNumber            = optionsDict['dataNumber']
     simulationDescription = optionsDict['simulationDescription']
@@ -65,16 +68,53 @@ def main():
         
     if vascularNetwork == None: exit()
     
+    oldNetworkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory', networkName, "xxx", 'read')
     
     vascularNetwork.update({'description':simulationDescription,
                             'dataNumber' :dataNumber})
     
     New_network = cNred.NetworkReduction(vascularNetwork)
-    
-    mXML.writeNetworkToXML(New_network, dataNumber = dataNumber)
-    #mLog2 = mLOG.NetworkLogFile(vascularNetwork, dataNumber = dataNumber)
-    #mLog2.writeNetworkLogfile()
+    truncateFile =  ''.join([oldNetworkDirectory,'/','truncate.txt'])
+    New_network.reduceNetwork(truncateFile)
 
+        
+    New_network.name = newNetworkName
+    newNetworkXmlFile =  mFPH.getFilePath('networkXmlFile', newNetworkName, "xxx", 'write')
+    
+    
+    mXML.writeNetworkToXML(New_network, dataNumber = dataNumber, networkXmlFile=newNetworkXmlFile)
+
+    if New_network.initialsationMethod == 'FromSolution':
+        oldInitialValuePath = mFPH.getDirectory('initialValueFileDirectory', networkName, dataNumber, 'write')
+        newInitialValuePath = mFPH.getDirectory('initialValueFileDirectory', newNetworkName, dataNumber, 'write')
+        if os.path.isdir(newInitialValuePath):
+            shutil.rmtree(newInitialValuePath)
+
+        shutil.copytree(oldInitialValuePath, newInitialValuePath)
+    
+    copyFlowFile = True
+    if copyFlowFile:
+            oldInflowFile = ''.join([oldNetworkDirectory,'/','inflow.csv'])
+            newNetworkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory', newNetworkName, "xxx", 'read')
+            newInflowFile = ''.join([newNetworkDirectory,'/','inflow.csv'])
+            
+            shutil.copyfile(oldInflowFile, newInflowFile)
+
+    copyTruncateFile = True
+    if copyTruncateFile:
+            
+            newNetworkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory', newNetworkName, "xxx", 'read')
+            newTruncateFile = ''.join([newNetworkDirectory,'/','truncate.txt'])
+            
+            shutil.copyfile(truncateFile, newTruncateFile)
+
+    
+    
+#     if save:
+#         string1 = ' '.join(['/usr/bin/python',cur+'/Main.py','-f',newNetworkName, '-n',dataNumber, '-d', simulationDescription])
+#         print "gonna run new network"
+#         print string1
+#         subprocess.Popen(string1, shell = True )
         
 if __name__ == '__main__':
     
