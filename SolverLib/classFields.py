@@ -4,6 +4,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 #sys.path.append(cur+'/NetworkLib')
 
 import numpy as np
+import matplotlib.pylab as plt
 
 
 class Field():
@@ -142,14 +143,17 @@ class Field():
         
         Pnewinterior = Pnewinterior[1:-1]
         Qnewinterior = Qnewinterior[1:-1]
-        Anewinterior=Anewinterior[1:-1]
+        Anewinterior = Anewinterior[1:-1]
         
-        self.P[n+1][1:-1] = Pnewinterior
-        self.Q[n+1][1:-1] = Qnewinterior
-        self.A[n+1][1:-1] = Anewinterior
+        self.P[n + 1][1:-1] = Pnewinterior
+        self.Q[n + 1][1:-1] = Qnewinterior
+        self.A[n + 1][1:-1] = Anewinterior
 
         #TODO: Please explain this if statement in a comment.
         if (self.P[n+1] < 0).any():
+            plt.figure()
+            plt.plot(self.P[n + 1])
+            plt.show()
             raise ValueError("ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
             #print self.P[n+1]
             #exit()   
