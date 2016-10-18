@@ -24,6 +24,7 @@ sys.path.append(''.join([cur,'/../']))
 
 import ConfigParser
 
+
 # TODO: (einar) Rename input variable exception and corresponding strings
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     """
@@ -275,7 +276,13 @@ def readConfigFile(options):
     """ 
     
     config = ConfigParser.ConfigParser()
-    config.read(getFilePath('configFile', "", '', 'read'))
+    
+    filePath = getFilePath('configFile', "", '', 'read',exception = 'No')
+    if filePath == None:
+        saveConfigFile({'WorkingDirectory': '', 'knownWorkingDirectories':''})
+        filePath = getFilePath('configFile', "", '', 'read')
+    
+    config.read(filePath)
         
     
     configurations = {}
@@ -288,8 +295,12 @@ def readConfigFile(options):
                 workingDirectory = None
                 raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed ini file corrupted, exit()")
             if workingDirectory == '':
-                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined, exit()")
+                print Warning("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined")
+                
+                workingDirectorySettings(searchKnowWorkingDirectories = False)
+            
             configurations['WorkingDirectory'] = workingDirectory
+            
         
         if option == 'knownWorkingDirectories':
             try:
@@ -352,6 +363,74 @@ def updateKnownWorkingDirectories():
         
         saveConfigFile({'knownWorkingDirectories':','.join(knownWorkingDirectories)})
     
+def prettyPrintList(title, listToPrint, indexOffSet = 0):
+    """
+    Function to pretty print a list to STDOUT with numbers to choose from
+    """
+    print title
+    for index,listElement in enumerate(listToPrint):
+        print "   [ {:3} ] - {}".format(index+indexOffSet,listElement)
+
+def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
+    '''
+    Question user to isert an integer number between minBound and maxBound
+    '''
+    appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
+    userInput = "NONE"
+    appropriateInputList.append('q')
+    print ""
+    while userInput not in appropriateInputList:
+        userInput = raw_input(question)
+    print ""
+    if userInput == 'q': exit()
+    else: return int(userInput)
+
+
+def workingDirectorySettings(searchKnowWorkingDirectories = True):
+    '''
+    working directory settings
+    '''
+    
+    prettyPrintList(' Working directory settings menu',['add working directory','switch to another known working directory'])
+    if searchKnowWorkingDirectories == True: 
+        updateKnownWorkingDirectories()
+        print "\n current working directory: {} ".format(readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
+    userInput = userInputEvaluationInt(2)
+    if userInput == 0:
+        insertWorkingDirectory(None)
+    elif userInput ==1:
+        knownWorkingDirectories = readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
+        prettyPrintList(' List of all known working directories:',knownWorkingDirectories)
+        userInput2 = userInputEvaluationInt(len(knownWorkingDirectories))
+        saveConfigFile({'WorkingDirectory': knownWorkingDirectories[userInput2]})
+
+def insertWorkingDirectory(optionArgument):
+    
+    print "Setting new working directory"
+    
+    if optionArgument == None:
+        optionArgument = ""
+        loopQuestion = True
+        
+        optionArgument = raw_input("Insert existing working directory path you want to add, or (q) quit: ")
+        
+    if optionArgument != "q":
+    
+        if os.path.isdir(optionArgument):
+            saveConfigFile({'WorkingDirectory':optionArgument})
+            updateKnownWorkingDirectories()
+            print "   working directory set!"
+        else:
+            print "  working directory does not exist! try to create folder"
+            try:
+                os.mkdir(optionArgument)
+                saveConfigFile({'WorkingDirectory':optionArgument})
+                updateKnownWorkingDirectories()
+                print "   created working directory folder successfully"
+                print "   working directory set!"
+            except:
+                print "  WARNING: moduleStartUp.insertWorkingDirectory() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
+        
     
 def updateSimulationDescriptions(networkName, currentDataNumber, currentDescription):
     """

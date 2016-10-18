@@ -147,7 +147,8 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                 exit()
         elif option == 'workingDirectorySettings':
             if optionArgument != None:
-                workingDirectorySettings()
+                # Settings moved there to prefent circular imports
+                mFPH.workingDirectorySettings()
                 exit()
                     
     # catch up non given but necessary options
@@ -202,48 +203,6 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     if userInput == 'q': exit()
     else: return int(userInput)
 
-
-def workingDirectorySettings():
-    '''
-    working directory settings
-    '''
-    mFPH.updateKnownWorkingDirectories()
-    prettyPrintList(' Working directory settings menu',['add working directory (folder must exist)','switch to another known working directory'])
-    print "\n current working directory: {} ".format(mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
-    userInput = userInputEvaluationInt(2)
-    if userInput == 0:
-        insertWorkingDirectory(None)
-    elif userInput ==1:
-        knownWorkingDirectories = mFPH.readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
-        prettyPrintList(' List of all known working directories:',knownWorkingDirectories)
-        userInput2 = userInputEvaluationInt(len(knownWorkingDirectories))
-        mFPH.saveConfigFile({'WorkingDirectory': knownWorkingDirectories[userInput2]})
-
-def insertWorkingDirectory(optionArgument):
-    
-    print "Setting new working directory"
-    
-    if optionArgument == None:
-        optionArgument = ""
-	# TODO: create directory if not existing!!!
-        while os.path.isdir(optionArgument) == False:
-            optionArgument = raw_input("Insert existing working directory path you want to add: ")
-    
-    if os.path.isdir(optionArgument):
-        mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
-        mFPH.updateKnownWorkingDirectories()
-        print "   working directory set!"
-    else:
-        print "  working directory does not exist! try to create folder"
-        try:
-            os.mkdir(optionArgument)
-            mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
-            mFPH.updateKnownWorkingDirectories()
-            print "   created working directory folder successfully"
-            print "   working directory set!"
-        except:
-            print "  WARNING: moduleStartUp.parseOptions() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
-    
 
 def chooseNetwork(showTemplates = True):
     """
