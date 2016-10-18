@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import gtk
 import gobject
-
+import matplotlib
+matplotlib.use(u'GTKAgg')
 import matplotlib.pyplot as plt   
 from matplotlib.figure import Figure
 # uncomment to select /GTK/GTKAgg/GTKCairo
@@ -250,7 +251,9 @@ class Visualisation2DPlotWindowGui(gtk.Window):
         self.fig = Figure(figsize=(5, 4), dpi=100)
         # self.plot(0)
         self.canvas = FigureCanvas(self.fig)  # a gtk.DrawingArea
-        self.canvas.set_size_request(640, 690)
+        width = 640
+        height = 500 #690
+        self.canvas.set_size_request(width, height)
         
         toolbar = NavigationToolbar(self.canvas, self)
         
@@ -423,11 +426,11 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         '''
         create graph with 2 subplots and all necessary lines 
         '''
-        self.fig = plt.figure(figsize=(6, 4), dpi=100, edgecolor='k')
+        self.fig = plt.figure(figsize=(5, 4), dpi=100, edgecolor='k')
         self.fig.subplots_adjust(right=0.86)
         self.fig.subplots_adjust(left=0.17)
         self.fig.subplots_adjust(top=0.95)
-        self.fig.subplots_adjust(bottom=0.35)
+        self.fig.subplots_adjust(bottom=0.15)
         self.fig.subplots_adjust(hspace=0.18)
         
         fontLegend = FontProperties()
@@ -837,10 +840,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     csol = vascularNetwork.vessels[vesselId].csol[:, [gridNode]]  
                     
                     Psol_f, Psol_b, Qsol_f, Qsol_b = mProc.linearWaveSplitting(Psol, Qsol, Asol, csol, vascularNetwork.vessels[vesselId].rho)
-                                        
+                    
                     yData00 = Psol / 133.32 - Psol[0]/ 133.32
                     yData01 = Psol_f / 133.32
-                    yData02 = Psol_b / 133.32 
+                    yData02 = Psol_b / 133.32
                     yData10 = Qsol * 1.e6   - Qsol[0]* 1.e6
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
@@ -1782,31 +1785,6 @@ class Visualisation2DMain(Visualisation2DMainGUI):
             for networkID in loadVesselIDdict.iterkeys():
                 vesselIds = loadVesselIDdict[networkID]
                 self.networks[networkID].loadSolutionDataRange(vesselIds, values=["All"])
-                
-                
-                saveWaveSpeedData = True
-                if saveWaveSpeedData == True:
-                    import h5py
-                    print 'save waveSpeedData'
-                    a = copy(self.networks[networkID].pathSolutionDataFilename)
-                    aList = a.split('/')
-                    aList.remove(aList[-1])
-                    aList.append('wavespeedData.hdf5')
-                    fileName =  '/'.join(aList)
-                    
-                    #fileName = "/home/Vinz/Daten/StrafishWorkingDir2/paper4/preprocessing/wavespeedData.hdf5"
-                    f = h5py.File(fileName, "w")
-                    
-                    allVessels = self.networks[networkID].vessels.keys()
-                    self.networks[networkID].loadSolutionDataRange(allVessels, values=["All"])
-                    
-                    for vesselId,vesselData in self.networks[networkID].vessels.iteritems():
-                        
-                        
-                        dset = f.create_dataset(' - '.join(["wavespeed",str(vesselId)]),  shape = np.shape(vesselData.csol))
-                        dset[:] = vesselData.csol
-                
-                    f.close()
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
 
     def loadVascularNetwork(self, networkName, dataNumber, networkXmlFile = None, pathSolutionDataFilename = None):

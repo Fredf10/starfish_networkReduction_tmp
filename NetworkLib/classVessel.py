@@ -3,6 +3,7 @@ from copy import deepcopy
 import sys, os
 from math import pi, cos, sin
 import numpy as np
+from scipy.integrate import simps
 
 ## TODO: needsto be imported as modules
 from moduleGrids import *
@@ -26,6 +27,10 @@ class Vessel(cSBO.StarfishBaseObject):
     number = 0
     quiet = False
 
+
+    solutionMemoryFields = ["Psol", "Asol", "Qsol"]
+    solutionMemoryFieldsToSave = ["Psol", "Asol", "Qsol"]
+
     def __init__(self, Id= None, name = None):
         """
         Constructor
@@ -39,11 +44,11 @@ class Vessel(cSBO.StarfishBaseObject):
         ## topology properties
         self.startNode          = None              # node id of starting node
         self.endNode            = None              # node id of ending node
-        self.leftDaughter       = None              # id of left daugther vessel
-        self.rightDaughter      = None              # id of right daugther vessel
+        self.leftDaughter       = None              # id of left daughter vessel
+        self.rightDaughter      = None              # id of right daughter vessel
         self.leftMother         = None              # id of left mother
         self.rightMother        = None              # id of right mother
-        
+
         # Coordinate system is RHS with Z along vessel axis. Origin is at the center of area of
         # the vessel, with Z+ pointing towards the distal end
         self.angleXMother       = 0                 # rotation angle in rad around x-axis relative to mother vessel
@@ -51,15 +56,11 @@ class Vessel(cSBO.StarfishBaseObject):
         self.angleZMother       = 0                 # rotation angle in rad around z-axis relative to mother vessel
 
         ## geometry properties
-        self.geometryType       = 'uniform'         # #TODO: fix this geometry type: 'uniform', 'Cone', 'Cons'
+        self.geometryType       = 'uniform'         # #TODO: fix this geometry type: 'uniform', 'cone', 'Cons'
         self.radiusProximal     = 0.01              # radius at vessel begin // in hole Vessel if radiusB = 0
         self.radiusDistal       = 0.01              # radius at vessel end
         self.length             = 0.1               # length of the vessel
         self.N                  = 5                 # number of gridpoints
-        ## for stenosed vessel
-        self.position           = 0.1
-        self.constriction       = 0.2
-        self.stenosisLength     = 0.01
 
         ## compliance properties
         self.complianceType     = 'Hayashi'         # type of the compliance see classCompliance
@@ -89,10 +90,10 @@ class Vessel(cSBO.StarfishBaseObject):
         # vascular Polynomial chaos data dictionary with uncertainty variables
 
         ### Calculated properties
-        # positions in space 
+        # positions in space
         # realtive to global system
-        self.positionStart  = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
-        self.positionEnd    = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
+        self.positionStart  = np.zeros((1,3))         # instantaneous position of vessel start point in the global system
+        self.positionEnd    = np.zeros((1,3))         # instantaneous position of vessel start point in the global system
         self.rotToGlobalSys = np.array([np.eye(3)])   # rotational matrix to the global system
 
         ## motion
@@ -100,7 +101,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.angleYMotherTime   = []                # describes angular motion over time; set up by flow solver
         self.angleZMotherTime   = []                # describes angular motion over time; set up by flow solver
 
-        # gravity 
+        # gravity
         self.netGravity         = [0.0]             # net gravity on the vessel
         self.gravityConstant    = -9.81             # gravity constant of the gravitational field
 
@@ -110,7 +111,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.A0                 = None              # initial Area
         self.AsVector           = None              # vector for the total grid containing area at state S
 
-        # SOLID properties   
+        # SOLID properties
         self.compliance         = None              # the compliance class reference
         self.P_Cexp             = None              # pressuer P0 for the ComplianceType exponential
         self.C                  = None              # Compliance function C(P) for all nodes
@@ -125,11 +126,12 @@ class Vessel(cSBO.StarfishBaseObject):
 
         ## flag to indicate vessel data should be saved
         self.save         = True
+        self.dsetGroup    = None
 
         # pointers to solutionData objects
-        self.Psol         = None  # pressure
-        self.Qsol         = None  # flow
-        self.Asol         = None  # area
+        self.Psol         = np.zeros((0,self.N))  # None  # pressure
+        self.Qsol         = np.zeros((0,self.N))  # None  # flow
+        self.Asol         = np.zeros((0,self.N))  # None  # area
         # calculated values for post processing
         self.csol         = None # wave speed
         self.vsol         = None # mean velocity
@@ -154,18 +156,12 @@ class Vessel(cSBO.StarfishBaseObject):
             except Exception:
                 if key != 'venousPressure':
                     self.exception("classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id))
-#                    print "ERROR: classVessel.initialize(): Fluid initialisation could not update variable {} of vessel {}!".format(key,self.Id)
 
         # initialize grid
         try:
-            if self.geometryType == "stenosed":
-                self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N, self.position, self.constriction, self.stenosisLength)
-            else:
-                self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N)
+            self.z,self.dz,self.A0 =  eval(self.geometryType)(self.length, self.radiusProximal, self.radiusDistal, self.N)
         except Exception:
             self.exception("classVessel.initialize(): Grid calculation of vessel {} failed!".format(self.Id))
-#            print "ERROR: classVessel.initialize(): Grid calculation of vessel {}!".format(self.Id)
-#            exit()
 
 
         ## calculate compliance reference area vector As
@@ -181,23 +177,21 @@ class Vessel(cSBO.StarfishBaseObject):
             elif self.geometryType == 'cone':
                 AsProximal = self.radiusProximal**2.0*np.pi
                 As_distal = self.radiusDistal**2.0*np.pi
-                #AsAveraged = (AsProximal+As_distal)/2.0
                 self.AsVector = np.linspace(AsProximal,As_distal,self.N)
-                #self.AsVector = np.linspace(AsAveraged,AsAveraged,self.N)
-                #print "WARNING: no reference Area for the Compliance As is given for vessel {} ! \n         As is now calculatet with given radiusA and radiusB".format(self.Id)
-            
-            elif self.geometryType == 'stenosed':
-                self.AsVector = self.A0
+            elif self.geometryType == 'constriction':
+                AsProximal = self.radiusProximal**2.0*np.pi
+                As_distal = self.radiusDistal**2.0*np.pi
+                self.AsVector = self.A0.copy() 
+                
+            elif self.geometryType == 'mtStig2016':
+                self.AsVector = self.A0.copy() 
             else:
                 raise ValueError("classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id))
-#                print "WARNING: classVessel.initialize(): no grid geometry not proper defined for vessel {} ! ".format(self.Id)
         except Exception:
             self.exception("classVessel.initialize(): As calculation of vessel {}!".format(self.Id))
-#            print "ERROR: classVessel.initialize(): As calculation of vessel {}!".format(self.Id)
 
         ## initialize compliance
         try:
-
             self.compliance = eval(self.complianceType)(self.rho,self.AsVector)
             # initialize compliance element
             complianceDict = {}
@@ -220,24 +214,19 @@ class Vessel(cSBO.StarfishBaseObject):
 
         except Exception:
             self.exception("classVessel.initialize(): init Compliance of vessel {}!".format(self.Id))
-#            print "ERROR: classVessel.initialize(): init Compliance of vessel {}!".format(self.Id)
-#            exit()
 
         # set up Resistance
         try:
             # calculate peuisell resistance R = (8*mu*L) / (pi*r**4)
             if self.geometryType == "uniform":
-                self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
+                self.resistance = 2*(self.gamma + 2)*self.my*self.length / (pi*self.radiusProximal**4)
             elif self.geometryType == "cone":
-                self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
-
-            elif self.geometryType == "stenosed":
-                self.resistance = 8*self.my*self.length / (pi*((self.radiusProximal+self.radiusDistal)/2)**4)
-
-
+                self.resistance = self.calcResistance()
+            elif self.geometryType == "constriction":
+                #TODO: Not sure if this is important for anything.
+                self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
         except Exception:
             self.exception("classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id))
-#            print "ERROR: classVessel.initialize(): in calculating resistance of vessel {}!".format(self.Id)
 
         # calculate Womersley number
 
@@ -245,29 +234,34 @@ class Vessel(cSBO.StarfishBaseObject):
         #set hooks waveSpeed function
         if self.c == None: self.c = self.waveSpeed
 
-    def initializeForSimulation(self,initialValues, memoryArraySizeTime, nTsteps):
+    def initializeForSimulation(self,initialValues, runtimeMemoryManager, nTsteps, vesselsDataGroup):
         """
         Initialize the solution data and allocates memory for it
 
         Input:
             memoryArraySize := number of time points of one array in memory
         """
+        # TODO: THESE MUST BE CORRECTED TO THE RIGHT SHAPE AS THE ADAPTIVE GRID DOESN'T RESIZE WHEN CHANGING N
+        # TODO: The memory estimate is therefore off as well
         numberOfGridPoints = self.N
-        # allocate memory for solution
-        self.Psol = np.ones((memoryArraySizeTime,numberOfGridPoints))
-        self.Qsol = np.zeros((memoryArraySizeTime,numberOfGridPoints))
-        self.Asol = np.zeros((memoryArraySizeTime,numberOfGridPoints))
+        self.Psol = np.ones((0,numberOfGridPoints))
+        self.Qsol = np.zeros((0,numberOfGridPoints))
+        self.Asol = np.zeros((0,numberOfGridPoints))
 
+        # create a new group in the data file
+        self.dsetGroup = vesselsDataGroup.create_group(' '.join([self.name, ' - ', str(self.Id)]))
+        self.dsetGroup.attrs['dz'] = self.length/self.N
+        self.dsetGroup.attrs['N'] = self.N
+        self.dsetGroup.attrs['length'] = self.length
+        self.allocate(runtimeMemoryManager)
         # set initial values
         try:
-            p0,p1 = initialValues['Pressure']
-            Qm    = initialValues['Flow']
+            p0,p1 = initialValues["Pressure"]
+            Qm    = initialValues["Flow"]
             self.Psol[0] = np.linspace(p0,p1,self.N)
             self.Qsol[0] = np.ones((1,self.N))*Qm
         except Exception:
-            self.warning("cV could not use initial values from network")
-#           print "Error: cV could not use initial values from network"
-#           pass
+            self.warning("vessel could not use initial values from network")
 
         self.Asol[0] = np.ones((1,self.N))*self.A(self.Psol[0])
 
@@ -279,12 +273,87 @@ class Vessel(cSBO.StarfishBaseObject):
 
     #### Functions for to calculate dependent solution variables (also used for simulations)
 
+    def loadSolutionDataRange(self, tSliceToLoad,
+                                  values=["All",
+                                  "Pressure",
+                                  "Flow",
+                                  "Area",
+                                  "WaveSpeed",
+                                  'Compliance',
+                                  "MeanVelocity",
+                                  "Gravity",
+                                  "Position",
+                                  "Rotation"]
+                              ):
+        """
+        loads the solution data of the vessels specified into memory for the times
+            specified and drops any other previously loaded data.
+        Inputs:
+            tSliceToLoad - a numpy slice object of the form np.s_[nBegin:nEnd:nSteps]
+            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll',
+                'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All'
+                is in the list all quantities are loaded. Inputs are case insensitive.
+        Effects and Usage:
+            loads the specified values into memory such that they may be accessed as
+            vascularNetwork.vessels[vesselId].Pressure, etc, returning a matrix of
+            solution values corresponding to the time points in vascularNetwork.tsol.
+            Accessing vessels and values not set to be loaded will produce errors.
+        """
+        # Update loaded data tracking if inputs are valid
+        # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
+        validValues = ["All", "Pressure", "Flow", "Area", "WaveSpeed",
+                       "Compliance", "MeanVelocity", "Gravity", "Position",
+                       "Rotation", "linearWavesplit"]
+        values = set(values)
+        if 'All' in values:
+            values.update(validValues)
+        else:
+            if "WaveSpeed" in values:
+                values.update(["Pressure", "Area"])
+            elif "MeanVelocity" in values:
+                values.update(["Pressure","Flow"])
+            elif "linearWavesplit" in values:
+                values.update(["Pressure","Flow","Area","WaveSpeed"])
+            elif "Compliance" in values:
+                values.update(["Pressure", "Compliance"])
+
+        dsetGroup = self.dsetGroup
+
+        # TODO Implement h5py direct_read method to improve speed
+        # i.e. dsetGroup["Psol"].read_direct(self.Psol,
+        # np.s_[nselectedBegin:nSelectedEnd:nTStepSpace], None)
+        # reads the selected values into the already allocated array Psol.
+        # Psol probably needs to be allocated already though.
+        if 'Pressure' in values:
+            self.Psol = dsetGroup['Psol'][tSliceToLoad]
+        if 'Flow' in values:
+            self.Qsol = dsetGroup['Qsol'][tSliceToLoad]
+        if  'Area' in values:
+            self.Asol = dsetGroup['Asol'][tSliceToLoad]
+        if 'WaveSpeed' in values:
+            #self.csol = self.waveSpeed(self.Asol,self.C(self.Psol))
+            self.postProcessing(['WaveSpeed'])
+        if 'MeanVelocity' in values:
+            #self.vsol = self.Qsol/self.Asol
+            self.postProcessing(["MeanVelocity"])
+        if 'Compliance' in values:
+            self.postProcessing(['Compliance'])
+        if "linearWavesplit" in values:
+            self.postProcessing(["linearWavesplit"])
+        if 'Gravity' in values:
+            try: self.netGravity = dsetGroup['NetGravity'][tSliceToLoad]
+            except Exception: self.warning("vessel.loadSolutionDataRange():  no netGravity stored in solutiondata file for vessel {}".format(self.Id))
+        if 'Rotation' in values:
+            try: self.rotToGlobalSys = dsetGroup['RotationToGlobal'][tSliceToLoad]
+            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file for vessel {}".format(self.Id))
+        if 'Position' in values:
+            try: self.positionStart = dsetGroup['PositionStart'][tSliceToLoad]
+            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file for vessel {}".format(self.Id))
+
     def postProcessing(self, variablesToProcess):
         """
-
         Input:
             variablesToProcess <list>: [ <str>, ...] variables to process
-
         """
         for variableToProcess in variablesToProcess:
             if variableToProcess == "WaveSpeed":
@@ -324,6 +393,28 @@ class Vessel(cSBO.StarfishBaseObject):
         Area = self.A(Pressure)
         c = self.waveSpeed(Area, Compliance)
         return 1.0/(c*Compliance)
+
+
+    def calcResistance(self, Nintegration=101):
+        """ calculate the vessel resistance:
+            Rv = 2(gamma + 2)*pi*my*K3, where
+            K3 = int(1/Ad**2)dx
+            """
+        
+        x = np.linspace(0, self.length, Nintegration)
+        
+        areaProx, areaDist = pi*self.radiusProximal**2, pi*self.radiusDistal**2
+        
+        Ad = np.linspace(areaProx, areaDist, Nintegration)
+        
+        f = 1./(Ad**2)
+        
+        K3 = simps(f, x)
+        
+        Rv = 2*(self.gamma + 2)*pi*self.my*K3
+        
+        return Rv
+
 
     def linearWaveSplitting(self):
         """
@@ -366,7 +457,7 @@ class Vessel(cSBO.StarfishBaseObject):
         dP_div_Z = self.Psol[:,[gridNode]][1::]/Zo[1::] - self.Psol[:,[gridNode]][0:-1]/Zo[0:-1]
         dQ_multi_Z = self.Qsol[:,[gridNode]][1::]*Zo[1::] - self.Qsol[:,[gridNode]][0:-1]*Zo[0:-1]
 
-        ## calculate dp_f, dp_b and dQ_f, dq_b     
+        ## calculate dp_f, dp_b and dQ_f, dq_b
         dp_f = (dP + dQ_multi_Z)/2.0
         dp_b = (dP - dQ_multi_Z)/2.0
         dQ_f = (dQ + dP_div_Z)/2.0
@@ -396,7 +487,7 @@ class Vessel(cSBO.StarfishBaseObject):
         dP_div_Z = pressureArray[1::]/Zo[1::] - pressureArray[0:-1]/Zo[0:-1]
         dQ_multi_Z = flowArray[1::]*Zo[1::] - flowArray[0:-1]*Zo[0:-1]
 
-        ## calculate dp_f, dp_b and dQ_f, dq_b     
+        ## calculate dp_f, dp_b and dQ_f, dq_b
         dp_f = (dP + dQ_multi_Z)/2.0
         dp_b = (dP - dQ_multi_Z)/2.0
         dQ_f = (dQ + dP_div_Z)/2.0
@@ -420,7 +511,6 @@ class Vessel(cSBO.StarfishBaseObject):
                 self.__setattr__(key,value)
             except Exception:
                 self.warning("Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key))
-#                print "ERROR Vessel.updateData (vesselId {}) Wrong key: {}, could not update varibale".format(self.Id, key)
 
     def getVariableValue(self,variableName):
         """
@@ -457,7 +547,7 @@ class Vessel(cSBO.StarfishBaseObject):
 
         Initializing net gravity on the vessels.
         """
-       
+
         if hasattr(self, "angleXMotherTime") and len(self.angleXMotherTime)>0:
             angleXMother = self.angleXMotherTime[n]
         else:
@@ -472,7 +562,7 @@ class Vessel(cSBO.StarfishBaseObject):
         rotToGlobalSys = rotToGlobalSysMother
 
         # 2. assemble rotation matrices,
-        ## 2.1 calculate local rotation matrix to mother depending on 
+        ## 2.1 calculate local rotation matrix to mother depending on
         ### x axis, angleXMother
         if angleXMother != 0:
             rotDaughterMotherX = np.array([[1, 0                     , 0                     ],

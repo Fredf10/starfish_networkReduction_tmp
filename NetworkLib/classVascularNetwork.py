@@ -1,32 +1,26 @@
-import sys, os
-from reportlab.lib.validators import isNumber
-
-# from UtilityLib.saveSimulationDataToCSV import vesselId
+import sys
+import os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
 
-#sys.path.append(cur + '/../NetworkLib')
-#sys.path.append(cur+'/../SolverLib')
 import UtilityLib.classStarfishBaseObject as cSBO
 
 import classVessel as cVes
 import classBaroreceptor as cBRX
 import classVenousPool as classVenousPool
 
-#sys.path.append(cur + '/../UtilityLib')
 import UtilityLib.moduleFilePathHandler as mFPH
 
-
-#sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 import numpy as np
 import math
 from scipy import interpolate
-#from math import pi, cos, sin
 import pprint
 import h5py
 from classBoundaryConditions import *
+
+from UtilityLib import classRuntimeMemoryManager
 
 class VascularNetwork(cSBO.StarfishBaseObject):
     """
@@ -34,6 +28,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     The vascular network consists out of vessels defined in classVessel::Vessel()
     Additional Topology, BoundaryConditions and the SimulationContext are saved.
     """
+
+
+    solutionMemoryFields    = ["simulationTime", "arterialVolume"]
+    solutionMemoryFieldsToSave = ["simulationTime", "arterialVolume"]
+
     def __init__(self, quiet=False):
 
         # # vascularNetwork variables to set via XML
@@ -42,37 +41,27 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.dataNumber = 'xxx'  # data number of the network
         self.quiet = quiet  # bool to suppress output
 
-        # saving options
-        self.pathSolutionDataFilename = None
-        self.timeSaveBegin = 0.0  # time when to start saving
-        self.timeSaveEnd = 2.0  # time when to end saving
-        self.maxMemory = 20  # maximum memory in MB
-        self.saveInitialisationPhase = False  # bool to enable saving of the initPhase
 
-        self.vesselsToSave = {}
-        self.nSaveBegin = None
-        self.nSaveEnd  = None
-        self.savedArraySize = None
-        self.nDCurrent = None
-        self.memoryArraySizeTime = None  # memory array size for the time arrays
-        self.solutionDataFile = None  # file name of the solution data
-        self.globalData = None
+        self.dsetGroup = None
         self.tiltAngle = None # Angle the network is tilted relative to supine position
         # keep track of time points loaded in memory
-        self.tsol = None
-        self.arterialVolume = None
-        
+        self.tsol = np.zeros(0)
+        self.arterialVolume = np.zeros(0)
+
 
         # running options
         self.cycleMode = False
+
 
         # simulation Context
         self.totalTime = 1.0  # simulation time in seconds
         self.CFL = 0.85  # maximal initial CFL number
         self.dt = None  # time step of the simulation determined by the solver
-        self.nTsteps = None  # number of timesteps of the simulation case determined by the solver
-        self.simulationTime = None  # array with simulation Time
-
+        self.nTSteps = None  # number of timesteps of the simulation case determined by the solver
+        self.simulationTime = np.zeros(0)  # array with simulation Time
+        self.currentMemoryIndex = None
+        # TODO: Remove when refactored
+        self.initDataManagement()
 
         # self.motion         = {'keyframe': [0, 0.1, 1.0],
         #                        'X1'     : [0, 45, 90]}
@@ -84,10 +73,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # gravity controls
         self.gravitationalField = False  # bool, turn gravity on or off
         self.gravityConstant = -9.81  # earth gravity
-
-        # venous system
-        self.centralVenousPressure = 0.0  # central venous pressure
-        self.minimumVenousPressure = 0.0  # minimum allowed venous pressure
 
         # the solver calibration
         self.rigidAreas = False  # # 'True' 'False' to change
@@ -112,24 +97,32 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.optimizeTree = False  # optimize areas of vessels to minimize reflections in root direction
 
-        # # dictionaries for network components
+        #dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
-        
-        # self.venousPool = classVenousPool.StaticVenousPool({}) # This is a dummy venous pool with no effect on the network unless accessed by other objects?
-        self.venousPool = None #classVenousPool.StaticVenousPool({}) # TODO add to xml
+
+        self.venousPool = None  #classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({})
+        self.heart = None
+
         self.boundaryConditions = {}
 
         self.globalFluid = {'my': 1e-6, 'rho': 1050., 'gamma': 2.0}  # dictionary containing the global fluid data if defined
+
         self.externalStimuli = {}
+
         self.baroreceptors = {}  # dictionary with baroreceptors
 
         self.communicators = {}  # dictionary with communicators, key = communicator id; values = {communicator data}
 
-        # # internal calculated variables
+        # internally calculated variables
         self.root = None  # the root vessel (mother of the mothers)
+        self.anastomosisExists = False
         self.boundaryVessels = []  # includes all vessels with terminal boundaryConditions (except start of root)
         self.treeTraverseList = []  # tree traverse list
+        self.treeTraverseList_sorted = []
         self.treeTraverseConnections = []  # tree traversal list including connections [ LM, RM , LD, RD ]
+        
+        self.nodes = []
+        self.connectionNodes = []
 
         self.initialValues = {}
         self.Rcum = {}  # Dictionary with all cumulative resistances
@@ -137,10 +130,33 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.totalTerminalAreaCompliance = None  # the sum of all Cends
         self.TotalVolumeComplianceTree = None  # total volume compliance of all vessels
 
-#         ### random variables TODO: move out of here to global class
+        # random variables TODO: move out of here to global class
         self.randomInputManager = None
+        self.measurementRoutine = None
 
-        self.measurmentRoutine = None
+    def initDataManagement(self):
+        """
+        Refactoring all "data management" code and variables into "independent functions"
+        """
+        self.pathSolutionDataFilename = None
+        self.timeSaveBegin = 0.0  # time when to start saving
+        self.timeSaveEnd = None # time when to end saving
+        self.maxMemory = 20  # maximum memory in MB
+        self.saveInitialisationPhase = True  # bool to enable saving of the initPhase
+
+        self.vesselsToSave = {}
+        self.nSaveSkip = 1
+        self.nSkipShift = 0
+        self.minSaveDt = -1
+        self.saveDt = None
+        self.nSaveBegin = None
+        self.nSaveEnd  = None
+        self.savedArraySize = None
+        self.nDCurrent = None
+        self.memoryArraySizeTime = None  # memory array size for the time arrays
+        self.solutionDataFile = None  # file name of the solution data
+
+        self.runtimeMemoryManager = None
 
     # all classes concerning vessel
     def addVessel(self, vesselId=None, dataDict=False):
@@ -184,7 +200,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if baroId == None:
             try:
                 baroId = max(self.baroreceptors.keys()) + 1
-            except:
+            except ValueError: # Empty dict
                 baroId = 0
 
         # check Id
@@ -245,15 +261,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
 
         for dictName in ['vascularNetworkData']:
-            try: 
+            try:
                 self.update(updateDict[dictName])
-            except Exception: 
+            except Exception:
                 self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         for dictName in ['globalFluid', 'communicators', 'externalStimuli']:
-            try: 
+            try:
                 self.getVariableValue(dictName).update(updateDict[dictName])
-            except Exception: 
+            except Exception:
                 self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         if 'vesselData' in updateDict:
@@ -341,6 +357,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     if vesselId == self.root:
                         for bc in bcs:
                             bc.setPosition(0)
+                            if "Elastance" in bc.name:
+                                self.heart = bc
 
                     elif vesselId in self.boundaryVessels:
                         for bc in bcs:
@@ -391,22 +409,26 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     except Exception:
                         self.warning("VascularNetwork.initialize(): could not set blood density for aortic valve!")
 
-
         # # initialize 3d positions of the vascularNetwork
-        self.calculate3DpositionsAndGravity(nSet=0)
+        if self.anastomosisExists:
+            print "WARNING: The network contain one or more anastomosis; 3DpositionsAndGravity will not be calculated. line 410 classVascularNetwork"
+        else:
+            self.calculate3DpositionsAndGravity(nSet=0)
 
         # ## initialize for simulation
+        # TODO: Can this be moved?
         if initializeForSimulation == True:
 
             # # initialize venous pressure and checks central venous pressure
             self.initializeVenousGravityPressure()
 
             # # print 3D positions
-            if self.quiet == False: 
+            if self.quiet == False:
                 self.print3D()
 
             # calculate the cumulative network resistances and vessel resistances of the network
-            if self.initialsationMethod != 'ConstantPressure':
+            if self.initialsationMethod not in ['ConstantPressure', 'AutoLinearSystem']:
+                print self.initialsationMethod
                 self.calculateNetworkResistance()
 
             # calculate the initial values of the network
@@ -420,7 +442,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.showWaveSpeedOfNetwork()
 
             # optimize tree reflection coefficients BADDDDD
-            if self.optimizeTree: 
+            if self.optimizeTree:
                 self.optimizeTreeRefelctionCoefficients()
 
             if self.quiet == False:
@@ -439,149 +461,175 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
 
         # initialize saving indices
-        if  self.timeSaveEnd < 0 or self.timeSaveEnd > self.totalTime:
-            raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveEnd not in [0, totalTime]")
+        self.timeSaveEnd = self.totalTime
 
         if self.timeSaveBegin < 0 or self.timeSaveBegin > self.timeSaveEnd:
-            raise ValueError("VascularNetwork.initializeSolutionMatrices(): timeSaveBegin not in [0, timeSaveEnd]")
+            raise ValueError("VascularNetwork.initializeNetworkForSimulation(): timeSaveBegin not in [0, timeSaveEnd]")
 
+        self.nSaveSkip = max(int(np.ceil(self.minSaveDt/self.dt)),1)
+        self.saveDt = self.nSaveSkip*self.dt
         self.nSaveBegin = int(np.floor(self.timeSaveBegin / self.dt))
         self.nSaveEnd = int(np.ceil(self.timeSaveEnd / self.dt))
+
         # set save counter to the correct parts
         if self.initialisationPhaseExist:
             self.nSaveEnd += self.nTstepsInitPhase
-            if self.saveInitialisationPhase:
-                self.nSaveBegin = 0
-            else:
+            if self.timeSaveBegin > 0:
                 self.nSaveBegin += self.nTstepsInitPhase
-        self.savedArraySize = self.nSaveEnd-self.nSaveBegin+1
-        self.nDCurrent = 0
+                self.saveInitialisationPhase = False
+            else:
+                self.saveInitialisationPhase = True
+                self.nSaveBegin += self.nTstepsInitPhase
 
-        # # -> derive  number int(maxMemory / (vessels*3 arrays per vessel*vessel.N)) = memoryArraySizeTime
-        estimatedMemorySolutionDataSpace = 0
+        self.savedArraySize = (self.nSaveEnd-self.nSaveBegin)//self.nSaveSkip + 1
+
+        self.runtimeMemoryManager = classRuntimeMemoryManager.RuntimeMemoryManager(self.nSaveBegin,
+                                                                                   self.nSaveEnd,
+                                                                                   self.nSaveSkip,
+                                                                                   self.nTSteps,
+                                                                                   self.maxMemory)
+
+
+        # Register all objects with the memory manager
+        sizes = self.getSolutionMemorySizes()
+        self.runtimeMemoryManager.registerDataSize(sizes)
+
         for vessel in self.vessels.itervalues():
-            estimatedMemorySolutionDataSpace += vessel.N * 8 * 3  # byte
+            sizes = vessel.getSolutionMemorySizes()
+            self.runtimeMemoryManager.registerDataSize(sizes)
 
-        self.memoryArraySizeTime = int(np.floor(self.maxMemory * 1024.*1024. / estimatedMemorySolutionDataSpace))
-        # Don't allocate more memory than needed
-        if self.memoryArraySizeTime > (self.nTsteps + 1):
-            self.memoryArraySizeTime = self.nTsteps + 1
+        for bcList in self.boundaryConditions.itervalues():
+            for bc in bcList:
+                self.runtimeMemoryManager.registerDataSize(bc.getSolutionMemorySizes())
+
+        for baroData in self.baroreceptors.itervalues():
+            sizes = baroData.getSolutionMemorySizes()
+            self.runtimeMemoryManager.registerDataSize(sizes)
+
+        sizes = self.venousPool.getSolutionMemorySizes()
+        self.runtimeMemoryManager.registerDataSize(sizes)
+
+        self.memoryArraySizeTime = self.runtimeMemoryManager.memoryArraySizeTime
 
 
         # Initialize solution file and data set groups
         # create solution file
         if self.pathSolutionDataFilename == None:
             self.pathSolutionDataFilename = mFPH.getFilePath('solutionFile', self.name, self.dataNumber, 'write')
-        self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
 
-        self.globalData = self.solutionDataFile.create_group('VascularNetwork')
-        self.globalData.create_dataset('ArterialVolume', (self.savedArraySize,), dtype='float64')
-        self.globalData.create_dataset('TotalVolume', (self.savedArraySize,), dtype='float64')
-        self.globalData.create_dataset('TiltAngle', (self.savedArraySize,),dtype='float64')
-        self.tiltAngle = np.zeros(self.nTsteps)
-        self.arterialVolume = np.zeros(self.memoryArraySizeTime)
+        self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "w")
+        self.dsetGroup = self.solutionDataFile.create_group('VascularNetwork')
+        self.allocate(self.runtimeMemoryManager)
+
+        # TODO: Integrate precalculated data into data saving framework
+        self.dsetGroup.create_dataset('TiltAngle', (self.savedArraySize,),dtype='float64')
+        self.tiltAngle = np.zeros(self.nTSteps)
+
+        self.simulationTime[0] = -self.nTstepsInitPhase*self.dt
+
+        print "cVN::InitializeNetworkForSimulation"
+        print "nTSteps", self.nTSteps
+        print "Saving ={}:{}:{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
+
+
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
-
-        # initialize for simulation
+        # initialize objects for simulation
         for vesselId, vessel in self.vessels.iteritems():
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
-                                           self.memoryArraySizeTime,
-                                           self.nTsteps)
-            # Put a reference to the dsetGroup into the saving dictionary if needed
-            if vessel.save == True:
-                # create a new group in the data file
-                dsetGroup = self.vesselDataGroup.create_group(' '.join([vessel.name, ' - ', str(vessel.Id)]))
-                nGridPoints =  vessel.N
-                dsetP = dsetGroup.create_dataset("Pressure", (self.savedArraySize,nGridPoints), dtype='float64')
-                dsetQ = dsetGroup.create_dataset("Flow", (self.savedArraySize,nGridPoints), dtype='float64')
-                dsetA = dsetGroup.create_dataset("Area", (self.savedArraySize,nGridPoints), dtype='float64')
+                                           self.runtimeMemoryManager,
+                                           self.nTSteps,
+                                           self.vesselDataGroup)
 
-                if self.nSaveBegin==0:
-                    dsetP[0] = vessel.Psol[0]
-                    dsetQ[0] = vessel.Qsol[0]
-                    dsetA[0] = vessel.Asol[0]
-                    self.nDCurrent = 1
 
-                self.vesselsToSave[vesselId] =  dsetGroup
-                
 
-        # # initialize varying elastance model
-        # # initialize boundary condition type 1: initial phase
         for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
             for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
-                    Qm = self.initialValues[vesselId]['Flow']
-                    # TODO: Figure out what this is supposed to be doing
-                    bC.update({'aorticFlowPreviousTimestep':Qm})
-                    bC.initializeSolutionVectors(self.nTsteps, self.savedArraySize,self.solutionDataFile)
-                if bC.type == 1:
-                    if self.initialisationPhaseExist:
-                        bC.update({'initialisationPhaseExist': True,
-                                   'nTstepsInitPhase': self.nTstepsInitPhase})
+                try:
+                    bC.initializeSolutionVectors(self.runtimeMemoryManager, self.solutionDataFile)
+                except AttributeError:
+                    pass # bC doesn't have solution vector data
+                bC.update({'initialisationPhaseExist': self.initialisationPhaseExist,
+                                     'nTstepsInitPhase': self.nTstepsInitPhase})
+
+
+        self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
+        for baroData in self.baroreceptors.itervalues():
+            baroData.initializeForSimulation(self)
+        try:
+            # Not all venous classes use this
+            self.venousPool.initializeForSimulation(self)
+        except AttributeError:
+            self.warning("Using static venous system", quiet=True)
 
         # # initialize gravity and 3d positions over time
         for stimulus in self.externalStimuli.itervalues():
             if stimulus['type'] == "headUpTilt":
                 self.initializeHeadUpTilt(stimulus)
-            
-        # # calculate gravity and positions
-        self.calculate3DpositionsAndGravity(nTsteps=self.nTsteps)
 
-        # # calculate venous pressure for windkessel
-        self.initializeVenousGravityPressureTime(self.nTsteps)
-        
-        ##
-        for vesselId, vessel in self.vessels.iteritems():
-            dsetGroup = self.vesselsToSave[vesselId]
-            dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
-            dsetRot = dsetGroup.create_dataset("RotationToGlobal", (self.savedArraySize,3,3), dtype='float64')
-            dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
 
-            # TODO: Verify that numpy's index range protocal... it seems to cutoff the final value in the range selected.
-            dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1]
-            dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1]
-            del vessel.positionStart, vessel.rotToGlobalSys # free memory not used during simulation
-            #TODO: do this nicer way
-            vessel.positionStart  = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
-            vessel.positionEnd    = np.zeros((1,3))         # instanteanoues position of vessel start point in the global system
-            vessel.rotToGlobalSys = np.array([np.eye(3)])
-            dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1]
-            
-        self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
-        
+        # calculate gravity and positions
+        if self.anastomosisExists:
+            self.initializeVenousGravityPressureTime(self.nTSteps)
+            print "WARNING: The network contain one or more anastomosis; lines 573-593 in classVascularNetwork will not be run"
+        else:
+            self.calculate3DpositionsAndGravity(nTsteps=self.nTSteps)
     
+            # calculate venous pressure for windkessel
+            self.initializeVenousGravityPressureTime(self.nTSteps)
+    
+            # Save gravity data if appropriate
+            for vesselId, vessel in self.vessels.iteritems():
+                dsetGroup = vessel.dsetGroup
+                if dsetGroup:
+                    dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
+                    dsetRot = dsetGroup.create_dataset("RotationToGlobal", (self.savedArraySize,3,3), dtype='float64')
+                    dsetGravity = dsetGroup.create_dataset("NetGravity", (self.savedArraySize,1), dtype='float64')
+    
+                    dsetPos[:] = vessel.positionStart[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+                    dsetRot[:] = vessel.rotToGlobalSys[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+                    dsetGravity[:] = vessel.netGravity[self.nSaveBegin:self.nSaveEnd+1:self.nSaveSkip]
+    
+                # TODO: Better way to return this to normal, while clearing the data?
+                vessel.positionStart  = np.zeros((1,3))         # instantaneous position of vessel start point in the global system
+                vessel.positionEnd    = np.zeros((1,3))         # instantaneous position of vessel end point in the global system
+                vessel.rotToGlobalSys = np.array([np.eye(3)])
+
+
+
+
+
     class WholeBodyTilt(cSBO.StarfishBaseObject):
         """Encapsulates data related to the tilting motion of the network.
-        
-        A WholeBodyTilt object specifies the action of tilting the entire 
+
+        A WholeBodyTilt object specifies the action of tilting the entire
         network about the root vessel of the network.
-        
+
         Attributes:
             startTime  (float): The time in seconds when the tilt begins
             duration  (float): The length in second of the tilt
             stopAngle (float): The angle swept out by the tilt, relative to
-             a supine position with a positive angle meaning an elevation 
+             a supine position with a positive angle meaning an elevation
              of the feet above the head.
         """
         def __init__(self):
             self.startTime
             self.duration
             self.stopAngle
-        
+
     def initializeHeadUpTilt(self, headUpTilt):
         """
-        Takes a head upt tilt stimulus object and applies the specification to 
+        Takes a head upt tilt stimulus object and applies the specification to
         generate vessel positions over the simulation
         """
 
         tstart = headUpTilt['startTime']
         duration = headUpTilt['duration']
         tiltAngle = headUpTilt['stopAngle']
-       
+
         tstop = tstart + duration
-        
+
         # TODO: Is vessels[1] the root?
         start = self.vessels[1].angleXMother
         end = start + tiltAngle
@@ -589,152 +637,81 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         nStepsTilt = int(math.ceil(tstop/self.dt)) - nStepsStart
         # TODO determine appropriate behaviour if simulation time is shorter that head up tilt time
         assert tstop < self.totalTime, 'tstop > totalTime'
-        # nStepsEnd = ceil((self.nTsteps*self.dt - tstop)/self.dt)
+        # nStepsEnd = ceil((self.nTSteps*self.dt - tstop)/self.dt)
         nStepsEnd = int(math.ceil(self.totalTime/self.dt))- nStepsTilt - nStepsStart
-        
+
         startAngle = np.ones(nStepsStart)*start
         endAngle = np.ones(nStepsEnd)*end
         tiltAngle = np.linspace(start, end, nStepsTilt+1) #Account for time points not time steps
         angleXSystem = np.append(startAngle, np.append(tiltAngle, endAngle))
         # TODO: Why is the key "1" here?
         motionDict = {1:{'angleXMotherTime': angleXSystem}}
-        
+
         self.tiltAngle = angleXSystem
-        
+
         # TODO: Do these belong here? and do they need to happen every simulation?
         for vesselId, angleDict in motionDict.iteritems():
             self.vessels[vesselId].update(angleDict)
 
+    def __call__(self):
+        # Global Compliance
+        # Global Impedance?
+        nmem = self.currentMemoryIndex[0]
+        self.simulationTime[nmem+1] = self.simulationTime[nmem] + self.dt
+        # TODO: Pressure update assumes happening last
+        if self.heart:
+            if len(self.venousPool.P_LA)>1:
+                self.heart.atriumPressure[nmem+1] = self.venousPool.P_LA[nmem+1]
+            else:
+                self.heart.atriumPressure[nmem+1] = self.venousPool.pressureGain*self.venousPool.P[0]
+        # TODO: Volume calculation assumes all other objects have been updated for the current time step!!!!
+        self.arterialVolume[nmem+1] = self.calculateNetworkVolume(nmem+1)
 
 
-
-    def flushSolutionMemory(self, currentTimeStep, currentMemoryIndex, chunkCount):
-        """
-        saving utility function to determine if solution data needs to be sent to the outputfile,
-        and to calculate the correct indices between solution memory and the data output file.
-        """
-
-        """
-        Explanation of index variables
-        nCB,nCE where the beginning and end of the current solution data in memory would lie
-         in a full time history of the solution.
-        nMB,nME what indices of the current memory mark the beginning and end of what should be saved
-         nME is a slice index, i.e. position + 1
-        nSB,nSE where the beginning and end of the current data to save would lie in the whole of the
-         simulation. nSE is a slice index, i.e. position + 1
-        nDB,nDE where does the current selection of data belong in the whole of the saved data
-        """
-
-        memoryArraySize = self.memoryArraySizeTime;
-        offset = (memoryArraySize - 1) * chunkCount
-        # indices mapping beginning and end of memory to the absolute number time steps in solution
-        nCB = offset+1
-        nCE = offset+memoryArraySize-1 # nCE == currentTimeStep+1
-        nDB = None
-        nDE = None
-        nSB = None
-        nSE = None
-        # check if we need to save
-        saving = not(nCE < self.nSaveBegin or nCB > self.nSaveEnd) # not(not saving)
-
-        if saving:
-            ## memory indices
-            nMB = 1
-            nSB = nCB
-            if (self.nSaveBegin-nCB)>0:
-                nMB = 1+(self.nSaveBegin-nCB)
-                nSB = self.nSaveBegin
-
-            #determine length to write
-            # assume we write out through the end of memory
-            lengthToWrite = self.memoryArraySizeTime - nMB
-
-            nME = memoryArraySize
-            nSE = nCE + 1
-            # correct this if save index is less than the current time step
-            if (self.nSaveEnd-nCE)<0:
-                # set the index to end saving
-                nME -= (nCE - self.nSaveEnd)
-                nSE -= (nCE - self.nSaveEnd)
-                lengthToWrite -= (nCE - self.nSaveEnd) # -(-nME) as nME is negative
-
-            nDB = self.nDCurrent
-            nDE = self.nDCurrent+lengthToWrite
-
-            self.nDCurrent += lengthToWrite
-            # zero out arterial volume if flushing data
-            self.arterialVolume = self.arterialVolume*0.0    
-
-        for vesselId,dsetGroup in self.vesselsToSave.iteritems():
+    def calculateNetworkVolume(self, n):
+        # Adds the volume of all compartments in the network
+        cumVolume = 0.0
+        for vesselId,vessel in self.vessels.iteritems():
             
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
-            vessel = self.vessels[vesselId]
-            
-            # calc vessel volume
-            A1 = self.vessels[vesselId].Asol[:,0:-1]
-            A2 = self.vessels[vesselId].Asol[:,1:]
+            # vessel = self.vessels[vesselId]
+
+            # calculate vessel volume
+            A1 = self.vessels[vesselId].Asol[n:n+1,0:-1]
+            A2 = self.vessels[vesselId].Asol[n:n+1,1:]
             volume = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0,axis=1)
-            self.arterialVolume += volume
-                
-            if saving:
-                dsetGroup["Pressure"][nDB:nDE] = vessel.Psol[nMB:nME]
-                dsetGroup["Flow"][nDB:nDE] = vessel.Qsol[nMB:nME]
-                dsetGroup["Area"][nDB:nDE] = vessel.Asol[nMB:nME]
-            # roll the end of the buffer
-            vessel.Psol[0] = vessel.Psol[-1]
-            vessel.Qsol[0] = vessel.Qsol[-1]
-            vessel.Asol[0] = vessel.Asol[-1]
-            
-        for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
-            for bC in boundaryConditions:
-                if bC.name in ['VaryingElastanceHeart', 'VaryingElastanceSimple','VaryingElastanceSimpleDAE']:
-                    bC.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            
-        for baro in self.baroreceptors.itervalues():
-            baro.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-        
-        # TODO: if saving/ Rolling of data
-        if self.venousPool: 
-            self.venousPool.flushSolutionData(saving,nDB,nDE,nSB,nSE)
-            if saving:
-                self.globalData['TotalVolume'][nDB:nDE] = self.arterialVolume[nMB:nME] + self.venousPool.dsetGroup['V'][nDB:nDE]
-        if saving:
-            self.globalData['ArterialVolume'][nDB:nDE] = self.arterialVolume[nMB:nME]
-        
+            cumVolume += volume
+        try:
+            cumVolume += self.venousPool.V[n]
+        except AttributeError:
+            pass # venous pool has no volume
+
+        # TODO: add heart handling
+        # cumVolume += self.heart.V[n]
+        return cumVolume
+
 
     def saveSolutionData(self):
         """
         # solution of the system over time
         # {vesselID: { 'Psol' : [ [solution at N nodes]<-one array for each timePoint , ...  ], ..  }
         """
-        globalData = self.globalData 
+        globalData = self.dsetGroup
         globalData.attrs['dt'] = self.dt
-        globalData.attrs['nTsteps'] = self.nTsteps
+        globalData.attrs['nTSteps'] = self.nTSteps
         globalData.attrs['nTstepsInitPhase'] = self.nTstepsInitPhase
         globalData.attrs['simulationDescription'] = self.description
 
-        savedArraySize = self.nSaveEnd - self.nSaveBegin + 1
-        dsetTime = globalData.create_dataset('Time', (savedArraySize,), dtype='float64')
+        # dsetTime = globalData.create_dataset('Time', (savedArraySize,), dtype='float64')
 
-        # find start and end time of the time vector of the solution data
-        if self.initialisationPhaseExist:
-            if self.saveInitialisationPhase:
-                startTime = -self.dt * self.nTstepsInitPhase
-                endTime = self.dt * (self.nSaveEnd - self.nTstepsInitPhase)
-            else:
-                startTime = self.dt * (self.nSaveBegin - self.nTstepsInitPhase)
-                endTime = self.dt * (self.nSaveEnd - self.nTstepsInitPhase)
-        else:
-            startTime = self.nSaveBegin * self.dt
-            endTime = self.dt * self.nSaveEnd
+        # TODO: Integrate this better with the chunking mechanism
 
-        dsetTime[:] = np.linspace(startTime, endTime, savedArraySize).reshape(savedArraySize,)
+        # dsetTime[:] = startTime + self.saveDt*np.arange(savedArraySize).reshape(savedArraySize,)
 
         self.solutionDataFile.close()
-    
-    def calculateNetworkVolume(self):
-        pass
+
+
 
     def linkSolutionData(self):
         """
@@ -754,8 +731,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for groupName, group in self.solutionDataFile.iteritems():
             if groupName == 'VascularNetwork':
                 self.dt = group.attrs['dt']
-                self.nTsteps = group.attrs['nTsteps']
-                self.simulationTime = group['Time'][:]
+                self.nTSteps = group.attrs['nTSteps']
+                self.simulationTime = group['simulationTime'][:]
 
             elif groupName == 'Baroreflex':
                 # This works perfectly as long as the variables are the same in the group as in the class __init__
@@ -765,19 +742,20 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         self.baroreceptors[baroId].update(subGroup)
                     except KeyError: # will fail for nested data
                         pass
-                
+
             elif groupName == 'Heart':
                 pass
 
             elif groupName == 'Vein':
                 pass
 
-            elif groupName == 'vessels' or '-' in groupName: # '-' is loads older hdf5 data files
+            elif groupName == 'vessels': # or '-' in groupName: # '-' is loads older hdf5 data files
                 for subGroupName, subGroup in group.iteritems():
                     vesselId = int(subGroupName.split(' - ')[-1])
                     # try:
                     # link data
                     self.vesselsToSave[vesselId] = subGroup
+                    self.vessels[vesselId].dsetGroup = subGroup
                         # except:
                             # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
                     # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
@@ -806,6 +784,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         endTime = self.simulationTime[-1]
 
 
+        # TODO: should these be errors?
         # Assume inputs are valid, otherwise flag invalid inputs
         inputsAreValid = True
         if t1>t2 :
@@ -820,7 +799,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             raise ValueError("ERROR:Invalid end time t2=%f after end of saved data t=%f" % (t2, endTime))
             inputsAreValid = False
 
-        if isNumber(mindt) and mindt > endTime - startTime:
+        if mindt is not None and mindt > endTime - startTime:
             inputsAreValid = False
             raise ValueError("ERROR: Invalid minimum time step %f larger than solution time span." % (mindt))
 
@@ -831,7 +810,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         return inputsAreValid
 
 
-    def getSolutionData(self,vesselId, variables, tvals, xvals, dx = None):
+    def getSolutionData(self,vesselId, variables, tvals, xvals):
         """
         Get interpolated solution data
         Inputs:
@@ -849,7 +828,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             'Compliance'
         tvals - a numpy array (or python list) of times at which the values are desired
         xvals - a numpy array (or python list) of positions at which the values are desired
-                
 
         Returns: A dictionary with keys corresponding to the input variables, and values are
             numpy arrays with rows corresponding to times(tvals) and columns corresponding to position(xvals)
@@ -858,11 +836,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         tspan = [np.min(tvals),np.max(tvals)]
         mindt=None
-
-        if dx != None:
-            xvals = np.linspace(0, self.vessels[vesselId].length,dx) 
-
-        if "ForwardPressure" in variables or "BackwardPressure" in variables or "ForwardFlow" in variables or  "BackwardFlow" in variables:
+        waveSplittingVariables =  ["ForwardPressure","BackwardPressure", "ForwardFlow","BackwardFlow"]
+        if any(i in variables for i in waveSplittingVariables):
+        # if "ForwardPressure" in variables or "BackwardPressure" in variables or "ForwardFlow" in variables or  "BackwardFlow" in variables:
             variables.append('linearWavesplit')
 
         self.loadSolutionDataRange([vesselId], tspan, mindt, variables)
@@ -883,7 +859,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             data_dict['WaveSpeed'] = interpfct(xvals,tvals)
         if 'Compliance' in variables:
             interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].Csol,kind='linear',copy=False)
-            data_dict['Compliance'] = interpfct(xvals,tvals) 
+            data_dict['Compliance'] = interpfct(xvals,tvals)
         if 'MeanVelocity' in variables:
             interpfct = interpolate.interp2d(self.vessels[vesselId].z,self.tsol,self.vessels[vesselId].vsol,kind='linear',copy=False)
             data_dict['MeanVelocity'] = interpfct(xvals,tvals)
@@ -902,16 +878,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         return data_dict
 
     def loadSolutionDataRange(self, vesselIds = None, tspan=None, mindt=None,
-                                  values=["All",
-                                  "Pressure",
-                                  "Flow",
-                                  "Area",
-                                  "WaveSpeed",
-                                  'Compliance',
-                                  "MeanVelocity",
-                                  "Gravity",
-                                  "Position",
-                                  "Rotation"]):
+                                  values=["All"]):
         """
         loads the solution data of the vessels specified into memory for the times
             specified and drops any other previously loaded data.
@@ -920,7 +887,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if vesselIds = None, data of all vessels is loaded
             tspan=[t1,t2] - a time range to load into memory t2 must be greater than t1.
                 if tspan=None, all times are loaded
-            values = a dictionary specifying which quantities to load entries keys are booleans and may be 'loadAll',
+            values = a list specifying which quantities to load entries keys are booleans and may be 'loadAll',
                 'loadPressure', 'loadArea', 'loadFlow', 'loadWaveSpeed', and 'loadMeanVelocity'. If 'All'
                 is in the list all quantities are loaded. Inputs are case insensitive.
             mindt := the minimum spacing in time between successively loaded points if
@@ -931,31 +898,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             solution values corresponding to the time points in vascularNetwork.tsol.
             Accessing vessels and values not set to be loaded will produce errors.
         """
-        # Update loaded data tracking if inputs are valid
-        # We could do this value = d.get(key, False) returns the value or False if it doesn't exist
-
-        values = set(values)
-        if 'All' in values:
-            values.update(["All",
-                        "Pressure",
-                        "Flow",
-                        "Area",
-                        "WaveSpeed",
-                        'Compliance',
-                        "MeanVelocity",
-                        "linearWavesplit",
-                        "Gravity",
-                        "Position",
-                        "Rotation"])
-        elif 'WaveSpeed' in values:
-            values.update(['Pressure', 'Area'])
-        elif 'MeanVelocity' in values:
-            values.update(['Flow','Area'])
-        elif "linearWavesplit" in values:
-            values.update(['Pressure','Flow','Area',"WaveSpeed"])
-        elif 'Compliance' in values:
-            values.update(['Pressure', 'Compliance'])
-                        
         if tspan is not None:
             t1 = tspan[0]
             t2 = tspan[1]
@@ -965,59 +907,26 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
 
         if self._checkAccessInputs(t1, t2, mindt):
-            nSelectedBegin, nSelectedEnd =self.getFileAccessIndices(t1, t2)
+            nSelectedBegin, nSelectedEnd = self.getFileAccessIndices(t1, t2)
 
-            if isNumber(mindt):
+            if mindt is not None:
                 nTStepSpaces = int(np.ceil(mindt / self.dt))
             else:
                 nTStepSpaces = 1
 
-            self.tsol = self.simulationTime[nSelectedBegin:nSelectedEnd:nTStepSpaces]
+            tSlice = np.s_[nSelectedBegin:nSelectedEnd:nTStepSpaces]
+
+            self.tsol = self.simulationTime[tSlice]
             # check if all vessels should be loaded
             if vesselIds == None: vesselIds = self.vessels.keys()
             # Update selected vessels
             for vesselId in vesselIds:
                 if vesselId in self.vesselsToSave:
                     vessel = self.vessels[vesselId]
-                    dsetGroup = self.vesselsToSave[vesselId]
-                    if dsetGroup['Pressure'].shape[1] == vessel.N:
-                        try: # TODO: check why this sometimes fails
-                            del vessel.Psol, vessel.Qsol, vessel.Asol
-                        except: pass
-                        # TODO Implement h5py direct_read method to improve speed
-                        if 'Pressure' in values:
-                            vessel.Psol = dsetGroup['Pressure'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if 'Flow' in values:
-                            vessel.Qsol = dsetGroup['Flow'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if  'Area' in values:
-                            vessel.Asol = dsetGroup['Area'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                        if 'WaveSpeed' in values:
-                            #vessel.csol = vessel.waveSpeed(vessel.Asol,vessel.C(vessel.Psol))
-                            vessel.postProcessing(['WaveSpeed'])
-                        if 'MeanVelocity' in values:
-                            #vessel.vsol = vessel.Qsol/vessel.Asol
-                            vessel.postProcessing(["MeanVelocity"])
-                        if 'Compliance' in values:
-                            vessel.postProcessing(['Compliance'])
-                        if "linearWavesplit" in values:
-                            vessel.postProcessing(["linearWavesplit"])
-                        if 'Gravity' in values:
-                            try: vessel.netGravity = dsetGroup['NetGravity'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no netGravity stored in solutiondata file")
-                        if 'Rotation' in values:
-                            try: vessel.rotToGlobalSys = dsetGroup['RotationToGlobal'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no rotation matrices stored in solutiondata file")
-                        if 'Position' in values:
-                            try: vessel.positionStart = dsetGroup['PositionStart'][nSelectedBegin:nSelectedEnd:nTStepSpaces]
-                            except Exception: self.warning("vascularNetwork.loadSolutionDataRange():  no positionStart stored in solutiondata file")
-                    else:
-                        self.warning("classVascularNetwork::loadSolutionDataRangeVessel Warning: vessel {} not in saved data".format(vesselId), noException= True)
-                        self.warning("this is a very bad warning text, as it is raised if the saved number of gridpoints is different from the xml file", noException= True)
+                    vessel.loadSolutionDataRange(tSlice,values)
 
         else:
-            raise ImportError("classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here")
-#            print 'classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here'
-#            exit()
+            raise ValueError("classVascularNetwork::loadSolutionDataRangeVessel Error: Inputs were not valid you should not get here")
 
 
 
@@ -1063,7 +972,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         except Exception:
             self.exception("vascularNetwork.findRootVessel(): could not find a root node")
         if len(roots) > 1:
-            raise ImportError("vascularNetwork.searchRoot(): found several roots: {}, check network again!".format(roots))
+            raise ValueError("vascularNetwork.searchRoot(): found several roots: {}, check network again!".format(roots))
 
     def checkDaughterDefinition(self):
         """
@@ -1275,10 +1184,16 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     def applyMothersToVessel(self):
         """
         Functions traverses the self.treeTraverseConnections and saves the id of the
-        left and right mother of the vessel
+        left and right mother of the vessel. Also check if there are any anastomosis 
+        in the network 
         """
+        self.anastomosisExists = False
+        
         for leftMother, rightMother, leftDaughter, rightDaughter in self.treeTraverseConnections:
-
+            
+            if leftMother != None and rightMother != None:
+                self.anastomosisExists = True
+                
             self.vessels[leftDaughter].leftMother = leftMother
             self.vessels[leftDaughter].rightMother = rightMother
             try:
@@ -1291,7 +1206,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         Function traverses self.treeTraverseConnections and creates start- and
         end-nodes for all vessels in the network
         """
+        self.treeTraverseList_sorted = self.treeTraverseList[:]
+        self.treeTraverseList_sorted.sort()
+        
+        nodes = []
         nodeCount = 0
+        nodes.append(nodeCount)
         self.vessels[self.root].startNode = nodeCount
         # add end node for root vessel
         nodeCount += 1
@@ -1305,6 +1225,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.vessels[leftDaughter].startNode = self.vessels[leftMother].endNode
                 # set end of LD
                 nodeCount += 1
+                
                 self.vessels[leftDaughter].endNode = nodeCount
 
             # # bifurcation
@@ -1314,9 +1235,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.vessels[rightDaughter].startNode = self.vessels[leftMother].endNode
                 # set end of LD
                 nodeCount += 1
+                
                 self.vessels[leftDaughter].endNode = nodeCount
                 # set end of RD
                 nodeCount += 1
+                
                 self.vessels[rightDaughter].endNode = nodeCount
 
             # # anastomosis
@@ -1327,7 +1250,27 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.vessels[leftDaughter].startNode = self.vessels[leftMother].endNode
                 # set end of LD
                 nodeCount += 1
+                
                 self.vessels[leftDaughter].endNode = nodeCount
+
+        connectionNodes = [0]
+        for vesselID in self.treeTraverseList_sorted:
+            nodes.append(self.vessels[vesselID].endNode)
+            endNodeTmp = self.vessels[vesselID].endNode
+            connection = False
+            for vesselIDtmp in self.treeTraverseList_sorted:
+                startNodetmp = self.vessels[vesselIDtmp].startNode
+                if startNodetmp == endNodeTmp:
+                    connection = True
+            
+            if connection:
+                connectionNodes.append(endNodeTmp)
+            #print "vessel{0}: startNode={1}, endNode={2}".format(vesselID, self.vessels[vesselID].startNode, self.vessels[vesselID].endNode)
+        
+        nodes.sort()
+        self.nodes =  list(set(nodes))
+        connectionNodes.sort()
+        self.connectionNodes = list(set(connectionNodes))
 
 
     def calculateNetworkResistance(self):
@@ -1398,6 +1341,197 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.warning("no method for resistance calculation for anastomosis is implemented!!! \n")
 
 
+    def calculateInitialValuesLinearSystem(self, Qmean):
+        """
+        This function convert the system to a lumped model of resistors in series and paralell and calculate average pressure and flow values
+        to be used as initial conditions. The system is reduced to a set of linear equations. For every vessel there is an equation for
+        the pressure drop over the vessel [Pstart - Pend + Q*Rv = 0], and for every junction there is an equation for the conservation of mass
+        [Qin -Qout = 0]
+        """
+        
+        Qmean = Qmean*10**6
+        
+        initialValues = {}
+        
+        Nunknowns = len(self.connectionNodes) + len(self.treeTraverseList_sorted) - 1
+        
+        M = np.zeros((Nunknowns, Nunknowns)) #system Matrix
+        
+        RHS = np.zeros(Nunknowns) #system right hand side
+        
+        for n, vesselId in enumerate(self.treeTraverseList_sorted):
+            """ iter through the list of vesseldicts and add the pressure equation:
+                p_start - p_end - Q*Rv = 0, and add the indices and floats in M and RHS """
+            if vesselId in self.boundaryVessels:
+                boundaryResistance = 0
+                for bc in self.boundaryConditions[vesselId]:
+                    # # if Rtotal is not given evaluate Rtotal := Rc + Zc_vessel
+                    try:
+                        # # windkessel 3 elements
+                        if bc.Rtotal == None:
+                            if bc.Z == 'VesselImpedance':
+                                P = np.ones(self.vessels[vesselId].N) * self.vessels[vesselId].Ps  # 158.747121018*133.32 #97.4608013004*133.32#
+                                compliance = self.vessels[vesselId].C(P)
+                                area = self.vessels[vesselId].A(P)
+                                waveSpeed = self.vessels[vesselId].c(area, compliance)
+                                Z = 1.0 / (compliance * waveSpeed)[-1]
+                            else: Z = bc.Z
+                            Rtotal = bc.Rc + Z
+                            bc.update({'Rtotal':Rtotal})
+                            print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
+                    except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
+                    # # add resistance to the value
+                    try: boundaryResistance = boundaryResistance + bc.Rtotal
+                    except Exception:
+                        # # winkessel 2 elements and single resistance
+                        try:
+                            if bc.Rc == 'VesselImpedance':
+                                P = np.ones(self.vessels[vesselId].N) * self.vessels[vesselId].Ps  # 158.747121018*133.32 #97.4608013004*133.32#
+                                compliance = self.vessels[vesselId].C(P)
+                                area = self.vessels[vesselId].A(P)
+                                waveSpeed = self.vessels[vesselId].c(area, compliance)
+                                Z = 1.0 / (compliance * waveSpeed)[-1]
+                                boundaryResistance = boundaryResistance + Z
+                        except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
+                        try:
+                            # # winkessel 2 elements and single resistance
+                            boundaryResistance = boundaryResistance + bc.Rc
+                        except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
+
+                # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
+                if boundaryResistance == 0:
+                    print "\n Boundary Condition at end of vessel {} has no resistance".format(vesselId)
+                    # # set boundaryresistance to 1/133.32*1.e6
+                    print "The resistance is set to 1*133.32*1.e6 \n"
+                    boundaryResistance = 1.*133.32 * 1.e6
+
+                nodeToNodeResistance = self.vessels[vesselId].resistance + boundaryResistance
+                boundaryVessel = True
+            else:
+                nodeToNodeResistance = self.vessels[vesselId].resistance
+                boundaryVessel = False
+            
+            
+            Pstart_index = None # index in Matrix for startnode
+            Pend_index = None # index in Matrix for endnode
+            
+            startNode = self.vessels[vesselId].startNode
+            endNode = self.vessels[vesselId].endNode
+            
+            for pos, item in enumerate(self.connectionNodes):
+                # iterate through connectionNodes (unknown P's) and find their correct index in Matrix M
+        
+                if item == startNode:
+                    Pstart_index = pos
+                
+                elif item == endNode:
+                    Pend_index = pos
+                    
+            Q_index = int(vesselId) - 1 + len(self.connectionNodes) - 1 # -1 due to Q1 is known and python index start at 0
+            
+            # TODO: 1) both flow and pressure BC at inlet
+            if vesselId != self.root and boundaryVessel == False:
+                M[n, Pstart_index] = 1
+                M[n, Pend_index] = -1
+                M[n, Q_index] = - 1.e-6*nodeToNodeResistance/133.32
+            elif vesselId == self.root:
+                M[n, Pstart_index] = 1
+                M[n, Pend_index] = -1
+                RHS[n] = Qmean*1.e-6*nodeToNodeResistance/133.32
+             
+            elif boundaryVessel:
+                
+                M[n, Pstart_index] = 1
+                M[n, Q_index] = -1.e-6*nodeToNodeResistance/133.32
+                RHS[n] = 0 # could set to venous pressure
+        
+        for leftMother, rightMother, leftDaughter, rightDaughter in (self.treeTraverseConnections):
+    
+            """iter through the list of junctions and add the equation about conservation of mass:
+               Qin - Qout = 0, and add the indices and floats in M and RHS """
+            
+            n += 1
+            
+            
+            #find Q in and Qout of junction
+            if rightMother == None:
+                Qin = [leftMother]
+            else:
+                Qin = [leftMother, rightMother]
+                
+            if rightDaughter == None:
+                Qout = [leftDaughter]
+            else:
+                Qout = [leftDaughter, rightDaughter]
+            
+            
+            for vesselid in Qin:
+                Q_index = int(vesselid) - 1 + len(self.connectionNodes) - 1
+                
+                if vesselid == self.root:
+                    RHS[n] = - Qmean
+                else:
+                    M[n, Q_index] = 1
+        
+            for vesselid in Qout:
+                Q_index = int(vesselid) - 1 + len(self.connectionNodes) - 1
+                
+                M[n, Q_index] = - 1
+                
+        
+        meanPandQ = np.linalg.solve(M, RHS)
+        
+                
+        for n, vesselId in enumerate(self.treeTraverseList_sorted):
+            # post processing to assign initialvalues
+            
+            Pstart_index = None 
+            Pend_index = None
+            
+            startNode = self.vessels[vesselId].startNode
+            endNode = self.vessels[vesselId].endNode
+            
+            for pos, item in enumerate(self.connectionNodes):
+                # iterate through connectionNodes (unknown P's) and find their correct index in solution array meanPandQ
+        
+                if item == startNode:
+                    Pstart_index = pos
+                
+                elif item == endNode:
+                    Pend_index = pos
+            
+            if vesselId != self.root:
+                Q_index = int(vesselId) - 1 + len(self.connectionNodes) - 1
+                qm = meanPandQ[Q_index]*1e-6
+            else:
+                qm = Qmean*1e-6
+            
+            p0 = meanPandQ[Pstart_index]*133.32
+            
+            
+            if Pend_index != None:
+                p1 = meanPandQ[Pend_index]*133.32
+            else:
+                p1 = p0 - qm*self.vessels[vesselId].resistance
+            
+            initialValues[vesselId] = {}
+            initialValues[vesselId]['Pressure'] = [p0, p1]
+            initialValues[vesselId]['Flow'] = qm
+            self.Rcum[vesselId] = p0/qm
+
+        
+        # # adjust pressure with venous pressure and difference between mean and diastolic pressure
+        for initialArray in initialValues.itervalues():
+            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
+            
+                
+        # # adjust pressure for gravity pressure
+        initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, self.root)
+        
+        self.initialValues = initialValuesWithGravity
+
+
     def calculateInitialValues(self):
         """
         This function travers the network tree and calculates the
@@ -1449,6 +1583,21 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.exception("classVascularNetwork: Unable to set given meanFlow at inflow point")
                 #exit()
 
+        elif self.initialsationMethod == 'AutoLinearSystem':
+
+            try:
+                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
+                self.initialisationPhaseExist = True
+
+            except Exception:
+                self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
+            
+            self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+            self.calculateInitialValuesLinearSystem(meanInflow)
+            
+            return
+
+                
         elif self.initialsationMethod == 'ConstantPressure':
 
             constantPressure = self.initMeanPressure
@@ -1480,14 +1629,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     initialValues[daughter]['Flow'] = 0
 
             # # adjust pressure with venous pressure
+            # TODO: this needs to work with the venousPool object/component
             for initialArray in initialValues.itervalues():
-                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.centralVenousPressure
-                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.centralVenousPressure
+                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
 
             # # Check if gravity is on and if user wants to correct for hydrostatic pressure
             if self.gravitationalField == True:
 
-                input = ['K']
+                input = 'K'
                 while input not in ['y', 'Y', 'yes', 'Yes', 'n', 'no', 'No', 'NO']:
                     input = str(raw_input("\n Adjust for hydrostatic pressure(y/n): "))
 
@@ -1530,10 +1680,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
             except Exception:
                 self.warning("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
-                
+
                 self.initialisationPhaseExist = False
                 self.initPhaseTimeSpan = 0.
-                
+
             p1 = p0 - self.vessels[root].resistance * meanInflow
         else:
             raise ValueError("Neither flow or pressure value given at inflow point!")
@@ -1568,8 +1718,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         # # adjust pressure with venous pressure
         for initialArray in initialValues.itervalues():
-            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.centralVenousPressure
-            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.centralVenousPressure
+            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
 
         # # adjust pressure for gravity pressure
         initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)
@@ -1577,64 +1727,84 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.initialValues = initialValuesWithGravity
 
     def evaluateNetworkResistanceAndCompliance(self):
-        
+
         arterialCompliance = 0
-        
         arterialCompliance120 = 0
         arterialCompliance80  = 0
         arterialCompliancePmean = 0
+        arterialVolume = 0
+        arterialVolume120 = 0
+        arterialVolume80  = 0
+        arterialVolumePmean = 0
+
         for vesselId, vessel_i in self.vessels.iteritems():
 
             p0, p1 = self.initialValues[vesselId]['Pressure']
             initialPressure = np.linspace(p0, p1, int(vessel_i.N))
             C = vessel_i.C(initialPressure)
             Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
-            
+            A = vessel_i.A(np.linspace(p0, p1, int(vessel_i.N)))
+            Avol = sum((A[1::] + A[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            arterialVolume = arterialVolume + Avol
             arterialCompliance = arterialCompliance + Cvol
-            
+
             p0 = 120*133.32
             p1 = p0
             C = vessel_i.C(np.linspace(p0, p1, int(vessel_i.N)))
-            Cvol120 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] 
+            Cvol120 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]
+            A = vessel_i.A(np.linspace(p0, p1, int(vessel_i.N)))
+            Avol120 = sum((A[1::] + A[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            arterialVolume120 = arterialVolume120 + Avol120
             arterialCompliance120 = arterialCompliance120 + Cvol120
-            
+
             p0 = 75*133.32
             p1 = p0
             C = vessel_i.C(np.linspace(p0, p1, int(vessel_i.N)))
-            Cvol80 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] 
+            Cvol80 = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]
+            A = vessel_i.A(np.linspace(p0, p1, int(vessel_i.N)))
+            Avol80 = sum((A[1::] + A[0:-1]) / 2.0) * vessel_i.dz[0]  # ## works only if equidistant grid
+            arterialVolume80 = arterialVolume80 + Avol80
             arterialCompliance80 = arterialCompliance80 + Cvol80
             
+
             numberEstimates = 20
             complianceEstimates = np.empty(numberEstimates)
             for index,p in zip(xrange(numberEstimates),np.linspace(65.,110.,numberEstimates)):
                 pressure = np.linspace(p*133.32, p*133.32, int(vessel_i.N))
                 C = vessel_i.C(pressure)
-                complianceEstimates[index] = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] 
-                
+                complianceEstimates[index] = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]
+
             arterialCompliancePmean = arterialCompliancePmean + np.mean(complianceEstimates)
-            
+
         windkesselCompliance = 0
         for bcs in self.boundaryConditions.itervalues():
             for bc in bcs:
                 if "Windkessel" in bc.name:
                     windkesselCompliance = windkesselCompliance + bc.C
-            
+
+        print "{:6} - arterial Volume initPressure".format(arterialVolume*1e6)
+        print "{:6} - arterial Volume 120".format(arterialVolume120*1e6)
+        print "{:6} - arterial Volume 80".format(arterialVolume80*1e6)
+        print
+        print "--------------------------"
         print "{:6} - arterial compliance initPressure".format(arterialCompliance*133.32*1e6)
         print "{:6} - arterial compliance 120".format(arterialCompliance120*133.32*1e6)
         print "{:6} - arterial compliance 80".format(arterialCompliance80*133.32*1e6)
         print "{:6} - arterial compliance physiological MPA range 65-120 mmHg".format(arterialCompliancePmean*133.32*1e6)
-        print 
+        print
         print "{:6} - windkessel compliance".format(windkesselCompliance*133.32*1e6)
         print "--------------------------"
         totalArterialCompliance = (arterialCompliancePmean+windkesselCompliance)
         print "{:6} - total arterial compliance".format(totalArterialCompliance*133.32*1e6)
         print "{:6} - ration between arterial/total compliance".format(arterialCompliancePmean/totalArterialCompliance)
-        self.calculateNetworkResistance()
-        rootVesselResistance = self.vessels[self.root].resistance
-        print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
-        print "{:6} - root vessel resistance".format(rootVesselResistance/133.32*1e-6)
-        print "{:6} - total-root vessel resistance".format((self.Rcum[self.root]-rootVesselResistance)/133.32*1e-6)
-        print "{:6} - ratio root vessel / total".format(rootVesselResistance/self.Rcum[self.root])
+        #self.calculateNetworkResistance()
+        if self.initialsationMethod != 'ConstantPressure':
+            
+            rootVesselResistance = self.vessels[self.root].resistance
+            print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
+            print "{:6} - root vessel resistance".format(rootVesselResistance/133.32*1e-6)
+            print "{:6} - total-root vessel resistance".format((self.Rcum[self.root]-rootVesselResistance)/133.32*1e-6)
+            print "{:6} - ratio root vessel / total".format(rootVesselResistance/self.Rcum[self.root])
 
 
     def evaluateWindkesselCompliance(self):
@@ -1653,7 +1823,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.Cends[vesselId] = C[-1]
 
             Cvol = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0] # ## works only if equidistant grid
-            
+
             # Cvol = C[-1]*vessel_i.length
 
             # print sum(C[1:-1])*vessel_i.dz[0], Cvol2, C[0]*vessel_i.length
@@ -1926,24 +2096,24 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
 
-            relativeVenousPressure = self.centralVenousPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[0][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
+            relativeVenousPressure = self.venousPool.P[0] + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[0][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 
-            if self.minimumVenousPressure != None:
-                if round(relativeVenousPressure, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
-                    relativeVenousPressure = self.minimumVenousPressure
+            if self.venousPool.Pmin != None:
+                if round(relativeVenousPressure, 2) < round(self.venousPool.Pmin, 2):  # round off everthing after 2 decimal points x.xx
+                    relativeVenousPressure = self.venousPool.Pmin
                     self.venousSystemCollaps = True
-                    self.warning("Venous system showing collapsing dynamics! Calculated Pressure %f".format(relativeVenousPressure), noException= True)
+                    self.warning("Venous system showing collapsing dynamics! Calculated Pressure %f".format(relativeVenousPressure), noException= True, quiet=True)
 
             for bc in self.boundaryConditions[vesselId]:
                 # update venous pressure at boundary nodes
                 if bc.name in ['_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
                     bc.update({'venousPressure':relativeVenousPressure})
-       
+
         # # print out of method
         if self.quiet == False:
             print '\n============================================================='
             print '_______________Venous Pressures _____________________________'
-            print '%s %36.1f' % ('Central venous pressure:', round(self.centralVenousPressure, 2))
+            print '%s %36.1f' % ('Central venous pressure:', round(self.venousPool.P[0], 2))
 
 #            if self.gravitationalField == True:
                 # for vesselId in sorted(self.boundaryVessels):
@@ -1972,9 +2142,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         Initializing the position and rotation of each vessel in 3D space
         Initializing netGravity of the vessels.
-        
+
         Coordinate system is RHS with Z vertical so gravity acts in -Z.
-                
+
         """
         # TODO: what is this?
         if nSet != None:
@@ -2018,12 +2188,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             relativeVenousPressure = np.empty(nTsteps+1)
             for n in xrange(nTsteps+1):
 
-                relativeVP = self.centralVenousPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
+                relativeVP = self.venousPool.P[0] + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 
-                if self.minimumVenousPressure != None:
-                    if round(relativeVP, 2) < round(self.minimumVenousPressure, 2):  # round off everthing after 2 decimal points x.xx
-                        relativeVP = self.minimumVenousPressure
-                        self.warning("Venous system showing collapsing dynamics!", noException= True)
+                if self.venousPool.Pmin != None:
+                    if round(relativeVP, 2) < round(self.venousPool.Pmin, 2):  # round off everthing after 2 decimal points x.xx
+                        relativeVP = self.venousPool.Pmin
+                        self.warning("Venous system showing collapsing dynamics!", noException= True, quiet=True)
 
                 relativeVenousPressure[n] = relativeVP
 
@@ -2032,19 +2202,19 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 # update venous pressure at boundary nodes
                 if bc.name in ['_Windkessel-2ElementsDAE', 'Windkessel-2ElementsDAE','_Windkessel-2Elements', 'Windkessel-2Elements', '_Windkessel-3Elements', 'Windkessel-3Elements']:
                     bc.update({'venousPressure':relativeVenousPressure})
-                
-                    
+
+
                 # TODO REMOVE THIS HACK
                 if vesselId == 27 and False:
                     abdominalVenuosHeight = -0.45*np.cos(self.tiltAngle)
-                    abdominalVenousPressure = self.centralVenousPressure + self.globalFluid['rho'] * abdominalVenuosHeight* self.gravityConstant - self.vessels[vesselId].externalPressure
+                    abdominalVenousPressure = self.venousPool.P[0] + self.globalFluid['rho'] * abdominalVenuosHeight* self.gravityConstant - self.vessels[vesselId].externalPressure
                     # from matplotlib import pyplot as plt
                     # plt.plot(self.tiltAngle)
                     # plt.show()
                     # plt.plot(abdominalVenuosHeight)
                     # plt.show()
                     # plt.plot(abdominalVenousPressure)
-                    # plt.show() 
+                    # plt.show()
                     self.boundaryConditions[vesselId][0].update({'venousPressure':abdominalVenousPressure})
-                    
+
 

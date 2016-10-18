@@ -220,21 +220,20 @@ class Laplace2(Laplace):
         
 
 class Hayashi(Compliance):
-    """
-    Compliance model found in Hayashi et al. 1993
-    """
-    def __init__(self, rho, As):
-        Compliance.__init__(self, rho, As)
-        self.betaHayashi = None
-        self.rho = rho
-             
-    def initialize(self,complianceDataDict):
-        """
-        Initilalize compliance class with type specific variables
-        and calculate set the marterial parameters
-        """
-        self.update(complianceDataDict)
-        
+	"""
+	Compliance model found in Hayashi et al. 1993
+	"""
+ 	def __init__(self, rho, As):
+ 		Compliance.__init__(self, rho, As)
+		self.betaHayashi = None
+			
+	def initialize(self,complianceDataDict):
+		"""
+		Initilalize compliance class with type specific variables
+		and calculate set the marterial parameters
+		"""
+		self.update(complianceDataDict)
+		self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
         self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
         self.C0preCalculated = self.C(self.Ps)
     
@@ -297,11 +296,8 @@ class HayashiEmpirical(Compliance):
         """
         self.update(complianceDataDict)
         
-        #self.betaHayashi     = np.ones(len(self.As))*self.betaHayashi 
-        Amm = self.As*1e6 
         #print "DB using area relation for beta", 
-        
-        self.C0preCalculated = self.C(self.Ps)
+		self.C0preCalculated = self.C(self.Ps)
         
 #         print "beta hayashi", self.betaHayashi
 #         print "beta HAy mean", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*self.betaHayashi)
@@ -312,20 +308,20 @@ class HayashiEmpirical(Compliance):
         self.betaHayashi = (13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*self.betaHayashi 
         
         
-    def A(self, P):
-        P = P-self.externalPressure
-        return self.As*( 1.0 + np.log( P/self.Ps ) / self.betaHayashi )**2.0    
-    def C(self, P):
-        P = P-self.externalPressure
-        return 2.0* self.As / self.betaHayashi * ( 1.0 + np.log( P/self.Ps ) / self.betaHayashi ) / P
-    
-    def A_Node(self, P, node):
-        P = P[node]-self.externalPressure
-        return self.As[node]*( 1.0 + np.log( P/self.Ps ) / self.betaHayashi[node] )**2.0
-    def C_Node(self, P, node):
-        P = P[node]-self.externalPressure
-        return 2.0* self.As[node] / self.betaHayashi[node] * ( 1.0 + np.log( P/self.Ps ) / self.betaHayashi[node] ) / P
-
+	def A(self, P):
+		P = P-self.externalPressure
+		return self.As*( 1.0 + np.log( P/self.Ps ) / self.betaHayashi )**2.0	
+	def C(self, P):
+		P = P-self.externalPressure
+		return 2.0* self.As / self.betaHayashi * ( 1.0 + np.log( P/self.Ps ) / self.betaHayashi ) / P
+	
+	def A_Node(self, P, node):
+		P = P[node]-self.externalPressure
+		return self.As[node]*( 1.0 + np.log( P/self.Ps ) / self.betaHayashi[node] )**2.0
+	def C_Node(self, P, node):
+		P = P[node]-self.externalPressure
+		return 2.0* self.As[node] / self.betaHayashi[node] * ( 1.0 + np.log( P/self.Ps ) / self.betaHayashi[node] ) / P
+	
 class Reymond(Compliance):
     """
     Compliance model found in Reymond et al. 2009

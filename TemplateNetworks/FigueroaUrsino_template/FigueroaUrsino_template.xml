@@ -2,16 +2,15 @@
 <FigueroaUrsino.xml id="xxx" version="4.2">
   <simulationContext>
     <description>None</description>
-    <totalTime unit="s">20.0</totalTime>
+    <totalTime unit="s">4.0</totalTime>
     <CFL>0.65</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
-    <timeSaveEnd unit="s">20.0</timeSaveEnd>
+    <minSaveDt unit="s"> 0.01 </minSaveDt>
     <maxMemory unit="MB">5000</maxMemory>
-    <saveInitialisationPhase>True</saveInitialisationPhase>
     <gravitationalField>True</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
-    <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
-    <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
+    <centralVenousPressure unit="mmHg">3.0</centralVenousPressure>
+    <minimumVenousPressure unit="mmHg">0.0</minimumVenousPressure>
   </simulationContext>
   <solverCalibration>
     <rigidAreas>False</rigidAreas>
@@ -22,8 +21,8 @@
   </solverCalibration>
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
-    <initMeanFlow unit="m3 s-1">1e-06</initMeanFlow>
-    <initMeanPressure unit="Pa">101.28*133.32</initMeanPressure>
+    <initMeanFlow unit="ml s-1">1.0</initMeanFlow>
+    <initMeanPressure unit="mmHg">101.28</initMeanPressure>
     <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
     <compPercentageWK3>0.2</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
@@ -44,7 +43,6 @@
 	          <duration unit='s'>7.</duration>
 	          <startTime unit='s'>15.</startTime>
 	      </externalStimulus>
-	    -->
 	    <externalStimulus type='headUpTilt' Id='1'>
 	          <startAngle unit='deg'>0</startAngle>
 	          <comment> corresponds to a tilting the head 60 degrees up from the supine position </comment>
@@ -52,7 +50,24 @@
 	          <duration unit='s'>7.</duration>
 	          <startTime unit='s'>5.</startTime>
 	      </externalStimulus>
+	      
+	    -->
   </externalStimuli>
+<venousPool>
+<!--
+<venousPoolContent class="StaticVenousPressure">
+<P0 unit="mmHg">5</P0>
+<pressureGain>3</pressureGain>
+</venousPoolContent>
+-->
+<venousPoolContent class="venousPool">
+<P0 unit="mmHg">2</P0>
+<pressureGain>1/0.228</pressureGain>
+<Vusv0 unit="ml">3440</Vusv0>
+<V0 unit="ml">3700</V0>
+<k>0.1124</k>
+</venousPoolContent>
+</venousPool>
 <baroreceptors>
   <baroreceptor Id="1">
       <topology>

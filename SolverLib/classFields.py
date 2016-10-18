@@ -8,7 +8,7 @@ import numpy as np
 
 class Field():
     
-    def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea, solvingSchemeField = 'MacCormack_Matrix'):
+    def __init__(self, vessel, currentMemoryIndex, dt, systemEquation, rigidArea, solvingSchemeField = 'MacCormack_Flux'):
         """
         Constructor of Field object
         
@@ -41,9 +41,7 @@ class Field():
                        
         if solvingSchemeField == 'MacCormack_Matrix':
             self.__call__ = self.MacCormackMatrix
-            #print "Classfields49: using Matrix based formulation in field calculation"
-        elif solvingSchemeField == 'MacCormack_Flux':
-            #print "Classfields51: using Flux based formulation in field calculation"
+        elif solvingSchemeField == "MacCormack_Flux":
             self.__call__ = self.MacCormackFlux
         else:
             raise ValueError('Classfields51: error, scheme for solving field not correct')
@@ -152,9 +150,7 @@ class Field():
 
         #TODO: Please explain this if statement in a comment.
         if (self.P[n+1] < 0).any():
-            print "ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print self.P[n+1]
-            exit()   
+            raise ValueError("ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
         
     def MacCormackMatrix(self):
         """

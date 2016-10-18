@@ -40,7 +40,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             'v' : visualisation type
             'c' : connect visualisations
             'w' : set working directory
-            'p': open workind directory settings
+            'p' : open workind directory settings
 
             visualisationOnly := bool if True proposal of visualisation cases are made if non is given
 
@@ -84,7 +84,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                               help = "resimulate case with same network saved in datanumber file, 0 = False, 1 = True")
         elif activeOption == 'w':
             parser.add_option("-w", "--workingDirectory", dest="workingDirectory", 
-                              help = "set the absolute path of your working Directory where you the networkfiles are stored")
+                              help = "set the absolute path of your working Directory where you the networkfiles are stored (If fresh installed use this option to set your first directory)")
         elif activeOption == 'p':
             parser.add_option("-p", "--workingDirectorySettings", action="store_true", dest="workingDirectorySettings", 
                               help = "open working directory settings menu")
@@ -208,7 +208,7 @@ def workingDirectorySettings():
     working directory settings
     '''
     mFPH.updateKnownWorkingDirectories()
-    prettyPrintList(' Working directory settings menu',['insert new working directory','switch to another known working directory'])
+    prettyPrintList(' Working directory settings menu',['add working directory (folder must exist)','switch to another known working directory'])
     print "\n current working directory: {} ".format(mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
     userInput = userInputEvaluationInt(2)
     if userInput == 0:
@@ -225,8 +225,9 @@ def insertWorkingDirectory(optionArgument):
     
     if optionArgument == None:
         optionArgument = ""
+	# TODO: create directory if not existing!!!
         while os.path.isdir(optionArgument) == False:
-            optionArgument = raw_input("Insert new working directory path: ")
+            optionArgument = raw_input("Insert existing working directory path you want to add: ")
     
     if os.path.isdir(optionArgument):
         mFPH.saveConfigFile({'WorkingDirectory':optionArgument})

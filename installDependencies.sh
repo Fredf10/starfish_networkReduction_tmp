@@ -3,20 +3,21 @@ OS=$(lsb_release -si)
 ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
 VER=$(lsb_release -sr)
 
-if [ $OS == "Ubuntu" ]; then
-    echo " %OS detected, starting installation via apt-get.."
+if [ $OS = "Ubuntu" ]; then
+    echo  $OS" detected, starting installation via apt-get.."
     apt-get -y install python-pip
-    apt-get -y install build-essential 
+    apt-get -y install build-essential
+    apt-get -y install libxml2-dev
+    apt-get -y install libxslt-dev
     apt-get -y install python-dev
     apt-get -y install python-gtk2
     apt-get -y install python-scipy
     apt-get -y install python-matplotlib
     apt-get -y install graphviz
     apt-get -y install libhdf5-dev
-    apt-get -y install libxml2-dev
-    apt-get -y install libxslt-dev
+    apt-get -y install python-h5py
 
-elif [ $OS == "Fedora" ]; then
+elif [ $OS = "Fedora" ]; then
     if [ $VER -lt 21 ]; then
         echo $OS "version 21 or earlier detected , starting installation via yum.."
         yum -y install gcc
@@ -28,6 +29,7 @@ elif [ $OS == "Fedora" ]; then
         yum -y install python-matplotlib
         yum -y install graphviz
         yum -y install hdf5-devel
+	yum -y install h5py
         yum -y install libxml-devel
         yum -y install libxslt-devel
 
@@ -42,6 +44,7 @@ elif [ $OS == "Fedora" ]; then
         dnf -y install python-matplotlib
         dnf -y install graphviz
         dnf -y install hdf5-devel
+	dnf -y install h5py
         dnf -y install libxml-devel
         dnf -y install libxslt-devel
 fi

@@ -14,7 +14,7 @@ class TimerBaseClass(cSBO.StarfishBaseObject):
 
         self.currentTimeStep = 0
         self.currentMemoryIndex = 0
-        self.nTsteps = 0
+        self.nTSteps = 0
         self.dt = 0
         self.Tstart = 0 # start time of the event
         self.Tend = 0 # end time of the event
@@ -64,13 +64,13 @@ class Valsalva(TimerBaseClass):
         end = int(self.Tend/self.dt) # time step where pressure ramp ends
         
         #startPressure = self.InitialexternalPressure * np.ones(start) # pressure at the beginning
-        #endPressure = (self.InitialexternalPressure+self.deltaP)*np.ones(self.nTsteps+1-end) # pressure after Valsalva
+        #endPressure = (self.InitialexternalPressure+self.deltaP)*np.ones(self.nTSteps+1-end) # pressure after Valsalva
         #changingPressure = np.linspace(0,self.deltaP,num = end-start) # pressure values during ramp
         #changingPressure = changingPressure + self.InitialexternalPressure*np.ones(end-start)
         
         startPressure = self.InitialexternalPressure * np.ones(start) # pressure at the beginning
         changingPressure = np.ones(end-start)*self.deltaP
-        endPressure = self.InitialexternalPressure*np.ones(self.nTsteps+1-end)
+        endPressure = self.InitialexternalPressure*np.ones(self.nTSteps+1-end)
         
         self.newexternalPressure = np.append(startPressure,np.append(changingPressure,endPressure)) # concatenate arrays to have the whole pressue history in one array
         

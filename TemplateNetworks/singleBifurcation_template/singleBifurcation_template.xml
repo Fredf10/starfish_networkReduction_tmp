@@ -4,9 +4,8 @@
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">0.5</totalTime>
     <timeSaveBegin unit="s">0.5</timeSaveBegin>
-	<timeSaveEnd unit="s">5.0</timeSaveEnd>
+    <minSaveDt>-1</minSaveDt>
 	<maxMemory unit="MB">500</maxMemory>
-	<saveInitialisationPhase>True</saveInitialisationPhase>
     <CFL>1.1</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
