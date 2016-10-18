@@ -1305,6 +1305,7 @@ class UqsaMethodMonteCarloParametrizedBootstrapping(TestBaseClass):
         self.sampleSize = 10
         #
         self.sensitivityAnalysis = False
+        # amount of averaged chunks 
         self.averageNumber = 10
         self.chunkSize = 100
          

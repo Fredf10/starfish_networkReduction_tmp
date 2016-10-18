@@ -11,7 +11,7 @@
       <preProcessData>True</preProcessData> 
       <postProcessing>True</postProcessing>
       <sampleManager class="sampleManager">
-      <samplingMethod>H</samplingMethod>
+      <samplingMethod>S</samplingMethod>
       <dependentCase>False</dependentCase>
         </sampleManager>
       <uqsaMethods>
@@ -26,7 +26,7 @@
           <uqsaMethod Id="MCpb-20" class="uqsaMethodMonteCarloParametrizedBootstrapping">
             <sampleSize>20</sampleSize>
             <sensitivityAnalysis>False</sensitivityAnalysis>
-            <averageNumber>3000.</averageNumber>
+            <averageNumber>4</averageNumber>
             <chunkSize>20</chunkSize>
           </uqsaMethod>
           <uqsaMethod class="uqsaMethodPolynomialChaos" Id="PC-1">
@@ -38,8 +38,8 @@
           <evaluateSimulationTime>True</evaluateSimulationTime>
     	  <locationsOfInterest>
     	  	<locationOfInterest class="LocationOfInterest" Id="exampleLocation"> 
-    	  		<quantitiesOfInterestToProcess>Pressure</quantitiesOfInterestToProcess>
-    	  		<queryLocation>vessel_1_3</queryLocation>
+    	  		<quantitiesOfInterestToProcess>Pressure Flow</quantitiesOfInterestToProcess>
+    	  		<queryLocation>vessel_1</queryLocation>
     	  		<xVal unit="m">0.05</xVal>
     	  		<confidenceAlpha>5</confidenceAlpha>
     	  	</locationOfInterest>
