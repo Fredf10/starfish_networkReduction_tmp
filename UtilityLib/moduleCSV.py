@@ -80,6 +80,8 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
         
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
+    if vesselCSVFile == None:
+        return None
     
     # load data    
     reader = ccBC.csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)

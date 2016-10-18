@@ -362,19 +362,18 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
 
 def loadingErrorMessageValueError(variableName, element, elementName):
     variableDict =   variablesDict[variableName]
-    print """ERROR loadNetworkFromXML():
+    raise ValueError("""ERROR loadNetworkFromXML():
           value for variable <<{}>> of {} {} is not defined.
-          (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
-    exit()
+          (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict))
+    
 
 
 def loadingErrorMessageVariableError(variableName, element, elementName):
     try: variableDict =   variablesDict[variableName]
     except KeyError: variableDict = "No entry defined for This element"
-    print """ERROR loadNetworkFromXML():
+    raise ValueError("""ERROR loadNetworkFromXML():
           variable "{}" of {} {} is not defined.
-          (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict)
-    exit()
+          (Hint:{}) , system exit!""".format(variableName, element, elementName, variableDict))
 
 
 # def loadRandomInputElement(xmlElement,nxml,variableName,randomInputManager, randomInputLocation):
