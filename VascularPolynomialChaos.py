@@ -32,7 +32,7 @@ import numpy as np
 
 import cPickle
 
-def vascularPolyChaos():
+def uncertaintyPropagation():
     '''
     Perform vascular polynomial chaos
     or MonteCarlo analysis for STARFiSh simulation case
@@ -133,4 +133,4 @@ def vascularPolyChaos():
                 
     # 8. plotting of variables
 if __name__ == '__main__':
-    vascularPolyChaos()
+    uncertaintyPropagation()
