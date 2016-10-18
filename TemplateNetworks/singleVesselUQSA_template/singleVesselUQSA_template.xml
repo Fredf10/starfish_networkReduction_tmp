@@ -5,6 +5,7 @@
     <totalTime unit="s">1.0</totalTime>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
 	<timeSaveEnd unit="s">1.0</timeSaveEnd>
+    <minSaveDt unit="s">-1</minSaveDt>
 	<maxMemory unit="MB">0.500</maxMemory>
 	<saveInitialisationPhase>False</saveInitialisationPhase>
     <CFL>0.8</CFL>

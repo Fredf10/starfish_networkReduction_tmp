@@ -29,7 +29,7 @@ import moduleFilePathHandler as mFPH
 #sys.path.append(cur + '/../VascularPolynomialChaosLib')
 from VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 
-from NetworkLib.classMeasurments import MeasurmentRoutine
+from NetworkLib.classMeasurements import MeasurementRoutine
 
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
@@ -125,7 +125,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
     for xmlElementName in nxmlW.xmlElements:
         xmlFileElement = etree.SubElement(root, xmlElementName)
         xmlElement = nxmlW.xmlElementsReference[xmlElementName]
-
+                
         if xmlElementName == 'boundaryConditions':
             for vesselId,boundaryConditions in vascularNetwork.boundaryConditions.iteritems():
                 subElement = etree.SubElement(xmlFileElement, 'boundaryCondition', vesselId = str(vesselId))
@@ -222,10 +222,10 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                 vascularNetwork.randomInputManager.writeDataToXmlNode(xmlFileElement)
                 xmlFileElement.set('class', 'RandomInputManager')
                 
-        elif xmlElementName == 'measurmentRoutine':
-            if vascularNetwork.measurmentRoutine != None:
-                vascularNetwork.measurmentRoutine.writeDataToXmlNode(xmlFileElement)
-                xmlFileElement.set('class', 'MeasurmentRoutine')
+        elif xmlElementName == 'measurementRoutine':
+            if vascularNetwork.measurementRoutine != None:
+                vascularNetwork.measurementRoutine.writeDataToXmlNode(xmlFileElement)
+                xmlFileElement.set('class', 'MeasurementRoutine')
                 
         elif xmlElementName == "externalStimuli":
             for stimulusId, stimulus in vascularNetwork.externalStimuli.iteritems():
@@ -244,7 +244,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 #                     if randomInputLocation in randomInputManager.map:
 #                         writeRandomInputElement(subsubElement, variable, randomInputManager, randomInputLocation)
 
-
+        
         else: # vascularNetwork
             for variable in xmlElement:
                 subElement = etree.SubElement(xmlFileElement, variable) # add subElement
@@ -731,13 +731,13 @@ def loadNetworkFromXML(networkName ,
                     vascularNetwork.randomInputManager = randomInputManager
                     vascularNetwork.randomInputManager.loadDataFromXmlNode(xmlElement)
 
-            elif xmlElementName == 'measurmentRoutine':
-                ## create measurmentRoutine
+            elif xmlElementName == 'measurementRoutine':
+                ## create measurementRoutine
                 xmlElementChildren = xmlElement.getchildren()
                 if len(xmlElementChildren) != 0:
-                    measurmentRoutine = MeasurmentRoutine()
-                    vascularNetwork.measurmentRoutine = measurmentRoutine
-                    vascularNetwork.measurmentRoutine.loadDataFromXmlNode(xmlElement)
+                    measurmentRoutine = MeasurementRoutine()
+                    vascularNetwork.measurementRoutine = measurmentRoutine
+                    vascularNetwork.measurementRoutine.loadDataFromXmlNode(xmlElement)
                                 
 
             elif xmlElementName in nxml.vascularNetworkElements: # vascularNetwork

@@ -100,7 +100,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         #dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
-        self.venousPool = None  #classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({})
+        self.venousPool = classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({})
         self.heart = None
 
         self.boundaryConditions = {}
@@ -339,8 +339,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             vessel.update({'gravityConstant': self.gravityConstant})
 
         # ## update wall models from measurment data
-        if self.measurmentRoutine != None:
-            self.measurmentRoutine.adaptationToPatientSpecificCondition(self)
+        if self.measurementRoutine != None:
+            self.measurementRoutine.adaptationToPatientSpecificCondition(self)
 
         # ## check and initialize boundary conditions
         if self.boundaryConditions != {}:
@@ -418,7 +418,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # ## initialize for simulation
         # TODO: Can this be moved?
         if initializeForSimulation == True:
-
+            
             # # initialize venous pressure and checks central venous pressure
             self.initializeVenousGravityPressure()
 

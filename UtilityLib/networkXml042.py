@@ -287,7 +287,7 @@ xmlElements  = [ 'simulationContext',
                  'communicators',
                  'boundaryConditions',
                  'randomInputManager',
-                 'measurmentRoutine',
+                 'measurementRoutine',
                  'vessels',
                  "venousPool"]
 
@@ -300,7 +300,7 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference, #TODO why is this Reference?
                         'randomInputManager'    : None,
-                        'measurmentRoutine'     : None,
+                        'measurementRoutine'     : None,
                         'vessels'               : vesselElements,
                         'venousPool' : None }
 

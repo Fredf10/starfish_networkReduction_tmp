@@ -136,9 +136,9 @@ class RandomInputManager(TestBaseClass):
                     
                     print "cRIM81, linked baroreceptor",int(loc[1]), 'to ',vascularNetwork.baroreceptors[int(loc[1])].update
                 
-                elif objType == "measurmentRoutine":
+                elif objType == "measurementRoutine":
                     randomInput.updateMethods = {randomInput.variableName[0]:
-                                                 vascularNetwork.measurmentRoutine.setVariablesDict}
+                                                 vascularNetwork.measurementRoutine.setVariablesDict}
                 
                 else: raise ValueError("RandomInputManager: Parameter {} of randomInput {} is linkable.".format(randomInput.location,randomInputName))
                 if randomInput.updateMethods == {}: break
