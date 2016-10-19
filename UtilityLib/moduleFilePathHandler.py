@@ -416,8 +416,10 @@ def insertWorkingDirectory(optionArgument):
     if optionArgument == None:
         optionArgument = ""
         loopQuestion = True
-        
-        optionArgument = raw_input("Insert existing working directory path you want to add, or (q) quit: ")
+        defaultWD = os.path.expanduser(os.path.join('~','starfish_working_directory')) 
+        print("Enter an absolute or relative path to set the working directory, or (q) quit")
+        input_prompt="[Press enter to use the default path {}]: ".format(defaultWD)
+        optionArgument = raw_input(input_prompt) or defaultWD
         
     if optionArgument != "q":
         optionArgument = os.path.expanduser(optionArgument)
