@@ -230,7 +230,7 @@ class BoundaryConditionType1(BoundaryCondition):
         self.freqNew = self.freq
         self.TspaceNew = self.Tspace
 
-    def initialize(self, bcDict, networkName=None):
+    def initialize(self, bcDict):
         """
         updates - the updateBoundaryDict data using a dictionary in from of
                   bcDict = {'variableName': value}
@@ -239,7 +239,6 @@ class BoundaryConditionType1(BoundaryCondition):
         """
 
         self.update(bcDict)
-        self.networkName = networkName
 
         self.Tperiod = self.Tspace + 1.0 / self.freq
 
@@ -269,9 +268,8 @@ class BoundaryConditionType1(BoundaryCondition):
 
         # # load file for Flow-From File
         if self.name == 'Flow-FromFile':
-            inflowFilePath = mFPH.getFilePath('inflowFile', networkName, 'XXX', 'read')
             if self.loadedFile == False:
-                self.loadFile(inflowFilePath)
+                self.loadFile()
 
     def updatePeriodRuntime(self, TperiodNew, updateTime):
         """
@@ -393,13 +391,13 @@ class BoundaryConditionType1(BoundaryCondition):
         except Exception:          #TODO This should get some comment to explain what is happening.
             return ampT * self.duMatrix
 
-    def findMeanFlowAndMeanTime(self, networkName=None, givenMeanFlow = None, quiet = False):
+    def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
         """
         This function calculates the mean flow of the signal self.MeanFlow
         and the first occurence evaluatedTime of the mean flow self.TmeanFlow
         """
         #find meanFlow
-        self.initialize({}, networkName=networkName)
+        self.initialize({})
 
         period = self.Tperiod
         totalTime = period+self.Tpulse
@@ -469,7 +467,7 @@ class BoundaryConditionType1(BoundaryCondition):
 
         if self.TmeanFlow != 0:
             self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
-        self.initialize({}, networkName=networkName)
+        self.initialize({})
         
 
         if quiet == False:
@@ -769,7 +767,7 @@ class FlowFromFile(BoundaryConditionType1):
             # set the path relative to THIS file not the executing file!
             
             #pathAndFilename = mFPH.getFilePath('inflowFile', networkName, dataNumber, mode, exception)
-            reader = csv.DictReader(open(inflowFilePath, 'rb'), delimiter=';')
+            reader = csv.DictReader(open(self.filePathName, 'rb'), delimiter=';')
         except Exception:
             self.exception("boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit".format(self.filePathName.split('/')[-1]))
         try:
