@@ -423,7 +423,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
             # calculate the cumulative network resistances and vessel resistances of the network
             if self.initialsationMethod not in ['ConstantPressure', 'AutoLinearSystem']:
-                print self.initialsationMethod
                 self.calculateNetworkResistance()
 
             # calculate the initial values of the network
@@ -1557,7 +1556,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         if self.initialsationMethod == 'Auto':
             try:
-                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
+                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet, networkName=self.name)
                 self.initialisationPhaseExist = True
             except Exception:
                 self.exception("classVascularNetwork: Unable to calculate mean flow at inflow point")
@@ -1567,7 +1566,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             try:
                 meanInflow = self.initMeanFlow
                 # # addjust bc condition
-                xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
+                xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet, networkName=self.name)
                 self.initialisationPhaseExist = True
             except Exception:
                 self.exception("classVascularNetwork: Unable to set given meanFlow at inflow point")
@@ -1584,7 +1583,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         elif self.initialsationMethod == 'AutoLinearSystem':
 
             try:
-                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
+                meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet, networkName=self.name)
                 self.initialisationPhaseExist = True
 
             except Exception:
@@ -1675,7 +1674,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             meanInflow = meanInPressure / self.Rcum[root]  # calculate mean flow
             p0 = meanInPressure
             # # addjust bc condition
-            try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet)
+            try:    xxx, self.initPhaseTimeSpan = self.boundaryConditions[root][0].findMeanFlowAndMeanTime(meanInflow, quiet=self.quiet, networkName=self.name)
             except Exception:
                 self.warning("VascularNetwork: Unable to adjust calculated meanFlow at inflow point boundary condition !")
 
