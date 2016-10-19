@@ -420,6 +420,7 @@ def insertWorkingDirectory(optionArgument):
         optionArgument = raw_input("Insert existing working directory path you want to add, or (q) quit: ")
         
     if optionArgument != "q":
+        optionArgument = os.path.expanduser(optionArgument)
     
         if os.path.isdir(optionArgument):
             saveConfigFile({'WorkingDirectory':optionArgument})
