@@ -35,6 +35,10 @@ import time
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
+import logging
+logger = logging.getLogger('starfish')
+logger.setLevel(logging.DEBUG)
+
 
 import SolverLib.class1DflowSolver as c1DFlowSolv
 
@@ -47,12 +51,8 @@ import matplotlib.pyplot as plt
 import gc
 
 import subprocess
-import logging
 
 def main():
-    logger = logging.getLogger('starfish')
-    logger.setLevel(logging.DEBUG)
-
     file_h = logging.FileHandler('starfish.log', mode='w')
     file_h.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

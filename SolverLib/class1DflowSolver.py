@@ -6,15 +6,15 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 topFolder = cur + "/../"
 #topFolder should point to where LOGcurrentWaveSpeed.txt is
 # located, and if it changes location, renaming it is appropriate.
-#sys.path.append(''.join([classFields.cur,'/../']))
 
-sys.path.append(cur+'/../')
+sys.path.append(os.path.join(cur,'..'))
+import logging
+logger = logging.getLogger('starfish')
 
 import UtilityLib.classStarfishBaseObject as cSBO
 
 import UtilityLib.progressBar as cPB
 
-#sys.path.append(cur+'/NetworkLib')
 from NetworkLib.classBoundaryConditions import VaryingElastance, Valve
 from NetworkLib.classVascularNetwork import VascularNetwork
 
@@ -27,11 +27,9 @@ from classCommunicators import *
 from UtilityLib import classRuntimeMemoryManager
 import classTimer
 
-#sys.path.append(cur+'/UtilityLib/')
 from UtilityLib.moduleHelperFunctions import memoryUsagePsutil
 
 import gc
-# import h5py
 
 class FlowSolver(cSBO.StarfishBaseObject):
 
@@ -42,8 +40,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
 
         if vascularNetwork == None: raise ValueError("ERROR: No vascularNetwork given!")
-        assert isinstance(vascularNetwork, VascularNetwork) #TODO asserts get removed automatically
-        # the vascular network to solve                     #TODO when compiled for release
+        assert isinstance(vascularNetwork, VascularNetwork) 
+        # the vascular network to solve                    
         self.vascularNetwork = vascularNetwork
         self.vascularNetwork.quiet = quiet
         self.quiet = quiet
@@ -106,18 +104,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # rigidAreas True: A = A0 False: A = A(P)
         self.rigidAreas = self.vascularNetwork.rigidAreas
 
-#         # Define the output of A, depending on the characteristic system 0.1
-#         if self.rigidArea == '02':
-#             self.AFunction = self.AFunctionSys0
-#         elif self.rigidArea == '2':
-#             self.AFunction = self.AFunctionSys1
-
-#         self.solvingScheme = self.vascularNetwork.networkSolver['solvingScheme']
-#         if self.solvingScheme == 'MacCormack':
-#             self.solve = self.MacCormack
-#         elif self.solvingScheme == 'MacCormack_Field':
-#             self.solve = self.MacCormack_Field
-
         #define solve function
         self.solve = self.MacCormack_Field
 
@@ -175,7 +161,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             #estimate initial pressure
             p0,p1 = initialValues[vessel.Id]['Pressure']
 
-            initialPressure = classTimer.np.linspace(p0,p1,vessel.N)
+            initialPressure = np.linspace(p0,p1,vessel.N)
 
             A0_max = max(vessel.A(initialPressure))
             #c_high = vessel.c(A0_max,vessel.initialPressure)
@@ -186,22 +172,22 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
             dz_low = min(vessel.dz)
             dt = self.calcTimeStep(dz_low,c_high,self.vascularNetwork.CFL)
-            c_max = classTimer.np.append(c_max,c_high)
-            dt_min = classTimer.np.append(dt_min,dt)
-            dz_min = classTimer.np.append(dz_min,dz_low)
-            gridNodens = classTimer.np.append(gridNodens,vessel.N)
+            c_max = np.append(c_max,c_high)
+            dt_min = np.append(dt_min,dt)
+            dz_min = np.append(dz_min,dz_low)
+            gridNodens = np.append(gridNodens,vessel.N)
 
             logfileData[vessel.Id] = [max(c_high),min(c_high),min(dt),vessel.dz,vessel.N]
 
         # Set time variables
         self.dt = min(dt_min)
         # calculate time steps
-        self.nTSteps = int(classTimer.np.ceil(self.totalTime/self.dt))
+        self.nTSteps = int(np.ceil(self.totalTime/self.dt))
         # calculate time steps for initialisation phase
         nTstepsInitPhase = 0
         if self.vascularNetwork.initialisationPhaseExist:
             initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
-            nTstepsInitPhase = int(classTimer.np.ceil(initPhaseTimeSpan/self.dt))
+            nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
         # correct time steps
         self.nTSteps += nTstepsInitPhase
 
@@ -256,12 +242,12 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         if self.output['CFLcorrect'] != []:
             if quiet == False:
-                print '====================================='
-                print '___CFL-correction: grid adaptation___'
-                print 'Id  | gridPoints |       CFL      |'
-                print '    | now -> new |   now -> new   |'
+                logger.info('=====================================')
+                logger.info('___CFL-correction: grid adaptation___')
+                logger.info('Id  | gridPoints |       CFL      |')
+                logger.info('    | now -> new |   now -> new   |')
                 for CFLcorr in self.output['CFLcorrect']:
-                    print '%s' % (CFLcorr)
+                    logger.info('%s' % (CFLcorr))
 
             if automaticGridCorrection != {}:
                 gridCorrection = 'ohYesDoItPlease'
@@ -272,7 +258,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 #    gridCorrection = raw_input('Do you whish to adapt grid? (yes [<ENTER>,<y>,<Y>]/no [<n>,<N>])')
 
                 if gridCorrection in (' ','','y','Y'):
-                    #if quiet == False: print ' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys())
+                    #if quiet == False: logger.info(' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys()))
                     arrayN = 0
                     for vesselId,Nnew in automaticGridCorrection.iteritems():
                         self.vessels[vesselId].update({'N':Nnew})
@@ -416,6 +402,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         for baroData in self.baroreceptors.itervalues():
             baroData.initializeWithFlowSolver(self)
+            
             # baroData.initializeForSimulation(self,self.vascularNetwork)
 
 
@@ -561,34 +548,31 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         initialize solution matrices
         """
-        #print '====================================='
-        print '___________Time variables ___________'
-        print '%-20s %2.3f' % ('totaltime (sec)',self.totalTime)
-        print '%-20s %2.3f' % ('dt (ms)',self.dt*1.0E3)
-        print '%-20s %4d' % ('nTSteps',self.nTSteps)
-        print '___________Div variables ____________'
-        print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
-        print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
-        try: print '%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6)
+        logger.info('=====================================')
+        logger.info('___________Time variables ___________')
+        logger.info('%-20s %2.3f' % ('totaltime (sec)',self.totalTime))
+        logger.info('%-20s %2.3f' % ('dt (ms)',self.dt*1.0E3))
+        logger.info('%-20s %4d' % ('nTSteps',self.nTSteps))
+        logger.info('___________Div variables ____________')
+        logger.info('%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6))
+        logger.info('%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32))
+        try: logger.info('%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6))
         except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput", oldExceptPass= True)
-        print '%-20s %2.1f' % ('CFL init max',self.vascularNetwork.CFL)
-        print '%-20s %2.1f' % ('dz min (mm)',self.output['dz_min']*1.0E3)
-        print '%-20s %2.1f' % ('c min (m/s)',self.output['c_min'])
-        print '%-20s %2.1f' % ('c max (m/s)',self.output['c_max'])
-        print '%-20s %4d' % ('Grid nodens',self.output['gridNodens'])
-        print '___________Num variables ____________'
-        print '%-20s %4d' % ('NumObj',len(self.fields)+len(self.boundarys)+len(self.connections))
-        print '%-20s %4d' % ('NumFields',len(self.fields))
-        print '%-20s %4d' % ('NumConnections',len(self.connections))
-        print '%-20s %4d' % ('NumBoundarys',len(self.boundarys))
-        print '%-20s %4d' % ('NumCommunicators',len(self.communicators))
-        print '%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors))
-        print '%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTSteps)
-        print '%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()  )
-        #print self.communicators[0]
-        #print np.shape(self.communicators[0].data['Strain'])
-        #print np.shape(self.communicators[0].data['MStrain'])
-        print '===================================== \n'
+        logger.info('%-20s %2.1f' % ('CFL init max',self.vascularNetwork.CFL))
+        logger.info('%-20s %2.1f' % ('dz min (mm)',self.output['dz_min']*1.0E3))
+        logger.info('%-20s %2.1f' % ('c min (m/s)',self.output['c_min']))
+        logger.info('%-20s %2.1f' % ('c max (m/s)',self.output['c_max']))
+        logger.info('%-20s %4d' % ('Grid nodens',self.output['gridNodens']))
+        logger.info('___________Num variables ____________')
+        logger.info('%-20s %4d' % ('NumObj',len(self.fields)+len(self.boundarys)+len(self.connections)))
+        logger.info('%-20s %4d' % ('NumFields',len(self.fields)))
+        logger.info('%-20s %4d' % ('NumConnections',len(self.connections)))
+        logger.info('%-20s %4d' % ('NumBoundarys',len(self.boundarys)))
+        logger.info('%-20s %4d' % ('NumCommunicators',len(self.communicators)))
+        logger.info('%-20s %4d' % ('NumBaroreceptors',len(self.baroreceptors)))
+        logger.info('%-20s %4d' % ('NumObj calls',len(self.numericalObjects)*self.nTSteps))
+        logger.info('%-20s %4d' % ('used Memory (Mb)',memoryUsagePsutil()))
+        logger.info('===================================== \n')
 
 
     """
@@ -596,8 +580,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
     # Solver Methods:
     #
     #    MacCormack_Field
-    #     ##MacCormack <- no in use anymore
-    #
     #
     ########################################################################################
     """
@@ -612,7 +594,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         conncetions, bifucations with a predictor-corrector step method
         """
         if self.quiet == False:
-            print "Solving system ..."
+            logger.info("Solving system ...")
             progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
@@ -632,10 +614,10 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         numericalObject()
                     except Exception:
                         # Save the Solution data for debugging
-                        print "Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject)
+                        logger.critical("Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject))
                         self.vascularNetwork.runtimeMemoryManager.flushSolutionMemory()
                         self.vascularNetwork.saveSolutionData()
-                        print "Success in saving solution data file. Reraising Exception"
+                        logger.critical("Success in saving solution data file. Reraising Exception")
                         raise # TODO: why does self.exception() not force the program to quit?
                         # self.exception()
                 
@@ -655,13 +637,13 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 p0,p1 = initialValues[vesselId]['Pressure']
                 Qm    = initialValues[vesselId]['Flow']
 
-                P_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
-                Q_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
-                A_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
+                P_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
+                Q_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
+                A_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
 
 
             for cycle in xrange(self.numberCycles-1):
-                print ' solving cycle {}'.format(cycle+1)
+                logger.info(' solving cycle {}'.format(cycle+1))
                 # 1. solve cycle
                 for n in xrange(self.nTSteps-1):
 
@@ -675,14 +657,14 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         #Qerror =  np.sum(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))/self.Q[vesselId].size
                         #Aerror =  np.sum(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))/self.A[vesselId].size
 
-                        Perror =  classTimer.np.max(classTimer.np.sqrt((classTimer.np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
+                        Perror =  np.max(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
                         #Qerror =  np.max(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))
-                        Aerror =  classTimer.np.max(classTimer.np.sqrt((classTimer.np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
+                        Aerror =  np.max(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
 
                         P_lastCycle[vesselId] = self.P[vesselId].copy()
                         #Q_lastCycle[vesselId] = self.Q[vesselId].copy()
                         A_lastCycle[vesselId] = self.A[vesselId].copy()
-                        print '{} {}'.format(Perror, Aerror)
+                        logger.debug('{} {}'.format(Perror, Aerror))
 
                 # 3. rehash solution arrays if not last cycle
                 if cycle is not self.numberCycles-1:
@@ -692,96 +674,49 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         self.A[vesselId][0]    = self.A[vesselId][-1]
 
 
-
-#             for bif in self.vascularNetwork.treeTraversingGenerationBifurcation:
-#
-#                 motherID = bif[0]
-#                 leftDaughter = bif[1]
-#                 rightDaughter = bif[2]
-#
-#                 # mother self.vessels[motherID]
-#                 impedanceM = self.vessels[motherID].Impedance(self.P[motherID][n])
-#                 AdmittanceM = 1.0/impedanceM[-1]
-#
-#                 # left daughter self.vessels[leftDaughter]
-#                 impedanceLD = self.vessels[leftDaughter].Impedance(self.P[leftDaughter][n])
-#                 AdmittanceD = 1.0/impedanceLD[0]
-#                 #print  AdmittanceD
-#
-#                 try:
-#                     #right daugther  self.vessels[rightDaughter]
-#                     impedanceRD = self.vessels[rightDaughter].Impedance(self.P[rightDaughter][n])
-#                     AdmittanceD = AdmittanceD+1.0/impedanceRD[0]
-#
-#                 except: pass
-#
-#                 expectedReflection = 0.5
-#                 ReflectionCoeffBif = (AdmittanceM-AdmittanceD) / (AdmittanceM+AdmittanceD)
-#                 if ReflectionCoeffBif != expectedReflection:
-#                     reflectionCoefficientCount = reflectionCoefficientCount+1
-#                     reflectionError = abs(ReflectionCoeffBif-expectedReflection)/expectedReflection
-#                     if  reflectionError > maxRef:
-#                         maxRef = reflectionError
-#                     #print 'bifurcation', bif,' n ',n ,' Ref ',ReflectionCoeffBif, maxRef, ' count ',reflectionCoefficientCount
-#                     #raw_input()
-
-#         ## Checks if VaryingElastance is used as the boundary condition at the root of the network, and if so
-#         ## returns various data from the ventricle as well as aortic and mitral valves
-#         if not np.size( self.boundarys[0][0].bcType2 ) == 0:
-#             rootBC = self.boundarys[0][0].bcType2[0]
-#             if isinstance(rootBC, VaryingElastance):
-#                 aortic, mitral = rootBC.aortic, rootBC.mitral
-#                 return self.P, self.Q, self.A, rootBC.pressure, rootBC.volume, rootBC.mitralQ, \
-#                      aortic.state, aortic.B, aortic.L, mitral.state, mitral.B, mitral.L
-
-        if self.quiet == False: print "\nSystem solved!"
+        if self.quiet == False: logger.info("\nSystem solved!")
 
         BVcheck = False
         if BVcheck == True:
 
-            print '\n====================================='
-            print '___Blood volume - consistency check___'
+            logger.info('\n=====================================')
+            logger.info('___Blood volume - consistency check___')
 
-            print 'Vessels  init (ml)  sol (ml)  diff'
+            logger.info('Vessels  init (ml)  sol (ml)  diff')
             vesselsInit = 0
             vesselsSol  = 0
             for vesselId,vessel in self.vessels.iteritems():
                 A1 = self.vessels[vesselId].Asol[0][0:-1]
                 A2 = self.vessels[vesselId].Asol[0][1:]
-                volumeInit = classTimer.np.sum(vessel.dz*(A1+A2+classTimer.np.sqrt(A1*A2))/3.0)*1.e6
+                volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
 
                 A1 = self.vessels[vesselId].Asol[-1][0:-1]
                 A2 = self.vessels[vesselId].Asol[-1][1:]
-                volumeSol  = classTimer.np.sum(vessel.dz*(A1+A2+classTimer.np.sqrt(A1*A2))/3.0)*1.e6
+                volumeSol  = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
                 diff = volumeInit-volumeSol
                 vesselsInit += volumeInit
                 vesselsSol  += volumeSol
-                print '{:<4}    {:7.2f}    {:7.2f}    {:4.2f}'.format(str(vesselId), volumeInit, volumeSol, diff)
+                logger.info('{:<4}    {:7.2f}    {:7.2f}    {:4.2f}'.format(str(vesselId), volumeInit, volumeSol, diff))
 
-            print ' ----------------------------------- '
-            print 'Boundarys        in (ml)   out (ml)  '
+            logger.info(' ----------------------------------- ')
+            logger.info('Boundarys        in (ml)   out (ml)  ')
             totalIn = 0
             totalOut = 0
             for boundaryList in self.boundarys.itervalues():
                 for boundary in boundaryList:
-                    #print '  volume in   (ml)  {:.2f}'.format((abs(boundary.BloodVolumen[0])*1.e6))
-                    #print '  volume out  (ml)  {:.2f}'.format((abs(boundary.BloodVolumen[1])*1.e6))
-                    #print '  volume diff (ml)  {:.2f}'.format(abs(abs(boundary.BloodVolumen[0])*1.e6 - abs(boundary.BloodVolumen[1])*1.e6))
-                    print '{:<12}     {:6.2f}    {:4.2f}'.format(boundary.name,
+                    logger.info('{:<12}     {:6.2f}    {:4.2f}'.format(boundary.name,
                                                                  abs(boundary.BloodVolumen[0])*1.e6,
-                                                                 abs(boundary.BloodVolumen[1])*1.e6 )
-                    #abs(abs(boundary.BloodVolumen[0])*1.e6 - abs(boundary.BloodVolumen[1])*1.e6))
-                    #print '   {} '.format(boundary.type)
+                                                                 abs(boundary.BloodVolumen[1])*1.e6 ))
                     totalIn  += abs(boundary.BloodVolumen[0])*1.e6
                     totalOut += abs(boundary.BloodVolumen[1])*1.e6
-            print ' ----------------------------------- '
-            print 'total'
-            print '  vessels initial  (ml)  {:4.2f}'.format(vesselsInit)
-            print '  vessels solution (ml)  {:4.2f}'.format(vesselsSol)
-            print '  boundarys in     (ml)  {:4.2f}'.format(totalIn)
-            print '  boundarys out    (ml)  {:4.2f}'.format(totalOut)
-            print '                    ------------'
-            print '  volume diff      (ml)  {:.2f}'.format(vesselsInit - vesselsSol + totalIn - totalOut)
+            logger.info(' ----------------------------------- ')
+            logger.info('total')
+            logger.info('  vessels initial  (ml)  {:4.2f}'.format(vesselsInit))
+            logger.info('  vessels solution (ml)  {:4.2f}'.format(vesselsSol))
+            logger.info('  boundarys in     (ml)  {:4.2f}'.format(totalIn))
+            logger.info('  boundarys out    (ml)  {:4.2f}'.format(totalOut))
+            logger.info('                    ------------')
+            logger.info('  volume diff      (ml)  {:.2f}'.format(vesselsInit - vesselsSol + totalIn - totalOut))
 
         ## stop realtime visualisation
         for communicator in self.communicators.itervalues():
@@ -790,63 +725,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         ### garbage collection
         gc.collect()
-
-            #f, axarr =plt.subplots(3)
-            #axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
-            #axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
-            #axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
-            #axarr[0].set_title("Pressure in LV and aorta")
-            #axarr[1].set_title("Volume flow")
-            #axarr[2].set_title("Volume in LV")
-            #plt.show(f)
-#             f, axarr =plt.subplots(5)
-#             axarr[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].pressure/133,Tim,self.vascularNetwork.boundaryConditions[0][0].aortaP/133)
-#             axarr[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
-#             axarr[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
-#             axarr[3].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].mitral.state)
-#             axarr[4].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Elastance)
-#             axarr[0].set_title("Pressure in LV")
-#             axarr[1].set_title("Volueme in LV")
-#             axarr[2].set_title("aortic state")
-#             axarr[3].set_title("Mitral state")
-#             plt.show(f)
-#
-#             f2, axarr2 =plt.subplots(3)
-#             axarr2[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
-#             axarr2[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
-#             axarr2[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].DtFlow)
-#             plt.show(f2)
-#
-#             f3,axarr3=plt.subplots(6)
-#             axarr3[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
-#             axarr3[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Flow)
-#             axarr3[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].DtFlow)
-#             axarr3[3].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Turb)
-#             axarr3[4].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Inert)
-#             axarr3[5].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].deltaP)
-#
-#             plt.show(f3)
-#
-#             f4,axarr4=plt.subplots(4)
-#             axarr4[0].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
-#             axarr4[1].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Turb)
-#             axarr4[2].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].Inert)
-#             axarr4[3].plot(Tim,self.vascularNetwork.boundaryConditions[0][0].InbyTurb)
-#
-#             plt.show(f4)
-
-
-
-
-
-#             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].volume*10**6)
-#
-#             plt.show()
-#             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].aortic.state)
-#             plt.show()
-#             plt.plot(Tim,self.vascularNetwork.boundaryConditions[0][0].mitral.state)
-#             plt.show()
-
 
         del self.numericalObjects
         del self.fields

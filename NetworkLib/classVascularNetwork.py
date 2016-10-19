@@ -553,6 +553,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
         for baroData in self.baroreceptors.itervalues():
             baroData.initializeForSimulation(self)
+        
         try:
             # Not all venous classes use this
             self.venousPool.initializeForSimulation(self)
@@ -749,15 +750,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             elif groupName == 'vessels': # or '-' in groupName: # '-' is loads older hdf5 data files
                 for subGroupName, subGroup in group.iteritems():
                     vesselId = int(subGroupName.split(' - ')[-1])
-                    # try:
-                    # link data
                     self.vesselsToSave[vesselId] = subGroup
                     self.vessels[vesselId].dsetGroup = subGroup
-                        # except:
-                            # print "WARNING: vascularNetwork.loadSolutionData() could not link solution data of vessel {}".format(vesselId)
-                    # except: print "WARNING: could not read in solution data for vessel {}".format(groupName)
             else:
-                print "classVascularNetwork::linkSolutionData() Unable to identify data group", groupName
+                logger.warning("classVascularNetwork::linkSolutionData() Unable to identify data group {}".format(groupName))
 
         self.initialize()
 
