@@ -169,18 +169,4 @@ def main():
                 exit()
         
 if __name__ == '__main__':
-    
-    profiling = False
-    callGraph = False
-    
-    if profiling == True:
-        import cProfile
-        cProfile.run('main()')
-        
-    elif callGraph == True:
-        import pycallgraph
-        pycallgraph.start_trace()
-        main()
-        pycallgraph.make_dot_graph('STARFiSh-CallGraph.png')
-    else:
-        main()
+    main()

@@ -2111,7 +2111,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     bc.update({'venousPressure':relativeVenousPressure})
         
         # # print out of method
-        if self.quiet == False:
+        if self.quiet == False and self.venousPool is not None:
             print '\n============================================================='
             print '_______________Venous Pressures _____________________________'
             print '%s %36.1f' % ('Central venous pressure:', round(self.venousPool.P[0], 2))

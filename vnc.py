@@ -47,7 +47,7 @@ def enterNetworkName(networkName, recentNetworkNames = None):
     
     input:
           networkName <string>      := current existing networkName
-          recentNetworkNames <list> := list of resent used networkNames
+          recentNetworkNames <list> := list of recently used networkNames
     
     return:
          networkNameUserInput <string> := if user input == None : networkName passed to function
@@ -161,6 +161,12 @@ def main():
         print " [p] - print network informations"
         print " [q] - quit"
         print ""
+        print '===========Parameter Units==========='
+        print ' NOTE! All parameter units are in the'
+        print ' Pa, seconds, and meters system'
+        print ' i.e. not mmHg, seconds, cm, or dynes,'
+        print ' seconds, grams'
+        print '====================================='
         print '  current network: ', networkName
         while  menuInput not in ("l","b","q","a","s","g","f","d","u",'n','p'):
             menuInput = raw_input("what to do? ")
@@ -631,7 +637,7 @@ def main():
                 
                 if subMenuInput in ["1","2","3",'5']:
                     print ""
-                    print "         resent used networks"
+                    print "         recently used networks"
                     i = 1
                     for name in recentNetworkNames:
                         print "          [",i,'] - ',name
@@ -842,7 +848,7 @@ def main():
             print ""
             print "     load from XML"
             print ""
-            print "         resent used networks"
+            print "         recently used networks"
             i = 1
             for name in recentNetworkNames:
                 print "          [",i,'] - ',name
