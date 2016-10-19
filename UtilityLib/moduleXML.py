@@ -223,7 +223,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                 xmlFileElement.set('class', 'RandomInputManager')
                 
         elif xmlElementName == 'measurementRoutine':
-            if vascularNetwork.measurementRoutine != None:
+            if vascularNetwork.measurementRoutine is not None:
                 vascularNetwork.measurementRoutine.writeDataToXmlNode(xmlFileElement)
                 xmlFileElement.set('class', 'MeasurementRoutine')
                 
