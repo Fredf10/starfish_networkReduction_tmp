@@ -13,7 +13,7 @@ import UtilityLib.moduleStartUp as mStartUp
 def main():    
     print ""
     print '====================================='
-    print '#    STARFiSh_v0.3 Visualisation    #'
+    print '#    STARFiSh_v0.4 Visualisation    #'
     print '====================================='
     print ""
     

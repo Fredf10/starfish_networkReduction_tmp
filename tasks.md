@@ -7,7 +7,7 @@
 
 # Unassigned tasks
 * Check for (einar) TODOs
-* Note that the WD must be given as an absolute path (or enable relative to the user's home folder (Could provide a sensible default folder in Documents a la MATLAB).
+* Note that the WD must be given as an absolute path (or enable relative to the user's home folder (Could provide a sensible default folder in Documents a la MATLAB). But need system variables to that as OS specific
 * Check TODOs
 * Delete central/minimum VenousPressure tags from xmlTemplates
 * Test venous system

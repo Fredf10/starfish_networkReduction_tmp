@@ -67,7 +67,7 @@ def main():
 
     logger.info("")
     logger.info('=====================================')
-    logger.info('#     STARFiSh_v0.4.2016.10.19      #')
+    logger.info('#     STARFiSh_v0.4.19.10.2016      #')
     logger.info('=====================================')
     
     optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w','p'])
