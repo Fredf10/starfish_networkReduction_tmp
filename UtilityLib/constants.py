@@ -140,7 +140,7 @@ variableUnitsSI = { # SimulationContext
                     'initMeanPressure':'Pa',
                     'compTotalSys':'m3 Pa-1',
                     'centralVenousPressure': 'Pa',
-                    'minimumVenousPressure': '',
+                    'minimumVenousPressure': 'Pa',
                     'gravityConstant': 'm s-2',
                     'angleXSystem': '',
                     'gravitationalField': '',

@@ -102,7 +102,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         #dictionaries for network components
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
-        self.venousPool = None #classVenousPool.StaticVenousPressure() # classVenousPool.venousPool({})
+        self.venousPool = None
+        
         self.heart = None
 
         self.boundaryConditions = {}
@@ -652,7 +653,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         # TODO: Pressure update assumes happening last
         if self.heart:
-            if self.venuosPool is not None:
+            if self.venousPool is not None:
                 if len(self.venousPool.P_LA)>1:
                     self.heart.atriumPressure[nmem+1] = self.venousPool.P_LA[nmem+1]
                 else:
@@ -1780,29 +1781,29 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if "Windkessel" in bc.name:
                     windkesselCompliance = windkesselCompliance + bc.C
 
-        print "{:6} - arterial Volume initPressure".format(arterialVolume*1e6)
-        print "{:6} - arterial Volume 120".format(arterialVolume120*1e6)
-        print "{:6} - arterial Volume 80".format(arterialVolume80*1e6)
-        print
-        print "--------------------------"
-        print "{:6} - arterial compliance initPressure".format(arterialCompliance*133.32*1e6)
-        print "{:6} - arterial compliance 120".format(arterialCompliance120*133.32*1e6)
-        print "{:6} - arterial compliance 80".format(arterialCompliance80*133.32*1e6)
-        print "{:6} - arterial compliance physiological MPA range 65-120 mmHg".format(arterialCompliancePmean*133.32*1e6)
-        print
-        print "{:6} - windkessel compliance".format(windkesselCompliance*133.32*1e6)
-        print "--------------------------"
+        logger.info("{:6} - arterial Volume initPressure".format(arterialVolume*1e6))
+        logger.info("{:6} - arterial Volume 120".format(arterialVolume120*1e6))
+        logger.info("{:6} - arterial Volume 80".format(arterialVolume80*1e6))
+        logger.info("")
+        logger.info("--------------------------")
+        logger.info("{:6} - arterial compliance initPressure".format(arterialCompliance*133.32*1e6))
+        logger.info("{:6} - arterial compliance 120".format(arterialCompliance120*133.32*1e6))
+        logger.info("{:6} - arterial compliance 80".format(arterialCompliance80*133.32*1e6))
+        logger.info("{:6} - arterial compliance physiological MPA range 65-120 mmHg".format(arterialCompliancePmean*133.32*1e6))
+        logger.info("")
+        logger.info("{:6} - windkessel compliance".format(windkesselCompliance*133.32*1e6))
+        logger.info("--------------------------")
         totalArterialCompliance = (arterialCompliancePmean+windkesselCompliance)
-        print "{:6} - total arterial compliance".format(totalArterialCompliance*133.32*1e6)
-        print "{:6} - ration between arterial/total compliance".format(arterialCompliancePmean/totalArterialCompliance)
+        logger.info("{:6} - total arterial compliance".format(totalArterialCompliance*133.32*1e6))
+        logger.info("{:6} - ratio between arterial/total compliance".format(arterialCompliancePmean/totalArterialCompliance))
         #self.calculateNetworkResistance()
         if self.initialsationMethod != 'ConstantPressure':
             
             rootVesselResistance = self.vessels[self.root].resistance
-            print "{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6)
-            print "{:6} - root vessel resistance".format(rootVesselResistance/133.32*1e-6)
-            print "{:6} - total-root vessel resistance".format((self.Rcum[self.root]-rootVesselResistance)/133.32*1e-6)
-            print "{:6} - ratio root vessel / total".format(rootVesselResistance/self.Rcum[self.root])
+            logger.info("{:6} - total arterial resistance".format(self.Rcum[self.root]/133.32*1e-6))
+            logger.info("{:6} - root vessel resistance".format(rootVesselResistance/133.32*1e-6))
+            logger.info("{:6} - total-root vessel resistance".format((self.Rcum[self.root]-rootVesselResistance)/133.32*1e-6))
+            logger.info("{:6} - ratio root vessel / total".format(rootVesselResistance/self.Rcum[self.root]))
 
 
     def evaluateWindkesselCompliance(self):
@@ -1973,7 +1974,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             self.vessels[vesselId].initialize({})
                         except Exception: self.warning("Old except: pass clause #6 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
             print " new Reflection Coeff area ratio", radiusLeftDaughterInit, self.vessels[leftDaughter].radiusProximal, 1 - (radiusLeftDaughterInit) / self.vessels[leftDaughter].radiusProximal
-                # print "      new Reflection coefficient {}, areas".format(reflectionCoefficient), self.vessels[leftDaughter].radiusProximal #, self.vessels[rightDaughter].radiusProximal
+            # print "      new Reflection coefficient {}, areas".format(reflectionCoefficient), self.vessels[leftDaughter].radiusProximal #, self.vessels[rightDaughter].radiusProximal
             # print
 
     def showReflectionCoefficientsConnectionInitialValues(self):

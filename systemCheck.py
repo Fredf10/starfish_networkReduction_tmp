@@ -1,7 +1,7 @@
 import os
 def systemCheck():
     """
-    Check for necessary moduls and 3thrd party libarys needed for STARFiSh and vnc:
+    Check for necessary modules and 3thrd party libarys needed for STARFiSh: 
         matplotlib
         numpy
         scipy
@@ -14,7 +14,7 @@ def systemCheck():
     """
     installed = " ... installed!"
     print ""
-    print "Check for necessary moduls and 3thrd party libarys needed for vascular1DFlow and vnc"
+    print "Check for necessary modules and 3thrd party libarys needed for STARFiSh"
     print ""
     
     print "check for matplotlib ",
@@ -24,19 +24,6 @@ def systemCheck():
     except:
         print " IMPORT ERROR; no version of matplotlib.pyplot found"
     
-    print "check for ffmpeg     ",
-    if os.path.isfile("/bin/ffmpeg"):
-        print installed
-    else:
-        print " ERROR could not find ffmpeg installation; this needs to be manual"
-        print " (not supported by the automatic installer)"
-        print " for Fedora:"
-        print "            1.) add RPMfusion free repositories to yum:"
-        print "                 http://rpmfusion.org/Configuration "
-        print "                 or"
-        print "                 sudo yum install --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
-        print "            2.) sudo yum install ffmpeg"     
-        
     print "check for numpy      ",
     try:
         import numpy
@@ -100,19 +87,6 @@ def systemCheck():
     except:
         print " IMPORT ERROR; no version of h5py found"  
     
-    print "check for sphinx     ",
-    try:
-        import sphinx
-        print installed
-    except:
-        print " IMPORT ERROR; no version of sphinx found"  
     
-    print "check for reportlab  ",
-    try:
-        import reportlab
-        print installed
-    except:
-        print " IMPORT ERROR; no version of reportlab found"         
-
 if __name__ == '__main__':
     systemCheck()
