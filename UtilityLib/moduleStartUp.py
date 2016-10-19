@@ -15,7 +15,7 @@
 
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(''.join([cur,'/../']))
+sys.path.append(os.path.join(*[cur,'..']))
 
 import inspect
 from pprint import pprint as pp
@@ -350,7 +350,7 @@ def chooseUQSACaseFile(networkName):
     from VascularPolynomialChaosLib import classUqsaCase
     
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
-    networkDirectory = '/'.join([workingDirectory,networkName])
+    networkDirectory = os.path.join(*[workingDirectory,networkName])
     
     filesNetworkDir = os.listdir(networkDirectory)
     filenames = []
@@ -358,7 +358,7 @@ def chooseUQSACaseFile(networkName):
     for fileNetworkDir in filesNetworkDir:
         # check if polychaos directory:
         if 'vascularPolynomialChaos' in fileNetworkDir:
-            allFilenames = os.listdir('/'.join([workingDirectory,networkName,fileNetworkDir]))
+            allFilenames = os.listdir(os.path.join(*[workingDirectory,networkName,fileNetworkDir]))
             for filename in allFilenames:
                 if ".xml" in filename and "uqsaCase" in filename:
                     filenames.append(filename)

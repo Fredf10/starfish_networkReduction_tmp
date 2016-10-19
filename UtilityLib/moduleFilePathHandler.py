@@ -259,8 +259,7 @@ def createWorkingCopyOfTemplateNetwork(templateNetworkName, destinationNetworkNa
         oldName = templateNetworkName.split('_template')[0]
         if oldName in renamedFile:
             renamedFile = ''.join([destinationNetworkName,renamedFile.split(oldName)[-1]])
-            
-        shutil.copy('/'.join([pathTemplateNetwork,file]), '/'.join([pathDestinationNetwork,renamedFile]))
+        shutil.copy(os.path.join(*[pathTemplateNetwork,file]), os.path.join(*[pathDestinationNetwork,renamedFile]))
         
     return destinationNetworkName
 
@@ -477,7 +476,6 @@ def updateSimulationDescriptions(networkName, currentDataNumber, currentDescript
     simCaseDescFile.writelines(simCaseDescriptionFileLines)
     simCaseDescFile.close()
 
-# TODO: (einar) fix exception variable
 def getSimulationCaseDescriptions(networkName, exception = 'Warning'):
     """
 

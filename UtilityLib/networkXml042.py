@@ -49,7 +49,7 @@ hemmorrhageElements = []
 
 externalStimulusElements = {'headUpTilt' : headUpTiltElements,
                     'valsalva'   : valsalvaElements,
-                    'hemmorrhage' : valsalvaElements,
+                    'hemmorrhage' : hemmorrhageElements,
                     }
 
 externalStimuliElementReference = {'externalStimulus':externalStimulusElements}
@@ -259,25 +259,6 @@ vesselElements = ['topology',
                   'compliance',
                   'fluid']
 
-# ###########################################################################################
-# ## Random variables
-# randomInputDistributionElements = ['distributionType',
-#                                    'a',
-#                                    'b']
-# 
-# randomInputCorrelationElements = []
-# 
-# randomInputsReference = {'distribution':randomInputDistributionElements,
-#                          'correlation' :randomInputCorrelationElements}
-# 
-# randomInputsElements = ['distribution',
-#                         'correlation']
-# 
-# generalRandomInputsAttributes = ['name']
-
-##########################################################################################
-## XML file elements
-
 xmlElements  = [ 'simulationContext',
                  'solverCalibration',
                  'initialisationControls',
@@ -304,15 +285,4 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'vessels'               : vesselElements,
                         'venousPool' : None }
 
-
-# 
-# 
-# ##########################################################################################
-# ##########################################################################################
-# ### uncertainty quantification and sensitivity analysis
-# 
-# locationOfInterest = ['quantitiesOfInterestToProcess',
-#                       'queryLocation',
-#                       'xVals',
-#                       'confidenceAlpha']
 
