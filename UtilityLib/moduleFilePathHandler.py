@@ -24,6 +24,12 @@ sys.path.append(''.join([cur,'/../']))
 
 import ConfigParser
 
+try:
+    from lxml import etree
+except:
+    # TODO: This produces an error!! with the pretty_print argument
+    from xml.etree import ElementTree as etree
+
 
 # TODO: (einar) Rename input variable exception and corresponding strings
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
@@ -38,7 +44,6 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
             'boundaryCSVFile',
             'networkXmlFileTemplate',
             'networkXmlFile',
-            'inflowFile',
             'solutionFile',
             'configFile',
             'simulationDescriptionFile',
@@ -65,7 +70,6 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                          'boundaryCSVFile',
                          'networkXmlFileTemplate',
                          'networkXmlFile',
-                         'inflowFile',
                          'solutionFile',
                          'configFile',
                          'simulationDescriptionFile',
@@ -87,7 +91,6 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                  'boundaryCSVFile'           : ''.join([networkName,'BC.csv']),
                  'networkXmlFileTemplate'    : ''.join([networkName,'.xml']),
                  'networkXmlFileXXX'         : ''.join([networkName,'.xml']),
-                 'inflowFile'                : ''.join([networkName,'_inflow.csv']),
                  'networkXmlFileSim'         : ''.join([networkName,'_SolutionData_',dataNumber,'.xml']),
                  'solutionFile'              : ''.join([networkName,'_SolutionData_',dataNumber,'.hdf5']),
                  'simulationDescriptionFile' : ''.join(['simulationCaseDescriptions.txt']),
@@ -149,7 +152,6 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         'networkXmlFileTemplateDirectory',
         'networkXmlFileXXXDirectory',
         'networkXmlFileSimDirectory',
-        'inflowFileDirectory',
         'solutionFileDirectory',
         'screenshotDirectory',
         'movieDirectory',
@@ -184,7 +186,6 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'networkXmlFileTemplateDirectory',
                               'networkXmlFileXXXDirectory',
                               'networkXmlFileSimDirectory',
-                              'inflowFileDirectory',
                               'solutionFileDirectory',
                               'screenshotDirectory',
                               'movieDirectory',
@@ -221,7 +222,6 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'networkXmlFileTemplateDirectory'    : networkXmlFileTemplateDirectory,
                    'networkXmlFileXXXDirectory'         : networkXmlFileDirectory,
                    'networkXmlFileSimDirectory'         : solutionFileDirectory,
-                   'inflowFileDirectory'                : networkXmlFileDirectory,
                    'solutionFileDirectory'              : solutionFileDirectory,
                    'simulationDescriptionFileDirectory' : networkXmlFileDirectory,
                    # 3d viz
@@ -267,6 +267,11 @@ def createWorkingCopyOfTemplateNetwork(templateNetworkName, destinationNetworkNa
             renamedFile = ''.join([destinationNetworkName,renamedFile.split(oldName)[-1]])
             
         shutil.copy('/'.join([pathTemplateNetwork,file]), '/'.join([pathDestinationNetwork,renamedFile]))
+        newFilePath = '/'.join([pathDestinationNetwork,renamedFile])
+        if ".xml" in newFilePath:
+            setFlowFromFilePathToAbsolute(newFilePath, pathDestinationNetwork)
+        
+            
         
     return destinationNetworkName
 
@@ -537,6 +542,38 @@ def loadExternalDataSet(fileName):
         print "Error: no or corrupted external data-file found"
     
     return externalData
+
+def setFlowFromFilePathToAbsolute(fileName, pathDestinationNetwork):
+    """
+    Function to change filePathName in Flow-FromFile xml element to absolute path after copying template network
+    Input:
+        fileName <string> (abs path of the copied xml fie)
+        pathDestinationNetwork <string> (abs path of the directory of the xml file)
+    Output:
+        extData <dict> 
+    """
+    
+    parser = etree.XMLParser(encoding='iso-8859-1')
+    tree = etree.parse(fileName, parser)
+    root = tree.getroot()
+    
+    for XmlElement in root:
+        
+        if XmlElement.tag == 'boundaryConditions':
+            for vessel in XmlElement:
+                for bc in vessel:
+                    if bc.tag == 'Flow-FromFile':
+                        for bcTag in bc:
+                            if bcTag.tag == 'filePathName':
+                                oldFilePath = bcTag.text
+                                bcTag.text = pathDestinationNetwork + oldFilePath
+    
+    tree.write(fileName)
+    
+    
+
+                                
+                                
 
 
 
