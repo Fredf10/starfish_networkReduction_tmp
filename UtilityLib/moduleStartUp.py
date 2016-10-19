@@ -161,10 +161,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         if simulationDescription == None:
             simulationDescription = defineSimulationDescription()
         if dataNumber == None:
-            actualNetworkName = networkName #TODO: CRITICAL!! What is the correct way to handle this case?
-            if "_template" in actualNetworkName:
-                actualNetworkName = ''.join(actualNetworkName.split('_template'))
-            dataNumber = defineDataNumber(actualNetworkName)
+            dataNumber = defineDataNumber(networkName)
     ## visualisation only
     if visualisationOnly == True and (dataSetNumber == None or networkName == None) and vascularPolynomialChaos == False: 
             print "\n  No networkName passed, choose between all available networks:"
@@ -172,6 +169,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             networkName,dataNumber = chooseSolutionDataCase()
     ## polynomial chaos
     if vascularPolynomialChaos == True:
+        #TODO Critical Need to check for network template here?
         if networkName == None:
             networkName = chooseNetwork(showTemplates = False)
         if dataSetNumber == None:
@@ -311,7 +309,9 @@ def defineSimulationDescription():
 def defineDataNumber(networkName):
     
     print "No solution-datanumber defined (3 characters)! It needs to be defined"
-    
+
+
+    #TODO CRITICAL this fails for template networks
     existingDataNumbers = findExistingDataNumbers(networkName)
     correctDataNumber = False
     
@@ -353,6 +353,14 @@ def findExistingDataNumbers(networkName):
     
     Returns: existingDataNumbers (list)
     """
+    # TODO: better way to handle this case?
+    if "_template" in networkName:
+        destinationNetworkName = ''.join(networkName.split("_template"))
+        try:
+            _ = mFPH.getFilePath('simulationDescriptionFile', destinationNetworkName, "zzz", 'read', exception = 'No')
+        except:
+            _ = mFPH.getFilePath('simulationDescriptionFile', networkName, "zzz", 'write')#, exception = 'No')
+
     simulationCaseDict = mFPH.getSimulationCaseDescriptions(networkName )#, exception = 'No')
     networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',networkName,'xxx','read')
     
