@@ -36,3 +36,4 @@
 * Fix vnc to not printout options for CSV BCs and RVs (Assigned to:Vinz)
 * VNC never should crash while loading networks and vessels from xml and csv (delimiter still problematic). (Vinz)
 * VNC shall detect delimiter and either warn/autofix rather than crash. (Vinz)
+* flow from file inflowfile is needed only in the "networkXMLFile" directory (Fredrik)
