@@ -1,19 +1,40 @@
 ########################################################################################
-#                            Vascular1dFlow v0.2
+#                           STARFiSh v0.4 
 ########################################################################################
 ## 
-# created by Vinzenz Eck vinzenz.eck@mytum.de
-# uses polynomial Chaos toolbox from Jonathan Feinberg, Simula Center Oslo
+# http://www.ntnu.no/starfish
+#
+# created by Vinzenz Eck TODO:vinzenz.eck@mytum.de
+# Developed by:
+# TODO: Hallvard M Nydal, Yappi, ... Fredrik Fossan, Yvan Gugler, Jacob Sturdy, Einar ..., 
+# TODO: ADD LICENSE (MIT) and COPYRIGHT
+#
+#Copyright (c) <year> <copyright holders>
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+#software and associated documentation files (the "Software"), to deal in the Software 
+#without restriction, including without limitation the rights to use, copy, modify, 
+#merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+#permit persons to whom the Software is furnished to do so, subject to the following 
+# conditions:
+#
+#The above copyright notice and this permission notice shall be included in all copies or 
+#substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+#INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+#PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+#HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+#CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR 
+# THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##
 
 #---------------------------------------------------------------------------------------#
+from __future__ import division
 import time 
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
-
-#import NetworkLib.classVascularNetwork as cVascNw
-### Unnecessary import, never used later.
 
 import SolverLib.class1DflowSolver as c1DFlowSolv
 
@@ -21,19 +42,33 @@ import UtilityLib.moduleXML as mXML
 import UtilityLib.moduleStartUp as mStartUp #import parseOptions
 import UtilityLib.moduleFilePathHandler as mFPH
 
-import pprint
 import matplotlib.pyplot as plt
 
 import gc
 
 import subprocess
-
+import logging
 
 def main():
-    print ""
-    print '====================================='
-    print '#     STARFiSh_v0.3_development     #'
-    print '====================================='
+    logger = logging.getLogger('starfish')
+    logger.setLevel(logging.DEBUG)
+
+    file_h = logging.FileHandler('starfish.log', mode='w')
+    file_h.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_h.setFormatter(file_formatter)
+    logger.addHandler(file_h)
+
+    console_h = logging.StreamHandler(sys.stdout)
+    console_h.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(message)s')
+    console_h.setFormatter(console_formatter)
+    logger.addHandler(console_h)
+
+    logger.info("")
+    logger.info('=====================================')
+    logger.info('#     STARFiSh_v0.4.2016.10.19      #')
+    logger.info('=====================================')
     
     optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w','p'])
     
@@ -46,13 +81,13 @@ def main():
     
     filename = str(networkName+'.xml')
         
-    print '____________Simulation_______________'
-    print '%-20s %s' % ('Network name',networkName)
-    print '%-20s %s' % ('Data number', dataNumber)
-    print '%-20s %s' % ('Save simulation', save)
-    print '%-20s %s' % ('Case description', simulationDescription)
-    print '%-20s %s' % ('Resimulate', resimulate)
-    print '%-20s %s' % ('Visualisationmode', vizOutput)
+    logger.info('____________Simulation_______________')
+    logger.info('%-20s %s' % ('Network name',networkName))
+    logger.info('%-20s %s' % ('Data number', dataNumber))
+    logger.info('%-20s %s' % ('Save simulation', save))
+    logger.info('%-20s %s' % ('Case description', simulationDescription))
+    logger.info('%-20s %s' % ('Resimulate', resimulate))
+    logger.info('%-20s %s' % ('Visualisationmode', vizOutput))
     
     ## check if template
     if '_template' in networkName:
@@ -66,7 +101,7 @@ def main():
         vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber = dataNumber)        
         if simulationDescription == '':
             simulationDescription = vascularNetwork.description
-        
+    
     if vascularNetwork == None: exit()
     
     
@@ -88,11 +123,10 @@ def main():
     secsSolve = timeSolverSolve-minutesSolve*60.
     
     
-    #print '====================================='
-    print '____________ Solver time _____________'
-    print 'Initialisation: {} min {} sec'.format(minutesInit,secsInit)
-    print 'Solving:        {} min {} sec'.format(minutesSolve,secsSolve)
-    print '====================================='
+    logger.info('____________ Solver time _____________')
+    logger.info('Initialisation: {} min {} sec'.format(minutesInit,secsInit))
+    logger.info('Solving:        {} min {} sec'.format(minutesSolve,secsSolve))
+    logger.info('=====================================')
     
     vascularNetwork.saveSolutionData()
     mXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
