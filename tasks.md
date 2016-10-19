@@ -1,7 +1,5 @@
 # List of confirmed tasks
 
-
-* VNC shall detect delimiter and either warn/autofix rather than crash. (Vinz)
 * Ensure the "Absolute Path" to flow from file is updated (Assigned to Fredrik)
 * update path manipulations to use `os.path` (Unassigned/Fredrik)
 * Update and verify the list of dependencies (Jacob)
@@ -26,3 +24,4 @@
 * Ensure that the config file is generated when first running the code (Vinz)
 * Fix vnc to not printout options for CSV BCs and RVs (Assigned to:Vinz)
 * VNC never should crash while loading networks and vessels from xml and csv (delimiter still problematic). (Vinz)
+* VNC shall detect delimiter and either warn/autofix rather than crash. (Vinz)
