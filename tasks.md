@@ -1,6 +1,4 @@
 # List of confirmed tasks
-* update Main.py to be a universal interface for simulation, network creation and visualisation (Vinz)
-* Add confirmation of overwriting any networks in the working directory (Even simulation cases)  (Vinz)
 * Add confirmation for rerunning samples/simulations of a UQSA case if they are already existing (Vinz)
 * Update and verify the list of dependencies on Fedora (Jacob)
 * Verify that template networks are working (Jacob)
@@ -9,6 +7,7 @@
 
 
 # Unassigned tasks
+* starfish Menu: uqsa create file has as exit() and visualisation has exit() need to catched by main menu to stop exiting everything
 * Check for (einar) TODOs
 * Note that the WD must be given as an absolute path (or enable relative to the user's home folder (Could provide a sensible default folder in Documents a la MATLAB). But need system variables to that as OS specific
 * Check TODOs
@@ -36,6 +35,9 @@
 
 
 # List of done tasks
+* Add confirmation of overwriting any networks in the working directory (Even simulation cases)  (Vinz)
+* ask questions if -d, -v is not defined!!!
+* update Main.py to be a universal interface for simulation, network creation and visualisation (Vinz)
 * Venous system
 * Update and verify the list of dependencies on Ubuntu (Jacob)
 * Fix optional initiation of venous system (Jacob)

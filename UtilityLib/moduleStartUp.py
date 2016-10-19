@@ -75,7 +75,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                                   help = "simulation case description; NB: no space subported")
         elif activeOption == 'v':
                 parser.add_option('-v', '--vizBool', dest='vizBool',
-                                  help = "choose visualisation mode, 0: no visualisation, 1: 2d and 3d, 2: 2d plots, 3: 3d visualisation default = 0")
+                                  help = "choose visualisation mode, 0: no visualisation, 1: 2d and 3d, 2: 2d plots, 3: 3d visualisation")
         elif activeOption == 'c':       
                 parser.add_option("-c", "--connect", action="store_true",  dest='connect',
                                   help="connect to 3dViz (True) or not (False); currently not working")
@@ -110,29 +110,31 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         # -n dataNumber
         elif option == 'dataNumber':
             dataNumber,dataSetNumber = evaluateDataNumber(optionArgument)  
-            if dataNumber == None:
-                dataNumber = '999'
-            else: save = True     
+            if dataNumber != None:
+                save = True     
         # -s save
         elif option == 'save':
             if optionArgument != None:
                 save = optionArgument
             #save solution data and the vascularNetwork in c pickle, if no save take temporary slot 999
-            if save == False:
-                dataNumber = '999'
+            #if save == False:
+            #    dataNumber = '999'
         # -d simulation Description
         elif option == 'description':
             if optionArgument != None:
                 simulationDescription = optionArgument
         # -v visialisation type        
         elif option == 'vizBool':
-            if optionArgument != None:
-                if optionArgument == '1':
-                    vizOutput = "2D+3D"
-                elif optionArgument == '2':
-                    vizOutput = "2D"
-                elif optionArgument == '3':
-                    vizOutput = "3D"
+            
+            if optionArgument == None:
+                optionArgument = defineVisualisation()
+            
+            if optionArgument == '1':
+                vizOutput = "2D+3D"
+            elif optionArgument == '2':
+                vizOutput = "2D"
+            elif optionArgument == '3':
+                vizOutput = "3D"
         # -c connect
         elif option == 'connect':
             if optionArgument != None:
@@ -158,6 +160,8 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             networkName = chooseNetwork()
         if simulationDescription == None:
             simulationDescription = defineSimulationDescription()
+        if dataNumber == None:
+            dataNumber = defineDataNumber(networkName)
     ## visualisation only
     if visualisationOnly == True and (dataSetNumber == None or networkName == None) and vascularPolynomialChaos == False: 
             print "\n  No networkName passed, choose between all available networks:"
@@ -254,7 +258,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                 else:
                     if exception == "Error":
                         raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
-                        exit()
+                        
                     elif exception == 'Warning':
                         print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
                         return False,False
@@ -268,7 +272,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
             if len(dataNumber) > 3:
                 if exception == "Error":
                     raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
-                    exit()
+                    
                 elif exception == 'Warning':
                     print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
                     return False,False
@@ -277,6 +281,19 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                 
     return dataNumber,dataSetNumber
   
+  
+def defineVisualisation():
+    """
+    Function to ask for visualisation type
+    
+    returns: visualisationBool (int)
+    """
+    listToPrint = ['o visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
+    prettyPrintList("\n        Choose visualisation mode:",listToPrint)
+    userInput = userInputEvaluationInt(4, 0, "     What to do? ")
+    return userInput
+    
+    
   
 def defineSimulationDescription():
     simulationDescription = str(raw_input("\n  Type in description of the simulation case: "))
@@ -287,6 +304,65 @@ def defineSimulationDescription():
         exit()
     if simulationDescription in ['',' ']: simulationDescription = '-'
     return simulationDescription
+    
+def defineDataNumber(networkName):
+    
+    print "No solution-datanumber defined (3 characters)! It needs to be defined"
+    
+    existingDataNumbers = findExistingDataNumbers(networkName)
+    correctDataNumber = False
+    
+    prettyPrintList("\n        Existing dataNumbers for this network: {}".format(networkName),existingDataNumbers)
+       
+    while correctDataNumber == False:
+        dataNumber = str(raw_input("\n  Please enter datanumber (3 characters): "))
+        testedFailed = False
+        try:
+            dataNumber,xx = evaluateDataNumber(dataNumber)
+        except ValueError as e:
+            print e
+            testedFailed = True
+            
+        if dataNumber in existingDataNumbers:
+            #userInput = str(raw_input
+            listToPrint = [" keep this datanumber and verwrite simulation case",
+                           " enter new data number"]
+            prettyPrintList("\n        Simulation case with datanumber exits already".format(networkName),listToPrint)
+            userInput = userInputEvaluationInt(2, 0, "     What to do? ")
+            if userInput == 0:
+                correctDataNumber = True
+            
+            elif userInput == 0:
+                dataNumber = False
+                correctDataNumber = False
+                
+        elif testedFailed == False:
+            correctDataNumber = True
+            
+    return dataNumber     
+
+            
+def findExistingDataNumbers(networkName):
+    """
+    evaluates exiting data numbers of a network
+    
+    Args: networkName (str) := networkName
+    
+    Returns: existingDataNumbers (list)
+    """
+    simulationCaseDict = mFPH.getSimulationCaseDescriptions(networkName )#, exception = 'No')
+    networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',networkName,'xxx','read')
+    
+    existingDataNumbers = []
+    
+    for root, dirs, files in os.walk(networkDirectory):
+        for file in files:
+            if ".hdf5" in file and "_SolutionData_" in file:
+                solutionDataFile = file.split('.')[0]
+                dataNumber = solutionDataFile.split('_SolutionData_')[-1]
+                if len(dataNumber) == 3:
+                    existingDataNumbers.append(dataNumber)
+    return existingDataNumbers
     
     
 def chooseSolutionDataCase():
@@ -311,7 +387,7 @@ def chooseSolutionDataCase():
             first = True
             for root, dirs, files in os.walk(networkDirectory):
                 for file in files:
-                    if ".hdf5" in file and "polyChaos" not in file:
+                    if ".hdf5" in file and "uqsa" not in file:
                         solutionDataFile = file.split('.')[0]
                         dataNumber = solutionDataFile.split('_SolutionData_')[-1]
                         if len(dataNumber) == 3:
