@@ -161,7 +161,10 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         if simulationDescription == None:
             simulationDescription = defineSimulationDescription()
         if dataNumber == None:
-            dataNumber = defineDataNumber(networkName)
+            actualNetworkName = networkName #TODO: CRITICAL!! What is the correct way to handle this case?
+            if "_template" in actualNetworkName:
+                actualNetworkName = ''.join(actualNetworkName.split('_template'))
+            dataNumber = defineDataNumber(actualNetworkName)
     ## visualisation only
     if visualisationOnly == True and (dataSetNumber == None or networkName == None) and vascularPolynomialChaos == False: 
             print "\n  No networkName passed, choose between all available networks:"
