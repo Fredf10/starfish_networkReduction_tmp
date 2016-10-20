@@ -471,6 +471,8 @@ def chooseUQSACaseFile(networkName):
         
         uqsaCase = classUqsaCase.UqsaCase()
         uqsaCase.loadXMLFile(configurationFilePathTemplate)
+        
+        # TODO: check if file exits and ask if it should be overwritten        
         configurationFilePath = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'write')
         uqsaCase.writeXMLFile(configurationFilePath)
         # copy network file
@@ -479,6 +481,7 @@ def chooseUQSACaseFile(networkName):
         shutil.copy(toCopyFile, destinationFile)
         print "files created!, exit()"
         exit()
+    
     else:
         networkName = filenames[userInput-1]
         dataNumber = networkName.split('.')[0].split('_')[-1]
