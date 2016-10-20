@@ -68,11 +68,6 @@ def main():
     console_h.setFormatter(console_formatter)
     logger.addHandler(console_h)
 
-    logger.info("")
-    logger.info('=====================================')
-    logger.info('#     STARFiSh_v0.4.19.10.2016      #')
-    logger.info('=====================================')
-    
     optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w','p'])
     
     networkName           = optionsDict['networkName']

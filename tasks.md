@@ -1,9 +1,10 @@
 # List of confirmed tasks
+* Decide about copyright and license
 * Add confirmation for rerunning samples/simulations of a UQSA case if they are already existing (Vinz)
 * Update and verify the list of dependencies on Fedora (Jacob)
 * Verify that template networks are working (Jacob)
-* Fix issue with deleting WD
-* rename vascularPolynomialChaos to vascularUQSA ?;w
+* Delete baroreceptor references
+* Remove realtime visualization from published templates
 
 
 # Unassigned tasks
@@ -26,6 +27,9 @@
 * Gravity
 
 # List of ideas
+* parameters may depend on "external" variables
+* Implement generic component framework
+* rename vascularPolynomialChaos to vascularUQSA 
 * update path manipulations to use `os.path` 
 * Make sure logging can be "quiet"
 * Replace printouts with logging 
