@@ -1,15 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
 ########################################################################################
 #                           STARFiSh v0.4 
 ########################################################################################
 ## 
 # http://www.ntnu.no/starfish
 #
-# created by Vinzenz Eck TODO:vinzenz.eck@mytum.de
-# Developed by:
-# TODO: Hallvard M Nydal, Yappi, ... Fredrik Fossan, Yvan Gugler, Jacob Sturdy, Einar ..., 
+# Contributors:
+# Leif Rune Hellevik, Vinzenz Gregor Eck, Jacob Sturdy, Fredrik Eikeland Fossan, 
+# Einar Nyberg Karlsen, Yvan Gugler, Yapi Donatien Achou, Hallvard Moian Nydal, 
+# Knut Petter Maråk #TODO: THIS MAY CAUSE UNICODE ISSUES, Paul Roger Leinan 
+#
 # TODO: ADD LICENSE (MIT) and COPYRIGHT
 #
-#Copyright (c) <year> <copyright holders>
+#Copyright (c) <2012-> <NTNU>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy of this 
 #software and associated documentation files (the "Software"), to deal in the Software 
@@ -30,12 +34,11 @@
 ##
 
 #---------------------------------------------------------------------------------------#
-
-import subprocess,os
+import os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
 
-import Main as simulator
+import Simulator as simulator
 import Visualisation as visualisationToolBox
 import vnc 
 import VascularPolynomialChaos as uqsaToolBox
