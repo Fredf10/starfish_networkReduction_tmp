@@ -289,7 +289,7 @@ def defineVisualisation():
     
     returns: visualisationBool (int)
     """
-    listToPrint = ['o visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
+    listToPrint = ['0 visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
     prettyPrintList("\n        Choose visualisation mode:",listToPrint)
     userInput = userInputEvaluationInt(4, 0, "     What to do? ")
     return userInput
@@ -353,15 +353,17 @@ def findExistingDataNumbers(networkName):
     Returns: existingDataNumbers (list)
     """
     # TODO: better way to handle this case?
+    destinationNetworkName = networkName
     if "_template" in networkName:
         destinationNetworkName = ''.join(networkName.split("_template"))
         try:
-            _ = mFPH.getFilePath('simulationDescriptionFile', destinationNetworkName, "zzz", 'read', exception = 'No')
+            _ = mFPH.getFilePath('simulationDescriptionFile', destinationNetworkName, "xxx", 'read', exception = 'No')
         except:
-            _ = mFPH.getFilePath('simulationDescriptionFile', networkName, "zzz", 'write')#, exception = 'No')
+            _ = mFPH.getFilePath('simulationDescriptionFile', destinationNetworkName , "xxx", 'write')#, exception = 'No')
 
-    simulationCaseDict = mFPH.getSimulationCaseDescriptions(networkName )#, exception = 'No')
-    networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',networkName,'xxx','read')
+    simulationCaseDict = mFPH.getSimulationCaseDescriptions(destinationNetworkName)#, exception = 'No')
+    print(simulationCaseDict)
+    networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',destinationNetworkName,'xxx','read')
     
     existingDataNumbers = []
     
