@@ -289,9 +289,9 @@ def defineVisualisation():
     
     returns: visualisationBool (int)
     """
-    listToPrint = ['0 visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
+    listToPrint = ['No visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
     prettyPrintList("\n        Choose visualisation mode:",listToPrint)
-    userInput = userInputEvaluationInt(4, 0, "     What to do? ")
+    userInput = userInputEvaluationInt(4, 0, "     What to do? (q)-quit: ")
     return userInput
     
     
@@ -327,7 +327,7 @@ def defineDataNumber(networkName):
             
         if dataNumber in existingDataNumbers:
             #userInput = str(raw_input
-            listToPrint = [" keep this datanumber and verwrite simulation case",
+            listToPrint = [" keep this datanumber and overwrite simulation case",
                            " enter new data number"]
             prettyPrintList("\n        Simulation case with datanumber exits already".format(networkName),listToPrint)
             userInput = userInputEvaluationInt(2, 0, "     What to do? ")

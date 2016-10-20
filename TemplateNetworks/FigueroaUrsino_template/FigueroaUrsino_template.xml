@@ -3,14 +3,12 @@
   <simulationContext>
     <description>None</description>
     <totalTime unit="s">4.0</totalTime>
-    <CFL>0.65</CFL>
+    <CFL>0.5</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
     <minSaveDt unit="s"> 0.01 </minSaveDt>
     <maxMemory unit="MB">5000</maxMemory>
     <gravitationalField>True</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
-    <centralVenousPressure unit="mmHg">3.0</centralVenousPressure>
-    <minimumVenousPressure unit="mmHg">0.0</minimumVenousPressure>
   </simulationContext>
   <solverCalibration>
     <rigidAreas>False</rigidAreas>
@@ -22,7 +20,7 @@
   <initialisationControls>
     <initialsationMethod>ConstantPressure</initialsationMethod>
     <initMeanFlow unit="ml s-1">1.0</initMeanFlow>
-    <initMeanPressure unit="mmHg">101.28</initMeanPressure>
+    <initMeanPressure unit="mmHg">131.28</initMeanPressure>
     <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
     <compPercentageWK3>0.2</compPercentageWK3>
     <compPercentageTree>0.8</compPercentageTree>
@@ -61,13 +59,14 @@
 </venousPoolContent>
 -->
 <venousPoolContent class="venousPool">
-<P0 unit="mmHg">2</P0>
-<pressureGain>1/0.228</pressureGain>
+<P0 unit="mmHg">2.0</P0>
+<pressureGain>1.0/0.228</pressureGain>
 <Vusv0 unit="ml">3440</Vusv0>
 <V0 unit="ml">3700</V0>
 <k>0.1124</k>
 </venousPoolContent>
 </venousPool>
+	    <!-- This is an example to comment out a portion of an input xml file so that it is not read in to the simulation
 <baroreceptors>
   <baroreceptor Id="1">
       <topology>
@@ -84,11 +83,12 @@
       </model>
   </baroreceptor>
 </baroreceptors>
+-->
   <boundaryConditions>
     <boundaryCondition vesselId="1">
       <VaryingElastanceSimple>
         <T unit = 's'>0.4686</T>
-        <Emax unit = 'mmHg ml-1'>3.049429067</Emax>2.31
+        <Emax unit = 'mmHg ml-1'>2.31</Emax>
         <Emin unit = 'mmHg ml-1'>0.06</Emin>
         <Tpeak unit = 's'>0.201498</Tpeak>
         <V0 unit = 'ml'>16.66</V0>20
