@@ -300,13 +300,24 @@ def readConfigFile(options):
     
     for option in options:    
         if option == 'WorkingDirectory':
-            try:
-                workingDirectory = config.get('Directory Paths', option)
-            except:
-                workingDirectory = None
-                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed ini file corrupted, exit()")
+            #try:
+            workingDirectory = config.get('Directory Paths', option)
+            if os.path.isdir(workingDirectory) == False:
+                print Warning("\n ERROR WorkingDirectory {} does not exist \n".format(workingDirectory))
+                
+                knownWorkingDirectories = config.get('Directory Paths', 'knownWorkingDirectories').split(',')
+                if workingDirectory in knownWorkingDirectories:            
+                    knownWorkingDirectories.remove(workingDirectory) 
+                    
+                saveConfigFile({'knownWorkingDirectories':','.join(knownWorkingDirectories)})
+                workingDirectory = ''
+           # except:
+            #    workingDirectory = None
+           #     raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed ini file corrupted, exit()")
             if workingDirectory == '':
                 print Warning("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined")
+                
+               
                 
                 workingDirectorySettings(searchKnowWorkingDirectories = False)
             
