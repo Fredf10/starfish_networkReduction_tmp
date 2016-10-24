@@ -5,6 +5,8 @@
 * Verify that template networks are working (Jacob)
 * Delete baroreceptor references
 * Remove realtime visualization from published templates
+* Identify which templates should be released
+* Which features should be highlighted/demonstrated in the tutorials? Heart models, venous models, data processing etc?
 
 
 # Unassigned tasks
@@ -19,6 +21,8 @@
 * Test heart models
 * Test UQSA
 * Test Anastomosis
+* go through Vinzenz' notes regarding starfish ideas
+* extract rotation and gravity into auxillary functions that can be applied
 
 # List of components to fully separate
 * Baroreflex
