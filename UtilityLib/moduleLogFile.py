@@ -3,16 +3,12 @@ import h5py
 import numpy as np
 from scipy.integrate import simps
 
-import subprocess
 
 
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(''.join([cur,'/../']))
-# sys.path.append(cur+'/../'+'/NetworkLib')
 
-import NetworkLib.classVascularNetwork as cVascNw
-from NetworkLib.classBoundaryConditions import *
 
 import moduleFilePathHandler as mFPH
 
@@ -67,14 +63,17 @@ class NetworkLogFile:
             if "% Fill in title here" in line:
                 self.writeTitle(fLogFile)
 
-            elif "% Fill model parameters here" in line:
-                self.writeModelParameters(fLogFile)
-
             elif "% Fill solving data here" in line:
                 self.writeSolvingData(fLogFile)
 
+            elif "% Fill numerical data here" in line:
+                self.writeNumericalData(fLogFile)
+                
             elif "% Fill total vlues here" in line:
                 self.writeTotalValues(fLogFile)
+                
+            elif "% Fill model parameters here" in line:
+                self.writeModelParameters(fLogFile)
 
             elif "% Fill lumped values here" in line:
                 if self.vascularNetwork.initialsationMethod not in ['ConstantPressure']:
@@ -144,6 +143,103 @@ class NetworkLogFile:
         fLogFile.write('\n')
         fLogFile.write("Outflow Windkessel pressure (Pa): & {0}".format(self.venousPressure))
         fLogFile.write('\n')
+        
+
+    def writeNumericalData(self, fLogFile):
+        
+        self.findNumericalValuesFromSolution()
+        
+        maxdz = 0
+        mindz = 100
+        maxNode = 0
+        minNode = 10000
+        maxCFL = 0
+        minCFL = 1000
+        minCFLmin = 1000
+        maxc = 0
+        minc = 1000
+        
+        maxdzID = None
+        mindzID = None
+        maxNodeID = None
+        minNodeID = None
+        maxCFLID = None
+        minCFLID = None
+        minCFLminID = None
+        maxcID = None
+        mincID = None
+        
+        for vesselID in self.treeTraverseList_sorted:
+            
+            cmin_in, cmax_in = self.numericalValues[vesselID]['cin']
+            cmin_out, cmax_out = self.numericalValues[vesselID]['cout']
+            dz = self.numericalValues[vesselID]['dz']
+            Nodes = self.numericalValues[vesselID]['N']
+            startCFLmax = self.numericalValues[vesselID]['CFLin']
+            endCFLmax = self.numericalValues[vesselID]['CFLout']
+            
+            cValues = [cmin_in, cmax_in, cmin_out, cmax_out]
+            cminVessel = min(cValues)
+            cmaxVessel = max(cValues)
+            
+            CFLminVessel = min([startCFLmax, endCFLmax])
+            CFLmaxVessel = max([startCFLmax, endCFLmax])
+            
+            if dz > maxdz:
+                maxdz = dz
+                maxdzID = vesselID
+            if dz < mindz:
+                mindz = dz
+                mindzID = vesselID
+                
+            if Nodes > maxNode:
+                maxNode = Nodes
+                maxNodeID = vesselID
+            if Nodes < minNode:
+                minNode = Nodes
+                minNodeID = vesselID
+
+            if cmaxVessel > maxc:
+                maxc = cmaxVessel
+                maxcID = vesselID
+            if cminVessel < minc:
+                minc = cminVessel
+                mincID = vesselID
+                
+            if CFLmaxVessel > maxCFL:
+                maxCFL = CFLmaxVessel
+                maxCFLID = vesselID
+            if CFLmaxVessel < minCFL:
+                minCFL = CFLmaxVessel
+                minCFLID = vesselID
+            if CFLminVessel < minCFLmin:
+                minCFLmin = CFLminVessel
+                minCFLminID = vesselID
+            
+        fLogFile.write("max CFL Values: & {0}, {1} ({2}, {3})".format(round(minCFL, 3), round(maxCFL, 3), minCFLID, maxCFLID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("min CFL: & {0} ({1})".format(round(minCFLmin, 3), minCFLminID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("max c (m/s): & {0} ({1})".format(round(maxc, 3), maxcID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("min c (m/s): & {0} ({1})".format(round(minc, 3), mincID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("max dz (mm): & {0} ({1})".format(round(maxdz*1000, 3), maxdzID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("min dz (mm): & {0} ({1})".format(round(mindz*1000, 3), mindzID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("max Nodes: & {0} ({1})".format(maxNode, maxNodeID))
+        fLogFile.write(r' \\')
+        fLogFile.write('\n')
+        fLogFile.write("min Nodes: & {0} ({1})".format(minNode, minNodeID))
+        fLogFile.write('\n')
+
     
     def writeTotalValues(self, fLogFile):
         root = self.vascularNetwork.root
@@ -387,6 +483,61 @@ class NetworkLogFile:
             averageValues[vesselId] = tmpValues
         
         self.averageValues = averageValues
+        
+
+    def findNumericalValuesFromSolution(self):
+        
+        hdf5File = h5py.File(self.solutionFile, 'r')
+        time = hdf5File['VascularNetwork']['simulationTime'][:] - hdf5File['VascularNetwork']['simulationTime'][0]
+        dt = time[1] - time[0]
+        root = self.vascularNetwork.root
+        freq = self.boundaryConditions[root][0].freq
+        period = 1./freq
+        N = int(period/dt)
+        N = len(time) - N - 1
+        time = time[N:]
+        
+        print "starting to load solutiondata"
+        print "averaging between t_start = {0} and t_end = {1}".format(time[0], time[-1])
+        numericalValues = {}
+        for vesselName in hdf5File['vessels'].keys():
+            tmpValues = {}
+            vesselId = vesselName.split(' - ')[-1]
+            vesselId = int(vesselId)
+            
+            startP  = hdf5File['vessels'][vesselName]['Psol'][N:, 0]
+            endP =  hdf5File['vessels'][vesselName]['Psol'][N:, -1]
+            
+            startA  = hdf5File['vessels'][vesselName]['Asol'][N:, 0]
+            endA =  hdf5File['vessels'][vesselName]['Asol'][N:, -1]
+            
+            startc = self.vessels[vesselId].waveSpeed(startA, self.vessels[vesselId].C_nID([startP], 0))
+            endc = self.vessels[vesselId].waveSpeed(endA, self.vessels[vesselId].C_nID([endP], -1))
+            
+            startQ  = hdf5File['vessels'][vesselName]['Qsol'][N:, 0]
+            endQ =  hdf5File['vessels'][vesselName]['Qsol'][-N, -1]
+            
+            startU = startQ/startA
+            endU = endQ/endA
+            
+            dz = self.vessels[vesselId].dz[0]
+            Nodes = self.vessels[vesselId].N
+            
+            startCFL = self.dt*(startU + startc)/dz
+            endCFL = self.dt*(endU + endc)/dz
+            startCFLmax = np.amax(startCFL)
+            endCFLmax = np.amax(endCFL)
+            
+            tmpValues['cin']= [np.amin(startc), np.amax(startc)]
+            tmpValues['cout'] = [np.amin(endc), np.amax(endc)]
+            tmpValues['dz'] = dz
+            tmpValues['N'] = Nodes
+            tmpValues['CFLin']= startCFLmax
+            tmpValues['CFLout']= endCFLmax
+            
+            numericalValues[vesselId] = tmpValues
+        
+        self.numericalValues = numericalValues
             
             
     def findMean(self, x, f):

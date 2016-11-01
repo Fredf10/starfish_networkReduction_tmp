@@ -18,10 +18,9 @@ cur = os.path.dirname( os.path.realpath('__file__') )
 ### Unnecessary import, never used later.
 
 
-import NetworkLib.classNetworkReduction as cNred
+import NetworkLib.classNetworkReduction_backup as cNred
 
 import UtilityLib.moduleXML as mXML
-import UtilityLib.moduleLogFile as mLOG
 import UtilityLib.moduleStartUp as mStartUp #import parseOptions
 import UtilityLib.moduleFilePathHandler as mFPH
 
