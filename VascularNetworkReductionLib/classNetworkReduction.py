@@ -20,11 +20,12 @@ class NetworkReduction(cSBO.StarfishBaseObject):
     solutionMemoryFields    = ["simulationTime", "arterialVolume"]
     solutionMemoryFieldsToSave = ["simulationTime", "arterialVolume"]
 
-    def __init__(self, vascularNetwork):
+    def __init__(self, vascularNetwork, quiet=False):
         
         
         
         self.vascularNetwork = vascularNetwork
+        self.vascularNetwork.quiet = quiet
         self.vascularNetwork.initialize(initializeForSimulation = True)
         #self.vascularNetwork.initializeNetworkForSimulation()
         self.name = vascularNetwork.name
@@ -72,6 +73,27 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         #self.test()
     
     
+    def initialize(self, useAverageValues=False, useVesselsImpedance=False, useLumpedValues=False):
+        
+        self.useAverageValues = useAverageValues
+        self.useVesselsImpedance = useVesselsImpedance
+        self.useLumpedValues = useLumpedValues
+        
+        if useLumpedValues:
+            self.reduceSingleVessel = self.reduceTerminalLumped
+        else:
+            self.reduceSingleVessel = self.reduceTerminal
+    
+    def reduceNetworkFromList(self, truncateList):
+        
+        
+        for vesselId in truncateList:    
+        
+            self.truncate(int(vesselId))
+        
+        if self.useVesselsImpedance:
+            self.setToVesselImpedance()
+            
     def reduceNetwork(self, truncateFile):
         
         f = open(truncateFile)
@@ -91,7 +113,6 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         
         if self.useVesselsImpedance:
             self.setToVesselImpedance()
-                    
         
 
 
@@ -129,8 +150,8 @@ class NetworkReduction(cSBO.StarfishBaseObject):
             a single terminal Wk3 is assigned at the distal end of the motherVessel. The method is taken from Epstein S. et al"""
             
         leftDaughter, rightDaughter = self.vessels[vesselId].leftDaughter, self.vessels[vesselId].rightDaughter
-        self.reduceTerminal(leftDaughter)
-        self.reduceTerminal(rightDaughter)
+        self.reduceSingleVessel(leftDaughter)
+        self.reduceSingleVessel(rightDaughter)
         self.reduceTerminalBifurcation(vesselId)
     
     
@@ -155,7 +176,7 @@ class NetworkReduction(cSBO.StarfishBaseObject):
                 toVisit.append(rightDaughter)
             toVisit.remove(tmpVessel)
         
-        print branchVessels
+        #print branchVessels
         
         terminalBifurcations = []
         
@@ -165,7 +186,7 @@ class NetworkReduction(cSBO.StarfishBaseObject):
             if terminalbif:
                 terminalBifurcations.append(tmpVessel)
         
-        print terminalBifurcations
+        #print terminalBifurcations
         if len(terminalBifurcations) == 1:
             keepTruncating = True
             tmpTerminalBif = terminalBifurcations[0]
@@ -243,10 +264,79 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         K3 = simps(f3, x)
         
         Cv = K1/(rho)
-        Rv = 2*(gamma + 2)*np.pi*my*K3
+        Rv = 2*(gamma + 2.)*np.pi*my*K3
         
         Rnew = Z + R + Rv
         Cnew = (Cv*R + Cv*Z + C*R + Rv*Cv)/Rnew
+
+        
+        self.vessels[vesselId].Rnew = Rnew
+        self.vessels[vesselId].Cnew = Cnew
+        
+        
+    def reduceTerminalLumped(self, vesselId, N=501):
+        """ This method reduces a terminal WK3 vessel into a
+            lumped Wk2 BC according to Epstein S. et al eq. 6 
+            and 7. Rnew and Cnew are stored as vessels[vesselID].Rnew
+            and vessels[vesselID].Cnew
+        """
+        
+        
+        #print self.boundaryConditions[vesselId]
+        Z = self.boundaryConditions[vesselId][0].Z
+        R = self.boundaryConditions[vesselId][0].Rc
+        
+        C = self.boundaryConditions[vesselId][0].C
+        
+        if self.useAverageValues:
+            [p0, p1] = self.lumpedValues[vesselId]['Pressure']
+            #print p0, p1
+            areaProximal = self.vessels[vesselId].A_nID([p0, p1], 0)
+            areaDistal = self.vessels[vesselId].A_nID([p0, p1], -1)
+            radiusProximal, radiusDistal = np.sqrt(areaProximal/np.pi), np.sqrt(areaDistal/np.pi)
+            
+            radiusProximal_diastolic = self.vessels[vesselId].radiusProximal
+            radiusDistal_diastolic = self.vessels[vesselId].radiusDistal
+            #exit()
+            
+        else:
+            radiusProximal = self.vessels[vesselId].radiusProximal
+            radiusDistal = self.vessels[vesselId].radiusDistal
+            
+            radiusProximal_diastolic = radiusProximal
+            radiusDistal_diastolic = radiusDistal
+        
+        
+        h_prox, h_dist = self.calcWallthickness(radiusProximal_diastolic), self.calcWallthickness(radiusDistal_diastolic)
+        
+        h = np.linspace(h_prox, h_dist, N)
+        
+        E = self.vessels[vesselId].youngModulus
+
+        Beta = (4./3)*np.sqrt(np.pi)*E*h
+        
+        rho = self.vessels[vesselId].rho
+        
+        r = np.linspace(radiusProximal, radiusDistal, N)
+        
+        r_diastolic = np.linspace(radiusProximal_diastolic, radiusDistal_diastolic, N)
+        
+        
+        A = np.pi*r**2
+        Ad = np.pi*r_diastolic**2
+        
+        cd = np.sqrt(Beta/(2*rho*Ad))*A**(1./4)
+        
+        x = np.linspace(0, self.vessels[vesselId].length, N)
+        
+        f1 = A/(cd**2)
+        
+        K1 = simps(f1, x)
+        
+        Cv = K1/(rho)
+        
+        Rnew = self.lumpedValues[vesselId]['R'][0]
+        Cnew = Cv + C
 
         
         self.vessels[vesselId].Rnew = Rnew
@@ -303,13 +393,21 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         R = Rnew - Z_0
 #         print "     R2 = {0} ".format(R)
         
-        # todo fix so one can reduce all the way down to self.root
+        # fix so that only bc[-1] is adjusted
         if vesselId in self.boundaryVessels:
             self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
             self.boundaryConditions[vesselId][1].Z = Z_0
             self.boundaryConditions[vesselId][1].Rc = R
             self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
             self.boundaryConditions[vesselId][1].C = Cnew
+        elif vesselId == self.vascularNetwork.root:
+            self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
+            self.boundaryConditions[vesselId][1].Z = Z_0
+            self.boundaryConditions[vesselId][1].Rc = R
+            self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][1].C = Cnew
+            self.boundaryConditions[vesselId][1].position = - 1
+            
         else:
             self.boundaryConditions[vesselId] = self.boundaryConditions[leftDaughter][:]
             self.boundaryConditions[vesselId][0].Z = Z_0
