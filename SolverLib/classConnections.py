@@ -84,9 +84,9 @@ class Link():
         # Define the call function depending on the solving Scheme
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
-            print "classconnection 86: using linear link model"
+            #print "classconnection 86: using linear link model"
         elif solvingScheme == "NonLinear":
-            print "classconnection 88: using nonlinear link model" 
+            #print "classconnection 88: using nonlinear link model" 
             self.__call__ = self.callNonLinear
         elif solvingScheme == "Stenosis":
             print "classconnection 92: using Stenosis link model" 
@@ -861,7 +861,7 @@ class Bifurcation():
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
         elif solvingScheme == "NonLinear":
-            print "classconnection 693: using nonlinear bifurcation model" 
+            #print "classconnection 693: using nonlinear bifurcation model" 
             self.__call__ = self.callNonLinear
         else:
             raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))

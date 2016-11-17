@@ -71,6 +71,7 @@ class PostprocessReduction:
                                                   networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
         
         vascularNetwork.initialize(initializeForSimulation = True)
+        vascularNetwork.quiet = True
 
         if pathSolutionDataFilename == None:
             pathSolutionDataFilename = mFPHVNR.getFilePath('solutionFile', self.name, self.dataNumber, 'read')

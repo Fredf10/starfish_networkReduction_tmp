@@ -25,7 +25,7 @@ sys.path.append(''.join([cur,'/../']))
 import ConfigParser
 
 # TODO: (einar) Rename input variable exception and corresponding strings
-def getFilePath(fileType, networkName, dataNumber, mode, reductionNetworkName='None', exception = 'Error'):
+def getFilePath(fileType, networkName, dataNumber, mode, reductionNetworkName='None', reductionNetworkCase='None', exception = 'Error'):
     """
     Function return a requested file path, if this file exists
 
@@ -111,7 +111,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, reductionNetworkName='N
     ## find requested file name
     requestedFilename  = filenames[''.join([fileType])]
     ## find directory
-    requestedDirectory = getDirectory(''.join([fileType,'Directory']), networkName, dataNumber, mode, reductionNetworkName, exception)
+    requestedDirectory = getDirectory(''.join([fileType,'Directory']), networkName, dataNumber, mode, reductionNetworkName, reductionNetworkCase, exception)
     if requestedDirectory == None:
         if exception == "Warning":
             print "WARNING: moduleFilePathHandler.getFileAndPaths() directory of file '{}' does not exits. Exit()".format(requestedFilename)
@@ -140,7 +140,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, reductionNetworkName='N
     return requestedFilePath
 
 # TODO: (einar) fix exception variable in function
-def getDirectory(directoryType, networkName, dataNumber, mode, reductionNetworkName='None', exception = 'Error'):
+def getDirectory(directoryType, networkName, dataNumber, mode, reductionNetworkName='None', reductionNetworkCase='None', exception = 'Error'):
     """
     Function returns a requested directory path, if this directory does not exists
     it is created.
@@ -223,7 +223,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, reductionNetworkN
            
     networkXmlFileTemplateDirectory  = ''.join([starfishHomeDirectory, '/TemplateNetworks/', networkName])
     networkXmlFileDirectory          = ''.join([workingDirectory, '/', networkName])
-    networkXmlFileDirectoryReduced   = ''.join([workingDirectory, '/', reductionNetworkName, '/ReducedNetworks/', networkName])
+    networkXmlFileDirectoryReduced   = ''.join([workingDirectory, '/', reductionNetworkName, '/ReducedNetworks/',reductionNetworkCase, '/', networkName])
     solutionFileDirectory            = ''.join([networkXmlFileDirectory, '/SolutionData_', str(dataNumber)])
     solutionFileDirectoryReduced     = ''.join([networkXmlFileDirectoryReduced, '/SolutionData_', str(dataNumber)])
     initialValueFileDirectory        = ''.join([networkXmlFileDirectory, '/InitialValues'])

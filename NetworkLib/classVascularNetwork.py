@@ -33,7 +33,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     solutionMemoryFields    = ["simulationTime", "arterialVolume"]
     solutionMemoryFieldsToSave = ["simulationTime", "arterialVolume"]
 
-    def __init__(self, quiet=False):
+    def __init__(self, quiet=True):
 
         # # vascularNetwork variables to set via XML
         self.name = 'vascularNetwork'  # name of the network
@@ -125,6 +125,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.connectionNodes = []
 
         self.initialValues = {}
+        self.lumpedValues = {}
         self.Rcum = {}  # Dictionary with all cumulative resistances
         self.Cends = {}  # Dictionary with the area compliances of all terminating vessels (at ends)
         self.totalTerminalAreaCompliance = None  # the sum of all Cends
@@ -373,8 +374,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             for Id, bcs in self.boundaryConditions.iteritems():
                 for bc in bcs:
                     bcPositions.append(bc.position)
+                    print bc.name, bc.position
             if 1 not in bcPositions and -1 not in bcPositions:
-                raise ImportError("VascularNetwork.initialize(): BoundaryConditions are not proper defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[0].name))
+                raise ImportError("VascularNetwork.initialize(): BoundaryConditions are not proper defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[Id].name))
                 #print "ERROR: VascularNetwork.initialize(): BoundaryConditions are not proper defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[0].name)
                 #exit()
 
@@ -523,9 +525,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.simulationTime[0] = -self.nTstepsInitPhase*self.dt
 
-        print "cVN::InitializeNetworkForSimulation"
-        print "nTSteps", self.nTSteps
-        print "Saving ={}:{}:{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
+        #print "cVN::InitializeNetworkForSimulation"
+        #print "nTSteps", self.nTSteps
+        #print "Saving ={}:{}:{}".format(self.nSaveBegin,self.nSaveEnd,self.nSaveSkip)
 
 
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
@@ -1345,8 +1347,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         
         
-        initialValuePath = mFPH.getDirectory('initialValueFileDirectory', self.name, self.dataNumber, 'write')
-        
+        #initialValuePath = mFPH.getDirectory('initialValueFileDirectory', self.name, self.dataNumber, 'write')
+        initialValuePath = "/home/fredrik/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55Model/InitialValues"
         initialValues =  {}
         for vesselId in self.treeTraverseList:
             
@@ -1383,7 +1385,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         
         Qmean = Qmean*10**6
-        print Qmean
         
         initialValues = {}
         
@@ -1414,7 +1415,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             else: Z = bc.Z
                             Rtotal = bc.Rc + Z
                             bc.update({'Rtotal':Rtotal})
-                            print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
+                            #print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
                     except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
                     # # add resistance to the value
                     try: boundaryResistance = boundaryResistance + bc.Rtotal
@@ -1555,6 +1556,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             initialValues[vesselId] = {}
             initialValues[vesselId]['Pressure'] = [p0, p1]
             initialValues[vesselId]['Flow'] = [qm, qm]
+            initialValues[vesselId]['R'] = [p0/qm, p1/qm]
             self.Rcum[vesselId] = (p0)/qm
 
         
