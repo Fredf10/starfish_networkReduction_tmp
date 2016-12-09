@@ -56,18 +56,6 @@ import gc
 import subprocess
 
 def main():
-    file_h = logging.FileHandler('starfish.log', mode='w')
-    file_h.setLevel(logging.DEBUG)
-    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_h.setFormatter(file_formatter)
-    logger.addHandler(file_h)
-
-    console_h = logging.StreamHandler(sys.stdout)
-    console_h.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('%(message)s')
-    console_h.setFormatter(console_formatter)
-    logger.addHandler(console_h)
-
     optionsDict = mStartUp.parseOptions(['f','n','d','s','v','r','w','p'])
     
     networkName           = optionsDict['networkName']
@@ -139,19 +127,19 @@ def main():
     
     
     if vizOutput == "2D":
-        string = ' '.join(['python',cur+'/VisualisationLib/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber)])                
+        string = ' '.join([sys.executable, cur + '/VisualisationLib/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber)])                
         subprocess.Popen(string, shell=True)
         
     
     if vizOutput == "3D":
-        string = ' '.join(['python',cur+'/VisualisationLib/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
+        string = ' '.join([sys.executable, cur+'/VisualisationLib/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
         subprocess.Popen(string, shell=True)
         
         
     if vizOutput == "2D+3D":
            
-        string1 = ' '.join(['python',cur+'/VisualisationLib/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
-        string2 = ' '.join(['python',cur+'/VisualisationLib/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
+        string1 = ' '.join([sys.executable, cur + '/VisualisationLib/class2dVisualisation.py', '-f', vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
+        string2 = ' '.join([sys.executable, cur + '/VisualisationLib/class3dVisualisation.py', '-f', vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
         
         viz2d = subprocess.Popen(string1, shell = True )
         viz3d = subprocess.Popen(string2, shell = True )
