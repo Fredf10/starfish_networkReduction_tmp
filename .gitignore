@@ -18,6 +18,9 @@
 *.synctex.gz
 *.toc
 
+# git merge files
+*.orig
+
 # For latexmk users
 *.fdb_latexmk
 *.fls

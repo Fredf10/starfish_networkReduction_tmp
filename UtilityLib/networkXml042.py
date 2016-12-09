@@ -240,7 +240,6 @@ vesselComplianceElements = {'Laplace'     :['complianceType','constantCompliance
                             'Laplace2'    :['complianceType','constantCompliance','externalPressure','Ps','As','wallThickness','youngModulus'],
                             'Exponential' :['complianceType','constantCompliance','externalPressure','Ps','As','betaExponential'],
                             'Hayashi'     :['complianceType','constantCompliance','externalPressure','Ps','As','betaHayashi'],
-                            'HayashiEmpirical' :['complianceType','constantCompliance','externalPressure','Ps','As','betaHayashi'],
                             'Reymond'     :['complianceType','constantCompliance','externalPressure','Ps','As','Cs','PmaxC','Pwidth','a1','b1']
                             }
 
@@ -259,21 +258,21 @@ vesselElements = ['topology',
                   'compliance',
                   'fluid']
 
-# ###########################################################################################
-# ## Random variables
-# randomInputDistributionElements = ['distributionType',
-#                                    'a',
-#                                    'b']
-# 
-# randomInputCorrelationElements = []
-# 
-# randomInputsReference = {'distribution':randomInputDistributionElements,
-#                          'correlation' :randomInputCorrelationElements}
-# 
-# randomInputsElements = ['distribution',
-#                         'correlation']
-# 
-# generalRandomInputsAttributes = ['name']
+###########################################################################################
+## Random variables
+randomInputDistributionElements = ['distributionType',
+                                   'a',
+                                   'b']
+
+randomInputCorrelationElements = []
+
+randomInputsReference = {'distribution':randomInputDistributionElements,
+                         'correlation' :randomInputCorrelationElements}
+
+randomInputsElements = ['distribution',
+                        'correlation']
+
+generalRandomInputsAttributes = ['name']
 
 ##########################################################################################
 ## XML file elements
@@ -287,7 +286,6 @@ xmlElements  = [ 'simulationContext',
                  'communicators',
                  'boundaryConditions',
                  'randomInputManager',
-                 'measurementRoutine',
                  'vessels',
                  "venousPool"]
 
@@ -300,19 +298,19 @@ xmlElementsReference = {'simulationContext'     : simulationContextElements,
                         'baroreceptors'         : baroreceptorElements,
                         'communicators'         : communicatorReference, #TODO why is this Reference?
                         'randomInputManager'    : None,
-                        'measurementRoutine'     : None,
+                        'generalRandomInputs'   : randomInputDistributionElements,
                         'vessels'               : vesselElements,
                         'venousPool' : None }
 
 
-# 
-# 
-# ##########################################################################################
-# ##########################################################################################
-# ### uncertainty quantification and sensitivity analysis
-# 
-# locationOfInterest = ['quantitiesOfInterestToProcess',
-#                       'queryLocation',
-#                       'xVals',
-#                       'confidenceAlpha']
+
+
+##########################################################################################
+##########################################################################################
+### uncertainty quantification and sensitivity analysis
+
+locationOfInterest = ['quantitiesOfInterestToProcess',
+                      'queryLocation',
+                      'xVals',
+                      'confidenceAlpha']
 

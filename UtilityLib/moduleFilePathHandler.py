@@ -24,6 +24,13 @@ sys.path.append(''.join([cur,'/../']))
 
 import ConfigParser
 
+try:
+    from lxml import etree
+except:
+    # TODO: This produces an error!! with the pretty_print argument
+    from xml.etree import ElementTree as etree
+
+
 # TODO: (einar) Rename input variable exception and corresponding strings
 def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     """
@@ -258,8 +265,13 @@ def createWorkingCopyOfTemplateNetwork(templateNetworkName, destinationNetworkNa
         oldName = templateNetworkName.split('_template')[0]
         if oldName in renamedFile:
             renamedFile = ''.join([destinationNetworkName,renamedFile.split(oldName)[-1]])
-            
-        shutil.copy('/'.join([pathTemplateNetwork,file]), '/'.join([pathDestinationNetwork,renamedFile]))
+
+        shutil.copy(os.path.join(*[pathTemplateNetwork,file]), os.path.join(*[pathDestinationNetwork,renamedFile]))
+        
+        newFilePath = os.path.join(*[pathDestinationNetwork,renamedFile])
+        if ".xml" in newFilePath:
+            setFlowFromFilePathToAbsolute(newFilePath, pathDestinationNetwork)
+
         
     return destinationNetworkName
 
@@ -275,21 +287,42 @@ def readConfigFile(options):
     """ 
     
     config = ConfigParser.ConfigParser()
-    config.read(getFilePath('configFile', "", '', 'read'))
+    
+    filePath = getFilePath('configFile', "", '', 'read',exception = 'No')
+    if filePath == None:
+        saveConfigFile({'WorkingDirectory': '', 'knownWorkingDirectories':''})
+        filePath = getFilePath('configFile', "", '', 'read')
+    
+    config.read(filePath)
         
     
     configurations = {}
     
     for option in options:    
         if option == 'WorkingDirectory':
-            try:
-                workingDirectory = config.get('Directory Paths', option)
-            except:
-                workingDirectory = None
-                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed ini file corrupted, exit()")
+            #try:
+            workingDirectory = config.get('Directory Paths', option)
+            if os.path.isdir(workingDirectory) == False:
+                print Warning("\n ERROR WorkingDirectory {} does not exist \n".format(workingDirectory))
+                
+                knownWorkingDirectories = config.get('Directory Paths', 'knownWorkingDirectories').split(',')
+                if workingDirectory in knownWorkingDirectories:            
+                    knownWorkingDirectories.remove(workingDirectory) 
+                    
+                saveConfigFile({'knownWorkingDirectories':','.join(knownWorkingDirectories)})
+                workingDirectory = ''
+           # except:
+            #    workingDirectory = None
+           #     raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed ini file corrupted, exit()")
             if workingDirectory == '':
-                raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined, exit()")
+                print Warning("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined")
+                
+               
+                
+                workingDirectorySettings(searchKnowWorkingDirectories = False)
+            
             configurations['WorkingDirectory'] = workingDirectory
+            
         
         if option == 'knownWorkingDirectories':
             try:
@@ -352,6 +385,77 @@ def updateKnownWorkingDirectories():
         
         saveConfigFile({'knownWorkingDirectories':','.join(knownWorkingDirectories)})
     
+def prettyPrintList(title, listToPrint, indexOffSet = 0):
+    """
+    Function to pretty print a list to STDOUT with numbers to choose from
+    """
+    print title
+    for index,listElement in enumerate(listToPrint):
+        print "   [ {:3} ] - {}".format(index+indexOffSet,listElement)
+
+def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
+    '''
+    Question user to isert an integer number between minBound and maxBound
+    '''
+    appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
+    userInput = "NONE"
+    appropriateInputList.append('q')
+    print ""
+    while userInput not in appropriateInputList:
+        userInput = raw_input(question)
+    print ""
+    if userInput == 'q': exit()
+    else: return int(userInput)
+
+
+def workingDirectorySettings(searchKnowWorkingDirectories = True):
+    '''
+    working directory settings
+    '''
+    
+    prettyPrintList(' Working directory settings menu',['add working directory','switch to another known working directory'])
+    if searchKnowWorkingDirectories == True: 
+        updateKnownWorkingDirectories()
+        print "\n current working directory: {} ".format(readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
+    userInput = userInputEvaluationInt(2)
+    if userInput == 0:
+        insertWorkingDirectory(None)
+    elif userInput ==1:
+        knownWorkingDirectories = readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
+        prettyPrintList(' List of all known working directories:',knownWorkingDirectories)
+        userInput2 = userInputEvaluationInt(len(knownWorkingDirectories))
+        saveConfigFile({'WorkingDirectory': knownWorkingDirectories[userInput2]})
+
+def insertWorkingDirectory(optionArgument):
+    
+    print "Setting new working directory"
+    
+    if optionArgument == None:
+        optionArgument = ""
+        loopQuestion = True
+        defaultWD = os.path.expanduser(os.path.join('~','starfish_working_directory')) 
+        print("Enter an absolute or relative path to set the working directory, or (q) quit")
+        input_prompt="[Press enter to use the default path {}]: ".format(defaultWD)
+        optionArgument = raw_input(input_prompt) or defaultWD
+        
+    if optionArgument != "q":
+        optionArgument = os.path.expanduser(optionArgument)
+    
+        if os.path.isdir(optionArgument):
+            saveConfigFile({'WorkingDirectory':optionArgument})
+            updateKnownWorkingDirectories()
+            print "   working directory set!"
+        else:
+            print "  working directory does not exist! try to create folder"
+            try:
+                os.mkdir(optionArgument)
+                saveConfigFile({'WorkingDirectory':optionArgument})
+                updateKnownWorkingDirectories()
+                print "   created working directory folder successfully"
+                print "   working directory set!"
+            except:
+                print "  WARNING: moduleStartUp.insertWorkingDirectory() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
+        
     
 def updateSimulationDescriptions(networkName, currentDataNumber, currentDescription):
     """
@@ -398,7 +502,6 @@ def updateSimulationDescriptions(networkName, currentDataNumber, currentDescript
     simCaseDescFile.writelines(simCaseDescriptionFileLines)
     simCaseDescFile.close()
 
-# TODO: (einar) fix exception variable
 def getSimulationCaseDescriptions(networkName, exception = 'Warning'):
     """
 
@@ -452,6 +555,38 @@ def loadExternalDataSet(fileName):
         print "Error: no or corrupted external data-file found"
     
     return externalData
+
+def setFlowFromFilePathToAbsolute(fileName, pathDestinationNetwork):
+    """
+    Function to change filePathName in Flow-FromFile xml element to absolute path after copying template network
+    Input:
+        fileName <string> (abs path of the copied xml fie)
+        pathDestinationNetwork <string> (abs path of the directory of the xml file)
+    Output:
+        extData <dict> 
+    """
+    
+    parser = etree.XMLParser(encoding='iso-8859-1')
+    tree = etree.parse(fileName, parser)
+    root = tree.getroot()
+    
+    for XmlElement in root:
+        
+        if XmlElement.tag == 'boundaryConditions':
+            for vessel in XmlElement:
+                for bc in vessel:
+                    if bc.tag == 'Flow-FromFile':
+                        for bcTag in bc:
+                            if bcTag.tag == 'filePathName':
+                                oldFilePath = bcTag.text
+                                bcTag.text = pathDestinationNetwork + oldFilePath
+    
+    tree.write(fileName)
+    
+    
+
+                                
+                                
 
 
 

@@ -80,36 +80,48 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
         
     vesselCSVFile = mFPH.getFilePath('vesselCSVFile', networkName, 'xxx', 'read', exception = 'Warning')
     
+    if vesselCSVFile == None:
+        return None
     
-    # load data    
-    reader = ccBC.csv.DictReader(open(vesselCSVFile,'rb'),delimiter=delimiter)
-    # hash data with in dictionary and separate units
-    columUnits = {}
-    vesselData = {}
-    for row in reader:
-        Id = row.pop('Id')
-        if Id == 'unit': columUnits = row
-        else:
-            Id = int(Id)
-            vesselData[Id] = row
+    
+    with open(vesselCSVFile,'rb') as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=";,")
+        csvfile.seek(0)
         
-    variablesToDiscard = []
-    for Id,data in vesselData.iteritems():
-#         polyChaos = {}
-        for variable,variableValueStr in data.iteritems():
-            # check if value is defined
-            if variableValueStr not in ['', None]:
-                #find units 
-                if '#' in columUnits[variable]: #  '#' in variable or 
-                    nothing,variableUnit = columUnits[variable].split('#',1)
-                # convert variables to corret unit and type
-                data[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
-            else: variablesToDiscard.append([Id,variable]) # find out variables which have no values
-    # remove variables which have no values 
-    for Id,variableToDiscard in variablesToDiscard:
-        del vesselData[Id][variableToDiscard]
-    
-    return {'vesselData':vesselData}    
+        if dialect.delimiter == ',':
+            print """\n WARNING: mCSV92 detected delimiter ',': This delimiter might lead to wrong data as
+             it is used as well as decimal place separator in some languages! Check the loaded values carefully!"""
+            
+        #reader = ccBC.csv.DictReader(csvfile,dialect)
+        reader = csv.DictReader(csvfile,delimiter = dialect.delimiter)
+        # hash data with in dictionary and separate units
+        columUnits = {}
+        vesselData = {}
+        
+        for row in reader:
+            Id = row.pop('Id')
+            if Id == 'unit': columUnits = row
+            else:
+                Id = int(Id)
+                vesselData[Id] = row
+            
+        variablesToDiscard = []
+        for Id,data in vesselData.iteritems():
+    #         polyChaos = {}
+            for variable,variableValueStr in data.iteritems():
+                # check if value is defined
+                if variableValueStr not in ['', None]:
+                    #find units 
+                    if '#' in columUnits[variable]: #  '#' in variable or 
+                        nothing,variableUnit = columUnits[variable].split('#',1)
+                    # convert variables to corret unit and type
+                    data[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)
+                else: variablesToDiscard.append([Id,variable]) # find out variables which have no values
+        # remove variables which have no values 
+        for Id,variableToDiscard in variablesToDiscard:
+            del vesselData[Id][variableToDiscard]
+        
+        return {'vesselData':vesselData}    
 
 def writeRandomInputstoCSV(networkName, randomInputManager, delimiter = ';'):
     '''

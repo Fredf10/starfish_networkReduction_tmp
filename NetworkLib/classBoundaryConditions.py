@@ -11,6 +11,7 @@ cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur+'/../')
 
 import UtilityLib.classStarfishBaseObject as cSBO
+import UtilityLib.moduleFilePathHandler as mFPH
 
 class BoundaryCondition(cSBO.StarfishBaseObject):
     """
@@ -467,6 +468,7 @@ class BoundaryConditionType1(BoundaryCondition):
         if self.TmeanFlow != 0:
             self.initPhaseTimeSpan = self.Tperiod - self.TmeanFlow
         self.initialize({})
+        
 
         if quiet == False:
             print '====================================='
@@ -759,14 +761,13 @@ class FlowFromFile(BoundaryConditionType1):
         self.dataFlow = []
         self.loadedFile = False
 
-    def loadFile(self):
+    def loadFile(self, inflowFilePath):
 
         try:
             # set the path relative to THIS file not the executing file!
-            if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
-
-            pathAndFilename = '/'.join([self.networkDirectory, self.filePathName])
-            reader = csv.DictReader(open(pathAndFilename, 'rb'), delimiter=';')
+            
+            #pathAndFilename = mFPH.getFilePath('inflowFile', networkName, dataNumber, mode, exception)
+            reader = csv.DictReader(open(self.filePathName, 'rb'), delimiter=';')
         except Exception:
             self.exception("boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit".format(self.filePathName.split('/')[-1]))
         try:

@@ -1466,7 +1466,7 @@ class DotWidget(gtk.DrawingArea):
         
     ### added by Vinzenz Eck for compatibility with vnc
     def set_vascularNetwork(self,vascularNetwork):
-        print "xdot1469", vascularNetwork
+        #print "xdot1469", vascularNetwork
         self.vascularNetwork = vascularNetwork
 
     def set_filter(self, filter):

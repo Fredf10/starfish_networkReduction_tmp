@@ -15,7 +15,7 @@
 
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(''.join([cur,'/../']))
+sys.path.append(os.path.join(*[cur,'..']))
 
 import inspect
 from pprint import pprint as pp
@@ -75,7 +75,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                                   help = "simulation case description; NB: no space subported")
         elif activeOption == 'v':
                 parser.add_option('-v', '--vizBool', dest='vizBool',
-                                  help = "choose visualisation mode, 0: no visualisation, 1: 2d and 3d, 2: 2d plots, 3: 3d visualisation default = 0")
+                                  help = "choose visualisation mode, 0: no visualisation, 1: 2d and 3d, 2: 2d plots, 3: 3d visualisation")
         elif activeOption == 'c':       
                 parser.add_option("-c", "--connect", action="store_true",  dest='connect',
                                   help="connect to 3dViz (True) or not (False); currently not working")
@@ -110,29 +110,31 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
         # -n dataNumber
         elif option == 'dataNumber':
             dataNumber,dataSetNumber = evaluateDataNumber(optionArgument)  
-            if dataNumber == None:
-                dataNumber = '999'
-            else: save = True     
+            if dataNumber != None:
+                save = True     
         # -s save
         elif option == 'save':
             if optionArgument != None:
                 save = optionArgument
             #save solution data and the vascularNetwork in c pickle, if no save take temporary slot 999
-            if save == False:
-                dataNumber = '999'
+            #if save == False:
+            #    dataNumber = '999'
         # -d simulation Description
         elif option == 'description':
             if optionArgument != None:
                 simulationDescription = optionArgument
         # -v visialisation type        
         elif option == 'vizBool':
-            if optionArgument != None:
-                if optionArgument == '1':
-                    vizOutput = "2D+3D"
-                elif optionArgument == '2':
-                    vizOutput = "2D"
-                elif optionArgument == '3':
-                    vizOutput = "3D"
+            
+            if optionArgument == None:
+                optionArgument = defineVisualisation()
+            
+            if optionArgument == 1:
+                vizOutput = "2D+3D"
+            elif optionArgument == 2:
+                vizOutput = "2D"
+            elif optionArgument == 3:
+                vizOutput = "3D"
         # -c connect
         elif option == 'connect':
             if optionArgument != None:
@@ -147,7 +149,8 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                 exit()
         elif option == 'workingDirectorySettings':
             if optionArgument != None:
-                workingDirectorySettings()
+                # Settings moved there to prefent circular imports
+                mFPH.workingDirectorySettings()
                 exit()
                     
     # catch up non given but necessary options
@@ -157,6 +160,8 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             networkName = chooseNetwork()
         if simulationDescription == None:
             simulationDescription = defineSimulationDescription()
+        if dataNumber == None:
+            dataNumber = defineDataNumber(networkName)
     ## visualisation only
     if visualisationOnly == True and (dataSetNumber == None or networkName == None) and vascularPolynomialChaos == False: 
             print "\n  No networkName passed, choose between all available networks:"
@@ -164,6 +169,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             networkName,dataNumber = chooseSolutionDataCase()
     ## polynomial chaos
     if vascularPolynomialChaos == True:
+        #TODO Critical Need to check for network template here?
         if networkName == None:
             networkName = chooseNetwork(showTemplates = False)
         if dataSetNumber == None:
@@ -202,48 +208,6 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     if userInput == 'q': exit()
     else: return int(userInput)
 
-
-def workingDirectorySettings():
-    '''
-    working directory settings
-    '''
-    mFPH.updateKnownWorkingDirectories()
-    prettyPrintList(' Working directory settings menu',['add working directory (folder must exist)','switch to another known working directory'])
-    print "\n current working directory: {} ".format(mFPH.readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
-    userInput = userInputEvaluationInt(2)
-    if userInput == 0:
-        insertWorkingDirectory(None)
-    elif userInput ==1:
-        knownWorkingDirectories = mFPH.readConfigFile(['knownWorkingDirectories'])['knownWorkingDirectories']
-        prettyPrintList(' List of all known working directories:',knownWorkingDirectories)
-        userInput2 = userInputEvaluationInt(len(knownWorkingDirectories))
-        mFPH.saveConfigFile({'WorkingDirectory': knownWorkingDirectories[userInput2]})
-
-def insertWorkingDirectory(optionArgument):
-    
-    print "Setting new working directory"
-    
-    if optionArgument == None:
-        optionArgument = ""
-	# TODO: create directory if not existing!!!
-        while os.path.isdir(optionArgument) == False:
-            optionArgument = raw_input("Insert existing working directory path you want to add: ")
-    
-    if os.path.isdir(optionArgument):
-        mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
-        mFPH.updateKnownWorkingDirectories()
-        print "   working directory set!"
-    else:
-        print "  working directory does not exist! try to create folder"
-        try:
-            os.mkdir(optionArgument)
-            mFPH.saveConfigFile({'WorkingDirectory':optionArgument})
-            mFPH.updateKnownWorkingDirectories()
-            print "   created working directory folder successfully"
-            print "   working directory set!"
-        except:
-            print "  WARNING: moduleStartUp.parseOptions() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
-    
 
 def chooseNetwork(showTemplates = True):
     """
@@ -295,7 +259,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                 else:
                     if exception == "Error":
                         raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
-                        exit()
+                        
                     elif exception == 'Warning':
                         print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
                         return False,False
@@ -309,7 +273,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
             if len(dataNumber) > 3:
                 if exception == "Error":
                     raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
-                    exit()
+                    
                 elif exception == 'Warning':
                     print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
                     return False,False
@@ -318,6 +282,19 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                 
     return dataNumber,dataSetNumber
   
+  
+def defineVisualisation():
+    """
+    Function to ask for visualisation type
+    
+    returns: visualisationBool (int)
+    """
+    listToPrint = ['No visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
+    prettyPrintList("\n        Choose visualisation mode:",listToPrint)
+    userInput = userInputEvaluationInt(4, 0, "     What to do? (q)-quit: ")
+    return userInput
+    
+    
   
 def defineSimulationDescription():
     simulationDescription = str(raw_input("\n  Type in description of the simulation case: "))
@@ -328,6 +305,76 @@ def defineSimulationDescription():
         exit()
     if simulationDescription in ['',' ']: simulationDescription = '-'
     return simulationDescription
+    
+def defineDataNumber(networkName):
+    
+    print "No solution-datanumber defined (3 characters)! It needs to be defined"
+
+    #TODO CRITICAL this fails for template networks
+    existingDataNumbers = findExistingDataNumbers(networkName)
+    correctDataNumber = False
+    
+    prettyPrintList("\n        Existing dataNumbers for this network: {}".format(networkName),existingDataNumbers)
+       
+    while correctDataNumber == False:
+        dataNumber = str(raw_input("\n  Please enter datanumber (3 characters): "))
+        testedFailed = False
+        try:
+            dataNumber,xx = evaluateDataNumber(dataNumber)
+        except ValueError as e:
+            print e
+            testedFailed = True
+            
+        if dataNumber in existingDataNumbers:
+            #userInput = str(raw_input
+            listToPrint = [" keep this datanumber and overwrite simulation case",
+                           " enter new data number"]
+            prettyPrintList("\n        Simulation case with datanumber exits already".format(networkName),listToPrint)
+            userInput = userInputEvaluationInt(2, 0, "     What to do? ")
+            if userInput == 0:
+                correctDataNumber = True
+            
+            elif userInput == 0:
+                dataNumber = False
+                correctDataNumber = False
+                
+        elif testedFailed == False:
+            correctDataNumber = True
+            
+    return dataNumber     
+
+            
+def findExistingDataNumbers(networkName):
+    """
+    evaluates exiting data numbers of a network
+    
+    Args: networkName (str) := networkName
+    
+    Returns: existingDataNumbers (list)
+    """
+    # TODO: better way to handle this case?
+    destinationNetworkName = networkName
+    if "_template" in networkName:
+        destinationNetworkName = ''.join(networkName.split("_template"))
+        try:
+            _ = mFPH.getFilePath('simulationDescriptionFile', destinationNetworkName, "xxx", 'read', exception = 'No')
+        except:
+            _ = mFPH.getFilePath('simulationDescriptionFile', destinationNetworkName , "xxx", 'write')#, exception = 'No')
+
+    simulationCaseDict = mFPH.getSimulationCaseDescriptions(destinationNetworkName)#, exception = 'No')
+    print(simulationCaseDict)
+    networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',destinationNetworkName,'xxx','read')
+    
+    existingDataNumbers = []
+    
+    for root, dirs, files in os.walk(networkDirectory):
+        for file in files:
+            if ".hdf5" in file and "_SolutionData_" in file:
+                solutionDataFile = file.split('.')[0]
+                dataNumber = solutionDataFile.split('_SolutionData_')[-1]
+                if len(dataNumber) == 3:
+                    existingDataNumbers.append(dataNumber)
+    return existingDataNumbers
     
     
 def chooseSolutionDataCase():
@@ -352,7 +399,7 @@ def chooseSolutionDataCase():
             first = True
             for root, dirs, files in os.walk(networkDirectory):
                 for file in files:
-                    if ".hdf5" in file and "polyChaos" not in file:
+                    if ".hdf5" in file and "uqsa" not in file:
                         solutionDataFile = file.split('.')[0]
                         dataNumber = solutionDataFile.split('_SolutionData_')[-1]
                         if len(dataNumber) == 3:
@@ -391,7 +438,7 @@ def chooseUQSACaseFile(networkName):
     from VascularPolynomialChaosLib import classUqsaCase
     
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
-    networkDirectory = '/'.join([workingDirectory,networkName])
+    networkDirectory = os.path.join(*[workingDirectory,networkName])
     
     filesNetworkDir = os.listdir(networkDirectory)
     filenames = []
@@ -399,7 +446,7 @@ def chooseUQSACaseFile(networkName):
     for fileNetworkDir in filesNetworkDir:
         # check if polychaos directory:
         if 'vascularPolynomialChaos' in fileNetworkDir:
-            allFilenames = os.listdir('/'.join([workingDirectory,networkName,fileNetworkDir]))
+            allFilenames = os.listdir(os.path.join(*[workingDirectory,networkName,fileNetworkDir]))
             for filename in allFilenames:
                 if ".xml" in filename and "uqsaCase" in filename:
                     filenames.append(filename)
@@ -426,6 +473,8 @@ def chooseUQSACaseFile(networkName):
         
         uqsaCase = classUqsaCase.UqsaCase()
         uqsaCase.loadXMLFile(configurationFilePathTemplate)
+        
+        # TODO: check if file exits and ask if it should be overwritten        
         configurationFilePath = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'write')
         uqsaCase.writeXMLFile(configurationFilePath)
         # copy network file
@@ -434,6 +483,7 @@ def chooseUQSACaseFile(networkName):
         shutil.copy(toCopyFile, destinationFile)
         print "files created!, exit()"
         exit()
+    
     else:
         networkName = filenames[userInput-1]
         dataNumber = networkName.split('.')[0].split('_')[-1]

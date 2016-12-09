@@ -1,16 +1,14 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<singleAorta.xml id="xxx" version="4.2">
+<singleVessel.xml id="xxx" version="4.2">
   <simulationContext>
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">8.0</totalTime>
     <timeSaveBegin unit="s">1.0</timeSaveBegin>
     <minSaveDt unit="s">-1</minSaveDt>
-	<maxMemory unit="MB">0.500</maxMemory>
+    <maxMemory unit="MB">0.500</maxMemory>
     <CFL>0.8</CFL>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">-9.81</gravityConstant>
-    <centralVenousPressure unit="Pa">0.0</centralVenousPressure>
-    <minimumVenousPressure unit="Pa">0.0</minimumVenousPressure>
   </simulationContext>
   <solverCalibration>
     <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
@@ -123,4 +121,11 @@
       </fluid>
     </vessel>
   </vessels>
-</singleAorta.xml>
+  <venousPool>
+    <venousPoolContent class="StaticVenousPressure">
+      <P0 unit="mmHg">10.0</P0>
+      <pressureGain>3.0</pressureGain>
+    </venousPoolContent>
+  </venousPool>
+
+</singleVessel.xml>
