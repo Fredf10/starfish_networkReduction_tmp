@@ -123,6 +123,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.cd_in              = None              # wavespeed at inlet at Ps
         self.cd_out             = None              # wavespeed at outlet at Ps
         self.Cv                 = None              # vessel compliance at Ps
+        self.Lv                 = None              # vessel Inertance at Ps
         
         self.resistance         = None              # vessel resistance
         self.womersleyNumber    = None              # Womersley number
@@ -225,7 +226,7 @@ class Vessel(cSBO.StarfishBaseObject):
             if self.geometryType == "uniform":
                 self.resistance = 2*(self.gamma + 2)*self.my*self.length / (pi*self.radiusProximal**4)
             elif self.geometryType == "cone":
-                self.resistance = self.calcResistance()
+                self.resistance = self.calcVesselResistance()
             elif self.geometryType == "constriction":
                 #TODO: Not sure if this is important for anything.
                 self.resistance = 8*self.my*self.length / (pi*self.radiusProximal**4)
@@ -234,7 +235,8 @@ class Vessel(cSBO.StarfishBaseObject):
             
         # calculate vessel compliance (CV) at Ps 
         try:
-            self.calcCompliance()
+            self.calcVesselCompliance()
+            self.calcVesselInertance()
         except Exception:
             self.exception("classVessel.initialize(): in calculating compliance Cv of vessel {}!".format(self.Id))
         # calculate Womersley number
@@ -404,28 +406,41 @@ class Vessel(cSBO.StarfishBaseObject):
         return 1.0/(c*Compliance)
 
 
-    def calcResistance(self, Nintegration=101):
+    def calcVesselResistance(self, Nintegration=101):
         """ calculate the vessel resistance:
             Rv = 2(gamma + 2)*pi*my*K3, where
             K3 = int(1/Ad**2)dx
             """
         
         x = np.linspace(0, self.length, Nintegration)
-        
         areaProx, areaDist = pi*self.radiusProximal**2, pi*self.radiusDistal**2
-        
         Ad = np.linspace(areaProx, areaDist, Nintegration)
         
         f = 1./(Ad**2)
-        
         K3 = simps(f, x)
-        
         Rv = 2*(self.gamma + 2)*pi*self.my*K3
         
         return Rv
     
     
-    def calcCompliance(self, Nintegration=101):
+    def calcVesselInertance(self, Nintegration=101):
+        """ calculate the vessel Compliance:
+            Lv = rho*K2, where
+            K2 = int(1/Ad)dx
+            """
+        
+        x = np.linspace(0, self.length, Nintegration)
+        areaProx, areaDist = pi*self.radiusProximal**2, pi*self.radiusDistal**2
+        Ad = np.linspace(areaProx, areaDist, Nintegration)
+        
+        f = 1./(Ad)
+        K2 = simps(f, x)
+        Lv = self.rho*K2 
+        
+        self.Lv = Lv
+    
+    
+    def calcVesselCompliance(self, Nintegration=101):
         """ calculate the vessel compliance at Ps :
             Cv = K1/rho, where
             K1 = int(Ad/cd**2)dx
@@ -433,29 +448,22 @@ class Vessel(cSBO.StarfishBaseObject):
         
         # TODO: make it possible to have more integrations than self.N
         x = np.linspace(0, self.length, self.N)
-        
         areaProx, areaDist = pi*self.radiusProximal**2, pi*self.radiusDistal**2
-        
         Ad = np.linspace(areaProx, areaDist, self.N)
-        
         Pd = self.Ps*np.ones(self.N)
         
         C = self.C(Pd)
         cd = self.waveSpeed(Ad, C)
         
-        self.cd_in, self.cd_out = cd[0], cd[-1]
+        
         f = Ad/(cd**2)
-        
         K1 = simps(f, x)
-        
         Cv = K1/self.rho
         
+        self.cd_in, self.cd_out = cd[0], cd[-1]
         self.Cv = Cv
         
         
-
-
-
     def linearWaveSplitting(self):
         """
         calculates the linear wave splitting for the hole vessel

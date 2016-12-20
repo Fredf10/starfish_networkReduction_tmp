@@ -33,7 +33,12 @@ class ReductionCase(TestBaseClass):
                              'numberOfProcessors'       : TestBaseClass.ExtValue(int),
                              'useAverageValues'         : TestBaseClass.ExtValue(bool),
                              'useVesselsImpedance'      : TestBaseClass.ExtValue(bool),
-                             'useLumpedValues'          : TestBaseClass.ExtValue(bool)
+                             'useLumpedValues'          : TestBaseClass.ExtValue(bool),
+                             'optimizeParams'           : TestBaseClass.ExtValue(bool),
+                             'optimizeParamsDataFile'   : TestBaseClass.ExtValue(str, strCases = ['anything']), # path to file
+                             'Wkoptimize'               : TestBaseClass.ExtValue(str, strCases = ['anything']), # ["Wk2", "Wk3" ,"Wk4p", "Wk4s"]
+                             'params'                   : TestBaseClass.ExtValue(str, strCases = ['anything'])  # ['R1LCR2', 'R1LC', 'R1L', 'R1', 'LCR2', 'LC', 'L', 'CR2', 'C', 'R2']
+                             
                            } 
     
     externXmlAttributes  = []
@@ -51,7 +56,12 @@ class ReductionCase(TestBaseClass):
                             'numberOfProcessors',
                             'useAverageValues',
                             'useVesselsImpedance',
-                            'useLumpedValues'
+                            'useLumpedValues',
+                            'optimizeParams',
+                            'optimizeParamsDataFile',
+                            'Wkoptimize',
+                            'params'
+                            
                             ]
     
     
@@ -80,6 +90,10 @@ class ReductionCase(TestBaseClass):
         self.useVesselsImpedance = False
         self.useLumpedValues = False
         
+        self.optimizeParams = False
+        self.optimizeParamsDataFile = None
+        self.Wkoptimize = 'Wk3'
+        self.params = 'R1LCR2'
         
     
     
@@ -89,6 +103,18 @@ class ReductionCase(TestBaseClass):
         batchDataList = pickle.load(open(filepath, 'rb'))
         
         self.batchDataList = batchDataList[self.batchDataStart: self.batchDataEnd]
+        
+    def loadoptimizeParamsDataFile(self):
+        
+        if self.optimizeParams:
+            filepath = self.optimizeParamsDataFile
+            print filepath
+            print os.path.isfile(filepath)
+            optParamsDict = pickle.load(open(filepath, 'rb'))
+        
+            self.optParamsDict = optParamsDict
+        else:
+            self.optParamsDict = None
     
     def createEvaluationCaseFiles(self): 
         '''
@@ -98,6 +124,8 @@ class ReductionCase(TestBaseClass):
                                             'reductionNetworkName': , truncateList}
         
         '''
+        if self.useLumpedValues and self.optimizeParams:
+            print "Error: both useLumpedValues and optimizeParams is set to True"
         
         #TODO: replace create evaluation files or save them to disc!!!
         if self.createNetworks == True:
@@ -123,7 +151,11 @@ class ReductionCase(TestBaseClass):
                 
                 New_network.initialize(useAverageValues=self.useAverageValues, 
                                        useVesselsImpedance=self.useVesselsImpedance, 
-                                       useLumpedValues=self.useLumpedValues)
+                                       useLumpedValues=self.useLumpedValues,
+                                       optimizeParams=self.optimizeParams,
+                                       optParamsDict=self.optParamsDict,
+                                       Wkoptimize=self.Wkoptimize,
+                                       params=self.params)
                 
                 New_network.reduceNetworkFromList(truncateList)
                 

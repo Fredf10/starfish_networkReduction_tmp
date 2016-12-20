@@ -392,10 +392,8 @@ class BoundaryConditionType1(BoundaryCondition):
             return ampT * self.duMatrix
 
     def findMeanFlow(self, N=10000):
-        import matplotlib.pylab as plt
-        import time as timeModule
+        #import time as timeModule
         self.initialize({})
-        cpustart = timeModule.time()
         freq = self.freq
         period = 1/self.freq
         
@@ -415,8 +413,7 @@ class BoundaryConditionType1(BoundaryCondition):
 
         self.TmeanFlow = 0
         self.initPhaseTimeSpan = 0
-        cpuend = timeModule.time()
-        print "cpu-time: ", cpuend - cpustart
+
         return Q_mean, self.initPhaseTimeSpan
 
     def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
@@ -794,10 +791,12 @@ class FlowFromFile(BoundaryConditionType1):
 
         try:
             # set the path relative to THIS file not the executing file!
-            if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
+            #if '.csv' not in self.filePathName: self.filePathName = self.filePathName.join(['', '.csv'])
 
-            pathAndFilename = '/'.join([self.networkDirectory, self.filePathName])
-            reader = csv.DictReader(open(pathAndFilename, 'rb'), delimiter=';')
+            #pathAndFilename = '/'.join([self.networkDirectory, self.filePathName])
+            #print self.filePathName
+            #print os.path.isfile(self.filePathName)
+            reader = csv.DictReader(open(self.filePathName, 'rb'), delimiter=';')
         except Exception:
             self.exception("boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit".format(self.filePathName.split('/')[-1]))
         try:
@@ -1430,7 +1429,7 @@ class Windkessel3DAE(generalPQ_BC):
 
         self.Qin[0] = 0.0
 
-    def __call__(self, _domegaField_, duPrescribed, R, L,nmem,  n, dt, P, Q, A, Z1, Z2):
+    def __call__(self, _domegaField_, duPrescribed, R, L, nmem,  n, dt, P, Q, A, Z1, Z2):
 
 
         if self.Z == 'VesselImpedance' and self.firstRun == False:

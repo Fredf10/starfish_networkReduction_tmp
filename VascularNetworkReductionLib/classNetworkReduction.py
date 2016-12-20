@@ -63,6 +63,7 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.boundaryConditions = vascularNetwork.boundaryConditions
         
         self.boundaryVessels = vascularNetwork.boundaryVessels
+        self.boundaryVesselsBaseline = vascularNetwork.boundaryVessels
         self.lumpedValues = vascularNetwork.lumpedValues
         
         self.useVesselsImpedance = False
@@ -73,16 +74,26 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         #self.test()
     
     
-    def initialize(self, useAverageValues=False, useVesselsImpedance=False, useLumpedValues=False):
+    def initialize(self, useAverageValues=False, useVesselsImpedance=False, useLumpedValues=False,
+                        optimizeParams=False, optParamsDict=None, Wkoptimize='Wk3', params='R1LCR2'):
         
         self.useAverageValues = useAverageValues
         self.useVesselsImpedance = useVesselsImpedance
         self.useLumpedValues = useLumpedValues
+        self.optimizeParams = optimizeParams
+        self.optParamsDict = optParamsDict
+        self.Wkoptimize = Wkoptimize
+        self.params = params
         
         if useLumpedValues:
             self.reduceSingleVessel = self.reduceTerminalLumped
+            self.lumpHere = self.reduceTerminalBifurcation
+        elif optimizeParams: 
+            self.reduceSingleVessel = self.reduceTerminalOpt
+            self.lumpHere = self.reduceTerminalBifurcationOpt
         else:
             self.reduceSingleVessel = self.reduceTerminal
+            self.lumpHere = self.reduceTerminalBifurcation
     
     def reduceNetworkFromList(self, truncateList):
         
@@ -152,7 +163,8 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         leftDaughter, rightDaughter = self.vessels[vesselId].leftDaughter, self.vessels[vesselId].rightDaughter
         self.reduceSingleVessel(leftDaughter)
         self.reduceSingleVessel(rightDaughter)
-        self.reduceTerminalBifurcation(vesselId)
+        self.lumpHere(vesselId)
+        #self.reduceTerminalBifurcation(vesselId)
     
     
     def truncate(self, vesselId):
@@ -341,6 +353,14 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         
         self.vessels[vesselId].Rnew = Rnew
         self.vessels[vesselId].Cnew = Cnew
+
+
+    def reduceTerminalOpt(self, vesselId, N=501):
+        """ This method is an empty function to be used if the method is based on optimization
+            run on ODEs of the Wks
+        """
+        
+        pass
         
         
     def reduceTerminalBifurcation(self, vesselId, N=501):
@@ -388,7 +408,7 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         
         Cnew = Cnew1 + Cnew2
         
-        Z_0 = rho*c_distal/Ad_distal
+        Z_0 = rho*c_distal/A_distal
         
         R = Rnew - Z_0
 #         print "     R2 = {0} ".format(R)
@@ -431,6 +451,62 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.boundaryVessels.remove(rightDaughter)
         
         self.boundaryVessels.append(vesselId)
+
+
+    def reduceTerminalBifurcationOpt(self, vesselId, N=501):
+        """ This function reduces a terminal bifurcation into a single 
+            vessel with a wk3 BC with parameters based optimization of ODEs
+        """
+        
+        leftDaughter, rightDaughter = self.vessels[vesselId].leftDaughter, self.vessels[vesselId].rightDaughter
+        
+        WkMethod = self.Wkoptimize
+        params = self.params
+        node = -1
+        
+        Z_0 = 10**6*133.32*self.optParamsDict[vesselId][node][WkMethod][params]['R1']
+        R = 10**6*133.32*self.optParamsDict[vesselId][node][WkMethod][params]['R2']
+        Cnew =  10**-6*self.optParamsDict[vesselId][node][WkMethod][params]['C']/133.32
+        
+        # fix so that only bc[-1] is adjusted
+        if vesselId in self.boundaryVessels:
+            self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
+            self.boundaryConditions[vesselId][1].Z = Z_0
+            self.boundaryConditions[vesselId][1].Rc = R
+            self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][1].C = Cnew
+        elif vesselId == self.vascularNetwork.root:
+            self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
+            self.boundaryConditions[vesselId][1].Z = Z_0
+            self.boundaryConditions[vesselId][1].Rc = R
+            self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][1].C = Cnew
+            self.boundaryConditions[vesselId][1].position = - 1
+            
+        else:
+            self.boundaryConditions[vesselId] = self.boundaryConditions[leftDaughter][:]
+            self.boundaryConditions[vesselId][0].Z = Z_0
+            self.boundaryConditions[vesselId][0].Rc = R
+            self.boundaryConditions[vesselId][0].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][0].C = Cnew
+        self.deleteWK3(leftDaughter)
+        self.deleteWK3(rightDaughter)
+        self.deleteVessel(leftDaughter)
+        self.deleteVessel(rightDaughter)
+        
+        self.vessels[vesselId].leftDaughter = None
+        self.vessels[vesselId].rightDaughter = None
+        
+        self.treeTraverseList_sorted.remove(leftDaughter)
+        self.treeTraverseList_sorted.remove(rightDaughter)
+        self.treeTraverseList.remove(leftDaughter)
+        self.treeTraverseList.remove(rightDaughter)
+        
+        self.boundaryVessels.remove(leftDaughter)
+        self.boundaryVessels.remove(rightDaughter)
+        
+        self.boundaryVessels.append(vesselId)
+        
     
     def calcWallthickness(self, r):
         
@@ -456,7 +532,7 @@ class NetworkReduction(cSBO.StarfishBaseObject):
     def setToVesselImpedance(self):
         
         for vesselId in self.treeTraverseList_sorted:
-            if vesselId in self.boundaryVessels:
+            if (vesselId in self.boundaryVessels) and (vesselId not in self.boundaryVesselsBaseline):
                 bc = self.boundaryConditions[vesselId] 
                 if len(bc)>1:
                     bc = bc[1]
