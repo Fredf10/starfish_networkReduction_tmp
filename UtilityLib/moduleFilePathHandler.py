@@ -579,7 +579,7 @@ def setFlowFromFilePathToAbsolute(fileName, pathDestinationNetwork):
                         for bcTag in bc:
                             if bcTag.tag == 'filePathName':
                                 oldFilePath = bcTag.text
-                                bcTag.text = pathDestinationNetwork + oldFilePath
+                                bcTag.text = os.path.join(pathDestinationNetwork, oldFilePath)
     
     tree.write(fileName)
     

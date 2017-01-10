@@ -48,6 +48,8 @@ class Field():
             self.__call__ = self.MacCormackFlux
         elif solvingSchemeField == "MacCormack_TwoStep":
             self.__call__ = self.MacCormackTwoStep
+            self.predict = self.MacCormackPredictor
+            self.correct = self.MacCormackCorrector
         else:
             raise ValueError('Classfields51: error, scheme for solving field not correct')
         

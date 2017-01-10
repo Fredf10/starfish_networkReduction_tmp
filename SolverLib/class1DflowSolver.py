@@ -71,6 +71,9 @@ class FlowSolver(cSBO.StarfishBaseObject):
         #
 
         # list of numerical objects (field,connection,boundary objects as in the traversing list)
+        self.fieldSolverList = []
+        self.connectionSolverList = []
+        self.boundarySolverList = []
         self.numericalObjects = []
         # time step
         self.dt = None
@@ -105,7 +108,12 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.rigidAreas = self.vascularNetwork.rigidAreas
 
         #define solve function
-        self.solve = self.MacCormack_Field
+        twoStep = True
+        
+        if twoStep:
+            self.solve = self.MacCormack_Field_TwoStep
+        else:
+            self.solve = self.MacCormack_Field
 
         # initialize system
         self.vascularNetwork.currentMemoryIndex = self.currentMemoryIndex
@@ -126,7 +134,11 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeBaroreceptors()
         self.initializeCommunicators()
         self.initializeTimers()
-        self.initializeNumericalObjectList()
+        
+        if twoStep:
+            self.initializeNumericalObjectListTwoStep()
+        else:
+            self.initializeNumericalObjectList()
 
         if self.quiet==False:
             self.initOutput() # feedback
@@ -544,6 +556,75 @@ class FlowSolver(cSBO.StarfishBaseObject):
         
         self.memoryOffset = self.vascularNetwork.runtimeMemoryManager.memoryOffset
 
+
+    def initializeNumericalObjectListTwoStep(self):
+        """
+        ## fill numObjectList (self.currentTimeStepumericalObjects) traversing the treeList
+        # 1. add root boundary
+        # 2  add vessels
+        # 3  add connection or distal boundary condition
+        # 4. repeat 2,3 for the whole tree
+        # 5. add communicators
+        # 6. add blocking Wait if multiprocessing
+        """
+
+        # get tree traversing list
+        treeList = self.vascularNetwork.treeTraverseList
+
+        singleVesselNetwork = False
+        if len(self.vessels) == 1:
+            singleVesselNetwork = True
+
+        for vesselId in treeList:
+            int(vesselId)
+            ## check if root add BC
+            try:
+                if vesselId == self.vascularNetwork.root:
+                    self.boundarySolverList.append(self.boundarys[vesselId][0])
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
+
+            ## add field
+            self.fieldSolverList.append(self.fields[vesselId])
+
+            ## try add Connection
+            try: self.connectionSolverList.append(self.connections[vesselId])
+            except Exception: self.warning("old except: pass #2 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
+
+            ## try add distal BC
+            try:
+                if vesselId in self.vascularNetwork.boundaryVessels:
+                    if singleVesselNetwork == False:
+                        self.boundarySolverList.append(self.boundarys[vesselId][0])
+                    else:
+                        self.boundarySolverList.append(self.boundarys[vesselId][1])
+            except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
+
+        for communicator in self.communicators.itervalues():
+            self.numericalObjects.append(communicator)
+            try:    communicator.startRealTimeVisualisation()
+            except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
+
+        for baroreceptor in self.baroreceptors.itervalues():
+            self.numericalObjects.append(baroreceptor)
+
+        for timer in self.timers.itervalues():
+            self.numericalObjects.append(timer)
+
+        if self.venousPool:
+            self.numericalObjects.append(self.venousPool)
+
+        self.vascularNetwork.runtimeMemoryManager.registerGlobalTimeSteps(self.currentMemoryIndex,self.currentTimeStep)
+
+        
+        
+        self.numericalObjects.append(self.vascularNetwork)
+
+        # TODO: This depends on sequential iteration through the numerical objects list!!!!
+        self.numericalObjects.append(self.vascularNetwork.runtimeMemoryManager)
+        
+        self.memoryOffset = self.vascularNetwork.runtimeMemoryManager.memoryOffset
+        
+
     def initOutput(self):
         """
         initialize solution matrices
@@ -727,6 +808,188 @@ class FlowSolver(cSBO.StarfishBaseObject):
         gc.collect()
 
         del self.numericalObjects
+        del self.fields
+        del self.connections
+        del self.boundarys
+        del self.communicators
+
+
+    def MacCormack_Field_TwoStep(self):
+        """
+        Two-step method
+        MacCormack solver method with forward-euler time steping,
+        Using either Characteristic system 0 or 1 as defined in the XML-file.
+
+        This method is solving the system by looping through the defined network
+        imposing the boundary conditions based on Riemann Invariants and then solving the vessels,
+        conncetions, bifucations with a predictor-corrector step method
+        """
+        if self.quiet == False:
+            logger.info("Solving system ...")
+            #progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
+
+        reflectionCoefficientCount = 0
+        maxRef = 0
+    
+        if self.cycleMode == False:
+            # original
+            for n in xrange(self.nTSteps):
+                self.currentTimeStep[0] = n
+                self.currentMemoryIndex[0] = n - self.memoryOffset[0]
+                
+                if self.quiet == False:
+                    pass
+                    #progressBar.progress(n)
+                
+                # Need to add exception
+                for fieldSolver in self.fieldSolverList:
+                    fieldSolver.predict()
+                
+                for connectionSolver in self.connectionSolverList:
+                    connectionSolver()
+                
+                for boundarySolver in self.boundarySolverList:
+                    boundarySolver()
+                
+                for fieldSolver in self.fieldSolverList:
+                    fieldSolver.correct()
+                
+                
+                for numericalObject in self.numericalObjects:
+                    try:
+                        numericalObject()
+                    except Exception:
+                        # Save the Solution data for debugging
+                        logger.critical("Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject))
+                        self.vascularNetwork.runtimeMemoryManager.flushSolutionMemory()
+                        self.vascularNetwork.saveSolutionData()
+                        logger.critical("Success in saving solution data file. Reraising Exception")
+                        raise # TODO: why does self.exception() not force the program to quit?
+                        # self.exception()
+                
+                if self.quiet == False:
+                    pass
+                    #progressBar.progress(n)
+                
+        ## to be concentrated with original cycle mode !!
+        else:
+            # steady state variables
+            P_lastCycle  = {}
+            Q_lastCycle  = {}
+            A_lastCycle  = {}
+
+            for vesselId,vessel in self.vessels.iteritems():
+
+                initialValues = self.vascularNetwork.initialValues
+                p0,p1 = initialValues[vesselId]['Pressure']
+                Qm    = initialValues[vesselId]['Flow']
+
+                P_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
+                Q_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
+                A_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
+
+
+            for cycle in xrange(self.numberCycles-1):
+                logger.info(' solving cycle {}'.format(cycle+1))
+                # 1. solve cycle
+                for n in xrange(self.nTSteps-1):
+
+                    self.currentTimeStep[0] = n
+                    
+                    for fieldSolver in self.fieldSolverList:
+                        fieldSolver.predict()
+                    
+                    for connectionSolver in self.connectionSolverList:
+                        connectionSolver()
+                    
+                    for boundarySolver in self.boundarySolverList:
+                        boundarySolver()
+                    
+                    for fieldSolver in self.fieldSolverList:
+                        fieldSolver.correct()
+                        
+                    for numericalObject in self.numericalObjects:
+                        numericalObject()
+                # 2. check for steady state
+                if self.quiet == False:
+                    for vesselId in self.vessels.keys():
+                        #Perror =  np.sum(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))/self.P[vesselId].size
+                        #Qerror =  np.sum(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))/self.Q[vesselId].size
+                        #Aerror =  np.sum(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))/self.A[vesselId].size
+
+                        Perror =  np.max(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))
+                        #Qerror =  np.max(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))
+                        Aerror =  np.max(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))
+
+                        P_lastCycle[vesselId] = self.P[vesselId].copy()
+                        #Q_lastCycle[vesselId] = self.Q[vesselId].copy()
+                        A_lastCycle[vesselId] = self.A[vesselId].copy()
+                        logger.debug('{} {}'.format(Perror, Aerror))
+
+                # 3. rehash solution arrays if not last cycle
+                if cycle is not self.numberCycles-1:
+                    for vesselId in self.vessels.keys():
+                        self.P[vesselId][0]    = self.P[vesselId][-1]
+                        self.Q[vesselId][0]    = self.Q[vesselId][-1]
+                        self.A[vesselId][0]    = self.A[vesselId][-1]
+
+
+        if self.quiet == False: logger.info("\nSystem solved!")
+
+        BVcheck = False
+        if BVcheck == True:
+
+            logger.info('\n=====================================')
+            logger.info('___Blood volume - consistency check___')
+
+            logger.info('Vessels  init (ml)  sol (ml)  diff')
+            vesselsInit = 0
+            vesselsSol  = 0
+            for vesselId,vessel in self.vessels.iteritems():
+                A1 = self.vessels[vesselId].Asol[0][0:-1]
+                A2 = self.vessels[vesselId].Asol[0][1:]
+                volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+
+                A1 = self.vessels[vesselId].Asol[-1][0:-1]
+                A2 = self.vessels[vesselId].Asol[-1][1:]
+                volumeSol  = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
+                diff = volumeInit-volumeSol
+                vesselsInit += volumeInit
+                vesselsSol  += volumeSol
+                logger.info('{:<4}    {:7.2f}    {:7.2f}    {:4.2f}'.format(str(vesselId), volumeInit, volumeSol, diff))
+
+            logger.info(' ----------------------------------- ')
+            logger.info('Boundarys        in (ml)   out (ml)  ')
+            totalIn = 0
+            totalOut = 0
+            for boundaryList in self.boundarys.itervalues():
+                for boundary in boundaryList:
+                    logger.info('{:<12}     {:6.2f}    {:4.2f}'.format(boundary.name,
+                                                                 abs(boundary.BloodVolumen[0])*1.e6,
+                                                                 abs(boundary.BloodVolumen[1])*1.e6 ))
+                    totalIn  += abs(boundary.BloodVolumen[0])*1.e6
+                    totalOut += abs(boundary.BloodVolumen[1])*1.e6
+            logger.info(' ----------------------------------- ')
+            logger.info('total')
+            logger.info('  vessels initial  (ml)  {:4.2f}'.format(vesselsInit))
+            logger.info('  vessels solution (ml)  {:4.2f}'.format(vesselsSol))
+            logger.info('  boundarys in     (ml)  {:4.2f}'.format(totalIn))
+            logger.info('  boundarys out    (ml)  {:4.2f}'.format(totalOut))
+            logger.info('                    ------------')
+            logger.info('  volume diff      (ml)  {:.2f}'.format(vesselsInit - vesselsSol + totalIn - totalOut))
+
+        ## stop realtime visualisation
+        for communicator in self.communicators.itervalues():
+            try: communicator.stopRealtimeViz()
+            except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field", oldExceptPass= True)
+
+        ### garbage collection
+        gc.collect()
+
+        del self.numericalObjects
+        del self.fieldSolverList
+        del self.connectionSolverList
+        del self.boundarySolverList
         del self.fields
         del self.connections
         del self.boundarys

@@ -761,12 +761,13 @@ class FlowFromFile(BoundaryConditionType1):
         self.dataFlow = []
         self.loadedFile = False
 
-    def loadFile(self, inflowFilePath):
+    def loadFile(self):
 
         try:
             # set the path relative to THIS file not the executing file!
             
             #pathAndFilename = mFPH.getFilePath('inflowFile', networkName, dataNumber, mode, exception)
+            print self.filePathName
             reader = csv.DictReader(open(self.filePathName, 'rb'), delimiter=';')
         except Exception:
             self.exception("boundaryConditions.FlowFromFile could not open file <<{}>> with boundary values, system exit".format(self.filePathName.split('/')[-1]))

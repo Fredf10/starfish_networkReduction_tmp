@@ -44,7 +44,7 @@
         <freq unit="s-1">1.0</freq>
         <Tspace unit="s">0.0</Tspace>
         <runtimeEvaluation>False</runtimeEvaluation>
-        <filePathName>adan56_benchmark_inflow.csv</filePathName>
+        <filePathName>adan56_benchmark2015_inflow.csv</filePathName>
         <prescribe>total</prescribe>
       </Flow-FromFile>
     </boundaryCondition>
