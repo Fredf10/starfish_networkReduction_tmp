@@ -46,6 +46,8 @@ class Field():
             self.__call__ = self.MacCormackMatrix
         elif solvingSchemeField == "MacCormack_Flux":
             self.__call__ = self.MacCormackFlux
+        elif solvingSchemeField == "MacCormack_TwoStep":
+            self.__call__ = self.MacCormackTwoStep
         else:
             raise ValueError('Classfields51: error, scheme for solving field not correct')
         
@@ -151,7 +153,7 @@ class Field():
         self.MacCormackCorrector()
     
     def MacCormackPredictor(self):
-        """ This is an implementation of the MacCormack scheme as proposed in Fredrik Eikeland Fossans Master Thesis"""
+        """ TPredictor Step of MacCorMack scheme as proposed in Fredrik Eikeland Fossans Master Thesis"""
         
         dt = self.dt
         
@@ -176,7 +178,10 @@ class Field():
         
         u[0,:] = P
         u[1,:] = Q
-        up=u.copy()
+        
+        self.u = u
+        
+        up = u.copy()
         
         Utemp1=u[1, :-1]/A[:-1]
         Aconst1 = A[:-1]
@@ -185,8 +190,8 @@ class Field():
         A2 = A[:-1]
         C1 = C[1:]
         C2 = C[:-1]
-        up[:,:-1] = u[:, :-1] - dt*(self.F(u[:, 1:], A1, C1, Aconst1, Cconst1) - self.F(u[:, :-1], A2, C2, Aconst1, Cconst1))/dx 
-        
+        up[:, :-1] = u[:, :-1] - dt*(self.F(u[:, 1:], A1, C1, Aconst1, Cconst1) - self.F(u[:, :-1], A2, C2, Aconst1, Cconst1))/dx 
+         
         A_grav = A[:-1]
         up[1,:-1] = up[1, :-1]-dt*2*(gamma + 2)*my*Utemp1*np.pi/rho +  dt*A_grav*netGravity
         
@@ -210,9 +215,8 @@ class Field():
         gamma = self.vessel.gamma
         
         up = self.up
-        u = up.copy()
-        
-        A_p = self.vessel.A(self.P_pre)
+        u = self.u
+        A_p = self.vessel.A(up[0, :])
         C_p = self.vessel.C(up[0, :])
         
         A_p1 = A_p[1:]
