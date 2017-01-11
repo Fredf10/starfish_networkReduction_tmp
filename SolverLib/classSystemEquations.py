@@ -7,7 +7,7 @@ import UtilityLib.classStarfishBaseObject as cSBO
 
 class System(cSBO.StarfishBaseObject):
     
-    def __init__(self,vessel,simplifyEigenvalues,riemannInvariantUnitBase,currentTimeStep,dt):
+    def __init__(self, vessel, simplifyEigenvalues, riemannInvariantUnitBase, currentTimeStep, dt, field=None, twoStep=False):
         """
         Constructor of System with the SystemEqations
         
@@ -68,7 +68,11 @@ class System(cSBO.StarfishBaseObject):
         self.dlt = (self.gamma+2.0)/(self.gamma+1.0)
         
         # eigen values
-        if simplifyEigenvalues   == True:
+        if twoStep:
+            self.updateLARL = self.updateLARLSys1InvariantPressureTwoStep
+            self.field = field
+            
+        elif simplifyEigenvalues   == True:
             if riemannInvariantUnitBase == 'Flow':
                 self.updateLARL = self.updateLARLSys0InvariantFlow
             elif riemannInvariantUnitBase == 'Pressure':
@@ -79,6 +83,7 @@ class System(cSBO.StarfishBaseObject):
                 self.updateLARL = self.updateLARLSys1InvariantFlow
             elif riemannInvariantUnitBase == 'Pressure':
                 self.updateLARL = self.updateLARLSys1InvariantPressure
+
     
         self.Re = 3000.0
                     
@@ -321,7 +326,7 @@ class System(cSBO.StarfishBaseObject):
           
         return L,R,LAMBDA,Z1,Z2,domega[0]
               
-    def updateLARLSys1InvariantPressure(self,P,Q,A,position,sqrt=np.sqrt):
+    def updateLARLSys1InvariantPressure(self, P, Q, A, position, sqrt=np.sqrt):
         """
         Update LAMBDA,R,L,Z of the system equations
         
@@ -388,6 +393,83 @@ class System(cSBO.StarfishBaseObject):
                     
         du[0]  = np.interp(zi,self.z,P) - P[position]
         du[-1] = np.interp(zi,self.z,Q) - Q[position]
+        
+        domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * Aid * self.netGravity[n]   
+          
+        return L,R,LAMBDA,Z1,Z2,domega[0]
+
+
+    def updateLARLSys1InvariantPressureTwoStep(self, P, Q, A, position, sqrt=np.sqrt):
+        """
+        Update LAMBDA,R,L,Z of the system equations
+        
+        Special terms:
+            sys1 :          uses correct eigenvalues lambda1/2 = dlt*v +- sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+            invariantFlow:  calculates R,L using riemannInvariants based on unit Pressure
+                            as derieved by Leif Rune Hellevik
+        
+        Input:
+            P                 <np.array> : current pressure values of the vessel
+            Q                 <np.array> : current flow values of the vessel
+            A                 <np.array> : current area values of the vessel
+            idArray = [0,-1]  <list>     : define which boundary should be updated (default = both)
+            update  = 'all'   <string>   : set to 'L' if only L and not R should be updated
+            Ct = None         <np.array> : Compliance C if avialiable otherwise it will be calculated
+            ct = None         <np.array> : waveSpeed  c if avialiable otherwise it will be calculated
+        """
+        dlt = self.dlt  
+        n = self.currentTimeStep[0]
+            
+        Aid = A[position]       
+                     
+        C = self.C_nID(P,position)
+        c = self.c(Aid,C)
+        
+        v = Q[position]/Aid
+        
+        l1 = dlt*v+sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+        l2 = dlt*v-sqrt(c**2.+dlt*(dlt-1.)*(v)**2.0)
+                        
+        LAMBDA = self.LAMBDA
+        LAMBDA[0] = l1
+        LAMBDA[1] = l2
+        
+        Z1 =  1.0/(C*l1)
+        Z2 = -1.0/(C*l2)
+                                
+        L = self.L
+        R = self.R
+        
+        ## left eigenvalue matrix
+        # riemannInvariants with unit poressure
+        L[0][1] =  Z2
+        L[1][1] = -Z1
+
+        ## right eigenvalue matrix
+        # riemannInvariants with unit pressure
+        R[0][0] =  Z1/(Z1+Z2)
+        R[0][1] =  Z2/(Z1+Z2)
+        R[1][0] =  1.0/(Z1+Z2)
+        R[1][1] = -1.0/(Z1+Z2)
+                
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
+                        
+        ### check consistency: calculate sum(R*L) == sum(I) == 2.0 
+        errorIdentity = abs((L[0][0]+L[1][0])*(R[0][0]+R[0][1])+(L[0][1]+L[1][1])*(R[1][0]+R[1][1])-2.0)
+        if errorIdentity > 5.e-16:
+            self.warning("SystemEquations, inverse of L and R differ, error {} > 5.e-16".format(errorIdentity), noException= True)
+            
+        ## calculate riemann invariants w1 at pos = -1 and w2 at pos = 0
+        # calculate omegas
+        du = self.du
+        zi = self.z[position] - [l2,l1][position] * self.dt
+        # use maccormack predicted value at the proximal end, and characteristic at distal end according to Hirsch
+        if position == 0:
+            du[0] = self.field.P_pre[position] - P[position]
+            du[1] = self.field.Q_pre[position] - Q[position]
+        else:
+            du[0]  = np.interp(zi,self.z,P) - P[position]
+            du[-1] = np.interp(zi,self.z,Q) - Q[position]
         
         domega = np.dot( L[1+position], du) + self.dt * L[1+position][1] * Aid * self.netGravity[n]   
           

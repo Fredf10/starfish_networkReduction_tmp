@@ -109,6 +109,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         #define solve function
         twoStep = True
+        self.twoStep = twoStep
         
         if twoStep:
             self.solve = self.MacCormack_Field_TwoStep
@@ -122,11 +123,17 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeTimeVariables(quiet)
 
         self.initializeSolutionMatrices() # init data in vessels
-
+        
+        self.initializeFields()
+        
         self.initializeSystemEquations()
+        
         self.initializeBoundarys()
         self.initializeConnections()
-        self.initializeFields()
+        
+        
+
+        
         try:
             self.venousPool.initializeWithFlowSolver(self)
         except AttributeError:
@@ -297,12 +304,22 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         initialize system Equations
         """
-        for vesselId,vessel in self.vessels.iteritems():
-            self.systemEquations[vesselId] = classSystemEquations.System(vessel,
+        for vesselId, vessel in self.vessels.iteritems():
+            
+            if self.twoStep:
+                self.systemEquations[vesselId] = classSystemEquations.System(vessel,
                                                     self.simplifyEigenvalues,
                                                     self.riemannInvariantUnitBase,
                                                     self.currentTimeStep,
-                                                    self.dt)
+                                                    self.dt,
+                                                    field=self.fields[vesselId],
+                                                    twoStep=self.twoStep)
+            else:
+                self.systemEquations[vesselId] = classSystemEquations.System(vessel,
+                                                    self.simplifyEigenvalues,
+                                                    self.riemannInvariantUnitBase,
+                                                    self.currentTimeStep,
+                                                    self.dt)                
             # initialize system equations
             self.systemEquations[vesselId].updateSystem(self.vessels[vesselId].Psol[0],
                                                         self.vessels[vesselId].Qsol[0],
@@ -403,7 +420,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
             self.fields[vesselId] = classFields.Field(  vessel,
                                             self.currentMemoryIndex,
                                             self.dt,
-                                            self.systemEquations[vesselId],
                                             self.rigidAreas,
                                             self.vascularNetwork.solvingSchemeField)
 
@@ -826,7 +842,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-            #progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
+            progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -839,7 +855,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 
                 if self.quiet == False:
                     pass
-                    #progressBar.progress(n)
+                    progressBar.progress(n)
                 
                 # Need to add exception
                 for fieldSolver in self.fieldSolverList:
@@ -869,7 +885,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 
                 if self.quiet == False:
                     pass
-                    #progressBar.progress(n)
+                    progressBar.progress(n)
                 
         ## to be concentrated with original cycle mode !!
         else:
