@@ -128,6 +128,8 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           'Windkessel-3ElementsDAE'          :'Windkessel3DAE',
                           'Windkessel-2Elements'             :'Windkessel2',
                           'Windkessel-3Elements'             :'Windkessel3',
+                          'Windkessel-4Elements-parallel'    :'Windkessel4p',
+                          'Windkessel-4Elements-series'      :'Windkessel4s',
                           'L-network'                        :'L_network',
                           'VaryingElastanceHeart'            :'VaryingElastance',
                           'VaryingElastanceSimple'           :'VaryingElastanceSimple',
@@ -158,6 +160,8 @@ bcTagsClassReferences = { # BoundaryConditions normal
                           '_Windkessel-2Elements'             :'Windkessel2',
                           '_Windkessel-3Elements'             :'Windkessel3',
                           '_L-network'                        :'L_network',
+                          '_Windkessel-4Elements-parallel'    :'Windkessel4p',
+                          '_Windkessel-4Elements-series'      :'Windkessel4s',
                           }
 
 #----------------------------------------------------------------------------------------#
@@ -172,6 +176,8 @@ boundaryConditionElements = {
           'Windkessel-3ElementsDAE'     :['Rc','Rtotal','C','Z'],
           'Windkessel-2Elements'        :['Rc','C'],
           'Windkessel-3Elements'        :['Rc','Rtotal','C','Z'],
+          'Windkessel-4Elements-parallel':['L','Z','C','Rc'],
+          'Windkessel-4Elements-series' :['L','Z','C','Rc'],
           'Flow-PhysiologicalFunction'  :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
           'Flow-Sinus'                  :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
           'Flow-Sinus2'                 :['amp','ampConst','Npulse','Tpulse','freq','Tspace','runtimeEvaluation','prescribe'],
@@ -218,6 +224,8 @@ boundaryConditionElements = {
           '_Windkessel-2Elements'       :['Rc','C'],
           '_Windkessel-3ElementsDAE'    :['Rc','Rtotal','C','Z'],
           '_Windkessel-3Elements'       :['Rc','Rtotal','C','Z'],
+          '_Windkessel-4Elements-parallel':['L','Z','C','Rc'],
+          '_Windkessel-4Elements-series':['L','Z','C','Rc'],
           '_L-network'                  :['Z','C'],
           'None'                        :['']}
 ##########################################################################################

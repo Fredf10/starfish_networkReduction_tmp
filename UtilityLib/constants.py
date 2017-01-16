@@ -153,6 +153,7 @@ variableUnitsSI = { # SimulationContext
                     'Tclosed1': 's',
                     'Tclosed2':'s',
                     'Rc':'Pa s m-3',
+                    'L':'Pa m-3',
                     'C':'m3 Pa-1',
                     'R':'Pa s m-3',
                     'RT':'Pa s m-3',
@@ -228,6 +229,7 @@ variableUnitsMed  = {
                     'Tclosed1': 's',
                     'Tclosed2':'s',
                     'Rc':'mmHg s cm-3',
+                    'L':'mmHg cm-3',
                     'C':'cm3 mmHg-1',
                     'R':'mmHg s cm-3',
                     'RT':'mmHg s cm-3',
@@ -351,6 +353,7 @@ variablesDict = {## class Vascular Network
                  'Rtotal'            : {'type':'float None',      'unitSI': 'Pa s m-3', 'strCases': None, 'multiVar': False},
                  'Rc'                : {'type':'float str None',  'unitSI': 'Pa s m-3', 'strCases': ['VesselImpedance'],  'multiVar': False},
                  'Z'                 : {'type':'float str',       'unitSI': 'Pa s m-3', 'strCases': ['VesselImpedance'], 'multiVar': False},
+                 'L'                 : {'type':'float',       'unitSI': 'Pa m-3', 'strCases': None, 'multiVar': False},
                  'C'                 : {'type':'float',           'unitSI': 'm3 Pa-1',  'strCases': None, 'multiVar': False},
                  # heart model
                  'T'                 : {'type':'float',  'unitSI': 's',         'strCases': None, 'multiVar': False},

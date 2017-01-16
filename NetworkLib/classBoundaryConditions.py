@@ -1788,6 +1788,209 @@ class Windkessel3(BoundaryConditionType2):
         return np.dot(R, self.omegaNew), self.dQInOut
 
 
+class Windkessel4p(BoundaryConditionType2):
+    """
+    Boundary profile - type 2
+
+    4 Element Windkessel with inertance and proximal resistance in paralell
+
+    call function input:
+     _domega_,dO,du,R,L,n,dt
+    returns the domega-vector with (domega_ , _domega) based on the input values
+    and its returnFunction
+    """
+
+    def __init__(self):
+        self.type = 2
+
+        # parameters in xml
+        self.Rc = None
+        self.Z = 'VesselImpedance'
+        self.C = 1
+        self.L = 1
+        self.Rtotal = None
+        # parameters for calculation
+        self.Z0 = None  # vesselimpedance at first step
+        self.RcNum = None
+
+        self.venousPressure = [0]  # 7.*133.
+        self.returnFunction = None
+        self.omegaNew = np.empty((2))
+        self.dQInOut = np.empty((2))
+
+        self.firstRun = True
+
+    def __call__(self, _domegaField_, duPrescribed, R, L, nmem, n, dt, P, Q, A, Z1, Z2):
+        return self.returnFunction(_domegaField_, R, dt, P, Q, Z1, Z2, n)
+
+    def funcPos0(self, _domegaField, R, dt, P, Q, Z1, Z2, n):
+        """
+        
+        NB! this funcpos0 is that of a WK3
+        return function for position 0 at the start
+        of the vessel
+        """
+        
+        pass
+
+
+
+    def funcPos1(self, domegaField_, R, dt, P, Q, Z1, Z2, n):
+        """
+        return function for position -1 at the end
+        of the vessel  (newer version from Knut Petter ??? )
+
+        Knut Petter: Yes this is a newer version based on the "half-step central difference"-scheme (shown for WK2 in my master thesis, but not WK3)
+        I am also putting the old version back into the comments so the two can be compared.
+
+        """
+        r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
+
+        
+        L = self.L
+        R1 = self.Z
+        C = self.C
+        R2 = self.Rc
+        
+        Pv = 5*133.32
+    
+
+        if self.firstRun == True:
+            Pd = P
+            QL = Q
+            self.Pd_prev = Pd
+            self.QL_prev = QL
+            print L
+            
+            self.firstRun = False
+
+
+        row1 = [dt*r12, -dt, -L, 0, 0, 0]
+        row2 = [0, C, 0, 0, -dt, 0]
+        row3 = [r12, -1, 0, -R1, 0, 0]
+        row4 = [0, 1, 0, 0, 0, -R2]
+        row5 = [r22, 0, -1, -1, 0, 0]
+        row6 = [r22, 0, 0, 0, -1, -1]
+        
+        RHS = [-L*self.QL_prev - dt*P - dt*r11*domegaField_, C*self.Pd_prev, - P - r11*domegaField_, Pv, -Q -r21*domegaField_, -Q -r21*domegaField_]
+        
+        A = np.array([row1, row2, row3, row4, row5, row6])
+        
+        #print np.linalg.norm(A)
+        b = np.array(RHS)
+        
+        [_domega, Pd, QL, QR1, QC, QR2] = np.linalg.solve(A, b)
+        
+        self.Pd_prev = Pd
+        self.QL_prev = QL
+
+        self.omegaNew[0] = domegaField_
+        self.omegaNew[1] = _domega
+
+        self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
+
+        return np.dot(R, self.omegaNew), self.dQInOut
+
+
+class Windkessel4s(BoundaryConditionType2):
+    """
+    Boundary profile - type 2
+
+    4 Element Windkessel with inertance and proximal resistance in series
+
+    call function input:
+     _domega_,dO,du,R,L,n,dt
+    returns the domega-vector with (domega_ , _domega) based on the input values
+    and its returnFunction
+    """
+
+    def __init__(self):
+        self.type = 2
+
+        # parameters in xml
+        self.Rc = None
+        self.Z = 'VesselImpedance'
+        self.C = 1
+        self.L = 1
+        self.Rtotal = None
+        # parameters for calculation
+        self.Z0 = None  # vesselimpedance at first step
+        self.RcNum = None
+
+        self.venousPressure = [0]  # 7.*133.
+        self.returnFunction = None
+        self.omegaNew = np.empty((2))
+        self.dQInOut = np.empty((2))
+
+        self.firstRun = True
+
+    def __call__(self, _domegaField_, duPrescribed, R, L, nmem, n, dt, P, Q, A, Z1, Z2):
+        return self.returnFunction(_domegaField_, R, dt, P, Q, Z1, Z2, n)
+
+    def funcPos0(self, _domegaField, R, dt, P, Q, Z1, Z2, n):
+        """
+        
+        NB! this funcpos0 is that of a WK3
+        return function for position 0 at the start
+        of the vessel
+        """
+        
+        pass
+
+
+
+    def funcPos1(self, domegaField_, R, dt, P, Q, Z1, Z2, n):
+        """
+        return function for position -1 at the end
+        of the vessel  (newer version from Knut Petter ??? )
+
+        Knut Petter: Yes this is a newer version based on the "half-step central difference"-scheme (shown for WK2 in my master thesis, but not WK3)
+        I am also putting the old version back into the comments so the two can be compared.
+
+        """
+        r11, r12, r21, r22 = R[0][0], R[0][1], R[1][0], R[1][1]
+
+        
+        L = self.L
+        R1 = self.Z
+        C = self.C
+        R2 = self.Rc
+        
+        Pv = 5*133.32
+    
+
+        if self.firstRun == True:
+            Pd = Q*R1
+            self.Pd_prev = Pd
+            print L
+            
+            self.firstRun = False
+
+
+        row1 = [dt*r12 -(L + dt*R1)*r22, -dt, 0, 0]
+        row2 = [0, C, -dt, 0]
+        row3 = [0, 1, 0, -R2]
+        row4 = [r22, 0, -1, -1]
+        
+        RHS = [-dt*(P + r11*domegaField_) + L*r21*domegaField_ + dt*R1*(Q + r21*domegaField_), C*self.Pd_prev, Pv, -Q -r21*domegaField_]
+        
+        A = np.array([row1, row2, row3, row4])
+        
+        #print np.linalg.norm(A)
+        b = np.array(RHS)
+        
+        [_domega, Pd, QC, QR2] = np.linalg.solve(A, b)
+        
+        self.Pd_prev = Pd
+
+        self.omegaNew[0] = domegaField_
+        self.omegaNew[1] = _domega
+
+        self.dQInOut = (R[:][1] * self.omegaNew)[::-1].copy()
+
+        return np.dot(R, self.omegaNew), self.dQInOut
+
+
 
 class L_network(BoundaryConditionType2):
     """
