@@ -31,6 +31,7 @@ class ReductionCase(TestBaseClass):
                              'postProcessing'           : TestBaseClass.ExtValue(bool),               
                              'multiprocessing'          : TestBaseClass.ExtValue(bool),  
                              'numberOfProcessors'       : TestBaseClass.ExtValue(int),
+                             'useGeneralMethod'         : TestBaseClass.ExtValue(bool),
                              'useAverageValues'         : TestBaseClass.ExtValue(bool),
                              'useVesselsImpedance'      : TestBaseClass.ExtValue(bool),
                              'useLumpedValues'          : TestBaseClass.ExtValue(bool),
@@ -54,6 +55,7 @@ class ReductionCase(TestBaseClass):
                             'postProcessing',                 
                             'multiprocessing',
                             'numberOfProcessors',
+                            'useGeneralMethod',
                             'useAverageValues',
                             'useVesselsImpedance',
                             'useLumpedValues',
@@ -86,6 +88,7 @@ class ReductionCase(TestBaseClass):
         self.numberOfProcessors     = 8
         self.postProcessing  = True
         
+        self.useGeneralMethod = False
         self.useAverageValues = False
         self.useVesselsImpedance = False
         self.useLumpedValues = False
@@ -101,8 +104,9 @@ class ReductionCase(TestBaseClass):
         
         filepath = self.batchDataFile
         batchDataList = pickle.load(open(filepath, 'rb'))
-        
         self.batchDataList = batchDataList[self.batchDataStart: self.batchDataEnd]
+
+        
         
     def loadoptimizeParamsDataFile(self):
         
@@ -132,7 +136,7 @@ class ReductionCase(TestBaseClass):
             
             sampleSize = len(self.batchDataList)
             
-            progressBar = cPB.ProgressBar(35, sampleSize)
+            #progressBar = cPB.ProgressBar(35, sampleSize)
             
             for simulationIndex, batchData in enumerate(self.batchDataList):
                 
@@ -157,7 +161,10 @@ class ReductionCase(TestBaseClass):
                                        Wkoptimize=self.Wkoptimize,
                                        params=self.params)
                 
-                New_network.reduceNetworkFromList(truncateList)
+                if self.useGeneralMethod:
+                    New_network.reduceNetworkFromListGen(truncateList)
+                else:
+                    New_network.reduceNetworkFromList(truncateList)
                 
                 New_network.name = networkName
                 newNetworkXmlFile =  mFPH_VNR.getFilePath('reductionNetworkXmlFileXXX', networkName, "xxx", 'write', reductionNetworkName=reductionNetworkName, reductionNetworkCase=self.caseName)
@@ -177,7 +184,7 @@ class ReductionCase(TestBaseClass):
                 del vascularNetwork
                 del New_network
             
-                progressBar.progress(simulationIndex) 
+                #progressBar.progress(simulationIndex) 
                 
         if self.solveNetworks:
             mBatchSim.runBatchAsMultiprocessing(self.batchDataList, CPUTimeFile=self.CPUTimeFile)

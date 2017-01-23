@@ -342,7 +342,7 @@ class NetworkLogFile:
                 
                 spesificLines = [startNewtableLine1, startNewtableLine2, startNewtableLine3, startNewtableLine4, startNewtableLine5, startNewtableLine6]
                 
-                self.endAndStartTable(fLogFile, spesificLines)
+                self.endAndStartTable(fLogFile, spesificLines, resizeTable=True)
                 
 
     def writeLumpedValues(self, fLogFile):
@@ -433,7 +433,7 @@ class NetworkLogFile:
                 self.endAndStartTable(fLogFile, spesificLines, resizeTable=False)
     
                 
-    def endAndStartTable(self, fLogFile, spesificLines, resizeTable):
+    def endAndStartTable(self, fLogFile, spesificLines, resizeTable=False):
         if resizeTable==True:
             lineList = [r"\end{tabular}}", r"\end{table}", r"\begin{table}", r"\resizebox{\textwidth}{!}{"]
         else:

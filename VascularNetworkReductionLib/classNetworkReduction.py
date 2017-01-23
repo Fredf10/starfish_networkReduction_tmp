@@ -1,5 +1,6 @@
 import sys
 import os
+from PyQt4.Qt import left
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
@@ -104,7 +105,67 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         
         if self.useVesselsImpedance:
             self.setToVesselImpedance()
+
+    def reduceNetworkFromListGen(self, truncateList):
+        
+        vesselsToRemove, bcsToRemove = self.findVesselsAndBCsToRemove(truncateList)
+        
+        for n, vesselId in enumerate(truncateList):
+            bcVesselToCopy = bcsToRemove[n]
             
+            if self.useLumpedValues:
+                
+                Rtot = self.lumpedValues[vesselId]["R"][-1]
+                Z_0 = self.lumpedValues[vesselId]["R1"][-1]
+                Cnew = self.lumpedValues[vesselId]["C"][-1]
+            else:
+                Rtot = self.lumpedValues[vesselId]["R_new"][-1]
+                Z_0 = self.lumpedValues[vesselId]["R1"][-1]
+                Cnew = self.lumpedValues[vesselId]["Cw"][-1]
+            
+            R = Rtot - Z_0
+                
+            
+            if vesselId in self.boundaryVessels:
+                self.boundaryConditions[vesselId].append(self.boundaryConditions[bcVesselToCopy][0])
+                self.boundaryConditions[vesselId][1].Z = Z_0
+                self.boundaryConditions[vesselId][1].Rc = R
+                self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+                self.boundaryConditions[vesselId][1].C = Cnew
+            elif vesselId == self.vascularNetwork.root:
+                self.boundaryConditions[vesselId].append(self.boundaryConditions[bcVesselToCopy][0])
+                self.boundaryConditions[vesselId][1].Z = Z_0
+                self.boundaryConditions[vesselId][1].Rc = R
+                self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+                self.boundaryConditions[vesselId][1].C = Cnew
+                self.boundaryConditions[vesselId][1].position = - 1
+                
+            else:
+                self.boundaryConditions[vesselId] = self.boundaryConditions[bcVesselToCopy][:]
+                self.boundaryConditions[vesselId][0].Z = Z_0
+                self.boundaryConditions[vesselId][0].Rc = R
+                self.boundaryConditions[vesselId][0].Rtotal = Z_0 + R
+                self.boundaryConditions[vesselId][0].C = Cnew
+            
+        
+            self.vessels[vesselId].leftDaughter = None
+            self.vessels[vesselId].rightDaughter = None
+        
+            self.boundaryVessels.append(vesselId)
+        
+        
+        for vesselId in vesselsToRemove:
+            
+            self.deleteVessel(vesselId)
+            self.treeTraverseList_sorted.remove(vesselId)
+            self.treeTraverseList.remove(vesselId)
+
+        for vesselId in bcsToRemove:
+            
+            self.deleteWK3(vesselId)
+            self.boundaryVessels.remove(vesselId)
+        
+        
     def reduceNetwork(self, truncateFile):
         
         f = open(truncateFile)
@@ -209,7 +270,6 @@ class NetworkReduction(cSBO.StarfishBaseObject):
                 else:
                     self.condenseTerminalBif(tmpTerminalBif)
                     tmpTerminalBif = self.vessels[tmpTerminalBif].leftMother
-        
         
     
     def reduceTerminal(self, vesselId, N=501):
@@ -506,6 +566,96 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.boundaryVessels.remove(rightDaughter)
         
         self.boundaryVessels.append(vesselId)
+
+
+    def reduceTerminalBifurcationOpt(self, vesselId, N=501):
+        """ This function reduces a terminal bifurcation into a single 
+            vessel with a wk3 BC with parameters based optimization of ODEs
+        """
+        
+        leftDaughter, rightDaughter = self.vessels[vesselId].leftDaughter, self.vessels[vesselId].rightDaughter
+        
+        WkMethod = self.Wkoptimize
+        params = self.params
+        node = -1
+        
+        Z_0 = 10**6*133.32*self.optParamsDict[vesselId][node][WkMethod][params]['R1']
+        R = 10**6*133.32*self.optParamsDict[vesselId][node][WkMethod][params]['R2']
+        Cnew =  10**-6*self.optParamsDict[vesselId][node][WkMethod][params]['C']/133.32
+        
+        # fix so that only bc[-1] is adjusted
+        if vesselId in self.boundaryVessels:
+            self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
+            self.boundaryConditions[vesselId][1].Z = Z_0
+            self.boundaryConditions[vesselId][1].Rc = R
+            self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][1].C = Cnew
+        elif vesselId == self.vascularNetwork.root:
+            self.boundaryConditions[vesselId].append(self.boundaryConditions[leftDaughter][0])
+            self.boundaryConditions[vesselId][1].Z = Z_0
+            self.boundaryConditions[vesselId][1].Rc = R
+            self.boundaryConditions[vesselId][1].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][1].C = Cnew
+            self.boundaryConditions[vesselId][1].position = - 1
+            
+        else:
+            self.boundaryConditions[vesselId] = self.boundaryConditions[leftDaughter][:]
+            self.boundaryConditions[vesselId][0].Z = Z_0
+            self.boundaryConditions[vesselId][0].Rc = R
+            self.boundaryConditions[vesselId][0].Rtotal = Z_0 + R
+            self.boundaryConditions[vesselId][0].C = Cnew
+        self.deleteWK3(leftDaughter)
+        self.deleteWK3(rightDaughter)
+        self.deleteVessel(leftDaughter)
+        self.deleteVessel(rightDaughter)
+        
+        self.vessels[vesselId].leftDaughter = None
+        self.vessels[vesselId].rightDaughter = None
+        
+        self.treeTraverseList_sorted.remove(leftDaughter)
+        self.treeTraverseList_sorted.remove(rightDaughter)
+        self.treeTraverseList.remove(leftDaughter)
+        self.treeTraverseList.remove(rightDaughter)
+        
+        self.boundaryVessels.remove(leftDaughter)
+        self.boundaryVessels.remove(rightDaughter)
+        
+        self.boundaryVessels.append(vesselId)
+        
+    
+    def findVesselsAndBCsToRemove(self, truncateList):
+        vesselsToRemove = []
+        bcsToRemove = []
+        
+        
+        for vesselIdTruncate in truncateList:
+            
+            toVisit = []
+            leftDaughter, rightDaughter = self.vessels[vesselIdTruncate].leftDaughter, self.vessels[vesselIdTruncate].rightDaughter
+            
+            if leftDaughter != None:
+                toVisit.append(leftDaughter)
+            if rightDaughter != None:
+                toVisit.append(rightDaughter)
+            while len(toVisit) > 0:
+                
+                for vesselId in toVisit:
+                    leftDaughter, rightDaughter = self.vessels[vesselId].leftDaughter, self.vessels[vesselId].rightDaughter
+                    if vesselId not in vesselsToRemove:
+                        vesselsToRemove.append(vesselId)
+                    
+                    if leftDaughter == None and rightDaughter == None and vesselId not in bcsToRemove:
+                        bcsToRemove.append(vesselId)
+                        
+                    if leftDaughter != None and leftDaughter not in toVisit:
+                        toVisit.append(leftDaughter)
+                    if rightDaughter != None and rightDaughter not in toVisit:
+                        toVisit.append(rightDaughter)
+                    
+                    toVisit.remove(vesselId)
+        
+        return vesselsToRemove, bcsToRemove
+                
         
     
     def calcWallthickness(self, r):

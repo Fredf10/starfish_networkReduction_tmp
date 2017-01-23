@@ -1578,6 +1578,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             L = L1
         elif connection == "bif":
             L = 1./(1./L1 + 1./L2)
+        elif connection == "anastomosis":
+            L = 2*L1
         
         return L
 
@@ -1587,6 +1589,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             R = R1
         elif connection == "bif":
             R = 1./(1./R1 + 1./R2)
+        elif connection == "anastomosis":
+            R = 2*R1
         
         return R
     
@@ -1597,6 +1601,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             C = C1
         elif connection == "bif":
             C = C1 + C2
+        elif connection == "anastomosis":
+            C = 0.5*C1
         
         return C
 
@@ -1651,7 +1657,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 leftMother = vessel.leftMother
                 rightMother = vessel.rightMother
                 if rightMother != None:
-                    print " Error: rightMother is not none in calcComplianceAndInertance cvN: ", vesselId
+                    toVisit.append(leftMother)
+                    toVisit.append(rightMother)
                     
                 if leftMother not in toVisit:
                     toVisit.append(leftMother)
@@ -1679,13 +1686,27 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         calcNext = False
                 
                 else:
-                    connection = "link"
-                
-                    if self.lumpedValues[leftDaughter]["C"] != None:
-                        calcNext = True
+                    
+                    leftMotherOfDaughter = self.vessels[leftDaughter].leftMother
+                    rightMotherOfDaughter = self.vessels[leftDaughter].rightMother
+                    
+                    if leftMotherOfDaughter !=None and rightMotherOfDaughter != None:
+                        connection = "anastomosis"
+                        
+                        if self.lumpedValues[leftDaughter]["C"] != None:
+                            calcNext = True
+                        
+                        else:
+                            calcNext = False
                     
                     else:
-                        calcNext = False
+                        connection = "link"
+                    
+                        if self.lumpedValues[leftDaughter]["C"] != None:
+                            calcNext = True
+                        
+                        else:
+                            calcNext = False
                 
                 if calcNext:
                     
@@ -1702,6 +1723,16 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         L2 = self.lumpedValues[rightDaughter]["L"][0]
                     
                     elif connection == "link":
+                        R1_new = self.lumpedValues[leftDaughter]["R_new"][0]
+                        R2_new = None
+                        C1 = self.lumpedValues[leftDaughter]["C"][0]
+                        C2 = None
+                        Cw1 = self.lumpedValues[leftDaughter]["Cw"][0]
+                        Cw2 = None
+                        L1 = self.lumpedValues[leftDaughter]["L"][0]
+                        L2 = None
+
+                    elif connection == "anastomosis":
                         R1_new = self.lumpedValues[leftDaughter]["R_new"][0]
                         R2_new = None
                         C1 = self.lumpedValues[leftDaughter]["C"][0]
@@ -1738,7 +1769,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     leftMother = vessel.leftMother
                     rightMother = vessel.rightMother
                     if rightMother != None:
-                        print " Error: rightMother is not None in calcComplianceAndInertance cvN: ", vesselId
+                        if rightMother not in toVisit and vesselId != self.root:
+                            toVisit.append(rightMother)
                     if leftMother not in toVisit and vesselId != self.root:
                         toVisit.append(leftMother)
                     toVisit.remove(vesselId)
@@ -1746,8 +1778,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         #import pickle
         #pickle.dump(self.lumpedValues, open("lumpedValuesWithWeighted.p", "wb"))
         #print self.lumpedValues[2]
-#         print self.lumpedValues[2]["L"]
-#         print self.lumpedValues[2]["C"]
 #         print self.lumpedValues[55]["L"]
 #         print self.lumpedValues[55]["C"]  
 #         exit()

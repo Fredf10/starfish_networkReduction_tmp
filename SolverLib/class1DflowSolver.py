@@ -156,7 +156,39 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
     def calcTimeStep(self,dz,c,CFL):
         return (CFL*dz)/c
+    
+    def calcGridNodes(self, vesselID):
+        
+        lumpedValues = self.vascularNetwork.lumpedValues
+        CFL = self.vascularNetwork.CFL
+        dt = self.dt
+        vessel = self.vessels[vesselID]
 
+        p0, p1 = lumpedValues[vesselID]['Pressure']
+        [qm, qm] = lumpedValues[vesselID]['Flow'] 
+        P_mean_array = np.linspace(p0, p1, vessel.N)
+
+        A_mean_array = vessel.A(P_mean_array)
+        #c_high = vessel.c(A0_max,vessel.initialPressure)
+
+        #c_high1 = vessel.c(A0_max,0)
+        Compliance = vessel.C(P_mean_array)
+        c = vessel.c(A_mean_array, Compliance)
+
+        U_mean_array = abs(qm)/A_mean_array
+        
+        cPlussUMax = np.amax(c + U_mean_array)
+        
+        l = vessel.length
+        
+        N_new =  int(CFL*l/(cPlussUMax*dt)) + 1
+        
+        if N_new < 4:
+            N_new = 4
+                
+        return N_new
+    
+    
     def initializeTimeVariables(self, quiet):
         """
         initialize time variable dt and Tstep
@@ -164,6 +196,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.totalTime = self.vascularNetwork.totalTime
 
         initialValues = self.vascularNetwork.initialValues
+        
 
         dt_min,dz_min,c_max,gridNodens = [],[],[],[]
         #create waveSpeed Log file
@@ -173,9 +206,9 @@ class FlowSolver(cSBO.StarfishBaseObject):
         for vessel in self.vessels.itervalues():
         # Calculate time variables
             #estimate initial pressure
-            p0,p1 = initialValues[vessel.Id]['Pressure']
+            p0, p1 = initialValues[vessel.Id]['Pressure']
 
-            initialPressure = classTimer.np.linspace(p0,p1,vessel.N)
+            initialPressure = classTimer.np.linspace(p0, p1, vessel.N)
 
             A0_max = max(vessel.A(initialPressure))
             #c_high = vessel.c(A0_max,vessel.initialPressure)
@@ -185,7 +218,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             c_high = vessel.c(A0_max, Compliance)
 
             dz_low = min(vessel.dz)
-            dt = self.calcTimeStep(dz_low,c_high,self.vascularNetwork.CFL)
+            dt =  self.calcTimeStep(dz_low,c_high,self.vascularNetwork.CFL)
             c_max = classTimer.np.append(c_max,c_high)
             dt_min = classTimer.np.append(dt_min,dt)
             dz_min = classTimer.np.append(dz_min,dz_low)
@@ -195,6 +228,9 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         # Set time variables
         self.dt = min(dt_min)
+        self.dt = 2*2e-4 #5e-5 #2.5e-4#z
+        if self.quiet == False:
+            print "Warning, line 198 1dFlowsSolver; setting dt: ", self.dt
         # calculate time steps
         self.nTSteps = int(classTimer.np.ceil(self.totalTime/self.dt))
         # calculate time steps for initialisation phase
@@ -272,13 +308,18 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 if gridCorrection in (' ','','y','Y'):
                     #if quiet == False: print ' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys())
                     arrayN = 0
-                    for vesselId,Nnew in automaticGridCorrection.iteritems():
+                    for vessel in self.vessels.itervalues():
+                        vesselId = vessel.Id
+                        Nnew = self.calcGridNodes(vesselId)
                         self.vessels[vesselId].update({'N':Nnew})
                         self.vessels[vesselId].initialize({})
-
-                        newOutput = self.output['CFLcorrect'][arrayN].split(' no')[0]
-                        self.output['CFLcorrect'][arrayN] = ' '.join([newOutput,'yes'])
-                        arrayN = arrayN+1
+#                     for vesselId, Nnew in automaticGridCorrection.iteritems():
+#                         self.vessels[vesselId].update({'N':Nnew})
+#                         self.vessels[vesselId].initialize({})
+# 
+#                         newOutput = self.output['CFLcorrect'][arrayN].split(' no')[0]
+#                         self.output['CFLcorrect'][arrayN] = ' '.join([newOutput,'yes'])
+#                         arrayN = arrayN+1
         gridNodes = 0
         for vessel in self.vascularNetwork.vessels.itervalues():
             gridNodes += vessel.N
@@ -565,7 +606,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         print '%-20s %2.3f' % ('dt (ms)',self.dt*1.0E3)
         print '%-20s %4d' % ('nTSteps',self.nTSteps)
         print '___________Div variables ____________'
-        print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6)
+        print '%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow'][0]*1.e6)
         print '%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32)
         try: print '%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6)
         except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput", oldExceptPass= True)
@@ -647,7 +688,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
                 initialValues = self.vascularNetwork.initialValues
                 p0,p1 = initialValues[vesselId]['Pressure']
-                Qm    = initialValues[vesselId]['Flow']
+                Qm    = initialValues[vesselId]['Flow'][0]
 
                 P_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))
                 Q_lastCycle[vesselId]  = classTimer.np.ones((self.nTSteps,vessel.N))

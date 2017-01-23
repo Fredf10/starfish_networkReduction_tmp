@@ -12,6 +12,8 @@ from SolverLib.class1DflowSolver import FlowSolver
 from UtilityLib import moduleXML
 import UtilityLib.progressBar as cPB
 
+import VascularNetworkReductionLib.classPostprocessReduction as cVNRpostProcess
+
 import gc,time
 
 import multiprocessing
@@ -66,13 +68,15 @@ def runSingleBatchSimulation(batchData):
     vascularNetworkTemp.saveSolutionData()
     moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFileSave)
     del flowSolver
+    cVnRpost = cVNRpostProcess.PostprocessReduction()
+    cVnRpost.postprocessSingle(batchData)
     gc.collect()
     timeSolverSolve = time.clock()-timeStart
     minutesSolve = int(timeSolverSolve/60.)
     secsSolve = timeSolverSolve-minutesSolve*60.
     return minutesSolve,secsSolve
 
-def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
+def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False, postProcess=True, CPUTimeFile=None):
     '''
     Run a set of simulations on one core without multiprocessing
     
@@ -82,6 +86,10 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
         
     '''
     if numberWorkers == None: numberWorkers = multiprocessing.cpu_count()
+    print "\n"
+    print numberWorkers
+    if postProcess:
+        cVnRpost = cVNRpostProcess.PostprocessReduction()
     timeStartBatch = time.time()
     print '====================================='
     print '------Multiprocessing Batch Job------'
@@ -107,4 +115,13 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     secsBatch = timeBatchJob-minutesBatch*60.
     print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
     print '====================================='
-            
+    
+    if CPUTimeFile is not None:
+        
+        writeCPUTimeFile(CPUTimeFile, len(batchDataList), minutesBatch, secsBatch)
+
+def writeCPUTimeFile(CPUTimeFile, Nsolve, minutesBatch, secsBatch):
+    
+    f = open(CPUTimeFile, 'w')
+    f.write("Solved {0} cases in {1} minutes and {2} sec".format(Nsolve, minutesBatch, secsBatch))
+    f.close()

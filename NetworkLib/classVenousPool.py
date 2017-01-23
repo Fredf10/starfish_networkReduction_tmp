@@ -20,7 +20,7 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
         self.veinId  = 0
 
         self.pressureGain = 3. # pressure gain between CVP and LAP - Bell paper
-        self.P0 = 2.0*133.32
+        self.P0 = 5.0*133.32
         self.Pmin = 0.0
         self.P = [self.P0]
         self.P_LA =[self.pressureGain*self.P[0]]
@@ -124,7 +124,7 @@ class venousPool(cSBO.StarfishBaseObject):
         self.Vusv0 =  3400.e-6 # 2378e-6 #  ? 3213e-6 # unstretched volume at reference state
 
 
-        self.P0 = 2.0 * 133.322368 # pressure constant for calculation of P venous
+        self.P0 = 5.0 * 133.322368 # pressure constant for calculation of P venous
         self.Pmin = 0.0
         self.k = 0.1124 #0.1124e-9 # constant
 
