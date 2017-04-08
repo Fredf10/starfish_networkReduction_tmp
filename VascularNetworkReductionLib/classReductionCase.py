@@ -80,7 +80,7 @@ class ReductionCase(TestBaseClass):
         self.solveNetworks     = False
         # ceate simulation case files       
         
-        self.batchDataFile = None
+        self.batchDataFile = None # path to pickle file containing name of network and info about where to truncate
         self.batchDataStart = 0
         self.batchDataEnd = -1
         #  run simulations 
@@ -88,7 +88,7 @@ class ReductionCase(TestBaseClass):
         self.numberOfProcessors     = 8
         self.postProcessing  = True
         
-        self.useGeneralMethod = False
+        self.useGeneralMethod = False # if true truncatelist only contain the actual vessels to truncate, otherwise the systematic way to truncate
         self.useAverageValues = False
         self.useVesselsImpedance = False
         self.useLumpedValues = False
@@ -136,7 +136,7 @@ class ReductionCase(TestBaseClass):
             
             sampleSize = len(self.batchDataList)
             
-            #progressBar = cPB.ProgressBar(35, sampleSize)
+            progressBar = cPB.ProgressBar(35, sampleSize)
             
             for simulationIndex, batchData in enumerate(self.batchDataList):
                 
@@ -184,7 +184,7 @@ class ReductionCase(TestBaseClass):
                 del vascularNetwork
                 del New_network
             
-                #progressBar.progress(simulationIndex) 
+                progressBar.progress(simulationIndex) 
                 
         if self.solveNetworks:
             mBatchSim.runBatchAsMultiprocessing(self.batchDataList, CPUTimeFile=self.CPUTimeFile)

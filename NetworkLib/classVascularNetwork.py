@@ -1348,7 +1348,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         
         #initialValuePath = mFPH.getDirectory('initialValueFileDirectory', self.name, self.dataNumber, 'write')
-        initialValuePath = "/home/fredrik/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55Model/InitialValues"
+        initialValuePath = "/home/fredrik/starfish_working_directory/Full55Model/InitialValues"
         initialValues =  {}
         for vesselId in self.treeTraverseList:
             
@@ -1386,7 +1386,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         Qmean = Qmean*10**6
         
-        initialValues = {}
+        
         
         Nunknowns = len(self.connectionNodes) + len(self.treeTraverseList_sorted) - 1
         
@@ -1396,181 +1396,500 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         RHS = np.zeros(Nunknowns) #system right hand side
         
-        for n, vesselId in enumerate(self.treeTraverseList_sorted):
-            """ iter through the list of vesseldicts and add the pressure equation:
-                p_start - p_end - Q*Rv = 0, and add the indices and floats in M and RHS """
-            if vesselId in self.boundaryVessels:
-                boundaryResistance = 0
-                for bc in self.boundaryConditions[vesselId]:
-                    # # if Rtotal is not given evaluate Rtotal := Rc + Zc_vessel
-                    try:
-                        # # windkessel 3 elements
-                        if bc.Rtotal == None:
-                            if bc.Z == 'VesselImpedance':
-                                P = np.ones(self.vessels[vesselId].N) * self.vessels[vesselId].Ps  # 158.747121018*133.32 #97.4608013004*133.32#
-                                compliance = self.vessels[vesselId].C(P)
-                                area = self.vessels[vesselId].A(P)
-                                waveSpeed = self.vessels[vesselId].c(area, compliance)
-                                Z = 1.0 / (compliance * waveSpeed)[-1]
-                            else: Z = bc.Z
-                            Rtotal = bc.Rc + Z
-                            bc.update({'Rtotal':Rtotal})
-                            #print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
-                    except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
-                    # # add resistance to the value
-                    try: boundaryResistance = boundaryResistance + bc.Rtotal
-                    except Exception:
-                        # # winkessel 2 elements and single resistance
+        itMax = 5
+        
+        initialValues_prev_it = None
+        
+        for it in range(itMax):
+            initialValues = {}
+            
+            M = np.zeros((Nunknowns, Nunknowns)) #system Matrix
+        
+            RHS = np.zeros(Nunknowns) #system right hand side
+            
+            for n, vesselId in enumerate(self.treeTraverseList_sorted):
+                """ iter through the list of vesseldicts and add the pressure equation:
+                    p_start - p_end - Q*Rv = 0, and add the indices and floats in M and RHS """
+                if vesselId in self.boundaryVessels:
+                    boundaryResistance = 0
+                    for bc in self.boundaryConditions[vesselId]:
+                        # # if Rtotal is not given evaluate Rtotal := Rc + Zc_vessel
                         try:
-                            if bc.Rc == 'VesselImpedance':
-                                P = np.ones(self.vessels[vesselId].N) * self.vessels[vesselId].Ps  # 158.747121018*133.32 #97.4608013004*133.32#
-                                compliance = self.vessels[vesselId].C(P)
-                                area = self.vessels[vesselId].A(P)
-                                waveSpeed = self.vessels[vesselId].c(area, compliance)
-                                Z = 1.0 / (compliance * waveSpeed)[-1]
-                                boundaryResistance = boundaryResistance + Z
-                        except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
-                        try:
+                            # # windkessel 3 elements
+                            if bc.Rtotal == None:
+                                if bc.Z == 'VesselImpedance':
+                                    P = np.ones(self.vessels[vesselId].N) * self.vessels[vesselId].Ps  # 158.747121018*133.32 #97.4608013004*133.32#
+                                    compliance = self.vessels[vesselId].C(P)
+                                    area = self.vessels[vesselId].A(P)
+                                    waveSpeed = self.vessels[vesselId].c(area, compliance)
+                                    Z = 1.0 / (compliance * waveSpeed)[-1]
+                                else: Z = bc.Z
+                                Rtotal = bc.Rc + Z
+                                bc.update({'Rtotal':Rtotal})
+                                #print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
+                        except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
+                        # # add resistance to the value
+                        try: boundaryResistance = boundaryResistance + bc.Rtotal
+                        except Exception:
                             # # winkessel 2 elements and single resistance
-                            boundaryResistance = boundaryResistance + bc.Rc
-                        except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
-
-                # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
-                if boundaryResistance == 0:
-                    print "\n Boundary Condition at end of vessel {} has no resistance".format(vesselId)
-                    # # set boundaryresistance to 1/133.32*1.e6
-                    print "The resistance is set to 1*133.32*1.e6 \n"
-                    boundaryResistance = 1.*133.32 * 1.e6
-
-                nodeToNodeResistance = self.vessels[vesselId].resistance + boundaryResistance
-                boundaryVessel = True
-            else:
-                nodeToNodeResistance = self.vessels[vesselId].resistance
-                boundaryVessel = False
-            
-
-            Pstart_index = None # index in Matrix for startnode
-            Pend_index = None # index in Matrix for endnode
-            
-            startNode = self.vessels[vesselId].startNode
-            endNode = self.vessels[vesselId].endNode
-            
-            for pos, item in enumerate(self.connectionNodes):
-                # iterate through connectionNodes (unknown P's) and find their correct index in Matrix M
-        
-                if item == startNode:
-                    Pstart_index = pos
-                
-                elif item == endNode:
-                    Pend_index = pos
+                            try:
+                                if bc.Rc == 'VesselImpedance':
+                                    P = np.ones(self.vessels[vesselId].N) * self.vessels[vesselId].Ps  # 158.747121018*133.32 #97.4608013004*133.32#
+                                    compliance = self.vessels[vesselId].C(P)
+                                    area = self.vessels[vesselId].A(P)
+                                    waveSpeed = self.vessels[vesselId].c(area, compliance)
+                                    Z = 1.0 / (compliance * waveSpeed)[-1]
+                                    boundaryResistance = boundaryResistance + Z
+                            except Exception: self.warning("Old except: pass clause #2 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
+                            try:
+                                # # winkessel 2 elements and single resistance
+                                boundaryResistance = boundaryResistance + bc.Rc
+                            except Exception: self.warning("Old except: pass clause #3 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
+    
+                    # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
+                    if boundaryResistance == 0:
+                        print "\n Boundary Condition at end of vessel {} has no resistance".format(vesselId)
+                        # # set boundaryresistance to 1/133.32*1.e6
+                        print "The resistance is set to 1*133.32*1.e6 \n"
+                        boundaryResistance = 1.*133.32 * 1.e6
                     
-            vesselindex = self.treeTraverseList_sorted.index(vesselId) # find index of vesselID in rangeList
-            Q_index = vesselindex + len(self.connectionNodes) - 1 # -1 due to Q1 is known and python index start at 0
-            
-            # TODO: 1) both flow and pressure BC at inlet
-            if vesselId != self.root and boundaryVessel == False:
-                M[n, Pstart_index] = 1
-                M[n, Pend_index] = -1
-                M[n, Q_index] = - 1.e-6*nodeToNodeResistance/133.32
-            elif vesselId == self.root:
-                M[n, Pstart_index] = 1
-                M[n, Pend_index] = -1
-                RHS[n] = Qmean*1.e-6*nodeToNodeResistance/133.32
-             
-            elif boundaryVessel:
-                
-                M[n, Pstart_index] = 1
-                M[n, Q_index] = -1.e-6*nodeToNodeResistance/133.32
-                RHS[n] = 0 # could set to venous pressure
-        
-        for leftMother, rightMother, leftDaughter, rightDaughter in (self.treeTraverseConnections):
-    
-            """iter through the list of junctions and add the equation about conservation of mass:
-               Qin - Qout = 0, and add the indices and floats in M and RHS """
-            
-            n += 1
-            
-            
-            #find Q in and Qout of junction
-            if rightMother == None:
-                Qin = [leftMother]
-            else:
-                Qin = [leftMother, rightMother]
-                
-            if rightDaughter == None:
-                Qout = [leftDaughter]
-            else:
-                Qout = [leftDaughter, rightDaughter]
-            
-            
-            for vesselId in Qin:
-                vesselindex = self.treeTraverseList_sorted.index(vesselId)
-                Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
-                
-                if vesselId == self.root:
-                    RHS[n] = - Qmean
+                    if it == 0:
+                        nodeToNodeResistance = self.vessels[vesselId].calcVesselResistance() + boundaryResistance
+                    else:
+                        
+                        P_prev_it = initialValues_prev_it[vesselId]['Pressure']
+                        nodeToNodeResistance = self.vessels[vesselId].calcVesselResistance(P=P_prev_it) + boundaryResistance
+                        
+                    boundaryVessel = True
+                        
                 else:
-                    M[n, Q_index] = 1
-        
-            for vesselId in Qout:
-                vesselindex = self.treeTraverseList_sorted.index(vesselId)
-                Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
+                    
+                    if it == 0:
+                        nodeToNodeResistance = self.vessels[vesselId].calcVesselResistance()
+                    else:
+                        
+                        P_prev_it = initialValues_prev_it[vesselId]['Pressure']
+                        nodeToNodeResistance = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                    boundaryVessel = False
                 
-                M[n, Q_index] = - 1
-                
-        meanPandQ = np.linalg.solve(M, RHS)
-                
-        for n, vesselId in enumerate(self.treeTraverseList_sorted):
-            # post processing to assign initialvalues
-            
-            Pstart_index = None 
-            Pend_index = None
-            
-            startNode = self.vessels[vesselId].startNode
-            endNode = self.vessels[vesselId].endNode
-            
-            for pos, item in enumerate(self.connectionNodes):
-                # iterate through connectionNodes (unknown P's) and find their correct index in solution array meanPandQ
-        
-                if item == startNode:
-                    Pstart_index = pos
-                
-                elif item == endNode:
-                    Pend_index = pos
-            
-            if vesselId != self.root:
-                vesselindex = self.treeTraverseList_sorted.index(vesselId)
-                Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
-                qm = meanPandQ[Q_index]*1e-6
-            else:
-                qm = Qmean*1e-6
-            
-            p0 = meanPandQ[Pstart_index]*133.32
-            
-            
-            if Pend_index != None:
-                p1 = meanPandQ[Pend_index]*133.32
-            else:
-                p1 = p0 - qm*self.vessels[vesselId].resistance
-            
-            initialValues[vesselId] = {}
-            initialValues[vesselId]['Pressure'] = [p0, p1]
-            initialValues[vesselId]['Flow'] = [qm, qm]
-            initialValues[vesselId]['R'] = [p0/qm, p1/qm]
-            self.Rcum[vesselId] = (p0)/qm
-
-        
-        # # adjust pressure with venous pressure and difference between mean and diastolic pressure
-        for initialArray in initialValues.itervalues():
-            initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
-            initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
-            
-                
-        # # adjust pressure for gravity pressure
-        initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, self.root)
-        
-        self.initialValues = initialValuesWithGravity
     
+                Pstart_index = None # index in Matrix for startnode
+                Pend_index = None # index in Matrix for endnode
+                
+                startNode = self.vessels[vesselId].startNode
+                endNode = self.vessels[vesselId].endNode
+                
+                for pos, item in enumerate(self.connectionNodes):
+                    # iterate through connectionNodes (unknown P's) and find their correct index in Matrix M
+            
+                    if item == startNode:
+                        Pstart_index = pos
+                    
+                    elif item == endNode:
+                        Pend_index = pos
+                        
+                vesselindex = self.treeTraverseList_sorted.index(vesselId) # find index of vesselID in rangeList
+                Q_index = vesselindex + len(self.connectionNodes) - 1 # -1 due to Q1 is known and python index start at 0
+                
+                # TODO: 1) both flow and pressure BC at inlet
+                if vesselId != self.root and boundaryVessel == False:
+                    M[n, Pstart_index] = 1
+                    M[n, Pend_index] = -1
+                    M[n, Q_index] = - 1.e-6*nodeToNodeResistance/133.32
+                elif vesselId == self.root:
+                    M[n, Pstart_index] = 1
+                    M[n, Pend_index] = -1
+                    RHS[n] = Qmean*1.e-6*nodeToNodeResistance/133.32
+                 
+                elif boundaryVessel:
+                    
+                    M[n, Pstart_index] = 1
+                    M[n, Q_index] = -1.e-6*nodeToNodeResistance/133.32
+                    RHS[n] = 0 # could set to venous pressure
+            
+            for leftMother, rightMother, leftDaughter, rightDaughter in (self.treeTraverseConnections):
+        
+                """iter through the list of junctions and add the equation about conservation of mass:
+                   Qin - Qout = 0, and add the indices and floats in M and RHS """
+                
+                n += 1
+                
+                
+                #find Q in and Qout of junction
+                if rightMother == None:
+                    Qin = [leftMother]
+                else:
+                    Qin = [leftMother, rightMother]
+                    
+                if rightDaughter == None:
+                    Qout = [leftDaughter]
+                else:
+                    Qout = [leftDaughter, rightDaughter]
+                
+                
+                for vesselId in Qin:
+                    vesselindex = self.treeTraverseList_sorted.index(vesselId)
+                    Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
+                    
+                    if vesselId == self.root:
+                        RHS[n] = - Qmean
+                    else:
+                        M[n, Q_index] = 1
+            
+                for vesselId in Qout:
+                    vesselindex = self.treeTraverseList_sorted.index(vesselId)
+                    Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
+                    
+                    M[n, Q_index] = - 1
+                    
+            meanPandQ = np.linalg.solve(M, RHS)
+                    
+            for n, vesselId in enumerate(self.treeTraverseList_sorted):
+                # post processing to assign initialvalues
+                
+                Pstart_index = None 
+                Pend_index = None
+                
+                startNode = self.vessels[vesselId].startNode
+                endNode = self.vessels[vesselId].endNode
+                
+                for pos, item in enumerate(self.connectionNodes):
+                    # iterate through connectionNodes (unknown P's) and find their correct index in solution array meanPandQ
+            
+                    if item == startNode:
+                        Pstart_index = pos
+                    
+                    elif item == endNode:
+                        Pend_index = pos
+                
+                if vesselId != self.root:
+                    vesselindex = self.treeTraverseList_sorted.index(vesselId)
+                    Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
+                    qm = meanPandQ[Q_index]*1e-6
+                else:
+                    qm = Qmean*1e-6
+                
+                p0 = meanPandQ[Pstart_index]*133.32
+                
+                
+                if Pend_index != None:
+                    p1 = meanPandQ[Pend_index]*133.32
+                else:
+                    
+                    if it == 0:
+                        Rv = self.vessels[vesselId].calcVesselResistance()
+                    else:
+                        P_prev_it = initialValues_prev_it[vesselId]['Pressure']
+                        Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                    p1 = p0 - qm*Rv
+                
+                initialValues[vesselId] = {}
+                initialValues[vesselId]['Pressure'] = [p0, p1]
+                initialValues[vesselId]['Flow'] = [qm, qm]
+                initialValues[vesselId]['R'] = [p0/qm, p1/qm]
+                if it == 0:
+                    radiusProximal = self.vessels[vesselId].radiusProximal
+                    radiusDistal = self.vessels[vesselId].radiusDistal
+                    areaProximal = np.pi*radiusProximal**2
+                    areaDistal = np.pi*radiusDistal**2
+                else:
+                    radiusProximal = np.sqrt(self.vessels[vesselId].A_nID([p0, p1], 0)/np.pi)
+                    radiusDistal = np.sqrt(self.vessels[vesselId].A_nID([p0, p1], -1)/np.pi)
+                    areaProximal = np.pi*radiusProximal**2
+                    areaDistal = np.pi*radiusDistal**2
+                rho = self.vessels[vesselId].rho
+                
+                initialValues[vesselId]['Velocity'] = [qm/areaProximal, qm/areaDistal]
+                initialValues[vesselId]['DynamicPressure'] = [0.5*rho*(qm/areaProximal)**2, 0.5*rho*(qm/areaDistal)**2]
+                initialValues[vesselId]['radius'] = [radiusProximal, radiusDistal]
+                
+                self.Rcum[vesselId] = (p0)/qm
+    
+            
+            # # adjust pressure with venous pressure and difference between mean and diastolic pressure
+            for initialArray in initialValues.itervalues():
+                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
+                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
+                
+                    
+            # # adjust pressure for gravity pressure
+            initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, self.root)
+            
+            initialValues_prev_it = initialValuesWithGravity.copy()
+            
+            if it == 0:
+                self.initialValues = initialValuesWithGravity.copy()
+        
+        from copy import deepcopy
+        self.initialValues['MeanValuesStatic'] = deepcopy(initialValuesWithGravity)
+        #print self.initialValues['MeanValuesStatic'][1]['Pressure'][0]
+        self.initialValues['MeanValues'] = self.adjustForTotalPressure(initialValues_prev_it)
+        #print "\n", self.initialValues['MeanValuesStatic'][1]['Pressure'][0]
+        #print self.name
+        
+        #import pickle
+        #pickle.dump(self.initialValues, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/initialValues.p", "wb"))
+        
+        
+    
+    
+    def adjustForTotalPressure(self, initialValues):
+        
+        toVisit = []
+        leftDaughter = self.vessels[self.root].leftDaughter
+        rightDaughter = self.vessels[self.root].rightDaughter
+        
+        if leftDaughter != None:
+            toVisit.append(leftDaughter)
+        if rightDaughter != None:
+            toVisit.append(rightDaughter)
+        
+        idToprint = 1
+#         print initialValues[self.root]['Flow']
+        #print initialValues[idToprint]['Pressure'][0]
+        initialValues_new = initialValues.copy()
+        
+        Qin = initialValues[self.root]['Flow'][0]
+        
+        itMax = 10
+        
+        for it in range(itMax):
+
+            toVisit = []
+            leftDaughter = self.vessels[self.root].leftDaughter
+            rightDaughter = self.vessels[self.root].rightDaughter
+            
+            if leftDaughter != None:
+                toVisit.append(leftDaughter)
+            if rightDaughter != None:
+                toVisit.append(rightDaughter)
+            # traverese from root to periphery to ajust for total pressure
+            while len(toVisit) > 0:
+                #print "first loop"
+                for vesselId in toVisit:
+                    
+                    leftMother = self.vessels[vesselId].leftMother
+                    P_mother = initialValues_new[leftMother]['Pressure'][-1]
+                    P_dynamic_mother = initialValues_new[leftMother]['DynamicPressure'][-1]
+                    
+                    P_dynamic = initialValues_new[vesselId]['DynamicPressure'][0]
+                    
+                    p0 = P_mother + P_dynamic_mother - P_dynamic
+                    
+                    P_prev_it = initialValues_new[vesselId]['Pressure']
+                    Qm_prev_it = initialValues_new[vesselId]['Flow'][0]
+                    Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                    
+                    p1 = p0 - Qm_prev_it*Rv
+                    
+                    initialValues_new[vesselId]['Pressure'] = [p0, p1]
+    
+                    radiusProximal = np.sqrt(self.vessels[vesselId].A_nID([p0, p1], 0)/np.pi)
+                    radiusDistal = np.sqrt(self.vessels[vesselId].A_nID([p0, p1], -1)/np.pi)
+                    areaProximal = np.pi*radiusProximal**2
+                    areaDistal = np.pi*radiusDistal**2
+                    rho = self.vessels[vesselId].rho
+                    
+                    initialValues_new[vesselId]['Velocity'] = [Qm_prev_it/areaProximal, Qm_prev_it/areaDistal]
+                    initialValues_new[vesselId]['DynamicPressure'] = [0.5*rho*(Qm_prev_it/areaProximal)**2, 0.5*rho*(Qm_prev_it/areaDistal)**2]
+                    initialValues_new[vesselId]['radius'] = [radiusProximal, radiusDistal]
+                    initialValues_new[vesselId]['Flow'] = [None, None]
+                    
+                    leftDaughter = self.vessels[vesselId].leftDaughter
+                    rightDaughter = self.vessels[vesselId].rightDaughter
+                    
+                    if leftDaughter != None and leftDaughter not in toVisit:
+                        toVisit.append(leftDaughter)
+                    if rightDaughter != None and rightDaughter not in toVisit:
+                        toVisit.append(rightDaughter)
+                        
+                    toVisit.remove(vesselId)
+            
+            
+
+            Pv = self.venousPool.P[0]
+            
+            Qout = 0
+            
+            # calculate flow out 
+            for vesselId in self.boundaryVessels:
+
+                bc = self.boundaryConditions[vesselId][-1]
+                
+                R = bc.Rc + bc.Z
+                
+                p1 = initialValues_new[vesselId]['Pressure'][-1]
+                
+                Qout += (p1 - Pv)/R
+                
+            Qscale = Qin/Qout
+            #print "Qscale: ", Qscale
+                
+            # traverse backwards to match flow with pressuredifference
+            toVisit = self.boundaryVessels[:]
+            
+            while len(toVisit) > 0:
+                #print "second loop"
+                for vesselId in toVisit:
+
+                    if vesselId in self.boundaryVessels:
+                        
+                        bc = self.boundaryConditions[vesselId][-1]
+                        
+                        R = bc.Rc + bc.Z
+                        P_prev_it = initialValues_new[vesselId]['Pressure']
+                        
+                        p1 = P_prev_it[-1]
+                        
+                        qm = Qscale*(p1 - Pv)/R
+                        Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                        p1 = qm*R + Pv
+                        p0 = p1 + qm*Rv
+                        
+                        initialValues_new[vesselId]['Flow'] = [qm, qm]
+                        initialValues_new[vesselId]['Pressure'] = [p0, p1]
+                        initialValues_new[vesselId]['R'] = [(p0 - Pv)/qm, (p1 - Pv)/qm]
+                        leftMother, rightMother = self.vessels[vesselId].leftMother, self.vessels[vesselId].rightMother
+                        
+                        if leftMother != None and leftMother not in toVisit:
+                            toVisit.append(leftMother)
+                        if rightMother != None and rightMother not in toVisit:
+                            print "Warning: ajust for total Pressure not implemented for anastomisis line approx 1708 cVN"
+                        
+                        toVisit.remove(vesselId)
+                        
+                    else:
+                        
+                        leftDaughter = self.vessels[vesselId].leftDaughter
+                        rightDaughter = self.vessels[vesselId].rightDaughter
+                        
+                        #bifurcation
+                        if rightDaughter != None:
+                            q1, q2 = initialValues_new[leftDaughter]['Flow'][0], initialValues_new[rightDaughter]['Flow'][0]
+                            
+                            if q1 != None and q2 != None:
+                                
+                                qm = q1 + q2
+    
+                                
+                                P_prev_it = initialValues_new[vesselId]['Pressure']
+                                Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                                
+                                P_daughter = initialValues_new[leftDaughter]['Pressure'][0]
+                                P_dynamic_daughter = initialValues_new[leftDaughter]['DynamicPressure'][0]
+                    
+                                P_dynamic = initialValues_new[vesselId]['DynamicPressure'][-1]
+                    
+                                p1 = P_daughter + P_dynamic_daughter - P_dynamic
+                                p0 = p1 + qm*Rv
+                                
+                                initialValues_new[vesselId]['Flow'] = [qm, qm]
+                                initialValues_new[vesselId]['Pressure'] = [p0, p1]
+                                
+                                leftMother, rightMother = self.vessels[vesselId].leftMother, self.vessels[vesselId].rightMother
+                                
+                                if leftMother != None and leftMother not in toVisit:
+                                    toVisit.append(leftMother)
+                                if rightMother != None and rightMother not in toVisit:
+                                    print "Warning: ajust for total Pressure not implemented for anastomisis line approx 1732 cVN"
+                                
+                                toVisit.remove(vesselId)
+                        
+                        else:
+    
+                            q1 = initialValues_new[leftDaughter]['Flow'][0]
+                            
+                            if q1 != None:
+                                
+                                qm = q1
+    
+                                P_prev_it = initialValues_new[vesselId]['Pressure']
+                                Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                                
+                                P_daughter = initialValues_new[leftDaughter]['Pressure'][0]
+                                P_dynamic_daughter = initialValues_new[leftDaughter]['DynamicPressure'][0]
+                    
+                                P_dynamic = initialValues_new[vesselId]['DynamicPressure'][-1]
+                    
+                                p1 = P_daughter + P_dynamic_daughter - P_dynamic
+                                p0 = p1 + qm*Rv
+                                
+                                initialValues_new[vesselId]['Flow'] = [qm, qm]
+                                initialValues_new[vesselId]['Pressure'] = [p0, p1]
+                                
+                                leftMother, rightMother = self.vessels[vesselId].leftMother, self.vessels[vesselId].rightMother
+                                
+                                if leftMother != None and leftMother not in toVisit:
+                                    toVisit.append(leftMother)
+                                if rightMother != None and rightMother not in toVisit:
+                                    print "Warning: ajust for total Pressure not implemented for anastomisis line approx 1732 cVN"
+                                
+                                toVisit.remove(vesselId)
+            
+            #print initialValues_new[self.root]['Flow']
+            #print initialValues[idToprint]['Pressure'][0]
+        #import pickle
+        
+#         print initialValues[self.root]['Flow']
+#         print initialValues[idToprint]['Pressure'][0]/133.32
+        
+        
+        #pickle.dump(initialValues_new, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/initialValues_new.p", "wb"))
+        
+        return initialValues_new
+    
+    def calcReflectionJunction(self, lumpedValues=None):
+        
+        for vesselId in self.treeTraverseList_sorted:
+            
+            leftDaughter = self.vessels[vesselId].leftDaughter
+            rightDaughter = self.vessels[vesselId].rightDaughter
+            
+            if leftDaughter != None and rightDaughter != None:
+                
+                if lumpedValues==None:
+                    Am = np.pi*self.vessels[vesselId].radiusDistal**2
+                    Ald = np.pi*self.vessels[leftDaughter].radiusProximal**2
+                    Ard = np.pi*self.vessels[rightDaughter].radiusProximal**2
+                    
+                    cm = self.vessels[vesselId].calcVesselWavespeed_in_out()[-1]
+                    cld = self.vessels[leftDaughter].calcVesselWavespeed_in_out()[0]
+                    crd = self.vessels[rightDaughter].calcVesselWavespeed_in_out()[0]
+                    
+                    Am_prox = np.pi*self.vessels[vesselId].radiusProximal**2
+                    cm_prox = self.vessels[vesselId].calcVesselWavespeed_in_out()[0]
+                else:
+                    Am = np.pi*lumpedValues[vesselId]['radius'][-1]**2
+                    Ald = np.pi*lumpedValues[leftDaughter]['radius'][0]**2
+                    Ard = np.pi*lumpedValues[rightDaughter]['radius'][0]**2
+                    
+                    Pm = lumpedValues[vesselId]['Pressure']
+                    Pld = lumpedValues[leftDaughter]['Pressure']
+                    Prd = lumpedValues[rightDaughter]['Pressure']
+                    
+                    cm = self.vessels[vesselId].calcVesselWavespeed_in_out(P=Pm)[-1]
+                    cld = self.vessels[leftDaughter].calcVesselWavespeed_in_out(P=Pld)[0]
+                    crd = self.vessels[rightDaughter].calcVesselWavespeed_in_out(P=Prd)[0]
+                    
+                    Am_prox = np.pi*lumpedValues[vesselId]['radius'][0]**2
+                    cm_prox = self.vessels[vesselId].calcVesselWavespeed_in_out(P=Pm)[0]
+                    
+                rho = self.vessels[vesselId].rho
+                
+                Ym = Am/(rho*cm)
+                Yld = Ald/(rho*cld)
+                Yrd = Ard/(rho*crd)
+                
+                R_bif = (Ym - Yld -Yrd)/(Ym + Yld + Yrd)
+                R_bif_ld = (Yld - Ym)/(Ym + Yld)
+                R_bif_rd = (Yrd - Ym)/(Ym + Yrd)
+                
+                Ym_prox = Am_prox/(rho*cm_prox)
+                
+                R_inOut = (Ym_prox - Ym)/(Ym + Ym_prox)
+                if abs(R_bif) > 0.05:
+                    print "aiai \n"
+                print "vessel: {0}, R_inOut: {1}, R_bif: {2}, R_bif_ld: {3}, R_bif_rd: {4}".format(vesselId, round(R_inOut, 2), round(R_bif, 2), round(R_bif_ld, 2), round(R_bif_rd, 2))
     
     def sumInertance(self, L1, L2, connection):
         
@@ -1613,7 +1932,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         return C_weight
         
     
-    def calcComplianceAndInertance(self):
+    def calcComplianceAndInertance(self, lumpedValues, state='standard', weightOnlyPeripheral=False):
         
         """ Method that traverses the tree from the periphery to the root and calculate total peripheral values of
             R, C, Cw and L"""
@@ -1621,23 +1940,48 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         toVisit = self.boundaryVessels[:]
         # TODO: Fix so that we can use with anastomosis and base on qm from self.lumpedValues
         #print toVisit
+        
+        
         for vesselId in self.treeTraverseList:
             if vesselId in self.boundaryVessels:
                 vessel = self.vessels[vesselId]
-                L = self.vessels[vesselId].Lv
-                Cv = self.vessels[vesselId].Cv
-                Rv = self.vessels[vesselId].resistance
+                
+                if state == "standard":
+                    L = self.vessels[vesselId].Lv
+                    Cv = self.vessels[vesselId].Cv
+                    Rv = self.vessels[vesselId].resistance
+                    
+                    radiusProximal = self.vessels[vesselId].radiusProximal
+                    radiusDistal = self.vessels[vesselId].radiusDistal
+
+                    c_prox = self.vessels[vesselId].cd_in
+                    c_dist = self.vessels[vesselId].cd_out
+                else:
+                    P_lump = lumpedValues[vesselId]["Pressure"]
+                    
+                    L = self.vessels[vesselId].calcVesselInertance(P=P_lump)
+                    Cv = self.vessels[vesselId].calcVesselCompliance(P=P_lump)
+                    Rv = self.vessels[vesselId].calcVesselResistance(P=P_lump)
+                    
+                    radiusProximal = np.sqrt(self.vessels[vesselId].A_nID(P_lump, 0)/np.pi)
+                    radiusDistal = np.sqrt(self.vessels[vesselId].A_nID(P_lump, -1)/np.pi)
+                    #[radiusProximal, radiusDistal] = lumpedValues[vesselId]["radius"]
+                    
+                    c_prox, c_dist = self.vessels[vesselId].calcVesselWavespeed_in_out(P=P_lump)
+                    
                 C = self.boundaryConditions[vesselId][-1].C
+            
                 try:
                     R = self.boundaryConditions[vesselId][-1].Z + self.boundaryConditions[vesselId][-1].Rc
                 except:
                     R = self.boundaryConditions[vesselId][-1].Rtotal
                 
                 rho = self.vessels[vesselId].rho
-                Ad_prox = np.pi*self.vessels[vesselId].radiusProximal**2
-                Ad_dist = np.pi*self.vessels[vesselId].radiusDistal**2
-                c_prox = self.vessels[vesselId].cd_in
-                c_dist = self.vessels[vesselId].cd_out
+                    
+                    
+                Ad_prox = np.pi*radiusProximal**2
+                Ad_dist = np.pi*radiusDistal**2
+
                 Z_prox, Z_dist = rho*c_prox/Ad_prox, rho*c_dist/Ad_dist
                 try: 
                     R1 = self.boundaryConditions[vesselId][-1].Z
@@ -1648,11 +1992,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 
                 C_w = self.impedanceWeightedCompliance(Cv, C, Rv, R1, R2)
                 
-                self.lumpedValues[vesselId]["R1"] = [Z_prox, Z_dist]
-                self.lumpedValues[vesselId]["Cw"] = [C_w, C]
-                self.lumpedValues[vesselId]["R_new"] = [R + Rv, R]
-                self.lumpedValues[vesselId]["C"] = [C + Cv, C]
-                self.lumpedValues[vesselId]["L"] = [L, 0]
+                lumpedValues[vesselId]["R1"] = [Z_prox, R1]
+                lumpedValues[vesselId]["Cw"] = [C_w, C]
+                lumpedValues[vesselId]["R_new"] = [R + Rv, R]
+                lumpedValues[vesselId]["C"] = [C + Cv, C]
+                lumpedValues[vesselId]["L"] = [L, 0]
                 
                 leftMother = vessel.leftMother
                 rightMother = vessel.rightMother
@@ -1665,8 +2009,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 toVisit.remove(vesselId)
                 
             else:
-                self.lumpedValues[vesselId]["C"] = None
-                self.lumpedValues[vesselId]["L"] = None
+                lumpedValues[vesselId]["C"] = None
+                lumpedValues[vesselId]["L"] = None
                 
                 
         while len(toVisit)>0:
@@ -1680,7 +2024,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 if leftDaughter !=None and rightDaughter != None:
                     connection = "bif"
                     
-                    if self.lumpedValues[leftDaughter]["C"] != None and self.lumpedValues[rightDaughter]["C"] != None:
+                    if lumpedValues[leftDaughter]["C"] != None and lumpedValues[rightDaughter]["C"] != None:
                         calcNext = True
                     else:
                         calcNext = False
@@ -1693,7 +2037,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     if leftMotherOfDaughter !=None and rightMotherOfDaughter != None:
                         connection = "anastomosis"
                         
-                        if self.lumpedValues[leftDaughter]["C"] != None:
+                        if lumpedValues[leftDaughter]["C"] != None:
                             calcNext = True
                         
                         else:
@@ -1702,70 +2046,94 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     else:
                         connection = "link"
                     
-                        if self.lumpedValues[leftDaughter]["C"] != None:
+                        if lumpedValues[leftDaughter]["C"] != None:
                             calcNext = True
                         
                         else:
                             calcNext = False
                 
                 if calcNext:
-                    
+                        
                     L = self.vessels[vesselId].Lv
                     Cv = self.vessels[vesselId].Cv
                     if connection == "bif":
-                        R1_new = self.lumpedValues[leftDaughter]["R_new"][0]
-                        R2_new = self.lumpedValues[rightDaughter]["R_new"][0]
-                        C1 = self.lumpedValues[leftDaughter]["C"][0]
-                        C2 = self.lumpedValues[rightDaughter]["C"][0]
-                        Cw1 = self.lumpedValues[leftDaughter]["Cw"][0]
-                        Cw2 = self.lumpedValues[rightDaughter]["Cw"][0]
-                        L1 = self.lumpedValues[leftDaughter]["L"][0]
-                        L2 = self.lumpedValues[rightDaughter]["L"][0]
+                        R1_new = lumpedValues[leftDaughter]["R_new"][0]
+                        R2_new = lumpedValues[rightDaughter]["R_new"][0]
+                        C1 = lumpedValues[leftDaughter]["C"][0]
+                        C2 = lumpedValues[rightDaughter]["C"][0]
+                        Cw1 = lumpedValues[leftDaughter]["Cw"][0]
+                        Cw2 = lumpedValues[rightDaughter]["Cw"][0]
+                        L1 = lumpedValues[leftDaughter]["L"][0]
+                        L2 = lumpedValues[rightDaughter]["L"][0]
                     
                     elif connection == "link":
-                        R1_new = self.lumpedValues[leftDaughter]["R_new"][0]
+                        R1_new = lumpedValues[leftDaughter]["R_new"][0]
                         R2_new = None
-                        C1 = self.lumpedValues[leftDaughter]["C"][0]
+                        C1 = lumpedValues[leftDaughter]["C"][0]
                         C2 = None
-                        Cw1 = self.lumpedValues[leftDaughter]["Cw"][0]
+                        Cw1 = lumpedValues[leftDaughter]["Cw"][0]
                         Cw2 = None
-                        L1 = self.lumpedValues[leftDaughter]["L"][0]
+                        L1 = lumpedValues[leftDaughter]["L"][0]
                         L2 = None
 
                     elif connection == "anastomosis":
-                        R1_new = self.lumpedValues[leftDaughter]["R_new"][0]
+                        R1_new = lumpedValues[leftDaughter]["R_new"][0]
                         R2_new = None
-                        C1 = self.lumpedValues[leftDaughter]["C"][0]
+                        C1 = lumpedValues[leftDaughter]["C"][0]
                         C2 = None
-                        Cw1 = self.lumpedValues[leftDaughter]["Cw"][0]
+                        Cw1 = lumpedValues[leftDaughter]["Cw"][0]
                         Cw2 = None
-                        L1 = self.lumpedValues[leftDaughter]["L"][0]
+                        L1 = lumpedValues[leftDaughter]["L"][0]
                         L2 = None
+                    
+                    if state == "standard":
+                        L = self.vessels[vesselId].Lv
+                        Cv = self.vessels[vesselId].Cv
+                        Rv = self.vessels[vesselId].resistance
+                        
+                        radiusProximal = self.vessels[vesselId].radiusProximal
+                        radiusDistal = self.vessels[vesselId].radiusDistal
+    
+                        c_prox = self.vessels[vesselId].cd_in
+                        c_dist = self.vessels[vesselId].cd_out
+                    else:
+                        P_lump = lumpedValues[vesselId]["Pressure"]
+                        
+                        L = self.vessels[vesselId].calcVesselInertance(P=P_lump)
+                        Cv = self.vessels[vesselId].calcVesselCompliance(P=P_lump)
+                        Rv = self.vessels[vesselId].calcVesselResistance(P=P_lump)
+
+                        radiusProximal = np.sqrt(self.vessels[vesselId].A_nID(P_lump, 0)/np.pi)
+                        radiusDistal = np.sqrt(self.vessels[vesselId].A_nID(P_lump, -1)/np.pi)
+                        #[radiusProximal, radiusDistal] = lumpedValues[vesselId]["radius"]
+                        
+                        c_prox, c_dist = self.vessels[vesselId].calcVesselWavespeed_in_out(P=P_lump)
                     
                     R_newDistal = self.sumResistance(R1_new, R2_new, connection)    
                     Cdistal = self.sumCompliance(C1, C2, connection)
                     CwDistal = self.sumCompliance(Cw1, Cw2, connection)
                     Ldistal = self.sumInertance(L1, L2, connection)
-                    self.lumpedValues[vesselId]["C"] = [Cdistal + Cv, Cdistal]
-                    self.lumpedValues[vesselId]["L"] = [Ldistal + L, Ldistal]
+                    lumpedValues[vesselId]["C"] = [Cdistal + Cv, Cdistal]
+                    lumpedValues[vesselId]["L"] = [Ldistal + L, Ldistal]
                     
-                    Cv = self.vessels[vesselId].Cv
-                    Rv = self.vessels[vesselId].resistance
                     rho = self.vessels[vesselId].rho
-                    Ad_prox = np.pi*self.vessels[vesselId].radiusProximal**2
-                    Ad_dist = np.pi*self.vessels[vesselId].radiusDistal**2
-                    c_prox = self.vessels[vesselId].cd_in
-                    c_dist = self.vessels[vesselId].cd_out
+                    Ad_prox = np.pi*radiusProximal**2
+                    Ad_dist = np.pi*radiusDistal**2
+                    
+
                     Z_prox, Z_dist = rho*c_prox/Ad_prox, rho*c_dist/Ad_dist
                     R1 = Z_dist
                     R2 = R_newDistal - R1
-                    CwProximal = self.impedanceWeightedCompliance(Cv, CwDistal, Rv, R1, R2)
+                    if weightOnlyPeripheral:
+                        CwProximal = CwDistal + Cv
+                    else:
+                        CwProximal = self.impedanceWeightedCompliance(Cv, CwDistal, Rv, R1, R2)
                     
-                    self.lumpedValues[vesselId]["R_new"] = [R_newDistal + Rv, R_newDistal]
-                    self.lumpedValues[vesselId]["R1"] = [Z_prox, Z_dist]
-                    self.lumpedValues[vesselId]["C"] = [Cdistal + Cv, Cdistal]
-                    self.lumpedValues[vesselId]["Cw"] = [CwProximal, CwDistal]
-                    self.lumpedValues[vesselId]["L"] = [Ldistal + L, Ldistal]
+                    lumpedValues[vesselId]["R_new"] = [R_newDistal + Rv, R_newDistal]
+                    lumpedValues[vesselId]["R1"] = [Z_prox, Z_dist]
+                    lumpedValues[vesselId]["C"] = [Cdistal + Cv, Cdistal]
+                    lumpedValues[vesselId]["Cw"] = [CwProximal, CwDistal]
+                    lumpedValues[vesselId]["L"] = [Ldistal + L, Ldistal]
                     leftMother = vessel.leftMother
                     rightMother = vessel.rightMother
                     if rightMother != None:
@@ -1864,10 +2232,30 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
             
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+            self.calcReflectionJunction()
             self.calculateInitialValuesLinearSystem(meanInflow)
+            from copy import deepcopy
+            self.lumpedValues = deepcopy(self.initialValues)
+            self.calcComplianceAndInertance(self.lumpedValues, weightOnlyPeripheral=True)
+            self.calcComplianceAndInertance(self.lumpedValues["MeanValuesStatic"], state="MeanValues", weightOnlyPeripheral=True)
+            self.calcComplianceAndInertance(self.lumpedValues["MeanValues"], state="MeanValues", weightOnlyPeripheral=True)
+
+            import pickle
+            SystolicDiastolicPressure = pickle.load(open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/systolicDiastolicPressures.p", 'rb'))
+            self.lumpedValues['Systolic'] = SystolicDiastolicPressure['Systolic']
+            self.lumpedValues['Diastolic'] = SystolicDiastolicPressure['Diastolic']
+
+            self.calcComplianceAndInertance(self.lumpedValues['Systolic'], state="MeanValues", weightOnlyPeripheral=True)
+            self.calcComplianceAndInertance(self.lumpedValues['Diastolic'], state="MeanValues", weightOnlyPeripheral=True)
             
-            self.lumpedValues = self.initialValues
-            self.calcComplianceAndInertance()
+            #self.lumpedValues = deepcopy(self.initialValues)
+            #print "\n"
+            #self.calcReflectionJunction(lumpedValues=self.lumpedValues["MeanValues"])
+            #import pickle
+            #optDict = pickle.load(open('/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55Model/ReducedNetworks/ReductionCases/OptimizationDicts/optAllVesselsWeighted_tot_constant_average.p', 'rb')) 
+            #self.calcComplianceAndInertance(self.lumpedValues["MeanValues"], state="MeanValues", useOptR1=True, optDict=optDict)
+            
+            #pickle.dump(self.lumpedValues, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/lumpedValues_all_WeightOnlyDistal.p", "wb"))
             self.calculateInitialValuesFromSolution()
             
             return
@@ -1875,11 +2263,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 
         elif self.initialsationMethod == 'ConstantPressure':
             meanInflowlumped, self.initPhaseTimeSpanlumped = inflowBoundaryCondition.findMeanFlow()
-            self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-            self.calculateInitialValuesLinearSystem(meanInflowlumped)
+            #self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+            #self.calculateInitialValuesLinearSystem(meanInflowlumped)
             
-            self.lumpedValues = self.initialValues
-            self.calcComplianceAndInertance()
+            #self.lumpedValues = self.initialValues
+            #self.calcComplianceAndInertance()
 
             constantPressure = self.initMeanPressure
             try:
@@ -1929,6 +2317,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     self.initialValues = initialValues
             else:  # with no gravity
                 self.initialValues = initialValues
+            self.lumpedValues = initialValues
             return
 
 
