@@ -108,7 +108,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.rigidAreas = self.vascularNetwork.rigidAreas
 
         #define solve function
-        twoStep = True
+        twoStep = False
         self.twoStep = twoStep
         
         if twoStep:
