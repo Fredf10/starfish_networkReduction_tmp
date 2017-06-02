@@ -1,12 +1,10 @@
 import sys, os, gc
 import numpy as np
 import math
-
 cur = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(cur + '/../')
-
-import UtilityLib.moduleXML as mXML
-import SolverLib.class1DflowSolver as c1dFS
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import starfish.UtilityLib.moduleXML as mXML
+import starfish.SolverLib.class1DflowSolver as c1dFS
 
 def test_singleVessel():
 
