@@ -106,10 +106,12 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.rigidAreas = self.vascularNetwork.rigidAreas
 
         #define solve function
-        twoStep = True
-        self.twoStep = twoStep
+        if self.vascularNetwork.solvingSchemeField == 'MacCormack_TwoStep':
+            self.twoStep = True
+        else:
+            self.twoStep = False
         
-        if twoStep:
+        if self.twoStep:
             self.solve = self.MacCormack_Field_TwoStep
         else:
             self.solve = self.MacCormack_Field
@@ -140,7 +142,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeCommunicators()
         self.initializeTimers()
         
-        if twoStep:
+        if self.twoStep:
             self.initializeNumericalObjectListTwoStep()
         else:
             self.initializeNumericalObjectList()
