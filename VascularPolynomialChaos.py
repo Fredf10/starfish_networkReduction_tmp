@@ -6,8 +6,8 @@
 # uses polynomial Chaos toolbox from Jonathan Feinberg, Simula Center Oslo
 ##
 
-import sys,os
-cur = os.path.dirname(os.path.realpath('__file__'))
+import os
+#cur = os.path.dirname(os.path.realpath('__file__'))
 
 #from NetworkLib.classVascularNetwork import VascularNetwork
 ### another unnecessary import.
@@ -16,21 +16,14 @@ cur = os.path.dirname(os.path.realpath('__file__'))
 ### another
 
 #import VascularPolynomialChaosLib.classVpcConfiguration as cVPCConf
-import VascularPolynomialChaosLib.classDistributionManager as cDistMng
-import VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
-import VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
-import VascularPolynomialChaosLib.classUqsaCase as cUqsaCase
+import starfish.VascularPolynomialChaosLib.classDistributionManager as cDistMng
+import starfish.VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
+import starfish.VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
+import starfish.VascularPolynomialChaosLib.classUqsaCase as cUqsaCase
 #import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
 
-import UtilityLib.moduleStartUp as mStartUp
-import UtilityLib.moduleXML as mXML
-
-import chaospy as cp
-import pprint
-
-import numpy as np
-
-import cPickle
+import starfish.UtilityLib.moduleStartUp as mStartUp
+import starfish.UtilityLib.moduleXML as mXML
 
 def uncertaintyPropagation():
     '''
@@ -79,7 +72,7 @@ def uncertaintyPropagation():
     vascularNetwork.randomInputManager.initialize(vascularNetwork)
     assert len(vascularNetwork.randomInputManager.randomInputs.keys()) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
     vascularNetwork.randomInputManager.printOutInfo()
-        
+ 
     # 2. create distributions
     distributionManager = cDistMng.DistributionManagerChaospy(vascularNetwork.randomInputManager.randomInputsExtDist)
     distributionManager.createRandomVariables()
