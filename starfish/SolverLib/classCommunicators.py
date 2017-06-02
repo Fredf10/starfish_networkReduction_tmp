@@ -3,16 +3,8 @@ import subprocess
 import math
 import numpy as np
 import sys,os,time
-# set the path relative to THIS file not the executing file!
-#cur = os.path.dirname( os.path.realpath( __file__ ) )
-#sys.path.append(cur+'/../')
-#sys.path.append(cur+'/../Visualisation')
-
+cur = os.path.dirname( os.path.realpath( __file__ ) )
 from ..UtilityLib import classStarfishBaseObject as cSBO
-
-# This isn't refrenced directly anywhere
-# from VisualisationLib.classRealTimeVisualisation import realTimeVisualisation
-
 class CommunicatorBaseClass(cSBO.StarfishBaseObject):
     """
     Base-class for all boundary conditions
@@ -181,7 +173,6 @@ class CommunicatorRealTimeViz(CommunicatorBaseClass):
         called after simulation, if this is called the graphs can not be updated again
         """
         self.writeCommunicatorFile('STOP')
-
 
 class CommunicatorBaroreceptor(CommunicatorBaseClass):
     def __init__(self, comDict):

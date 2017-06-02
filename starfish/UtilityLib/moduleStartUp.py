@@ -182,13 +182,13 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             'connect'               : connect,
             'resimulate'            : resimulate}
 
-def prettyPrintList(title, listToPrint, indexOffSet = 0):
+def prettyPrintList(title, listToPrint, indexOffset=0):
     """
     Function to pretty print a list to STDOUT with numbers to choose from
     """
     print title
     for index,listElement in enumerate(listToPrint):
-        print "   [ {:3} ] - {}".format(index+indexOffSet,listElement)
+        print "   [ {:3} ] - {}".format(index + indexOffset, listElement)
 
 def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
     '''
@@ -215,12 +215,12 @@ def chooseNetwork(showTemplates = True):
         # network templates
         templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
         dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
-        prettyPrintList("\n Template Networks: \n",dirNamesTemplate)
+        prettyPrintList("\n Template Networks: \n", dirNamesTemplate)
         prettyPringOffset = len(dirNamesTemplate)
     # working directory
     workingDirectoryPath = mFPH.getDirectory('workingDirectory','','','read')
     dirWorkingDirectory = [d for d in os.listdir(workingDirectoryPath) if '.' not in  d]
-    prettyPrintList("\n WorkingDirectory Networks: \n", dirWorkingDirectory, indexOffSet = prettyPringOffset)
+    prettyPrintList("\n WorkingDirectory Networks: \n", dirWorkingDirectory, indexOffset=prettyPringOffset)
     
     dirNames = dirNamesTemplate+dirWorkingDirectory    
     userInput = userInputEvaluationInt(len(dirNames), 0)
@@ -285,7 +285,7 @@ def defineVisualisation():
     returns: visualisationBool (int)
     """
     listToPrint = ['No visualisation', '2d and 3d', '2d visualisation', '3d visualisation']
-    prettyPrintList("\n        Choose visualisation mode:",listToPrint)
+    prettyPrintList("\n        Choose visualisation mode:", listToPrint)
     userInput = userInputEvaluationInt(4, 0, "     What to do? (q)-quit: ")
     return userInput
     
@@ -306,8 +306,8 @@ def defineDataNumber(networkName):
     #TODO CRITICAL this fails for template networks
     existingDataNumbers = findExistingDataNumbers(networkName)
     correctDataNumber = False
-    
-    prettyPrintList("\n        Existing dataNumbers for this network: {}".format(networkName),existingDataNumbers)
+
+    prettyPrintList("\n        Existing dataNumbers for this network: {}".format(networkName), existingDataNumbers)
        
     while correctDataNumber == False:
         dataNumber = str(raw_input("\n  Please enter datanumber (3 characters): "))
@@ -322,7 +322,7 @@ def defineDataNumber(networkName):
             #userInput = str(raw_input
             listToPrint = [" keep this datanumber and overwrite simulation case",
                            " enter new data number"]
-            prettyPrintList("\n        Simulation case with datanumber exits already".format(networkName),listToPrint)
+            prettyPrintList("\n        Simulation case with datanumber exits already".format(networkName), listToPrint)
             userInput = userInputEvaluationInt(2, 0, "     What to do? ")
             if userInput == 0:
                 correctDataNumber = True
@@ -401,8 +401,8 @@ def chooseSolutionDataCase():
                                 
                             listToPrint.append("{} : {}".format(dataNumber, description))
                             fileNameDataNumber.append([networkName,dataNumber])
-    
-        prettyPrintList("\n        {}".format(networkName),listToPrint, indexOffSet = indexOffSet)
+
+        prettyPrintList("\n        {}".format(networkName), listToPrint, indexOffset=indexOffSet)
         indexOffSet = indexOffSet+len(listToPrint)
         
     if len(fileNameDataNumber) == 0:
@@ -419,13 +419,13 @@ def chooseSolutionDataCase():
 def chooseUQSACaseFile(networkName):
     """
     console Interface to choose a vascularPolynomialChaos Config File
-     including the possility to create a template Config File
+     including the possibility to create a template Config File
     Input:
         networkName of VascularNetwork
     Output:
         networkName,dataNumber of the Config File (networkName should be the same)
     """
-    from VascularPolynomialChaosLib import classUqsaCase
+    from ..VascularPolynomialChaosLib import classUqsaCase
     
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkDirectory = os.path.join(*[workingDirectory,networkName])
@@ -444,13 +444,15 @@ def chooseUQSACaseFile(networkName):
     print "\n  No dataNumber for UQSAcase file passed, choose between all available UQSAcase files:"
     print "  (NB: use -n dataNumber to define a specific UQSAcase you want to open)\n"
     print "   [   0 ] - Create new template uqsa case file and exit"
+    print "   [   1 ] - Create new template uqsa case file and run"
+    indexOffset = 2
     if filenames != []:
-        prettyPrintList('',filenames, indexOffSet = 1)
+        prettyPrintList('', filenames, indexOffset=indexOffset)
         
     question  = "  Choose Option or Config-File you want to open according to its number:, (q)-quit: "
-    userInput = userInputEvaluationInt(1+len(filenames), 0, question)
+    userInput = userInputEvaluationInt(indexOffset+len(filenames), 0, question)
         
-    if userInput in [0] :
+    if userInput in [0,1] :
         
         userInputDataNumber = 'xxxx'
         dataNumber = False
@@ -471,8 +473,9 @@ def chooseUQSACaseFile(networkName):
         toCopyFile = mFPH.getFilePath('networkXmlFile', networkName, 'xxx','write')
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
-        print "files created!, exit()"
-        exit()
+        if userInput == 0:
+            print "files created!, exit()"
+            exit()
     
     else:
         networkName = filenames[userInput-1]

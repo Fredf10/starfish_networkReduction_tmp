@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<singleVesselUQSA_uqsaCase_tst gitHash="37d0831ebbada17d90fc60216ea109947a30ee44 uncomitted changes">
+  <UqsaCase class="UqsaCase">
+    <createSample>True</createSample>
+    <createEvaluationXmlFiles>True</createEvaluationXmlFiles>
+    <simulateEvaluations>True</simulateEvaluations>
+    <preProcessData>True</preProcessData>
+    <postProcessing>True</postProcessing>
+    <localEvaluation>True</localEvaluation>
+    <multiprocessing>True</multiprocessing>
+    <numberOfProcessors>12</numberOfProcessors>
+    <simulateEvaluationNumbers>0</simulateEvaluationNumbers>
+    <sampleManager class="sampleManager">
+      <samplingMethod>S</samplingMethod>
+      <dependentCase>False</dependentCase>
+    </sampleManager>
+    <uqsaMethods>
+      <uqsaMethod Id="MC-40" class="uqsaMethodMonteCarlo">
+        <sampleSize>40</sampleSize>
+        <sensitivityAnalysis>False</sensitivityAnalysis>
+      </uqsaMethod>
+      <uqsaMethod Id="PC-1" class="uqsaMethodPolynomialChaos">
+        <polynomialOrder>1</polynomialOrder>
+        <sampleFactor>2</sampleFactor>
+      </uqsaMethod>
+      <uqsaMethod Id="MCpb-20" class="uqsaMethodMonteCarloParametrizedBootstrapping">
+        <sampleSize>20</sampleSize>
+        <sensitivityAnalysis>False</sensitivityAnalysis>
+        <averageNumber>4</averageNumber>
+        <chunkSize>20</chunkSize>
+      </uqsaMethod>
+      <uqsaMethod Id="MC-20" class="uqsaMethodMonteCarlo">
+        <sampleSize>20</sampleSize>
+        <sensitivityAnalysis>False</sensitivityAnalysis>
+      </uqsaMethod>
+    </uqsaMethods>
+    <locationOfInterestManager class="LocationOfInterestManager">
+      <evaluateSimulationTime>True</evaluateSimulationTime>
+      <locationsOfInterest>
+        <locationOfInterest Id="exampleLocation" class="LocationOfInterest">
+          <queryLocation>vessel_1</queryLocation>
+          <xVal unit="m">0.05</xVal>
+          <quantitiesOfInterestToProcess>Pressure Flow</quantitiesOfInterestToProcess>
+          <confidenceAlpha>5.0</confidenceAlpha>
+        </locationOfInterest>
+      </locationsOfInterest>
+    </locationOfInterestManager>
+  </UqsaCase>
+</singleVesselUQSA_uqsaCase_tst>

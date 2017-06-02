@@ -115,7 +115,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
               
     return requestedFilePath
     
-def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', caseName = 'None'):
+def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Error', caseName = 'None', workingDirectory=None):
     '''
     Function returns a requested directory path, if this directory does not exists
     it is created.
