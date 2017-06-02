@@ -41,9 +41,9 @@ def writeXMLsetUnit(xmlElement, variable, value, unit = 'unitSI'):
             if conversionFactor and value and isinstance(value,numbers.Number):
                 value = value/conversionFactor
     except (KeyError,TypeError) as e:
-        print """ERROR: moduleXML.writeXML():
+        print("""ERROR: moduleXML.writeXML():
             variable {} of element {} is not properly defined
-            in variablesDict""".format(variable,xmlElement)
+            in variablesDict""".format(variable,xmlElement))
         raise e
     return value
 
@@ -70,7 +70,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
     try:
         root = etree.Element(networkName, id = dataNumber, version = newestNetworkXmlVersion)
     except: #TODO: find out what errors etree.Element raises and fix this except statement.
-        print " Error: path / file does not exist"
+        print(" Error: path / file does not exist")
         return
 
     ## import current network xml description as nxmlW(rite) to avoid version clash
@@ -238,7 +238,7 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                         else:
                             variableValue = variableValue*unitsDict[variableUnit]
                     except KeyError:
-                        print """ Warning: Can't find {} in unitsDict Key""".format(variableUnit)
+                        print(""" Warning: Can't find {} in unitsDict Key""".format(variableUnit))
                         pass
                     except TypeError:
                         #print """ Warning: Can't find {} in unitsDict Type""".format(variableUnit)
@@ -252,10 +252,10 @@ def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'un
                 try:
                     variableValue = eval(variableValueString)
                 except TypeError:
-                    print "Warning: loadVariablesConversion() bool: variableValueString is not a valid expression for eval()"
+                    print("Warning: loadVariablesConversion() bool: variableValueString is not a valid expression for eval()")
                     convertError.append('bool')
                 except NameError:
-                    print "Warning: loadVariablesConversion() bool: variableValueString is not defined"
+                    print("Warning: loadVariablesConversion() bool: variableValueString is not defined")
                     convertError.append('bool')
 
             elif variableType in ['str']:
@@ -309,7 +309,7 @@ def loadNetworkFromXML(networkName ,
 
     # read from file
     if networkName == None:
-        print 'ERROR: moduleXML.loadNetworkFromXML() : load XML - no networkName passed'
+        print('ERROR: moduleXML.loadNetworkFromXML() : load XML - no networkName passed')
         return None
 
     if networkXmlFile == None:
@@ -327,15 +327,15 @@ def loadNetworkFromXML(networkName ,
         tree = etree.parse(''.join([networkXmlFile]), parser)
     except (etree.ParseError, ImportError) as e:
         if isinstance(e, etree.ParseError):
-            print " ERROR moduleXML.loadNetworkFromXML() on line {} {}: ".format(e.position[0], e)
+            print(" ERROR moduleXML.loadNetworkFromXML() on line {} {}: ".format(e.position[0], e))
             exit()
 
     # create root
     root = tree.getroot()
     xmlFileVersion = root.attrib['version']
     if xmlFileVersion not in currentVersions:
-        print "ERROR moduleXML.loadNetworkFromXML(): XML file is outdated file-version {} " \
-        "current supported version {}, could not parse file! system exit".format(root.attrib['version'],currentVersions); exit()
+        print("ERROR moduleXML.loadNetworkFromXML(): XML file is outdated file-version {} " \
+        "current supported version {}, could not parse file! system exit".format(root.attrib['version'],currentVersions)); exit()
 
 
     if xmlFileVersion == newestNetworkXmlVersion:
@@ -346,7 +346,7 @@ def loadNetworkFromXML(networkName ,
         import networkXml041 as nxml
 
     if xmlFileVersion != newestNetworkXmlVersion:
-        print " WARNING the version of the network xml file you try to load is outdated it may cause some problems!"
+        print(" WARNING the version of the network xml file you try to load is outdated it may cause some problems!")
 
     for xmlElementName in nxml.xmlElements:
         for xmlElement in root.findall(''.join([".//",xmlElementName])):

@@ -142,7 +142,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                     except: type = 'str'
                     #TODO: Try Except Pass should be fixed
                     try: self.actualValuesDict[key][index] = eval(type)(value)
-                    except: print """WARNING: could not convert "{}" to "{}" """.format(text,type)
+                    except: print("""WARNING: could not convert "{}" to "{}" """.format(text,type))
                     
                 else:
                     text = entry.get_text()
@@ -151,7 +151,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                         except: type = 'float'
                         #TODO: Try Except Pass should be fixed
                         try: self.actualValuesDict[key][index] = eval(type)(text)
-                        except: print """WARNING: could not convert "{}" to "{}" """.format(text,type)
+                        except: print("""WARNING: could not convert "{}" to "{}" """.format(text,type))
                             
         self.parentWindow.update({self.dictVariableName:self.actualValuesDict})
         self.parentWindow.updatePlotWindow()
@@ -419,7 +419,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
             except: 
-                print 'WARNING vascularNetwork.update(): wrong key: %s, could not update vascularNetwork' %key 
+                print('WARNING vascularNetwork.update(): wrong key: %s, could not update vascularNetwork' %key) 
     
        
     def createGraph(self):
@@ -848,7 +848,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
                     
-                    print sum(Psol_b)/len(Psol_b)
+                    print(sum(Psol_b)/len(Psol_b))
                     
                     xData = vascularNetwork.tsol
                     
@@ -943,7 +943,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     yData11 = Qsol_f * 1.e6  
                     yData12 = Qsol_b * 1.e6  
                     
-                    print sum(Psol_b)/len(Psol_b)
+                    print(sum(Psol_b)/len(Psol_b))
                     xData = vascularNetwork.tsol
 #                     
 #                     # calculate centeroid of Psol_f
@@ -1053,9 +1053,9 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     ydata10 = yData00 * vascularNetwork.dt / sum(dz) * len(dz)
                     
                     xData = np.linspace(0, vascularNetwork.vessels[vesselId].length, len(yData00)) * 100.
-                    print np.shape(xData)
+                    print(np.shape(xData))
                     
-                    print yData00, xData
+                    print(yData00, xData)
                     
                     self.lines[i]['axis1']['-'].set_data(xData, yData00)
                     self.lines[i]['axis2']['-'].set_data(xData, ydata10)      
@@ -1136,7 +1136,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                 try:
                     yData00 = vascularNetwork.vessels[vesselId].netGravity[:]
                     if len(yData00)!= 1:
-                        print "WARNING 2dVisualisation.updateLinesGravity(): either no motion or no correct solution data"
+                        print("WARNING 2dVisualisation.updateLinesGravity(): either no motion or no correct solution data")
                     #ydata10 = vascularNetwork.vessels[vesselId].Qsol[:, [gridNode]] * 1e6    
                     xData = vascularNetwork.tsol
                                                              
@@ -1831,16 +1831,16 @@ class Visualisation2DMain(Visualisation2DMainGUI):
                 if '_'.join([networkName, dataNumber]) not in self.networkCases:
                     self.loadVascularNetwork(networkName, dataNumber)
             elif '_evaluation_' in filename:# polynomial chaos cases
-                print filename
+                print(filename)
                 networkFileName = ''.join([filename.split('/')[-1].split('.')[0],'.xml'])
                 networkName = filename.split('/')[-1].split('_evaluation_')[0]
                 evaluationNumber = filename.split('/')[-1].split('_evaluation_')[1].split('.')[0]
                 networkXmlFile = ''.join(['/'.join(filename.split('/')[0:-2]),'/evaluationNetworkFiles/',networkFileName])
                 
-                print networkFileName
-                print networkName
-                print evaluationNumber
-                print networkXmlFile
+                print(networkFileName)
+                print(networkName)
+                print(evaluationNumber)
+                print(networkXmlFile)
                 if '_'.join([networkName, evaluationNumber]) not in self.networkCases:
                     self.loadVascularNetwork(networkName, evaluationNumber,networkXmlFile,filename)
                 
@@ -1874,7 +1874,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         if response == gtk.RESPONSE_OK:
             filenames = dialog.get_filenames()
         elif response == gtk.RESPONSE_CANCEL:
-            print 'Closed, no files selected'
+            print('Closed, no files selected')
         dialog.destroy()    
         return filenames
     

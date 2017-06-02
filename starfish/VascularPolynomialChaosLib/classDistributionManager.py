@@ -46,11 +46,11 @@ class DistributionManager(object):
         '''
             
         if len(sample) == len(self.randomInputsExtDist):
-            print "\nSample number {}".format(sampleIndex)
-            print '{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","realisation")
-            print "--------------------------------------------------------------------"          
+            print("\nSample number {}".format(sampleIndex))
+            print('{:3} | {:20} | {:21} | {}'.format("Id","variableName","location","realisation"))
+            print("--------------------------------------------------------------------")          
             for randomInput,sample_i in zip(self.randomInputsExtDist,sample):
-                print "random variable {} with realisation {}".format(randomInput.name,sample_i)
+                print("random variable {} with realisation {}".format(randomInput.name,sample_i))
                 randomInput.passRealisationToAssosiatedObj(sample_i)
     
     ## methods created by the toolbox-child class implementation
@@ -93,7 +93,7 @@ class DistributionManagerChaospy(DistributionManager):
         Create marginal and joint distributions for the random inputs 
         '''
         if self.randomInputsExtDist == None:
-            print "WARNING: DistributionManager.createRandomVariablesChaospy() no randomInputsExtDist are defined"
+            print("WARNING: DistributionManager.createRandomVariablesChaospy() no randomInputsExtDist are defined")
             return
         
         evalDistDict = {'Uniform': cp.Uniform, 

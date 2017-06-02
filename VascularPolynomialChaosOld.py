@@ -60,10 +60,10 @@ except: pass
 import polychaos as pc
 
 def main():
-    print ""
-    print '=============================================='
-    print '#        VascularPolynomialChaos_v0.2        #'
-    print '=============================================='
+    print("")
+    print('==============================================')
+    print('#        VascularPolynomialChaos_v0.2        #')
+    print('==============================================')
        
     optionsDict = parseOptions(['f','n'])
     
@@ -316,7 +316,7 @@ def main():
        
     for order in polynomialOrders:
         ### define the paths for saving data and plots
-        print 'current order is ', order, ' choosen method is', method
+        print('current order is ', order, ' choosen method is', method)
         
         ## Polynomial Chaos
         saveDirectory = ''.join([cur,"/NetworkFiles/",vascularNetwork.name,'/',"VascularPolynomialChaos",'/','polyChaos_solution_',dataNumber,'_order_',str(order).zfill(2),'_method_',method,'/'])
@@ -407,7 +407,7 @@ def main():
             FluidType = []
             FluidCount = 0
             for fluidProperty,interval in vascularNetwork.globalFluidPolyChaos.iteritems():
-                print fluidProperty,interval
+                print(fluidProperty,interval)
                 if interval[0] != interval[1]:
                     FluidType.append(fluidProperty)
                     uncertainVarNames.append(str(fluidProperty))
@@ -522,19 +522,19 @@ def main():
             saveFile = open(distributionsDictFile,"wb")       
             cPickle.dump(distributionsDict,saveFile,protocol=2)
             saveFile.close()
-            print ".. done"
+            print(".. done")
             
         else:
             try:
-                print " load and create distributions"
+                print(" load and create distributions")
                 loadFile = open(distributionsDictFile,"rb")
                 # load pickle
                 distributionsDict = cPickle.load(loadFile)
                 loadFile.close()
-                print ".. done"
+                print(".. done")
             except:
-                print 'File does not exits:'
-                print distributionsDictFile
+                print('File does not exits:')
+                print(distributionsDictFile)
                 exit()
                 
             uncertainVarNames   = distributionsDict['uncertainVarNames']
@@ -604,7 +604,7 @@ def main():
             if not os.path.exists(polynomPathOrtho):
                 os.makedirs(polynomPathOrtho)
             
-            print " create and save orthogonal polynoms "
+            print(" create and save orthogonal polynoms ")
             #create orthogonal polynom  
             #orthoPoly = pc.orth_gs(order,distributions)
             orthoPoly = pc.orth_ttr(order,distributions)
@@ -616,25 +616,25 @@ def main():
             saveFile = open(orthoFile,"wb")       
             cPickle.dump(orthoPoly,saveFile,protocol=2)
             saveFile.close()
-            print ".. done"
+            print(".. done")
         else:
             try:
-                print " load orthogonal polynoms "
+                print(" load orthogonal polynoms ")
                 loadFile = open(orthoFile,"rb")
                 # load pickle
                 orthoPoly = cPickle.load(loadFile)
                 loadFile.close()
-                print ".. done"
+                print(".. done")
             except:
-                print 'File does not exits:'
-                print orthoFile
+                print('File does not exits:')
+                print(orthoFile)
                 exit()
                 
         #--- 0.2 collocation method ( TRUE == create and save, FALSE == load existing)
         if createSample == True:
             if not os.path.exists(polynomPathOrtho):
                 os.makedirs(polynomPathOrtho)
-            print " create and save collocation methods sample space "
+            print(" create and save collocation methods sample space ")
     
             
             sampleOrder = 2*pc.terms(order,len(distributions))
@@ -643,23 +643,23 @@ def main():
             if len(distributions) == 1: sample = np.array([sample])
             sample = sample.transpose()
             
-            print "number of simulations",len(sample)
+            print("number of simulations",len(sample))
             #save file
             saveFile = open(sampleFile,"wb")       
             cPickle.dump(sample,saveFile,protocol=2)
             saveFile.close()
-            print ".. done"
+            print(".. done")
         else:
             try:
-                print " load collocation methods sample space "
+                print(" load collocation methods sample space ")
                 loadFile = open(sampleFile,"rb")
                 # load pickle
                 sample = cPickle.load(loadFile)
                 loadFile.close()
-                print ".. done"
+                print(".. done")
             except:
-                print 'File does not exits:'
-                print sampleFile
+                print('File does not exits:')
+                print(sampleFile)
                 exit()
         
         ################################################################################
@@ -683,14 +683,14 @@ def main():
             
             numberOfSmulations = len(sample)
             
-            print " starting the calculation of the samples! %.0f Simulations will be run" %(numberOfSmulations)
+            print(" starting the calculation of the samples! %.0f Simulations will be run" %(numberOfSmulations))
             startTime = time.clock()
             #---start the simulations
             for polyCount in np.linspace(0, len(sample)-1, len(sample)):
                 
                 if polyCount >= startEvaluation:
                 
-                    print '\n polyChaos run', polyCount+1  
+                    print('\n polyChaos run', polyCount+1)  
                     #--- GET POlYVARABLES OF CURRENT RUN --------------------------------------------------
                     ####               
                     polyVariable = sample[polyCount,:]
@@ -762,7 +762,7 @@ def main():
                     timeSolverSolve = time.clock()-timeSolverSolveStart
                     minutesSolve = int(timeSolverSolve/60.)
                     secsSolve = timeSolverSolve-minutesSolve*60.
-                    print '      Solver time {} min {} sec'.format(minutesSolve,secsSolve)
+                    print('      Solver time {} min {} sec'.format(minutesSolve,secsSolve))
                     
                     # ---POSTPROCESS AND SAVE THE DATA---------------------------------------------------------------
                     #calculate wave speed array
@@ -780,7 +780,7 @@ def main():
                   
             
             endTime = time.clock()
-            print "It took %1.2f seconds to run polychaos simulation evaluations\n" % (endTime-startTime)
+            print("It took %1.2f seconds to run polychaos simulation evaluations\n" % (endTime-startTime))
             
             # --saving numberOfEvaluations-File-----------------------------------------------------------
             log = [int(polyCount+1),order,numberOfSmulations]
@@ -796,7 +796,7 @@ def main():
             if preProcessData == True:
                 
                 
-                print '   loading polychaos solution data'
+                print('   loading polychaos solution data')
                 startTime = time.clock()
                 #load log file
                 logFILE = open(numberOfEvaluationsPath,"rb")
@@ -832,7 +832,7 @@ def main():
                                              
                      
                 endTime = time.clock()
-                print "    It took %1.2f seconds to load the solution \n" % (endTime-startTime)
+                print("    It took %1.2f seconds to load the solution \n" % (endTime-startTime))
                 # solution pre processing
                 
                 # interpolate solution
@@ -843,7 +843,7 @@ def main():
                 count = 0
                 for dictionary in solutionDataAdapted:
                     if dictionary['Tsteps'] == 999999999:
-                        print 'ERROR in data hashing no/bad data found polyCount is probably zero!'
+                        print('ERROR in data hashing no/bad data found polyCount is probably zero!')
                         break
                     name = names[count]
                     count = count+1
@@ -966,49 +966,49 @@ def main():
                     for solNumber in range(len(solutionInterpolatedCurrentPressure)):
                         if len(extremaP[0][solNumber]) == len(extremaP[1][solNumber]):
                             countExtremaP.append(len(extremaP[0][solNumber]))
-                        else: print "ERROR of extremaP"
+                        else: print("ERROR of extremaP")
                         if len(extremaP_f[0][solNumber]) == len(extremaP_f[1][solNumber]):
                             countExtremaP_f.append(len(extremaP_f[0][solNumber]))
-                        else: print "ERROR of extremaP_f"
+                        else: print("ERROR of extremaP_f")
                         if len(extremaP_b[0][solNumber]) == len(extremaP_b[1][solNumber]):
                             countExtremaP_b.append(len(extremaP_b[0][solNumber]))
-                        else: print "ERROR of extremaP_b"
+                        else: print("ERROR of extremaP_b")
                         
                         if len(extremaQ[0][solNumber]) == len(extremaQ[1][solNumber]):
                             countExtremaQ.append(len(extremaQ[0][solNumber]))
-                        else: print "ERROR of extremaQ"
+                        else: print("ERROR of extremaQ")
                         if len(extremaQ_f[0][solNumber]) == len(extremaQ_f[1][solNumber]):
                             countExtremaQ_f.append(len(extremaQ_f[0][solNumber]))
-                        else: print "ERROR of extremaQ_f"
+                        else: print("ERROR of extremaQ_f")
                         if len(extremaQ_b[0][solNumber]) == len(extremaQ_b[1][solNumber]):
                             countExtremaQ_b.append(len(extremaQ_b[0][solNumber]))
-                        else: print "ERROR of extremaQ_b"
+                        else: print("ERROR of extremaQ_b")
                     
                             
                     if sum(np.asarray(countExtremaP) == countExtremaP[0]) != len(countExtremaP):
-                        print "ERROR: vPC: not same minMaxPoints extremaP are found for all solutions"
-                        print countExtremaP
+                        print("ERROR: vPC: not same minMaxPoints extremaP are found for all solutions")
+                        print(countExtremaP)
                         notSameExtremaInAllSolData = True
                     if sum(np.asarray(countExtremaP_f) == countExtremaP_f[0]) != len(countExtremaP_f):
-                        print "ERROR: vPC: not same minMaxPoints countExtremaP_f are found for all solutions"
-                        print countExtremaP_f
+                        print("ERROR: vPC: not same minMaxPoints countExtremaP_f are found for all solutions")
+                        print(countExtremaP_f)
                         notSameExtremaInAllSolData = True
                     if sum(np.asarray(countExtremaP_b) == countExtremaP_b[0]) != len(countExtremaP_b):
-                        print "ERROR: vPC: not same minMaxPoints countExtremaP_b are found for all solutions"
-                        print countExtremaP_b
+                        print("ERROR: vPC: not same minMaxPoints countExtremaP_b are found for all solutions")
+                        print(countExtremaP_b)
                         notSameExtremaInAllSolData = True
                     if sum(np.asarray(countExtremaQ) == countExtremaQ[0]) != len(countExtremaQ):
-                        print "ERROR: vPC: not same minMaxPoints countExtremaQ are found for all solutions"
-                        print countExtremaQ
+                        print("ERROR: vPC: not same minMaxPoints countExtremaQ are found for all solutions")
+                        print(countExtremaQ)
                         notSameExtremaInAllSolData = True
                     if sum(np.asarray(countExtremaQ_f) == countExtremaQ_f[0]) != len(countExtremaQ_f):
-                        print "ERROR: vPC: not same minMaxPoints countExtremaQ_f are found for all solutions"
-                        print countExtremaQ_f
+                        print("ERROR: vPC: not same minMaxPoints countExtremaQ_f are found for all solutions")
+                        print(countExtremaQ_f)
                         notSameExtremaInAllSolData = True
                     
                     if sum(np.asarray(countExtremaQ_b) == countExtremaQ_b[0]) != len(countExtremaQ_b):
-                        print "ERROR: vPC: not same minMaxPoints countExtremaQ_b are found for all solutions"
-                        print countExtremaQ_b
+                        print("ERROR: vPC: not same minMaxPoints countExtremaQ_b are found for all solutions")
+                        print(countExtremaQ_b)
                         notSameExtremaInAllSolData = True
                     
                     solutionInterpolated.append({'Pressure':solutionInterpolatedCurrentPressure,'Pressure_f':solutionInterpolatedCurrentP_f,'Pressure_b':solutionInterpolatedCurrentP_b,
@@ -1026,7 +1026,7 @@ def main():
                 FILE.close()
             else:
                 notSameExtremaInAllSolData = False
-                print '   loading interpolated and adapted polychaos solution data'
+                print('   loading interpolated and adapted polychaos solution data')
                 startTime = time.clock()
                 #Load solution data 
                 loadFile = open(solutionInterpolatedFile,"rb")
@@ -1034,12 +1034,12 @@ def main():
                 solutionInterpolated = cPickle.load(loadFile)
                 loadFile.close()
                 endTime = time.clock()
-                print "    It took %1.2f seconds to load the solution \n" % (endTime-startTime)
+                print("    It took %1.2f seconds to load the solution \n" % (endTime-startTime))
     
             ################################################################################
             #--- 2.2 plot min max points
             if plotMinMaxPoints == True:
-                print '   plotting: P,Q extrema'
+                print('   plotting: P,Q extrema')
                 if not os.path.exists(saveDirectoryPolySolPlots):
                     os.makedirs(saveDirectoryPolySolPlots)  
                 
@@ -1122,26 +1122,26 @@ def main():
               
             if solutionInterpolated != None:
             #--- 2.3 claculate gPCE
-                print "    starting the polychaos polynomial calculation from polychaos simulation result!!"
+                print("    starting the polychaos polynomial calculation from polychaos simulation result!!")
                 startTime = time.clock()
                 
                 polynomsT = []
                 count = 0
                 for sol in solutionInterpolated:
-                    print "      Polynomial calculation for point ", names[count]     
+                    print("      Polynomial calculation for point ", names[count])     
                     count = count+1
                     polyDict = {}
                     
                     for tag,data in sol.iteritems():
                         # polynoms for the total pressure signal
-                        print "        polynoms for ",str(tag)
+                        print("        polynoms for ",str(tag))
                         if 'extrema' not in tag:
                             
                             polynomial = pc.fitter_lr(orthoPoly, sample.T, data)     
                             polyDict[tag]= polynomial
                             
                         else:
-                            print sample.shape
+                            print(sample.shape)
                             
                             #print orthoPoly.dim
                             #print orthoPoly.shape
@@ -1159,7 +1159,7 @@ def main():
                     endTime = time.clock()
                     polynomsT.append(polyDict)
                     
-                print "    It took %1.2f seconds to create the polynoms with order %d\n" % (endTime-startTime,order)
+                print("    It took %1.2f seconds to create the polynoms with order %d\n" % (endTime-startTime,order))
                 
                 if not os.path.exists(polynomPath):
                     os.makedirs(polynomPath)    
@@ -1180,7 +1180,7 @@ def main():
         ### load polynoms 
         if ((calculateGPCE == False) or len(polynomsToPlotOrder) > 1.0) and postProcessing == True:
             
-            print '   loading polynoms'
+            print('   loading polynoms')
             startTime = time.clock()
             polynoms = []
             for polyToPlot in polynomsToPlotOrder:
@@ -1196,7 +1196,7 @@ def main():
                 loadFile.close()
                 polynoms.append(polynom)
             endTime = time.clock()
-            print "    It took %1.2f seconds to load the polynoms\n" % (endTime-startTime)
+            print("    It took %1.2f seconds to load the polynoms\n" % (endTime-startTime))
     
         ##########################################################################################      
         
@@ -1217,7 +1217,7 @@ def main():
                     solutionDataPlain.append(solutionDataLoad[1][0])
                     FILE.close()   
                 endTime = time.clock()
-                print "It took %1.2f seconds to load the orginal result\n" % (endTime-startTime) 
+                print("It took %1.2f seconds to load the orginal result\n" % (endTime-startTime)) 
         
             # prepare plots of the peaks
             if plotPeaks == True: 
@@ -1242,7 +1242,7 @@ def main():
                 count = polynomsToCalculate.index(pTC, )
                 name = names[count]
                 
-                print 'Sensitivity analysis for point',name
+                print('Sensitivity analysis for point',name)
                 # load external data sets (no plotting methods implemented  (IKEA-prinzip)(do it your self) )
                 deterministicSolution = None
                 if solutionDataPlain != []:
@@ -1286,7 +1286,7 @@ def main():
                 #### 3.1 mean and STD plots for the total P and Q signal
                 if plotMeanSTD == True:
                     
-                    print '   Plotting: mean and STD'
+                    print('   Plotting: mean and STD')
                     if not os.path.exists(plotDirectoryMeanVar):
                         os.makedirs(plotDirectoryMeanVar) 
                     
@@ -1301,7 +1301,7 @@ def main():
                     p_Reymond55Visco       = DataReymondCode55Visco['SolutionData'][1]['Pressure']
                     
                     for quantity,unit in plotMeanStdQuantities.iteritems():
-                        print '    Quantity: ',quantity
+                        print('    Quantity: ',quantity)
                         # polinomual solution 
                         
                         expected = pc.E(polynoms[0][count][quantity],distributions)
@@ -1327,7 +1327,7 @@ def main():
                         #polynomWithMeans = polynoms[0][count][quantity](*distMean)
                         
                         if plotMeanConfidenceInterval == True:
-                            print '     Calculate {} Confidence Intervals'.format(100-plotMeanConfidenceAlpha)
+                            print('     Calculate {} Confidence Intervals'.format(100-plotMeanConfidenceAlpha))
                             lenPolynoms = len(polynoms[0][count][quantity])
                             confIntervalLow = np.zeros(lenPolynoms)
                             confIntervalUp  = np.zeros(lenPolynoms)
@@ -1339,7 +1339,7 @@ def main():
                                     confIntervalLow[index] = confInterval[0]
                                     confIntervalUp[index]  = confInterval[1]
                                 index += 1
-                            print '     Done'            
+                            print('     Done')            
                         partialPolyExpected = []
                         partialPolySTD =  []
                         #for indexD in number:
@@ -1501,7 +1501,7 @@ def main():
                 #### 3.2 sensitivity of peaks  
                 if plotPeaks == True:
                     
-                    print '   plotting: pressure peak deviation in time and amplitude'
+                    print('   plotting: pressure peak deviation in time and amplitude')
                                         
                     #quantities to plot: analytic bool
                     quantitiesToPlotPeaks = {'extremaPressure':False,'extremaFlow':False,
@@ -1571,7 +1571,7 @@ def main():
                             interSavedData = cPickle.load(FILE)
                             FILE.close()
                         except:
-                            print 'ERROR try to load PeakAnlaysis File - Peak Anlaysis is not Performed'
+                            print('ERROR try to load PeakAnlaysis File - Peak Anlaysis is not Performed')
                             input = raw_input('  Should Peak Anlaysis be performed now (y)? ')
                             if input == 'y': peakAnalysis = True
                             else: exit()
@@ -1579,9 +1579,9 @@ def main():
                     
                     if peakAnalysis:
                         for quantity,analyticBool in quantitiesToPlotTemp.iteritems():
-                            print '    run peak analysis for', quantitiesNames[quantity]
+                            print('    run peak analysis for', quantitiesNames[quantity])
                             if len(polynoms[0][count][quantity]['Time']) == 0:
-                                print 'no polynoms for ',quantity
+                                print('no polynoms for ',quantity)
                                 break
                                 
                             # sensitivity with respect to all random variables
@@ -1735,7 +1735,7 @@ def main():
                     ###############################################################################################################
                     ### Creating Plots
                                          
-                    print '    Creating Plots'                           
+                    print('    Creating Plots')                           
                     for quantity,analyticBool in quantitiesToPlotTemp.iteritems():     
                         
                         peakconfIntTime = interSavedData[quantitiesNames[quantity]]['peakconfIntTime']
@@ -2011,12 +2011,12 @@ def main():
                             elif peakCount == 2 : ax.set_title(quantitiesNameNow[quantity]+' - shoulder ',fontsize = fontSizeLabel)
                             elif peakCount == 3 : ax.set_title(quantitiesNameNow[quantity]+'\\ - point of inflection',fontsize = fontSizeLabel)
                             
-                            print quantitiesNameNow[quantity],peakCount
-                            print 'time'
-                            print sobolIndexTime.T[peakCount]
-                            print 'amp'
-                            print sobolIndexAmp.T[peakCount]
-                            print 
+                            print(quantitiesNameNow[quantity],peakCount)
+                            print('time')
+                            print(sobolIndexTime.T[peakCount])
+                            print('amp')
+                            print(sobolIndexAmp.T[peakCount])
+                            print() 
                             
                             ax.legend(loc='upper right', frameon=False, ncol=1,fontsize = fontSizeLabel, numpoints=1)
                             
@@ -2048,7 +2048,7 @@ def main():
                         polynomWithMeans = pc.E(polynoms[0][count][quantitiesNames[quantity]],distributions) #(*distMean)
                         timeValuesPolynom = np.linspace(0,totalTime,len(polynomWithMeans))
                         
-                        print quantity
+                        print(quantity)
                         
                         linstyleO = '-'
                         # main signal if forward and backward
@@ -2068,7 +2068,7 @@ def main():
                             
                             initialPressureCorrection = polynomWithMeansTotal[0] *unitScale[quantitiesNames[quantity]] #initialPressureCorrection = vascularNetwork.globalFluid['initialPressure']*unitScale['Pressure']
                             
-                            print number, peakCounts
+                            print(number, peakCounts)
                             for indexD in number:
                                 ax = plt.subplot(max(number)+1,1,indexD+1)
                                 
@@ -2201,31 +2201,31 @@ def printIntervalData( printList, listName, printArguments, printTrue = True):
     number,nameLength,numberVessel,vesselIds,varNames,numberBC,BCvesselID,BCtype,numberFluid,FluidType,numberNetworkSolver,uncertainParameterNetworkSolver,numberMulti,multiVesselIDS,uncertainParameter,uncertainVarNames = printArguments
     
     if len(printList) != len(number):
-        print " WARNING: print List has wrong length!"
+        print(" WARNING: print List has wrong length!")
         return
     string1 = ''.join(['Nr.'.center(3),'|','Id'.center(3),'|','Variable'.ljust(nameLength),'|',listName,'\n'])
-    if printTrue: print 'Nr.'.center(3),'|','Id'.center(3),'|','Variable'.ljust(nameLength),'|',listName
+    if printTrue: print('Nr.'.center(3),'|','Id'.center(3),'|','Variable'.ljust(nameLength),'|',listName)
     string2 = ''
 
     # Vessel data
     for num in numberVessel:
         stringCur = ''.join([str(number[num]).center(3),'|',str(vesselIds[num]).center(3),'|',str(varNames[num]).ljust(nameLength),'|',str(printList[num]),'\n'])
         string2 = ''.join([string2,stringCur])
-        if printTrue: print str(number[num]).center(3),'|',str(vesselIds[num]).center(3),'|',str(varNames[num]).ljust(nameLength),'|',str(printList[num])
+        if printTrue: print(str(number[num]).center(3),'|',str(vesselIds[num]).center(3),'|',str(varNames[num]).ljust(nameLength),'|',str(printList[num]))
     
     # BC conditions
     splitNumber = len(numberVessel)
     for num in numberBC:
         stringCur = ''.join([str(number[num+splitNumber]).center(3) ,'|',str(BCvesselID[num]).center(3),'|',str(BCtype[num]).ljust(nameLength),  '|',str(printList[num+splitNumber]),'\n'])
         string2 = ''.join([string2,stringCur])
-        if printTrue: print str(number[num+splitNumber]).center(3),'|',str(BCvesselID[num]).center(3),'|',str(BCtype[num]).ljust(nameLength),'|',str(printList[num+splitNumber])
+        if printTrue: print(str(number[num+splitNumber]).center(3),'|',str(BCvesselID[num]).center(3),'|',str(BCtype[num]).ljust(nameLength),'|',str(printList[num+splitNumber]))
     splitNumber = splitNumber+ len(numberBC)
     
     # global FLUID properties
     for num in numberFluid:
         stringCur = ''.join([str(number[num+splitNumber]).center(3) ,'|','gF'.center(3),'|',str(FluidType[num]).ljust(nameLength),  '|',str(printList[num+splitNumber]),'\n'])
         string2 = ''.join([string2,stringCur])
-        if printTrue: print str(number[num+splitNumber]).center(3),'|','gF'.center(3),'|',str(FluidType[num]).ljust(nameLength),'|',str(printList[num+splitNumber])
+        if printTrue: print(str(number[num+splitNumber]).center(3),'|','gF'.center(3),'|',str(FluidType[num]).ljust(nameLength),'|',str(printList[num+splitNumber]))
     splitNumber = splitNumber+ len(numberFluid)   
         
     #networkSolverCount
@@ -2233,7 +2233,7 @@ def printIntervalData( printList, listName, printArguments, printTrue = True):
     for num in numberNetworkSolver:
         stringCur = ''.join([str(number[num+splitNumber]).center(3) ,'|','nS'.center(3),'|',str(uncertainParameterNetworkSolver[num]).ljust(nameLength),  '|',str(printList[num+splitNumber]),'\n'])
         string2 = ''.join([string2,stringCur])
-        if printTrue: print str(number[num+splitNumber]).center(3),'|','nS'.center(3),'|',str(uncertainParameterNetworkSolver[num]).ljust(nameLength),'|',str(printList[num+splitNumber])
+        if printTrue: print(str(number[num+splitNumber]).center(3),'|','nS'.center(3),'|',str(uncertainParameterNetworkSolver[num]).ljust(nameLength),'|',str(printList[num+splitNumber]))
     splitNumber = splitNumber+ len(numberNetworkSolver)
     
     # Multi random variables
@@ -2241,9 +2241,9 @@ def printIntervalData( printList, listName, printArguments, printTrue = True):
         for multiVesselID in multiVesselIDS[num]:
             stringCur = ''.join([str(number[num+splitNumber]).center(3),'|',''.join(['Multiple ',str(numberMulti[num])]).center(3),'|',str(uncertainVarNames[num+splitNumber]).ljust(nameLength),'|',str(printList[num+splitNumber]),'\n'])
             string2 = ''.join([string2,stringCur])
-        if printTrue: print str(number[num+splitNumber]).center(3),'|',''.join(['Multiple ',str(numberMulti[num])]).center(3),'|',str(uncertainVarNames[num+splitNumber]).ljust(nameLength),'|',str(printList[num+splitNumber])        
+        if printTrue: print(str(number[num+splitNumber]).center(3),'|',''.join(['Multiple ',str(numberMulti[num])]).center(3),'|',str(uncertainVarNames[num+splitNumber]).ljust(nameLength),'|',str(printList[num+splitNumber]))        
         
-    if printTrue: print "------------------------------------------------- \n"
+    if printTrue: print("------------------------------------------------- \n")
     return ''.join([string1,string2,"------------------------------------------------- \n\n"])
 
 

@@ -66,7 +66,7 @@ class LocationOfInterestManager(TestBaseClass):
         
         if self.evaluateSimulationTime == True:
             
-            print "estimate simulation time of all simulations"
+            print("estimate simulation time of all simulations")
             progressBar = cPB.ProgressBar(35, len(evaluationCaseFiles))
             
             for batchData in evaluationCaseFiles:
@@ -99,7 +99,7 @@ class LocationOfInterestManager(TestBaseClass):
             self.saveQuantitiyOfInterestData(simulationTimeFileSave) 
             
         else:
-            print "load estimated simulation time of all simulations"
+            print("load estimated simulation time of all simulations")
             if simulationTimeFileLoad != None:
                 self.loadQuantitiyOfInterestData(simulationTimeFileLoad)
             else:
@@ -107,7 +107,7 @@ class LocationOfInterestManager(TestBaseClass):
         
         
         self.openQuantityOfInterestFile(preprocessedSolutionData)
-        print "estimate solution data for quantities of interest"
+        print("estimate solution data for quantities of interest")
         progressBar = cPB.ProgressBar(35, len(evaluationCaseFiles))
         
         # pass the data to the locationsOfInterests which will load the information needed

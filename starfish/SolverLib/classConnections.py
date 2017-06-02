@@ -330,8 +330,8 @@ class Link():
             
             if Niterations > 30:
                 
-                print "Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations
-                print "f1,f2: ", f1, f2
+                print("Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations)
+                print("f1,f2: ", f1, f2)
                 
                 break
             Xold = Xnew
@@ -496,8 +496,8 @@ class Link():
             
             if Niterations > 30:
                 
-                print "Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations
-                print "f1,f2: ", f1, f2
+                print("Niterations excedded in link calculation in vessel, Niterations: ", self.names[0], Niterations)
+                print("f1,f2: ", f1, f2)
                 
                 break
             Xold = Xnew
@@ -955,7 +955,7 @@ class Bifurcation():
         self.Q_leftDaughter[n+1][pos2]  = Q2_new
         self.P_rightDaughter[n+1][pos3] = P3_new
         self.Q_rightDaughter[n+1][pos3] = Q3_new
-        print "using linear bifurcation model"
+        print("using linear bifurcation model")
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
             raise ValueError("Connection: {} calculated negative pressure, P1_new = {}, P2_new = {}, P3_new = {}, at time {} (n {},dt {})".format(self.name,P1_new, P2_new, P3_new, n*dt,n,dt))
             #print P1_new, P2_new, P3_new
@@ -1121,7 +1121,7 @@ class Bifurcation():
                     A2_last = self.A_func[1]([P2discretize],pos2)
                     A3_last = self.A_func[2]([P3discretize],pos3)
                 except FloatingPointError as E:
-                    print "Floating Point error in Connection {}".format(self.name)
+                    print("Floating Point error in Connection {}".format(self.name))
                     raise E
             else:
                 A1_last = A1[pos1]
@@ -1157,22 +1157,22 @@ class Bifurcation():
             Niterations = Niterations + 1
             
             if Niterations > 30:
-                print "\n"
-                print "Niterations excedded in Bifurcation calculation in vessel, Niterations: ", self.names[0], Niterations
+                print("\n")
+                print("Niterations excedded in Bifurcation calculation in vessel, Niterations: ", self.names[0], Niterations)
 
-                print "Xnew: ", Xnew
-                print "Xold: ", Xold
+                print("Xnew: ", Xnew)
+                print("Xold: ", Xold)
                 
-                print "f1: ", f1
-                print "f2: ", f2
-                print "f3: ", f3
-                print "epsilonvalues: ", epsilonvalues
-                print "Q1discretize, Q1o: ", Q1discretize, Q1o
-                print "Q2discretize, Q2o: ", Q2discretize, Q2o
-                print "Q3discretize, Q3o: ", Q3discretize, Q3o
-                print "P1discretize, P1o: ", P1discretize, P1o
-                print "P2discretize, P2o: ", P2discretize, P2o
-                print "P3discretize, P3o: ",P3discretize, P3o
+                print("f1: ", f1)
+                print("f2: ", f2)
+                print("f3: ", f3)
+                print("epsilonvalues: ", epsilonvalues)
+                print("Q1discretize, Q1o: ", Q1discretize, Q1o)
+                print("Q2discretize, Q2o: ", Q2discretize, Q2o)
+                print("Q3discretize, Q3o: ", Q3discretize, Q3o)
+                print("P1discretize, P1o: ", P1discretize, P1o)
+                print("P2discretize, P2o: ", P2discretize, P2o)
+                print("P3discretize, P3o: ",P3discretize, P3o)
                 
                 break
             Xold = Xnew
@@ -1196,24 +1196,24 @@ class Bifurcation():
         self.Q_rightDaughter[n+1][pos3] = Q3_new
         
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new, P3_new
-            print "Niterations: ", Niterations
+            print("ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
+            print(P1_new, P2_new, P3_new)
+            print("Niterations: ", Niterations)
             
-            print "solving nonlinear/total pressure Bifurcation"
-            print "domega1_2_init: ", domega1_2_init
-            print "domega1_1: ", domega1_1
+            print("solving nonlinear/total pressure Bifurcation")
+            print("domega1_2_init: ", domega1_2_init)
+            print("domega1_1: ", domega1_1)
                     
-            print "f1: ", f1
-            print "f2: ", f2
-            print "f3: ", f3
-            print "epsilonvalues: ", epsilonvalues
-            print "Q1discretize, Q1o: ", Q1discretize, Q1o
-            print "Q2discretize, Q2o: ", Q2discretize, Q2o
-            print "Q3discretize, Q3o: ", Q3discretize, Q3o
-            print "P1discretize, P1o: ", P1discretize, P1o
-            print "P2discretize, P2o: ", P2discretize, P2o
-            print "P3discretize, P3o: ",P3discretize, P3o
+            print("f1: ", f1)
+            print("f2: ", f2)
+            print("f3: ", f3)
+            print("epsilonvalues: ", epsilonvalues)
+            print("Q1discretize, Q1o: ", Q1discretize, Q1o)
+            print("Q2discretize, Q2o: ", Q2discretize, Q2o)
+            print("Q3discretize, Q3o: ", Q3discretize, Q3o)
+            print("P1discretize, P1o: ", P1discretize, P1o)
+            print("P2discretize, P2o: ", P2discretize, P2o)
+            print("P3discretize, P3o: ",P3discretize, P3o)
             exit()
         
         
@@ -1597,7 +1597,7 @@ class Anastomosis():
         if solvingScheme == "Linear": 
             self.__call__ = self.callLinear
         elif solvingScheme == "NonLinear":
-            print "classconnection 1652: using nonlinear anastomosis model: {0}".format(self.name) 
+            print("classconnection 1652: using nonlinear anastomosis model: {0}".format(self.name)) 
             self.__call__ = self.callNonLinear
         else:
             raise ValueError("Connections; wrong solving scheme! {}".format(solvingScheme))
@@ -1730,8 +1730,8 @@ class Anastomosis():
             self.maxQError  = sumQError
         #print self.name,' \n Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
         if sumQError > 1.e-5:
-            print "Warning: Connection: {} to high error in conservation of mass at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
-            print sumQError, ' <- Q1,Q2,Q3 ',Q1_new, Q2_new, Q3_new
+            print("Warning: Connection: {} to high error in conservation of mass at time {} (n {},dt {})".format(self.name,n*dt,n,dt))
+            print(sumQError, ' <- Q1,Q2,Q3 ',Q1_new, Q2_new, Q3_new)
             #exit()
         
         sumPError = abs(P1_new-P3_new)/abs(P3_new)
@@ -1741,8 +1741,8 @@ class Anastomosis():
             self.maxPError  = sumPError
         #print self.name,' Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
         if sumPError > 1.e-5:
-            print "ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {})".format(self.name,n*dt,n,dt)
-            print sumPError, ' <- P1,P2,P3 ',P1_new, P2_new, P3_new
+            print("ERROR: Connection: {} to high error in conservation of pressure at time {} (n {},dt {})".format(self.name,n*dt,n,dt))
+            print(sumPError, ' <- P1,P2,P3 ',P1_new, P2_new, P3_new)
             #exit()
         
         sumPErrorNonLin = 1050./2.*(Q1_new/A1n)**2#abs(P1_new+500*(Q1_new/A1n)**2-(P2_new+500*(Q2_new/A2n)**2))/abs(P1_new+0.5*(Q1_new/A1n)**2)
@@ -1750,9 +1750,9 @@ class Anastomosis():
             self.sumPErrorNonLinCount = self.sumPErrorNonLinCount+1
         if sumPErrorNonLin > self.maxPErrorNonLin:
             self.maxPErrorNonLin  = sumPErrorNonLin
-        print self.name,' Error P non lin',  sumPErrorNonLin, self.maxPErrorNonLin ,' - ', n, self.sumPErrorNonLinCount
+        print(self.name,' Error P non lin',  sumPErrorNonLin, self.maxPErrorNonLin ,' - ', n, self.sumPErrorNonLinCount)
         
-        print self.name,'dynamic Pressures',1050./2.*(Q1_new/A1n)**2,1050./2.*(Q2_new/A2n)**2,1050./2.*(Q3_new/A3n)**2, '--',1050./2.*(Q1_new/A1n)**2+-1050./2.*(Q3_new/A3n)**2
+        print(self.name,'dynamic Pressures',1050./2.*(Q1_new/A1n)**2,1050./2.*(Q2_new/A2n)**2,1050./2.*(Q3_new/A3n)**2, '--',1050./2.*(Q1_new/A1n)**2+-1050./2.*(Q3_new/A3n)**2)
         
         
     def callNonLinear(self):
@@ -1871,7 +1871,7 @@ class Anastomosis():
                     A2_last = self.A_func[1]([P2discretize],pos2)
                     A3_last = self.A_func[2]([P3discretize],pos3)
                 except FloatingPointError as E:
-                    print "Floating Point error in Connection {}".format(self.name)
+                    print("Floating Point error in Connection {}".format(self.name))
                     raise E
             else:
                 A1_last = A1[pos1]
@@ -1906,22 +1906,22 @@ class Anastomosis():
             Niterations = Niterations + 1
             
             if Niterations > 50:
-                print "\n"
-                print "Niterations excedded in anastomosis calculation in vessel, Niterations: ", self.names[0], Niterations
+                print("\n")
+                print("Niterations excedded in anastomosis calculation in vessel, Niterations: ", self.names[0], Niterations)
 
-                print "Xnew: ", Xnew
-                print "Xold: ", Xold
+                print("Xnew: ", Xnew)
+                print("Xold: ", Xold)
                 
-                print "f1: ", f1
-                print "f2: ", f2
-                print "f3: ", f3
-                print "epsilonvalues: ", epsilonvalues
-                print "Q1discretize, Q1o: ", Q1discretize, Q1o
-                print "Q2discretize, Q2o: ", Q2discretize, Q2o
-                print "Q3discretize, Q3o: ", Q3discretize, Q3o
-                print "P1discretize, P1o: ", P1discretize, P1o
-                print "P2discretize, P2o: ", P2discretize, P2o
-                print "P3discretize, P3o: ",P3discretize, P3o
+                print("f1: ", f1)
+                print("f2: ", f2)
+                print("f3: ", f3)
+                print("epsilonvalues: ", epsilonvalues)
+                print("Q1discretize, Q1o: ", Q1discretize, Q1o)
+                print("Q2discretize, Q2o: ", Q2discretize, Q2o)
+                print("Q3discretize, Q3o: ", Q3discretize, Q3o)
+                print("P1discretize, P1o: ", P1discretize, P1o)
+                print("P2discretize, P2o: ", P2discretize, P2o)
+                print("P3discretize, P3o: ",P3discretize, P3o)
                 #exit()
                 break
             Xold = Xnew
@@ -1945,24 +1945,24 @@ class Anastomosis():
         self.Q_daughter[n+1][pos3] = Q3_new
         
         if P1_new < 0 or P2_new < 0 or P3_new < 0:
-            print "ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt)
-            print P1_new, P2_new, P3_new
-            print "Niterations: ", Niterations
+            print("ERROR: Connection: {} calculated negative pressure at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
+            print(P1_new, P2_new, P3_new)
+            print("Niterations: ", Niterations)
             
-            print "solving nonlinear/total pressure anastomosis"
-            print "domega1_2_init: ", domega1_2_init
-            print "domega1_1: ", domega1_1
+            print("solving nonlinear/total pressure anastomosis")
+            print("domega1_2_init: ", domega1_2_init)
+            print("domega1_1: ", domega1_1)
                     
-            print "f1: ", f1
-            print "f2: ", f2
-            print "f3: ", f3
-            print "epsilonvalues: ", epsilonvalues
-            print "Q1discretize, Q1o: ", Q1discretize, Q1o
-            print "Q2discretize, Q2o: ", Q2discretize, Q2o
-            print "Q3discretize, Q3o: ", Q3discretize, Q3o
-            print "P1discretize, P1o: ", P1discretize, P1o
-            print "P2discretize, P2o: ", P2discretize, P2o
-            print "P3discretize, P3o: ",P3discretize, P3o
+            print("f1: ", f1)
+            print("f2: ", f2)
+            print("f3: ", f3)
+            print("epsilonvalues: ", epsilonvalues)
+            print("Q1discretize, Q1o: ", Q1discretize, Q1o)
+            print("Q2discretize, Q2o: ", Q2discretize, Q2o)
+            print("Q3discretize, Q3o: ", Q3discretize, Q3o)
+            print("P1discretize, P1o: ", P1discretize, P1o)
+            print("P2discretize, P2o: ", P2discretize, P2o)
+            print("P3discretize, P3o: ",P3discretize, P3o)
             exit()
         
         

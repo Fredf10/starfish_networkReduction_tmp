@@ -33,15 +33,15 @@ optionsDict = moduleStartUp.parseOptions(['f','n','c'], visualisationOnly = True
 networkName           = optionsDict['networkName']
 dataSetNumber         = optionsDict['dataNumber']
 
-print dataSetNumber
+print(dataSetNumber)
 
 ##  open data file choosed above
 try:
-    print " Try to open network {} with data number {}".format(networkName, dataSetNumber)
+    print(" Try to open network {} with data number {}".format(networkName, dataSetNumber))
     vascularNetwork = mXML.loadNetworkFromXML(filename = networkName, dataNumber = dataNumber) 
     vascularNetwork.linkSolutionData() 
 except:
-    print "Error could not open solution data with data number {} of network {}".format(dataSetNumber,networkName)
+    print("Error could not open solution data with data number {} of network {}".format(dataSetNumber,networkName))
     exit()
     
 

@@ -53,35 +53,35 @@ def main():
     mainMenuInput = ""
     while mainMenuInput not in ['q']:
         print('\n Main menu:\n')
-        print " [1] - run simulation | Main.py"
-        print " [2] - run vnc (vascular network creator) | vnc.py"
-        print " [3] - run visualisation | Visualisation.py"
-        print " [4] - run uncertainty quantification tool box | VascularPolynomialChaos.py"
-        print " [q] - quit \n"
+        print(" [1] - run simulation | Main.py")
+        print(" [2] - run vnc (vascular network creator) | vnc.py")
+        print(" [3] - run visualisation | Visualisation.py")
+        print(" [4] - run uncertainty quantification tool box | VascularPolynomialChaos.py")
+        print(" [q] - quit \n")
         while  mainMenuInput not in ('1','2','3','4','q'):
             mainMenuInput = raw_input("what to do? ")
         
         if mainMenuInput == '1':
-            print "\n .. running simulation \n"
+            print("\n .. running simulation \n")
             simulator.main()
             mainMenuInput = ""
             
         if mainMenuInput == '2':
-            print "\n .. running vnc \n"
+            print("\n .. running vnc \n")
             vnc.main()
             mainMenuInput = ""
             
         if mainMenuInput == '3':
-            print "\n .. running visualisation \n"
+            print("\n .. running visualisation \n")
             visualisationToolBox.main()
             mainMenuInput = ""
             
         if mainMenuInput == '4':
-            print "\n .. running uncertainty quantification tool box \n"
+            print("\n .. running uncertainty quantification tool box \n")
             uqsaToolBox.uncertaintyPropagation()
             mainMenuInput = ""
             
-    print "bye bye .." 
+    print("bye bye ..") 
     
 if __name__ == '__main__':
     main()

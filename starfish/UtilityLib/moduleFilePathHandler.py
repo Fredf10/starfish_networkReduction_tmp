@@ -111,7 +111,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     requestedDirectory = getDirectory(''.join([fileType,'Directory']), networkName, dataNumber, mode, exception)
     if requestedDirectory == None:
         if exception == "Warning":
-            print "WARNING: moduleFilePathHandler.getFileAndPaths() directory of file '{}' does not exits. Exit()".format(requestedFilename)
+            print("WARNING: moduleFilePathHandler.getFileAndPaths() directory of file '{}' does not exits. Exit()".format(requestedFilename))
             return None
         elif exception == "No":
             pass
@@ -126,7 +126,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
         ## ensure that the file exists
         if not os.path.isfile(requestedFilePath):
             if exception == "Warning":
-                print "WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath)
+                print("WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))
                 return None
             elif exception == "No":
                 #print "raise no exception"
@@ -301,7 +301,7 @@ def readConfigFile(options):
             #try:
             workingDirectory = config.get('Directory Paths', option)
             if os.path.isdir(workingDirectory) == False:
-                print Warning("\n ERROR WorkingDirectory {} does not exist \n".format(workingDirectory))
+                print(Warning("\n ERROR WorkingDirectory {} does not exist \n".format(workingDirectory)))
                 
                 knownWorkingDirectories = config.get('Directory Paths', 'knownWorkingDirectories').split(',')
                 if workingDirectory in knownWorkingDirectories:            
@@ -313,7 +313,7 @@ def readConfigFile(options):
             #    workingDirectory = None
            #     raise ValueError("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed ini file corrupted, exit()")
             if workingDirectory == '':
-                print Warning("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined")
+                print(Warning("ERROR pathAndFilenameHandler.readConfigFile reading WorkingDirectory failed: no path defined"))
                 
                
                 
@@ -387,9 +387,9 @@ def prettyPrintList(title, listToPrint, indexOffSet = 0):
     """
     Function to pretty print a list to STDOUT with numbers to choose from
     """
-    print title
+    print(title)
     for index,listElement in enumerate(listToPrint):
-        print "   [ {:3} ] - {}".format(index+indexOffSet,listElement)
+        print("   [ {:3} ] - {}".format(index+indexOffSet,listElement))
 
 def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
     '''
@@ -398,10 +398,10 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
     userInput = "NONE"
     appropriateInputList.append('q')
-    print ""
+    print("")
     while userInput not in appropriateInputList:
         userInput = raw_input(question)
-    print ""
+    print("")
     if userInput == 'q': exit()
     else: return int(userInput)
 
@@ -413,7 +413,7 @@ def workingDirectorySettings(searchKnowWorkingDirectories = True):
     prettyPrintList(' Working directory settings menu',['add working directory','switch to another known working directory'])
     if searchKnowWorkingDirectories == True: 
         updateKnownWorkingDirectories()
-        print "\n current working directory: {} ".format(readConfigFile(['WorkingDirectory'])['WorkingDirectory'])
+        print("\n current working directory: {} ".format(readConfigFile(['WorkingDirectory'])['WorkingDirectory']))
     userInput = userInputEvaluationInt(2)
     if userInput == 0:
         insertWorkingDirectory(None)
@@ -425,7 +425,7 @@ def workingDirectorySettings(searchKnowWorkingDirectories = True):
 
 def insertWorkingDirectory(optionArgument):
     
-    print "Setting new working directory"
+    print("Setting new working directory")
     
     if optionArgument == None:
         optionArgument = ""
@@ -441,17 +441,17 @@ def insertWorkingDirectory(optionArgument):
         if os.path.isdir(optionArgument):
             saveConfigFile({'WorkingDirectory':optionArgument})
             updateKnownWorkingDirectories()
-            print "   working directory set!"
+            print("   working directory set!")
         else:
-            print "  working directory does not exist! try to create folder"
+            print("  working directory does not exist! try to create folder")
             try:
                 os.mkdir(optionArgument)
                 saveConfigFile({'WorkingDirectory':optionArgument})
                 updateKnownWorkingDirectories()
-                print "   created working directory folder successfully"
-                print "   working directory set!"
+                print("   created working directory folder successfully")
+                print("   working directory set!")
             except:
-                print "  WARNING: moduleStartUp.insertWorkingDirectory() could not set WorkingDirectory {} directory does not exists!".format(optionArgument)
+                print("  WARNING: moduleStartUp.insertWorkingDirectory() could not set WorkingDirectory {} directory does not exists!".format(optionArgument))
         
 def updateSimulationDescriptions(networkName, currentDataNumber, currentDescription):
     """
@@ -507,7 +507,7 @@ def getSimulationCaseDescriptions(networkName, exception = 'Warning'):
         simCaseDescFile = open(simCaseDescFilePath, 'r')
     except:
         if exception == 'Warning':
-            print "WARNING getSimulationCaseDescriptions() simulation description file of network {} does not exist!".format(networkName)
+            print("WARNING getSimulationCaseDescriptions() simulation description file of network {} does not exist!".format(networkName))
         elif exception == 'No':
             pass
         else: raise ValueError(exception)
@@ -546,7 +546,7 @@ def loadExternalDataSet(fileName):
         externalDataFile = open(fileName,'rb')
         externalData = cPickle.load(externalDataFile)
     except:
-        print "Error: no or corrupted external data-file found"
+        print("Error: no or corrupted external data-file found")
     
     return externalData
 

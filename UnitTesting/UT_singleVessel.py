@@ -95,9 +95,9 @@ class testSingleVessel(setUp_singleVessel):
                 testVals = np.array(self.dataDictNew[vesselId][key])
                 refVals = np.array(self.dataDictRef[vesselId][key])
                 if len(testVals) != len(refVals):
-                    print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                    print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
                 if len(testVals[0]) != len(refVals[0]):
-                    print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                    print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
                 SEArrayEntrance = np.zeros(len(testVals))
                 SEArrayExit = np.zeros(len(testVals))
                 for i in xrange(len(testVals)):

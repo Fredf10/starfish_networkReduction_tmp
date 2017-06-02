@@ -68,9 +68,9 @@ def test_singleVessel():
             testVals = np.array(dataDictNew[key])
             refVals = np.array(dataDictRef[key])
             if len(testVals) != len(refVals):
-                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
             if len(testVals[0]) != len(refVals[0]):
-                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
             SEArrayEntrance = np.zeros(len(testVals))
             SEArrayExit = np.zeros(len(testVals))
             for i in xrange(len(testVals)):
@@ -87,12 +87,12 @@ def test_singleVessel():
         for key in RMSEDict[vesselId]:
             if testDict[key] < RMSEDict[vesselId][key] :
                 TooHighError = True
-                print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
+                print("Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key]))
 
     assert(not TooHighError)
     if not TooHighError:
-        print "\nAll values below error threshold"
-        print "Test Successful!"
+        print("\nAll values below error threshold")
+        print("Test Successful!")
 
 def test_saveSkipping():
 
@@ -178,9 +178,9 @@ def test_saveSkipping():
             testVals = np.array(dataDictNew[key])
             refVals = np.array(dataDictRef[key])
             if len(testVals) != len(refVals):
-                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
             if len(testVals[0]) != len(refVals[0]):
-                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
             SEArrayEntrance = np.zeros(len(testVals))
             SEArrayExit = np.zeros(len(testVals))
             for i in xrange(len(testVals)):
@@ -197,12 +197,12 @@ def test_saveSkipping():
         for key in RMSEDict[vesselId]:
             if testDict[key] < RMSEDict[vesselId][key] :
                 TooHighError = True
-                print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
+                print("Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key]))
 
     assert(not TooHighError)
     if not TooHighError:
-        print "\nAll values below error threshold"
-        print "Test Successful!"
+        print("\nAll values below error threshold")
+        print("Test Successful!")
 
 #        print dataDictNew
 #        print dataDictNew
@@ -275,9 +275,9 @@ def test_memoryChunking():
             testVals = np.array(dataDictNew[key])
             refVals = np.array(dataDictRef[key])
             if len(testVals) != len(refVals):
-                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
             if len(testVals[0]) != len(refVals[0]):
-                print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
             SEArrayEntrance = np.zeros(len(testVals))
             SEArrayExit = np.zeros(len(testVals))
             for i in xrange(len(testVals)):
@@ -294,12 +294,12 @@ def test_memoryChunking():
         for key in RMSEDict[vesselId]:
             if testDict[key] < RMSEDict[vesselId][key] :
                 TooHighError = True
-                print "Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key])
+                print("Error was found to be too high for Vessel {}, key {}, with value {} being above threshold of {}".format(vesselId, key, RMSEDict[vesselId][key], testDict[key]))
     assert(not TooHighError)
 
     if not TooHighError:
-        print "\nAll values below error threshold"
-        print "Test Successful!"
+        print("\nAll values below error threshold")
+        print("Test Successful!")
 
 if __name__ == "__main__":
     test_singleVessel()

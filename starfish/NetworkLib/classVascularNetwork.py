@@ -287,12 +287,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         writes Network properties (without vesselData) to console
         """
-        print "-------------------"
-        print " vascularNetwork ", self.name, "\n"
+        print("-------------------")
+        print(" vascularNetwork ", self.name, "\n")
         for variable, value in self.__dict__.iteritems():
             try:
-                print " {:<20} {:>8}".format(variable, value)
-            except Exception: print " {:<20} {:>8}".format(variable, 'None')
+                print(" {:<20} {:>8}".format(variable, value))
+            except Exception: print(" {:<20} {:>8}".format(variable, 'None'))
 
     def initialize(self, initializeForSimulation=False):
         """
@@ -1286,7 +1286,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             else: Z = bc.Z
                             Rtotal = bc.Rc + Z
                             bc.update({'Rtotal':Rtotal})
-                            print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
+                            print("vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6))
                     except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
                     # # add resistance to the value
                     try: boundaryResistance = boundaryResistance + bc.Rtotal
@@ -1308,9 +1308,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
                 # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
                 if boundaryResistance == 0:
-                    print "\n Boundary Condition at end of vessel {} has no resistance".format(vesselId)
+                    print("\n Boundary Condition at end of vessel {} has no resistance".format(vesselId))
                     # # set boundaryresistance to 1/133.32*1.e6
-                    print "The resistance is set to 1*133.32*1.e6 \n"
+                    print("The resistance is set to 1*133.32*1.e6 \n")
                     boundaryResistance = 1.*133.32 * 1.e6
 
                 self.Rcum[vesselId] = self.vessels[vesselId].resistance + boundaryResistance
@@ -1367,7 +1367,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             else: Z = bc.Z
                             Rtotal = bc.Rc + Z
                             bc.update({'Rtotal':Rtotal})
-                            print "vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6)
+                            print("vessel {} : estimated peripheral windkessel resistance (Rtotal) {}".format(vesselId, Rtotal / 133.32 * 1.e-6))
                     except Exception: self.warning("Old except:pass clause #1 in VascularNetwork.calculateNetworkResistance", oldExceptPass= True)
                     # # add resistance to the value
                     try: boundaryResistance = boundaryResistance + bc.Rtotal
@@ -1389,9 +1389,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
                 # print 'boundaryResistance',boundaryResistance/133.32*1.e-6
                 if boundaryResistance == 0:
-                    print "\n Boundary Condition at end of vessel {} has no resistance".format(vesselId)
+                    print("\n Boundary Condition at end of vessel {} has no resistance".format(vesselId))
                     # # set boundaryresistance to 1/133.32*1.e6
-                    print "The resistance is set to 1*133.32*1.e6 \n"
+                    print("The resistance is set to 1*133.32*1.e6 \n")
                     boundaryResistance = 1.*133.32 * 1.e6
 
                 nodeToNodeResistance = self.vessels[vesselId].resistance + boundaryResistance
@@ -1661,7 +1661,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if meanInflow != None:
             p0 = self.Rcum[root] * meanInflow
             p1 = p0 - self.vessels[root].resistance * meanInflow
-            print "DB cVN 1519: root init pressure", p0,p1, self.Rcum[root], meanInflow
+            print("DB cVN 1519: root init pressure", p0,p1, self.Rcum[root], meanInflow)
 
         elif meanInPressure != None:
             meanInflow = meanInPressure / self.Rcum[root]  # calculate mean flow
@@ -1838,13 +1838,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             raise ValueError("VascularNetwork in calculating C_wkTotal!")
 
         if self.quiet == False:
-            print '====================================='
-            print '__________total compliances________'
-            print '               Compliance'
-            print "TerminalArea     {:5.3}".format(self.totalTerminalAreaCompliance * 133.32 * 1.e6)
-            print "TreeVolume       {:5.3}".format(self.TotalVolumeComplianceTree * 133.32 * 1.e6)
-            print "Total System     {:5.3}".format((self.TotalVolumeComplianceTree + C_wkTotal) * 133.32 * 1.e6)
-            print "Total WK's       {:5.3}".format(C_wkTotal * 133.32 * 1.e6)
+            print('=====================================')
+            print('__________total compliances________')
+            print('               Compliance')
+            print("TerminalArea     {:5.3}".format(self.totalTerminalAreaCompliance * 133.32 * 1.e6))
+            print("TreeVolume       {:5.3}".format(self.TotalVolumeComplianceTree * 133.32 * 1.e6))
+            print("Total System     {:5.3}".format((self.TotalVolumeComplianceTree + C_wkTotal) * 133.32 * 1.e6))
+            print("Total WK's       {:5.3}".format(C_wkTotal * 133.32 * 1.e6))
 
         wk3CompPrintList = {}
         # calculate wk3Compliance and apply it to boundaryCondition
@@ -1863,11 +1863,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     raise ValueError("Windkessel Compliance at vessel {}:  {} < 0!".format(vesselId, wk3Compliance))
                     #exit()
         if self.quiet == False:
-            print '________estimated compliances________'
-            print ' vesselId       Rt       C     Cdef'
+            print('________estimated compliances________')
+            print(' vesselId       Rt       C     Cdef')
             for vesselId in self.vessels.keys():
-                try: print "{:3} {:10.3f} {:10.3f} {:10.3f}".format(vesselId, wk3CompPrintList[vesselId][0], wk3CompPrintList[vesselId][1], wk3CompPrintList[vesselId][2])
-                except Exception: print "{:3}".format(vesselId)
+                try: print("{:3} {:10.3f} {:10.3f} {:10.3f}".format(vesselId, wk3CompPrintList[vesselId][0], wk3CompPrintList[vesselId][1], wk3CompPrintList[vesselId][2]))
+                except Exception: print("{:3}".format(vesselId))
 
     def calculateReflectionCoefficientConnection(self, mothers, daughters):
         """
@@ -1965,15 +1965,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             except Exception: self.warning("Old except: pass clause #5 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
                             self.vessels[vesselId].initialize({})
                         except Exception: self.warning("Old except: pass clause #6 in VascularNetwork.optimizeTreeRefelctionCoefficients", oldExceptPass= True)
-            print " new Reflection Coeff area ratio", radiusLeftDaughterInit, self.vessels[leftDaughter].radiusProximal, 1 - (radiusLeftDaughterInit) / self.vessels[leftDaughter].radiusProximal
+            print(" new Reflection Coeff area ratio", radiusLeftDaughterInit, self.vessels[leftDaughter].radiusProximal, 1 - (radiusLeftDaughterInit) / self.vessels[leftDaughter].radiusProximal)
             # print "      new Reflection coefficient {}, areas".format(reflectionCoefficient), self.vessels[leftDaughter].radiusProximal #, self.vessels[rightDaughter].radiusProximal
             # print
 
     def showReflectionCoefficientsConnectionInitialValues(self):
         if self.quiet == False:
-            print '====================================='
-            print '________Reflection Coefficients______'
-            print ' LM RM LD RD   Reflection coefficient'
+            print('=====================================')
+            print('________Reflection Coefficients______')
+            print(' LM RM LD RD   Reflection coefficient')
         # # add rest of the vessels by traversing the connections
         for leftMother, rightMother, leftDaughter, rightDaughter  in self.treeTraverseConnections:
                 p0, p1 = self.initialValues[leftMother]['Pressure']
@@ -2005,14 +2005,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                                                                          [[leftDaughter, initialPressureLD]])
                 if rightMother == None: rightMother = '-'
                 if rightDaughter == None: rightDaughter = '-'
-                print "{:3} {:3} {:3} {:3}      {:.4}".format(leftMother, rightMother, leftDaughter, rightDaughter, reflectionCoefficient)
+                print("{:3} {:3} {:3} {:3}      {:.4}".format(leftMother, rightMother, leftDaughter, rightDaughter, reflectionCoefficient))
 
 
 
     def showWaveSpeedOfNetwork(self, Pressure=None, Flow=None):
-        print '====================================='
-        print '__________initial wave speed_________'
-        print ' vessel    wave speed c(P_init)   A(P_init)    As_init      Dw(P_init)      Re(P_init)'
+        print('=====================================')
+        print('__________initial wave speed_________')
+        print(' vessel    wave speed c(P_init)   A(P_init)    As_init      Dw(P_init)      Re(P_init)')
         for vesselId, vessel in self.vessels.iteritems():
             if Pressure == None:
                 # calc initial pressure
@@ -2033,7 +2033,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 v = Flow / A
 
             Re = np.max(np.sqrt(A / np.pi) * 2.0 * v / self.globalFluid['my'] * self.globalFluid['rho'])
-            print ' {:3}            {:5.4}            {:5.4}     {:5.4}     {:4.4}    {:5.0f}'.format(vesselId, c, np.max(A), As, Dw, Re)
+            print(' {:3}            {:5.4}            {:5.4}     {:5.4}     {:4.4}    {:5.0f}'.format(vesselId, c, np.max(A), As, Dw, Re))
 
 
     def initializeGravityHydrostaticPressure(self, initialValues, root):
@@ -2105,15 +2105,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         # # print out of method
         if self.quiet == False and self.venousPool is not None:
-            print '\n============================================================='
-            print '_______________Venous Pressures _____________________________'
-            print '%s %36.1f' % ('Central venous pressure:', round(self.venousPool.P[0], 2))
+            print('\n=============================================================')
+            print('_______________Venous Pressures _____________________________')
+            print('%s %36.1f' % ('Central venous pressure:', round(self.venousPool.P[0], 2)))
 
     def print3D(self):
 
         # # print
-        print '==========================================================================================  \n'
-        print '__________________________Vessel Id: position, net Gravity________________________________'
+        print('==========================================================================================  \n')
+        print('__________________________Vessel Id: position, net Gravity________________________________')
 
         # traverse vascular network
         for vesselId in sorted(self.treeTraverseList):
@@ -2122,7 +2122,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # print 'Start position  : vessel  {} {:19.3f} {:20.3f} {:21.3f}'.format(vesselId, positionStart[0],   positionStart[1],   positionStart[2])
             # print 'End position    : vessel  {} {:19.3f} {:20.3f} {:21.3f}'.format(vesselId, positionEnd[0],     positionEnd[1],     positionEnd[2])
             if self.gravitationalField == True:
-                print '%s %2i %19.3f' % ('Net gravity     : vessel ', vesselId, self.vessels[vesselId].netGravity[0])
+                print('%s %2i %19.3f' % ('Net gravity     : vessel ', vesselId, self.vessels[vesselId].netGravity[0]))
 
     def calculate3DpositionsAndGravity(self, nTsteps=None, nSet=None):
         """
@@ -2250,7 +2250,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
     if solutionDataSet == None:
         Rf_static = {}
         rho = vascularNetwork.globalFluid['rho'] # local rho!!
-        print 'Rf at bifurcations for initial condition'
+        print('Rf at bifurcations for initial condition')
         for bifurcation in bifurcationList:
             mother = bifurcation[0]
             leftDaughter = bifurcation[1]
@@ -2267,7 +2267,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
         return Rf_static
     else:
     # over time // after simulation
-        print 'Rf at bifurcations transient'
+        print('Rf at bifurcations transient')
         Rf_transient = {}
         rho = vascularNetwork.globalFluid['rho'] # change to local
         for bifurcation in bifurcationList:

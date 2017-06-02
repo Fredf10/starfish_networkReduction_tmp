@@ -48,10 +48,10 @@ def uncertaintyPropagation():
 
     # 9. uncertainty quantfication, sensitivity analysis
     '''
-    print ""
-    print '=============================================='
-    print '#        VascularPolynomialChaos_v0.3        #'
-    print '=============================================='
+    print("")
+    print('==============================================')
+    print('#        VascularPolynomialChaos_v0.3        #')
+    print('==============================================')
     # steps
     # 1. load vpc case and configuration
     optionsDict = mStartUp.parseOptions(['f','n'],vascularPolynomialChaos=True)

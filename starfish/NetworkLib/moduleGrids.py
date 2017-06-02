@@ -47,7 +47,7 @@ def constriction(length, radiusA, radiusB, N):
     dz = np.diff(z)
     R0 = radiusA + (radiusB-radiusA)*(1.0 + np.cos(np.linspace(-1.,1.,N)*np.pi))/2.
     A0 = np.pi*R0**2
-    print "WARNING: constricted vessel geometry was never verified and vaildated!"
+    print("WARNING: constricted vessel geometry was never verified and vaildated!")
     return z,dz,A0
 
 
@@ -63,7 +63,7 @@ def mtStig2016(length, radiusA, radiusB, N):
              A0 = area-array with given radius
     """  
     
-    print "we use this model yes! mtStig2016 gird"
+    print("we use this model yes! mtStig2016 gird")
     exit()
     z  = np.linspace(0.,length,N)
     dz = np.diff(z)

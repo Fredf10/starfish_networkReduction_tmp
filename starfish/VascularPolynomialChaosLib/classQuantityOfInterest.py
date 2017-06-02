@@ -69,7 +69,7 @@ class QuantityOfInterest(TestBaseClass):
         if uqsaMeasureName not in self.uqsaMeasures:
             self.uqsaMeasures[uqsaMeasureName] = uqsaMeasure
         else:
-            print " did not add {} as it already exist in dict".format(uqsaMeasureName)
+            print(" did not add {} as it already exist in dict".format(uqsaMeasureName))
     
     
     def retainDsetRowData(self,dsetName, dataRow, sampleIndex, totalDataShape):

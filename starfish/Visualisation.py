@@ -11,11 +11,11 @@ import UtilityLib.moduleStartUp as mStartUp
 
 
 def main():    
-    print ""
-    print '====================================='
-    print '#    STARFiSh_v0.4 Visualisation    #'
-    print '====================================='
-    print ""
+    print("")
+    print('=====================================')
+    print('#    STARFiSh_v0.4 Visualisation    #')
+    print('=====================================')
+    print("")
     
     optionsDict = mStartUp.parseOptions(['f','n','v'], visualisationOnly = True)
     

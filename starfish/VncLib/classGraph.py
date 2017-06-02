@@ -55,7 +55,7 @@ class Graph(object):
         
         # check if networkNode exists
         if self.graph.get_node(networkNode) == None or self.graph.get_node(networkNode) == []:
-            print 'Error: something went wrong, not such network nodes'
+            print('Error: something went wrong, not such network nodes')
         
         # creates boundary condition node
         if self.graph.get_node(bcNode) == None or self.graph.get_node(bcNode) == []:
@@ -112,7 +112,7 @@ class Graph(object):
                                   
                     ## anastomosis
                     elif RD == None:
-                        print LM,RM,LD,RD 
+                        print(LM,RM,LD,RD) 
                         # connect LM and RM
                         #addVesselToGraph(' ', str(vascularNetwork.vessels[RM].startNode), str(vascularNetwork.vessels[LM].startNode), 'anas', ' ')
                         # add rightDaughter

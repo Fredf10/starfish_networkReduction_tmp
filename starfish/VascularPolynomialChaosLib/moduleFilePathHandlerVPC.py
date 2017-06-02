@@ -90,7 +90,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
                                       exception = exception)
     if requestedDirectory == None:
         if exception == "Warning":
-            print "WARNING: moduleFilePathHandler.getFileAndPaths() directory of file '{}' does not exits. Exit()".format(requestedFilename)
+            print("WARNING: moduleFilePathHandler.getFileAndPaths() directory of file '{}' does not exits. Exit()".format(requestedFilename))
             return None
         elif exception == "No":
             pass
@@ -105,10 +105,10 @@ def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", eval
         ## ensure that the file exists
         if not os.path.isfile(requestedFilePath):
             if exception == "Warning":
-                print "WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath)
+                print("WARNING: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))
                 return None
             elif exception == "No":
-                print "raise no exception"
+                print("raise no exception")
                 return None
             else:
                 raise ValueError("ERROR: moduleFilePathHandler.getFileAndPaths() file '{}' does not exits. Exit()".format(requestedFilePath))

@@ -93,7 +93,7 @@ class Boundary(cSBO.StarfishBaseObject):
             self.bcType1ConditionQuantity = self.bcType1[0].conditionQuantity
             self.duRuntimeEvaluation      = self.bcType1[0].runtimeEvaluation
             precribeTotalValues           = self.bcType1[0].prescribeTotalValues
-            print "WARNING: Multiple Type1 Boundary Conditions are prescribed as influx condition!"
+            print("WARNING: Multiple Type1 Boundary Conditions are prescribed as influx condition!")
         # prepare duVector from boundaryConditions:
         self.duEvaluateVector()
         # set bcType1 to type instead of list
@@ -235,7 +235,7 @@ class Boundary(cSBO.StarfishBaseObject):
         self.A[currentMemoryIndex+1][position] = A_calc
 
         try: self.BloodFlowSep[currentTimeStep] = self.BloodFlowSep[currentTimeStep-1]+dBloodVolumen
-        except Exception: print "passed bloodflow integration"
+        except Exception: print("passed bloodflow integration")
         try:    self.BloodVolumen = self.BloodVolumen + 0.5*(self.BloodFlowSep[currentTimeStep-1]+self.BloodFlowSep[currentTimeStep])*dt
         except Exception: self.BloodVolumen = self.BloodVolumen + self.BloodFlowSep[currentTimeStep]*dt
 

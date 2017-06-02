@@ -48,16 +48,16 @@ if __name__ == "__main__":
     
     
     
-    print "systolic Presssure",np.max(data.P/mmHg)
-    print "diastolic Presssure",np.min(data.P/mmHg)
-    print "mean Presssure",np.mean(data.P/mmHg)
-    print "mean Presssure estimate",np.min(data.P/mmHg)+ (np.max(data.P/mmHg)-np.min(data.P/mmHg))/3.
-    print "geometric mean pressure", np.sqrt(np.max(data.P/mmHg)*np.min(data.P/mmHg))
-    print "mean Presssure estimate diff 2",np.min(data.P/mmHg)+ (np.max(data.P/mmHg)-np.min(data.P/mmHg))/2.
+    print("systolic Presssure",np.max(data.P/mmHg))
+    print("diastolic Presssure",np.min(data.P/mmHg))
+    print("mean Presssure",np.mean(data.P/mmHg))
+    print("mean Presssure estimate",np.min(data.P/mmHg)+ (np.max(data.P/mmHg)-np.min(data.P/mmHg))/3.)
+    print("geometric mean pressure", np.sqrt(np.max(data.P/mmHg)*np.min(data.P/mmHg)))
+    print("mean Presssure estimate diff 2",np.min(data.P/mmHg)+ (np.max(data.P/mmHg)-np.min(data.P/mmHg))/2.)
     
-    print "mean flow", np.mean(data.Q/ml)
+    print("mean flow", np.mean(data.Q/ml))
     
-    print "resistance", np.mean(data.P/mmHg)/np.mean(data.Q/ml)
+    print("resistance", np.mean(data.P/mmHg)/np.mean(data.Q/ml))
     
     ## wave split
     beta = 3.6
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     rho = 1050.
     
     def A(P,beta,As,Ps):
-        print P-Ps
+        print(P-Ps)
         return As*( 1.0 + np.log( P/Ps ) / beta )**2.0
     def C(P,beta,As,Ps):
     #print P,'-',np.log( P/Ps)

@@ -77,7 +77,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
                     elif bc.type == 2:
                         self.boundaryConditionII = bc
                     else:
-                        print "Warning Baroreceptor: vascularNetwork.root has the wrong type of boundary condition"
+                        print("Warning Baroreceptor: vascularNetwork.root has the wrong type of boundary condition")
             elif bcId != vascularNetwork.root:
                 for bc in bcs:
                     if bc.type == 2:  # type 2 BC, outflow or Varying Elastance heart
@@ -158,7 +158,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
             self.voi, self.states, self.algebraic = self.solveCellML(strain)  # TODO Results in two solves
 
             Tperiod = self.algebraic[-1][self.cellMLoutputID]
-            print "Tperiod", Tperiod
+            print("Tperiod", Tperiod)
             if self.changeEffectors:
                 # update period in runtime using the method defined in the BC type 1 class
                 self.boundaryCondition.updatePeriodRuntime(Tperiod, (self.newUpdateTime - 2) * self.dt)
@@ -187,7 +187,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
                 self.newCycles = np.append(self.newCycles, n)  # to save the time step where new cycles start to solution data
 
         else:
-                print "WARNING Baroreceptor::calcAndupdatePeriodTypeIIcellML: not a varying elastance heart"
+                print("WARNING Baroreceptor::calcAndupdatePeriodTypeIIcellML: not a varying elastance heart")
 
 class AorticBaroreceptor(Baroreceptor):
     """
@@ -367,8 +367,8 @@ class AorticBaroreceptor(Baroreceptor):
 
             if self.boundaryCondition is not None:
                 self.calcAndupdatePeriodTypeIcellML(n, self.MStrain[self.oldUpdateTime:(self.newUpdateTime - 2)])
-                print self.algebraic[-1][self.cellMLoutputID]
-                print self.boundaryCondition.Tperiod
+                print(self.algebraic[-1][self.cellMLoutputID])
+                print(self.boundaryCondition.Tperiod)
 
             else:
                 self.calcAndupdatePeriodTypeIIcellML(self.MStrain[n:(n + 1)])

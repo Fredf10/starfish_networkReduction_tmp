@@ -32,25 +32,23 @@ def test_singleVessel():
    # 1.1 load configuration and locations of interest      
     uqsaCase = cUqsaCase.UqsaCase() #cConfigUQSA.ConfigurationUQSA()
     uqsaCaseFileSol = os.path.join(*[cur, "singleVesselUQSA", "vascularPolynomialChaos_tst",  "singleVesselUQSA_uqsaCase_tst.xml"])
-    uqsaCaseFile = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'read')
+    uqsaCaseFile = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'write')
     path_to_delete = os.path.split(uqsaCaseFile)[0]
     if not os.path.exists(os.path.split(uqsaCaseFile)[0]):
         os.makedirs(os.path.split(uqsaCaseFile)[0])
-    shutil.copy(uqsaCaseFile, uqsaCaseFileSol)
+    shutil.copy(uqsaCaseFileSol, uqsaCaseFile)
     uqsaCase.loadXMLFile(uqsaCaseFile)
     uqsaCase.initialize(networkName,dataNumber)
 
     
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFileSol = os.path.join(*[cur, "singleVesselUQSA", "vascularPolynomialChaos_tst",  "singleVesselUQSA_vpc_tst.xml"])
-    vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'read')
+    vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'write')
     if not os.path.exists(os.path.split(vpcNetworkXmlFileSol)[0]):
         os.makedirs(os.path.split(vpcNetworkXmlFileSol)[0])
     shutil.copy(vpcNetworkXmlFileSol, vpcNetworkXmlFile)
 
-
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
-   
     # TODO: steps 1.1 and 1.2 should be entirely external to the UQSA core
 
     # 1.3 initialized defined random inputs

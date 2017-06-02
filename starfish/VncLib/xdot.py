@@ -1752,24 +1752,24 @@ class DotWidget(gtk.DrawingArea):
                                         vesselId = int(vesselId)
                                         self.vascularNetwork.vessels[vesselId].printToConsole()
                                     except:
-                                        print "ERROR: vnx: xdot.on_area_button_release(): Click on Edge:\n  Vessel Id not defined properly!"
+                                        print("ERROR: vnx: xdot.on_area_button_release(): Click on Edge:\n  Vessel Id not defined properly!")
                             
-                                    print "\n"
-                                    print '====================================='
-                                    print '#    VascularNetworkCreator_v2.1    #'
-                                    print '====================================='
-                                    print " [a] - add vessel to network"
-                                    print " [d] - delete vessel in network"
-                                    print " [n] - new network"
-                                    print " [b] - set boundary conditions"
-                                    print " [f] - set global fluid properties"
-                                    print " [l] - load network"
-                                    print " [s] - save network"
-                                    print " [u] - update XML from CSV file(s)"
-                                    print " [g] - print network graph"
-                                    print " [p] - print network informations"
-                                    print " [q] - quit"
-                                    print ""    
+                                    print("\n")
+                                    print('=====================================')
+                                    print('#    VascularNetworkCreator_v2.1    #')
+                                    print('=====================================')
+                                    print(" [a] - add vessel to network")
+                                    print(" [d] - delete vessel in network")
+                                    print(" [n] - new network")
+                                    print(" [b] - set boundary conditions")
+                                    print(" [f] - set global fluid properties")
+                                    print(" [l] - load network")
+                                    print(" [s] - save network")
+                                    print(" [u] - update XML from CSV file(s)")
+                                    print(" [g] - print network graph")
+                                    print(" [p] - print network informations")
+                                    print(" [q] - quit")
+                                    print("")    
                             
                             if  shapeTemp.__class__.__name__ == 'PolygonShape':     
                                 if itemType == 'Node':
@@ -1788,42 +1788,42 @@ class DotWidget(gtk.DrawingArea):
                                         startEndNodeID = int(startEndNodeID)
                                         for vessel in self.vascularNetwork.vessels.itervalues():
                                             if vessel.endNode == startEndNodeID or vessel.startNode == startEndNodeID: 
-                                                print ''
-                                                print ''
-                                                print '----------------------- '
-                                                print '  Boundary Condition(s)'
-                                                print ''
+                                                print('')
+                                                print('')
+                                                print('----------------------- ')
+                                                print('  Boundary Condition(s)')
+                                                print('')
                                                 if vessel.Id in self.vascularNetwork.boundaryConditions:
                                                     bcArray = self.vascularNetwork.boundaryConditions[vessel.Id]
                                                     
                                                     for bc in bcArray:
-                                                        print bc.name
+                                                        print(bc.name)
                                                         pp(bc.__dict__)
-                                                        print   
+                                                        print()   
                                                     
                                                 else:
-                                                    print '?'
-                                                print ''
-                                                print ""
-                                                print '====================================='
-                                                print '#    VascularNetworkCreator_v2.1    #'
-                                                print '====================================='
-                                                print " [a] - add vessel to network"
-                                                print " [d] - delete vessel in network"
-                                                print " [n] - new network"
-                                                print " [b] - set boundary conditions"
-                                                print " [f] - set global fluid properties"
-                                                print " [l] - load network"
-                                                print " [s] - save network"
-                                                print " [u] - update XML from CSV file(s)"
-                                                print " [g] - print network graph"
-                                                print " [p] - print network informations"
-                                                print " [q] - quit"
-                                                print ""
+                                                    print('?')
+                                                print('')
+                                                print("")
+                                                print('=====================================')
+                                                print('#    VascularNetworkCreator_v2.1    #')
+                                                print('=====================================')
+                                                print(" [a] - add vessel to network")
+                                                print(" [d] - delete vessel in network")
+                                                print(" [n] - new network")
+                                                print(" [b] - set boundary conditions")
+                                                print(" [f] - set global fluid properties")
+                                                print(" [l] - load network")
+                                                print(" [s] - save network")
+                                                print(" [u] - update XML from CSV file(s)")
+                                                print(" [g] - print network graph")
+                                                print(" [p] - print network informations")
+                                                print(" [q] - quit")
+                                                print("")
                                             
                                             
                                     except:
-                                        print "ERROR: vnx: xdot.on_area_button_release(): Click on Node:\n   Vessel Id not defined properly!"
+                                        print("ERROR: vnx: xdot.on_area_button_release(): Click on Node:\n   Vessel Id not defined properly!")
                                             
                                        
 

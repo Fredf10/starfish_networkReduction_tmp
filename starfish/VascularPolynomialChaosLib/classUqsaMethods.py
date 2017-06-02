@@ -1205,7 +1205,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
                 statsDict['conficenceInterval']  = np.percentile(data,quantiles, axis=0)
                 statsDict['confidenceAlpha'] = confidenceAlpha
             else:
-                print "Monte Carlo Sensitivity Analysis"  
+                print("Monte Carlo Sensitivity Analysis")  
                 self.createSampleMatixHashTable(distDim)
                 
                 dataA = data[self.matrixHash['A'][0]:self.matrixHash['A'][1]]

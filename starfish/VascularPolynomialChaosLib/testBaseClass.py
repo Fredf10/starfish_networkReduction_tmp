@@ -352,8 +352,8 @@ class TestBaseClass(object):
                 else: raise ValueError("""ERROR try to read <<{}>> of xml-node {},
                    however attribute <<Id>> is not defined in the XML-tag""".format(dictXmlElement, externXmlElement))
                 
-            else: print """WARNING: try to read xml-node <<{}>> as dict element for <<{}>>,
-        however this sub-type is not defined as variable-type of <<{}>>. Skipping xml-node""".format(dictXmlElement,externXmlElement,externXmlElement)
+            else: print("""WARNING: try to read xml-node <<{}>> as dict element for <<{}>>,
+        however this sub-type is not defined as variable-type of <<{}>>. Skipping xml-node""".format(dictXmlElement,externXmlElement,externXmlElement))
                 
                 
         return elementDictData
@@ -567,7 +567,7 @@ class TestBaseClass(object):
                     for dictObjectName,dictObject in dictL.iteritems():
                         if dictObjectName in dictGroup.keys():
                             dictObject.loadDataHdf5()
-                        else: print "Warning: loadDataHdf5 {} could not save dict {} as not a sub-group node of {}".format(self.hdf5Group, dictObjectName, dictName) 
+                        else: print("Warning: loadDataHdf5 {} could not save dict {} as not a sub-group node of {}".format(self.hdf5Group, dictObjectName, dictName)) 
                 
         self.setVariablesDict(loadedData)
         
@@ -604,7 +604,7 @@ class TestBaseClass(object):
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
             except KeyError:
-                print "WARNING {}.updateData - Wrong key: {}, could not update varibale".format(self.__class__.__name__, key)
+                print("WARNING {}.updateData - Wrong key: {}, could not update varibale".format(self.__class__.__name__, key))
                 
     def getVariable(self,variableName):
         '''
@@ -621,4 +621,4 @@ class TestBaseClass(object):
             return self.__getattribute__(variableName)
         except: 
             name = self.__class__.__name__
-            print "ERROR {}.getVariable() : {} has no variable {}".format(name,name,variableName)
+            print("ERROR {}.getVariable() : {} has no variable {}".format(name,name,variableName))

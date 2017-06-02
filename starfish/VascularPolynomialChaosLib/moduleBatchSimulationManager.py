@@ -21,22 +21,22 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
         
     '''
     timeStartBatch = time.time()
-    print '====================================='
-    print '------Single Process Batch Job-------'
-    print 'numberOfEval.:   {}'.format(len(batchDataList))
+    print('=====================================')
+    print('------Single Process Batch Job-------')
+    print('numberOfEval.:   {}'.format(len(batchDataList)))
     progressBar = cPB.ProgressBar(35, len(batchDataList))
     for completed,batchData in enumerate(batchDataList):
         minutesSolve,secsSolve = runSingleBatchSimulation(batchData)
         if quiet == False:
-            print '____________Batch   {:5} ___________'.format(batchDataList.index(batchData)) 
-            print 'Runtime:        {} min {} sec'.format(minutesSolve,secsSolve)
+            print('____________Batch   {:5} ___________'.format(batchDataList.index(batchData))) 
+            print('Runtime:        {} min {} sec'.format(minutesSolve,secsSolve))
         progressBar.progress(completed)
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
-    print '====================================='
-    print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
-    print '====================================='
+    print('=====================================')
+    print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
+    print('=====================================')
   
 def runSingleBatchSimulation(batchData):
     '''
@@ -70,7 +70,7 @@ def runSingleBatchSimulation(batchData):
     except:
         minutesSolve= 0
         secsSolve = 0
-        print "Error in running {}".format(networkXmlFileLoad)
+        print("Error in running {}".format(networkXmlFileLoad))
     
     return minutesSolve,secsSolve
 
@@ -88,10 +88,10 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     if numberWorkers == None: numberWorkers = multiprocessing.cpu_count()
     
     timeStartBatch = time.time()
-    print '====================================='
-    print '------Multiprocessing Batch Job------'
-    print 'numberWorkers:   {}'.format(numberWorkers)
-    print 'numberOfEval.:   {}'.format(len(batchDataList))
+    print('=====================================')
+    print('------Multiprocessing Batch Job------')
+    print('numberWorkers:   {}'.format(numberWorkers))
+    print('numberOfEval.:   {}'.format(len(batchDataList)))
     progressBar = cPB.ProgressBar(35, len(batchDataList))
     pool = multiprocessing.Pool(numberWorkers, maxtasksperchild = None)
     results = pool.imap(runSingleBatchSimulation,batchDataList)
@@ -102,14 +102,14 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
         progressBar.progress(completed)
     pool.join()
     if quiet == False:
-        print '====================================='
+        print('=====================================')
         for batchJobIndex,[minutesSolve,secsSolve] in enumerate(results):
-            print '____________Batch   {:5} ___________'.format(batchJobIndex+1) 
-            print 'Runtime:        {} min {} sec'.format(minutesSolve,secsSolve)
-        print '====================================='
+            print('____________Batch   {:5} ___________'.format(batchJobIndex+1)) 
+            print('Runtime:        {} min {} sec'.format(minutesSolve,secsSolve))
+        print('=====================================')
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
-    print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
-    print '====================================='
+    print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
+    print('=====================================')
             

@@ -415,7 +415,7 @@ class BoundaryConditionType1(BoundaryCondition):
             evaluatedMeanFlow = np.mean(evaluatedFlow)
             #print dt, evaluatedMeanFlow ,    MeanFlow-evaluatedMeanFlow, nTsteps-nTstepsStart
             if evaluatedMeanFlow < min(evaluatedFlow) or evaluatedMeanFlow > max(evaluatedFlow):
-                print "Meanflow is wrong"
+                print("Meanflow is wrong")
                 exit()
             if abs(MeanFlow-evaluatedMeanFlow) < tolerance:
                 notConverged = False
@@ -464,12 +464,12 @@ class BoundaryConditionType1(BoundaryCondition):
         
 
         if quiet == False:
-            print '====================================='
-            print '___BC _Type1: mean flow evaluation___'
-            print 'meanFlow evaluated (ml/s)  {:.6}'.format(str(evaluatedMeanFlow*1.e6).ljust(5))
-            print 'meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5))
-            print 'initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5))
-            print 'total volume/period (ml)   {:.6}'.format(str(np.sum(evaluatedFlow*1.e6)*dt).ljust(5))
+            print('=====================================')
+            print('___BC _Type1: mean flow evaluation___')
+            print('meanFlow evaluated (ml/s)  {:.6}'.format(str(evaluatedMeanFlow*1.e6).ljust(5)))
+            print('meanFlowTime (s)           {:.6}'.format(str(self.TmeanFlow).ljust(5)))
+            print('initPhaseTimeSpan          {:.6}'.format(str(self.initPhaseTimeSpan).ljust(5)))
+            print('total volume/period (ml)   {:.6}'.format(str(np.sum(evaluatedFlow*1.e6)*dt).ljust(5)))
 
         return  self.MeanFlow, self.initPhaseTimeSpan
 
@@ -1909,7 +1909,7 @@ class VaryingElastance(BoundaryConditionType2):
 
         """ Initialize Solution Vectors """
 
-        print """ Initialize Solution Vectors """
+        print(""" Initialize Solution Vectors """)
 
         self.mitral.initializeSolutions(Tsteps+1)
         self.aortic.initializeSolutions(Tsteps+1)
@@ -2524,7 +2524,7 @@ class VaryingElastanceSimple(BoundaryConditionType2):
 
         """ Initialize Solution Vectors """
 
-        print """ Initialize Solution Vectors """
+        print(""" Initialize Solution Vectors """)
 
         self.dsetGroup = solutionDataFile.create_group('Heart')
         self.allocate(runtimeMemoryManager)

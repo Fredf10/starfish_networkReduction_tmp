@@ -244,8 +244,8 @@ class CommunicatorBaroreceptor(CommunicatorBaseClass):
 
         self.data['Strain'][n] = self.epsilon
         self.data['MStrain'][n] = self.epsMean
-        print 'epsilon'
-        print self.epsMean
+        print('epsilon')
+        print(self.epsMean)
 
         time1 = 5.
         time2 = 10

@@ -364,7 +364,7 @@ def minMaxFunction(arrayToEvaluate,timeValues=np.array([]),delta=0.025, seperate
             zeroNaNinputdetection = False
             break
     if zeroNaNinputdetection: 
-        print 'WARNING: minMax Function: zero or NaN input detected'    
+        print('WARNING: minMax Function: zero or NaN input detected')    
         if   seperateMinMax == False:
             return minMaxAmp, minMaxTime
         else:
@@ -422,11 +422,11 @@ def calculateWaveShoulderPoint(waveData, timeData, startPointT, endPointT = None
     endIndex   = None
     startIndex = np.where(timeData == startPointT)
     if startIndex == None:
-        print "ERROR calculateWaveShoulderPoint: could not find startIndex! return"; return
+        print("ERROR calculateWaveShoulderPoint: could not find startIndex! return"); return
     if endPointT: endIndex   = np.where(timeData == endPointT)
     else: endPointT = len(timeData)
-    print startIndex
-    print endIndex
+    print(startIndex)
+    print(endIndex)
     slope = 0
     slopeIndex = None
     for i in xrange(startIndex[0],endIndex[0]):
@@ -455,7 +455,7 @@ def calculatePointOfInflection(waveData, timeData, startPointT, endPointT = None
     endIndex   = None
     startIndex = np.where(timeData == startPointT)
     if startIndex == None:
-        print "ERROR calculateWaveShoulderPoint: could not find startIndex! return"; return
+        print("ERROR calculateWaveShoulderPoint: could not find startIndex! return"); return
     if endPointT != None: 
         endIndex = np.where(timeData == endPointT)
     else:
@@ -527,7 +527,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
     if solutionDataSet == None:
         Rf_static = {}
         rho = vascularNetwork.globalFluid['rho'] # local rho!!
-        print 'Rf at bifurcations for initial condition'
+        print('Rf at bifurcations for initial condition')
         for bifurcation in bifurcationList:
             mother = bifurcation[0]
             leftDaughter = bifurcation[1]
@@ -544,7 +544,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
         return Rf_static
     else:
     # over time // after simulation
-        print 'Rf at bifurcations transient'
+        print('Rf at bifurcations transient')
         Rf_transient = {}
         rho = vascularNetwork.globalFluid['rho'] # change to local
         for bifurcation in bifurcationList:

@@ -108,7 +108,7 @@ class Field():
                 A_p = self.vessel.A(up[0, :])
                 C_p = self.vessel.C(up[0, :])
             except FloatingPointError as E:
-                print "Floating Point error in Field {}".format(self.name)
+                print("Floating Point error in Field {}".format(self.name))
                 raise E
         
         A_p1 = A_p[1:]

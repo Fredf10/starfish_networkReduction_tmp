@@ -139,7 +139,7 @@ class BackwardEuler(ODESolver):
             self.Newton_iter = []
         self.Newton_iter.append(n)
         if n >= 30:
-            print "Newton's failed to converge at t=%g (%d iterations)" % (t[k+1], n)
+            print("Newton's failed to converge at t=%g (%d iterations)" % (t[k+1], n))
         return u_new
 
 

@@ -222,7 +222,7 @@ class LUT(object):
         else:
             #activate exponential function for the wavesplit look up table
             self.waveSplitExponent = [1,2,3,4,5,6,1][self.waveSplitExponent]
-            print " wave split exponent is set to: ",self.waveSplitExponent
+            print(" wave split exponent is set to: ",self.waveSplitExponent)
     def updateLUTWindow(self):
         '''
         updates the LUT window with all current quantity, range and colors
@@ -417,4 +417,4 @@ class LUT(object):
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
             except: 
-                print 'Warning: LUT.update(): wrong key: %s, could not set up LUT' %key
+                print('Warning: LUT.update(): wrong key: %s, could not set up LUT' %key)

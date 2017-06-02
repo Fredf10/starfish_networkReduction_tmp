@@ -131,7 +131,7 @@ class RandomInputManager(TestBaseClass):
                     randomInput.updateMethods = {randomInput.variableName[0]:
                                                  vascularNetwork.baroreceptors[int(loc[1])].update}
                     
-                    print "cRIM81, linked baroreceptor",int(loc[1]), 'to ',vascularNetwork.baroreceptors[int(loc[1])].update
+                    print("cRIM81, linked baroreceptor",int(loc[1]), 'to ',vascularNetwork.baroreceptors[int(loc[1])].update)
                 
                 elif objType == "measurementRoutine":
                     randomInput.updateMethods = {randomInput.variableName[0]:
@@ -193,7 +193,7 @@ class RandomInputManager(TestBaseClass):
         Function to print out random variable informations
         '''
         for info in self.generateInfo():
-            print info
+            print(info)
             
     def generateInfo(self):
         '''

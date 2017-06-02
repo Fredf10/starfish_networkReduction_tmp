@@ -98,7 +98,7 @@ class UqsaCase(TestBaseClass):
         self.locationOfInterestManager.initialize()
         
         for uqsaMethodName in self.uqsaMethods.iterkeys():
-            print "Info classUQSACase 96: running ", uqsaMethodName
+            print("Info classUQSACase 96: running ", uqsaMethodName)
         
     def aquireSamples(self, distributionManager, randomInputsExtDist):
         '''
@@ -147,7 +147,7 @@ class UqsaCase(TestBaseClass):
         
             sampleSize = self.sampleManager.currentSampleSize
             
-            print "Create evaluation case file list"
+            print("Create evaluation case file list")
             progressBar = cPB.ProgressBar(35, sampleSize)
             
             for simulationIndex in xrange(sampleSize):
@@ -295,16 +295,16 @@ class UqsaCase(TestBaseClass):
                 #basis = np.linspace(0.025,0.03,25)
                 
                 
-                print "hashDataForGivenBases {}".format(basis)
+                print("hashDataForGivenBases {}".format(basis))
                 #qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
                 
                 timeBatchJob= time.time()-timeStartBatch
                 minutesBatch = int(timeBatchJob/60.)
                 secsBatch = timeBatchJob-minutesBatch*60.
-                print '====================================='
-                print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
-                print '====================================='
-                print
+                print('=====================================')
+                print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
+                print('=====================================')
+                print()
                 
                 multiprocessingUQSA = False
                 
@@ -318,7 +318,7 @@ class UqsaCase(TestBaseClass):
                     for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
                         
                         timeStartBatch = time.time()
-                        print "calculate uqsa measure for {}".format(uqsaMethodName)
+                        print("calculate uqsa measure for {}".format(uqsaMethodName))
                         
                         uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, self.sampleManager, qoi)
                         qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
@@ -326,18 +326,18 @@ class UqsaCase(TestBaseClass):
                         timeBatchJob= time.time()-timeStartBatch
                         minutesBatch = int(timeBatchJob/60.)
                         secsBatch = timeBatchJob-minutesBatch*60.
-                        print '====================================='
-                        print 'runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
-                        print '====================================='
-                        print
+                        print('=====================================')
+                        print('runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
+                        print('=====================================')
+                        print()
             
                     timeTotal= time.time()-timeStartTotal
                     minutesTotal = int(timeTotal/60.)
                     secsTotal = timeTotal-minutesTotal*60.
-                    print '====================================='
-                    print 'total runtime:  {} min {} sec'.format(minutesTotal,secsTotal)
-                    print '====================================='
-                    print
+                    print('=====================================')
+                    print('total runtime:  {} min {} sec'.format(minutesTotal,secsTotal))
+                    print('=====================================')
+                    print()
             
             self.locationOfInterestManager.closeAndSaveQuantityOfInterestFile()
     
@@ -347,7 +347,7 @@ class UqsaCase(TestBaseClass):
         '''
         Run all uqsa methods in as a local multiprocess
         '''
-        print "running Multiprocessing UQSA"
+        print("running Multiprocessing UQSA")
         timeStartBatch = time.time()
         
         # create batch list for all jobs    
@@ -363,10 +363,10 @@ class UqsaCase(TestBaseClass):
         timeBatchJob= time.time()-timeStartBatch
         minutesBatch = int(timeBatchJob/60.)
         secsBatch = timeBatchJob-minutesBatch*60.
-        print '====================================='
-        print 'total runtime:  {} min {} sec'.format(minutesBatch,secsBatch)
-        print '====================================='
-        print
+        print('=====================================')
+        print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
+        print('=====================================')
+        print()
         
         
         

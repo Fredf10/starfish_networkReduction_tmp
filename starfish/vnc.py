@@ -55,7 +55,7 @@ def enterNetworkName(networkName, recentNetworkNames = None):
                                                            the correspinding networkName
                                           if user input == newNetworkName: newNetworkName
     """
-    print "     current networkName: ",networkName
+    print("     current networkName: ",networkName)
     networkNameUserInput = str(raw_input("     enter/change networkName (only! ENTER to use current networkName):\n     "))
     
     if networkNameUserInput == "":
@@ -145,34 +145,34 @@ def main():
     k = None
     while menuInput != "q":
         menuInput = ""
-        print ""
-        print '====================================='
-        print '#    VascularNetworkCreator_v2.1    #'
-        print '====================================='
-        print " [a] - add vessel to network"
-        print " [d] - delete vessel in network"
-        print " [n] - new network"
-        print " [b] - set boundary conditions"
-        print " [f] - set global fluid properties"
-        print " [l] - load network"
-        print " [s] - save network"
-        print " [u] - update XML from CSV file(s)"
-        print " [g] - print network graph"
-        print " [p] - print network informations"
-        print " [q] - quit"
-        print ""
-        print '===========Parameter Units==========='
-        print ' NOTE! All parameter units are in the'
-        print ' Pa, seconds, and meters system'
-        print ' i.e. not mmHg, seconds, cm, or dynes,'
-        print ' seconds, grams'
-        print '====================================='
-        print '  current network: ', networkName
+        print("")
+        print('=====================================')
+        print('#    VascularNetworkCreator_v2.1    #')
+        print('=====================================')
+        print(" [a] - add vessel to network")
+        print(" [d] - delete vessel in network")
+        print(" [n] - new network")
+        print(" [b] - set boundary conditions")
+        print(" [f] - set global fluid properties")
+        print(" [l] - load network")
+        print(" [s] - save network")
+        print(" [u] - update XML from CSV file(s)")
+        print(" [g] - print network graph")
+        print(" [p] - print network informations")
+        print(" [q] - quit")
+        print("")
+        print('===========Parameter Units===========')
+        print(' NOTE! All parameter units are in the')
+        print(' Pa, seconds, and meters system')
+        print(' i.e. not mmHg, seconds, cm, or dynes,')
+        print(' seconds, grams')
+        print('=====================================')
+        print('  current network: ', networkName)
         while  menuInput not in ("l","b","q","a","s","g","f","d","u",'n','p'):
             menuInput = raw_input("what to do? ")
         
         if menuInput == "a": 
-            print "Add new vessel"
+            print("Add new vessel")
             
             existing = False
             vesselId = raw_input(" enter the vessel id:  ")
@@ -184,10 +184,10 @@ def main():
                     else:
                         existing = True
                 except ValueError:
-                    print "TYPE-ERROR: vessel id must be type(int) not type(string)"
+                    print("TYPE-ERROR: vessel id must be type(int) not type(string)")
                     vesselId = raw_input(" enter non existing id: ")
                 if existing == True:
-                    print " the vessel id exists already enter a new one"
+                    print(" the vessel id exists already enter a new one")
                     vesselId = raw_input(" enter non existing id: ")
                     existing = False
             
@@ -204,11 +204,11 @@ def main():
                         else:
                             existing = True
                     except ValueError:
-                        print "TYPE-ERROR: mother id must be type(int) not type(string)"
+                        print("TYPE-ERROR: mother id must be type(int) not type(string)")
                         mother = raw_input(" enter existing mother id:  ")
                     if existing == True:
-                        if mother not in vascularNetwork.vessels: print " there exists no vessel with this id"
-                        else: print "   only bifurcations possible!"
+                        if mother not in vascularNetwork.vessels: print(" there exists no vessel with this id")
+                        else: print("   only bifurcations possible!")
                         mother = raw_input(" enter existing mother id:  ")
                         existing = False
                     
@@ -216,12 +216,12 @@ def main():
                 else: vascularNetwork.vessels[mother].rightDaughter = vesselId
                                 
             vascularNetwork.addVessel(vesselId)
-            print " define vessel compliance!"
+            print(" define vessel compliance!")
             
             
             inputType = '0'
-            print "     available compliance types:"
-            print ""
+            print("     available compliance types:")
+            print("")
             # get all defined boundaryConditions from constants-dict save as bcTypes
             complianceTypes = nxml.vesselComplianceElements.keys()
             compTypes = ['default (Hayashi)']
@@ -230,7 +230,7 @@ def main():
             # show all compliance types in the compTypes
             index = 0
             for key in compTypes:
-                print "       [",str(index).rjust(2),"]    ",key
+                print("       [",str(index).rjust(2),"]    ",key)
                 index = index+1
             # get user input and check if it was correct to define the bcType 
             existing = False
@@ -245,11 +245,11 @@ def main():
                         existing = True
                 # if not int but string
                 except ValueError:
-                    print "      TYPE-ERROR: vessel id must be type(int) not type(string)"
+                    print("      TYPE-ERROR: vessel id must be type(int) not type(string)")
                     inputType = (raw_input ("      choose type "))
                 # if int but to low or high
                 if existing == True:
-                    print "       the type does not exist"
+                    print("       the type does not exist")
                     inputType = (raw_input ("      choose type "))
                     existing = False
             
@@ -259,8 +259,8 @@ def main():
                 vesselData = {'complianceType':compType}
                 nxml.vesselComplianceElements[compType]
                                     
-                print ""
-                print "      set values for the Compliance: ", compType
+                print("")
+                print("      set values for the Compliance: ", compType)
                 question = True
                 for arg in nxml.vesselComplianceElements[compType]:
                     if arg != 'complianceType':
@@ -268,7 +268,7 @@ def main():
                         test = True
                         try: float(currValue)
                         except:
-                            print '            VALUE or TYPE ERROR, set to None'
+                            print('            VALUE or TYPE ERROR, set to None')
                             test = False
                         if test == True: vesselData[arg] = (float(currValue))
                         else: vesselData[arg] = None
@@ -277,7 +277,7 @@ def main():
             mainGraph.update_graph(vascularNetwork, window)
                     
         if menuInput == "d":
-            print "Delete a vessel and all its daugthers"
+            print("Delete a vessel and all its daugthers")
             if vascularNetwork.vessels.keys() != []:
                 
                 existing = False
@@ -290,10 +290,10 @@ def main():
                         else: 
                             existing = True
                     except ValueError:
-                        print "TYPE-ERROR: vessel id must be type(int) not type(string)"
+                        print("TYPE-ERROR: vessel id must be type(int) not type(string)")
                         vesselId = raw_input(" enter existing vessel id: ")
                     if existing == True:
-                        print " the vessel does not exist"
+                        print(" the vessel does not exist")
                         vesselId = raw_input(" enter existing vessel id: ")
                         existing = False
                 
@@ -313,10 +313,10 @@ def main():
                     mainGraph.update_graph(vascularNetwork, window)
                 
             else:
-                print " there are no vessels to delete"
+                print(" there are no vessels to delete")
                 
         elif menuInput == "n":
-            print "new network"
+            print("new network")
             question = raw_input(" are u sure to delete all current data? [y] - yes: ")
             if question == 'y':
                 # delete vascularNetwork
@@ -331,14 +331,14 @@ def main():
             vascularNetwork.randomInputManager.printOutInfo()
                         
         elif menuInput == "g":
-            print mainGraph.getGraph()
+            print(mainGraph.getGraph())
             
         elif menuInput == "b":
             subMenuInput = ''
             
             while  subMenuInput not in ['1','2','3','b']:
                 if vascularNetwork.getVariableValue('vessels') == {}:
-                    print " there are no vessels defined and thus no boundarys available";break
+                    print(" there are no vessels defined and thus no boundarys available");break
                 else:
                     # evaluate boundarys in Network
                     boundarys = []
@@ -353,7 +353,7 @@ def main():
                     # update saved boundary conditions
                     for boundarysCurrent in boundarys:
                         if boundarysCurrent not in boundarysSaved:
-                            print " boundary added to vascularNetwork"
+                            print(" boundary added to vascularNetwork")
                             vascularNetwork.boundaryConditions[boundarysCurrent] = []
                             boundarysSaved.append(boundarysCurrent)
                             
@@ -362,40 +362,40 @@ def main():
                         
                     nonBoundarys = list(set(boundarys).symmetric_difference(set(boundarysSaved)))
                     for nonBoundary in nonBoundarys:
-                        print " boundary removed from vacularNetwork"
+                        print(" boundary removed from vacularNetwork")
                         del(vascularNetwork.boundaryConditions[nonBoundary])
                         if nonBoundary in notDefinedBoundarys: notDefinedBoundarys.remove(nonBoundary)
                         
                     vascularNetwork.evaluateConnections()
-                    print ""
-                    print "    sub menu: boundary conditions"
-                    print ""
-                    print "     [1] - show  boundary conditions"
-                    print "     [2] - add   boundary condition "
-                    print "     [3] - del   boundary condition "
+                    print("")
+                    print("    sub menu: boundary conditions")
+                    print("")
+                    print("     [1] - show  boundary conditions")
+                    print("     [2] - add   boundary condition ")
+                    print("     [3] - del   boundary condition ")
 #                     print "     [4] - load  boundary conditions from CSV"
 #                     print "     [5] - write boundary conditions to CSV"
-                    print "     [b] - back to the main menu"
-                    print ""     
+                    print("     [b] - back to the main menu")
+                    print("")     
                     subMenuInput = raw_input("     what to do? ") 
                     
                     if subMenuInput == '1':
-                        print "     boundary conditions"
+                        print("     boundary conditions")
                         pprint.pprint(vascularNetwork.boundaryConditions)
                         subMenuInput = ''
                         
                     elif subMenuInput == '2' and vascularNetwork.root != []:
                         
-                        print "     add   boundary condition"
-                        print ""
+                        print("     add   boundary condition")
+                        print("")
                         
                         definedBoundarys = list(set(notDefinedBoundarys).symmetric_difference(set(vascularNetwork.boundaryConditions.keys())))
-                        print "     vessels with defined boundary condition:"
-                        print "       ",'  '.join(str(i) for i in definedBoundarys)
+                        print("     vessels with defined boundary condition:")
+                        print("       ",'  '.join(str(i) for i in definedBoundarys))
                         
-                        print "     vessels with undefined boundary condition:"
-                        print "       ",'  '.join(str(i) for i in notDefinedBoundarys)
-                        print ""
+                        print("     vessels with undefined boundary condition:")
+                        print("       ",'  '.join(str(i) for i in notDefinedBoundarys))
+                        print("")
                                             
                         existing = False
                         vesselId = raw_input(" enter existing vessel id: ")
@@ -407,16 +407,16 @@ def main():
                                 else:
                                     existing = True
                             except ValueError:
-                                print " TYPE-ERROR: vessel id must be type(int) not type(string)"
+                                print(" TYPE-ERROR: vessel id must be type(int) not type(string)")
                                 vesselId = raw_input(" enter existing vessel id: ")
                             if existing == True:
-                                print " the vessel does not exist"
+                                print(" the vessel does not exist")
                                 vesselId = raw_input(" enter existing vessel id: ")
                                 existing = False
                                                 
                         inputType = '0'
-                        print "     add boundary condition type:"
-                        print ""
+                        print("     add boundary condition type:")
+                        print("")
                         # get all defined boundaryConditions from constants-dict save as bcTypes
                         bcTypesAll = nxml.bcTagsClassReferences.keys()
                         bcTypes = []
@@ -427,7 +427,7 @@ def main():
                         # show all boundaryConditions in the bcTypes
                         index = 0
                         for key in bcTypes:
-                            print "       [",str(index).rjust(2),"]    ",key
+                            print("       [",str(index).rjust(2),"]    ",key)
                             index = index+1
                         # get user input and check if it was correct to define the bcType 
                         existing = False
@@ -442,11 +442,11 @@ def main():
                                     existing = True
                             # if not int but string
                             except ValueError:
-                                print "      TYPE-ERROR: vessel id must be type(int) not type(string)"
+                                print("      TYPE-ERROR: vessel id must be type(int) not type(string)")
                                 inputType = (raw_input ("      choose type "))
                             # if int but to low or high
                             if existing == True:
-                                print "       the type does not exist"
+                                print("       the type does not exist")
                                 inputType = (raw_input ("      choose type "))
                                 existing = False
                         
@@ -456,9 +456,9 @@ def main():
                         boundaryDataDict = {}
                         boundaryDataDict['name']= bcType
                         
-                        print ""
-                        print "      set values for the BC condition: ", bcType
-                        print "          enter 'b' for the first value to skip this procedure"
+                        print("")
+                        print("      set values for the BC condition: ", bcType)
+                        print("          enter 'b' for the first value to skip this procedure")
                         question = True
                         for arg in nxml.boundaryConditionElements[bcType]:
                             if question == True: 
@@ -467,13 +467,13 @@ def main():
                                 test = True
                                 try: float(currValue)
                                 except:
-                                    print '            VALUE or TYPE ERROR, set to None'
+                                    print('            VALUE or TYPE ERROR, set to None')
                                     test = False
                                 if test == True: boundaryDataDict[arg] = (float(currValue))
                                 else: boundaryDataDict[arg] = None
                             else: boundaryDataDict[arg] = None
                         if len(vascularNetwork.boundaryConditions.keys()) == 1:
-                            print "      set position of the BC condition"
+                            print("      set position of the BC condition")
                             position = '2'
                             while position not in ['1','0']:
                                 position = raw_input ("          enter '0' for the start or '1' for the end of the vessel ")
@@ -481,7 +481,7 @@ def main():
                                 #bcType = ''.join(['_',bcType])
                                 boundaryDataDict['name']= ''.join(['_',bcType])
                         
-                        print bcType,boundaryDataDict
+                        print(bcType,boundaryDataDict)
                         
                         boundaryInstances = []
                         boundaryInstance.update(boundaryDataDict)
@@ -498,8 +498,8 @@ def main():
                             
                     
                     elif subMenuInput == '3' and vascularNetwork.root != []:
-                        print "     delete boundary condition"
-                        print ""
+                        print("     delete boundary condition")
+                        print("")
                         pprint.pprint(vascularNetwork.boundaryConditions)
                         
                         vesselId = -1
@@ -508,24 +508,24 @@ def main():
                         
                         bcs = vascularNetwork.boundaryConditions[vesselId]
                         if bcs != []:                 
-                            print ""
+                            print("")
                             index = 0
                             for bc in bcs:
-                                print "       [",str(index).rjust(2),"]    ",bc.name
+                                print("       [",str(index).rjust(2),"]    ",bc.name)
                                 index = index+1
-                            print ""
+                            print("")
                             inType = '0'
                             while inType not in np.linspace(0,len(bcs)-1,len(bcs)):
                                 inType = int(raw_input ("      choose condition to delete "))
                              
-                            print ""
-                            print "     boundary condition ",bcs[inType]," removed!"
-                            print ""
+                            print("")
+                            print("     boundary condition ",bcs[inType]," removed!")
+                            print("")
                             vascularNetwork.boundaryConditions[vesselId].remove(bcs[inType])
                             
                             mainGraph.update_graph(vascularNetwork, window)
                         else:
-                            print "     nothing to delete!"
+                            print("     nothing to delete!")
                         subMenuInput = ''
                     
 #                     elif subMenuInput == '4' and vascularNetwork.root != []:
@@ -553,21 +553,21 @@ def main():
             
             subMenuInput = ''
             while  subMenuInput not in ["1","2","b"]:
-                print ""
-                print "    sub menu: set global fluid properties"
-                print ""
-                print "     [1] - set all"
-                print "     [2] - set individual"
-                print "     [b] - back to the main menu"
-                print ""
-                print "    current fluid properties:"
+                print("")
+                print("    sub menu: set global fluid properties")
+                print("")
+                print("     [1] - set all")
+                print("     [2] - set individual")
+                print("     [b] - back to the main menu")
+                print("")
+                print("    current fluid properties:")
                 for key,value in vascularNetwork.globalFluid.iteritems():
-                    print "     {0:20}     {1:10}  {2:10}".format(key,value,variableUnits[key])
-                print ""
+                    print("     {0:20}     {1:10}  {2:10}".format(key,value,variableUnits[key]))
+                print("")
                 subMenuInput = raw_input("    what to do? ")
                 
                 if subMenuInput == '1':
-                    print "     set all fluid properties"
+                    print("     set all fluid properties")
                     
                     for key in vascularNetwork.globalFluid.keys():
                         inputType = "1"
@@ -582,11 +582,11 @@ def main():
                     subMenuInput = ''
                     
                 elif subMenuInput == '2':
-                    print "     set individual fluid property:"
+                    print("     set individual fluid property:")
                     i = 0
                     properties = vascularNetwork.globalFluid.keys()
                     for property_i in properties:
-                        print "          [",i,'] - ',property_i
+                        print("          [",i,'] - ',property_i)
                         i = 1+i
                     inputType = 0
                     while inputType not in [str(i) for i in range(0,len(properties))]:
@@ -619,33 +619,33 @@ def main():
             
             while  subMenuInput not in ["1","2","3",'5','6',"b"]: #["1","2","3",'4','5','6',"b"]:
                                 
-                print ""
-                print "    sub menu: load data"
-                print ""
-                print "     [1] - load network from XML"
-                print "     [2] - load template network"
-                print "     [3] - load vessel data from CSV"
+                print("")
+                print("    sub menu: load data")
+                print("")
+                print("     [1] - load network from XML")
+                print("     [2] - load template network")
+                print("     [3] - load vessel data from CSV")
                 #print "     [4] - load vessel data and boundary conditions from CSV"
-                print "     [4] - "
-                print "     [5] - load network from SolutionData"
+                print("     [4] - ")
+                print("     [5] - load network from SolutionData")
                 #print "     [6] - load random inputs from CSV"
-                print "     [b] - back to the main menu"
-                print ""
+                print("     [b] - back to the main menu")
+                print("")
                 
                 subMenuInput = raw_input("what to do? ")
                 
                 
                 if subMenuInput in ["1","2","3",'5']:
-                    print ""
-                    print "         recently used networks"
+                    print("")
+                    print("         recently used networks")
                     i = 1
                     for name in recentNetworkNames:
-                        print "          [",i,'] - ',name
+                        print("          [",i,'] - ',name)
                         i = 1+i
-                    print ""
+                    print("")
                 
                 if subMenuInput == '1':
-                    print "     load from XML\n"
+                    print("     load from XML\n")
                     
                     networkName = enterNetworkName(networkName,recentNetworkNames = recentNetworkNames)
                     if networkName == None:break
@@ -659,8 +659,8 @@ def main():
                     except ValueError as e:
                         mainGraph.update_graph(None, window)
                         vascularNetwork = VascularNetwork()
-                        print "\n  could not load network, it does not exist or the file is not up-to-date! \n"
-                        print(str(e))
+                        print("\n  could not load network, it does not exist or the file is not up-to-date! \n")
+                        print((str(e)))
                         #if networkName in recentNetworkNames:
                         #    recentNetworkNames.remove(networkName)
                         networkName = None
@@ -677,15 +677,15 @@ def main():
                     break
                 
                 elif subMenuInput == '2':
-                    print "\n     load template network:\n"
+                    print("\n     load template network:\n")
                     
                     # network templates
                     templatePath = mFPH.getDirectory('networkXmlFileTemplateDirectory','','','read')
                     
                     dirNamesTemplate = [d for d in os.listdir(templatePath) if '.' not in  d]
                     for index,dirName in enumerate(dirNamesTemplate):
-                        print "        [ {:3} ] - {}".format(index,dirName)
-                    print ""
+                        print("        [ {:3} ] - {}".format(index,dirName))
+                    print("")
                     indexChoosen = None
                     while  indexChoosen not in [str(i) for i in xrange(len(dirNamesTemplate))]:
                         indexChoosen = raw_input("     Insert index of network: ")
@@ -702,7 +702,7 @@ def main():
                     except:
                         mainGraph.update_graph(None, window)
                         vascularNetwork = VascularNetwork()
-                        print "\n  could not load network, it does not exist! \n"
+                        print("\n  could not load network, it does not exist! \n")
                         if networkName in recentNetworkNames:
                             recentNetworkNames.remove(networkName)
                         networkName = None
@@ -715,14 +715,14 @@ def main():
                     break
                 
                 elif subMenuInput == '3':
-                    print "     load vessel data from CSV - non existing vessels are added automatically"
-                    print ""
+                    print("     load vessel data from CSV - non existing vessels are added automatically")
+                    print("")
                     networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
                     if networkName == None:break
                     
                     vesselData = mCSV.readVesselDataFromCSV(networkName)
                     if vesselData == None:
-                        print "\n  could not load network csv, it does not exist! \n"
+                        print("\n  could not load network csv, it does not exist! \n")
                     else:
                         vascularNetwork.updateNetwork(vesselData)
                         mainGraph.update_graph(vascularNetwork, window)
@@ -742,7 +742,7 @@ def main():
 #                     break
                 
                 elif subMenuInput == '5':
-                    print "     load network from SolutionData"
+                    print("     load network from SolutionData")
                     try:
                         networkName,dataNumber = mStartUp.chooseSolutionDataCase()
                         
@@ -751,7 +751,7 @@ def main():
                         networkName = None
                         mainGraph.update_graph(vascularNetwork, window)
                                                     
-                    except: print "\n ERROR occured could not open requested network, file does not exist or is out dated"
+                    except: print("\n ERROR occured could not open requested network, file does not exist or is out dated")
                     break
                 
                 
@@ -778,22 +778,22 @@ def main():
             
         elif menuInput == "s":
             subMenuInput = ''
-            print ""
-            print "    sub menu: save data"
-            print ""
-            print "     [1] - write to XML"
-            print "     [2] - write vessel data to CSV"
+            print("")
+            print("    sub menu: save data")
+            print("")
+            print("     [1] - write to XML")
+            print("     [2] - write vessel data to CSV")
             #print "     [3] - write vessel data and boundary conditions to CSV"
-            print "     [3] - "
-            print "     [4] - write graph to .png"
+            print("     [3] - ")
+            print("     [4] - write graph to .png")
             #print "     [5] - write random input data to CSV"
-            print "     [b] - back to the main menu"
-            print ""
+            print("     [b] - back to the main menu")
+            print("")
             while subMenuInput not in ["1","2",'4',"b"]: #["1","2","3",'4','5',"b"]:
                 subMenuInput = raw_input("what to do? ")
                      
                 if subMenuInput == '1':
-                    print "     write to XML"
+                    print("     write to XML")
                     networkName = enterNetworkName(networkName)
                     vascularNetwork.name = networkName
                     if networkName == None:break
@@ -801,7 +801,7 @@ def main():
                     break
                     
                 elif subMenuInput == '2':
-                    print "     write vessel data to CSV"
+                    print("     write vessel data to CSV")
                     networkName = enterNetworkName(networkName) 
                     if networkName == None:break
                     mCSV.writeVesselDataToCSV(networkName, vascularNetwork.vessels)
@@ -819,7 +819,7 @@ def main():
 #                     break
                 
                 elif subMenuInput == '4':
-                    print "     write graph to .png"
+                    print("     write graph to .png")
                     vncNetworkGraphFile = mFPH.getFilePath('vncNetworkGraphFile', networkName, 'xxx', 'write')
                     #mainGraph.graph.write(graphPath+networkName+'/'+pictureName+'.dot')
                     mainGraph.graph.write_png(vncNetworkGraphFile)
@@ -843,17 +843,17 @@ def main():
                 recentNetworkNames = []
                         
             subMenuInput = ''
-            print ""
-            print "    sub menu: update XML from CSV"
-            print ""
-            print "     load from XML"
-            print ""
-            print "         recently used networks"
+            print("")
+            print("    sub menu: update XML from CSV")
+            print("")
+            print("     load from XML")
+            print("")
+            print("         recently used networks")
             i = 1
             for name in recentNetworkNames:
-                print "          [",i,'] - ',name
+                print("          [",i,'] - ',name)
                 i = 1+i
-            print ""
+            print("")
             networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
             if networkName == None:break
             # delete the old network
@@ -864,8 +864,8 @@ def main():
             except ValueError as e:
                 mainGraph.update_graph(None, window)
                 vascularNetwork = VascularNetwork()
-                print "\n  could not load network, it does not exist or the file is not up-to-date! \n"
-                print(str(e))
+                print("\n  could not load network, it does not exist or the file is not up-to-date! \n")
+                print((str(e)))
                 #if networkName in recentNetworkNames:
                 #    recentNetworkNames.remove(networkName)
                 networkName = None
@@ -876,10 +876,10 @@ def main():
                 mainGraph.update_graph(vascularNetwork, window)
                 
             if networkName is not None:
-                print "     load vessel data from CSV - non existing vessels are added automatically"
+                print("     load vessel data from CSV - non existing vessels are added automatically")
                 vesselData = mCSV.readVesselDataFromCSV(networkName)
                 if vesselData == None:
-                    print "\n  could not load network csv, it does not exist! \n"
+                    print("\n  could not load network csv, it does not exist! \n")
                 else:
                     vascularNetwork.updateNetwork(vesselData)
                 #print "     load boundaryData from csv as well? press [u]" 
@@ -891,13 +891,13 @@ def main():
                 
                     mainGraph.update_graph(vascularNetwork, window)
                 
-                print "     write to XML"
+                print("     write to XML")
                 vascularNetwork.name = networkName
                 mXML.writeNetworkToXML(vascularNetwork)
             else:
-                print "\n  could not update network \n"
+                print("\n  could not update network \n")
             
-    print "bye bye .."
+    print("bye bye ..")
 
 if __name__ == '__main__':
     main()

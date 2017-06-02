@@ -72,12 +72,12 @@ class Visualisation3DGUI(pyglet.window.Window):
         except pyglet.window.NoSuchConfigException:
             try:
                 config = screen.get_best_config(templateLow)
-                print "OpenGlconfig", config
+                print("OpenGlconfig", config)
             except pyglet.window.NoSuchConfigException:
-                print " OpenGL: simple context configuration is applied due to installed hardware"
+                print(" OpenGL: simple context configuration is applied due to installed hardware")
                 template = gl.Config()
                 config = screen.get_best_config(template)
-                print "OpenGlconfig", config
+                print("OpenGlconfig", config)
 
         context = config.create_context(None)
 
@@ -210,7 +210,7 @@ class Visualisation3DGUI(pyglet.window.Window):
         if dx < 0: addx = -2
         addy = 2
         if dy < 0: addy = -2
-        print "new size", self.width+addx, self.height-addy
+        print("new size", self.width+addx, self.height-addy)
 
         self.set_size(self.width+addx, self.height-addy)
 
@@ -773,7 +773,7 @@ class Visualisation3D(Visualisation3DGUI):
             self.switch_to()
             pyglet.image.get_buffer_manager().get_color_buffer().save(''.join([self.templateMovDataDirectory,'/.screenShot',str(self.movieCount).zfill(4),'.png']))
 
-            print ''.join([self.templateMovDataDirectory,'/.screenShot',str(self.movieCount).zfill(4),'.png'])
+            print(''.join([self.templateMovDataDirectory,'/.screenShot',str(self.movieCount).zfill(4),'.png']))
             self.movieCount = self.movieCount + 1
 
     def resetVisualisationAndPause(self):
@@ -804,7 +804,7 @@ class Visualisation3D(Visualisation3DGUI):
 
             self.oneCycle = oneCycle
             if oneCycle:
-                print " create movie for one cylce"
+                print(" create movie for one cylce")
                 self.resetVisualisationAndPause()
                 self.startVisualisation()
 
@@ -832,7 +832,7 @@ class Visualisation3D(Visualisation3DGUI):
         '''
         open all movie-template-*.png's and create a movie out of it
         '''
-        print "createMovie(): writing image data"
+        print("createMovie(): writing image data")
 
         #frameSizeImage = read_png(''.join([self.templateMovDataDirectory,'/.screenShot0000.png']))
         #frameSize = (np.shape(frameSizeImage)[1],np.shape(frameSizeImage)[0])
@@ -879,12 +879,12 @@ class Visualisation3D(Visualisation3DGUI):
 
 
             #os.spawnvp(os.P_WAIT, 'ffmpeg', commandFFmpg)
-            print commandFFmpg
+            print(commandFFmpg)
             subprocess.Popen(commandFFmpg, shell = True )
 
-            print str(1./self.updateTime)
+            print(str(1./self.updateTime))
             self.movieNumber = self.movieNumber+1
-            print "createMovie(): created movie sucessfull"
+            print("createMovie(): created movie sucessfull")
         #except:
         #    print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
 
@@ -1029,7 +1029,7 @@ class Visualisation3D(Visualisation3DGUI):
         # get values
         valueStart,indexStart = self.findNearestValueIdOfArray(self.vascularNetwork.simulationTime, startTime)
         valueEnd,indexEnd     = self.findNearestValueIdOfArray(self.vascularNetwork.simulationTime, endTime)
-        print " restrict visualisation time: from {}({}) to {}({}) ".format(valueStart,startTime,valueEnd,endTime)
+        print(" restrict visualisation time: from {}({}) to {}({}) ".format(valueStart,startTime,valueEnd,endTime))
 
         if indexStart < indexEnd:
             # set timesteps
@@ -1153,7 +1153,7 @@ class Vessel3D(Vessel):
             r = np.sqrt(self.Asol[0]/np.pi)  # try using solution data
         except:
             r = np.sqrt(self.AsVector/np.pi) # use As vector if no solutionData is available
-            print "WARNING: 3dVisialisation.class3DVessel,createInitial3dVertice(): area solution available, taking As instead!"
+            print("WARNING: 3dVisialisation.class3DVessel,createInitial3dVertice(): area solution available, taking As instead!")
 
         ## create matrix with constants for cos,sin and z values
         cosRepeated = np.repeat([np.cos(theta)],N,axis=0).ravel()
@@ -1359,7 +1359,7 @@ if __name__ == '__main__':
 
 
         pyglet.app.run()
-        print "and exit()"
+        print("and exit()")
         pyglet.app.exit()
         ### garbage collection
         gc.collect()

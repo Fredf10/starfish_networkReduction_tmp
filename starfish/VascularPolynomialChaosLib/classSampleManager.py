@@ -139,7 +139,7 @@ class SampleManager(TestBaseClass):
         distDim = distributionManager.distributionDimension
         
         if distDim == 1:
-            print "WARNING: random distribution dimension == 1, no sensitivity analysis possible!"
+            print("WARNING: random distribution dimension == 1, no sensitivity analysis possible!")
             self.sensitivityAnalysis = False
         
         ## if sensitivityAnalysis is false, only UQ is done with one matrix
@@ -161,7 +161,7 @@ class SampleManager(TestBaseClass):
                 
             samplesTest = np.sum((samplesA-samplesB).ravel())
             if samplesTest == 0:
-                print "WARNING: samplesA and samplesB are the same!"
+                print("WARNING: samplesA and samplesB are the same!")
         
             for i in xrange(distDim):
                 samplesC = samplesB.copy()

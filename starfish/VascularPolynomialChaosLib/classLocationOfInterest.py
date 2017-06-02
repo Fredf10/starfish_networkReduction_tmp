@@ -106,7 +106,7 @@ class LocationOfInterest(TestBaseClass):
                     
                     interpolateX = False
                     if vascularNetwork.vessels[vesselId].N != 50:
-                        print "DB: SampleNumebr {} not gridSize 50 but {}".format(sampleIndex,vascularNetwork.vessels[vesselId].N)
+                        print("DB: SampleNumebr {} not gridSize 50 but {}".format(sampleIndex,vascularNetwork.vessels[vesselId].N))
                         interpolateX = True
                     
                         maxNumberPoints = 100 # if this is changed peak index in data saving must be changed
@@ -355,7 +355,7 @@ class LocationOfInterest(TestBaseClass):
                          
         else:
             ## TODO: add more locations as necessary baroreceptor etc.
-            print "class LoacationOfInterest: location {} is not supported yet".format(self.queryLocation)
+            print("class LoacationOfInterest: location {} is not supported yet".format(self.queryLocation))
      
      
     
@@ -555,10 +555,10 @@ class LocationOfInterest(TestBaseClass):
             plt.title(quantityNamePure)
             plt.show(block = False)
             
-            print '\n    Extrema detection all simulations are evaluated:'
-            print '      [0] - Analyse all points'
-            print '      [1] - Choose points for analysis'
-            print '      [2] - Not all desiered peaks are detected (redo and adjust search-delta)'
+            print('\n    Extrema detection all simulations are evaluated:')
+            print('      [0] - Analyse all points')
+            print('      [1] - Choose points for analysis')
+            print('      [2] - Not all desiered peaks are detected (redo and adjust search-delta)')
             suggestions = [str(i) for i in xrange(3)]
             answer = "nothing"
             while answer not in suggestions:
@@ -570,9 +570,9 @@ class LocationOfInterest(TestBaseClass):
                                 
             if answer == '1':
                 allDesieredPointsDetected = True
-                print "\n    points found for analysis:"
+                print("\n    points found for analysis:")
                 for i in xrange(numberOfPointsFirst):
-                    print "      [{}] - color: {}, marker style {}".format(i,colors[i],markerstyles[i])
+                    print("      [{}] - color: {}, marker style {}".format(i,colors[i],markerstyles[i]))
                 answerSelectionSplit = ['']
                 while sum([item in [str(i) for i in xrange(numberOfPointsFirst)] for item in answerSelectionSplit]) != len(answerSelectionSplit):
                     answerSelection = raw_input("    please enter the numbers of the points (separated with comma): ")
@@ -592,7 +592,7 @@ class LocationOfInterest(TestBaseClass):
                         delta = float(answer2)
                         convertableToFloat = True
                     except ValueError as v:
-                        print "{} not convertable to float!!".format(v)
+                        print("{} not convertable to float!!".format(v))
                         
             #TODO: save the figures and close ..
             plt.close()

@@ -160,8 +160,8 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             dataNumber = defineDataNumber(networkName)
     ## visualisation only
     if visualisationOnly == True and (dataSetNumber == None or networkName == None) and vascularPolynomialChaos == False: 
-            print "\n  No networkName passed, choose between all available networks:"
-            print "  (NB: use -f networkName to define a specific file you want to open) \n"
+            print("\n  No networkName passed, choose between all available networks:")
+            print("  (NB: use -f networkName to define a specific file you want to open) \n")
             networkName,dataNumber = chooseSolutionDataCase()
     ## polynomial chaos
     if vascularPolynomialChaos == True:
@@ -186,9 +186,9 @@ def prettyPrintList(title, listToPrint, indexOffset=0):
     """
     Function to pretty print a list to STDOUT with numbers to choose from
     """
-    print title
+    print(title)
     for index,listElement in enumerate(listToPrint):
-        print "   [ {:3} ] - {}".format(index + indexOffset, listElement)
+        print("   [ {:3} ] - {}".format(index + indexOffset, listElement))
 
 def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your choice, (q)-quit: "):
     '''
@@ -197,10 +197,10 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
     userInput = "NONE"
     appropriateInputList.append('q')
-    print ""
+    print("")
     while userInput not in appropriateInputList:
         userInput = raw_input(question)
-    print ""
+    print("")
     if userInput == 'q': exit()
     else: return int(userInput)
 
@@ -224,8 +224,8 @@ def chooseNetwork(showTemplates = True):
     
     dirNames = dirNamesTemplate+dirWorkingDirectory    
     userInput = userInputEvaluationInt(len(dirNames), 0)
-    print ""
-    print '====================================='
+    print("")
+    print('=====================================')
     return dirNames[userInput]
 
 # TODO: (einar) fix exception variable
@@ -257,7 +257,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                         raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
                         
                     elif exception == 'Warning':
-                        print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
+                        print('moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber))
                         return False,False
                     else:
                         raise Exception
@@ -271,7 +271,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
                     raise ValueError('moduleStartUp.evaluateDataNumber. Datanumber {} to high! system exit'.format(dataSetNumber))
                     
                 elif exception == 'Warning':
-                    print 'moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber)
+                    print('moduleStartUp.evaluateDataNumber. Datanumber {} to high'.format(dataSetNumber))
                     return False,False
                 else:
                     raise Exception   
@@ -294,14 +294,14 @@ def defineSimulationDescription():
     try:
         simulationDescription = str(simulationDescription)
     except:
-        print 'ERROR: no String Convertable input given, system exit'
+        print('ERROR: no String Convertable input given, system exit')
         exit()
     if simulationDescription in ['',' ']: simulationDescription = '-'
     return simulationDescription
     
 def defineDataNumber(networkName):
     
-    print "No solution-datanumber defined (3 characters)! It needs to be defined"
+    print("No solution-datanumber defined (3 characters)! It needs to be defined")
 
     #TODO CRITICAL this fails for template networks
     existingDataNumbers = findExistingDataNumbers(networkName)
@@ -315,7 +315,7 @@ def defineDataNumber(networkName):
         try:
             dataNumber,xx = evaluateDataNumber(dataNumber)
         except ValueError as e:
-            print e
+            print(e)
             testedFailed = True
             
         if dataNumber in existingDataNumbers:
@@ -406,7 +406,7 @@ def chooseSolutionDataCase():
         indexOffSet = indexOffSet+len(listToPrint)
         
     if len(fileNameDataNumber) == 0:
-        print "No solutionCases available, system exit"
+        print("No solutionCases available, system exit")
         exit()
     
     question  = "  Choose simulation case you want to open according to its number, (q)-quit: "
@@ -441,10 +441,10 @@ def chooseUQSACaseFile(networkName):
                 if ".xml" in filename and "uqsaCase" in filename:
                     filenames.append(filename)
             
-    print "\n  No dataNumber for UQSAcase file passed, choose between all available UQSAcase files:"
-    print "  (NB: use -n dataNumber to define a specific UQSAcase you want to open)\n"
-    print "   [   0 ] - Create new template uqsa case file and exit"
-    print "   [   1 ] - Create new template uqsa case file and run"
+    print("\n  No dataNumber for UQSAcase file passed, choose between all available UQSAcase files:")
+    print("  (NB: use -n dataNumber to define a specific UQSAcase you want to open)\n")
+    print("   [   0 ] - Create new template uqsa case file and exit")
+    print("   [   1 ] - Create new template uqsa case file and run")
     indexOffset = 2
     if filenames != []:
         prettyPrintList('', filenames, indexOffset=indexOffset)
@@ -474,7 +474,7 @@ def chooseUQSACaseFile(networkName):
         destinationFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber,'write')
         shutil.copy(toCopyFile, destinationFile)
         if userInput == 0:
-            print "files created!, exit()"
+            print("files created!, exit()")
             exit()
     
     else:

@@ -134,13 +134,13 @@ class MeasurementRoutine(TestBaseClass):
         sol = optimize.root(self.estimateCff, alpha_c, args)
         alpha_c = sol.x[0]
         
-        print 
-        print "MeasurementRoutine"
-        print 
-        print "estimated alpha_p:", alpha_p
-        print "estimated alpha_a:", alpha_a
-        print "estimated alpha_c:", alpha_c, type(alpha_c)
-        print         
+        print() 
+        print("MeasurementRoutine")
+        print() 
+        print("estimated alpha_p:", alpha_p)
+        print("estimated alpha_a:", alpha_a)
+        print("estimated alpha_c:", alpha_c, type(alpha_c))
+        print()         
         
         # 2.2 loop through vessels and adjust all coefficients with alpha_c
         for vessel in vascularNetwork.vessels.itervalues():

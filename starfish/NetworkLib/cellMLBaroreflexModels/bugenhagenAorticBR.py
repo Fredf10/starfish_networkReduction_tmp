@@ -391,9 +391,9 @@ if __name__ == "__main__":
     strain = 0.3419557616+0.0671788693*sin((78.9000/60.0000*6.28)*timeArray)
     timeArray2 = linspace(0,0.0004,2)
     p[34] = strain[0]
-    print p[34]
+    print(p[34])
     voi, states, algebraic = solver2(timeArray2,states,constants)
-    print algebraic[-1][11]
+    print(algebraic[-1][11])
     
     HR = np.zeros(np.size(strain))
     HR[0] = algebraic[-1][11]
@@ -403,8 +403,8 @@ if __name__ == "__main__":
         p[34] = strain[t+1]
         voi, states, algebraic = solver2(timeArray2,states[-1],constants)
         #print size(algebraic)    
-        print p[34]
-        print algebraic[-1][11]
+        print(p[34])
+        print(algebraic[-1][11])
         HR[t+1] = algebraic[-1][11]
         
     import matplotlib.pyplot as plt

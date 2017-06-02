@@ -526,12 +526,12 @@ class Vessel(cSBO.StarfishBaseObject):
         """
         writes all variables and their values to the console
         """
-        print "----------------"
-        print "    Vessel %d"%self.Id,"\n"
+        print("----------------")
+        print("    Vessel %d"%self.Id,"\n")
         for variable,value in self.__dict__.iteritems():
             try:
-                print " {:<20} {:>8}".format(variable,value)
-            except Exception: print " {:<20} {:>8}".format(variable,'None')
+                print(" {:<20} {:>8}".format(variable,value))
+            except Exception: print(" {:<20} {:>8}".format(variable,'None'))
 
     def caculatePositionAndGravity(self, n, positionEndMother, rotToGlobalSysMother):
         """

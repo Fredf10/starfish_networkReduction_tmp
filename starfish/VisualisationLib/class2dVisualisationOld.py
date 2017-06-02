@@ -366,7 +366,7 @@ class Visualisation2D(gtk.Window):
                     self.currentDataNumber = dataNumber
                     self.CBsolData.set_active(self.dataNumbers.index(dataNumber))
             else:
-                print "Error: different Networks loaded!"
+                print("Error: different Networks loaded!")
         return True    
         
     def on_clickedPlots(self, widget):
@@ -443,7 +443,7 @@ class Visualisation2D(gtk.Window):
         if response == gtk.RESPONSE_OK:
             filenames = dialog.get_filenames()
         elif response == gtk.RESPONSE_CANCEL:
-            print 'Closed, no files selected'
+            print('Closed, no files selected')
         dialog.destroy()
         
         return filenames
@@ -692,7 +692,7 @@ class Window2dPlots(gtk.Window):
         self.canvas.queue_resize()
         
     def on_clickedRenderMovie(self,widget):
-        print " Render movie data: {} plots to save".format(len(self.hScaleTimeArray))
+        print(" Render movie data: {} plots to save".format(len(self.hScaleTimeArray)))
         
         
         dirName = ''.join([cur,'/','movieTempData/'])
@@ -879,40 +879,40 @@ class Window2dPlots(gtk.Window):
             
             minMaxPoints = {}
             if self.plotMinMaxPoints == True:
-                print "Min Max Points"
+                print("Min Max Points")
                 try:
                     minMaxPoints['Psol'],minMaxPoints['PsolT'] = mProc.minMaxFunction(Psol.ravel()/unitP,xAxisValues,delta=0.025)
-                    print "Pressure: "
+                    print("Pressure: ")
                     pp(minMaxPoints['Psol'])
                     pp(minMaxPoints['PsolT'])
                 except: pass 
                 try:
                     minMaxPoints['Pf'],minMaxPoints['PfT'] = mProc.minMaxFunction(p_f.ravel()/unitP,xAxisValues,delta=0.025)
-                    print "Pressure forward: "
+                    print("Pressure forward: ")
                     pp(minMaxPoints['Pf'])
                     pp(minMaxPoints['PfT'])
                 except: pass 
                 try:
                     minMaxPoints['Pb'],minMaxPoints['PbT'] = mProc.minMaxFunction(p_b.ravel()/unitP,xAxisValues,delta=0.025)
-                    print "Pressure backward: "
+                    print("Pressure backward: ")
                     pp(minMaxPoints['Pb'])
                     pp(minMaxPoints['PbT'])
                 except: pass 
                 try:
                     minMaxPoints['Qsol'],minMaxPoints['QsolT'] = mProc.minMaxFunction(Qsol.ravel()*unitF,xAxisValues,delta=0.025)
-                    print "Flow: "
+                    print("Flow: ")
                     pp(minMaxPoints['Qsol'])
                     pp(minMaxPoints['QsolT'])
                 except: pass 
                 try: 
                     minMaxPoints['Qf'],minMaxPoints['QfT'] = mProc.minMaxFunction(q_f.ravel()*unitF,xAxisValues,delta=0.025)
-                    print "Flow forward: "
+                    print("Flow forward: ")
                     pp(minMaxPoints['Qf'])
                     pp(minMaxPoints['QfT'])
                 except: pass 
                 try: 
                     minMaxPoints['Qb'],minMaxPoints['QbT'] = mProc.minMaxFunction(q_b.ravel()*unitF,xAxisValues,delta=0.025)
-                    print "Flow backward: "
+                    print("Flow backward: ")
                     pp(minMaxPoints['Qb'])
                     pp(minMaxPoints['QbT'])
                 except: pass 

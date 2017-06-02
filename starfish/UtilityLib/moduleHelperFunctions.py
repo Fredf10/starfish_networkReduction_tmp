@@ -24,7 +24,7 @@ def getGitHash():
     try:
         gitHash = subprocess.check_output("git rev-parse HEAD", shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        print e
+        print(e)
         gitHash = "not available"
     
     gitHash  = gitHash.split('\n')[0]
@@ -33,10 +33,10 @@ def getGitHash():
     try:
         dirtyRepos = subprocess.check_output("git diff --quiet --exit-code", shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        print e
+        print(e)
         dirtyRepos = True
-        print """WARNING: moduleHelperFunctions.getGitHash(): uncommited changes detected,
-         git hash does not correspond to actual code version!"""
+        print("""WARNING: moduleHelperFunctions.getGitHash(): uncommited changes detected,
+         git hash does not correspond to actual code version!""")
         gitHash = ' '.join([gitHash, 'uncomitted changes'])
     
     return gitHash
