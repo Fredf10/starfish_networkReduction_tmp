@@ -41,18 +41,12 @@ cur = os.path.dirname( os.path.realpath('__file__') )
 import logging
 logger = logging.getLogger('starfish')
 logger.setLevel(logging.DEBUG)
-
-
-import SolverLib.class1DflowSolver as c1DFlowSolv
-
-import UtilityLib.moduleXML as mXML
-import UtilityLib.moduleStartUp as mStartUp #import parseOptions
-import UtilityLib.moduleFilePathHandler as mFPH
-
+import starfish.SolverLib.class1DflowSolver as c1DFlowSolv
+import starfish.UtilityLib.moduleXML as mXML
+import starfish.UtilityLib.moduleStartUp as mStartUp #import parseOptions
+import starfish.UtilityLib.moduleFilePathHandler as mFPH
 import matplotlib.pyplot as plt
-
 import gc
-
 import subprocess
 
 def main():

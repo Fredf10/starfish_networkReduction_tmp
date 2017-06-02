@@ -34,13 +34,9 @@
 ##
 
 #---------------------------------------------------------------------------------------#
-import os
-# set the path relative to THIS file not the executing file!
-cur = os.path.dirname( os.path.realpath('__file__') )
-
 import Simulator as simulator
-import Visualisation as visualisationToolBox
-import vnc 
+import starfish.Visualisation as visualisationToolBox
+import starfish.vnc  as vnc
 import VascularPolynomialChaos as uqsaToolBox
 
 def main():

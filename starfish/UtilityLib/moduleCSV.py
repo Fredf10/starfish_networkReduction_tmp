@@ -1,13 +1,13 @@
 import csv
 from numpy import sqrt,pi
 import sys,os
-import ..NetworkLib.classBoundaryConditions as ccBC
+from ..NetworkLib import classBoundaryConditions as ccBC
 
 from .constants import newestNetworkXml as nxml
 from .constants import variablesDict
 
-from . import .moduleXML as mXML
-from . import .moduleFilePathHandler as mFPH
+from . import moduleXML as mXML
+from . import moduleFilePathHandler as mFPH
 
 def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     """
