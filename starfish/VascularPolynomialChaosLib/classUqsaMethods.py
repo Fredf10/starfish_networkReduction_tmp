@@ -33,7 +33,7 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
                     
@@ -154,7 +154,7 @@ class UqsaMethodPolynomialChaosPseudoSpectral(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
                     
@@ -270,7 +270,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -403,7 +403,7 @@ class UqsaMethodPolynomialChaosDepDirLRorder(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -468,8 +468,8 @@ class UqsaMethodPolynomialChaosDepDirLRorder(TestBaseClass):
             n_right = int((1-nu)*len(v))
     
             o = 0
-            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
-                    2*cp.terms(o, 4) <= len(samples_right[0]):
+            while 2*cp.bertran.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.bertran.terms(o, 4) <= len(samples_right[0]):
                 o += 1
             o = (o or 1)-1
             o = (o or 1)
@@ -542,7 +542,7 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -607,8 +607,8 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
             n_right = int((1-nu)*len(v))
     
             o = 0
-            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
-                    2*cp.terms(o, 4) <= len(samples_right[0]):
+            while 2*cp.bertran.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.bertran.terms(o, 4) <= len(samples_right[0]):
                 o += 1
             o = (o or 1)-1
             o = (o or 1)
@@ -684,7 +684,7 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -741,8 +741,8 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
             f_vals_left = data[j][t_>=t_max]
     
             o = 0
-            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
-                    2*cp.terms(o, 4) <= len(samples_right[0]):
+            while 2*cp.bertran.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.bertran.terms(o, 4) <= len(samples_right[0]):
                 o += 1
             o = (o or 1)-1
             o = (o or 1)
@@ -805,7 +805,7 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -864,8 +864,8 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
     
     
             o = 0
-            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
-                    2*cp.terms(o, 4) <= len(samples_right[0]):
+            while 2*cp.bertran.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.bertran.terms(o, 4) <= len(samples_right[0]):
                 o += 1
             o = (o or 1)-1
             o = (o or 1)
@@ -929,7 +929,7 @@ class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -986,8 +986,8 @@ class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
             f_vals_left = data[j][t_>=t_max]
     
             o = 0
-            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
-                    2*cp.terms(o, 4) <= len(samples_right[0]):
+            while 2*cp.bertran.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.bertran.terms(o, 4) <= len(samples_right[0]):
                 o += 1
             o = (o or 1)-1
             o = (o or 1)
@@ -1046,7 +1046,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         function to evaluate the sample size
         '''
         # calculate samplesSize from expansion order 
-        samplesSize = int(self.sampleFactor*cp.terms(self.polynomialOrder, distributionDimension))
+        samplesSize = int(self.sampleFactor*cp.bertran.terms(self.polynomialOrder, distributionDimension))
         abcSample = False
         return samplesSize,abcSample
               
@@ -1103,8 +1103,8 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
             f_vals_right = data[j][t_<t_max]
     
             o = 0
-            while 2*cp.terms(o, 4) <= len(samples_left[0]) and\
-                    2*cp.terms(o, 4) <= len(samples_right[0]):
+            while 2*cp.bertran.terms(o, 4) <= len(samples_left[0]) and\
+                    2*cp.bertran.terms(o, 4) <= len(samples_right[0]):
                 o += 1
             o = (o or 1)-1
             o = (o or 1)
