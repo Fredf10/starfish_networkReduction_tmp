@@ -44,11 +44,11 @@ def main():
         
         while True:
             
-            if viz2d.poll() != None:
+            if viz2d.poll() is not None:
                 viz3d.terminate()
                 exit()
                 
-            if viz3d.poll() != None:
+            if viz3d.poll() is not None:
                 viz2d.terminate()
                 exit()
                 

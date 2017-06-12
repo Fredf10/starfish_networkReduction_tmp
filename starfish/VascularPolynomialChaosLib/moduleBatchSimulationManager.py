@@ -110,6 +110,6 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
-    print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
+    print(u'total runtime:  {:d} min {:.2f} sec'.format(minutesBatch,secsBatch)) #TODO figure out why this was an issue without u'.'
     print('=====================================')
             

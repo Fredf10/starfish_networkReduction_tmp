@@ -1120,7 +1120,7 @@ def main():
             
             ################################################################################
               
-            if solutionInterpolated != None:
+            if solutionInterpolated is not None:
             #--- 2.3 claculate gPCE
                 print("    starting the polychaos polynomial calculation from polychaos simulation result!!")
                 startTime = time.clock()
@@ -1525,7 +1525,7 @@ def main():
                     #find root
                     root = vascularNetwork.root    
                     # add root to the viz vessels if root has daughters:
-                    if vascularNetwork.vessels[root].leftDaughter != None:
+                    if vascularNetwork.vessels[root].leftDaughter is not None:
                         viz.append(root)
                     # loop through tree until all daughters are conected
                     while len(viz) != 0:
@@ -1537,22 +1537,22 @@ def main():
                         #append the mother to the calc list
                         curCalcList = [motherVessel]
                         
-                        if leftDaughter != None:
+                        if leftDaughter is not None:
                             #append the left daughter to the calc list
                             curCalcList.append(leftDaughter)
                            
-                            if rightDaughter != None:
+                            if rightDaughter is not None:
                                 #append the left daughter to the calc list
                                 curCalcList.append(rightDaughter)
                             else:
                                 curCalcList.append(None)
                             # check if leftDaughter has also daughters 
-                            if vascularNetwork.vessels[leftDaughter].leftDaughter != None:
+                            if vascularNetwork.vessels[leftDaughter].leftDaughter is not None:
                                 viz.append(leftDaughter)
                                 
-                            if rightDaughter != None:
+                            if rightDaughter is not None:
                                 # check if rightDaughter has also daughters 
-                                if vascularNetwork.vessels[rightDaughter].leftDaughter != None:
+                                if vascularNetwork.vessels[rightDaughter].leftDaughter is not None:
                                     viz.append(rightDaughter)
                         bifurcationList.append(curCalcList)
                     
@@ -1664,8 +1664,8 @@ def main():
 #                                 #calculate mean and STD with respect to a certain random varibale
 #                                 currDistMean = pc.E(distributions)
 #                                 currDistMean[bif[0]] = np.nan
-#                                 if bif[1] != None: currDistMean[bif[1]] = np.nan
-#                                 if bif[2] != None: currDistMean[bif[2]] = np.nan
+#                                 if bif[1] is not None: currDistMean[bif[1]] = np.nan
+#                                 if bif[2] is not None: currDistMean[bif[2]] = np.nan
 #                                 # reduce polynomials
 #                                 currPolynomTime = polynoms[0][count][quantity]['Time'](*currDistMean)
 #                                 currPolynomAmp = polynoms[0][count][quantity]['Amp'](*currDistMean)

@@ -724,7 +724,7 @@ class ParseError(Exception):
         self.col = col
 
     def __str__(self):
-        return ':'.join([str(part) for part in (self.filename, self.line, self.col, self.msg) if part != None])
+        return ':'.join([str(part) for part in (self.filename, self.line, self.col, self.msg) if part is not None])
         
 
 class Scanner:
@@ -1738,7 +1738,7 @@ class DotWidget(gtk.DrawingArea):
                     vinzenz@eck-mail.eu
                     '''
                     
-                    if self.vascularNetwork != None:
+                    if self.vascularNetwork is not None:
                     
                         itemType = jump.item.__class__.__name__
                         shapesTemp = jump.item.shapes

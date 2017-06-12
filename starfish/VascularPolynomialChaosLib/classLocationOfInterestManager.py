@@ -100,7 +100,7 @@ class LocationOfInterestManager(TestBaseClass):
             
         else:
             print("load estimated simulation time of all simulations")
-            if simulationTimeFileLoad != None:
+            if simulationTimeFileLoad is not None:
                 self.loadQuantitiyOfInterestData(simulationTimeFileLoad)
             else:
                 raise ValueError('simulationTime hdf5 file for case does not exist! {}'.format(simulationTimeFileLoad))

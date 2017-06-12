@@ -75,7 +75,7 @@ class RandomInput(TestBaseClass):
         elif isinstance(input,float):        
             # if input comes from distribution handler
             sample_i = input        
-        if sample_i != None:
+        if sample_i is not None:
             realisation = self.evaluateRealisationFromSample(sample_i)
             if self.updateMethods != {}:
                 #for i,loc in enumerate(self.parameter.split('_')):

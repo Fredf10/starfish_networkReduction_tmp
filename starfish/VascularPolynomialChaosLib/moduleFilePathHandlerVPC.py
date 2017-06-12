@@ -164,7 +164,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     vpcOrderMethodDirectory     = ''.join([vpcCaseDirectory,'/','samplingMethod',caseName])
     vpcEvaluationNetDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationNetworkFiles'])
     vpcEvaluationSolDirectory   = ''.join([vpcOrderMethodDirectory,'/evaluationSolutionData'])
-    vpcConficTemplateDicrectory = ''.join([starfishHomeDirectory,'/TemplateNetworks','/vascularPolynomialChaos'])
+    vpcConfigTemplateDicrectory = ''.join([starfishHomeDirectory,'/TemplateNetworks','/vascularPolynomialChaos'])
     
     ## look up tables
     # directories
@@ -180,7 +180,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'evaluationLogFileDirectory'             : vpcOrderMethodDirectory,
                    'preprocessedDataFileDirectory'          : vpcOrderMethodDirectory,
                    'uqsaSolutionDataFileDirectory'          : vpcOrderMethodDirectory,
-                   'uqsaCaseTemplateFileDirectory'          : vpcConficTemplateDicrectory
+                   'uqsaCaseTemplateFileDirectory'          : vpcConfigTemplateDicrectory
                    }
     
     requestedDirectory = os.path.normpath(directories[directoryType])

@@ -1,0 +1,21 @@
+# To create the environment just run the command below
+# conda-env create -f tutorial.yml
+name: starfish27
+channels:
+  - jsturdy
+dependencies:
+  - python =2.7
+  - psutil
+  - jupyter
+  - numpy
+  - matplotlib
+  - scipy
+  - pydot >=1.0.2
+  - h5py
+  - lxml >=3.4.2
+  - pip
+  - graphviz
+  - pip:
+    - chaospy >=2.2.2
+    - progressbar-simple
+

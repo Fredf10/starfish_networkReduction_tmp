@@ -3,7 +3,7 @@
 # 2. run VascularPolynomialChaos.py  on the singleVesselUQSA.xml to produce vpcCase
 # 3. run VascularPolynomialChaos.py on the resulting vpc.xml to evaluate all
 
-import sys, os, gc
+import sys, os
 import shutil
 import numpy as np
 import math

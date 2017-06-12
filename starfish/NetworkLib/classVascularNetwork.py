@@ -331,7 +331,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             vessel.update({'gravityConstant': self.gravityConstant})
 
         # ## update wall models from measurment data
-        if self.measurementRoutine != None:
+        if self.measurementRoutine is not None:
             self.measurementRoutine.adaptationToPatientSpecificCondition(self)
 
         # ## check and initialize boundary conditions
@@ -942,10 +942,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         approximatedBif = 0
         for vessel in self.vessels.itervalues():
             try:
-                if vessel.leftDaughter != None:
+                if vessel.leftDaughter is not None:
                     daughters.append(vessel.leftDaughter)
                 try:
-                    if vessel.rightDaughter != None:
+                    if vessel.rightDaughter is not None:
                         daughters.append(vessel.rightDaughter)
                         approximatedBif += 1
                 except Exception: self.warning("old except: pass clause #1 in VascularNetwork.findRootVessel", oldExceptPass= True)
@@ -970,19 +970,19 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         additional check if there is a vessel with this id, if not remove daughter
         """
         for vessel in self.vessels.itervalues():
-            if vessel.leftDaughter == None and vessel.rightDaughter != None:
+            if vessel.leftDaughter == None and vessel.rightDaughter is not None:
                 self.warning("vascularNetwork.checkDaughterDefiniton(): Vessel {} has no leftDaughter but a rightDaughter {}, this daughter is now assumed to be leftDaughter".format(vessel.Id, vessel.rightDaughter), noException= True)
                 vessel.leftDaughter = vessel.rightDaughter
                 vessel.rightDaughter = None
             # check if daughter vessel exists
-            if vessel.leftDaughter != None:
+            if vessel.leftDaughter is not None:
                 try:
                     self.vessels[vessel.leftDaughter]
                 except Exception:
                     self.warning("vascularNetwork.checkDaugtherDefinition():\n      leftDaughter with Id {} of vessel {} does not exist".format(vessel.leftDaughter, vessel.Id,))
                     vessel.leftDaughter = None
 
-            if vessel.rightDaughter != None:
+            if vessel.rightDaughter is not None:
                 try:
                     self.vessels[vessel.rightDaughter]
                 except Exception:
@@ -1021,7 +1021,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         ranking = {}
         mothers = {}
 
-        if self.vessels[root].leftDaughter != None:
+        if self.vessels[root].leftDaughter is not None:
             toVisit.append(root)  # Add root to the 'toVisit'-vessels if root has daughters:
             toVisit.append('nextGeneration')  # add nextGeneration marker
         else:
@@ -1051,7 +1051,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # Grab left daughter
             leftDaughter = self.vessels[motherVessel].leftDaughter
 
-            if leftDaughter != None:
+            if leftDaughter is not None:
                 # adjust ranking
                 rankingLeftDaughter = ranking[motherVessel] - rankGeneration
 
@@ -1110,7 +1110,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         currentConnectionList = [existingMothers[0], existingMothers[1], leftDaughter, None]
 
                 # check if leftDaughter has also daughters which should be visualized
-                if self.vessels[leftDaughter].leftDaughter != None:
+                if self.vessels[leftDaughter].leftDaughter is not None:
                     toVisit.append(leftDaughter)
                 else:
                     # append vessel to ends as it has no left and right daughters
@@ -1118,7 +1118,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
                 rightDaughter = self.vessels[motherVessel].rightDaughter
 
-                if rightDaughter != None:
+                if rightDaughter is not None:
                     # adjust ranking
                     rankingRightDaughter = ranking[motherVessel] + rankGeneration
 
@@ -1153,7 +1153,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                             currentConnectionList = [existingMothers[0], existingMothers[1], rightDaughter, None]
 
                     # check if rightDaughter has also daughters which should be visualized
-                    if self.vessels[rightDaughter].leftDaughter != None: toVisit.append(rightDaughter)
+                    if self.vessels[rightDaughter].leftDaughter is not None: toVisit.append(rightDaughter)
                     else:
                         if rightDaughter not in self.boundaryVessels: self.boundaryVessels.append(rightDaughter)
                         # append vessel to ends as it has no left and right daughters
@@ -1180,7 +1180,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         for leftMother, rightMother, leftDaughter, rightDaughter in self.treeTraverseConnections:
             
-            if leftMother != None and rightMother != None:
+            if leftMother is not None and rightMother is not None:
                 self.anastomosisExists = True
                 
             self.vessels[leftDaughter].leftMother = leftMother
@@ -1498,7 +1498,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             p0 = meanPandQ[Pstart_index]*133.32
             
             
-            if Pend_index != None:
+            if Pend_index is not None:
                 p1 = meanPandQ[Pend_index]*133.32
             else:
                 p1 = p0 - qm*self.vessels[vesselId].resistance
@@ -1594,7 +1594,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             try:
                 constantPressure = self.initMeanPressure
                 ## TODO: uncomment again after MC simulations are done
-                #if inflowBoundaryCondition != None:
+                #if inflowBoundaryCondition is not None:
                     #xxx, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
 
                 self.initialisationPhaseExist = False
@@ -1612,7 +1612,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # set initial values of the vessels by traversing the connections
             for leftMother, rightMother, leftDaughter, rightDaughter in self.treeTraverseConnections:
                 calcDaughters = [leftDaughter]
-                if rightDaughter != None: calcDaughters.append(rightDaughter)
+                if rightDaughter is not None: calcDaughters.append(rightDaughter)
                 for daughter in calcDaughters:
                     initialValues[daughter] = {}
                     initialValues[daughter]['Pressure'] = [constantPressure, constantPressure]
@@ -1658,12 +1658,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if self.venousSystemCollapse == True:
             self.warning("no method for venous collapsing system is implemented to initialize network with method 'Tree' !!!", noException=True)
 
-        if meanInflow != None:
+        if meanInflow is not None:
             p0 = self.Rcum[root] * meanInflow
             p1 = p0 - self.vessels[root].resistance * meanInflow
             print("DB cVN 1519: root init pressure", p0,p1, self.Rcum[root], meanInflow)
 
-        elif meanInPressure != None:
+        elif meanInPressure is not None:
             meanInflow = meanInPressure / self.Rcum[root]  # calculate mean flow
             p0 = meanInPressure
             # # addjust bc condition
@@ -1691,7 +1691,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 p0 = initialValues[leftMother]['Pressure'][1]
                 calcDaughters = [leftDaughter]
                 # check for bifurcation
-                if rightDaughter != None:
+                if rightDaughter is not None:
                     calcDaughters.append(rightDaughter)
                 for daughter in calcDaughters:
                     qm = p0 / self.Rcum[daughter]
@@ -2058,7 +2058,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             calcDaughters = [leftDaughter]
 
             # add for bifucation
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 calcDaughters.append(rightDaughter)
 
             for daughter in calcDaughters:
@@ -2092,7 +2092,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             relativeVenousPressure = 0.0 + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[0][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 
             if self.venousPool is not None:
-                if self.venousPool.Pmin != None:
+                if self.venousPool.Pmin is not None:
                     if relativeVenousPressure < self.venousPool.Pmin:
                         relativeVenousPressure = self.venousPool.Pmin
                         self.venousSystemCollapse = True
@@ -2133,12 +2133,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         """
         # TODO: what is this?
-        if nSet != None:
+        if nSet is not None:
             nTsteps = 0
 
         for n in xrange(nTsteps+1):
 
-            if nSet != None: n = nSet
+            if nSet is not None: n = nSet
 
             if n == 0:
                 self.vessels[self.root].angleXMother = 90.*np.pi / 180.
@@ -2155,10 +2155,10 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 rotToGlobalSysMother = self.vessels[leftMother].rotToGlobalSys[n]
                 self.vessels[leftDaughter].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother)
                 # initiaize right daughter
-                if rightDaughter != None:
+                if rightDaughter is not None:
                     self.vessels[rightDaughter].caculatePositionAndGravity(n, positionEndMother, rotToGlobalSysMother)
 
-                if rightMother != None:
+                if rightMother is not None:
                     if np.sum(self.vessels[rightMother].positionEnd - self.vessels[leftMother].positionEnd) < 3.e-15:
                         raise NotImplementedError('ERROR: 3d positions of anastomosis {} {} {} is not correct!'.format(leftMother, rightMother, leftDaughter))
 
@@ -2182,7 +2182,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 relativeVP = venousPoolPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 
                 if self.venousPool is not None:
-                    if self.venousPool.Pmin != None:
+                    if self.venousPool.Pmin is not None:
                         if relativeVP < self.venousPool.Pmin:  
                             relativeVP = self.venousPool.Pmin
                             self.warning("Venous system showing collapsing dynamics!", noException= True, quiet=True)
@@ -2215,7 +2215,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
     #find root
     root = vascularNetwork.root[0]        
     # add root to the viz vessels if root has daughters:
-    if vascularNetwork.vessels[root].leftDaugther != None:
+    if vascularNetwork.vessels[root].leftDaugther is not None:
         viz.append(root)
     # loop through tree until all daughters are conected
     while len(viz) != 0:
@@ -2227,22 +2227,22 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
         #append the mother to the calc list
         curCalcList = [motherVessel]
         
-        if leftDaughter != None:
+        if leftDaughter is not None:
             #append the left daughter to the calc list
             curCalcList.append(leftDaughter)
            
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 #append the left daughter to the calc list
                 curCalcList.append(rightDaughter)
             else:
                 curCalcList.append(None)
             # check if leftDaughter has also daughters 
-            if vascularNetwork.vessels[leftDaughter].leftDaugther != None:
+            if vascularNetwork.vessels[leftDaughter].leftDaugther is not None:
                 viz.append(leftDaughter)
                 
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 # check if rightDaughter has also daughters 
-                if vascularNetwork.vessels[rightDaughter].leftDaugther != None:
+                if vascularNetwork.vessels[rightDaughter].leftDaugther is not None:
                     viz.append(rightDaughter)
         bifurcationList.append(curCalcList)
           
@@ -2258,7 +2258,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
             # bifurcation    
             Y_m = C*c# = (vascularNetwork.vessels[mother].r[-1]**2*np.pi) / (rho*vascularNetwork.vessels[mother].c[-1])
             Y_lD # =  (vascularNetwork.vessels[leftDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[leftDaughter].c[0])
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 Y_rD # = (vascularNetwork.vessels[rightDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[rightDaughter].c[0])          
             else :
                 Y_rD = 0.0
@@ -2283,7 +2283,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
             Y_m  = (motherAsol) / (rho*motherCsol)
             Y_lD  =  (leftDaughterAsol) / (rho*leftDaughterCsol)
             
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 rightDaughterAsol = solutionDataSet['Area'][rightDaughter][:,[0]]
                 rightDaughterCsol = solutionDataSet['WaveSpeed'][rightDaughter][:,[0]]
         

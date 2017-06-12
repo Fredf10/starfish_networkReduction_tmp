@@ -105,7 +105,7 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
             saveToFile = False
 
         completeString = "Warning: "
-        if infoString != None:
+        if infoString is not None:
             completeString = completeString + infoString
         else:
             completeString = completeString + "no string passed to warn()"

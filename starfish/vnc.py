@@ -59,13 +59,13 @@ def enterNetworkName(networkName, recentNetworkNames = None):
     networkNameUserInput = str(raw_input("     enter/change networkName (only! ENTER to use current networkName):\n     "))
     
     if networkNameUserInput == "":
-        if networkName != None:
+        if networkName is not None:
             networkNameUserInput = networkName
         else:
             networkNameUserInput = None
             
-    if networkNameUserInput != None:       
-        if networkNameUserInput in [str(int(i)) for i in range(0,9)] and len(networkNameUserInput)==1 and recentNetworkNames!= None:
+    if networkNameUserInput is not None:       
+        if networkNameUserInput in [str(int(i)) for i in range(0,9)] and len(networkNameUserInput)==1 and recentNetworkNamesis not None:
             number = int(networkNameUserInput)
             if len(recentNetworkNames)>= number:
                 networkNameUserInput = recentNetworkNames[number-1]
@@ -86,7 +86,7 @@ def findAllDaughters(vascularNetwork, motherVesselID):
     daughters = []
     viz = []
     root = motherVesselID
-    if vascularNetwork.vessels[root].leftDaughter != None:
+    if vascularNetwork.vessels[root].leftDaughter is not None:
         viz.append(root)
     # loop through tree until all daughters are added to the graph
     while len(viz) != 0:
@@ -97,15 +97,15 @@ def findAllDaughters(vascularNetwork, motherVesselID):
         # add left daughter
         daughters.append(leftDaughter)
         # check if leftDaughter has also daughters 
-        if vascularNetwork.vessels[leftDaughter].leftDaughter != None:
+        if vascularNetwork.vessels[leftDaughter].leftDaughter is not None:
             viz.append(leftDaughter)
         # find right daughter
-        if vascularNetwork.vessels[motherVessel].rightDaughter != None:
+        if vascularNetwork.vessels[motherVessel].rightDaughter is not None:
             rightDaughter = vascularNetwork.vessels[motherVessel].rightDaughter
             # add right daughter
             daughters.append(rightDaughter)
             # check if rightDaughter has also daughters
-            if vascularNetwork.vessels[rightDaughter].leftDaughter != None:
+            if vascularNetwork.vessels[rightDaughter].leftDaughter is not None:
                 viz.append(rightDaughter)
     return daughters
     
@@ -345,7 +345,7 @@ def main():
                     notDefinedBoundarys = []
                     
                     boundarys.extend(vascularNetwork.boundaryVessels)
-                    if vascularNetwork.root != None and vascularNetwork.root not in boundarys: 
+                    if vascularNetwork.root is not None and vascularNetwork.root not in boundarys: 
                         boundarys.append(vascularNetwork.root)
                         
                     boundarysSaved = vascularNetwork.boundaryConditions.keys()
@@ -492,7 +492,7 @@ def main():
                         else:
                             vascularNetwork.boundaryConditions[vesselId].extend(boundaryInstances)
                         
-                        #if vascularNetwork.getVariableValue('root') != None:
+                        #if vascularNetwork.getVariableValue('root') is not None:
                         mainGraph.update_graph(vascularNetwork, window)
                         subMenuInput = ''
                             
@@ -672,7 +672,7 @@ def main():
                         
                         break
                     
-                    if networkName != None:
+                    if networkName is not None:
                         mainGraph.update_graph(vascularNetwork, window)
                     break
                 
@@ -764,7 +764,7 @@ def main():
                 elif subMenuInput == 'b':
                     break
             
-            if networkName != None:    
+            if networkName is not None:    
                 if networkName not in recentNetworkNames: recentNetworkNames.insert(0,networkName)
                 else: 
                     recentNetworkNames.remove(networkName)

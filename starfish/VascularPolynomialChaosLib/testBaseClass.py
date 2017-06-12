@@ -143,7 +143,7 @@ class TestBaseClass(object):
                 externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  
                 
                 variableValue = self.getVariable(externXmlElement)
-                if variableValue != None:
+                if variableValue is not None:
                     ## find out what type the externXmlElement variable is:
                     # 2.1 if dict variable -> writeExtValueXml
                     if isinstance(externVariable,self.ExtDict):
@@ -218,7 +218,7 @@ class TestBaseClass(object):
             externVariable : instance of ExtObject defining the variable properties
         '''
         # set unit if existing
-        if externVariable.unit != None: externXmlNode.set('unit', externVariable.unit)
+        if externVariable.unit is not None: externXmlNode.set('unit', externVariable.unit)
         # write variable value
         if externVariable.multiVar == True:
             externXmlNode.text = ' '.join(str(i) for i in variableValues)
@@ -298,7 +298,7 @@ class TestBaseClass(object):
                         # if the element is optional then continue without reading it!
                         externXmlNode = None
                     
-                if externXmlNode != None:
+                if externXmlNode is not None:
                     ## find out what type the externXmlElement variable is:
                     if isinstance(externVariable,self.ExtDict): 
                         newData[externXmlElement] = self.loadExtDictXml(externXmlNode, externXmlElement, externVariable)
@@ -442,7 +442,7 @@ class TestBaseClass(object):
                     except ValueError and NameError:
                         convertError.append('float')
                                                                    
-                    if externVariable.unit != None and variableUnit != None:
+                    if externVariable.unit is not None and variableUnit is not None:
                         if ' ' in variableUnit:
                             variableUnits = variableUnit.split(' ')
                             for variableUnit in variableUnits: variableValue = variableValue*unitsDict[variableUnit]
@@ -520,7 +520,7 @@ class TestBaseClass(object):
         for dictName in self.objectDictsHdf5Memory:
             # check if dictionary not none and not empty
             dictL = self.getVariable(dictName) 
-            if dictL != {} and dictL != None:
+            if dictL != {} and dictL is not None:
                 # serach for dict group node for the dictionary create if needed
                 if dictName not in self.hdf5Group.keys():
                     dictGroup = self.hdf5Group.create_group(dictName)
@@ -560,7 +560,7 @@ class TestBaseClass(object):
         for dictName in self.objectDictsHdf5Memory:
             # check if dictionary not none and not empty
             dictL = self.getVariable(dictName) 
-            if dictL != {} and dictL != None:
+            if dictL != {} and dictL is not None:
                 # serach for dict group node for the dictionary
                 if dictName in self.hdf5Group.keys():
                     dictGroup = self.hdf5Group[dictName]
@@ -579,7 +579,7 @@ class TestBaseClass(object):
         # functionality
         for variableName in self.variablesHdf5Memory:
             variableValue = self.getVariable(variableName)
-            if variableValue != None: 
+            if variableValue is not None: 
                 if variableName in self.hdf5Group.keys():
                     del self.hdf5Group[variableName]
                 self.hdf5Group.create_dataset(variableName, data=variableValue)
@@ -587,7 +587,7 @@ class TestBaseClass(object):
         # functionality
         for dictName in self.objectDictsHdf5Memory:
             dictValue = self.getVariable(dictName)
-            if dictValue != None or dictValue == {}:
+            if dictValue is not None or dictValue == {}:
                 for dictObjectName,dictObject in dictValue.iteritems():
                     dictObject.saveDataHdf5()
     

@@ -456,7 +456,7 @@ def calculatePointOfInflection(waveData, timeData, startPointT, endPointT = None
     startIndex = np.where(timeData == startPointT)
     if startIndex == None:
         print("ERROR calculateWaveShoulderPoint: could not find startIndex! return"); return
-    if endPointT != None: 
+    if endPointT is not None: 
         endIndex = np.where(timeData == endPointT)
     else:
         endIndex = [len(timeData)-1]
@@ -492,7 +492,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
     #find root
     root = vascularNetwork.root[0]        
     # add root to the viz vessels if root has daughters:
-    if vascularNetwork.vessels[root].leftDaugther != None:
+    if vascularNetwork.vessels[root].leftDaugther is not None:
         viz.append(root)
     # loop through tree until all daughters are conected
     while len(viz) != 0:
@@ -504,22 +504,22 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
         #append the mother to the calc list
         curCalcList = [motherVessel]
         
-        if leftDaughter != None:
+        if leftDaughter is not None:
             #append the left daughter to the calc list
             curCalcList.append(leftDaughter)
            
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 #append the left daughter to the calc list
                 curCalcList.append(rightDaughter)
             else:
                 curCalcList.append(None)
             # check if leftDaughter has also daughters 
-            if vascularNetwork.vessels[leftDaughter].leftDaugther != None:
+            if vascularNetwork.vessels[leftDaughter].leftDaugther is not None:
                 viz.append(leftDaughter)
                 
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 # check if rightDaughter has also daughters 
-                if vascularNetwork.vessels[rightDaughter].leftDaugther != None:
+                if vascularNetwork.vessels[rightDaughter].leftDaugther is not None:
                     viz.append(rightDaughter)
         bifurcationList.append(curCalcList)
           
@@ -535,7 +535,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
             # bifurcation    
             Y_m = C*c# = (vascularNetwork.vessels[mother].r[-1]**2*np.pi) / (rho*vascularNetwork.vessels[mother].c[-1])
             Y_lD # =  (vascularNetwork.vessels[leftDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[leftDaughter].c[0])
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 Y_rD # = (vascularNetwork.vessels[rightDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[rightDaughter].c[0])          
             else :
                 Y_rD = 0.0
@@ -560,7 +560,7 @@ def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet 
             Y_m  = (motherAsol) / (rho*motherCsol)
             Y_lD  =  (leftDaughterAsol) / (rho*leftDaughterCsol)
             
-            if rightDaughter != None:
+            if rightDaughter is not None:
                 rightDaughterAsol = solutionDataSet['Area'][rightDaughter][:,[0]]
                 rightDaughterCsol = solutionDataSet['WaveSpeed'][rightDaughter][:,[0]]
         

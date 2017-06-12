@@ -136,7 +136,7 @@ class ConfigurableObjectBase(object):
                 externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  
                 
                 variableValue = self.getVariable(externXmlElement)
-                if variableValue != None:
+                if variableValue is not None:
                     ## find out what type the externXmlElement variable is:
                     # 2.1 if dict variable -> writeExtValueXml
                     if isinstance(externVariable,self.ExtDict):
@@ -211,7 +211,7 @@ class ConfigurableObjectBase(object):
             externVariable : instance of ExtObject defining the variable properties
         '''
         # set unit if existing
-        if externVariable.unit != None: externXmlNode.set('unit', externVariable.unit)
+        if externVariable.unit is not None: externXmlNode.set('unit', externVariable.unit)
         # write variable value
         if externVariable.multiVar == True:
             externXmlNode.text = ' '.join(str(i) for i in variableValues)
@@ -291,7 +291,7 @@ class ConfigurableObjectBase(object):
                         # if the element is optional then continue without reading it!
                         externXmlNode = None
                     
-                if externXmlNode != None:
+                if externXmlNode is not None:
                     ## find out what type the externXmlElement variable is:
                     if isinstance(externVariable,self.ExtDict): 
                         newData[externXmlElement] = self.loadExtDictXml(externXmlNode, externXmlElement, externVariable)
@@ -432,7 +432,7 @@ class ConfigurableObjectBase(object):
                     try: variableValue = float(eval(variableValueString))
                     except ValueError: convertError.append('float') 
                     
-                    if externVariable.unit != None and variableUnit != None:
+                    if externVariable.unit is not None and variableUnit is not None:
                         if ' ' in variableUnit:
                             variableUnits = variableUnit.split(' ')
                             for variableUnit in variableUnits: variableValue = variableValue*unitsDict[variableUnit]

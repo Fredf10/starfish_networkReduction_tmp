@@ -123,7 +123,7 @@ class SampleManager(TestBaseClass):
         '''
         Create dependen samples if dependen case = True and dependent random variables true
         '''
-        if distributionManager.jointDistributionDependent != None:
+        if distributionManager.jointDistributionDependent is not None:
             samplesDependent = distributionManager.jointDistributionDependent.inv(distributionManager.jointDistribution.fwd(samples.T)).transpose()
         else:
             raise ValueError("uqsaMethodPolynomialChaos.createDependentSamples(), cannot create dependent samples as distributionManager.jointDistributionDependent is not defined!")
@@ -275,7 +275,7 @@ class SampleManager(TestBaseClass):
         # functionality
         for variableName in variablesToSave:
             variableValue = self.getVariable(variableName)
-            if variableValue != None: 
+            if variableValue is not None: 
                 hdf5SaveGroup.create_dataset(variableName, data=variableValue)
         
         ## attributes
@@ -287,7 +287,7 @@ class SampleManager(TestBaseClass):
         # functionality
         for attributeName in attributesToSave:
             attributeValue = self.getVariable(attributeName)
-            if attributeValue != None: 
+            if attributeValue is not None: 
                 hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
         
         hdf5SaveGroup.flush()

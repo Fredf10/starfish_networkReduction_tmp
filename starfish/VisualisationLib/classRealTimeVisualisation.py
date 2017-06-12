@@ -184,13 +184,13 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     networkVariables = {}
 
-    if options.filename != None:
+    if options.filename is not None:
         networkVariables['filename'] = options.filename
-    if options.dt != None:
+    if options.dt is not None:
         networkVariables['dt'] = float(options.dt)
-    if options.quantitiesToPlot != None:
+    if options.quantitiesToPlot is not None:
         networkVariables['quantitiesToPlot'] = options.quantitiesToPlot.split('-')
-    if options.initialValues != None:
+    if options.initialValues is not None:
         networkVariables['initialValues'] = [float(i) for i in options.initialValues.split('=')]
 
     realTimeVisualisation(networkVariables)

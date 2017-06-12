@@ -99,7 +99,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                 try: comboChoices = self.variableFixedChoice[key][index]
                 except: pass
                 
-                if comboChoices != None:
+                if comboChoices is not None:
                     entry = gtk.combo_box_new_text() 
                     for choice in comboChoices:
                         entry.append_text(choice)
@@ -136,7 +136,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                 try: comboChoices = self.variableFixedChoice[key][index]
                 except: pass
                 
-                if comboChoices != None: 
+                if comboChoices is not None: 
                     value = entry.get_active_text()                    
                     try: type = self.variableTypes[key][index]
                     except: type = 'str'
@@ -170,7 +170,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
                 try: comboChoices = self.variableFixedChoice[key][index]
                 except: pass
                 
-                if comboChoices != None: 
+                if comboChoices is not None: 
                     valueIndex = comboChoices.index(value)
                     entry.set_active(valueIndex) 
                 else:
@@ -516,7 +516,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                                                                  marker='o',
                                                                                  linewidth=self.linewidth)[0]
         
-        if self.selectedExternalData != None:
+        if self.selectedExternalData is not None:
             self.lines['external'] = {}
             self.lines['external']['axis1'] = {'-':self.axis['axis1'].plot( -1, 0,
                                                                             color= 'k',
@@ -686,7 +686,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data([-1], [0])
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
                     
-                if self.selectedExternalData != None:
+                if self.selectedExternalData is not None:
                     #TODO: Try Except Pass should be fixed
                     try:
                         xData   = self.selectedExternalData['SolutionData'][vesselId]['Time']+self.limits['external time shift']
@@ -716,7 +716,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data([-1], [0])
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
                     
-                if self.selectedExternalData != None:
+                if self.selectedExternalData is not None:
                     self.lines['external']['axis1']['-'].set_data([-1], [0])
                     self.lines['external']['axis2']['-'].set_data([-1], [0])
         
@@ -1170,7 +1170,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.lines[i]['axis1']['-'].set_data([-1], [0])
                     self.lines[i]['axis2']['-'].set_data([-1], [0])
   
-#                 if self.selectedExternalData != None:
+#                 if self.selectedExternalData is not None:
 #                     self.lines['external']['axis1']['-'].set_data([-1], [0])
 #                     self.lines['external']['axis2']['-'].set_data([-1], [0])
         
@@ -1339,7 +1339,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                                            np.max(qf*1.e6),
                                            np.max(qb*1.e6)])]
                          
-            if self.selectedExternalData != None:
+            if self.selectedExternalData is not None:
                 #TODO: Try Except Pass should be fixed
                 try:
                     # pressure

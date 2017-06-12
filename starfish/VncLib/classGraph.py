@@ -82,7 +82,7 @@ class Graph(object):
      
         self.resetGraph()
         
-        if vascularNetwork != None: 
+        if vascularNetwork is not None: 
         
             vascularNetwork.evaluateConnections()
             vascularNetwork.findStartAndEndNodes()

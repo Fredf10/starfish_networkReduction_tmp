@@ -216,7 +216,7 @@ class Visualisation2D(gtk.Window):
         self.add(vBox)
         self.show_all()
         
-        if networkName != None:
+        if networkName is not None:
             self.initializeSolutionData(networkName, dataSetNumber)
             title = ' '.join([self.mainTitle,self.currentNetworkName])
             self.set_title(title)
@@ -300,7 +300,7 @@ class Visualisation2D(gtk.Window):
         '''
         call function of the combobox to choose vessel of the network
         '''
-        if self.vascularNetwork != None:
+        if self.vascularNetwork is not None:
             cbIndex = widget.get_active()-1
             if cbIndex < 0: self.currentVesselID = None
             else: self.currentVesselID = self.vascularNetwork.vessels.keys()[cbIndex] 
@@ -318,7 +318,7 @@ class Visualisation2D(gtk.Window):
         '''
         call function of the combobox to choose vessel of the network for comparison
         '''
-        if self.vascularNetwork != None:
+        if self.vascularNetwork is not None:
             cbIndex = widget.get_active()-1
             if cbIndex < 0: self.currentVesselIDComparison  = None
             else: self.currentVesselIDComparison = self.vascularNetwork.vessels.keys()[cbIndex] 
@@ -375,10 +375,10 @@ class Visualisation2D(gtk.Window):
         showing the plots of the vessel.
         '''
         
-        if self.currentVesselID != None:
+        if self.currentVesselID is not None:
             
             dataComparison = None
-            if self.currentDataNumberComparison != None:
+            if self.currentDataNumberComparison is not None:
                 dataComparison = self.solutionDataSets[self.dataNumbers.index(self.currentDataNumberComparison)]
             
             description = [self.dataSetDescription.get_text(), self.dataSetDescriptionComparison.get_text()] 
@@ -491,7 +491,7 @@ class Window2dPlots(gtk.Window):
         self.solutionData = solutionData
         self.solutionDataComparison = solutionDataComparison
         self.compare = False
-        if solutionDataComparison != None: self.compare = True
+        if solutionDataComparison is not None: self.compare = True
         self.N = self.vessel.N
         self.val = 0
         

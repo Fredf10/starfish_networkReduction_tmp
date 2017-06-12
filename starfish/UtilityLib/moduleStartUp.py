@@ -101,23 +101,23 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
     for option,optionArgument in optionsDict.iteritems():
         # -f network name
         if option == 'networkName':
-            if optionArgument != None:
+            if optionArgument is not None:
                 networkName = optionArgument
         # -n dataNumber
         elif option == 'dataNumber':
             dataNumber,dataSetNumber = evaluateDataNumber(optionArgument)  
-            if dataNumber != None:
+            if dataNumber is not None:
                 save = True     
         # -s save
         elif option == 'save':
-            if optionArgument != None:
+            if optionArgument is not None:
                 save = optionArgument
             #save solution data and the vascularNetwork in c pickle, if no save take temporary slot 999
             #if save == False:
             #    dataNumber = '999'
         # -d simulation Description
         elif option == 'description':
-            if optionArgument != None:
+            if optionArgument is not None:
                 simulationDescription = optionArgument
         # -v visialisation type        
         elif option == 'vizBool':
@@ -133,18 +133,18 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
                 vizOutput = "3D"
         # -c connect
         elif option == 'connect':
-            if optionArgument != None:
+            if optionArgument is not None:
                 connect = optionArgument
         # -r resimulate
         elif option == 'resimulate':
-            if optionArgument != None:
+            if optionArgument is not None:
                     resimulate = optionArgument
         elif option == 'workingDirectory':
-            if optionArgument != None:
+            if optionArgument is not None:
                 insertWorkingDirectory(optionArgument)
                 exit()
         elif option == 'workingDirectorySettings':
-            if optionArgument != None:
+            if optionArgument is not None:
                 # Settings moved there to prefent circular imports
                 mFPH.workingDirectorySettings()
                 exit()
@@ -244,7 +244,7 @@ def evaluateDataNumber(dataNumberString, exception = "Error"):
     """
     dataSetNumber = None
     dataNumber = None
-    if dataNumberString != None:
+    if dataNumberString is not None:
         dataNumber = dataNumberString
         if ',' in dataNumber:
             dataNumbers = dataNumber.split(',')
@@ -386,7 +386,7 @@ def chooseSolutionDataCase():
         networkDirectory = mFPH.getDirectory('networkXmlFileXXXDirectory',networkName,'xxx','read')
         
         listToPrint = []
-        if simulationCaseDict != None:
+        if simulationCaseDict is not None:
             first = True
             for root, dirs, files in os.walk(networkDirectory):
                 for file in files:
@@ -462,7 +462,6 @@ def chooseUQSACaseFile(networkName):
         
         # create template configuration
         configurationFilePathTemplate = mFPH_VPC.getFilePath('uqsaCaseTemplateFile', networkName, dataNumber, 'read')
-        
         uqsaCase = classUqsaCase.UqsaCase()
         uqsaCase.loadXMLFile(configurationFilePathTemplate)
         
