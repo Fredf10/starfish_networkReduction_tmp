@@ -477,7 +477,7 @@ def chooseUQSACaseFile(networkName):
             exit()
     
     else:
-        networkName = filenames[userInput-1]
+        networkName = filenames[userInput-indexOffset]
         dataNumber = networkName.split('.')[0].split('_')[-1]
         
     return dataNumber   
