@@ -65,7 +65,7 @@ def enterNetworkName(networkName, recentNetworkNames = None):
             networkNameUserInput = None
             
     if networkNameUserInput is not None:       
-        if networkNameUserInput in [str(int(i)) for i in range(0,9)] and len(networkNameUserInput)==1 and recentNetworkNamesis not None:
+        if networkNameUserInput in [str(int(i)) for i in range(0,9)] and len(networkNameUserInput)==1 and recentNetworkNames is not None:
             number = int(networkNameUserInput)
             if len(recentNetworkNames)>= number:
                 networkNameUserInput = recentNetworkNames[number-1]
