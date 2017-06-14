@@ -1340,9 +1340,7 @@ class Vessel3D(Vessel):
             normalLines = np.append(vertices[nPointsPerCircle:nPointsPerCircle*(N-1)].ravel(),normalEndpoint.ravel())
             self.vertexList2.vertices[nPointsPerCircle*3:nPointsPerCircle*(N-1)*3] = normalLines.ravel()
 
-
-if __name__ == '__main__':
-
+def main():
     optionsDict = moduleStartUp.parseOptions(['f','n','c'], visualisationOnly = True)
 
     networkName  = optionsDict['networkName']
@@ -1364,4 +1362,7 @@ if __name__ == '__main__':
         ### garbage collection
         gc.collect()
         del visualisation3D
+
+if __name__ == '__main__':
+    main()
 
