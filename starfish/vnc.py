@@ -7,32 +7,32 @@ cur = os.path.dirname( os.path.realpath('__file__') )
 
 # functions for vascular1DFlow_v0.2
 
-from NetworkLib.classVascularNetwork import VascularNetwork 
-from NetworkLib.classBoundaryConditions import *
+from starfish.NetworkLib.classVascularNetwork import VascularNetwork 
+from starfish.NetworkLib.classBoundaryConditions import *
 
-import UtilityLib.moduleXML as mXML 
-import UtilityLib.moduleCSV as mCSV
-import UtilityLib.moduleFilePathHandler as mFPH
+import starfish.UtilityLib.moduleXML as mXML 
+import starfish.UtilityLib.moduleCSV as mCSV
+import starfish.UtilityLib.moduleFilePathHandler as mFPH
 
-from UtilityLib.constants import newestNetworkXml as nxml
+from starfish.UtilityLib.constants import newestNetworkXml as nxml
 
 ### import units of all variables in the SI system
-from UtilityLib.constants import variableUnitsSI as variableUnits
-from UtilityLib.constants import unitsDictSI as unitsDict
+from starfish.UtilityLib.constants import variableUnitsSI as variableUnits
+from starfish.UtilityLib.constants import unitsDictSI as unitsDict
 
 #from modulePickle import loadSolutionDataFile
-import UtilityLib.moduleStartUp as mStartUp
+import starfish.UtilityLib.moduleStartUp as mStartUp
 
 ### import units of all variales in the Medical System
 #from constants import variableUnitsMed as variableUnits
 #from constants import unitsDictMed as unitsDict
 
 import pydot
-from VncLib import xdot
+from starfish.VncLib import xdot
 import gtk
 
-from VncLib.classGraph import Graph
-from VncLib.classGraph import MyDotWindow
+from starfish.VncLib.classGraph import Graph
+from starfish.VncLib.classGraph import MyDotWindow
 
 import cPickle
 import pprint as pprint
