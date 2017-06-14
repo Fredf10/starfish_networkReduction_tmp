@@ -1,7 +1,5 @@
 import sys,os
-cur = os.path.dirname(os.path.realpath('__file__'))
 from starfish.SolverLib.class1DflowSolver import FlowSolver
-#sys.path.append(''.join([cur,'/../UtilityLib']))
 from starfish.UtilityLib import moduleXML
 import progressbarsimple as cPB
 import gc,time
@@ -110,6 +108,6 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
-    print(u'total runtime:  {:d} min {:.2f} sec'.format(minutesBatch,secsBatch)) #TODO figure out why this was an issue without u'.'
+    print("total runtime {:d} min {:.2f} sec".format(minutesBatch, secsBatch)) 
     print('=====================================')
             
