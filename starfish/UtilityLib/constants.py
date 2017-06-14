@@ -1,4 +1,3 @@
-
 ## Units
 import numpy as np
 
@@ -7,7 +6,7 @@ import numpy as np
 network xml version definition
 """
 newestNetworkXmlVersion = '4.2'
-from . import networkXml042 as newestNetworkXml
+from starfish.UtilityLib import networkXml042 as newestNetworkXml
 ##########################################################################################
 #----------------------------------------------------------------------------------------#
 #convert unit to SI system

@@ -1,4 +1,4 @@
-from ..VascularPolynomialChaosLib.testBaseClass import TestBaseClass
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass
 import numpy as np
 from scipy import optimize
 

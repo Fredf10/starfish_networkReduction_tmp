@@ -4,7 +4,7 @@ import math
 import numpy as np
 import sys,os,time
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 class CommunicatorBaseClass(cSBO.StarfishBaseObject):
     """
     Base-class for all boundary conditions

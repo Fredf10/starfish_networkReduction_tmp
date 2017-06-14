@@ -9,23 +9,23 @@ topFolder = cur + "/../"
 # located, and if it changes location, renaming it is appropriate.
 import logging
 logger = logging.getLogger('starfish')
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 import progressbarsimple as cPB
 
-from ..NetworkLib.classBoundaryConditions import VaryingElastance
-from ..NetworkLib.classBoundaryConditions import Valve
-from ..NetworkLib.classVascularNetwork import VascularNetwork
+from starfish.NetworkLib.classBoundaryConditions import VaryingElastance
+from starfish.NetworkLib.classBoundaryConditions import Valve
+from starfish.NetworkLib.classVascularNetwork import VascularNetwork
 
-from .classBoundarys import Boundary
-from . import classSystemEquations
-from . import classConnections
-from . import classFields
-from . import classCommunicators  as CC
-from .classCommunicators import *
-from ..UtilityLib import classRuntimeMemoryManager
-from . import classTimer
-from ..UtilityLib.moduleHelperFunctions import memoryUsagePsutil
+from starfish.SolverLib.classBoundarys import Boundary
+from starfish.SolverLib import classSystemEquations
+from starfish.SolverLib import classConnections
+from starfish.SolverLib import classFields
+from starfish.SolverLib import classCommunicators  as CC
+from starfish.SolverLib.classCommunicators import *
+from starfish.SolverLib import classTimer
+from starfish.UtilityLib import classRuntimeMemoryManager
+from starfish.UtilityLib.moduleHelperFunctions import memoryUsagePsutil
 
 import gc
 

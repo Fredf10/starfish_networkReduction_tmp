@@ -1,7 +1,7 @@
 import os,sys
 
-from .constants import unitsDictSI as unitsDict
-from .moduleHelperFunctions import getGitHash
+from starfish.UtilityLib.constants import unitsDictSI as unitsDict
+from starfish.UtilityLib.moduleHelperFunctions import getGitHash
 
 try:
     from lxml import etree

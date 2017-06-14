@@ -1,7 +1,7 @@
 import sys, os
 import numpy as np
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class TimerBaseClass(cSBO.StarfishBaseObject):
     """

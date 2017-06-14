@@ -5,7 +5,7 @@ import scipy.optimize as so
 from . import ODESolver as OD
 import os, sys
 # set the path relative to THIS file not the executing file!
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class BoundaryCondition(cSBO.StarfishBaseObject):
     """

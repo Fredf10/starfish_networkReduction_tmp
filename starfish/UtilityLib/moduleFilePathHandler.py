@@ -20,7 +20,8 @@
 import cPickle
 import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-
+import starfish
+STARFISHconfig = 'STARFiSh.config'
 import ConfigParser
 
 try:
@@ -85,7 +86,7 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
     
     # file names
     filenames = {
-                 'configFile'                : 'STARFiSh.config',
+                 'configFile'                : STARFISHconfig,
                  'vesselCSVFile'             : ''.join([networkName,'.csv']),
                  'boundaryCSVFile'           : ''.join([networkName,'BC.csv']),
                  'networkXmlFileTemplate'    : ''.join([networkName,'.xml']),
@@ -194,16 +195,23 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'vncNetworkGraphFileDirectory'} 
     
     if directoryType not in existingDirectoryTypes:
-        raise ValueError("ERROR: getDirectory, requested directoryType {}\
-                          is not in existingDirectoryTypes{}".format(directoryType, existingDirectoryTypes))
+        raise ValueError("ERROR: getDirectory, requested directoryType {} is not in existingDirectoryTypes{}".format(directoryType, existingDirectoryTypes))
+    
     ##definitions
-    starfishHomeDirectory = ''.join([cur,'/..'])
+    starfishHomeDirectory = module_path = os.path.dirname(starfish.__file__)
+    
+
     
     if directoryType != 'configFileDirectory': 
         # load working directory from config file
         workingDirectory = readConfigFile(['WorkingDirectory'])['WorkingDirectory']
     else:
-        workingDirectory = os.path.join(starfishHomeDirectory, "..")
+        workingDirectory = starfishHomeDirectory
+
+    if os.path.exists(os.path.join(os.getcwd(),STARFISHconfig)):
+        configDirectory = os.getcwd()
+    else:
+        configDirectory = os.path.join(os.path.expanduser('~'),STARFISHconfig) 
            
     networkXmlFileTemplateDirectory = ''.join([starfishHomeDirectory,'/TemplateNetworks/',networkName])
     networkXmlFileDirectory         = ''.join([workingDirectory,'/',networkName])
@@ -214,7 +222,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     # directories
     directories = {
                    'workingDirectory'                   : workingDirectory,
-                   'configFileDirectory'                : starfishHomeDirectory,
+                   'configFileDirectory'                : configDirectory,
                    'vesselCSVFileDirectory'             : networkXmlFileDirectory,
                    'boundaryCSVFileDirectory'           : networkXmlFileDirectory,
                    'randomVariableCSVFileDirectory'     : networkXmlFileDirectory,
@@ -347,11 +355,9 @@ def saveConfigFile(configurations):
     """ 
     # open config to get current states
     existingOptions = ['WorkingDirectory','knownWorkingDirectories']
-    
     Config = ConfigParser.ConfigParser()
-    
     configFilePath = getFilePath('configFile', '','',  'read',exception = 'No')
-    
+
     if configFilePath is not None:  #  file exists
         Config.read(configFilePath)
     else: #  file does not exist

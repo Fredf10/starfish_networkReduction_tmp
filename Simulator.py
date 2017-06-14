@@ -1,7 +1,5 @@
 ##!/usr/bin/env python
-# -*- coding: utf-8 -*- 
-#######################################################################################
-#                           STARFiSh v0.4 
+# -*- coding: utf-8 -*- ####################################################################################### STARFiSh v0.4 
 ########################################################################################
 ## 
 # http://www.ntnu.no/starfish
@@ -16,8 +14,7 @@
 #Copyright (c) <2012-> <NTNU>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy of this 
-#software and associated documentation files (the "Software"), to deal in the Software 
-#without restriction, including without limitation the rights to use, copy, modify, 
+#software and associated documentation files (the "Software"), to deal in the Software #without restriction, including without limitation the rights to use, copy, modify, 
 #merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
 #permit persons to whom the Software is furnished to do so, subject to the following 
 # conditions:
@@ -41,6 +38,7 @@ cur = os.path.dirname( os.path.realpath('__file__') )
 import logging
 logger = logging.getLogger('starfish')
 logger.setLevel(logging.DEBUG)
+import starfish
 import starfish.SolverLib.class1DflowSolver as c1DFlowSolv
 import starfish.UtilityLib.moduleXML as mXML
 import starfish.UtilityLib.moduleStartUp as mStartUp #import parseOptions
@@ -110,42 +108,39 @@ def main():
     
     vascularNetwork.saveSolutionData()
     mXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
-    
-    
     del flowSolver
     gc.collect()
-    
     mFPH.updateSimulationDescriptions(networkName, dataNumber, simulationDescription)
-    
     gc.collect()
     
+    string2d = ' '.join([sys.executable, '-c' 
+        '"import starfish.VisualisationLib.class2dVisualisation as viz;', 
+        "viz.main()", '"', 
+        '-f', vascularNetwork.name, 
+        '-n',str(dataNumber)])
+
+    string3d = ' '.join([sys.executable, '-c' 
+        '"import starfish.VisualisationLib.class3dVisualisation as viz;', 
+        "viz.main()", '"', 
+        '-f', vascularNetwork.name, 
+        '-n',str(dataNumber)])
     
     if vizOutput == "2D":
-        string = ' '.join([sys.executable, cur + '/VisualisationLib/class2dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber)])                
-        subprocess.Popen(string, shell=True)
-        
-    
-    if vizOutput == "3D":
-        string = ' '.join([sys.executable, cur+'/VisualisationLib/class3dVisualisation.py','-f',vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
-        subprocess.Popen(string, shell=True)
-        
-        
-    if vizOutput == "2D+3D":
-           
-        string1 = ' '.join([sys.executable, cur + '/VisualisationLib/class2dVisualisation.py', '-f', vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
-        string2 = ' '.join([sys.executable, cur + '/VisualisationLib/class3dVisualisation.py', '-f', vascularNetwork.name, '-n',str(dataNumber), '-c True']) 
-        
-        viz2d = subprocess.Popen(string1, shell = True )
-        viz3d = subprocess.Popen(string2, shell = True )
+            subprocess.Popen(string2d, shell=True)
+    elif vizOutput == "3D":
+        subprocess.Popen(string3d, shell=True)
+    elif vizOutput == "2D+3D":
+        viz2d = subprocess.Popen(string2d, shell = True)
+        viz3d = subprocess.Popen(string3d, shell = True)
         
         while True:
             
             if viz2d.poll() is not None:
-                viz3d.terminate()
+                viz2d.terminate()
                 exit()
                 
             if viz3d.poll() is not None:
-                viz2d.terminate()
+                viz3d.terminate()
                 exit()
         
 if __name__ == '__main__':

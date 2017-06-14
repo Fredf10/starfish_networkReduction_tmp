@@ -1,23 +1,23 @@
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/../')
+# sys.path.append(cur+'/../')
 
 #sys.path.append(cur+'/../UtilityLib')
 
 import subprocess
 
-import UtilityLib.moduleXML as mXML
-import UtilityLib.moduleStartUp as moduleStartUp
-import UtilityLib.moduleFilePathHandler as mFPH
+import starfish.UtilityLib.moduleXML as mXML
+import starfish.UtilityLib.moduleStartUp as moduleStartUp
+import starfish.UtilityLib.moduleFilePathHandler as mFPH
 
-import UtilityLib.processing as mProc
+import starfish.UtilityLib.processing as mProc
 
 #from NetworkLib.classVascularNetwork import VascularNetwork
-from NetworkLib.classVessel import Vessel
+from starfish.NetworkLib.classVessel import Vessel
 
-import class3dLUT as c3dLUT
+import starfish.VisualisationLib.class3dLUT as c3dLUT
 
-import class3dControlGUI as c3dCtrlGUI
+import starfish.VisualisationLib.class3dControlGUI as c3dCtrlGUI
 
 import numpy as np
 from math  import *

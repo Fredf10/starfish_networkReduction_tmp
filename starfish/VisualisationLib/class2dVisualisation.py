@@ -16,15 +16,15 @@ from matplotlib.patches import Rectangle
 
 import sys, os
 cur = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(cur + '/../')
+#sys.path.append(cur + '/../')
 
 #sys.path.append(cur + '/../UtilityLib')
-import UtilityLib.processing as mProc
+import starfish.UtilityLib.processing as mProc
 #from processing import nonLinearWaveSplitting
 
-import UtilityLib.moduleStartUp as moduleStartUp
-import UtilityLib.moduleFilePathHandler as mFPH
-import UtilityLib.moduleXML as mXML
+import starfish.UtilityLib.moduleStartUp as moduleStartUp
+import starfish.UtilityLib.moduleFilePathHandler as mFPH
+import starfish.UtilityLib.moduleXML as mXML
 
 
 import numpy as np
@@ -1892,9 +1892,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         except: 
             pass
 
-
-if __name__ == '__main__':
-               
+def main():
     optionsDict = moduleStartUp.parseOptions(['f', 'n', 'c'], visualisationOnly=True)
     
     networkName = optionsDict['networkName']
@@ -1903,3 +1901,9 @@ if __name__ == '__main__':
 
     Visualisation2DMain(networkName=networkName, dataNumber=dataNumber, connect=connect)
     gtk.main()
+
+if __name__ == '__main__':
+    print(os.getcwd())
+    main()
+               
+    

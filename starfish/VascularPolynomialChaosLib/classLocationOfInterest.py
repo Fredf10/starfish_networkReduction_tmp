@@ -2,7 +2,7 @@ from copy import copy as copy
 import numpy as np
 
 from .classQuantityOfInterest import QuantityOfInterest
-from ..UtilityLib import processing as mProc
+from starfish.UtilityLib import processing as mProc
 import matplotlib.pyplot as plt
 
 from .testBaseClass import TestBaseClass 

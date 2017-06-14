@@ -12,8 +12,8 @@ from .classCompliance import *
 # moduleGrids: ERROR: classVessel.initialize(): Grid calculation of vessel 1
 # classCompliance: ERROR: classVessel.initialize(): init compliance of vessel 1
 
-from ..UtilityLib import classStarfishBaseObject as cSBO
-from ..UtilityLib.constants import newestNetworkXml as nxml
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib.constants import newestNetworkXml as nxml
 
 class Vessel(cSBO.StarfishBaseObject):
     """

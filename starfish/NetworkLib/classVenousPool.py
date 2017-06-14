@@ -2,8 +2,8 @@ import sys
 import os
 import numpy as np
 cur = os.path.dirname(os.path.realpath( __file__ ))
-from ..UtilityLib import classStarfishBaseObject as cSBO
-from ..UtilityLib import classConfigurableObjectBase as cCOB
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classConfigurableObjectBase as cCOB
 
 class StaticVenousPressure(cSBO.StarfishBaseObject):
     """

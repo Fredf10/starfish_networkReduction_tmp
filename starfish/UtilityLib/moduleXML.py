@@ -7,20 +7,20 @@ except:
     from xml.etree import ElementTree as etree
 import numbers
 
-from ..NetworkLib import classVascularNetwork as cVascNw
-from ..NetworkLib import classVenousPool
-from ..NetworkLib.classBoundaryConditions import *
+from starfish.NetworkLib import classVascularNetwork as cVascNw
+from starfish.NetworkLib import classVenousPool
+from starfish.NetworkLib.classBoundaryConditions import *
 # XML data with names referencing ccBC's functions
 # won't work if this import changes
 
-from .constants import variablesDict
-from .constants import unitsDictSI as unitsDict
-from .constants import newestNetworkXmlVersion
-from . import moduleFilePathHandler as mFPH
+from starfish.UtilityLib.constants import variablesDict
+from starfish.UtilityLib.constants import unitsDictSI as unitsDict
+from starfish.UtilityLib.constants import newestNetworkXmlVersion
+from starfish.UtilityLib import moduleFilePathHandler as mFPH
 
-from ..VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
+from starfish.VascularPolynomialChaosLib.classRandomInputManager import RandomInputManager
 
-from ..NetworkLib.classMeasurements import MeasurementRoutine
+from starfish.NetworkLib.classMeasurements import MeasurementRoutine
 
 def writeXMLsetUnit(xmlElement, variable, value, unit = 'unitSI'):
     """

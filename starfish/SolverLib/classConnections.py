@@ -6,7 +6,7 @@ from scipy.optimize import fsolve
 from pprint import pprint as pp
 #cur = os.path.dirname( os.path.realpath( __file__ ) )
 #sys.path.append(cur+'/../')
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 from copy import copy as copy       
  

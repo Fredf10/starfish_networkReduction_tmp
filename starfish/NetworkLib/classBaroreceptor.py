@@ -4,7 +4,7 @@ import math
 # import cellMLBaroreflexModels # Used later on in classes
 from .cellMLBaroreflexModels import pettersenAorticBR
 from .cellMLBaroreflexModels import bugenhagenAorticBR
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class Baroreceptor(cSBO.StarfishBaseObject):
     """

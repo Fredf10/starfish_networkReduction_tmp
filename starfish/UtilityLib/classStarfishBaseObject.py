@@ -3,7 +3,7 @@ import sys, os
 import traceback
 import time
 import numpy as np
-from . import classConfigurableObjectBase
+from starfish.UtilityLib import classConfigurableObjectBase
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 root = ''.join([cur,'/../'])
 logFilePath = root + 'warninglog.txt'

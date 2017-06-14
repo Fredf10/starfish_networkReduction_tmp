@@ -16,8 +16,8 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 import inspect
 from pprint import pprint as pp
 
-from . import moduleFilePathHandler as mFPH
-from ..VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
+from starfish.UtilityLib import moduleFilePathHandler as mFPH
+from starfish.VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
 
 from optparse import OptionParser
 
@@ -125,11 +125,11 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             if optionArgument == None:
                 optionArgument = defineVisualisation()
             
-            if optionArgument == '1':
+            if optionArgument == 1:
                 vizOutput = "2D+3D"
-            elif optionArgument == '2':
+            elif optionArgument == 2:
                 vizOutput = "2D"
-            elif optionArgument == '3':
+            elif optionArgument == 3:
                 vizOutput = "3D"
         # -c connect
         elif option == 'connect':
@@ -425,7 +425,7 @@ def chooseUQSACaseFile(networkName):
     Output:
         networkName,dataNumber of the Config File (networkName should be the same)
     """
-    from ..VascularPolynomialChaosLib import classUqsaCase
+    from starfish.VascularPolynomialChaosLib import classUqsaCase
     
     workingDirectory = mFPH.getDirectory('workingDirectory','','','read')
     networkDirectory = os.path.join(*[workingDirectory,networkName])

@@ -4,11 +4,11 @@ import os
 #cur = os.path.dirname(os.path.realpath(__file__))
 #sys.path.append(cur + '/../')
 
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 from . import classVessel as cVes
 from . import classBaroreceptor as cBRX
 from . import classVenousPool as classVenousPool
-from ..UtilityLib import moduleFilePathHandler as mFPH
+from starfish.UtilityLib import moduleFilePathHandler as mFPH
 import numpy as np
 import math
 from scipy import interpolate
@@ -16,7 +16,7 @@ import pprint
 import h5py
 from .classBoundaryConditions import *
 
-from ..UtilityLib import classRuntimeMemoryManager
+from starfish.UtilityLib import classRuntimeMemoryManager
 import logging
 logger = logging.getLogger('starfish')
 

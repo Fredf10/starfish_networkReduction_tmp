@@ -3,7 +3,7 @@ import sys, os
 # raise errors
 np.seterr(invalid='raise')
 
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class Compliance(cSBO.StarfishBaseObject):
     """

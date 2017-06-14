@@ -1,6 +1,6 @@
 import numpy as np
 import sys, os
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class ODESolver(cSBO.StarfishBaseObject):
     """

@@ -9,8 +9,6 @@ import numpy as np
 import os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 
-
-
 class realTimeVisualisation(gtk.Window):
 
     def __init__(self,networkVariables):

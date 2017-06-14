@@ -20,7 +20,7 @@ import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 from copy import copy as copy 
 from pprint import pprint as pp
-from ..UtilityLib import moduleFilePathHandler as mFPH
+from starfish.UtilityLib import moduleFilePathHandler as mFPH
 
 def getFilePath(fileType, networkName, dataNumber, mode, caseName = "None", evaluationNumber = "None", exception = 'Error'):
     '''

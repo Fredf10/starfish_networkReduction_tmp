@@ -5,8 +5,8 @@ import numpy as np
 #cur = os.path.dirname( os.path.realpath( __file__ ) )
 #sys.path.append(cur+'/../')
 
-from ..UtilityLib import classStarfishBaseObject as cSBO
-from ..NetworkLib import classBoundaryConditions as ccBC
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
+from starfish.NetworkLib import classBoundaryConditions as ccBC
 
 class Boundary(cSBO.StarfishBaseObject):
     def __init__(self, vessel, boundaryConditions, rigidArea, dt, currentMemoryIndex, currentTimeStep, nTsteps, systemEquation):

@@ -1,6 +1,6 @@
 import sys,os
 from .classLocationOfInterest import LocationOfInterest
-from ..UtilityLib import moduleXML
+from starfish.UtilityLib import moduleXML
 import progressbarsimple as cPB
 import numpy as np
 import h5py

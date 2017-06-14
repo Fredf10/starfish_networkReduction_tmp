@@ -1,8 +1,8 @@
 import sys,os
 cur = os.path.dirname(os.path.realpath('__file__'))
-from ..SolverLib.class1DflowSolver import FlowSolver
+from starfish.SolverLib.class1DflowSolver import FlowSolver
 #sys.path.append(''.join([cur,'/../UtilityLib']))
-from ..UtilityLib import moduleXML
+from starfish.UtilityLib import moduleXML
 import progressbarsimple as cPB
 import gc,time
 import multiprocessing

@@ -13,18 +13,18 @@ from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as Navig
 
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/../')
+#sys.path.append(cur+'/../')
 
 #sys.path.append(cur+'/../UtilityLib')
-import UtilityLib.moduleXML as mXML 
-import UtilityLib.processing as mProc
-import UtilityLib.moduleStartUp as moduleStartUp
+import starfish.UtilityLib.moduleXML as mXML 
+import starfish.UtilityLib.processing as mProc
+import starfish.UtilityLib.moduleStartUp as moduleStartUp
 #from UtilityLib.modulePickle import loadSolutionDataFile
 #from UtilityLib.modulePickle import loadExternalDataSet
 #deprecated
 
 #sys.path.append(cur+'/../NetworkLib')
-from NetworkLib.classVascularNetwork import VascularNetwork 
+from starfish.NetworkLib.classVascularNetwork import VascularNetwork 
 
 from matplotlib.font_manager import FontProperties
 

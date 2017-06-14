@@ -1,6 +1,6 @@
 import sys, os
 import numpy as np
-from ..UtilityLib import classStarfishBaseObject as cSBO
+from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class System(cSBO.StarfishBaseObject):
     

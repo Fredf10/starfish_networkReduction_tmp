@@ -1,10 +1,10 @@
 import sys,os,io
 cur = os.path.dirname( os.path.realpath( __file__ ) )
-sys.path.append(cur+'/../')
+#sys.path.append(cur+'/../')
 
 
 #sys.path.append(cur+'/../NetworkLib')
-from NetworkLib.classVascularNetwork import VascularNetwork 
+from starfish.NetworkLib.classVascularNetwork import VascularNetwork 
 
 import numpy as np
 from math  import *

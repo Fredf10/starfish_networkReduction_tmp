@@ -1,9 +1,5 @@
 import numpy as np
 
-
-
-    
-
 def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,maxLength=500):
     """
     calculates the linear wave splitting for a given P,Q,A,c (np.arrays) and rho (float) 
@@ -321,9 +317,6 @@ def nonLinearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,coml
         q_f = np.dot(matrix,dQ_f)
         q_b = np.dot(matrix,dQ_b)  
     """
-    
-    
-
 
 def minMaxFunction(arrayToEvaluate,timeValues=np.array([]),delta=0.025, seperateMinMax = False):
     """finds mins and max of all arrays
@@ -410,7 +403,6 @@ def minMaxFunction(arrayToEvaluate,timeValues=np.array([]),delta=0.025, seperate
         return minMaxAmp, minMaxTime
     else:
         return np.array(maxtab),np.array(mintab)
-    
     
 def calculateWaveShoulderPoint(waveData, timeData, startPointT, endPointT = None):
     """
