@@ -102,7 +102,7 @@ class Exponential(Compliance):
     Exponential Compliance Model 
     """
     def __init__(self, rho, As):
-        Compliance.__init__(self, rho, As)
+        super(Exponential, self).__init__(rho, As)
         self.betaExponential = None
         self.P0 = 0 #self.Ps*np.exp(self.beta*(self.A0/self.As-1.))
         
@@ -139,7 +139,7 @@ class Laplace(Compliance):
     Laplace Compliance Model actually Hookean Model
     """
     def __init__(self, rho, As):
-        Compliance.__init__(self, rho, As)
+        super(Laplace, self).__init__(rho, As)
         self.betaLaplace   = None
         
     def initialize(self,complianceDataDict):
@@ -199,10 +199,9 @@ class Laplace2(Laplace):
     youngs modulus and wallThickness
     """
     def __init__(self, rho, As):
-        Compliance.__init__(self, rho, As)
+        super(Laplace2, self).__init__(rho, As)
         self.wallThickness = None
         self.youngModulus  = None
-        self.betaLaplace   = None
         
     def initialize(self,complianceDataDict):
         """
@@ -213,14 +212,12 @@ class Laplace2(Laplace):
         self.betaLaplace = (4./3.)*(np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
         self.C0preCalculated = self.C(self.Ps)
         
-        
-
 class Hayashi(Compliance):
     """
     Compliance model found in Hayashi et al. 1993
     """
     def __init__(self, rho, As):
-        Compliance.__init__(self, rho, As)
+        super(Hayashi, self).__init__(rho, As)
         self.betaHayashi = None
             
     def initialize(self,complianceDataDict):
@@ -281,7 +278,7 @@ class HayashiEmpirical(Compliance):
     modified with diameter wavespeed equation found in Reymond et al. 2009
     """
     def __init__(self, rho, As):
-        Compliance.__init__(self, rho, As)
+        super(HayashiEmpirical, self).__init__(rho, As)
         self.betaHayashi = None
         self.rho = rho
              
@@ -327,10 +324,8 @@ class Reymond(Compliance):
     Cs   : compliance at reference pressure of compliance model
     """
     def __init__(self, rho, As):
-        
-        Compliance.__init__(self, rho, As)
-        self.Cs             = None # compliance at reference pressure ps
-        
+        super(Reymond, self).__init__(rho, As)
+        self.Cs = None # compliance at reference pressure ps
         # defined constants from the paper
         self.a1 = 0.4
         self.b1 = 5.0
