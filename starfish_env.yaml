@@ -1,6 +1,6 @@
 # To create the environment just run the command below
 # conda-env create -f tutorial.yml
-name: starfish272
+name: starfish27
 dependencies:
   - python =2.7
   - psutil
@@ -16,5 +16,5 @@ dependencies:
   - pip:
     - chaospy >=2.2.2
     - progressbar-simple
-    - "--editable=git+cbg_git:starfish/starfish.git@extractCore#egg=starfish"
+    - "--editable=git+cbg_git:starfish/starfish.git@master#egg=starfish"
 
