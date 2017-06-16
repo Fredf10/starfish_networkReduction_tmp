@@ -1,11 +1,15 @@
 numpy>=1.8.2
-PyOpenGL>=3.1.0b2
-pyglet>=1.1
-pydot>=1.0.2
+matplotlib
+scipy
+lxml >=3.4.2
 lxml>=3.4.2
 psutil>=3.1.1
 chaospy>=2.2
 h5py
 scipy
 progressbar-simple
+graphviz
+PyOpenGL>=3.1.0b2
+pyglet>=1.1
+pydot>=1.0.2
 

@@ -211,7 +211,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
     if os.path.exists(os.path.join(os.getcwd(),STARFISHconfig)):
         configDirectory = os.getcwd()
     else:
-        configDirectory = os.path.join(os.path.expanduser('~'),STARFISHconfig) 
+        configDirectory = os.path.join(os.path.expanduser('~')) 
            
     networkXmlFileTemplateDirectory = ''.join([starfishHomeDirectory,'/TemplateNetworks/',networkName])
     networkXmlFileDirectory         = ''.join([workingDirectory,'/',networkName])
@@ -291,7 +291,6 @@ def readConfigFile(options):
     output:
         configurations = dict with {option: configuration from file}
     """ 
-    
     config = ConfigParser.ConfigParser()
     
     filePath = getFilePath('configFile', "", '', 'read',exception = 'No')

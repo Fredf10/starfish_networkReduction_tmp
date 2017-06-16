@@ -1,8 +1,6 @@
 # To create the environment just run the command below
 # conda-env create -f tutorial.yml
 name: starfish27
-channels:
-  - jsturdy
 dependencies:
   - python =2.7
   - psutil

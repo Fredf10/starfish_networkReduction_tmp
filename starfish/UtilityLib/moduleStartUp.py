@@ -204,7 +204,6 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     if userInput == 'q': exit()
     else: return int(userInput)
 
-
 def chooseNetwork(showTemplates = True):
     """
     console Interface to choose a VascularNetwork for simulation / vascularPolynomial Chaos
