@@ -1,4 +1,4 @@
-from .testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 
 class RandomInput(TestBaseClass):
     def __init__(self):

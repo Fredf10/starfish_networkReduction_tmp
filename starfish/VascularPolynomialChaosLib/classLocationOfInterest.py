@@ -1,11 +1,11 @@
 from copy import copy as copy
 import numpy as np
 
-from .classQuantityOfInterest import QuantityOfInterest
+from starfish.VascularPolynomialChaosLib.classQuantityOfInterest import QuantityOfInterest
 from starfish.UtilityLib import processing as mProc
 import matplotlib.pyplot as plt
 
-from .testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 
 class LocationOfInterest(TestBaseClass):
     '''

@@ -1,6 +1,5 @@
-from .testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 import numpy as np
-#import ..UtilityLib.progressBar as cPB
 import progressbarsimple as cPB
 
 class QuantityOfInterest(TestBaseClass):

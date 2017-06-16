@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import sys,os
 cur = os.path.dirname(os.path.realpath(__file__))
-from .testBaseClass import TestBaseClass 
-from .classUqsaMeasures import UqsaMeasures
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib.classUqsaMeasures import UqsaMeasures
 import progressbarsimple as cPB
 import chaospy as cp
 import numpy as np

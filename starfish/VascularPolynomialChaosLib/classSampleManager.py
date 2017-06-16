@@ -1,5 +1,5 @@
-from .testBaseClass import TestBaseClass
-from . import moduleFilePathHandlerVPC as mFPH_VPC
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass
+from starfish.VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
 import h5py
 import numpy as np
 import chaospy as cp

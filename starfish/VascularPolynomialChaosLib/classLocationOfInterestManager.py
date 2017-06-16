@@ -1,10 +1,10 @@
 import sys,os
-from .classLocationOfInterest import LocationOfInterest
+from starfish.VascularPolynomialChaosLib.classLocationOfInterest import LocationOfInterest
 from starfish.UtilityLib import moduleXML
 import progressbarsimple as cPB
 import numpy as np
 import h5py
-from .testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 
 
 class LocationOfInterestManager(TestBaseClass):

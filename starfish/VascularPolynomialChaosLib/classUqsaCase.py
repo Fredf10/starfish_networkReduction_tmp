@@ -1,10 +1,10 @@
 import sys,os
-from .testBaseClass import TestBaseClass 
-from . import moduleFilePathHandlerVPC as mFPH_VPC
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
 import progressbarsimple as cPB
-from . import classLocationOfInterestManager
-from . import classUqsaMethods
-from . import classSampleManager
+from starfish.VascularPolynomialChaosLib import classLocationOfInterestManager
+from starfish.VascularPolynomialChaosLib import classUqsaMethods
+from starfish.VascularPolynomialChaosLib import classSampleManager
 import shutil
 import time
 import numpy as np

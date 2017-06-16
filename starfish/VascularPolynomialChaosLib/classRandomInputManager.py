@@ -1,8 +1,8 @@
 import numpy as np
 import itertools
-from .testBaseClass import TestBaseClass 
-from . import classRandomInput 
-from . import classCorrelationMatrices
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib import classRandomInput 
+from starfish.VascularPolynomialChaosLib import classCorrelationMatrices
 
 class RandomInputManager(TestBaseClass):
     
@@ -55,6 +55,22 @@ class RandomInputManager(TestBaseClass):
         self.linkRandomInputUpdateFunctions(vascularNetwork)
             
         self.checkCorrelationMatrix()
+    
+    def addRandomInput(self,name, a, b, distributionType, parameter=None):
+        '''
+        Add a random input
+        '''
+        if parameter is not None: # TODO validate parameter
+            randomInput = classRandomInput.ParametricRandomInput()
+            randomInput.parameter = parameter
+        else:
+            randomInput = classRandomInput.GeneralRandomInput()
+
+        randomInput.distributionType = distributionType # TODO validate distributionType
+        randomInput.a = a
+        randomInput.a = b
+        randomInput.name = name 
+        self.randomInputs[name] = randomInput
             
     def checkCorrelationMatrix(self):
         '''

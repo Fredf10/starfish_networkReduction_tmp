@@ -1,4 +1,4 @@
-from .testBaseClass import TestBaseClass 
+from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 import numpy as np
 
 class UqsaMeasures(TestBaseClass):
