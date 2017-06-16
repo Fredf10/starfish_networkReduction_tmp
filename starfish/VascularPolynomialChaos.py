@@ -67,7 +67,10 @@ def uncertaintyPropagation():
     # 1.2 load vascular network file polynomial chaos
     vpcNetworkXmlFile = mFPH_VPC.getFilePath('vpcNetworkXmlFile', networkName, dataNumber, 'read')
     vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber, networkXmlFile = vpcNetworkXmlFile)
+    run_uqsa_case(uqsaCase, vascularNetwork)
     
+def run_uqsa_case(uqsaCase, vascularNetwork):
+
     # 1.3 initialized defined random inputs
     vascularNetwork.randomInputManager.initialize(vascularNetwork)
     assert len(vascularNetwork.randomInputManager.randomInputs.keys()) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
@@ -100,11 +103,11 @@ def uncertaintyPropagation():
             distributionManager.passRealisation(sample,sampleIndex)
             # save evaluation file
             networkXmlFileSave = uqsaCase.evaluationCaseFiles[sampleIndex]['networkXmlFileSave']
-            mXML.writeNetworkToXML(vascularNetwork,  dataNumber = dataNumber, networkXmlFile= networkXmlFileSave)
+            mXML.writeNetworkToXML(vascularNetwork,  dataNumber = vascularNetwork.dataNumber, networkXmlFile= networkXmlFileSave)
         
         # save evaluation to log file
-        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', networkName, dataNumber, mode = "write", caseName = uqsaCase.sampleManager.samplingMethod)
-        vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, networkName, dataNumber, caseName = uqsaCase.sampleManager.samplingMethod)
+        evaluationLogFile = mFPH_VPC.getFilePath('evaluationLogFile', vascularNetwork.name, vascularNetwork.dataNumber, mode = "write", caseName = uqsaCase.sampleManager.samplingMethod)
+        vascularNetwork.randomInputManager.saveRealisationLog(evaluationLogFile, vascularNetwork.name, vascularNetwork.dataNumber, caseName = uqsaCase.sampleManager.samplingMethod)
         
     # 5.3 run evaluation simulations
     if uqsaCase.simulateEvaluations == True:
@@ -123,7 +126,7 @@ def uncertaintyPropagation():
     
     # 7. uncertainty quantification and sensitivty analysis
     uqsaCase.quantifyUncertaintyAndAnalyseSensitivtiy(distributionManager)
-                
     # 8. plotting of variables
+
 if __name__ == '__main__':
     uncertaintyPropagation()

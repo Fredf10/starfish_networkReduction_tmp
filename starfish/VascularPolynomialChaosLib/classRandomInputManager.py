@@ -50,11 +50,12 @@ class RandomInputManager(TestBaseClass):
                 if randomInput.parameter not in randomInputParameters:
                     randomInputParameters.append(randomInput.parameter)
                 else:
-                    raise ValueError("assoziated parameter <{}> of randomInput {} is doubled defined!".format(randomInput.location,randomInput.name))
+                    raise ValueError("assoziated parameter <{}> of randomInput {} is doubled defined!".format(randomInput.parameter,randomInput.name))
                 
         self.linkRandomInputUpdateFunctions(vascularNetwork)
             
-        self.checkCorrelationMatrix()
+        if self.correlation is not None:
+            self.checkCorrelationMatrix()
     
     def addRandomInput(self,name, a, b, distributionType, parameter=None):
         '''
@@ -68,7 +69,7 @@ class RandomInputManager(TestBaseClass):
 
         randomInput.distributionType = distributionType # TODO validate distributionType
         randomInput.a = a
-        randomInput.a = b
+        randomInput.b = b
         randomInput.name = name 
         self.randomInputs[name] = randomInput
             
@@ -202,7 +203,6 @@ class RandomInputManager(TestBaseClass):
         logfile.write(''.join(['{:<10}'.format('EvalNr'), ''.join(['{:20}'.format(j) for j in ['{:<5}'.format(k) for k in randomInputName]]),'\n',]))     
         for i,logLine in enumerate(logData):
             logfile.write(''.join(['{:<10}'.format(i), ''.join(['{:20}'.format(j) for j in ['{:<.5}'.format(k) for k in logLine]]),'\n']))
-        
         
     def printOutInfo(self):
         '''

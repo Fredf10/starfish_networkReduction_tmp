@@ -5,8 +5,6 @@ import progressbarsimple as cPB
 import numpy as np
 import h5py
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
-
-
 class LocationOfInterestManager(TestBaseClass):
     '''
     
@@ -39,12 +37,17 @@ class LocationOfInterestManager(TestBaseClass):
         for locationOfInterest in self.locationsOfInterest.itervalues():
             locationOfInterest.initialize()
                 
-    def addLocationOfInterest(self,locationId, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):
+    def addLocationOfInterest(self, queryLocation, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):
         '''
         
         '''
-        self.locationsOfInterest[locationId] = LocationOfInterest(locationName,quantitiesOfInterestToProcess, xVal, confidenceAlpha)
-                                
+        loi = LocationOfInterest()
+        loi.queryLocation = queryLocation 
+        loi.quantitiesOfInterestToProcess = quantitiesOfInterestToProcess
+        loi.xVal = xVal
+        loi.confidenceAlpha = confidenceAlpha
+        self.locationsOfInterest[locationName] = loi #Todo why have this separate from queryLocation
+
     def preprocessSolutionData(self,
                                evaluationCaseFiles,
                                preprocessedSolutionData,
