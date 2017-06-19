@@ -51,12 +51,9 @@ class UqsaCase(TestBaseClass):
                             'uqsaMethods',
                             'locationOfInterestManager']
     
-    
     def __init__(self):
-        
         self.networkName = None
         self.dataNumber  = None
-        
         ### data read in from file
         ##control variables
         # create samples ( TRUE == create and save, FALSE == load existing)
@@ -74,19 +71,14 @@ class UqsaCase(TestBaseClass):
         self.preProcessData   = True
         # post processing - uncertainty quantification and sensitivity analysis
         self.postProcessing  = True
-        
         # sample manager for the case
         self.sampleManager = None
-        
         ## uqsa method instance of this case to use
         self.uqsaMethods = None # {}
-        
         ## location of interests i.e. datastructure including all evaluated data y = f(z)
         self.locationOfInterestManager = None
-        
         ### data assoziated during run time
         ## samples of Z
-        
         
     def initialize(self,networkName, dataNumber):
         '''
@@ -112,13 +104,13 @@ class UqsaCase(TestBaseClass):
         abcSample = False
         #find out maximum numbers of samples needed and if ABC sample is needed
         for uqsaMethod in self.uqsaMethods.itervalues():
-            sampleSizeCurrent,abcSampleCurrent = uqsaMethod.evaluateSamplesSize(distributionManager.distributionDimension)   
+            sampleSizeCurrent, abcSampleCurrent = uqsaMethod.evaluateSamplesSize(distributionManager.distributionDimension)   
             
             if sampleSizeCurrent > maxSampleSize:
                 maxSampleSize = sampleSizeCurrent
             if abcSampleCurrent == True:
                 abcSample = True
-                
+            print("maxSampleSize", maxSampleSize) 
         if self.createSample == True:
             sampleSaveFile = mFPH_VPC.getFilePath('uqsaSampleFile', self.networkName, self.dataNumber, 
                                                   mode = "write", caseName = self.sampleManager.samplingMethod)
@@ -132,7 +124,6 @@ class UqsaCase(TestBaseClass):
                             
         self.locationOfInterestManager.sampleSize = self.sampleManager.currentSampleSize
     
-        
     def createEvaluationCaseFiles(self): 
         '''
         
@@ -171,10 +162,9 @@ class UqsaCase(TestBaseClass):
                 
                 self.evaluationCaseFiles.append(caseFileDict1)
             
-                progressBar.progress(simulationIndex) 
+                progressBar.progress() 
             
-        
-    def getSimulatioNBatchFileList(self):
+    def getSimulationBatchFileList(self):
         '''
         Returns simulation batch file list, as defined in configs
         '''
@@ -204,11 +194,10 @@ class UqsaCase(TestBaseClass):
             preprocessedSolutionData = mFPH_VPC.getFilePath('preprocessedDataFile', self.networkName, self.dataNumber, 
                                                      mode = "write", caseName = caseName )
             
-            simulationTimeFileSave  = mFPH_VPC.getFilePath('simulationTime', self.networkName, self.dataNumber, 
+            simulationTimeFileSave = mFPH_VPC.getFilePath('simulationTime', self.networkName, self.dataNumber, 
                                                      mode = "write", caseName =  caseName)
             simulationTimeFileLoad = mFPH_VPC.getFilePath('simulationTime', self.networkName, self.dataNumber, 
                                                      mode = "read", caseName = caseName, exception = 'No')
-            
             self.locationOfInterestManager.preprocessSolutionData(self.evaluationCaseFiles,
                                                                   preprocessedSolutionData,
                                                                   simulationTimeFileSave,
@@ -216,7 +205,7 @@ class UqsaCase(TestBaseClass):
                     
     def quantifyUncertaintyAndAnalyseSensitivtiy(self, distributionManager):
         '''
-        evnoke uq sa process
+        invoke uq sa process
         '''
         if self.postProcessing == True:
             
@@ -227,92 +216,14 @@ class UqsaCase(TestBaseClass):
             uqsaSolutionDataFile = mFPH_VPC.getFilePath('uqsaSolutionDataFile', self.networkName, self.dataNumber, 
                                                      mode = "write", caseName = caseName)
             shutil.copy(preprocessedSolutionData,uqsaSolutionDataFile)
-            
             # open solution file
             self.locationOfInterestManager.openQuantityOfInterestFile(uqsaSolutionDataFile, mode = 'r+')
-            
             # loop through data objects
             for qoi in self.locationOfInterestManager.getQoiIterator():
-                
-                timeStartBatch = time.time()
-                
-                ## ranges 
-                
-                ### Normal distribution
-                ## last wave start to first discontinuity
-                ## 0.2572545014772901 - 0.2709600872555526
-                #basis = np.linspace(0.258,0.269,100)
-                
-                ## first discontinuity to first wave return
-                ## 0.2709600872555526 - 0.29017871810043244
-                #basis = np.linspace(0.271,0.29,100)
-                
-                ### Uniform distribution
-                
-                ## last wave start to first discontinuity
-                #basis = np.linspace(0.258,0.277,100)
-                
-                ## first discontinuity to last discontinuity
-                #basis = np.linspace(0.27890,0.28824,100)
-                
-                #basis = np.array([0.280])
-                
-                # all
-                #basis = np.linspace(0.025,0.045,500)
-                
-                # just discontinuity
-                
-                #basis = np.linspace(0.031,0.039,50)
-                
-                numerOfSamples = 20
-                
-                # called now
-                #lowerEnd = 0.031 
-                
-                # called now2
-                #lowerEnd = 0.0318
-                
-                #upperEnd = 0.035
-                
-                #called full
-                lowerEnd = 0.032
-                upperEnd = 0.038
-                
-                import chaospy as cp
-                u = cp.Uniform()
-                basis = lowerEnd+(upperEnd-lowerEnd)*np.sort(u.sample(numerOfSamples,'H'))
-                                
-                #basis = np.linspace(0.03170,0.035,22)
-                
-                #basis = np.linspace(0.034,0.035,25)
-                
-                
-                # half
-                
-                #basis = np.linspace(0.025,0.035,100)
-                
-                # no sicontinuity
-                #basis = np.linspace(0.025,0.03,25)
-                
-                
-                print("hashDataForGivenBases {}".format(basis))
-                #qoi.hashDataForGivenBases(basis, self.sampleManager.currentSampleSize)
-                
-                timeBatchJob= time.time()-timeStartBatch
-                minutesBatch = int(timeBatchJob/60.)
-                secsBatch = timeBatchJob-minutesBatch*60.
-                print('=====================================')
-                print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
-                print('=====================================')
-                print()
-                
                 multiprocessingUQSA = False
-                
                 if multiprocessingUQSA == True:
                     self.multiprocessingUQSA(qoi, distributionManager)
-                
                 else:
-                    
                     timeStartTotal = time.time()
                     
                     for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
@@ -341,8 +252,6 @@ class UqsaCase(TestBaseClass):
             
             self.locationOfInterestManager.closeAndSaveQuantityOfInterestFile()
     
-    
-    
     def multiprocessingUQSA(self,qoi, distributionManager):
         '''
         Run all uqsa methods in as a local multiprocess
@@ -355,7 +264,7 @@ class UqsaCase(TestBaseClass):
         for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
             batchList.append([uqsaMethodName,uqsaMethod,distributionManager,self.sampleManager,qoi])         
         # run jobs
-        pool = multiprocessing.Pool( multiprocessing.cpu_count())
+        pool = multiprocessing.Pool(multiprocessing.cpu_count())
         pool.imap(self.batchJobUQSA,batchList)
         pool.close() 
         pool.join()
@@ -367,21 +276,11 @@ class UqsaCase(TestBaseClass):
         print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
         print('=====================================')
         print()
-        
-        
-        
     
     def batchJobUQSA(self, args):
         '''
         batch job for local uqsa multiprocessing
         '''
-        
-        uqsaMethodName,uqsaMethod,distributionManager,sampleManager,qoi = args
-        
+        uqsaMethodName, uqsaMethod, distributionManager, sampleManager, qoi = args
         uqsaMeasures = uqsaMethod.calculateStatistics(distributionManager, sampleManager, qoi)
         qoi.addUqsaMeasures(uqsaMethodName, uqsaMeasures)
-            
-        
-        
-    
-    

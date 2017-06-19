@@ -87,6 +87,7 @@ class LocationOfInterest(TestBaseClass):
             
             dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xVal])
             for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
+                quantityObject.simulationTime = simulationTime
                 # normal quantity of interest
                 if 'Extrema' not in quantitiyName and 'InflectionPoint' not in quantitiyName and 'Trajectory' not in quantitiyName:    
                     totalDataShape = (sampleSize,len(simulationTime))

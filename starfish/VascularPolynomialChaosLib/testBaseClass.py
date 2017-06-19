@@ -140,10 +140,10 @@ class TestBaseClass(object):
                 # get the extern variable definition class
                 externVariable  = self.externVariables[externXmlElement]
                 # create xml node
-                externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  
                 
                 variableValue = self.getVariable(externXmlElement)
                 if variableValue is not None:
+                    externXmlNode  = etree.SubElement(xmlNode, externXmlElement)  # Only create if existing 
                     ## find out what type the externXmlElement variable is:
                     # 2.1 if dict variable -> writeExtValueXml
                     if isinstance(externVariable,self.ExtDict):

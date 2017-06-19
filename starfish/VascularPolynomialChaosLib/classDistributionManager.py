@@ -63,7 +63,6 @@ class DistributionManager(object):
         pass
     
     def createDependentDistribution(self):
-        
         '''
         Method creates a dependent distribution 
         '''

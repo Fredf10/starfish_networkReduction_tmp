@@ -7,20 +7,11 @@
 ##
 
 import os
-#cur = os.path.dirname(os.path.realpath('__file__'))
 
-#from NetworkLib.classVascularNetwork import VascularNetwork
-### another unnecessary import.
-
-#from SolverLib.class1DflowSolver import FlowSolver
-### another
-
-#import VascularPolynomialChaosLib.classVpcConfiguration as cVPCConf
 import starfish.VascularPolynomialChaosLib.classDistributionManager as cDistMng
 import starfish.VascularPolynomialChaosLib.moduleFilePathHandlerVPC as mFPH_VPC
 import starfish.VascularPolynomialChaosLib.moduleBatchSimulationManager as mBSM
 import starfish.VascularPolynomialChaosLib.classUqsaCase as cUqsaCase
-#import VascularPolynomialChaosLib.classConfigurationUQSA as cConfigUQSA
 
 import starfish.UtilityLib.moduleStartUp as mStartUp
 import starfish.UtilityLib.moduleXML as mXML
@@ -59,7 +50,7 @@ def uncertaintyPropagation():
     dataNumber  = optionsDict['dataNumber']
     
     # 1.1 load configuration and locations of interest      
-    uqsaCase = cUqsaCase.UqsaCase() #cConfigUQSA.ConfigurationUQSA()
+    uqsaCase = cUqsaCase.UqsaCase() 
     uqsaCaseFile = mFPH_VPC.getFilePath('uqsaCaseXmlFile', networkName, dataNumber, 'read')
     uqsaCase.loadXMLFile(uqsaCaseFile)
     uqsaCase.initialize(networkName,dataNumber)
@@ -87,7 +78,6 @@ def run_uqsa_case(uqsaCase, vascularNetwork):
         
     # 4. create or load samples
     uqsaCase.aquireSamples(distributionManager, vascularNetwork.randomInputManager.randomInputsExtDist)
-    
     # 5. evaluate model / on local machine or on server
     # 5.1 create evaluation case file list
     uqsaCase.createEvaluationCaseFiles()
@@ -111,7 +101,7 @@ def run_uqsa_case(uqsaCase, vascularNetwork):
         
     # 5.3 run evaluation simulations
     if uqsaCase.simulateEvaluations == True:
-        batchFileList = uqsaCase.getSimulatioNBatchFileList()
+        batchFileList = uqsaCase.getSimulationBatchFileList()
         if uqsaCase.localEvaluation == True:
             if uqsaCase.multiprocessing == False:
                 mBSM.runBatchAsSingleProcess(batchFileList, quiet = True)
@@ -120,7 +110,7 @@ def run_uqsa_case(uqsaCase, vascularNetwork):
         else:
             # TODO: server simulations not implemented yet
             raise NotImplementedError("server simulations not implemented yet")
-
+    
     # 6. process quantity of interest
     uqsaCase.preprocessSolutionData()
     

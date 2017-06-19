@@ -92,7 +92,7 @@ def test_singleVessel():
         
     # 5.3 run evaluation simulations
     if uqsaCase.simulateEvaluations == True:
-        batchFileList = uqsaCase.getSimulatioNBatchFileList()
+        batchFileList = uqsaCase.getSimulationBatchFileList()
         if uqsaCase.localEvaluation == True:
             if uqsaCase.multiprocessing == False:
                 mBSM.runBatchAsSingleProcess(batchFileList, quiet = True)

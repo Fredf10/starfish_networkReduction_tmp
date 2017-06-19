@@ -28,7 +28,7 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
         if quiet == False:
             print('____________Batch   {:5} ___________'.format(batchDataList.index(batchData))) 
             print('Runtime:        {} min {} sec'.format(minutesSolve,secsSolve))
-        progressBar.progress(completed)
+        progressBar.progress()
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
@@ -65,13 +65,14 @@ def runSingleBatchSimulation(batchData):
         timeSolverSolve = time.clock()-timeStart
         minutesSolve = int(timeSolverSolve/60.)
         secsSolve = timeSolverSolve-minutesSolve*60.
-    except:
+    except Exception as e: #TODO handle exceptions with more information
         minutesSolve= 0
         secsSolve = 0
         print("Error in running {}".format(networkXmlFileLoad))
+        print("The exception was: ")
+        print(e) #TODO add a traceback
     
     return minutesSolve,secsSolve
-
 
 def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
     '''
@@ -94,10 +95,13 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     pool = multiprocessing.Pool(numberWorkers, maxtasksperchild = None)
     results = pool.imap(runSingleBatchSimulation,batchDataList)
     pool.close() 
+    last_update  = 0
     while (True):
         completed = results._index
         if (completed == len(batchDataList)): break
-        progressBar.progress(completed)
+        if last_update < completed:
+            progressBar.progress()
+            last_update = completed
     pool.join()
     if quiet == False:
         print('=====================================')
@@ -110,4 +114,3 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     secsBatch = timeBatchJob-minutesBatch*60.
     print("total runtime {:d} min {:.2f} sec".format(minutesBatch, secsBatch)) 
     print('=====================================')
-            

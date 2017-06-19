@@ -1,7 +1,5 @@
-from __future__ import absolute_import
 import sys,os
 import numpy as np
-
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 topFolder = cur + "/../"
@@ -16,7 +14,6 @@ import progressbarsimple as cPB
 from starfish.NetworkLib.classBoundaryConditions import VaryingElastance
 from starfish.NetworkLib.classBoundaryConditions import Valve
 from starfish.NetworkLib.classVascularNetwork import VascularNetwork
-
 from starfish.SolverLib.classBoundarys import Boundary
 from starfish.SolverLib import classSystemEquations
 from starfish.SolverLib import classConnections
@@ -704,7 +701,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 
                 if self.quiet == False:
-                    progressBar.progress(n)
+                    progressBar.progress()
                 
                 for numericalObject in self.numericalObjects:
                     try:
@@ -719,7 +716,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         # self.exception()
                 
                 if self.quiet == False:
-                    progressBar.progress(n)
+                    progressBar.progress()
                 
         ## to be concentrated with original cycle mode !!
         else:
@@ -855,7 +852,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 
                 if self.quiet == False:
                     pass
-                    progressBar.progress(n)
+                    progressBar.progress()
                 
                 # Need to add exception
                 for fieldSolver in self.fieldSolverList:
@@ -884,7 +881,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         # self.exception()
                 
                 if self.quiet == False:
-                    progressBar.progress(n)
+                    progressBar.progress()
                 
         ## to be concentrated with original cycle mode !!
         else:

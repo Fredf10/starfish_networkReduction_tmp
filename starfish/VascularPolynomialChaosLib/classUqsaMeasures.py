@@ -7,7 +7,7 @@ class UqsaMeasures(TestBaseClass):
     variablesHdf5Memory = ["expectedValue",
                            "variance",
                            "standardDeviation",
-                           "conficenceInterval",
+                           "confidenceInterval",
                            "conditionalExpectedValue",
                            "conditionalVariance",
                            "firstOrderSensitivities",
@@ -30,7 +30,7 @@ class UqsaMeasures(TestBaseClass):
         self.conditionalExpectedValue = None
         self.conditionalVariance      = None
         
-        self.conficenceInterval       = None
+        self.confidenceInterval       = None
         self.confidenceAlpha          = None
         
         self.firstOrderSensitivities  = None

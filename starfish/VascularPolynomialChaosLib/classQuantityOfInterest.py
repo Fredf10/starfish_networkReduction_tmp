@@ -8,7 +8,7 @@ class QuantityOfInterest(TestBaseClass):
     # in class definition
     ## pure variables
     variablesHdf5Memory = []
-    
+   
     ## dictionary with objects to load
     objectDictsHdf5Memory = ['uqsaMeasures']
         
@@ -22,7 +22,6 @@ class QuantityOfInterest(TestBaseClass):
         self.simulationTime = None # link to simulation time
         #
         self.uqsaMeasures = None
-        
     
     def getData(self, sampleSize, abcSample, offset = 0):
         '''
@@ -56,7 +55,7 @@ class QuantityOfInterest(TestBaseClass):
             
             self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
         
-            progressBar.progress(n)
+            progressBar.progress()
         
     def addUqsaMeasures(self,uqsaMeasureName,uqsaMeasure):
         '''
@@ -70,7 +69,6 @@ class QuantityOfInterest(TestBaseClass):
         else:
             print(" did not add {} as it already exist in dict".format(uqsaMeasureName))
     
-    
     def retainDsetRowData(self,dsetName, dataRow, sampleIndex, totalDataShape):
         '''
         
@@ -78,6 +76,3 @@ class QuantityOfInterest(TestBaseClass):
         if dsetName not in self.hdf5Group.keys():
             self.hdf5Group.create_dataset(dsetName, totalDataShape, dtype='float64')
         self.hdf5Group[dsetName][sampleIndex] = dataRow
-        
-    
-        

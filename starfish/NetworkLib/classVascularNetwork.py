@@ -695,7 +695,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         globalData.attrs['dt'] = self.dt
         globalData.attrs['nTSteps'] = self.nTSteps
         globalData.attrs['nTstepsInitPhase'] = self.nTstepsInitPhase
-        globalData.attrs['simulationDescription'] = self.description
+        globalData.attrs['simulationDescription'] = str(self.description)
 
         # dsetTime = globalData.create_dataset('Time', (savedArraySize,), dtype='float64')
 

@@ -15,6 +15,6 @@ dependencies:
   - graphviz
   - pip:
     - chaospy >=2.2.2
-    - progressbar-simple
+    - "git+https://github.com/utsekaj42/progressBar.git@master#egg=progressbar-simple"
     - "--editable=git+cbg_git:starfish/starfish.git@master#egg=starfish"
 

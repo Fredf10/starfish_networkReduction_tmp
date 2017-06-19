@@ -95,7 +95,7 @@ class LocationOfInterestManager(TestBaseClass):
                 vascularNetwork.solutionDataFile.close()
                 del vascularNetwork
             
-                progressBar.progress(evaluationCaseFiles.index(batchData))  
+                progressBar.progress()  
             
             self.simulationTime = np.linspace(timeS, timeE, nPoints)
             # save the simulationTime
@@ -126,7 +126,7 @@ class LocationOfInterestManager(TestBaseClass):
             for locationOfInterest in self.locationsOfInterest.values():
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, simulationIndex)
         
-            progressBar.progress(evaluationCaseFiles.index(batchData))    
+            progressBar.progress()    
             
         # save hdf5 file
         

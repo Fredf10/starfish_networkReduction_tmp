@@ -77,8 +77,8 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
         statsDict['expectedValue']  = cp.E(gPCExpansion, distributionManager.jointDistribution)
         statsDict['variance']       = cp.Var(gPCExpansion, distributionManager.jointDistribution)
         statsDict['standardDeviation']   = np.sqrt(statsDict['variance'])
-        conficenceInterval  = cp.Perc(gPCExpansion, [confidenceAlpha/2., 100-confidenceAlpha/2.], distributionManager.jointDistribution)
-        statsDict['conficenceInterval']  =  conficenceInterval.reshape(2,len(np.atleast_1d(statsDict['expectedValue'])))
+        confidenceInterval  = cp.Perc(gPCExpansion, [confidenceAlpha/2., 100-confidenceAlpha/2.], distributionManager.jointDistribution)
+        statsDict['confidenceInterval']  =  confidenceInterval.reshape(2,len(np.atleast_1d(statsDict['expectedValue'])))
         statsDict['confidenceAlpha'] = confidenceAlpha
         
         # conditional expected values  and sensitivity coefficients
@@ -196,8 +196,8 @@ class UqsaMethodPolynomialChaosPseudoSpectral(TestBaseClass):
         statsDict['expectedValue']  = cp.E(gPCExpansion, distributionManager.jointDistribution)
         statsDict['variance']       = cp.Var(gPCExpansion, distributionManager.jointDistribution)
         statsDict['standardDeviation']   = np.sqrt(statsDict['variance'])
-        conficenceInterval  = cp.Perc(gPCExpansion, [confidenceAlpha/2., 100-confidenceAlpha/2.], distributionManager.jointDistribution)
-        statsDict['conficenceInterval']  =  conficenceInterval.reshape(2,len(np.atleast_1d(statsDict['expectedValue'])))
+        confidenceInterval  = cp.Perc(gPCExpansion, [confidenceAlpha/2., 100-confidenceAlpha/2.], distributionManager.jointDistribution)
+        statsDict['confidenceInterval']  =  confidenceInterval.reshape(2,len(np.atleast_1d(statsDict['expectedValue'])))
         statsDict['confidenceAlpha'] = confidenceAlpha
         
         # conditional expected values  and sensitivity coefficients
@@ -365,7 +365,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
             V[j]   = cp.Var(poly, dist)
             
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -505,7 +505,7 @@ class UqsaMethodPolynomialChaosDepDirLRorder(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -647,7 +647,7 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -768,7 +768,7 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -892,7 +892,7 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -1009,7 +1009,7 @@ class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
             E[j]  = cp.E(poly, dist)
             V[j]  = cp.Var(poly, dist)
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -1126,7 +1126,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
             E[j]  = cp.E(poly, dist)
             V[j]  = cp.Var(poly, dist)
             
-            progressBar.progress(j)
+            progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -1202,7 +1202,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
                 statsDict['variance']            = np.sum(data**2-statsDict['expectedValue']**2,axis=0)/len(samples)
                 
                 quantiles = [confidenceAlpha/2, 100.-confidenceAlpha/2]
-                statsDict['conficenceInterval']  = np.percentile(data,quantiles, axis=0)
+                statsDict['confidenceInterval']  = np.percentile(data,quantiles, axis=0)
                 statsDict['confidenceAlpha'] = confidenceAlpha
             else:
                 print("Monte Carlo Sensitivity Analysis")  
@@ -1252,7 +1252,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
                     statsDict['standardDeviation']  = np.sqrt(varianceA)
                 
                 quantiles = [confidenceAlpha/2, 100.-confidenceAlpha/2]
-                statsDict['conficenceInterval'] = np.percentile(data,quantiles, axis=0) 
+                statsDict['confidenceInterval'] = np.percentile(data,quantiles, axis=0) 
                 statsDict['confidenceAlpha'] = confidenceAlpha
                 
                 statsDict['conditionalExpectedValue'] = None
@@ -1352,7 +1352,7 @@ class UqsaMethodMonteCarloParametrizedBootstrapping(TestBaseClass):
                     variance[aNX] = np.sum(data**2-expectedValue[aNX]**2,axis=0)/len(samples)
                     
 #                     quantiles = [confidenceAlpha/2, 100.-confidenceAlpha/2]
-#                     statsDict['conficenceInterval']  = np.percentile(data,quantiles, axis=0)
+#                     statsDict['confidenceInterval']  = np.percentile(data,quantiles, axis=0)
 #                     statsDict['confidenceAlpha'] = confidenceAlpha
                 else:
                     

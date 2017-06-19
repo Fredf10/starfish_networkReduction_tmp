@@ -7,9 +7,8 @@ psutil>=3.1.1
 chaospy>=2.2
 h5py
 scipy
-progressbar-simple
+git+https://github.com/utsekaj42/progressBar.git@master#egg=progressbar-simple
 graphviz
 PyOpenGL>=3.1.0b2
 pyglet>=1.1
 pydot>=1.0.2
-
