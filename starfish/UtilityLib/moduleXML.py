@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 try:
@@ -189,7 +190,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 
                 writeXMLsaveValues(subElement,variable,variableValues)
 
-    xmlFile.write(networkXmlFile,encoding='iso-8859-1',pretty_print = True)
+    xmlFile.write(networkXmlFile,encoding='iso-8859-1',pretty_print= True)
 
 def loadVariablesConversion(variable, variableValueStr, variableUnit, unit = 'unitSI'):
     """

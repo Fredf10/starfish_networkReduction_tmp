@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import itertools
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
@@ -206,7 +207,7 @@ class RandomInputManager(TestBaseClass):
         
     def printOutInfo(self):
         '''
-        Function to print out random variable informations
+        Function to print(out random variable informations)
         '''
         for info in self.generateInfo():
             print(info)

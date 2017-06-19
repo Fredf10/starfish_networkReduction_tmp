@@ -1,3 +1,4 @@
+from __future__ import print_function
 import  numpy as np 
 import sys, os
 # raise errors
@@ -82,7 +83,7 @@ class Compliance(cSBO.StarfishBaseObject):
                 self.__setattr__(key,value)
             except Exception:
                 self.warning("compliance.updateData Wrong key: {}, could not update varibale".format(key))
-#                print "ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key)
+#                print("ERROR compliance.updateData Wrong key: {}, could not update varibale".format(key))
     
     def adaptMaterialCoefficient(self, alpha_c, materialCoefficient = None):
         """
@@ -292,10 +293,10 @@ class HayashiEmpirical(Compliance):
         #print "DB using area relation for beta", 
         self.C0preCalculated = self.C(self.Ps)
         
-#         print "beta hayashi", self.betaHayashi
-#         print "beta HAy mean", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*self.betaHayashi)
-#         print "beta HAy mean+0.05", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*(self.betaHayashi+0.05))
-#         print "beta HAy mean+0.4", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*(self.betaHayashi+0.4))
+#         print("beta hayashi", self.betaHayashi)
+#         print("beta HAy mean", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*self.betaHayashi))
+#         print("beta HAy mean+0.05", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*(self.betaHayashi+0.05)))
+#         print("beta HAy mean+0.4", np.mean((13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*(self.betaHayashi+0.4)))
 #         print
          
         self.betaHayashi = (13.3/(np.sqrt(Amm*4./np.pi)**0.3))**2.*2.*self.rho/self.Ps*self.betaHayashi 

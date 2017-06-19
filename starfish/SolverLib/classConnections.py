@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, os
 import numpy as np
 from numpy.linalg import solve
@@ -426,9 +427,9 @@ class Link():
 
         Niterations = 0
         Xold = np.array([domega1_2_last, domega2_1_last])
-#         print "\n"
-#         print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2
-#         print "\n"
+#         print("\n")
+#         print("domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_2, domega3_2)
+#         print("\n")
         while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.0001 :
             """iterative Newton Rahpson solver
                 domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
@@ -627,7 +628,7 @@ class Link():
 #                 self.sumQErrorCount = self.sumQErrorCount+1
 #             if sumQError > self.maxQError:
 #                 self.maxQError  = sumQError
-#             print 'Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
+#             print('Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount)
 #             
 #             if self.rigidAreas == False:
 #                 # calculate new areas
@@ -849,7 +850,7 @@ class Bifurcation():
 #         elif rigidAreas == False:
 #             self.fsolveFunction = self.fsolveBifurcationSys1
 #             self.jacobiMatrix = self.jacobiMatrixBifSys1
-#         else: print "ERROR classConnections: EquSys not properly defined!";exit()
+#         else: print("ERROR classConnections: EquSys not properly defined!";exit())
 
         self.rigidAreas = rigidAreas
         solvingScheme = "NonLinear"
@@ -1374,20 +1375,20 @@ class Bifurcation():
 #                 self.A_rightMother[n+1][pos2]  = A2[pos2]
 #                 self.A_daughter[n+1][pos3] = A3[pos3]
 #         
-#             print   
+#             print(  )
 #             sumQError = abs(abs(sol[3])-abs(sol[1])-abs(sol[4]))/abs(sol[3])
 #             if sumQError > 0.0: 
 #                 self.sumQErrorCount = self.sumQErrorCount+1
 #             if sumQError > self.maxQError:
 #                 self.maxQError  = sumQError
-#             print 'Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount
+#             print('Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount)
 #             
 #             sumPError = abs(abs(sol[2])-abs(sol[0]))/abs(sol[2])
 #             if sumPError > 0.0: 
 #                 self.sumPErrorCount = self.sumPErrorCount+1
 #             if sumPError > self.maxPError:
 #                 self.maxPError  = sumPError
-#             print 'Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount
+#             print('Error P lin    ',  sumPError, self.maxPError ,' - ', n, self.sumPErrorCount)
 #             
 #             ## non linear error
 #             sumPErrorNonLin = abs((sol[2]+0.5*(sol[3]/A1n)**2)-(sol[0]+0.5*(sol[1]/AL12n)**2))/abs(sol[2]+0.5*(sol[3]/A1n)**2)
@@ -1395,7 +1396,7 @@ class Bifurcation():
 #                 self.sumPErrorNonLinCount = self.sumPErrorNonLinCount+1
 #             if sumPErrorNonLin > self.maxPErrorNonLin:
 #                 self.maxPErrorNonLin  = sumPErrorNonLin
-#             print 'Error P non lin',  sumPErrorNonLin, self.maxPErrorNonLin ,' - ', n, self.sumPErrorNonLinCount
+#             print('Error P non lin',  sumPErrorNonLin, self.maxPErrorNonLin ,' - ', n, self.sumPErrorNonLinCount)
 #             
 #     
 #     def fsolveBifurcationSys0(self,x,args):
@@ -1842,9 +1843,9 @@ class Anastomosis():
         A3_last = A3o
         Niterations = 0
         Xold = np.array([domega1_2_last, domega2_2_last, domega3_1_last])
-#         print "\n"
-#         print "domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2
-#         print "\n"
+#         print("\n")
+#         print("domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2)
+#         print("\n")
         while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.001 or epsilonvalues[2]>0.001:
             """iterative Newton Rahpson solver
                 domega1_2, domega2_1, domega3_1 are the unknowns that are changing from

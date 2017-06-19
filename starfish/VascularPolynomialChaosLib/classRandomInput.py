@@ -1,3 +1,4 @@
+from __future__ import print_function
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 
 class RandomInput(TestBaseClass):
@@ -80,9 +81,9 @@ class RandomInput(TestBaseClass):
             if self.updateMethods != {}:
                 #for i,loc in enumerate(self.parameter.split('_')):
                 #    if i == 0:
-                #        print '{:3} | {:20} | {:21} | {:.4} '.format(self.name,self.variableName,loc, realisation)
+                #        print('{:3} | {:20} | {:21} | {:.4} '.format(self.name,self.variableName,loc, realisation))
                 #    else:
-                #        print '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
+                #        print('{:3} | {:20} | {:21} | '.format(' ',' ',loc))
                 #print  
                 for variableIdentifier,updateMethod in self.updateMethods.iteritems():                    
                     updateMethod({variableIdentifier : realisation})

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, os, gc
 import numpy as np
 import math
@@ -79,8 +80,8 @@ def test_singleVessel():
             RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))
 
     ##    Uncomment these if you want to  have a printout of all RMSE values
-    #    print "Root Mean Square Error for each part of the network is:"
-    #    print RMSEDict
+    #    print("Root Mean Square Error for each part of the network is:")
+    #    print(RMSEDict)
 
     TooHighError = False
     for vesselId in RMSEDict:
@@ -161,7 +162,7 @@ def test_saveSkipping():
         RMSEDict[vesselId] = {}
         dataDictNew = {}
         dataDictRef = {}
-#        print "testing vessel nr. {}".format(vesselId)
+#        print("testing vessel nr. {}".format(vesselId))
         keyList = []
         for key in testDict:
             keyList.append(key)
@@ -174,7 +175,7 @@ def test_saveSkipping():
                                                           vascularNetworkNew.simulationTime, [0.0, 0.2])
 
         for key in testDict:
-#            print "testing key {}".format(key)
+#            print("testing key {}".format(key))
             testVals = np.array(dataDictNew[key])
             refVals = np.array(dataDictRef[key])
             if len(testVals) != len(refVals):
@@ -189,8 +190,8 @@ def test_saveSkipping():
             RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))
 
 ##    Uncomment these if you want to  have a printout of all RMSE values
-#    print "Root Mean Square Error for each part of the network is:"
-#    print RMSEDict
+#    print("Root Mean Square Error for each part of the network is:")
+#    print(RMSEDict)
 
     TooHighError = False
     for vesselId in RMSEDict:
@@ -204,9 +205,9 @@ def test_saveSkipping():
         print("\nAll values below error threshold")
         print("Test Successful!")
 
-#        print dataDictNew
-#        print dataDictNew
-#        print dataDictRef
+#        print(dataDictNew)
+#        print(dataDictNew)
+#        print(dataDictRef)
 # root mean square
 
 def test_memoryChunking():
@@ -258,7 +259,7 @@ def test_memoryChunking():
         RMSEDict[vesselId] = {}
         dataDictNew = {}
         dataDictRef = {}
-#        print "testing vessel nr. {}".format(vesselId)
+#        print("testing vessel nr. {}".format(vesselId))
         keyList = []
         for key in testDict:
             keyList.append(key)
@@ -271,7 +272,7 @@ def test_memoryChunking():
                                                           vascularNetworkNew.simulationTime, [0.0, 0.2])
 
         for key in testDict:
-#            print "testing key {}".format(key)
+#            print("testing key {}".format(key))
             testVals = np.array(dataDictNew[key])
             refVals = np.array(dataDictRef[key])
             if len(testVals) != len(refVals):
@@ -286,8 +287,8 @@ def test_memoryChunking():
             RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))
 
 ##    Uncomment these if you want to  have a printout of all RMSE values
-#    print "Root Mean Square Error for each part of the network is:"
-#    print RMSEDict
+#    print("Root Mean Square Error for each part of the network is:")
+#    print(RMSEDict)
 
     TooHighError = False
     for vesselId in RMSEDict:

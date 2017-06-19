@@ -1,6 +1,7 @@
 
 # import dependencies
 
+from __future__ import print_function
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
@@ -373,8 +374,8 @@ def main():
                     print("     [1] - show  boundary conditions")
                     print("     [2] - add   boundary condition ")
                     print("     [3] - del   boundary condition ")
-#                     print "     [4] - load  boundary conditions from CSV"
-#                     print "     [5] - write boundary conditions to CSV"
+#                     print("     [4] - load  boundary conditions from CSV")
+#                     print("     [5] - write boundary conditions to CSV")
                     print("     [b] - back to the main menu")
                     print("")     
                     subMenuInput = raw_input("     what to do? ") 
@@ -529,8 +530,8 @@ def main():
                         subMenuInput = ''
                     
 #                     elif subMenuInput == '4' and vascularNetwork.root != []:
-#                         print "     load  boundary conditions from CSV"
-#                         print ""
+#                         print("     load  boundary conditions from CSV")
+#                         print("")
 #                         networkName = enterNetworkName(networkName)
 #                         boundaryConditions,boundaryConditionPolyChaos = mCSV.readBCFromCSV(networkName)
 #                         vascularNetwork.update({'boundaryConditions':boundaryConditions,
@@ -539,8 +540,8 @@ def main():
 #                         mainGraph.update_graph(vascularNetwork, window)
 #                                                                 
 #                     elif subMenuInput == '5' and vascularNetwork.root != []:
-#                         print "     write boundary conditions to CSV"
-#                         print ""
+#                         print("     write boundary conditions to CSV")
+#                         print("")
 #                         networkName = enterNetworkName(networkName)
 #                         boundaryConditions = vascularNetwork.getVariableValue('boundaryConditions')
 #                         boundaryConditionPolyChaos = deepcopy(vascularNetwork.getVariableValue('boundaryConditionPolyChaos'))
@@ -729,7 +730,7 @@ def main():
                     break
                 
 #                 elif subMenuInput == '4':
-#                     print "     load vessel data and boundary conditions from CSV"
+#                     print("     load vessel data and boundary conditions from CSV")
 #                     networkName = enterNetworkName(networkName, recentNetworkNames = recentNetworkNames)
 #                     if networkName == None:break
 #                     
@@ -756,7 +757,7 @@ def main():
                 
                 
 #                 elif subMenuInput == '6':
-#                     print "     load random input from CSV"
+#                     print("     load random input from CSV")
 #                     networkName = enterNetworkName(networkName)
 #                     mCSV.readRandomInputsfromCSV(networkName, vascularNetwork.randomInputManager)
 #                     vascularNetwork.randomInputManager.linkRandomInputUpdateFunctions(vascularNetwork)
@@ -808,7 +809,7 @@ def main():
                     break
                 
 #                 elif subMenuInput == '3':
-#                     print "     write vessel data and boundary conditions to CSV"
+#                     print("     write vessel data and boundary conditions to CSV")
 #                     networkName = enterNetworkName(networkName) 
 #                     if networkName == None:break
 #                     boundaryConditions = vascularNetwork.getVariableValue('boundaryConditions')
@@ -826,7 +827,7 @@ def main():
                     break
                 
 #                 elif subMenuInput == '5':
-#                     print "     write random input data to CSV"
+#                     print("     write random input data to CSV")
 #                     networkName = enterNetworkName(networkName) 
 #                     mCSV.writeRandomInputstoCSV(networkName, vascularNetwork.randomInputManager)                
 #                     break

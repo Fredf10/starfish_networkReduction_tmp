@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 import sys, os, gc
 import numpy as np
@@ -57,7 +58,7 @@ class setUp_singleVessel(unittest.TestCase):
             self.RMSEDict[vesselId] = {}
             self.dataDictNew = {}
             self.dataDictRef = {}
-#            print "testing vessel nr. {}".format(vesselId)
+#            print("testing vessel nr. {}".format(vesselId))
             self.vesselDict[vesselId] = []
             for key in self.testDict:
                 self.vesselDict[vesselId].append(key)
@@ -91,7 +92,7 @@ class testSingleVessel(setUp_singleVessel):
     def test_errorThreshold(self):
         for vesselId, keylist in self.vesselDict.iteritems():
             for key in keylist:
-#                print "testing key {}".format(key)
+#                print("testing key {}".format(key))
                 testVals = np.array(self.dataDictNew[vesselId][key])
                 refVals = np.array(self.dataDictRef[vesselId][key])
                 if len(testVals) != len(refVals):
@@ -106,8 +107,8 @@ class testSingleVessel(setUp_singleVessel):
                 self.RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))
 
 ##       Uncomment these if you want to  have a printout of all RMSE values
-#        print "Root Mean Square Error for each part of the network is:"
-#        print self.RMSEDict
+#        print("Root Mean Square Error for each part of the network is:")
+#        print(self.RMSEDict)
 
         TooHighError = False
         errorString = ""
@@ -119,8 +120,8 @@ class testSingleVessel(setUp_singleVessel):
 
         self.assertFalse(TooHighError, errorString)
 #        if not TooHighError:
-#            print "\nAll values below error threshold"
-#            print "Test Successful!"
+#            print("\nAll values below error threshold")
+#            print("Test Successful!")
 
 
 if __name__ == "__main__":

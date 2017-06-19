@@ -2,6 +2,7 @@
 #
 # Symlinks the hooks to the local git directory
 ret_val = 0 
+from __future__ import print_function
 import os
 import stat
 import errno
@@ -39,7 +40,7 @@ for filename in filenames:
         bash_exec = "if [ -x "+  target_path + " ]; then true else false; fi"
         exec_stat = os.system(bash_exec)
         if exec_stat != 0:
-            print "Unable to set hook as an executable" 
+            print("Unable to set hook as an executable" )
             ret_val = 1
 
         source_path = os.path.join(git_hooks_path, hook_name)
@@ -54,7 +55,7 @@ for filename in filenames:
                 linkIsGood = os.path.samefile(current_target,target_path)
 
                 if linkIsGood is not True:
-                    print hook_name, "hook already exists in ", git_hooks_path
+                    print(hook_name, "hook already exists in ", git_hooks_path)
                     ret_val = 1
 sys.exit(ret_val)
 

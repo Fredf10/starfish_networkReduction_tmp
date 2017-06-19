@@ -11,6 +11,7 @@
 # created by Vinzenz Eck // vinzenz.g.eck@ntnu.no
 ##
 
+from __future__ import print_function
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 import inspect
@@ -184,7 +185,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
 
 def prettyPrintList(title, listToPrint, indexOffset=0):
     """
-    Function to pretty print a list to STDOUT with numbers to choose from
+    Function to pretty print(a list to STDOUT with numbers to choose from)
     """
     print(title)
     for index,listElement in enumerate(listToPrint):

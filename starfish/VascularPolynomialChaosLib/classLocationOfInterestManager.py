@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys,os
 from starfish.VascularPolynomialChaosLib.classLocationOfInterest import LocationOfInterest
 from starfish.UtilityLib import moduleXML

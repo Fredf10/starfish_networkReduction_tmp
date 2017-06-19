@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys,os
 import numpy as np
 # set the path relative to THIS file not the executing file!
@@ -689,7 +690,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-            progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
+            progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -700,8 +701,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 
-                if self.quiet == False:
-                    progressBar.progress()
+                progressBar.progress()
                 
                 for numericalObject in self.numericalObjects:
                     try:
@@ -714,9 +714,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         logger.critical("Success in saving solution data file. Reraising Exception")
                         raise # TODO: why does self.exception() not force the program to quit?
                         # self.exception()
-                
-                if self.quiet == False:
-                    progressBar.progress()
                 
         ## to be concentrated with original cycle mode !!
         else:
@@ -839,7 +836,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-            progressBar = cPB.ProgressBar(35,self.nTSteps, subpressPrint = self.quiet)
+            progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -849,10 +846,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
             for n in xrange(self.nTSteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
-                
-                if self.quiet == False:
-                    pass
-                    progressBar.progress()
                 
                 # Need to add exception
                 for fieldSolver in self.fieldSolverList:
@@ -880,8 +873,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         raise # TODO: why does self.exception() not force the program to quit?
                         # self.exception()
                 
-                if self.quiet == False:
-                    progressBar.progress()
+                progressBar.progress()
                 
         ## to be concentrated with original cycle mode !!
         else:

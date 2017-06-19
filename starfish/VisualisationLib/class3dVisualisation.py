@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 # sys.path.append(cur+'/../')
@@ -838,7 +839,7 @@ class Visualisation3D(Visualisation3DGUI):
         #frameSize = (np.shape(frameSizeImage)[1],np.shape(frameSizeImage)[0])
 
         #try:   FFMpegWriter = animation.writers['mencoder']
-       # except: print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
+       # except: print("ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return)
 
         if True:
         #try:
@@ -886,7 +887,7 @@ class Visualisation3D(Visualisation3DGUI):
             self.movieNumber = self.movieNumber+1
             print("createMovie(): created movie sucessfull")
         #except:
-        #    print "ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return
+        #    print("ERROR: Visualisation3D.createMovie(): mencoder libary is not installed, could not create movie!"; return)
 
 
 

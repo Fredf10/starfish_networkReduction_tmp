@@ -1,3 +1,4 @@
+from __future__ import print_function
 import csv
 from numpy import sqrt,pi
 import sys,os
@@ -82,11 +83,11 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
         csvfile.seek(0)
         
         if dialect.delimiter == ',':
-            print """\n WARNING: mCSV92 detected delimiter ',': This delimiter might lead to wrong data as
-             it is used as well as decimal place separator in some languages! Check the loaded values carefully!"""
+            print("""\n WARNING: mCSV92 detected delimiter ',': This delimiter might lead to wrong data as
+             it is used as well as decimal place separator in some languages! Check the loaded values carefully!""")
             
         #reader = ccBC.csv.DictReader(csvfile,dialect)
-        reader = csv.DictReader(csvfile,delimiter = dialect.delimiter)
+        reader = csv.DictReader(csvfile, delimiter = dialect.delimiter)
         # hash data with in dictionary and separate units
         columUnits = {}
         vesselData = {}
@@ -168,7 +169,7 @@ def readRandomInputsfromCSV(networkName, randomInputManager, delimiter = ';'):
                 variableUnit = None 
                 # save converted CSV-value
                 dataDict[variable] = mXML.loadVariablesConversion(variable, row[variable], variableUnit)
-            else: print "WARNING: mCSV.readRandomInputsfromCSV(), no variable {} defined in the csv file but needed to create proper working random input".format(variable)
+            else: print("WARNING: mCSV.readRandomInputsfromCSV(), no variable {} defined in the csv file but needed to create proper working random input".format(variable))
         randomInputManager.addRandomInput(dataDict)
 
 def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos, delimiter=';'):
@@ -303,7 +304,7 @@ def readBCFromCSV(networkName, delimiter=';'):
                 if variable == 'filePathName':
                     path = ''.join([boundaryCSVFile])
                     if path not in variableValueStr:  variableValueStr = variableValueStr.join([path,''])
-                print variableValueStr
+                print(variableValueStr)
                 if variableValueStr != '':
                     try:
                         boundaryDataDict[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit)

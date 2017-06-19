@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys,os
 import numpy as np
 
@@ -255,8 +256,8 @@ class Field():
 #         # solve vessel objects
 #         dt = self.dt
 #         
-#         # Any need to print this out?
-#         # print "using Matrix based formulation in field calculation"
+#         # Any need to print(this out?)
+#         # print("using Matrix based formulation in field calculation")
 #         
 #         # the current position in solution memory
 #         n = self.currentMemoryIndex[0]

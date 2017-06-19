@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gtk
 import gobject
 from optparse import OptionParser

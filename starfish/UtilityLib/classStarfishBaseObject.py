@@ -1,4 +1,5 @@
 # SuperClass.py (name should maybe be changed)
+from __future__ import print_function
 import sys, os
 import traceback
 import time
@@ -92,9 +93,9 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
             noException (Optional Bool): Boolean determining if it
                 should use the last exception's info or not.
                 Defaults to False.
-            quiet (Opt. Bool): Whether to print warning at all.
+            quiet (Opt. Bool): Whether to print(warning at all.)
                 Defaults to False.
-            verbose (Opt. Bool): Whether or not to print full traceback.
+            verbose (Opt. Bool): Whether or not to print(full traceback.)
                 Defaults to False.
             saveToFile (Opt. Bool): Whether or not to save info to file.
                 Will save info in STARFiSh/warninglog.txt
@@ -119,7 +120,7 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
             completeString = completeString + exceptionInfo
 
         #if not quiet:
-            # print completeString
+            # print(completeString)
 
         if saveToFile:
             if not verbose: completeString = completeString + exceptionInfo

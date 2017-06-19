@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys,os
 from starfish.SolverLib.class1DflowSolver import FlowSolver
 from starfish.UtilityLib import moduleXML

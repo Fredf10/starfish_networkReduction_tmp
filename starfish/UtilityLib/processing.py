@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 
 def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,maxLength=500):
@@ -62,7 +63,7 @@ def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,max
 #             divisor = divisorPrimeCase
 #             dlength = (lendp_f-1)/divisorPrimeCase
 #         
-#         print 'original signal length',lendp_f,' splitted in ',divisor,' parts a,', dlength, '+',int(isPrime),'(prime number)'
+#         print('original signal length',lendp_f,' splitted in ',divisor,' parts a,', dlength, '+',int(isPrime),'(prime number)')
 #         
 #         
 #         if isPrime:
@@ -265,7 +266,7 @@ def nonLinearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,coml
             divisor = divisorPrimeCase
             dlength = (lendp_f-1)/divisorPrimeCase
 
-        print 'original signal length',lendp_f,' splitted in ',divisor,' parts a,', dlength, '+',int(isPrime),'(prime number)'
+        print('original signal length',lendp_f,' splitted in ',divisor,' parts a,', dlength, '+',int(isPrime),'(prime number)')
 
         if isPrime:
             #get last entry

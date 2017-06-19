@@ -1,3 +1,4 @@
+from __future__ import print_function
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 import numpy as np
 

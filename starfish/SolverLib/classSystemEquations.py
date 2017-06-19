@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, os
 import numpy as np
 from starfish.UtilityLib import classStarfishBaseObject as cSBO
@@ -103,7 +104,7 @@ class System(cSBO.StarfishBaseObject):
         
 # #         Re = np.max(np.sqrt(A/np.pi)*2.0*v/self.my*self.rho)    
 # #         if Re > self.Re: # > 3000.0
-# #             print "WARNING approaching high reynoldsnumber for vessel", self.name, Re
+# #             print("WARNING approaching high reynoldsnumber for vessel", self.name, Re)
 # #             self.Re = Re
 #             
         dlt = self.dlt

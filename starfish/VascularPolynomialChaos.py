@@ -6,6 +6,7 @@
 # uses polynomial Chaos toolbox from Jonathan Feinberg, Simula Center Oslo
 ##
 
+from __future__ import print_function
 import os
 
 import starfish.VascularPolynomialChaosLib.classDistributionManager as cDistMng

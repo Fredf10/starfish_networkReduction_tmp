@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import sys, os
 from starfish.UtilityLib import classStarfishBaseObject as cSBO

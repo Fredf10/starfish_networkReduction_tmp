@@ -1,3 +1,4 @@
+from __future__ import print_function
 from copy import copy as copy
 import numpy as np
 
@@ -448,8 +449,8 @@ class LocationOfInterest(TestBaseClass):
 #                         maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
 #                     quantityObject.trajectoryData = xInt
 #                     quantityObject.data = maxTimeMatched
-#                     print "Approximated error in forward wave jump: as a multiple of timesteps"
-#                     print np.abs(np.min(maxTimes[:,1::]-maxTimes[:,0:-1], axis=1))/(simulationTime[1]-simulationTime[0])
+#                     print("Approximated error in forward wave jump: as a multiple of timesteps")
+#                     print(np.abs(np.min(maxTimes[:,1::]-maxTimes[:,0:-1], axis=1))/(simulationTime[1]-simulationTime[0]))
 #                     
 #                                          
 #                     fig = plt.figure()

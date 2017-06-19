@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys,os
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 from starfish.VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC

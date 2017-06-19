@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, os
 import numpy as np
 cur = os.path.dirname( os.path.realpath( __file__ ) )

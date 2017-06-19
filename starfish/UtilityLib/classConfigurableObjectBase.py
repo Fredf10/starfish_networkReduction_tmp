@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os,sys
 
 from starfish.UtilityLib.constants import unitsDictSI as unitsDict
@@ -70,7 +71,7 @@ class ConfigurableObjectBase(object):
             self.dictObjType = dictObjType
             
             #TODO: approptiate testing for dictObjType  
-#             print type(dictObjType)
+#             print(type(dictObjType))
 #             if type(dictObjType) is type(object):
 #             else: raise ValueError("ERROR: ExtDict in {}, dictObjType is not a class instance: <<{}>>".format(self.__class__.__name__,dictObjType))
 #             
@@ -110,7 +111,7 @@ class ConfigurableObjectBase(object):
         xmlFile = etree.ElementTree(root)
         xmlNodeSelf = etree.SubElement(root, self.__class__.__name__, {'class':self.__class__.__name__})  
         self.writeDataToXmlNode(xmlNodeSelf)
-        xmlFile.write(filePathName,encoding='iso-8859-1',pretty_print = True)
+        xmlFile.write(filePathName,encoding='iso-8859-1',pretty_print= True)
        
     def writeDataToXmlNode(self,xmlNode):
         '''

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import gtk
 import gobject
 import matplotlib
@@ -951,10 +952,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
 #                     t = xData[1:]
 #                     x = np.trapz(yData01*t)/A            
 #                     y = np.trapz(yData01**2./2)/A
-#                     print "DB cernteroids start"
-#                     print "A", A
-#                     print x,y
-#                     print "DB cernteroids end"
+#                     print("DB cernteroids start")
+#                     print("A", A)
+#                     print(x,y)
+#                     print("DB cernteroids end")
 #                     
 #                     self.points[i]['axis1Twin']['--'].set_data(x, y)
                     
