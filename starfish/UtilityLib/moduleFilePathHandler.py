@@ -19,12 +19,19 @@
 
 from __future__ import print_function, absolute_import
 from builtins import input
-import cPickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 import starfish
 STARFISHconfig = 'STARFiSh.config'
-import ConfigParser
+try:
+    import configparser as ConfigParser
+except ImportError:
+    import ConfigParser
 
 try:
     from lxml import etree
@@ -551,7 +558,7 @@ def loadExternalDataSet(fileName):
                     'Description': ''}
     try:
         externalDataFile = open(fileName,'rb')
-        externalData = cPickle.load(externalDataFile)
+        externalData = pickle.load(externalDataFile)
     except:
         print("Error: no or corrupted external data-file found")
     

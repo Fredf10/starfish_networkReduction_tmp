@@ -1,5 +1,6 @@
 # SuperClass.py (name should maybe be changed)
 from __future__ import print_function, absolute_import
+from future.utils import raise_
 from builtins import input
 import sys, os
 import traceback
@@ -150,7 +151,7 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
         else:
             try: raise
             except Exception as e:
-                raise type(e), type(e)(e.message + "\nAppended : " + infoString), sys.exc_info()[2]
+                raise_(type(e), type(e)(e.message + "\nAppended : " + infoString), sys.exc_info()[2])
 
 
 

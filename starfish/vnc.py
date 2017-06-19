@@ -1,6 +1,3 @@
-
-# import dependencies
-
 from __future__ import print_function, absolute_import
 from builtins import input
 import sys,os
@@ -36,7 +33,11 @@ import gtk
 from starfish.VncLib.classGraph import Graph
 from starfish.VncLib.classGraph import MyDotWindow
 
-import cPickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import pprint as pprint
 import numpy as np
 import thread
@@ -612,7 +613,7 @@ def main():
         elif menuInput == "l":
             try:
                 vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'read'),'rb')
-                recentNetworkNames = cPickle.load(vncRescentNetworksFile)
+                recentNetworkNames = pickle.load(vncRescentNetworksFile)
                 vncRescentNetworksFile.close()
             except:
                 recentNetworkNames = []
@@ -669,7 +670,7 @@ def main():
                         
                         #vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
                         # store pickle
-                        #cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                        #pickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
                         #vncRescentNetworksFile.close()
                         
                         break
@@ -710,7 +711,7 @@ def main():
                         networkName = None
                         vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
                         # store pickle
-                        cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                        pickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
                         vncRescentNetworksFile.close()
                         break
                     mainGraph.update_graph(vascularNetwork, window)
@@ -775,7 +776,7 @@ def main():
                             
                 vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'write'),'wb')
                 # store pickle
-                cPickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
+                pickle.dump(recentNetworkNames, vncRescentNetworksFile, protocol=2)
                 vncRescentNetworksFile.close()
             
         elif menuInput == "s":
@@ -839,7 +840,7 @@ def main():
         elif menuInput == "u":
             try:
                 vncRescentNetworksFile = open(mFPH.getFilePath('vncRescentNetworksFile', 'networkName', 'xxx', 'read'),'rb')
-                recentNetworkNames = cPickle.load(vncRescentNetworksFile)
+                recentNetworkNames = pickle.load(vncRescentNetworksFile)
                 vncRescentNetworksFile.close()
             except:
                 recentNetworkNames = []

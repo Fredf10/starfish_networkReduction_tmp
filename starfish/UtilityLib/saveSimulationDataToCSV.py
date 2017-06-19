@@ -15,7 +15,6 @@ import UtilityLib.moduleStartUp as moduleStartUp
 from NetworkLib.classVascularNetwork import VascularNetwork 
 
 from optparse import OptionParser
-import cPickle
 import numpy as np
 
 from pprint import pprint as pp
