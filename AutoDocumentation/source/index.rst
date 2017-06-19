@@ -12,17 +12,15 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
-   Main
-   Visualisation
-   vnc
-   systemCheck 
-   NetworkLib
-   SolverLib
-   UtilityLib
-   VascularPolynomialChaosLib
-   VisualisationLib
-   VncLib
+   starfish.__main__
+   starfish.Visualisation
+   starfish.vnc
+   starfish.NetworkLib
+   starfish.SolverLib
+   starfish.UtilityLib
+   starfish.VascularPolynomialChaosLib
+   starfish.VisualisationLib
+   starfish.VncLib
 
 
 Indices and tables
