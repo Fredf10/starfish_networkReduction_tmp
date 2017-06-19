@@ -1,5 +1,5 @@
 ## Units
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import numpy as np
 
 # define current network xml description variable

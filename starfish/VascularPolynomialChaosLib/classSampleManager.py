@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass
 from starfish.VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH_VPC
 import h5py

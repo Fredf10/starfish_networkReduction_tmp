@@ -1,9 +1,9 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import numpy as np
 import csv
 from math import exp
 import scipy.optimize as so
-from . import ODESolver as OD
+from starfish.NetworkLib import ODESolver as OD
 import os, sys
 # set the path relative to THIS file not the executing file!
 from starfish.UtilityLib import classStarfishBaseObject as cSBO

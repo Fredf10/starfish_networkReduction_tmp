@@ -2,7 +2,7 @@
 """Based on the example setup.py from
 https://github.com/pypa/sampleproject
 """
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 from setuptools import setup, find_packages
 from codecs import open
 from os import path

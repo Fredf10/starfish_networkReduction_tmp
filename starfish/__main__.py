@@ -34,11 +34,11 @@
 ##
 
 #---------------------------------------------------------------------------------------#
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import starfish.Simulator as simulator
 import starfish.Visualisation as visualisationToolBox
 import starfish.vnc  as vnc
-import VascularPolynomialChaos as uqsaToolBox
+import starfish.VascularPolynomialChaos as uqsaToolBox
 
 def main(args=None):
         

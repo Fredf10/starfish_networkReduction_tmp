@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os,sys
 from starfish.UtilityLib.constants import unitsDictSI as unitsDict
 from starfish.UtilityLib.moduleHelperFunctions import getGitHash

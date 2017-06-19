@@ -11,7 +11,7 @@
 # created by Vinzenz Eck // vinzenz.g.eck@ntnu.no
 ##
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 import inspect

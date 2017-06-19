@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 try:
@@ -75,7 +75,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
         return
 
     ## import current network xml description as nxmlW(rite) to avoid version clash
-    from constants import newestNetworkXml as nxmlW
+    from starfish.UtilityLib.constants import newestNetworkXml as nxmlW
 
     xmlFile = etree.ElementTree(root)
 
@@ -340,11 +340,11 @@ def loadNetworkFromXML(networkName ,
 
 
     if xmlFileVersion == newestNetworkXmlVersion:
-        from constants import newestNetworkXml as nxml
+        from starfish.UtilityLib.constants import newestNetworkXml as nxml
     elif xmlFileVersion == '4.0':
-        import networkXml040 as nxml
+        import starfish.UtilityLib.networkXml040 as nxml
     elif xmlFileVersion == '4.1':
-        import networkXml041 as nxml
+        import starfish.UtilityLib.networkXml041 as nxml
 
     if xmlFileVersion != newestNetworkXmlVersion:
         print(" WARNING the version of the network xml file you try to load is outdated it may cause some problems!")

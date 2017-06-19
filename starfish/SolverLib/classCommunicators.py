@@ -1,5 +1,5 @@
 #Warning: this file hard-links to ../VisualisationLib/classRealTimeVisualisation.py in the function startRealTimeVisualisation.
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import subprocess
 import math
 import numpy as np

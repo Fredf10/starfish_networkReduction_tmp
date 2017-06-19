@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import sys
 import os
 # set the path relative to THIS file not the executing file!
@@ -6,16 +6,16 @@ import os
 #sys.path.append(cur + '/../')
 
 from starfish.UtilityLib import classStarfishBaseObject as cSBO
-from . import classVessel as cVes
-from . import classBaroreceptor as cBRX
-from . import classVenousPool as classVenousPool
+from starfish.NetworkLib import classVessel as cVes
+from starfish.NetworkLib import classBaroreceptor as cBRX
+from starfish.NetworkLib import classVenousPool as classVenousPool
 from starfish.UtilityLib import moduleFilePathHandler as mFPH
 import numpy as np
 import math
 from scipy import interpolate
 import pprint
 import h5py
-from .classBoundaryConditions import *
+from starfish.NetworkLib.classBoundaryConditions import *
 
 from starfish.UtilityLib import classRuntimeMemoryManager
 import logging
@@ -27,8 +27,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     The vascular network consists out of vessels defined in classVessel::Vessel()
     Additional Topology, BoundaryConditions and the SimulationContext are saved.
     """
-
-
     solutionMemoryFields    = ["simulationTime", "arterialVolume"]
     solutionMemoryFieldsToSave = ["simulationTime", "arterialVolume"]
 

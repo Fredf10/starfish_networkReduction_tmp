@@ -1,6 +1,6 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import pydot
-import xdot
+import starfish.VncLib.xdot as xdot
 
 class MyDotWindow(xdot.DotWindow):
 

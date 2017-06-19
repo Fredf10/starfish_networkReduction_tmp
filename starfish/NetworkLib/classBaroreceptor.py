@@ -1,10 +1,10 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import sys, os
 import numpy as np
 import math
 # import cellMLBaroreflexModels # Used later on in classes
-from .cellMLBaroreflexModels import pettersenAorticBR
-from .cellMLBaroreflexModels import bugenhagenAorticBR
+from starfish.NetworkLib.cellMLBaroreflexModels import pettersenAorticBR
+from starfish.NetworkLib.cellMLBaroreflexModels import bugenhagenAorticBR
 from starfish.UtilityLib import classStarfishBaseObject as cSBO
 
 class Baroreceptor(cSBO.StarfishBaseObject):

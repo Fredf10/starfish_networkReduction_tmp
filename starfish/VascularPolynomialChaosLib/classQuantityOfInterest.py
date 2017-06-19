@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 import numpy as np
 import progressbarsimple as cPB

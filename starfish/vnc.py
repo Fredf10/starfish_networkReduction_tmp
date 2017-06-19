@@ -1,7 +1,7 @@
 
 # import dependencies
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )

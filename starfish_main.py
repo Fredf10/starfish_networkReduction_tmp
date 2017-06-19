@@ -34,7 +34,7 @@
 ##
 
 #---------------------------------------------------------------------------------------#
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import Simulator as simulator
 import starfish.Visualisation as visualisationToolBox
 import starfish.vnc  as vnc

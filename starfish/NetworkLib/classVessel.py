@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import pprint
 from copy import deepcopy
 import sys, os
@@ -7,8 +7,8 @@ import numpy as np
 from scipy.integrate import simps
 
 ## TODO: needsto be imported as modules
-from .moduleGrids import *
-from .classCompliance import *
+from starfish.NetworkLib.moduleGrids import *
+from starfish.NetworkLib.classCompliance import *
 # TODO: Can't change import without crashing simulation.
 # moduleGrids: ERROR: classVessel.initialize(): Grid calculation of vessel 1
 # classCompliance: ERROR: classVessel.initialize(): init compliance of vessel 1
