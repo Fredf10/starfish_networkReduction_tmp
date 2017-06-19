@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 import sys
 import os
 # set the path relative to THIS file not the executing file!
@@ -1626,11 +1627,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # Check if gravity is on and if user wants to correct for hydrostatic pressure
             if self.gravitationalField == True:
 
-                input = 'K'
-                while input not in ['y', 'Y', 'yes', 'Yes', 'n', 'no', 'No', 'NO']:
-                    input = str(raw_input("\n Adjust for hydrostatic pressure(y/n): "))
+                input_ = 'K'
+                while input_ not in ['y', 'Y', 'yes', 'Yes', 'n', 'no', 'No', 'NO']:
+                    input_ = input("\n Adjust for hydrostatic pressure(y/n): ")
 
-                if input in ['y', 'Y', 'yes', 'Yes']:  # 'y' Adjust ConstantPressure to correct for hydrostatic pressure
+                if input_ in ['y', 'Y', 'yes', 'Yes']:  # 'y' Adjust ConstantPressure to correct for hydrostatic pressure
                     initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)
                     self.initialValues = initialValuesWithGravity
 

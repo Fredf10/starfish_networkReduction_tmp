@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 import  numpy as np 
 import sys, os
 # raise errors

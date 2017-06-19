@@ -3,6 +3,7 @@
 https://github.com/pypa/sampleproject
 """
 from __future__ import print_function, absolute_import
+from builtins import input
 from setuptools import setup, find_packages
 from codecs import open
 from os import path

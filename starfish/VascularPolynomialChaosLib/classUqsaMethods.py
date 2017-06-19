@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function, absolute_import
+from builtins import input
 import sys,os
 cur = os.path.dirname(os.path.realpath(__file__))
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 

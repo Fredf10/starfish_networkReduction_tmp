@@ -1,5 +1,6 @@
 # SuperClass.py (name should maybe be changed)
 from __future__ import print_function, absolute_import
+from builtins import input
 import sys, os
 import traceback
 import time

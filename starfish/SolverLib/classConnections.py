@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 import sys, os
 import numpy as np
 from numpy.linalg import solve
@@ -1322,7 +1323,7 @@ class Bifurcation():
 #         # solve system
 #         sol,infodict,a,b = fsolve(self.fsolveFunction ,x ,args = args, fprime = self.jacobiMatrix,full_output=True)
 #         #print "cC",infodict['nfev'],infodict['njev'], b
-#         #if infodict['nfev'] > 2: raw_input("")
+#         #if infodict['nfev'] > 2: input("")
 #         #""" Predictor Step """
 #         if self.step == "predictor":
 #             self.step = "corrector"

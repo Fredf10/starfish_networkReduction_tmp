@@ -32,6 +32,7 @@
 
 #---------------------------------------------------------------------------------------#
 from __future__ import print_function, absolute_import
+from builtins import input
 import time 
 import sys,os
 # set the path relative to THIS file not the executing file!

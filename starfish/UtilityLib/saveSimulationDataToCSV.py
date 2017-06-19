@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 sys.path.append(cur+'/../')

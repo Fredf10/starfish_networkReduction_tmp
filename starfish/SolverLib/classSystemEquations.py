@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 import sys, os
 import numpy as np
 from starfish.UtilityLib import classStarfishBaseObject as cSBO

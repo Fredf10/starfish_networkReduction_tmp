@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 import numpy as np
 

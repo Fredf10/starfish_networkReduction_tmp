@@ -18,6 +18,7 @@
 ##
 
 from __future__ import print_function, absolute_import
+from builtins import input
 import cPickle
 import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -406,7 +407,7 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     appropriateInputList.append('q')
     print("")
     while userInput not in appropriateInputList:
-        userInput = raw_input(question)
+        userInput = input(question)
     print("")
     if userInput == 'q': exit()
     else: return int(userInput)
@@ -439,7 +440,7 @@ def insertWorkingDirectory(optionArgument):
         defaultWD = os.path.expanduser(os.path.join('~','starfish_working_directory')) 
         print("Enter an absolute or relative path to set the working directory, or (q) quit")
         input_prompt="[Press enter to use the default path {}]: ".format(defaultWD)
-        optionArgument = raw_input(input_prompt) or defaultWD
+        optionArgument = input(input_prompt) or defaultWD
         
     if optionArgument != "q":
         optionArgument = os.path.expanduser(optionArgument)

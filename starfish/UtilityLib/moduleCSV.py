@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import input
 import csv
 from numpy import sqrt,pi
 import sys,os
