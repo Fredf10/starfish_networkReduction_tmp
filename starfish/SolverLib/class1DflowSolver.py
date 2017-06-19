@@ -691,7 +691,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-            progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
+        progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -837,7 +837,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-            progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
+        progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -989,8 +989,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
             except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field", oldExceptPass= True)
 
         ### garbage collection
-        gc.collect()
-
         del self.numericalObjects
         del self.fieldSolverList
         del self.connectionSolverList
@@ -999,4 +997,5 @@ class FlowSolver(cSBO.StarfishBaseObject):
         del self.connections
         del self.boundarys
         del self.communicators
+        gc.collect()
 
