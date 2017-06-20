@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import sys
 import os
 # set the path relative to THIS file not the executing file!
@@ -1629,7 +1629,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
                 input_ = 'K'
                 while input_ not in ['y', 'Y', 'yes', 'Yes', 'n', 'no', 'No', 'NO']:
-                    input_ = input("\n Adjust for hydrostatic pressure(y/n): ")
+                    input_ =input3("\n Adjust for hydrostatic pressure(y/n): ")
 
                 if input_ in ['y', 'Y', 'yes', 'Yes']:  # 'y' Adjust ConstantPressure to correct for hydrostatic pressure
                     initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)

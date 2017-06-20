@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import numpy as np
 
 def linearWaveSplitting(pressureArray,flowArray,areaArray,waveSpeedArray,rho,maxLength=500):

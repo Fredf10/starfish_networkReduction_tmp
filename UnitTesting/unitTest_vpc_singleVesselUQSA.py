@@ -4,7 +4,7 @@
 # 3. run VascularPolynomialChaos.py on the resulting vpc.xml to evaluate all
 
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import sys, os
 import shutil
 import numpy as np

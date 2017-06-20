@@ -12,7 +12,7 @@
 ##
 
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
 import inspect
@@ -201,7 +201,7 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     appropriateInputList.append('q')
     print("")
     while userInput not in appropriateInputList:
-        userInput = input(question)
+        userInput =input3(question)
     print("")
     if userInput == 'q': exit()
     else: return int(userInput)
@@ -291,7 +291,7 @@ def defineVisualisation():
     return userInput
     
 def defineSimulationDescription():
-    simulationDescription = input("\n  Type in description of the simulation case: ")
+    simulationDescription =input3("\n  Type in description of the simulation case: ")
     try:
         simulationDescription = str(simulationDescription)
     except:
@@ -311,7 +311,7 @@ def defineDataNumber(networkName):
     prettyPrintList("\n        Existing dataNumbers for this network: {}".format(networkName), existingDataNumbers)
        
     while correctDataNumber == False:
-        dataNumber = input("\n  Please enter datanumber (3 characters): ")
+        dataNumber =input3("\n  Please enter datanumber (3 characters): ")
         testedFailed = False
         try:
             dataNumber,xx = evaluateDataNumber(dataNumber)
@@ -457,7 +457,7 @@ def chooseUQSACaseFile(networkName):
         userInputDataNumber = 'xxxx'
         dataNumber = False
         while dataNumber == False:
-            userInputDataNumber = input("\n  Insert dataNumber for polynomial Chaos case (overwrites if existing): ")
+            userInputDataNumber =input3("\n  Insert dataNumber for polynomial Chaos case (overwrites if existing): ")
             dataNumber = evaluateDataNumber(userInputDataNumber, exception = "Warning")[0]
         
         # create template configuration

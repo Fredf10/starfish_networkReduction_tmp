@@ -1,7 +1,7 @@
 # SuperClass.py (name should maybe be changed)
 from __future__ import print_function, absolute_import
 from future.utils import raise_
-from builtins import input
+from builtins import input as input3
 import sys, os
 import traceback
 import time

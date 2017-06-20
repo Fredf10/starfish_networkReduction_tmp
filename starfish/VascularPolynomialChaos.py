@@ -7,7 +7,7 @@
 ##
 
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import os
 
 import starfish.VascularPolynomialChaosLib.classDistributionManager as cDistMng

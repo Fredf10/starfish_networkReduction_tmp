@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import numpy as np
 import csv
 from math import exp
@@ -187,7 +187,7 @@ class BoundaryConditionType1(BoundaryCondition):
         signal type can be quantified with function1 / function2
         which are a function of (t)
 
-        call function input (n,dt)
+        call function input3(n,dt)
         gives amplitude value for pressure/flow back
         for the function delta g
     """

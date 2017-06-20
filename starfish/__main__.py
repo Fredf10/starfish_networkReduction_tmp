@@ -35,7 +35,7 @@
 
 #---------------------------------------------------------------------------------------#
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import starfish.Simulator as simulator
 import starfish.Visualisation as visualisationToolBox
 import starfish.vnc  as vnc
@@ -57,7 +57,7 @@ def main(args=None):
         print(" [4] - run uncertainty quantification tool box | VascularPolynomialChaos.py")
         print(" [q] - quit \n")
         while  mainMenuInput not in ('1','2','3','4','q'):
-            mainMenuInput = input("what to do? ")
+            mainMenuInput =input3("what to do? ")
         
         if mainMenuInput == '1':
             print("\n .. running simulation \n")

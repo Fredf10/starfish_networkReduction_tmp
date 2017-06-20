@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 
 class RandomInput(TestBaseClass):
@@ -66,7 +66,7 @@ class RandomInput(TestBaseClass):
         starfish base code with the defined update methods in the updateMethods dictionary.
         
         Args:
-            input (float) or (dict):
+            input3(float) or (dict):
                 if the input is of type float, the 'sample' comes from the distribution manager
                 elif the input is of type dict the sample comes from another random input
         '''

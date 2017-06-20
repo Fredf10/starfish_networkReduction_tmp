@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 from copy import copy as copy
 import numpy as np
 
@@ -565,7 +565,7 @@ class LocationOfInterest(TestBaseClass):
             suggestions = [str(i) for i in xrange(3)]
             answer = "nothing"
             while answer not in suggestions:
-                answer = input("What do you want to do: ")
+                answer =input3("What do you want to do: ")
                 
             if answer == '0':
                 answerSelectionSplit = [str(i) for i in xrange(numberOfPointsFirst)]
@@ -578,7 +578,7 @@ class LocationOfInterest(TestBaseClass):
                     print("      [{}] - color: {}, marker style {}".format(i,colors[i],markerstyles[i]))
                 answerSelectionSplit = ['']
                 while sum([item in [str(i) for i in xrange(numberOfPointsFirst)] for item in answerSelectionSplit]) != len(answerSelectionSplit):
-                    answerSelection = input("    please enter the numbers of the points (separated with comma): ")
+                    answerSelection =input3("    please enter the numbers of the points (separated with comma): ")
                     if ',' in answerSelection:
                         answerSelectionSplit = answerSelection.split(',')
                     elif ' ' in answerSelection:
@@ -590,7 +590,7 @@ class LocationOfInterest(TestBaseClass):
                 answer2 = "haha"
                 convertableToFloat = False
                 while convertableToFloat == False:
-                    answer2 = input("please redefine delta, current delta value == {} ".format(delta))
+                    answer2 =input3("please redefine delta, current delta value == {} ".format(delta))
                     try:
                         delta = float(answer2)
                         convertableToFloat = True

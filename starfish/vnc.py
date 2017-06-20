@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 import sys,os
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname( os.path.realpath('__file__') )
@@ -59,7 +59,7 @@ def enterNetworkName(networkName, recentNetworkNames = None):
                                           if user input == newNetworkName: newNetworkName
     """
     print("     current networkName: ",networkName)
-    networkNameUserInput = input("     enter/change networkName (only! ENTER to use current networkName):\n     ")
+    networkNameUserInput =input3("     enter/change networkName (only! ENTER to use current networkName):\n     ")
     
     if networkNameUserInput == "":
         if networkName is not None:
@@ -172,13 +172,13 @@ def main():
         print('=====================================')
         print('  current network: ', networkName)
         while  menuInput not in ("l","b","q","a","s","g","f","d","u",'n','p'):
-            menuInput = input("what to do? ")
+            menuInput =input3("what to do? ")
         
         if menuInput == "a": 
             print("Add new vessel")
             
             existing = False
-            vesselId = input(" enter the vessel id:  ")
+            vesselId =input3(" enter the vessel id:  ")
             while True:
                 try:
                     vesselId = int(vesselId)
@@ -188,17 +188,17 @@ def main():
                         existing = True
                 except ValueError:
                     print("TYPE-ERROR: vessel id must be type(int) not type(string)")
-                    vesselId = input(" enter non existing id: ")
+                    vesselId =input3(" enter non existing id: ")
                 if existing == True:
                     print(" the vessel id exists already enter a new one")
-                    vesselId = input(" enter non existing id: ")
+                    vesselId =input3(" enter non existing id: ")
                     existing = False
             
             
             if vascularNetwork.vessels != {}:
                                     
                 existing = False
-                mother = input(" enter existing mother id:  ")
+                mother =input3(" enter existing mother id:  ")
                 while True:
                     try:
                         mother = int(mother)
@@ -208,11 +208,11 @@ def main():
                             existing = True
                     except ValueError:
                         print("TYPE-ERROR: mother id must be type(int) not type(string)")
-                        mother = input(" enter existing mother id:  ")
+                        mother =input3(" enter existing mother id:  ")
                     if existing == True:
                         if mother not in vascularNetwork.vessels: print(" there exists no vessel with this id")
                         else: print("   only bifurcations possible!")
-                        mother = input(" enter existing mother id:  ")
+                        mother =input3(" enter existing mother id:  ")
                         existing = False
                     
                 if vascularNetwork.vessels[mother].leftDaughter == None: vascularNetwork.vessels[mother].leftDaughter = vesselId
@@ -237,7 +237,7 @@ def main():
                 index = index+1
             # get user input and check if it was correct to define the bcType 
             existing = False
-            inputType = input ("      choose type ")
+            inputType = input3("      choose type ")
             while True:
                 # check if right input
                 try:
@@ -249,11 +249,11 @@ def main():
                 # if not int but string
                 except ValueError:
                     print("      TYPE-ERROR: vessel id must be type(int) not type(string)")
-                    inputType = (input ("      choose type "))
+                    inputType = (input3("      choose type "))
                 # if int but to low or high
                 if existing == True:
                     print("       the type does not exist")
-                    inputType = (input ("      choose type "))
+                    inputType = (input3("      choose type "))
                     existing = False
             
             compType = compTypes[int(inputType)] 
@@ -267,7 +267,7 @@ def main():
                 question = True
                 for arg in nxml.vesselComplianceElements[compType]:
                     if arg != 'complianceType':
-                        currValue = input (str("            set value for "+str(arg)+' '))
+                        currValue = input3(str("            set value for "+str(arg)+' '))
                         test = True
                         try: float(currValue)
                         except:
@@ -284,7 +284,7 @@ def main():
             if vascularNetwork.vessels.keys() != []:
                 
                 existing = False
-                vesselId = input(" enter existing vessel id: ")
+                vesselId =input3(" enter existing vessel id: ")
                 while True:
                     try:
                         vesselId = int(vesselId)
@@ -294,10 +294,10 @@ def main():
                             existing = True
                     except ValueError:
                         print("TYPE-ERROR: vessel id must be type(int) not type(string)")
-                        vesselId = input(" enter existing vessel id: ")
+                        vesselId =input3(" enter existing vessel id: ")
                     if existing == True:
                         print(" the vessel does not exist")
-                        vesselId = input(" enter existing vessel id: ")
+                        vesselId =input3(" enter existing vessel id: ")
                         existing = False
                 
                 #travers the tree starting with the vessel and collect all ids
@@ -320,7 +320,7 @@ def main():
                 
         elif menuInput == "n":
             print("new network")
-            question = input(" are u sure to delete all current data? [y] - yes: ")
+            question =input3(" are u sure to delete all current data? [y] - yes: ")
             if question == 'y':
                 # delete vascularNetwork
                 del vascularNetwork
@@ -380,7 +380,7 @@ def main():
 #                     print("     [5] - write boundary conditions to CSV")
                     print("     [b] - back to the main menu")
                     print("")     
-                    subMenuInput = input("     what to do? ") 
+                    subMenuInput =input3("     what to do? ") 
                     
                     if subMenuInput == '1':
                         print("     boundary conditions")
@@ -401,7 +401,7 @@ def main():
                         print("")
                                             
                         existing = False
-                        vesselId = input(" enter existing vessel id: ")
+                        vesselId =input3(" enter existing vessel id: ")
                         while True:
                             try:
                                 vesselId = int(vesselId)
@@ -411,10 +411,10 @@ def main():
                                     existing = True
                             except ValueError:
                                 print(" TYPE-ERROR: vessel id must be type(int) not type(string)")
-                                vesselId = input(" enter existing vessel id: ")
+                                vesselId =input3(" enter existing vessel id: ")
                             if existing == True:
                                 print(" the vessel does not exist")
-                                vesselId = input(" enter existing vessel id: ")
+                                vesselId =input3(" enter existing vessel id: ")
                                 existing = False
                                                 
                         inputType = '0'
@@ -434,7 +434,7 @@ def main():
                             index = index+1
                         # get user input and check if it was correct to define the bcType 
                         existing = False
-                        inputType = input ("      choose type ")
+                        inputType = input3("      choose type ")
                         while True:
                             # check if right input
                             try:
@@ -446,11 +446,11 @@ def main():
                             # if not int but string
                             except ValueError:
                                 print("      TYPE-ERROR: vessel id must be type(int) not type(string)")
-                                inputType = (input ("      choose type "))
+                                inputType = (input3("      choose type "))
                             # if int but to low or high
                             if existing == True:
                                 print("       the type does not exist")
-                                inputType = (input ("      choose type "))
+                                inputType = (input3("      choose type "))
                                 existing = False
                         
                         bcType = bcTypes[int(inputType)] 
@@ -465,7 +465,7 @@ def main():
                         question = True
                         for arg in nxml.boundaryConditionElements[bcType]:
                             if question == True: 
-                                currValue = input (str("            set value for "+str(arg)+' '))
+                                currValue = input3(str("            set value for "+str(arg)+' '))
                                 if currValue == 'b': question=False
                                 test = True
                                 try: float(currValue)
@@ -479,7 +479,7 @@ def main():
                             print("      set position of the BC condition")
                             position = '2'
                             while position not in ['1','0']:
-                                position = input ("          enter '0' for the start or '1' for the end of the vessel ")
+                                position = input3("          enter '0' for the start or '1' for the end of the vessel ")
                             if position == '1':
                                 #bcType = ''.join(['_',bcType])
                                 boundaryDataDict['name']= ''.join(['_',bcType])
@@ -507,7 +507,7 @@ def main():
                         
                         vesselId = -1
                         while vesselId not in vascularNetwork.boundaryConditions.keys():
-                            vesselId = int(input ("      choose vessel id "))
+                            vesselId = int(input3("      choose vessel id "))
                         
                         bcs = vascularNetwork.boundaryConditions[vesselId]
                         if bcs != []:                 
@@ -519,7 +519,7 @@ def main():
                             print("")
                             inType = '0'
                             while inType not in np.linspace(0,len(bcs)-1,len(bcs)):
-                                inType = int(input ("      choose condition to delete "))
+                                inType = int(input3("      choose condition to delete "))
                              
                             print("")
                             print("     boundary condition ",bcs[inType]," removed!")
@@ -567,7 +567,7 @@ def main():
                 for key,value in vascularNetwork.globalFluid.iteritems():
                     print("     {0:20}     {1:10}  {2:10}".format(key,value,variableUnits[key]))
                 print("")
-                subMenuInput = input("    what to do? ")
+                subMenuInput =input3("    what to do? ")
                 
                 if subMenuInput == '1':
                     print("     set all fluid properties")
@@ -577,7 +577,7 @@ def main():
                         typeFalse = False
                         while typeFalse == False:
                             try: 
-                                inputType = input("      type value for property: {} with unit {} : ".format(key,variableUnits[key]))
+                                inputType =input3("      type value for property: {} with unit {} : ".format(key,variableUnits[key]))
                                 inputType = float(inputType)
                                 typeFalse = True
                                 vascularNetwork.globalFluid[key] = inputType
@@ -593,13 +593,13 @@ def main():
                         i = 1+i
                     inputType = 0
                     while inputType not in [str(i) for i in range(0,len(properties))]:
-                        inputType = input("      choose property to set ")
+                        inputType =input3("      choose property to set ")
                     
                     inputProperty = ""   
                     inputFalse = False
                     while inputFalse == False:
                         try: 
-                            inputProperty = input("      type value for property: {} with unit {} : ".format(properties[int(inputType)],variableUnits[properties[int(inputType)]]))
+                            inputProperty =input3("      type value for property: {} with unit {} : ".format(properties[int(inputType)],variableUnits[properties[int(inputType)]]))
                             inputProperty = float(inputProperty)
                             vascularNetwork.globalFluid[properties[int(inputType)]] = inputProperty
                             inputFalse = True
@@ -635,7 +635,7 @@ def main():
                 print("     [b] - back to the main menu")
                 print("")
                 
-                subMenuInput = input("what to do? ")
+                subMenuInput =input3("what to do? ")
                 
                 
                 if subMenuInput in ["1","2","3",'5']:
@@ -691,7 +691,7 @@ def main():
                     print("")
                     indexChoosen = None
                     while  indexChoosen not in [str(i) for i in xrange(len(dirNamesTemplate))]:
-                        indexChoosen = input("     Insert index of network: ")
+                        indexChoosen =input3("     Insert index of network: ")
                                                    
                     templateNetworkName = dirNamesTemplate[int(indexChoosen)]
                     #load the new network
@@ -793,7 +793,7 @@ def main():
             print("     [b] - back to the main menu")
             print("")
             while subMenuInput not in ["1","2",'4',"b"]: #["1","2","3",'4','5',"b"]:
-                subMenuInput = input("what to do? ")
+                subMenuInput =input3("what to do? ")
                      
                 if subMenuInput == '1':
                     print("     write to XML")
@@ -886,7 +886,7 @@ def main():
                 else:
                     vascularNetwork.updateNetwork(vesselData)
                 #print "     load boundaryData from csv as well? press [u]" 
-                #subMenuInput = input("yes [u]? ")
+                #subMenuInput =input3("yes [u]? ")
                 #if subMenuInput == 'u':
                 #    boundaryConditions,boundaryConditionPolyChaos = mCSV.readBCFromCSV(networkName)
                 #    vascularNetwork.update({'boundaryConditions':boundaryConditions,

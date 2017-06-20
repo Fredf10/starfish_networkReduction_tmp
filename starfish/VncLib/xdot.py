@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import print_function, absolute_import
-from builtins import input
+from builtins import input as input3
 
 '''Visualize dot graphs via the xdot format.'''
 
