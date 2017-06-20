@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import numpy as np
@@ -314,7 +315,7 @@ class BoundaryConditionType1(BoundaryCondition):
         lastStep = self.calculateOneStep(0, dt, initPhase=initPhase)
 
         # add rest of simulation time
-        for nt in xrange(nTsteps):
+        for nt in range(nTsteps):
             if nt == self.nTstepsInitPhase: initPhase = False
             nextStep = self.calculateOneStep(nt + 1, dt, initPhase=initPhase)
             self.duVector[nt] = nextStep - lastStep
@@ -410,7 +411,7 @@ class BoundaryConditionType1(BoundaryCondition):
             evaluatedFlow = np.zeros(nTsteps-nTstepsStart-1)
             evaluatedTime = np.zeros(nTsteps-nTstepsStart-1)
 
-            for n in xrange(nTstepsStart,nTsteps-1):
+            for n in range(nTstepsStart,nTsteps-1):
                 flow = self.calculateOneStep(n,dt)
                 evaluatedFlow[n-nTstepsStart] = flow[1]
                 evaluatedTime[n-nTstepsStart]= (n-nTstepsStart)*dt
@@ -446,7 +447,7 @@ class BoundaryConditionType1(BoundaryCondition):
         self.initPhaseTimeSpan = 0
         # find mean flow time
         if givenMeanFlow != 0 or evaluatedFlow[0] != 0:
-            for n in xrange(len(evaluatedFlow)):
+            for n in range(len(evaluatedFlow)):
                 tn = evaluatedTime[n]
                 qn = evaluatedFlow[n]
                 if n < len(evaluatedFlow)-1:

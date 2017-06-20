@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
@@ -123,7 +124,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeTimeVariables(quiet)
 
         self.initializeSolutionMatrices() # init data in vessels
-        
         self.initializeFields()
         
         self.initializeSystemEquations()
@@ -131,8 +131,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.initializeBoundarys()
         self.initializeConnections()
         
-        
-
         
         try:
             self.venousPool.initializeWithFlowSolver(self)
@@ -227,8 +225,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         automaticGridCorrection = {}
 
-        logfile = open(str(topFolder+'LOGcurrentWaveSpeed.txt'),'wb')
-        logfile2 = open(str(topFolder+'LOGproposedGrid.txt'),'wb')
+        logfile = open(str(topFolder+'LOGcurrentWaveSpeed.txt'),'w')
+        logfile2 = open(str(topFolder+'LOGproposedGrid.txt'),'w')
         CFL = self.vascularNetwork.CFL
         for vesselT,data in iteritems(logfileData):
             #number of deltaX
@@ -416,8 +414,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         creates field numerical objects for each vessel in the network
         """
-        for vesselId,vessel in iteritems(self.vessels):
-            self.fields[vesselId] = classFields.Field(  vessel,
+        for vesselId, vessel in iteritems(self.vessels):
+            self.fields[vesselId] = classFields.Field(vessel,
                                             self.currentMemoryIndex,
                                             self.dt,
                                             self.rigidAreas,
@@ -562,8 +560,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
             self.numericalObjects.append(self.venousPool)
 
         self.vascularNetwork.runtimeMemoryManager.registerGlobalTimeSteps(self.currentMemoryIndex,self.currentTimeStep)
-
-        
         
         self.numericalObjects.append(self.vascularNetwork)
 
@@ -630,8 +626,6 @@ class FlowSolver(cSBO.StarfishBaseObject):
             self.numericalObjects.append(self.venousPool)
 
         self.vascularNetwork.runtimeMemoryManager.registerGlobalTimeSteps(self.currentMemoryIndex,self.currentTimeStep)
-
-        
         
         self.numericalObjects.append(self.vascularNetwork)
 
@@ -677,6 +671,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
     # Solver Methods:
     #
     #    MacCormack_Field
+    #    MacCormack_Field_TwoStep
     #
     ########################################################################################
     """
@@ -699,7 +694,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
     
         if self.cycleMode == False:
             # original
-            for n in xrange(self.nTSteps):
+            for n in range(self.nTSteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 
@@ -735,17 +730,17 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 A_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
 
 
-            for cycle in xrange(self.numberCycles-1):
+            for cycle in range(self.numberCycles-1):
                 logger.info(' solving cycle {}'.format(cycle+1))
                 # 1. solve cycle
-                for n in xrange(self.nTSteps-1):
+                for n in range(self.nTSteps-1):
 
                     self.currentTimeStep[0] = n
                     for numericalObject in self.numericalObjects:
                         numericalObject()
                 # 2. check for steady state
                 if self.quiet == False:
-                    for vesselId in self.vessels.keys():
+                    for vesselId in iterkeys(self.vessels):
                         #Perror =  np.sum(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))/self.P[vesselId].size
                         #Qerror =  np.sum(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))/self.Q[vesselId].size
                         #Aerror =  np.sum(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))/self.A[vesselId].size
@@ -761,7 +756,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
                 # 3. rehash solution arrays if not last cycle
                 if cycle is not self.numberCycles-1:
-                    for vesselId in self.vessels.keys():
+                    for vesselId in iterkeys(self.vessels):
                         self.P[vesselId][0]    = self.P[vesselId][-1]
                         self.Q[vesselId][0]    = self.Q[vesselId][-1]
                         self.A[vesselId][0]    = self.A[vesselId][-1]
@@ -845,7 +840,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
     
         if self.cycleMode == False:
             # original
-            for n in xrange(self.nTSteps):
+            for n in range(self.nTSteps):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 
@@ -895,10 +890,10 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 A_lastCycle[vesselId]  = np.ones((self.nTSteps,vessel.N))
 
 
-            for cycle in xrange(self.numberCycles-1):
+            for cycle in range(self.numberCycles-1):
                 logger.info(' solving cycle {}'.format(cycle+1))
                 # 1. solve cycle
-                for n in xrange(self.nTSteps-1):
+                for n in range(self.nTSteps-1):
 
                     self.currentTimeStep[0] = n
                     
@@ -918,7 +913,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         numericalObject()
                 # 2. check for steady state
                 if self.quiet == False:
-                    for vesselId in self.vessels.keys():
+                    for vesselId in iterkeys(self.vessels):
                         #Perror =  np.sum(np.sqrt((np.divide((P_lastCycle[vesselId]-self.P[vesselId]),P_lastCycle[vesselId]))**2.0))/self.P[vesselId].size
                         #Qerror =  np.sum(np.sqrt((np.divide((Q_lastCycle[vesselId]-self.Q[vesselId]),Q_lastCycle[vesselId]))**2.0))/self.Q[vesselId].size
                         #Aerror =  np.sum(np.sqrt((np.divide((A_lastCycle[vesselId]-self.A[vesselId]),A_lastCycle[vesselId]))**2.0))/self.A[vesselId].size
@@ -934,7 +929,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
                 # 3. rehash solution arrays if not last cycle
                 if cycle is not self.numberCycles-1:
-                    for vesselId in self.vessels.keys():
+                    for vesselId in iterkeys(self.vessels):
                         self.P[vesselId][0]    = self.P[vesselId][-1]
                         self.Q[vesselId][0]    = self.Q[vesselId][-1]
                         self.A[vesselId][0]    = self.A[vesselId][-1]

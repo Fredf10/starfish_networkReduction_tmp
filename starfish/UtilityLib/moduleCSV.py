@@ -166,7 +166,7 @@ def readRandomInputsfromCSV(networkName, randomInputManager, delimiter = ';'):
     for row in reader:
         dataDict = {}
         for variable in variablesToLoadTags: 
-            if variable in row.keys():
+            if variable in row:
                 # TODO: add units
                 variableUnit = None 
                 # save converted CSV-value
@@ -315,7 +315,7 @@ def readBCFromCSV(networkName, delimiter=';'):
             if '-pC' in variable and variableValueStr != '':
                 polyChaos['name'] = boundaryType
                 variable,number = variable.split('-pC')
-                if variable in polyChaos.keys():
+                if variable in polyChaos:
                     polyChaos[variable] = ' '.join([polyChaos[variable],variableValueStr])
                 else: polyChaos[variable] = variableValueStr
         # convert polynomial chaos variables to corret unit and type
@@ -325,13 +325,13 @@ def readBCFromCSV(networkName, delimiter=';'):
                     variableUnit = columUnits[variable].split('#',1)
                     polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)
                 except: pass          
-            if Id not in boundaryConditionPolyChaos.keys(): 
+            if Id not in boundaryConditionPolyChaos: 
                 boundaryConditionPolyChaos[Id] =[polyChaos]
             else: boundaryConditionPolyChaos[Id].append(polyChaos)           
             
         boundaryInstance.update(boundaryDataDict)
         
-        if Id not in BCconditionData.keys(): BCconditionData[Id] = [boundaryInstance]
+        if Id not in BCconditionData: BCconditionData[Id] = [boundaryInstance]
         else: BCconditionData[Id].append(boundaryInstance)
     
     return BCconditionData, boundaryConditionPolyChaos

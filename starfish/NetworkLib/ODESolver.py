@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import numpy as np
@@ -48,7 +49,7 @@ class ODESolver(cSBO.StarfishBaseObject):
         try:
             f0 = self.f(self.U0, 0)
         except IndexError:
-            self.exception('Index of u out of bounds in f(u,t) func. Legal indices are %s' % (str(range(self.neq))))
+            self.exception('Index of u out of bounds in f(u,t) func. Legal indices are %s' % (str(list(range(self.neq)))))
         if f0.size != self.neq:
             raise ValueError('f(u,t) returns %d components, while u has %d components' % (f0.size, self.neq))
 

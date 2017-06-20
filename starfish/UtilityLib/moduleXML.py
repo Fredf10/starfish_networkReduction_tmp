@@ -395,7 +395,7 @@ def loadNetworkFromXML(networkName ,
                             boundaryInstances.append(boundaryInstance)
 
                     # apply read data to vascularNetwork
-                    if vesselId not in vascularNetwork.boundaryConditions.keys():
+                    if vesselId not in list(vascularNetwork.boundaryConditions.keys()):
                         vascularNetwork.boundaryConditions[vesselId] = boundaryInstances
                     else:
                         vascularNetwork.boundaryConditions[vesselId].extend(boundaryInstances)

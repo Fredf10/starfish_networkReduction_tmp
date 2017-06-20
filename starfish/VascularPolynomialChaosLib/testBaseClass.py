@@ -506,7 +506,7 @@ class TestBaseClass(object):
         in case of existing class hdf5Group is added as self.hdf5Group variable
         which is used for loading and saving data
         '''        
-        if baseGroupName not in self.hdf5File.keys():
+        if baseGroupName not in self.hdf5File:
             hdf5Group = self.hdf5File.create_group(baseGroupName)
         else:
             hdf5Group = self.hdf5File[baseGroupName]
@@ -525,14 +525,14 @@ class TestBaseClass(object):
             dictL = self.getVariable(dictName) 
             if dictL != {} and dictL is not None:
                 # serach for dict group node for the dictionary create if needed
-                if dictName not in self.hdf5Group.keys():
+                if dictName not in self.hdf5Group:
                     dictGroup = self.hdf5Group.create_group(dictName)
                 else:
                     dictGroup = self.hdf5Group[dictName]
                 # go through all dictionary entries
                 for dictObjectName,dictObject in iteritems(dictL):
                     # check if object node exists or not
-                    if dictObjectName not in dictGroup.keys():
+                    if dictObjectName not in dictGroup:
                         dictObjectGroup = dictGroup.create_group(dictObjectName)
                     else:
                         dictObjectGroup = dictGroup[dictObjectName]
@@ -547,7 +547,7 @@ class TestBaseClass(object):
         ## pure variables
         # functionality
         for variableName in self.variablesHdf5Memory:
-            if variableName in self.hdf5Group.keys(): 
+            if variableName in self.hdf5Group: 
                 variableData = self.hdf5Group[variableName]
                 
                 # TODO: use externalVariable definitions dictionary ... #
@@ -565,10 +565,10 @@ class TestBaseClass(object):
             dictL = self.getVariable(dictName) 
             if dictL != {} and dictL is not None:
                 # serach for dict group node for the dictionary
-                if dictName in self.hdf5Group.keys():
+                if dictName in self.hdf5Group:
                     dictGroup = self.hdf5Group[dictName]
                     for dictObjectName,dictObject in iteritems(dictL):
-                        if dictObjectName in dictGroup.keys():
+                        if dictObjectName in dictGroup:
                             dictObject.loadDataHdf5()
                         else: print("Warning: loadDataHdf5 {} could not save dict {} as not a sub-group node of {}".format(self.hdf5Group, dictObjectName, dictName)) 
                 
@@ -583,7 +583,7 @@ class TestBaseClass(object):
         for variableName in self.variablesHdf5Memory:
             variableValue = self.getVariable(variableName)
             if variableValue is not None: 
-                if variableName in self.hdf5Group.keys():
+                if variableName in self.hdf5Group:
                     del self.hdf5Group[variableName]
                 self.hdf5Group.create_dataset(variableName, data=variableValue)
             

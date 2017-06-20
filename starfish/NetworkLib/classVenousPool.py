@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys
@@ -68,7 +69,7 @@ class venousPool(cSBO.StarfishBaseObject):
                             'k' :  cCOB.ConfigurableObjectBase.ExtValue(float,  unit = None),
                              'pressureGain': cCOB.ConfigurableObjectBase.ExtValue(float,  unit = None )}
     externXmlAttributes  = []
-    externXmlElements    = externVariables.keys()
+    externXmlElements    = list(externVariables.keys())
     
     
     solutionMemoryFields    = ["Vusv", "V", "P", "Qin", "Qout", "P_LA"]

@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os,io
@@ -211,7 +212,7 @@ class LUT(object):
         
         if self.waveSplit == False:
             
-            tableIterator = range(len(self.colorTables))
+            tableIterator = list(range(len(self.colorTables)))
             tableIterator.pop(0)
             tableIterator.append(0)
             # set color table and range

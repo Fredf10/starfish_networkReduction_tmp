@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
@@ -576,7 +577,7 @@ class Visualisation3DGUI(pyglet.window.Window):
 
     ###
     def changeBackgroundColor(self):
-        tableIterator = range(len(self.backgroundColors))
+        tableIterator = list(range(len(self.backgroundColors)))
         tableIterator.pop(0)
         tableIterator.append(0)
         self.backgroundColor = self.backgroundColors[self.backgroundColorIterator]
@@ -904,13 +905,13 @@ class Visualisation3D(Visualisation3DGUI):
         numberOfUpdates = 50.
 
         dtSim     = self.vascularNetwork.dt
-        timeSteps = len(self.vessels3D[self.vessels3D.keys()[0]].Psol)-1 # number of dt is one less then number of solutions
+        timeSteps = len(self.vessels3D[list(self.vessels3D.keys())[0]].Psol)-1 # number of dt is one less then number of solutions
         totalTime = timeSteps*dtSim
 
         # approximate frame rate
         timeSolverSolve = []
         self.timeStepCurrent = int(self.timeStepsTotal/2.)
-        for i in xrange(int(numberOfUpdates)):
+        for i in range(int(numberOfUpdates)):
             timeSolverSolveStart = time.clock()
             self.updateVisualisation(0.0)
             timeSolverSolve.append(time.clock()-timeSolverSolveStart)
@@ -1112,7 +1113,7 @@ class Vessel3D(Vessel):
         self.QsolF = np.zeros_like(self.Psol)
         self.QsolB = np.zeros_like(self.Psol)
 
-        for n in xrange(int(self.N)):
+        for n in range(int(self.N)):
             pf,pb,qf,qb =  mProc.linearWaveSplitting(self.Psol[:,[n]],self.Qsol[:,[n]],self.Asol[:,[n]],self.csol[:,[n]],self.rho)
             self.PsolF[1::,[n]] = pf.reshape(numberOfTimeSteps-1,1)
             self.PsolB[1::,[n]] = pb.reshape(numberOfTimeSteps-1,1)
@@ -1178,7 +1179,7 @@ class Vessel3D(Vessel):
         self.verticesInitial = np.copy(vertices)
 
         indeces = []
-        for i in xrange((N-1)*nPointsPerCircle):
+        for i in range((N-1)*nPointsPerCircle):
             if (i+1)%(nPointsPerCircle) == 0:
                 indeces.extend([i,i-nPointsPerCircle+1,i+1,i+nPointsPerCircle])
             else:
@@ -1197,7 +1198,7 @@ class Vessel3D(Vessel):
         normalIndicesEnd2   = []
         # create a normal for each vertex point
         numberOfVertices = len(vertices)
-        for i in xrange(numberOfVertices):
+        for i in range(numberOfVertices):
             # find indices of vectors needed for the normals
             ip1 = i+1
             imP = i-nPointsPerCircle
@@ -1247,7 +1248,7 @@ class Vessel3D(Vessel):
             numberOfNormals = len(vertices)
             normalLineIndeces = []
             # create normal indeces for the normal line
-            for i in xrange(numberOfNormals):
+            for i in range(numberOfNormals):
                 normalLineIndeces.extend([i,i+numberOfNormals])
 
         ## create color map

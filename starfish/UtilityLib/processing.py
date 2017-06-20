@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import numpy as np
@@ -424,7 +425,7 @@ def calculateWaveShoulderPoint(waveData, timeData, startPointT, endPointT = None
     print(endIndex)
     slope = 0
     slopeIndex = None
-    for i in xrange(startIndex[0],endIndex[0]):
+    for i in range(startIndex[0],endIndex[0]):
         m = (waveData[i]- waveData[startPointT]) / (timeData[i] - timeData[startPointT])
         if m > slope:
             slope = m
@@ -458,7 +459,7 @@ def calculatePointOfInflection(waveData, timeData, startPointT, endPointT = None
         
     slope = 0
     slopeIndex = None
-    for i in xrange(startIndex[0],endIndex[0]):
+    for i in range(startIndex[0],endIndex[0]):
         m = (waveData[i+1]- waveData[i-1]) / (timeData[i+1] - timeData[i-1])
         if m > slope:
             slope = m

@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 
@@ -306,7 +307,7 @@ class BezierShape(Shape):
     def draw(self, cr, highlight=False):
         x0, y0 = self.points[0]
         cr.move_to(x0, y0)
-        for i in xrange(1, len(self.points), 3):
+        for i in range(1, len(self.points), 3):
             x1, y1 = self.points[i]
             x2, y2 = self.points[i + 1]
             x3, y3 = self.points[i + 2]

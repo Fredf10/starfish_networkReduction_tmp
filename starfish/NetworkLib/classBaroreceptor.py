@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys, os
@@ -141,7 +142,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         # timeArray = np.linspace(0,(nbElements-2)*self.dt,(nbElements-1))
 
         # set the input values to the model, which are defined in input
-        for i in xrange(0, (nbElements)):
+        for i in range(0, (nbElements)):
 
             self.constants[self.cellMLinputID] = strain[i]
             self.voi, self.states, self.algebraic = baroreceptorCellML.solver2([0, self.dt], self.states[-1][:], self.constants)

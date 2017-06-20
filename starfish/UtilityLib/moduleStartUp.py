@@ -12,6 +12,7 @@
 ##
 
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os,shutil,sys
@@ -197,7 +198,7 @@ def userInputEvaluationInt(maxBound, minBound=0, question = "    insert your cho
     '''
     Question user to isert an integer number between minBound and maxBound
     '''
-    appropriateInputList = [str(int(i+minBound)) for i in xrange(maxBound-minBound)]
+    appropriateInputList = [str(int(i+minBound)) for i in range(maxBound-minBound)]
     userInput = "NONE"
     appropriateInputList.append('q')
     print("")

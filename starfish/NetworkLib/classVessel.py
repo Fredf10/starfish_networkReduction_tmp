@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import pprint
@@ -424,7 +425,7 @@ class Vessel(cSBO.StarfishBaseObject):
         self.QsolF = np.zeros_like(self.Psol)
         self.QsolB = np.zeros_like(self.Psol)
 
-        for gridNode in xrange(int(self.N)):
+        for gridNode in range(int(self.N)):
             pf,pb,qf,qb =  self.linearWaveSplittingGridNode(gridNode)
             self.PsolF[1::,[gridNode]] = pf.reshape(numberOfTimeSteps-1,1)
             self.PsolB[1::,[gridNode]] = pb.reshape(numberOfTimeSteps-1,1)

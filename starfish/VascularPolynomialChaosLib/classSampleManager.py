@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass
@@ -46,7 +47,7 @@ class SampleManager(TestBaseClass):
         dependenSample or independenSample is chooses dependent on the case definitions
         '''
         # TODO: if random sample, ensure that sub set samples of sample space are randomly choosen
-        if sampleIndex in xrange(self.currentSampleSize):
+        if sampleIndex in range(self.currentSampleSize):
             if self.dependentCase == False:
                 sample = self.samples[sampleIndex]
             else:
@@ -166,7 +167,7 @@ class SampleManager(TestBaseClass):
             if samplesTest == 0:
                 print("WARNING: samplesA and samplesB are the same!")
         
-            for i in xrange(distDim):
+            for i in range(distDim):
                 samplesC = samplesB.copy()
                 samplesC[:,i] = samplesA[:,i].copy()
                 
@@ -181,7 +182,7 @@ class SampleManager(TestBaseClass):
         self.matrixHash = {}
         self.matrixHash['A'] = [0,self.sampleSize]
         self.matrixHash['B'] = [self.sampleSize,2*self.sampleSize]
-        for d in xrange(distDim):
+        for d in range(distDim):
             self.matrixHash[''.join(['C',str(d)])] = [self.sampleSize*(d),self.sampleSize*(d+1),self.sampleSize*(d+2),self.sampleSize*(d+3)]
     
     def evaluateLoadedSamples(self, sampleFile, maxSampleSize, randomVariableNames):
@@ -191,7 +192,7 @@ class SampleManager(TestBaseClass):
         # load data
         loadedData = self.loadSamples(sampleFile)
         # TODO: type conversion should be moved to load function
-        loadedData['randomVariableNames'] = loadedData['randomVariableNames'].tolist()
+        loadedData['randomVariableNames'] = loadedData['randomVariableNames'].split(':')
         loadedData['abcSample'] = bool(loadedData['abcSample'])
         
         # check if data is correct
@@ -290,8 +291,13 @@ class SampleManager(TestBaseClass):
         # functionality
         for attributeName in attributesToSave:
             attributeValue = self.getVariable(attributeName)
+            print(attributeName, attributeValue)
             if attributeValue is not None: 
-                hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
+                if attributeName == 'randomVariableNames':
+                    attributeValue = ':'.join(attributeValue)
+                    hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
+                else:
+                    hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
         
         hdf5SaveGroup.flush()
         hdf5SaveGroup.close()  

@@ -56,7 +56,7 @@ def test_singleVessel():
 
     # 1.3 initialized defined random inputs
     vascularNetwork.randomInputManager.initialize(vascularNetwork)
-    assert len(vascularNetwork.randomInputManager.randomInputs.keys()) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
+    assert len(vascularNetwork.randomInputManager.randomInputs) != 0, "VascularPolynomialChaos_v0.3: no random inputs defined!"
     vascularNetwork.randomInputManager.printOutInfo()
  
     # 2. create distributions

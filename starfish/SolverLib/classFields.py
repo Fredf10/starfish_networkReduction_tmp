@@ -36,19 +36,19 @@ class Field():
         
         gamma = self.vessel.gamma
         self.alpha = 1 #(gamma+2.0)/(gamma+1.0) # Velocity profile correction, uncomment to activate
-        
         self.step = "predictor"
                        
-        if solvingSchemeField == 'MacCormack_Matrix':
-            self.__call__ = self.MacCormackMatrix
-        elif solvingSchemeField == "MacCormack_Flux":
-            self.__call__ = self.MacCormackFlux
+        if solvingSchemeField == "MacCormack_Flux":
+            self._callfct = self.MacCormackFlux
         elif solvingSchemeField == "MacCormack_TwoStep":
-            self.__call__ = self.MacCormackTwoStep
+            self._callfct = self.MacCormackTwoStep
             self.predict = self.MacCormackPredictor
             self.correct = self.MacCormackCorrector
         else:
             raise ValueError('Classfields51: error, scheme for solving field not correct')
+    
+    def __call__(self):
+        return self._callfct()
         
     def F(self, u, A, C, Aconst, Cconst):
     
@@ -61,7 +61,6 @@ class Field():
         flux[0,:] = q/Cconst
         flux[1,:] = Aconst*p/rho + self.alpha*q**2/A
         return flux 
-    
     
     def MacCormackFlux(self):
         """ This is an implementation of the MacCormack scheme as proposed in Fredrik Eikeland Fossans Master Thesis"""
@@ -145,9 +144,7 @@ class Field():
         if (self.P[n+1] < 0).any():
             raise ValueError("ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
 
-    
     def MacCormackTwoStep(self):
-        
         self.MacCormackPredictor()
         self.MacCormackCorrector()
     
@@ -199,8 +196,6 @@ class Field():
         self.P_pre = up[0, :]
         self.Q_pre =up[1, :]
         
-        
-        
     def MacCormackCorrector(self):
         
         n = self.currentMemoryIndex[0]
@@ -249,86 +244,3 @@ class Field():
         #TODO: Please explain this if statement in a comment.
         if (self.P[n+1] < 0).any():
             raise ValueError("ERROR: {} calculated negative pressure in corrector step at time {} (n {},dt {}), exit system".format(self.name,n*dt,n,dt))
-   
-        
-#     def MacCormackMatrix(self):
-#         """
-#         Mac Cormack Predictor-Corrector
-#         """
-#         # solve vessel objects
-#         dt = self.dt
-#         
-#         # Any need to print(this out?)
-#         # print("using Matrix based formulation in field calculation")
-#         
-#         # the current position in solution memory
-#         n = self.currentMemoryIndex[0]
-#         
-#         P = self.P[n]
-#         Q = self.Q[n]
-#         A = self.A[n]
-#         
-#         # set bc values of predictor step arrays
-#         self.P_pre[0]   = P[0]
-#         self.P_pre[-1]  = P[-1] 
-#         self.Q_pre[0]   = Q[0]
-#         self.Q_pre[-1]  = Q[-1] 
-#         self.A_pre[0]   = A[0]
-#         
-#         self.A_pre[-1]  = A[-1]
-#         
-#         #""" Predictor Step """            
-#         # update matrices               
-#         m12,m21,m22,b2 = self.systemEquation.updateSystem(P,Q,A)
-#          
-#         # create lokal variables for predictor varibales with
-#         P_pre = self.P_pre
-#         Q_pre = self.Q_pre 
-#         A_pre = self.A_pre
-#           
-#         dzPre = self.dz
-#         dzCor = self.dz[0:-1]
-#         
-#         # calculate derivatives forward # predict bc-predictor value at P[0] etc.
-#         dPdz  = (P[1::] - P[0:-1])/dzPre
-#         dQdz  = (Q[1::] - Q[0:-1])/dzPre
-#         dQ2A  = pow(Q,2.)/A
-#         dQ2dz = (dQ2A[1::] - dQ2A[0:-1])/dzPre
-#         
-#         # solve vessel
-#         P_pre[0:-1] = (P[0:-1] - (m12[0:-1]*dQdz)*dt)
-#         Q_pre[0:-1] = (Q[0:-1] - (m21[0:-1]*dPdz + m22[0:-1]*dQ2dz - b2[0:-1] )*dt)
-#          
-#         # check pressure solution
-#         if (P_pre < 0).any():
-#             raise ValueError("{} calculated negative pressure P_pre = {} in predictor step at time {} (n {},dt {}), exit system".format(self.name, P_pre,n*dt,n,dt))
-# 
-#         # solve area
-#         if self.rigidArea == True:
-#             A_pre = A
-#         else:
-#             A_pre[0:-1] = self.AFunction(P_pre)[0:-1]        
-#                                           
-#         #"""Corrector Step"""    
-#         # update matrices  
-#         m12,m21,m22,b2 = self.systemEquation.updateSystem(P_pre,Q_pre,A_pre)
-#          
-#         # calculate derivatives backward 
-#         dPdz  = (P_pre[1:-1] - P_pre[0:-2])/dzCor
-#         dQdz  = (Q_pre[1:-1] - Q_pre[0:-2])/dzCor
-#         dQ2A  = pow(Q_pre,2.)/A_pre
-#         dQ2dz = (dQ2A[1:-1] - dQ2A[0:-2])/dzCor
-#                  
-#         #solve vessel
-#         self.P[n+1][1:-1] = (P[1:-1] + P_pre[1:-1] - (m12[1:-1]*dQdz)*dt)/2.0
-#         self.Q[n+1][1:-1] = (Q[1:-1] + Q_pre[1:-1] - (m21[1:-1]*dPdz + m22[1:-1]*dQ2dz - b2[1:-1])*dt )/2.0
-#          
-#         # check pressure solution
-#         if (self.P[n+1] < 0).any():
-#             raise ValueError("{} calculated negative pressure self.P[n+1] = {} in corrector step at time {} (n {},dt {}), exit system".format(self.name,self.P[n+1],n*dt,n,dt))
-#          
-#         # solve area
-#         if self.rigidArea == True:
-#             self.A[n+1] = A_pre
-#         else:
-#             self.A[n+1][1:-1] = self.AFunction(self.P[n+1])[1:-1]

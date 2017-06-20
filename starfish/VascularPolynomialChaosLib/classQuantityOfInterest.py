@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
@@ -32,11 +33,11 @@ class QuantityOfInterest(TestBaseClass):
         '''
         if abcSample == False:
             # check for trajectory stuff TODO: do it nicer
-            if 'trajectoryData' in self.hdf5Group.keys():
+            if 'trajectoryData' in self.hdf5Group:
                 # get min max of all basis saved
                 return self.hdf5Group['trajectoryData'][offset:sampleSize+offset]
             
-            elif 'data' in self.hdf5Group.keys():
+            elif 'data' in self.hdf5Group:
                 return self.hdf5Group['data'][offset:sampleSize+offset]
         else:
             #TODO: implement abc sampling hash if monte carlo is used
@@ -51,7 +52,7 @@ class QuantityOfInterest(TestBaseClass):
         
         progressBar = cPB.ProgressBar(35, sampleSize)
         
-        for n in xrange(sampleSize):
+        for n in range(sampleSize):
             
             data      = self.hdf5Group['data'][n]
             dataBasis = self.hdf5Group['dataBasis'][n]
@@ -76,6 +77,6 @@ class QuantityOfInterest(TestBaseClass):
         '''
         
         '''
-        if dsetName not in self.hdf5Group.keys():
+        if dsetName not in self.hdf5Group:
             self.hdf5Group.create_dataset(dsetName, totalDataShape, dtype='float64')
         self.hdf5Group[dsetName][sampleIndex] = dataRow

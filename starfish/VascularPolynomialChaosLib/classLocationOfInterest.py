@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from copy import copy as copy
@@ -510,7 +511,7 @@ class LocationOfInterest(TestBaseClass):
             amplitudesList = []
             timingList = []
             numberOfPointsFirst = None
-            for sampleIndex in xrange(sampleSize):
+            for sampleIndex in range(sampleSize):
                 
                 dataPureCurr = dataPure[sampleIndex]
                 
@@ -563,22 +564,22 @@ class LocationOfInterest(TestBaseClass):
             print('      [0] - Analyse all points')
             print('      [1] - Choose points for analysis')
             print('      [2] - Not all desiered peaks are detected (redo and adjust search-delta)')
-            suggestions = [str(i) for i in xrange(3)]
+            suggestions = [str(i) for i in range(3)]
             answer = "nothing"
             while answer not in suggestions:
                 answer =input3("What do you want to do: ")
                 
             if answer == '0':
-                answerSelectionSplit = [str(i) for i in xrange(numberOfPointsFirst)]
+                answerSelectionSplit = [str(i) for i in range(numberOfPointsFirst)]
                 allDesieredPointsDetected = True
                                 
             if answer == '1':
                 allDesieredPointsDetected = True
                 print("\n    points found for analysis:")
-                for i in xrange(numberOfPointsFirst):
+                for i in range(numberOfPointsFirst):
                     print("      [{}] - color: {}, marker style {}".format(i,colors[i],markerstyles[i]))
                 answerSelectionSplit = ['']
-                while sum([item in [str(i) for i in xrange(numberOfPointsFirst)] for item in answerSelectionSplit]) != len(answerSelectionSplit):
+                while sum([item in [str(i) for i in range(numberOfPointsFirst)] for item in answerSelectionSplit]) != len(answerSelectionSplit):
                     answerSelection =input3("    please enter the numbers of the points (separated with comma): ")
                     if ',' in answerSelection:
                         answerSelectionSplit = answerSelection.split(',')

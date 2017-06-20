@@ -203,7 +203,7 @@ def main():
                 while True:
                     try:
                         mother = int(mother)
-                        if mother in vascularNetwork.vessels.keys() and vascularNetwork.vessels[mother].rightDaughter == None:
+                        if mother in vascularNetwork.vessels and vascularNetwork.vessels[mother].rightDaughter == None:
                             break
                         else:
                             existing = True
@@ -227,9 +227,8 @@ def main():
             print("     available compliance types:")
             print("")
             # get all defined boundaryConditions from constants-dict save as bcTypes
-            complianceTypes = nxml.vesselComplianceElements.keys()
             compTypes = ['default (Hayashi)']
-            for compType in complianceTypes: 
+            for compType in iterkeys(nxml.vesselComplianceElements): 
                 compTypes.append(compType)
             # show all compliance types in the compTypes
             index = 0
@@ -282,7 +281,7 @@ def main():
                     
         if menuInput == "d":
             print("Delete a vessel and all its daugthers")
-            if vascularNetwork.vessels.keys() != []:
+            if vascularNetwork.vessels:
                 
                 existing = False
                 vesselId =input3(" enter existing vessel id: ")
@@ -310,11 +309,12 @@ def main():
                     vascularNetwork.deleteVessel(vesselToDelete)
                 
                 # empty the graph to redraw it
-                if vascularNetwork.vessels.keys() == []:
+                if vascularNetwork.vessels:
+                    mainGraph.update_graph(vascularNetwork, window)
+                else:
                     mainGraph.update_graph(None, window)
                     vascularNetwork = VascularNetwork()
-                else:
-                    mainGraph.update_graph(vascularNetwork, window)
+
                 
             else:
                 print(" there are no vessels to delete")
@@ -352,7 +352,7 @@ def main():
                     if vascularNetwork.root is not None and vascularNetwork.root not in boundarys: 
                         boundarys.append(vascularNetwork.root)
                         
-                    boundarysSaved = vascularNetwork.boundaryConditions.keys()
+                    boundarysSaved = list(vascularNetwork.boundaryConditions.keys())
                     
                     # update saved boundary conditions
                     for boundarysCurrent in boundarys:
@@ -422,9 +422,8 @@ def main():
                         print("     add boundary condition type:")
                         print("")
                         # get all defined boundaryConditions from constants-dict save as bcTypes
-                        bcTypesAll = nxml.bcTagsClassReferences.keys()
                         bcTypes = []
-                        for bcType in bcTypesAll: 
+                        for bcType in iterkeys(nxml.bcTagsClassReferences): 
                             if "_" is not bcType[0]:
                                 bcTypes.append(bcType)
                         bcTypes.sort()
@@ -491,7 +490,7 @@ def main():
                         boundaryInstance.update(boundaryDataDict)
                         boundaryInstances.append(boundaryInstance)
                         
-                        if vesselId not in vascularNetwork.boundaryConditions.keys():
+                        if vesselId not in vascularNetwork.boundaryConditions:
                             vascularNetwork.boundaryConditions[vesselId] = boundaryInstances
                         else:
                             vascularNetwork.boundaryConditions[vesselId].extend(boundaryInstances)
@@ -507,7 +506,7 @@ def main():
                         pprint.pprint(vascularNetwork.boundaryConditions)
                         
                         vesselId = -1
-                        while vesselId not in vascularNetwork.boundaryConditions.keys():
+                        while vesselId not in vascularNetwork.boundaryConditions:
                             vesselId = int(input3("      choose vessel id "))
                         
                         bcs = vascularNetwork.boundaryConditions[vesselId]
@@ -573,7 +572,7 @@ def main():
                 if subMenuInput == '1':
                     print("     set all fluid properties")
                     
-                    for key in vascularNetwork.globalFluid.keys():
+                    for key in iterkeys(vascularNetwork.globalFluid):
                         inputType = "1"
                         typeFalse = False
                         while typeFalse == False:
@@ -588,7 +587,7 @@ def main():
                 elif subMenuInput == '2':
                     print("     set individual fluid property:")
                     i = 0
-                    properties = vascularNetwork.globalFluid.keys()
+                    properties = list(vascularNetwork.globalFluid.keys())
                     for property_i in properties:
                         print("          [",i,'] - ',property_i)
                         i = 1+i

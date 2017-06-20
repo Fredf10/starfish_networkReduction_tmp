@@ -128,10 +128,6 @@ class Boundary(cSBO.StarfishBaseObject):
         self.rigidArea = rigidArea
         self.A_nID = vessel.A_nID
 
-        ## 5. Define the call function depending on the solving Scheme
-        #if solvingScheme == "MacCormack_Field":
-        #    self.__call__ = self.callMacCormackField
-
     ### Function which calculated du
     def duFunctionZero(self,currentTimeStep,dt):
         """

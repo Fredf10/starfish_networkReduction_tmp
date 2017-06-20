@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys
@@ -340,7 +341,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             # # Set position of boundary conditions
             # check position if one Vessel
             if len(self.vessels) == 1:
-                vesselId = self.boundaryConditions.keys()[0]
+                vesselId = list(self.boundaryConditions.keys())[0]
                 if vesselId != self.root: logger.error("Error Wrong Root found") #TODO: should this stop something?
                 for bc in self.boundaryConditions[vesselId]:
                     if '_' not in bc.name[0]: bc.setPosition(0)
@@ -1761,7 +1762,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
             numberEstimates = 20
             complianceEstimates = np.empty(numberEstimates)
-            for index,p in zip(xrange(numberEstimates),np.linspace(65.,110.,numberEstimates)):
+            for index,p in zip(range(numberEstimates),np.linspace(65.,110.,numberEstimates)):
                 pressure = np.linspace(p*133.32, p*133.32, int(vessel_i.N))
                 C = vessel_i.C(pressure)
                 complianceEstimates[index] = sum((C[1::] + C[0:-1]) / 2.0) * vessel_i.dz[0]
@@ -2137,7 +2138,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if nSet is not None:
             nTsteps = 0
 
-        for n in xrange(nTsteps+1):
+        for n in range(nTsteps+1):
 
             if nSet is not None: n = nSet
 
@@ -2178,7 +2179,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
             relativeVenousPressure = np.empty(nTsteps+1)
-            for n in xrange(nTsteps+1):
+            for n in range(nTsteps+1):
 
                 relativeVP = venousPoolPressure + self.globalFluid['rho'] * self.vessels[vesselId].positionEnd[n][2] * self.gravityConstant - self.vessels[vesselId].externalPressure
 

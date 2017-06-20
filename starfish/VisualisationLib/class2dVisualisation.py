@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import gtk
@@ -83,7 +84,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
         countHeight = 1
         countWidth = 1
         
-        keys = actualValuesDict.keys()
+        keys = list(actualValuesDict.keys())
         keys.sort()
         for key in keys:
             hbox = gtk.HBox(False, 10) 
@@ -484,7 +485,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         # lines and points are refered with the id(int) in the selectedNetworks list == 'caseId'
         # lines  = dict[caseId][axis][linestyle]
         # points = dict[caseId][axis][linestyle] ## here the linestyle define the according line only
-        for caseId in xrange(len(self.selectedVesselIds)):
+        for caseId in range(len(self.selectedVesselIds)):
             # create dictionaies accroding to current defined axis
             self.lines[caseId]  = {key: {} for key in self.axis.keys()}
             self.points[caseId] = {key: {} for key in self.axis.keys()}
@@ -670,7 +671,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis2'].set_ylabel('Flow ' + self.unitFtext, fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
                 
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                 try:
@@ -744,7 +745,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis2'].spines['right'].set_visible(True)
         
         
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                  try:
@@ -833,7 +834,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis1Twin'].set_visible(True)
         self.axis['axis2Twin'].set_visible(True) 
         
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                  try:
@@ -926,7 +927,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis1Twin'].set_visible(True)
         self.axis['axis2Twin'].set_visible(True) 
         
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                  try:
@@ -1025,7 +1026,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis1'].set_ylabel('Wave Speed $m/s$', fontsize=self.fontSizeLabel)
         self.axis['axis2'].set_ylabel('CFL $-$' + self.unitFtext, fontsize=self.fontSizeLabel)
         
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                 try:
@@ -1080,7 +1081,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis2'].set_ylabel('Compliance $mm^2/mmHg$', fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
         
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                 try:
@@ -1133,7 +1134,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         self.axis['axis2'].set_ylabel('', fontsize=self.fontSizeLabel)
         # 2. update lines for P and Q over time for grid node 0
                 
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)), self.selectedNetworks, self.selectedVesselIds):        
             
             if self.axisX == 'Time':               
                 try:
@@ -1223,7 +1224,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                        'gridNodes': [0, -1e50],
                        'G':         [-0.25, 0.25]}
         
-        for i, vascularNetwork, vesselId in zip(xrange(len(self.selectedVesselIds)),
+        for i, vascularNetwork, vesselId in zip(range(len(self.selectedVesselIds)),
                                                 self.selectedNetworks, self.selectedVesselIds):        
             # pressure
             limit = 'P'

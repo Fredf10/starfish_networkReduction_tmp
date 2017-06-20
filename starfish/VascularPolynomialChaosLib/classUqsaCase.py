@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
@@ -144,7 +145,7 @@ class UqsaCase(TestBaseClass):
             print("Create evaluation case file list")
             progressBar = cPB.ProgressBar(35, sampleSize)
             
-            for simulationIndex in xrange(sampleSize):
+            for simulationIndex in range(sampleSize):
                                         
                 networkXmlFileLoad = mFPH_VPC.getFilePath('uqsaEvaluationNetworkXmlFile', self.networkName, 
                                                            self.dataNumber, 'write',
@@ -178,7 +179,7 @@ class UqsaCase(TestBaseClass):
         newRange = self.simulateEvaluationNumbers
         if len(newRange) == 2:
             # check if the indices are avaliable
-            if all([i in xrange(self.sampleManager.currentSampleSize) for i in newRange]):
+            if all([i in range(self.sampleManager.currentSampleSize) for i in newRange]):
                 if newRange[0] < newRange[1]:
                     startIndex = newRange[0]
                     endIndex   = newRange[1]

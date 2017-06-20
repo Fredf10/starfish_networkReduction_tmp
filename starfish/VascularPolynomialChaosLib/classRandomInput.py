@@ -107,7 +107,7 @@ class RandomInput(TestBaseClass):
         
         for i,loc in enumerate(self.parameter.split('_')):
             if i == 0:
-                info = '{:3} | {:20} | {:21} | {:3} + {:3} {} '.format(self.name,self.variableName,loc, self.a, self.b, dist)
+                info = '{:3} | {:20} | {:21} | {:3} + {:3} {} '.format(self.name, str(self.variableName), loc, self.a, self.b, dist)
             else:
                 info = '{:3} | {:20} | {:21} | '.format(' ',' ',loc)
             randomInputInfo.append(info)

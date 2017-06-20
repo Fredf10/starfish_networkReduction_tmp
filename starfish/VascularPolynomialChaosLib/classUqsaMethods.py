@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
@@ -93,7 +94,7 @@ class UqsaMethodPolynomialChaos(TestBaseClass):
                 conditionalExpectedValue = []
                 conditionalVariance      = []
                 # conditional mean and variance
-                for rvIndex in xrange(distributionDimension):
+                for rvIndex in range(distributionDimension):
                     currDistMean = cp.E(distributionManager.jointDistribution)
                     currDistMean[rvIndex] = np.nan
                     # reduce polynomials
@@ -212,7 +213,7 @@ class UqsaMethodPolynomialChaosPseudoSpectral(TestBaseClass):
                 conditionalExpectedValue = []
                 conditionalVariance      = []
                 # conditional mean and variance
-                for rvIndex in xrange(distributionDimension):
+                for rvIndex in range(distributionDimension):
                     currDistMean = cp.E(distributionManager.jointDistribution)
                     currDistMean[rvIndex] = np.nan
                     # reduce polynomials
@@ -321,7 +322,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -454,7 +455,7 @@ class UqsaMethodPolynomialChaosDepDirLRorder(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -593,7 +594,7 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -735,7 +736,7 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -856,7 +857,7 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -980,7 +981,7 @@ class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -1097,7 +1098,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
         progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
-        for j in xrange(nTimePoints):
+        for j in range(nTimePoints):
             t_ = t[j]
     
             samples_left = samples[:,t_>=t_max]
@@ -1214,7 +1215,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
                 dataA = data[self.matrixHash['A'][0]:self.matrixHash['A'][1]]
                 dataB = data[self.matrixHash['B'][0]:self.matrixHash['B'][1]]
                 dataC = np.empty((distDim,self.sampleSize,len(data[0])))
-                for d in xrange(distDim):
+                for d in range(distDim):
                     key = ''.join(['C',str(d)])
                     s = self.matrixHash[key][2]
                     e = self.matrixHash[key][3]
@@ -1242,7 +1243,7 @@ class UqsaMethodMonteCarlo(TestBaseClass):
                 Si  =  []
                 STi =  []
             
-                for i in xrange(distDim):
+                for i in range(distDim):
                     conditionalVarianceGivenQ[i] = np.sum(dataAmm*dataCmm[i],axis=0)/self.sampleSize - f0sq
                     conditionalVarianceNotQ[i]   = np.sum(dataBmm*dataCmm[i],axis=0)/self.sampleSize - f0sq
                     Si.append(conditionalVarianceGivenQ[i]/(varianceA+(varianceA==0))*(varianceA!=0))
@@ -1328,7 +1329,7 @@ class UqsaMethodMonteCarloParametrizedBootstrapping(TestBaseClass):
         expectedValue = np.empty((self.averageNumber,np.shape(data)[1]))
         variance      = np.empty((self.averageNumber,np.shape(data)[1]))
         
-        for aNX in xrange(self.averageNumber):
+        for aNX in range(self.averageNumber):
             
                     
             offset = int(aNX * self.chunkSize) 

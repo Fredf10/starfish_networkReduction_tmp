@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function, absolute_import
+from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import gtk
@@ -703,7 +704,7 @@ class Window2dPlots(gtk.Window):
             os.makedirs(dirName)
         
         self.scale.set_value(2)
-        for n in xrange(len(self.hScaleTimeArray)):
+        for n in range(len(self.hScaleTimeArray)):
              
             fileName = ''.join([dirName,str(n).zfill(3),'.png'])
             self.scale.set_value(n)

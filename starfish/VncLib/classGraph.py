@@ -90,7 +90,7 @@ class Graph(object):
             vascularNetwork.evaluateConnections()
             vascularNetwork.findStartAndEndNodes()
             
-            if vascularNetwork.vessels.keys() != []:
+            if vascularNetwork.vessels:
                 ## go through network as a binary tree and create vessel graph
                 
                 root = vascularNetwork.root
@@ -127,7 +127,7 @@ class Graph(object):
                 # find applied bc conditions
                 bcNames = ['?']
                 bcTrue = False
-                if root in vascularNetwork.boundaryConditions.keys() and vascularNetwork.boundaryConditions[root] != {}:
+                if root in vascularNetwork.boundaryConditions and vascularNetwork.boundaryConditions[root]:
                         bcNames.pop(0)
                         for boundaryInstance in vascularNetwork.boundaryConditions[root]:
                             bcNames.append(boundaryInstance.name)
@@ -140,7 +140,7 @@ class Graph(object):
                 # end node bc conditions
                 for endNode in vascularNetwork.boundaryVessels:
                     bcNames = ['?']
-                    if endNode in vascularNetwork.boundaryConditions.keys() and vascularNetwork.boundaryConditions[endNode] != {}:
+                    if endNode in vascularNetwork.boundaryConditions and vascularNetwork.boundaryConditions:
                             bcNames.pop(0)
                             for boundaryInstance in vascularNetwork.boundaryConditions[endNode]:
                                 bcNames.append(boundaryInstance.name)
