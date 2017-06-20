@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import csv
 from numpy import sqrt,pi
@@ -53,7 +54,7 @@ def writeVesselDataToCSV(networkName, vessels, delimiter=';'):
     # write all data
     writer.writerow(unitRow)
     data = [] 
-    for vessel in vessels.itervalues():
+    for vessel in itervalues(vessels):
         vesselDict = {}
         for tag in tags:
             vesselDict[tag] = vessel.getVariableValue(tag)
@@ -101,9 +102,9 @@ def readVesselDataFromCSV(networkName, delimiter=';'):
                 vesselData[Id] = row
             
         variablesToDiscard = []
-        for Id,data in vesselData.iteritems():
+        for Id,data in iteritems(vesselData):
     #         polyChaos = {}
-            for variable,variableValueStr in data.iteritems():
+            for variable,variableValueStr in iteritems(data):
                 # check if value is defined
                 if variableValueStr not in ['', None]:
                     #find units 
@@ -126,7 +127,7 @@ def writeRandomInputstoCSV(networkName, randomInputManager, delimiter = ';'):
     # evaluate tags
     variablesToSaveTags = []
     variablesToSaveTags.extend(nxml.generalRandomInputsAttributes)
-    for listValue in nxml.randomInputsReference.itervalues():
+    for listValue in itervalues(nxml.randomInputsReference):
         variablesToSaveTags.extend(listValue)
     variablesToSaveTags.extend(['randomInputType','location'])
     # create writer 
@@ -158,7 +159,7 @@ def readRandomInputsfromCSV(networkName, randomInputManager, delimiter = ';'):
     # evaluate tags
     variablesToLoadTags = []
     variablesToLoadTags.extend(nxml.generalRandomInputsAttributes)
-    for listValue in nxml.randomInputsReference.itervalues():
+    for listValue in itervalues(nxml.randomInputsReference):
         variablesToLoadTags.extend(listValue)
     variablesToLoadTags.extend(['randomInputType','location'])
     # add random variables
@@ -187,15 +188,15 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     # find all polychaos tags
     # TODO: read write polynomial chaos variables
 #     polyChaosTags = {}
-#     for id,bcPolyChaosList in boundaryConditionPolyChaos.iteritems():
+#     for id,bcPolyChaosList in iteritems(boundaryConditionPolyChaos):
 #         for bcPolyChaosDict in bcPolyChaosList:
-#             for variable,interval in bcPolyChaosDict.iteritems():
+#             for variable,interval in iteritems(bcPolyChaosDict):
 #                 if variable != 'name': polyChaosTags[variable] = len(interval)     
                 
     # find all tags which are known for all boundary conditions
     tagsBCType1 = ['Id','boundaryType']
     tagsBCType2 = [] 
-    for boundaryCondition,elementTags in nxml.boundaryConditionElements.iteritems():
+    for boundaryCondition,elementTags in iteritems(nxml.boundaryConditionElements):
         # None - bc for tag evaluation
         if 'None' not in boundaryCondition and '_' not in boundaryCondition:
             #check out type of BoundaryCondition:
@@ -240,7 +241,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
     writer.writerow(unitRow)
     
     ## fill out data of defined boundary conditions
-    for Id,boundaryConditions in boundaryConditionDict.iteritems():
+    for Id,boundaryConditions in iteritems(boundaryConditionDict):
         for boundaryCondition in boundaryConditions:
             boundaryType  = boundaryCondition.getVariableValue('name')
             dataRow       = {}
@@ -251,7 +252,7 @@ def writeBCToCSV(networkName, boundaryConditionDict, boundaryConditionPolyChaos,
 #             try:
 #                 for bcPolyChaosDict in boundaryConditionPolyChaos[Id]:
 #                     bcPolyChaosDict.pop('name')
-#                     for variable,interval in bcPolyChaosDict.iteritems():
+#                     for variable,interval in iteritems(bcPolyChaosDict):
 #                         for count,value in enumerate(interval): 
 #                             dataRow[''.join([variable,'-pC',str(int(count)+1)])] = value
 #             except: pass               
@@ -297,7 +298,7 @@ def readBCFromCSV(networkName, delimiter=';'):
         except: 'ERROR moduleCSV.readBCFromCSV: boundaryType <<{}>> does not exist'.format(boundaryType)
         boundaryDataDict = {'name':boundaryType}
         polyChaos = {}
-        for variable,variableValueStr in bcData.iteritems():
+        for variable,variableValueStr in iteritems(bcData):
             if variable in nxml.boundaryConditionElements[boundaryType]: 
                 try: variableUnit = columUnits[variable]
                 except: variableUnit = None 
@@ -319,7 +320,7 @@ def readBCFromCSV(networkName, delimiter=';'):
                 else: polyChaos[variable] = variableValueStr
         # convert polynomial chaos variables to corret unit and type
         if polyChaos != {}:
-            for variable,variableValueStr in polyChaos.iteritems():
+            for variable,variableValueStr in iteritems(polyChaos):
                 try:
                     variableUnit = columUnits[variable].split('#',1)
                     polyChaos[variable] = mXML.loadVariablesConversion(variable, variableValueStr, variableUnit, polychaos = True)

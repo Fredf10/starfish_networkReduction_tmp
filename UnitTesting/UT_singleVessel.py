@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import unittest
 import sys, os, gc
@@ -91,7 +92,7 @@ class setUp_singleVessel(unittest.TestCase):
 class testSingleVessel(setUp_singleVessel):
 
     def test_errorThreshold(self):
-        for vesselId, keylist in self.vesselDict.iteritems():
+        for vesselId, keylist in iteritems(self.vesselDict):
             for key in keylist:
 #                print("testing key {}".format(key))
                 testVals = np.array(self.dataDictNew[vesselId][key])

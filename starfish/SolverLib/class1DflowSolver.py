@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
 import numpy as np
@@ -174,7 +175,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         logfileData = {}
 
         dt = self.totalTime
-        for vessel in self.vessels.itervalues():
+        for vessel in itervalues(self.vessels):
         # Calculate time variables
             #estimate initial pressure
             p0,p1 = initialValues[vessel.Id]['Pressure']
@@ -229,7 +230,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         logfile = open(str(topFolder+'LOGcurrentWaveSpeed.txt'),'wb')
         logfile2 = open(str(topFolder+'LOGproposedGrid.txt'),'wb')
         CFL = self.vascularNetwork.CFL
-        for vesselT,data in logfileData.iteritems():
+        for vesselT,data in iteritems(logfileData):
             #number of deltaX
             Nnew = int((sum(data[3])*CFL/(self.dt*data[0])))
 
@@ -278,7 +279,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 if gridCorrection in (' ','','y','Y'):
                     #if quiet == False: logger.info(' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys()))
                     arrayN = 0
-                    for vesselId,Nnew in automaticGridCorrection.iteritems():
+                    for vesselId,Nnew in iteritems(automaticGridCorrection):
                         self.vessels[vesselId].update({'N':Nnew})
                         self.vessels[vesselId].initialize({})
 
@@ -286,7 +287,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         self.output['CFLcorrect'][arrayN] = ' '.join([newOutput,'yes'])
                         arrayN = arrayN+1
         gridNodes = 0
-        for vessel in self.vascularNetwork.vessels.itervalues():
+        for vessel in itervalues(self.vascularNetwork.vessels):
             gridNodes += vessel.N
 
         self.output['gridNodens'] = int(gridNodes)
@@ -303,7 +304,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         initialize system Equations
         """
-        for vesselId, vessel in self.vessels.iteritems():
+        for vesselId, vessel in iteritems(self.vessels):
             
             if self.twoStep:
                 self.systemEquations[vesselId] = classSystemEquations.System(vessel,
@@ -353,7 +354,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                                                 self.systemEquations[rootId])]
             self.output['BndrNR'] = 2
         else:
-            for vesselId,boundaryConditions in self.vascularNetwork.boundaryConditions.iteritems():
+            for vesselId,boundaryConditions in iteritems(self.vascularNetwork.boundaryConditions):
                 self.boundarys[vesselId] = [  Boundary( self.vessels[vesselId],
                                                         boundaryConditions,
                                                         self.rigidAreas,
@@ -415,7 +416,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         creates field numerical objects for each vessel in the network
         """
-        for vesselId,vessel in self.vessels.iteritems():
+        for vesselId,vessel in iteritems(self.vessels):
             self.fields[vesselId] = classFields.Field(  vessel,
                                             self.currentMemoryIndex,
                                             self.dt,
@@ -427,7 +428,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         method used to initialize Baroreceptor (baroreflex) objects
         """
-        for baroData in self.baroreceptors.itervalues():
+        for baroData in itervalues(self.baroreceptors):
             baroData.initializeWithFlowSolver(self)
             
             # baroData.initializeForSimulation(self,self.vascularNetwork)
@@ -438,7 +439,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         method used to initialize Timer objects
         """
-        for TimerId, TimerData in self.timers.iteritems():
+        for TimerId, TimerData in iteritems(self.timers):
 
             TimerData['currentTimeStep']         = self.currentTimeStep
             TimerData['currentMemoryIndex']      = self.currentMemoryIndex
@@ -466,8 +467,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
 
         #print 'cFS 435 Communicators',self.vascularNetwork.communicators
-        for comId, comData in self.vascularNetwork.communicators.iteritems():
-        #for comId, comData in self.communicators.iteritems():
+        for comId, comData in iteritems(self.vascularNetwork.communicators):
+        #for comId, comData in iteritems(self.communicators):
             #try:
             data = {'Pressure': self.vessels[comData['vesselId']].Psol,
                     'Flow'    : self.vessels[comData['vesselId']].Qsol,
@@ -490,7 +491,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
             ## for baroreceptor
             try:
-                for bcId,bcs in self.vascularNetwork.boundaryConditions.iteritems():
+                for bcId,bcs in iteritems(self.vascularNetwork.boundaryConditions):
                     if bcId == comData['vesselId']:
                         for bc in bcs:
                             if bc.type == 1:
@@ -546,15 +547,15 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         self.numericalObjects.append(self.boundarys[vesselId][1])
             except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
 
-        for communicator in self.communicators.itervalues():
+        for communicator in itervalues(self.communicators):
             self.numericalObjects.append(communicator)
             try:    communicator.startRealTimeVisualisation()
             except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
 
-        for baroreceptor in self.baroreceptors.itervalues():
+        for baroreceptor in itervalues(self.baroreceptors):
             self.numericalObjects.append(baroreceptor)
 
-        for timer in self.timers.itervalues():
+        for timer in itervalues(self.timers):
             self.numericalObjects.append(timer)
 
         if self.venousPool:
@@ -614,15 +615,15 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         self.boundarySolverList.append(self.boundarys[vesselId][1])
             except Exception: self.warning("old except: pass #3 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
 
-        for communicator in self.communicators.itervalues():
+        for communicator in itervalues(self.communicators):
             self.numericalObjects.append(communicator)
             try:    communicator.startRealTimeVisualisation()
             except Exception: self.warning("old except: pass #4 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
 
-        for baroreceptor in self.baroreceptors.itervalues():
+        for baroreceptor in itervalues(self.baroreceptors):
             self.numericalObjects.append(baroreceptor)
 
-        for timer in self.timers.itervalues():
+        for timer in itervalues(self.timers):
             self.numericalObjects.append(timer)
 
         if self.venousPool:
@@ -723,7 +724,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             Q_lastCycle  = {}
             A_lastCycle  = {}
 
-            for vesselId,vessel in self.vessels.iteritems():
+            for vesselId,vessel in iteritems(self.vessels):
 
                 initialValues = self.vascularNetwork.initialValues
                 p0,p1 = initialValues[vesselId]['Pressure']
@@ -777,7 +778,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             logger.info('Vessels  init (ml)  sol (ml)  diff')
             vesselsInit = 0
             vesselsSol  = 0
-            for vesselId,vessel in self.vessels.iteritems():
+            for vesselId,vessel in iteritems(self.vessels):
                 A1 = self.vessels[vesselId].Asol[0][0:-1]
                 A2 = self.vessels[vesselId].Asol[0][1:]
                 volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
@@ -794,7 +795,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             logger.info('Boundarys        in (ml)   out (ml)  ')
             totalIn = 0
             totalOut = 0
-            for boundaryList in self.boundarys.itervalues():
+            for boundaryList in itervalues(self.boundarys):
                 for boundary in boundaryList:
                     logger.info('{:<12}     {:6.2f}    {:4.2f}'.format(boundary.name,
                                                                  abs(boundary.BloodVolumen[0])*1.e6,
@@ -811,7 +812,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             logger.info('  volume diff      (ml)  {:.2f}'.format(vesselsInit - vesselsSol + totalIn - totalOut))
 
         ## stop realtime visualisation
-        for communicator in self.communicators.itervalues():
+        for communicator in itervalues(self.communicators):
             try: communicator.stopRealtimeViz()
             except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field", oldExceptPass= True)
 
@@ -883,7 +884,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             Q_lastCycle  = {}
             A_lastCycle  = {}
 
-            for vesselId,vessel in self.vessels.iteritems():
+            for vesselId,vessel in iteritems(self.vessels):
 
                 initialValues = self.vascularNetwork.initialValues
                 p0,p1 = initialValues[vesselId]['Pressure']
@@ -950,7 +951,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             logger.info('Vessels  init (ml)  sol (ml)  diff')
             vesselsInit = 0
             vesselsSol  = 0
-            for vesselId,vessel in self.vessels.iteritems():
+            for vesselId,vessel in iteritems(self.vessels):
                 A1 = self.vessels[vesselId].Asol[0][0:-1]
                 A2 = self.vessels[vesselId].Asol[0][1:]
                 volumeInit = np.sum(vessel.dz*(A1+A2+np.sqrt(A1*A2))/3.0)*1.e6
@@ -967,7 +968,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             logger.info('Boundarys        in (ml)   out (ml)  ')
             totalIn = 0
             totalOut = 0
-            for boundaryList in self.boundarys.itervalues():
+            for boundaryList in itervalues(self.boundarys):
                 for boundary in boundaryList:
                     logger.info('{:<12}     {:6.2f}    {:4.2f}'.format(boundary.name,
                                                                  abs(boundary.BloodVolumen[0])*1.e6,
@@ -984,7 +985,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             logger.info('  volume diff      (ml)  {:.2f}'.format(vesselsInit - vesselsSol + totalIn - totalOut))
 
         ## stop realtime visualisation
-        for communicator in self.communicators.itervalues():
+        for communicator in itervalues(self.communicators):
             try: communicator.stopRealtimeViz()
             except Exception: self.warning("old except: pass #1 clause in c1dFlowSolv.MacCormack_Field", oldExceptPass= True)
 

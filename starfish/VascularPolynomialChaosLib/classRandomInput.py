@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
 
@@ -86,7 +87,7 @@ class RandomInput(TestBaseClass):
                 #    else:
                 #        print('{:3} | {:20} | {:21} | '.format(' ',' ',loc))
                 #print  
-                for variableIdentifier,updateMethod in self.updateMethods.iteritems():                    
+                for variableIdentifier,updateMethod in iteritems(self.updateMethods):                    
                     updateMethod({variableIdentifier : realisation})
                 self.updateLog.append(realisation)
                     

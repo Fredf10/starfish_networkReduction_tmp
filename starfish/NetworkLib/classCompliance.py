@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import  numpy as np 
 import sys, os
@@ -78,7 +79,7 @@ class Compliance(cSBO.StarfishBaseObject):
         updates the compliance data using a dictionary in from of 
         complianceData = {'variableName': value}
         """
-        for key,value in complianceData.iteritems():
+        for key,value in iteritems(complianceData):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)

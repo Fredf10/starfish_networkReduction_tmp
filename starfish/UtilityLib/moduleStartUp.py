@@ -12,6 +12,7 @@
 ##
 
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os,shutil,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -100,7 +101,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
     resimulate  = False
     
     
-    for option,optionArgument in optionsDict.iteritems():
+    for option,optionArgument in iteritems(optionsDict):
         # -f network name
         if option == 'networkName':
             if optionArgument is not None:

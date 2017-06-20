@@ -16,6 +16,7 @@
 ##
 
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os,sys,shutil
 cur = os.path.dirname( os.path.realpath( __file__ ) )

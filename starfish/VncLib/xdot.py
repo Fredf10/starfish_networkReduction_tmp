@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 
 '''Visualize dot graphs via the xdot format.'''
@@ -1506,7 +1507,7 @@ class DotWidget(gtk.DrawingArea):
             return False
         try:
             self.set_xdotcode(xdotcode)
-        except ParseError, ex:
+        except ParseError as ex:
             dialog = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
                                        message_format=str(ex),
                                        buttons=gtk.BUTTONS_OK)
@@ -1788,7 +1789,7 @@ class DotWidget(gtk.DrawingArea):
                                             startEndNodeID = shapeTemp.t
                                     try:
                                         startEndNodeID = int(startEndNodeID)
-                                        for vessel in self.vascularNetwork.vessels.itervalues():
+                                        for vessel in itervalues(self.vascularNetwork.vessels):
                                             if vessel.endNode == startEndNodeID or vessel.startNode == startEndNodeID: 
                                                 print('')
                                                 print('')
@@ -1974,7 +1975,7 @@ class DotWindow(gtk.Window):
             fp = file(filename, 'rt')
             self.set_dotcode(fp.read(), filename)
             fp.close()
-        except IOError, ex:
+        except IOError as ex:
             dlg = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
                                     message_format=str(ex),
                                     buttons=gtk.BUTTONS_OK)

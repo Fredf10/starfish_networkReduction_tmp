@@ -3,6 +3,7 @@
 https://github.com/pypa/sampleproject
 """
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from setuptools import setup, find_packages
 from codecs import open

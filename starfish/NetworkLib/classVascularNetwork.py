@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys
 import os
@@ -214,7 +215,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         updates the vascularNetwork data using a dictionary in form of
         vascularNetworkData = {'variableName': value}
         """
-        for key, value in vascularNetworkData.iteritems():
+        for key, value in iteritems(vascularNetworkData):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key, value)
@@ -262,14 +263,14 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         if 'vesselData' in updateDict:
-            for vesselId, vesselData in (updateDict['vesselData']).iteritems():
+            for vesselId, vesselData in iteritems((updateDict['vesselData'])):
                 try:
                     self.vessels[vesselId].update(vesselData)
                 except KeyError:
                     self.addVessel(vesselId, vesselData)
 
         if 'baroreceptors' in updateDict:
-            for baroId, baroData in (updateDict['baroreceptors']).iteritems():
+            for baroId, baroData in iteritems((updateDict['baroreceptors'])):
                 try:
                     self.baroreceptors[baroId].update(baroData)
                 except KeyError:
@@ -280,7 +281,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         writes the Vesseldata for each vessel to console (calls printToConsole() from each vessel)
         """
         print(" Vessels in Network:")
-        for vessel in self.vessels.itervalues():
+        for vessel in itervalues(self.vessels):
             vessel.printToConsole()
 
     def showNetwork(self):
@@ -289,7 +290,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         print("-------------------")
         print(" vascularNetwork ", self.name, "\n")
-        for variable, value in self.__dict__.iteritems():
+        for variable, value in iteritems(self.__dict__):
             try:
                 print(" {:<20} {:>8}".format(variable, value))
             except Exception: print(" {:<20} {:>8}".format(variable, 'None'))
@@ -306,7 +307,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if self.gravitationalField == False: self.gravityConstant = 0.
 
         # ## check global fluid properties
-        for fluidItem, value in self.globalFluid.iteritems():
+        for fluidItem, value in iteritems(self.globalFluid):
             if value == None:
                 if fluidItem == 'dlt':
                     try:
@@ -326,7 +327,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     exit()
 
         # ## initialize vessels
-        for vessel in self.vessels.itervalues():
+        for vessel in itervalues(self.vessels):
             vessel.initialize(self.globalFluid)
             vessel.update({'gravityConstant': self.gravityConstant})
 
@@ -345,7 +346,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     if '_' not in bc.name[0]: bc.setPosition(0)
                     else: bc.setPosition(-1)
             else:
-                for vesselId, bcs in self.boundaryConditions.iteritems():
+                for vesselId, bcs in iteritems(self.boundaryConditions):
                     if vesselId == self.root:
                         for bc in bcs:
                             bc.setPosition(0)
@@ -366,7 +367,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             raise RuntimeError(tmpstring)
         if len(self.vessels) == 1:
             bcPositions = []
-            for Id, bcs in self.boundaryConditions.iteritems():
+            for Id, bcs in iteritems(self.boundaryConditions):
                 for bc in bcs:
                     bcPositions.append(bc.position)
             if 1 not in bcPositions and -1 not in bcPositions:
@@ -375,13 +376,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 raise RuntimeError(error_msg)
 
         # initialize boundary conditions of type 1
-        for Id, bcs in self.boundaryConditions.iteritems():
+        for Id, bcs in iteritems(self.boundaryConditions):
             for bc in bcs:
                 try: bc.initialize({})
                 except Exception: self.warning("old except: pass clause in VascularNetwork.initialize", oldExceptPass= True)
 
         windkesselExist = False
-        for Id, bcs in self.boundaryConditions.iteritems():
+        for Id, bcs in iteritems(self.boundaryConditions):
 
             for bc in bcs:
                 if bc.name in ['_Velocity-Gaussian', 'Velocity-Gaussian']: bc.update({'area':self.vessels[Id].A0})
@@ -485,15 +486,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         sizes = self.getSolutionMemorySizes()
         self.runtimeMemoryManager.registerDataSize(sizes)
 
-        for vessel in self.vessels.itervalues():
+        for vessel in itervalues(self.vessels):
             sizes = vessel.getSolutionMemorySizes()
             self.runtimeMemoryManager.registerDataSize(sizes)
 
-        for bcList in self.boundaryConditions.itervalues():
+        for bcList in itervalues(self.boundaryConditions):
             for bc in bcList:
                 self.runtimeMemoryManager.registerDataSize(bc.getSolutionMemorySizes())
 
-        for baroData in self.baroreceptors.itervalues():
+        for baroData in itervalues(self.baroreceptors):
             sizes = baroData.getSolutionMemorySizes()
             self.runtimeMemoryManager.registerDataSize(sizes)
 
@@ -527,7 +528,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.vesselDataGroup = self.solutionDataFile.create_group('vessels')
 
         # initialize objects for simulation
-        for vesselId, vessel in self.vessels.iteritems():
+        for vesselId, vessel in iteritems(self.vessels):
             # initialize the vessel for simulation
             vessel.initializeForSimulation(self.initialValues[vesselId],
                                            self.runtimeMemoryManager,
@@ -536,7 +537,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
 
 
-        for vesselId, boundaryConditions in self.boundaryConditions.iteritems():
+        for vesselId, boundaryConditions in iteritems(self.boundaryConditions):
             for bC in boundaryConditions:
                 try:
                     bC.initializeSolutionVectors(self.runtimeMemoryManager, self.solutionDataFile)
@@ -547,7 +548,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
 
         self.BrxDataGroup = self.solutionDataFile.create_group('Baroreflex')
-        for baroData in self.baroreceptors.itervalues():
+        for baroData in itervalues(self.baroreceptors):
             baroData.initializeForSimulation(self)
         
         try:
@@ -557,7 +558,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             logger.debug("Using static venous system")
 
         # # initialize gravity and 3d positions over time
-        for stimulus in self.externalStimuli.itervalues():
+        for stimulus in itervalues(self.externalStimuli):
             if stimulus['type'] == "headUpTilt":
                 self.initializeHeadUpTilt(stimulus)
 
@@ -573,7 +574,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.initializeVenousGravityPressureTime(self.nTSteps)
     
             # Save gravity data if appropriate
-            for vesselId, vessel in self.vessels.iteritems():
+            for vesselId, vessel in iteritems(self.vessels):
                 dsetGroup = vessel.dsetGroup
                 if dsetGroup:
                     dsetPos = dsetGroup.create_dataset("PositionStart", (self.savedArraySize,3), dtype='float64')
@@ -639,7 +640,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.tiltAngle = angleXSystem
 
         # TODO: Do these belong here? and do they need to happen every simulation?
-        for vesselId, angleDict in motionDict.iteritems():
+        for vesselId, angleDict in iteritems(motionDict):
             self.vessels[vesselId].update(angleDict)
 
     def __call__(self):
@@ -665,7 +666,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     def calculateNetworkVolume(self, n):
         # Adds the volume of all compartments in the network
         cumVolume = 0.0
-        for vesselId,vessel in self.vessels.iteritems():
+        for vesselId,vessel in iteritems(self.vessels):
             
             # access each variable to save.
             # TODO: Is there a better way to define these in the vessel class
@@ -722,7 +723,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.solutionDataFile = h5py.File(self.pathSolutionDataFilename, "r")
 
         vesselId = None
-        for groupName, group in self.solutionDataFile.iteritems():
+        for groupName, group in iteritems(self.solutionDataFile):
             if groupName == 'VascularNetwork':
                 self.dt = group.attrs['dt']
                 self.nTSteps = group.attrs['nTSteps']
@@ -730,7 +731,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
             elif groupName == 'Baroreflex':
                 # This works perfectly as long as the variables are the same in the group as in the class __init__
-                for subGroupName, subGroup in group.iteritems():
+                for subGroupName, subGroup in iteritems(group):
                     baroId = int(subGroupName.split(' - ')[-1])
                     try:
                         self.baroreceptors[baroId].update(subGroup)
@@ -744,7 +745,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 pass
 
             elif groupName == 'vessels': # or '-' in groupName: # '-' is loads older hdf5 data files
-                for subGroupName, subGroup in group.iteritems():
+                for subGroupName, subGroup in iteritems(group):
                     vesselId = int(subGroupName.split(' - ')[-1])
                     self.vesselsToSave[vesselId] = subGroup
                     self.vessels[vesselId].dsetGroup = subGroup
@@ -940,7 +941,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         """
         daughters = []
         approximatedBif = 0
-        for vessel in self.vessels.itervalues():
+        for vessel in itervalues(self.vessels):
             try:
                 if vessel.leftDaughter is not None:
                     daughters.append(vessel.leftDaughter)
@@ -969,7 +970,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         it should be defined as a leftDaughter, if it is defined as a rightDaughter, this method will rename it!
         additional check if there is a vessel with this id, if not remove daughter
         """
-        for vessel in self.vessels.itervalues():
+        for vessel in itervalues(self.vessels):
             if vessel.leftDaughter == None and vessel.rightDaughter is not None:
                 self.warning("vascularNetwork.checkDaughterDefiniton(): Vessel {} has no leftDaughter but a rightDaughter {}, this daughter is now assumed to be leftDaughter".format(vessel.Id, vessel.rightDaughter), noException= True)
                 vessel.leftDaughter = vessel.rightDaughter
@@ -1511,7 +1512,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         # # adjust pressure with venous pressure and difference between mean and diastolic pressure
         if self.venousPool is not None:
-            for initialArray in initialValues.itervalues():
+            for initialArray in itervalues(initialValues):
                 initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
                 initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
             
@@ -1620,7 +1621,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
             # # adjust pressure with venous pressure
             if self.venousPool is not None: 
-                for initialArray in initialValues.itervalues():
+                for initialArray in itervalues(initialValues):
                     initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
                     initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
 
@@ -1708,7 +1709,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         # # adjust pressure with venous pressure
         if self.venousPool is not None:
-            for initialArray in initialValues.itervalues():
+            for initialArray in itervalues(initialValues):
                 initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
                 initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
 
@@ -1728,7 +1729,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         arterialVolume80  = 0
         arterialVolumePmean = 0
 
-        for vesselId, vessel_i in self.vessels.iteritems():
+        for vesselId, vessel_i in iteritems(self.vessels):
 
             p0, p1 = self.initialValues[vesselId]['Pressure']
             initialPressure = np.linspace(p0, p1, int(vessel_i.N))
@@ -1768,7 +1769,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             arterialCompliancePmean = arterialCompliancePmean + np.mean(complianceEstimates)
 
         windkesselCompliance = 0
-        for bcs in self.boundaryConditions.itervalues():
+        for bcs in itervalues(self.boundaryConditions):
             for bc in bcs:
                 if "Windkessel" in bc.name:
                     windkesselCompliance = windkesselCompliance + bc.C
@@ -1802,7 +1803,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         self.TotalVolumeComplianceTree = 0.0
         self.totalTerminalAreaCompliance = 0.0
-        for vesselId, vessel_i in self.vessels.iteritems():
+        for vesselId, vessel_i in iteritems(self.vessels):
             # vessel_i = self.vessels[vesselId]
 
             p0, p1 = self.initialValues[vesselId]['Pressure']
@@ -2013,7 +2014,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         print('=====================================')
         print('__________initial wave speed_________')
         print(' vessel    wave speed c(P_init)   A(P_init)    As_init      Dw(P_init)      Re(P_init)')
-        for vesselId, vessel in self.vessels.iteritems():
+        for vesselId, vessel in iteritems(self.vessels):
             if Pressure == None:
                 # calc initial pressure
                 p0, p1 = self.initialValues[vesselId]['Pressure']

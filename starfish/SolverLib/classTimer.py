@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys, os
 import numpy as np
@@ -25,7 +26,7 @@ class TimerBaseClass(cSBO.StarfishBaseObject):
         updates the data using a dictionary in form of 
         TimeDict = {'variableName': value}
         """
-        for key,value in TimeDict.iteritems():
+        for key,value in iteritems(TimeDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
@@ -82,7 +83,7 @@ class Valsalva(TimerBaseClass):
         
         n = self.currentTimeStep[0]
         
-        for key,vessel in self.VesselsToModify.iteritems():
+        for key,vessel in iteritems(self.VesselsToModify):
             
             vessel.compliance.update({"externalPressure": self.newexternalPressure[n+1]})
 

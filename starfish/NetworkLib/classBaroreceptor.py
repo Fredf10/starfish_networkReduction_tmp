@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys, os
 import numpy as np
@@ -71,7 +72,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         bc2out = {}
         terminalBoundaries = 0
 
-        for bcId, bcs in vascularNetwork.boundaryConditions.iteritems():
+        for bcId, bcs in iteritems(vascularNetwork.boundaryConditions):
             if bcId == vascularNetwork.root:
                 for bc in bcs:
                     if bc.type == 1:
@@ -102,7 +103,7 @@ class Baroreceptor(cSBO.StarfishBaseObject):
         updates the Baroreceptor using a dictionary in form of
         baroDict = {'variableName': value}
         """
-        for key, value in baroDict.iteritems():
+        for key, value in iteritems(baroDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key, value)

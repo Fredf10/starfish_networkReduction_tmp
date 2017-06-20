@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys
 import os
@@ -36,7 +37,7 @@ class StaticVenousPressure(cSBO.StarfishBaseObject):
         updates the data
         Dict = {'variableName': value}
         """
-        for key,value in dataDict.iteritems():
+        for key,value in iteritems(dataDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
@@ -264,7 +265,7 @@ class venousPool(cSBO.StarfishBaseObject):
         updates the data
         Dict = {'variableName': value}
         """
-        for key,value in dataDict.iteritems():
+        for key,value in iteritems(dataDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)

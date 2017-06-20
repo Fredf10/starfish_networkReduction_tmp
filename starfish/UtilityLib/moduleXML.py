@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os,sys
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -85,7 +86,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
         xmlElement = nxmlW.xmlElementsReference[xmlElementName]
                 
         if xmlElementName == 'boundaryConditions':
-            for vesselId,boundaryConditions in vascularNetwork.boundaryConditions.iteritems():
+            for vesselId,boundaryConditions in iteritems(vascularNetwork.boundaryConditions):
                 subElement = etree.SubElement(xmlFileElement, 'boundaryCondition', vesselId = str(vesselId))
                 # loop saved condition instances
                 for boundaryCondition in boundaryConditions:
@@ -99,7 +100,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                         writeXMLsaveValues(variableElement,variable,value)
 
         elif xmlElementName == 'vessels':
-            for vessel in vascularNetwork.vessels.itervalues():
+            for vessel in itervalues(vascularNetwork.vessels):
                 attributes = {}
                 for attribute in nxmlW.vesselAttributes:
                     attributes[attribute] = str(vessel.getVariableValue(attribute))
@@ -122,7 +123,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
 
 
         elif xmlElementName == 'communicators':
-            for comId,comData in vascularNetwork.communicators.iteritems():
+            for comId,comData in iteritems(vascularNetwork.communicators):
                 comType = comData['comType']
                 subElement = etree.SubElement(xmlFileElement, comType)
                 for variable in nxmlW.communicatorReference[comData['comType']]:
@@ -132,7 +133,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                     writeXMLsaveValues(subsubElement,variable,value)
 
         elif xmlElementName == 'baroreceptors':
-            for baroId, baro in vascularNetwork.baroreceptors.iteritems():
+            for baroId, baro in iteritems(vascularNetwork.baroreceptors):
                 # add baroElement
                 subElement = etree.SubElement(xmlFileElement, 'baroreceptor', Id = str(baroId))
                 for subsubElementTag in nxmlW.xmlElementsReference[xmlElementName]:
@@ -168,7 +169,7 @@ def writeNetworkToXML(vascularNetwork, dataNumber = "xxx", networkXmlFile = None
                 xmlFileElement.set('class', 'MeasurementRoutine')
                 
         elif xmlElementName == "externalStimuli":
-            for stimulusId, stimulus in vascularNetwork.externalStimuli.iteritems():
+            for stimulusId, stimulus in iteritems(vascularNetwork.externalStimuli):
                 stimulusType = stimulus['type']
                 # add stimuliElement
                 subElement = etree.SubElement(xmlFileElement, 'externalStimulus', Id=str(stimulusId), type=stimulusType)

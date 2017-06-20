@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from copy import copy as copy
 import numpy as np
@@ -88,7 +89,7 @@ class LocationOfInterest(TestBaseClass):
             vesselId = int(self.queryLocation.split('_')[-1])
             
             dataDict = vascularNetwork.getSolutionData(vesselId, self.quantitiesOfInterest.keys(), simulationTime, [self.xVal])
-            for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
+            for quantitiyName,quantityObject in iteritems(self.quantitiesOfInterest):
                 quantityObject.simulationTime = simulationTime
                 # normal quantity of interest
                 if 'Extrema' not in quantitiyName and 'InflectionPoint' not in quantitiyName and 'Trajectory' not in quantitiyName:    
@@ -350,7 +351,7 @@ class LocationOfInterest(TestBaseClass):
             for quantitiyName in self.quantitiesOfInterest.keys():
                 dataDict[quantitiyName] = vascularNetwork.baroreceptors[baroId].getVariableValue(quantitiyName)
             
-            for quantitiyName,quantityObject in self.quantitiesOfInterest.iteritems():
+            for quantitiyName,quantityObject in iteritems(self.quantitiesOfInterest):
                 if quantityObject.data == None: 
                     quantityObject.data = np.empty((sampleSize,len(simulationTime)))
                 quantityObject.data[sampleIndex] = dataDict[quantitiyName][:]

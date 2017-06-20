@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os,sys
 
@@ -169,7 +170,7 @@ class ConfigurableObjectBase(object):
             externVariable (ExtDict)       : instance of ExtDict defining the variable properties
         '''
         # iterate through dictionary
-        for key,value in dictToWrite.iteritems():
+        for key,value in iteritems(dictToWrite):
             # find out the name of the variable and create a xml node
             externXmlDictNode  = etree.SubElement(externXmlNode, externVariable.dictObjName) 
             # write id
@@ -193,7 +194,7 @@ class ConfigurableObjectBase(object):
             externVariable (ExtObject)     : instance of ExtObject defining the variable properties
         '''
         classNameDefined = False
-        for definedClassName, definedClasses in externVariable.classCases.iteritems():
+        for definedClassName, definedClasses in iteritems(externVariable.classCases):
             if isinstance(classToWrite,definedClasses):
                 externXmlNode.set('class',definedClassName)
                 classNameDefined = True
@@ -481,7 +482,7 @@ class ConfigurableObjectBase(object):
         Args:
             dataDict (dict): dictionary with new data to update class in from of dataDict = {'variableName': value}
         '''
-        for key,value in dataDict.iteritems():
+        for key,value in iteritems(dataDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)

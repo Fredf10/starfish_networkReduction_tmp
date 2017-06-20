@@ -1,5 +1,6 @@
 #Warning: this file hard-links to ../VisualisationLib/classRealTimeVisualisation.py in the function startRealTimeVisualisation.
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import subprocess
 import math
@@ -30,7 +31,7 @@ class CommunicatorBaseClass(cSBO.StarfishBaseObject):
         updates the updateCommunicatorDict data using a dictionary in form of
         comDict = {'variableName': value}
         """
-        for key,value in comDict.iteritems():
+        for key,value in iteritems(comDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)

@@ -3,6 +3,7 @@
 # Symlinks the hooks to the local git directory
 ret_val = 0 
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os
 import stat

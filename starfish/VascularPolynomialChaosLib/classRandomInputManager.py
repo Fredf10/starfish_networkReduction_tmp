@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import numpy as np
 import itertools
@@ -45,7 +46,7 @@ class RandomInputManager(TestBaseClass):
         
         randomInputParameters = []
         
-        for name,randomInput in self.randomInputs.iteritems():
+        for name,randomInput in iteritems(self.randomInputs):
             # set name            
             randomInput.name = name
             if randomInput.randomInputType == 'parametricRandomInput':
@@ -125,7 +126,7 @@ class RandomInputManager(TestBaseClass):
         '''
         
         randomInputMap = {}
-        for randomInputName,randomInput in self.randomInputs.iteritems():
+        for randomInputName,randomInput in iteritems(self.randomInputs):
             dist = randomInput.distributionType 
             
             if randomInput.randomInputType == 'parametricRandomInput':
@@ -170,9 +171,9 @@ class RandomInputManager(TestBaseClass):
                     randomInputMap[dist][randomInputName] = randomInput.passRealisationToAssosiatedObj
         
         # link general random inputs 
-        for dist,updateMethods in randomInputMap.iteritems():
+        for dist,updateMethods in iteritems(randomInputMap):
             # find random input with dist:
-            for randomInputName in self.randomInputs.iterkeys():
+            for randomInputName in iterkeys(self.randomInputs):
                 if dist == randomInputName:
                     generalRandomInput = self.randomInputs[randomInputName]
                     generalRandomInput.updateMethods = updateMethods

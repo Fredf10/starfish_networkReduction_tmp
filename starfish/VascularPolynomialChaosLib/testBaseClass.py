@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import os,sys
 from starfish.UtilityLib.constants import unitsDictSI as unitsDict
@@ -176,7 +177,7 @@ class TestBaseClass(object):
             externVariable (ExtDict)       : instance of ExtDict defining the variable properties
         '''
         # iterate through dictionary
-        for key,value in dictToWrite.iteritems():
+        for key,value in iteritems(dictToWrite):
             # find out the name of the variable and create a xml node
             externXmlDictNode  = etree.SubElement(externXmlNode, externVariable.dictObjName) 
             # write id
@@ -200,7 +201,7 @@ class TestBaseClass(object):
             externVariable (ExtObject)     : instance of ExtObject defining the variable properties
         '''
         classNameDefined = False
-        for definedClassName, definedClasses in externVariable.classCases.iteritems():
+        for definedClassName, definedClasses in iteritems(externVariable.classCases):
             if isinstance(classToWrite,definedClasses):
                 externXmlNode.set('class',definedClassName)
                 classNameDefined = True
@@ -529,7 +530,7 @@ class TestBaseClass(object):
                 else:
                     dictGroup = self.hdf5Group[dictName]
                 # go through all dictionary entries
-                for dictObjectName,dictObject in dictL.iteritems():
+                for dictObjectName,dictObject in iteritems(dictL):
                     # check if object node exists or not
                     if dictObjectName not in dictGroup.keys():
                         dictObjectGroup = dictGroup.create_group(dictObjectName)
@@ -566,7 +567,7 @@ class TestBaseClass(object):
                 # serach for dict group node for the dictionary
                 if dictName in self.hdf5Group.keys():
                     dictGroup = self.hdf5Group[dictName]
-                    for dictObjectName,dictObject in dictL.iteritems():
+                    for dictObjectName,dictObject in iteritems(dictL):
                         if dictObjectName in dictGroup.keys():
                             dictObject.loadDataHdf5()
                         else: print("Warning: loadDataHdf5 {} could not save dict {} as not a sub-group node of {}".format(self.hdf5Group, dictObjectName, dictName)) 
@@ -590,7 +591,7 @@ class TestBaseClass(object):
         for dictName in self.objectDictsHdf5Memory:
             dictValue = self.getVariable(dictName)
             if dictValue is not None or dictValue == {}:
-                for dictObjectName,dictObject in dictValue.iteritems():
+                for dictObjectName,dictObject in iteritems(dictValue):
                     dictObject.saveDataHdf5()
     
     ### getter and setter
@@ -601,7 +602,7 @@ class TestBaseClass(object):
         Args:
             dataDict (dict): dictionary with new data to update class in from of dataDict = {'variableName': value}
         '''
-        for key,value in dataDict.iteritems():
+        for key,value in iteritems(dataDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)

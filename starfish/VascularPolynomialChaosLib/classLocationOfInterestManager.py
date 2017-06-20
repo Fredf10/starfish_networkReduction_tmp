@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
 from starfish.VascularPolynomialChaosLib.classLocationOfInterest import LocationOfInterest
@@ -36,7 +37,7 @@ class LocationOfInterestManager(TestBaseClass):
         '''
         Function to initialize all locations of interest which creates quantity of intertes objects
         '''
-        for locationOfInterest in self.locationsOfInterest.itervalues():
+        for locationOfInterest in itervalues(self.locationsOfInterest):
             locationOfInterest.initialize()
                 
     def addLocationOfInterest(self, queryLocation, locationName, quantitiesOfInterestToProcess, xVal, confidenceAlpha):
@@ -148,7 +149,7 @@ class LocationOfInterestManager(TestBaseClass):
         '''
         qoiList = []
         for locationOfInterest in self.locationsOfInterest.values():
-            for qoi in locationOfInterest.quantitiesOfInterest.itervalues():
+            for qoi in itervalues(locationOfInterest.quantitiesOfInterest):
                 qoiList.append(qoi)
         return qoiList
     

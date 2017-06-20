@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass 
@@ -91,7 +92,7 @@ class UqsaCase(TestBaseClass):
         
         self.locationOfInterestManager.initialize()
         
-        for uqsaMethodName in self.uqsaMethods.iterkeys():
+        for uqsaMethodName in iterkeys(self.uqsaMethods):
             print("Info classUQSACase 96: running ", uqsaMethodName)
         
     def aquireSamples(self, distributionManager, randomInputsExtDist):
@@ -105,7 +106,7 @@ class UqsaCase(TestBaseClass):
         maxSampleSize = 0
         abcSample = False
         #find out maximum numbers of samples needed and if ABC sample is needed
-        for uqsaMethod in self.uqsaMethods.itervalues():
+        for uqsaMethod in itervalues(self.uqsaMethods):
             sampleSizeCurrent, abcSampleCurrent = uqsaMethod.evaluateSamplesSize(distributionManager.distributionDimension)   
             
             if sampleSizeCurrent > maxSampleSize:
@@ -228,7 +229,7 @@ class UqsaCase(TestBaseClass):
                 else:
                     timeStartTotal = time.time()
                     
-                    for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
+                    for uqsaMethodName,uqsaMethod in iteritems(self.uqsaMethods):
                         
                         timeStartBatch = time.time()
                         print("calculate uqsa measure for {}".format(uqsaMethodName))
@@ -263,7 +264,7 @@ class UqsaCase(TestBaseClass):
         
         # create batch list for all jobs    
         batchList = []
-        for uqsaMethodName,uqsaMethod in self.uqsaMethods.iteritems():
+        for uqsaMethodName,uqsaMethod in iteritems(self.uqsaMethods):
             batchList.append([uqsaMethodName,uqsaMethod,distributionManager,self.sampleManager,qoi])         
         # run jobs
         pool = multiprocessing.Pool(multiprocessing.cpu_count())

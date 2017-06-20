@@ -35,11 +35,22 @@
 
 #---------------------------------------------------------------------------------------#
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import starfish.Simulator as simulator
-import starfish.Visualisation as visualisationToolBox
-import starfish.vnc  as vnc
 import starfish.VascularPolynomialChaos as uqsaToolBox
+
+try:
+    import starfish.Visualisation as visualisationToolBox
+    NOVIZ=False
+except ImportError:
+    NOVIZ=True
+try:
+    import starfish.vnc  as vnc
+    NOVNC=False
+except ImportError:
+    NOVNC=True
+
 
 def main(args=None):
         
@@ -52,8 +63,16 @@ def main(args=None):
     while mainMenuInput not in ['q']:
         print('\n Main menu:\n')
         print(" [1] - run simulation | Main.py")
-        print(" [2] - run vnc (vascular network creator) | vnc.py")
-        print(" [3] - run visualisation | Visualisation.py")
+        if NOVNC:
+            VNCSTR="(Not Available)"
+        else:
+            VNCSTR=""
+        print(" [2] -{} run vnc (vascular network creator) | vnc.py".format(VNCSTR))
+        if NOVIZ:
+            VIZSTR="(Not Available)"
+        else:
+            VIZSTR=""
+        print(" [3] -{} run visualisation | Visualisation.py".format(VIZSTR))
         print(" [4] - run uncertainty quantification tool box | VascularPolynomialChaos.py")
         print(" [q] - quit \n")
         while  mainMenuInput not in ('1','2','3','4','q'):
@@ -64,12 +83,18 @@ def main(args=None):
             simulator.main()
             mainMenuInput = ""
             
-        if mainMenuInput == '2':
+        if mainMenuInput == '2' and NOVNC:
+            print("\n .. vnc not available \n")
+            mainMenuInput = ""
+        elif mainMenuInput == '2':
             print("\n .. running vnc \n")
             vnc.main()
             mainMenuInput = ""
             
-        if mainMenuInput == '3':
+        if mainMenuInput == '3' and NOVIZ:
+            print("\n .. visualisation not available \n")
+            mainMenuInput = ""
+        elif mainMenuInput == '3':    
             print("\n .. running visualisation \n")
             visualisationToolBox.main()
             mainMenuInput = ""

@@ -13,6 +13,7 @@
 # serve to show the default.
 
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys
 import os

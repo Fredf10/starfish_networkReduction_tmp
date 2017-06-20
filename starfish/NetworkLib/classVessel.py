@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import pprint
 from copy import deepcopy
@@ -143,7 +144,7 @@ class Vessel(cSBO.StarfishBaseObject):
         This method calculates and set up, the compliance, gird, fluid and resistance of the Vessel.
         """
         # initialze fluid
-        for key,value in globalFluid.iteritems():
+        for key,value in iteritems(globalFluid):
 
             try:
                 if self.applyGlobalFluid == True:
@@ -500,7 +501,7 @@ class Vessel(cSBO.StarfishBaseObject):
             updates the vessel data using a dictionary in from of
             dataDict = {'variableName': value}
         """
-        for key,value in Dict.iteritems():
+        for key,value in iteritems(Dict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
@@ -530,7 +531,7 @@ class Vessel(cSBO.StarfishBaseObject):
         """
         print("----------------")
         print("    Vessel %d"%self.Id,"\n")
-        for variable,value in self.__dict__.iteritems():
+        for variable,value in iteritems(self.__dict__):
             try:
                 print(" {:<20} {:>8}".format(variable,value))
             except Exception: print(" {:<20} {:>8}".format(variable,'None'))

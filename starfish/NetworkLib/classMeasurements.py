@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass
 import numpy as np
@@ -99,7 +100,7 @@ class MeasurementRoutine(TestBaseClass):
         alpha_p  = self.referencePressure / measurmentVessel.compliance.Ps
         alpha_a  = self.referenceArea / np.mean(measurmentVessel.compliance.As)        
         # 1.2 loop through vessels and adjust Ps, and As with alpha_1 and alpha_2
-        for vessel in vascularNetwork.vessels.itervalues():
+        for vessel in itervalues(vascularNetwork.vessels):
             vessel.compliance.Ps = vessel.compliance.Ps*alpha_p
             vessel.compliance.As = vessel.compliance.As*alpha_a
             
@@ -114,7 +115,7 @@ class MeasurementRoutine(TestBaseClass):
         alpha_c = 1.0
         # get initial values for the coefficients
         initialMaterialCoefficients = {}
-        for vesselId,vessel in vascularNetwork.vessels.iteritems():
+        for vesselId,vessel in iteritems(vascularNetwork.vessels):
             
             
             
@@ -145,7 +146,7 @@ class MeasurementRoutine(TestBaseClass):
         print()         
         
         # 2.2 loop through vessels and adjust all coefficients with alpha_c
-        for vessel in vascularNetwork.vessels.itervalues():
+        for vessel in itervalues(vascularNetwork.vessels):
             vessel.compliance.adaptMaterialCoefficient(alpha_c)
             
     def estimateCff(self, alpha_c, args):

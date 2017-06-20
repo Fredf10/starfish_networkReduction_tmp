@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import gtk
 import gobject
@@ -131,7 +132,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
         update dictionary from data 
         written in entriesCombo and choosen from comboboxes
         '''
-        for key, entries in self.entriesCombo.iteritems():
+        for key, entries in iteritems(self.entriesCombo):
             for index,entry in enumerate(entries):
                 
                 comboChoices = None
@@ -162,7 +163,7 @@ class Visualisation2DPlotWindowAdjustValues(gtk.Window):
         '''
         Reset entriesCombo and and comboBoxes to entriesCombo of the beginning
         '''
-        for key, entries in self.entriesCombo.iteritems():
+        for key, entries in iteritems(self.entriesCombo):
             for index,entry in enumerate(entries):
                 
                 value = self.inititalValuesDict[key][index]
@@ -416,7 +417,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         updates the vascularNetwork data using a dictionary in form of 
         visualisationData = {'dictVariableName': value}
         '''
-        for key,value in visualisationData.iteritems():
+        for key,value in iteritems(visualisationData):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
@@ -547,10 +548,10 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         '''
         set all line data to single point at (-1, 0) out of the view field
         '''
-        for caseId,axisDict in self.lines.iteritems():
-            for axis,lineDict in axisDict.iteritems():
+        for caseId,axisDict in iteritems(self.lines):
+            for axis,lineDict in iteritems(axisDict):
                 if lines:
-                    for line in lineDict.itervalues():
+                    for line in itervalues(lineDict):
                         line.set_data([-1], [0])
                     self.axis['axis1Twin'].set_visible(False)
                     self.axis['axis2Twin'].set_visible(False)
@@ -558,11 +559,11 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
                     self.axis['axis2'].spines['right'].set_visible(False)
                 if points:
                     try:
-                        for point in self.points[caseId][axis].itervalues():
+                        for point in itervalues(self.points[caseId][axis]):
                             point.set_data([-1], [0])
                     except: pass
                 if labels:
-                    for linestyle in lineDict.iterkeys():
+                    for linestyle in iterkeys(lineDict):
                         currentName = ' '.join([str(caseId),axis,linestyle])
                         self.labels[currentName] = '' 
                                    
@@ -609,7 +610,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         '''
         handles = []
         labels  = []
-        for axis in self.axis.itervalues():
+        for axis in itervalues(self.axis):
             ha,la = axis.get_legend_handles_labels()
             for currentAxis,currentLine in zip(ha,la):
                 label = self.labels[currentLine][0]
@@ -650,9 +651,9 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
            linestyle
            linewidth
         '''
-        for caseId,axisDict in self.lines.iteritems():
-            for axis,lineDict in axisDict.iteritems():
-                for linestyle,line in lineDict.iteritems():
+        for caseId,axisDict in iteritems(self.lines):
+            for axis,lineDict in iteritems(axisDict):
+                for linestyle,line in iteritems(lineDict):
                     currentName = ' '.join([str(caseId),axis,linestyle])
                     color,style,width = self.lineProperties[currentName]
                     line.set_color(color)
@@ -1185,9 +1186,9 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
         plot min and max points of all current lines
         '''
         # 1 find out current visible lines
-        for caseId,axisDict in self.lines.iteritems():
-            for axis,lineDict in axisDict.iteritems():
-                for linestyle,line in lineDict.iteritems():
+        for caseId,axisDict in iteritems(self.lines):
+            for axis,lineDict in iteritems(axisDict):
+                for linestyle,line in iteritems(lineDict):
                     
                     xData = line.get_xdata()
                     if len(xData) != 1:
@@ -1784,7 +1785,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
             
         # # open plot window        
         if selectedNetworks != []:
-            for networkID in loadVesselIDdict.iterkeys():
+            for networkID in iterkeys(loadVesselIDdict):
                 vesselIds = loadVesselIDdict[networkID]
                 self.networks[networkID].loadSolutionDataRange(vesselIds, values=["All"])
             Visualisation2DPlotWindow(selectedNetworks, selectedVesselIds, selectedExternalData, selectedCaseNames)
@@ -1807,7 +1808,7 @@ class Visualisation2DMain(Visualisation2DMainGUI):
         self.networkCases.append(networkSolutionName)
         # # get vessel names
         vesselNames = []
-        for vessel in vascularNetwork.vessels.itervalues():
+        for vessel in itervalues(vascularNetwork.vessels):
             vesselNames.append('{:3}-{}'.format(vessel.Id, vessel.name))
         # # reference network showing network case name and [corresponding number of vessels, vesselNames, description]
         self.networkInfo[networkSolutionName] = [ vesselNames, vascularNetwork.description]

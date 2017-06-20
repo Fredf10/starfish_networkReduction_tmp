@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
 # set the path relative to THIS file not the executing file!
@@ -564,7 +565,7 @@ def main():
                 print("     [b] - back to the main menu")
                 print("")
                 print("    current fluid properties:")
-                for key,value in vascularNetwork.globalFluid.iteritems():
+                for key,value in iteritems(vascularNetwork.globalFluid):
                     print("     {0:20}     {1:10}  {2:10}".format(key,value,variableUnits[key]))
                 print("")
                 subMenuInput =input3("    what to do? ")

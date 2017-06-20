@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import numpy as np
 import csv
@@ -30,7 +31,7 @@ class BoundaryCondition(cSBO.StarfishBaseObject):
         updates the updateBoundaryDict data using a dictionary in form of
         bcDict = {'variableName': value}
         """
-        for key, value in bcDict.iteritems():
+        for key, value in iteritems(bcDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key, value)
@@ -1146,7 +1147,7 @@ class ReflectionCoefficientTimeVarying(BoundaryConditionType2):
         bcDict = {'variableName': value}
         """
         # TODO: this should refer to BoundaryCondition's update function instead of doing the exact same thing.
-        for key, value in bcDict.iteritems():
+        for key, value in iteritems(bcDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key, value)

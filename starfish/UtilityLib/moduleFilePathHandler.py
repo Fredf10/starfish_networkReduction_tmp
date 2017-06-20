@@ -18,6 +18,7 @@
 ##
 
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 try:
     import cPickle as pickle
@@ -371,7 +372,7 @@ def saveConfigFile(configurations):
     else: #  file does not exist
         Config.add_section('Directory Paths')
         
-    for option,config in configurations.iteritems(): 
+    for option,config in iteritems(configurations): 
             if option in existingOptions:
                 Config.set('Directory Paths', option, config)
                     

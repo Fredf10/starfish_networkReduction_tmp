@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -736,7 +737,7 @@ class Visualisation3D(Visualisation3DGUI):
         vascularNetwork and stores it in self.vessels3D = {vesselId: vessel3D}
         '''
         if self.vascularNetwork is not None:
-            for vesselId,vessel in self.vascularNetwork.vessels.iteritems():
+            for vesselId,vessel in iteritems(self.vascularNetwork.vessels):
                 self.vessels3D[vesselId] = Vessel3D( vessel,
                                                      self.batch,
                                                      self.nPointsPerCircle,
@@ -965,7 +966,7 @@ class Visualisation3D(Visualisation3DGUI):
         that r is allways greater then 0.2 * r0
         '''
         rfmax = 5000
-        for vessel in self.vascularNetwork.vessels.itervalues():
+        for vessel in itervalues(self.vascularNetwork.vessels):
             A0 = vessel.Asol[0]
             devisor = ((vessel.Asol[1::]-A0))
             devisor[devisor==0] = 1
@@ -998,7 +999,7 @@ class Visualisation3D(Visualisation3DGUI):
         maximaQ = [1.e20, 0]
 
         if range == None:
-            for vessel in self.vascularNetwork.vessels.itervalues():
+            for vessel in itervalues(self.vascularNetwork.vessels):
                 # maximum
                 maximaP[1] = np.max([maximaP[1], np.max(vessel.Psol)])
                 maximaQ[1] = np.max([maximaQ[1], np.max(vessel.Qsol)])
@@ -1010,7 +1011,7 @@ class Visualisation3D(Visualisation3DGUI):
             s = range[0]
             e = range[1]+1
 
-            for vessel in self.vascularNetwork.vessels.itervalues():
+            for vessel in itervalues(self.vascularNetwork.vessels):
                 # maximum
                 maximaP[1] = np.max([maximaP[1], np.max(vessel.Psol[s:e,:])])
                 maximaQ[1] = np.max([maximaQ[1], np.max(vessel.Qsol[s:e,:])])
@@ -1044,7 +1045,7 @@ class Visualisation3D(Visualisation3DGUI):
             self.findMinMaxPressure(range = [indexStart,indexEnd] )
             self.cLUT.update({'range':self.quantitiyMaxima})
 
-            for vessel in self.vessels3D.itervalues():
+            for vessel in itervalues(self.vessels3D):
                 vessel.calculateWaveSpeedRange(range = [indexStart,indexEnd] )
 
             # recalculate rf factor

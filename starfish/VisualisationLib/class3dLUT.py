@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
 import sys,os,io
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -414,7 +415,7 @@ class LUT(object):
         updates the LUT data using a dictionary in form of 
         updateDict = {'variableName': value}
         '''
-        for key,value in updateDict.iteritems():
+        for key,value in iteritems(updateDict):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key,value)
