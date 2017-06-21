@@ -487,7 +487,7 @@ def updateSimulationDescriptions(networkName, currentDataNumber, currentDescript
     except:
         simCaseDescFilePath = getFilePath('simulationDescriptionFile', networkName, currentDataNumber, 'write')#, exception = 'No')
     
-        simCaseDescFile = file(simCaseDescFilePath, 'w+')
+        simCaseDescFile = open(simCaseDescFilePath, 'w+')
         simCaseDescFile.write("DataNumber   Description \n")
         simCaseDescFile.close()
         simCaseDescFile = open(simCaseDescFilePath, 'r')

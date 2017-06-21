@@ -25,13 +25,13 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     print('=====================================')
     print('------Single Process Batch Job-------')
     print('numberOfEval.:   {}'.format(len(batchDataList)))
-    progressBar = cPB.ProgressBar(35, len(batchDataList))
+    #progressBar = cPB.ProgressBar(35, len(batchDataList))
     for completed,batchData in enumerate(batchDataList):
         minutesSolve,secsSolve = runSingleBatchSimulation(batchData)
         if quiet == False:
             print('____________Batch   {:5} ___________'.format(batchDataList.index(batchData))) 
             print('Runtime:        {} min {} sec'.format(minutesSolve,secsSolve))
-        progressBar.progress()
+        #progressBar.progress()
     timeBatchJob= time.time()-timeStartBatch
     minutesBatch = int(timeBatchJob/60.)
     secsBatch = timeBatchJob-minutesBatch*60.
@@ -94,17 +94,17 @@ def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False
     print('------Multiprocessing Batch Job------')
     print('numberWorkers:   {}'.format(numberWorkers))
     print('numberOfEval.:   {}'.format(len(batchDataList)))
-    progressBar = cPB.ProgressBar(35, len(batchDataList))
+    #progressBar = cPB.ProgressBar(35, len(batchDataList))
     pool = multiprocessing.Pool(numberWorkers, maxtasksperchild = None)
     results = pool.imap(runSingleBatchSimulation,batchDataList)
     pool.close() 
     last_update  = 0
     while (True):
         completed = results._index
+        while last_update < completed:
+            #progressBar.progress()
+            last_update +=1
         if (completed == len(batchDataList)): break
-        if last_update < completed:
-            progressBar.progress()
-            last_update = completed
     pool.join()
     if quiet == False:
         print('=====================================')

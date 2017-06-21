@@ -2,6 +2,7 @@
 # pylint: disable-all
 from __future__ import print_function, absolute_import
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
+from builtins import range
 from builtins import input as input3
 from math import *
 from numpy.core import *
@@ -402,7 +403,7 @@ if __name__ == "__main__":
     HR = np.zeros(np.size(strain))
     HR[0] = algebraic[-1][11]
     
-    for t in xrange((size(strain)-1)):
+    for t in range((size(strain)-1)):
         
         p[34] = strain[t+1]
         voi, states, algebraic = solver2(timeArray2,states[-1],constants)

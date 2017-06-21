@@ -195,7 +195,7 @@ class RandomInputManager(TestBaseClass):
         
         logData = np.array([randomInput.updateLog for randomInput in self.randomInputs.values()]).transpose()
         
-        logfile = open(evaluationLogFile, "wb")
+        logfile = open(evaluationLogFile, "w")
         logfile.write(''.join(['Stochastic simulation ',str(networkName),' DataNumber ',dataNumber,'\n','\n']))
         logfile.write(''.join(['uqsaCase :', caseName,'  number of evaluations: ',str(len(logData)),'\n','\n']))
         

@@ -1,4 +1,4 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import, unicode_literals
 from builtins import range
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
@@ -7,7 +7,7 @@ from starfish.VascularPolynomialChaosLib import moduleFilePathHandlerVPC as mFPH
 import h5py
 import numpy as np
 import chaospy as cp
-
+STR_SEP = ":"
 class SampleManager(TestBaseClass):
     
     externVariables      = { 'dependentCase' : TestBaseClass.ExtValue(bool),
@@ -192,7 +192,7 @@ class SampleManager(TestBaseClass):
         # load data
         loadedData = self.loadSamples(sampleFile)
         # TODO: type conversion should be moved to load function
-        loadedData['randomVariableNames'] = loadedData['randomVariableNames'].split(':')
+        loadedData['randomVariableNames'] = loadedData['randomVariableNames'].tolist()
         loadedData['abcSample'] = bool(loadedData['abcSample'])
         
         # check if data is correct
@@ -291,13 +291,10 @@ class SampleManager(TestBaseClass):
         # functionality
         for attributeName in attributesToSave:
             attributeValue = self.getVariable(attributeName)
-            print(attributeName, attributeValue)
             if attributeValue is not None: 
-                if attributeName == 'randomVariableNames':
-                    attributeValue = ':'.join(attributeValue)
-                    hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
-                else:
-                    hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
-        
+                if isinstance(attributeValue, (str, list, tuple)): #TODO what else to check for?
+                    attributeValue = np.string_(attributeValue) # TODO what about unicode 
+                hdf5SaveGroup.attrs.create(attributeName, data = attributeValue)
+
         hdf5SaveGroup.flush()
         hdf5SaveGroup.close()  

@@ -1284,7 +1284,7 @@ class Visualisation2DPlotWindow(Visualisation2DPlotWindowGui):
             except: pass
                         
             # pressure / flow,  forward backward
-            for n in [0,-1]:#xrange(int(vascularNetwork.vessels[vesselId].N)):
+            for n in [0,-1]:#range(int(vascularNetwork.vessels[vesselId].N)):
                 pf,pb,qf,qb =  mProc.linearWaveSplitting(Psol[:,n],Qsol[:,n],Asol[:,n],csol[:,n],vascularNetwork.vessels[vesselId].rho)
                  
                 limit = 'Pf'

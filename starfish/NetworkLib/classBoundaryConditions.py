@@ -36,8 +36,7 @@ class BoundaryCondition(cSBO.StarfishBaseObject):
             try:
                 self.__getattribute__(key)
                 self.__setattr__(key, value)
-            except Exception:
-                self.warning("boundaryConditions.update(): wrong key: %s, could not set up boundaryCondition" % key)
+            except AttributeError: pass #TODO self.warning("boundaryConditions.update(): wrong key: %s, could not set up boundaryCondition" % key)
 
     def setPosition(self, position):
         """Set the position of the boundaryCondition """

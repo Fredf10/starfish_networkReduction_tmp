@@ -7,9 +7,8 @@ import traceback
 import time
 import numpy as np
 from starfish.UtilityLib import classConfigurableObjectBase
-cur = os.path.dirname( os.path.realpath( __file__ ) )
-root = ''.join([cur,'/../'])
-logFilePath = root + 'warninglog.txt'
+import logging
+logger = logging.getLogger('starfish')
 
 class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
     """Super class every other class in STARFiSh
@@ -118,25 +117,10 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
             except: exceptionInfo = "\n" + traceback.format_exc()
         else: exceptionInfo = " "
 
-        if verbose:
-            completeString = completeString + exceptionInfo
-
-        #if not quiet:
-            # print(completeString)
-
-        if saveToFile:
-            if not verbose: completeString = completeString + exceptionInfo
-            try: f = open(logFilePath, 'a')
-            except: f = open(logFilePath, 'w')
-            f.write("\n======================")
-            f.write("\n{}".format(
-                time.strftime("%Y.%b.%d, %H:%M:%S")))
-            f.write("\n----------------------\n")
-            f.write(completeString)
-            f.write("======================\n\n")
-            f.close()
-
-    def exception(self, infoString = None):
+        completeString = completeString + exceptionInfo
+        logger.warn(completeString)
+            
+    def exception(self, infoString = None): #TODO no need for this I think?
         """
         The exception appending function.
 
@@ -151,11 +135,5 @@ class StarfishBaseObject(classConfigurableObjectBase.ConfigurableObjectBase):
         else:
             try: raise
             except Exception as e:
-                raise_(type(e), type(e)(e.message + "\nAppended : " + infoString), sys.exc_info()[2])
-
-
-
-
-
-
+                raise_(type(e), str(e) + "\nAppended : " + infoString, sys.exc_info()[2])
 

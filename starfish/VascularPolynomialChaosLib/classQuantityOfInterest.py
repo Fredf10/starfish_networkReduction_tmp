@@ -50,7 +50,7 @@ class QuantityOfInterest(TestBaseClass):
         self.hdf5Group.create_dataset('trajectoryData', (sampleSize,len(basis)) , dtype='float64')
         self.hdf5Group.create_dataset('trajectoryBasis', data = basis, dtype='float64')
         
-        progressBar = cPB.ProgressBar(35, sampleSize)
+        #progressBar = cPB.ProgressBar(35, sampleSize)
         
         for n in range(sampleSize):
             
@@ -59,7 +59,7 @@ class QuantityOfInterest(TestBaseClass):
             
             self.hdf5Group['trajectoryData'][n] = np.interp(basis, dataBasis, data)
         
-            progressBar.progress()
+            #progressBar.progress()
         
     def addUqsaMeasures(self,uqsaMeasureName,uqsaMeasure):
         '''

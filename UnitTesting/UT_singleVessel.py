@@ -1,5 +1,6 @@
 from __future__ import print_function, absolute_import
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
+from builtins import range
 from builtins import input as input3
 import unittest
 import sys, os, gc
@@ -103,7 +104,7 @@ class testSingleVessel(setUp_singleVessel):
                     print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
                 SEArrayEntrance = np.zeros(len(testVals))
                 SEArrayExit = np.zeros(len(testVals))
-                for i in xrange(len(testVals)):
+                for i in range(len(testVals)):
                     SEArrayEntrance[i] = (testVals[i][0] - refVals[i][0])*(testVals[i][0] - refVals[i][0])
                     SEArrayExit[i] = (testVals[i][1] - refVals[i][1])*(testVals[i][1] - refVals[i][1])
                 self.RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))

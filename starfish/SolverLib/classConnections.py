@@ -31,7 +31,6 @@ class Link():
         self.A_func          = []
         self.positions       = []
         self.names           = []
-#       self.vz = []
 
         self.dt = dt
         
@@ -50,7 +49,6 @@ class Link():
         self.positions.append(-1)
         self.names.append(mother.Id)
         self.A_func.append(mother.A_nID)
-#        self.vz.append(-1)
         # SolutionVariables
         self.P_mother = mother.Psol
         self.Q_mother = mother.Qsol
@@ -64,32 +62,23 @@ class Link():
         self.positions.append(0)
         self.names.append(daughter.Id)
         self.A_func.append(daughter.A_nID)
-#        self.vz.append(1)
         # SolutionVariables
         self.P_daughter = daughter.Psol
         self.Q_daughter = daughter.Qsol
         self.A_daughter = daughter.Asol
             
-#        if   rigidAreas == '02': 
-#            self.fsolveFunction = self.fsolveConnectionSys0
-##            self.jacobiMatrix = self.jacobiMatrixSys0
-#        elif rigidAreas == '2':  
-#            self.fsolveFunction = self.fsolveConnectionSys1
-#            self.jacobiMatrix = self.jacobiMatrixSys1
-#       else: 
-#            print"ERROR: classConnections: EquSys not properly defined! system exit"
-#            exit()
+
 
         self.rigidAreas = rigidAreas
         #solvingScheme = "Stenosis"
         solvingScheme = "NonLinear"
         # Define the call function depending on the solving Scheme
         if solvingScheme == "Linear": 
-            self.__call__ = self.callLinear
+            self._callfcn = self.callLinear
         elif solvingScheme == "NonLinear":
-            self.__call__ = self.callNonLinear
+            self._callfcn = self.callNonLinear
         elif solvingScheme == "Stenosis":
-            self.__call__ = self.callStenosisYoungAndTsai
+            self._callfcn = self.callStenosisYoungAndTsai
         else:
             raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
     
@@ -102,6 +91,9 @@ class Link():
         self.maxPError = 0
         self.sumPErrorCount = 0
         self.sumPErrorNonLinCount = 0
+    
+    def __call__(self):
+        return self._callfcn()
     
     def callLinear(self):
         """
@@ -535,248 +527,7 @@ class Link():
         # apply Areas
         self.A_mother[n+1][pos1]   = A1n
         self.A_daughter[n+1][pos2] = A2n
-              
-#     def callMacCormackField1(self):
-#         """
-#         Call function for vessel-vessel connection
-#         """        
-#         dt = self.dt
-#         n = self.currentMemoryIndex[0]
-#         pos1 = self.positions[0]
-#         pos2 = self.positions[1]
-#         
-#         #""" Predictor Step """positions
-#         if self.step == "predictor":
-#             P1 = self.P_leftMother[n]
-#             Q1 = self.Q_leftMother[n]
-#             A1 = self.A_leftMother[n]
-#             
-#             P2 = self.P_daughter[n]
-#             Q2 = self.Q_daughter[n]
-#             A2 = self.A_daughter[n]
-#                  
-#         #"""Corrector Step"""    A
-#         elif self.step == "corrector":
-#             P1 = self.P_mother_pre
-#             Q1 = self.Q_mother_pre
-#             A1 = self.A_mother_pre
-#             
-#             P2 = self.P_daughter_pre
-#             Q2 = self.Q_daughter_pre
-#             A2 = self.A_daughter_pre
-#                  
-#         P1o = P1[pos1]
-#         Q1o = Q1[pos1]
-#         P2o = P2[pos2]
-#         Q2o = Q2[pos2]
-#         
-#         # update system equation and store L1o
-#         self.systemEquations[0].updateLARL(P1,Q1,A1,idArray=[pos1],update='L') #
-#         L1o = self.systemEquations[0].L[pos1][pos1+1]
-#         # calculate domega1
-#         z1 = self.z[0][pos1] - self.systemEquations[0].LAMBDA[pos1][0] * dt
-#         du1 = np.array([np.interp(z1,self.z[0],P1)-P1o,np.interp(z1,self.z[0],Q1)-Q1o])
-#         domega1 =  np.dot(L1o,du1)
-#         
-#         # update system equation and store L2o
-#         self.systemEquations[1].updateLARL(P2,Q2,A2,idArray=[pos2],update='L') #
-#         L2o = self.systemEquations[1].L[pos2][pos2+1]
-#         # calculate domega2
-#         z2 = self.z[1][pos2] - self.systemEquations[1].LAMBDA[pos2][1] * dt
-#         du2 = np.array([np.interp(z2,self.z[1],P2)-P2o,np.interp(z2,self.z[1],Q2)-Q2o])
-#         domega2 =  np.dot(L2o,du2)
-#         
-#         # setup solve function
-#         args = [A1[pos1],A2[pos2],pos1,pos2,self.vz[0],self.vz[1],P1o,Q1o,P2o,Q2o,domega1,domega2,self.rho[0],self.rho[1],L1o,L2o,du1,du2] 
-#         x = [P1o,Q1o,Q2o,P2o]
-#         sol = fsolve(self.fsolveFunction ,x ,args = args, fprime = self.jacobiMatrix)
-#         
-#         #sol,infodict,a,b = fsolve(self.fsolveFunction ,x ,args = args, fprime = self.jacobiMatrix,full_output=True)
-#         #print infodict['nfev'],infodict['njev']
-#         
-#         #print sol[0],sol[3]
-#         
-#         #""" Predictor Step """
-#         if self.step == "predictor":
-#             self.step = "corrector"   
-#             # apply changed values
-#             self.P_mother_pre[pos1]   = sol[0]
-#             self.Q_mother_pre[pos1]   = sol[1]
-#             self.P_daughter_pre[pos2] = sol[3]
-#             self.Q_daughter_pre[pos2] = sol[2]
-#             
-#             if self.rigidAreas == False:
-#                 # calculate new areas
-#                 A1n = self.A_func[0]([sol[0]],pos1)
-#                 A2n = self.A_func[1]([sol[3]],pos2)
-#                 self.A_mother_pre[pos1]   = A1n
-#                 self.A_daughter_pre[pos2] = A2n             
-#             else:
-#                 self.A_mother_pre[pos1]   = A1[pos1]
-#                 self.A_daughter_pre[pos2] = A2[pos2]
-#         
-#         #"""Corrector Step"""    
-#         elif self.step == "corrector":
-#             self.step = "predictor"
-#             
-#             # apply changed values
-#             self.P_leftMother[n+1][pos1]   = sol[0]
-#             self.Q_leftMother[n+1][pos1]   = sol[1]
-#             self.P_daughter[n+1][pos2] = sol[3]
-#             self.Q_daughter[n+1][pos2] = sol[2]
-#             
-#             sumQError = abs(sol[1] - sol[2])
-#             if sumQError > 0.0: 
-#                 self.sumQErrorCount = self.sumQErrorCount+1
-#             if sumQError > self.maxQError:
-#                 self.maxQError  = sumQError
-#             print('Error cons mass',  sumQError, self.maxQError ,' - ', n, self.sumQErrorCount)
-#             
-#             if self.rigidAreas == False:
-#                 # calculate new areas
-#                 A1n = self.A_func[0]([sol[0]],pos1)
-#                 A2n = self.A_func[1]([sol[3]],pos2)
-#                 self.A_leftMother[n+1][pos1]   = A1n
-#                 self.A_daughter[n+1][pos2] = A2n             
-#             else:
-#                 self.A_leftMother[n+1][pos1]   = A1[pos1]
-#                 self.A_daughter[n+1][pos2] = A2[pos2]
-#     
-#     def fsolveConnectionSys0(self,x,args):
-#         """
-#         Residual Function with equations to solve for at the Link
-#         Using constant areas, i.e. initial areas
-#         
-#         Input:     x = array [P1,Q1,Q2,P2]
-#                    args = args with local variables
-#         Returns array with residuals 
-#         """
-#         P1,Q1,Q2,P2 = x
-#         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
-#         
-#         du1[0] = P1 - P1o 
-#         du1[1] = Q1 - Q1o
-#         du2[0] = P2 - P2o
-#         du2[1] = Q2 - Q2o
-#         
-#         
-#         self.systemEquations[0].updateLARL([P1],[Q1],[A1],idArray=[pos1],update='L') 
-#         self.systemEquations[1].updateLARL([P2],[Q2],[A2],idArray=[pos2],update='L') 
-#         
-#         #calculate residuals
-#         res1 = vz1*Q1+vz2*Q2
-#         res2 = vz1*P1+vz1*rho1*0.5*(Q1/A1)**2.+vz2*P2+vz2*rho2*0.5*(Q2/A2)**2.
-#         res3 = np.dot(self.systemEquations[0].L[pos1][pos1+1],du1) - domega1
-#         res4 = np.dot(self.systemEquations[1].L[pos2][pos2+1],du2) - domega2
-#         
-#         return [res3,res2,res1,res4]
-#     
-#     def jacobiMatrixSys0(self,x,args):
-#         """
-#         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
-#         Using constant areas, i.e. initial areas
-#         """
-#         P1,Q1,Q2,P2 = x
-#         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
-#         
-#         return np.array([[L1[0], L1[1]            , 0                , 0    ],
-#                          [vz1  , vz1*rho1*Q1/A1**2, vz2*rho2*Q2/A2**2, vz2  ],
-#                          [0    , vz1              , vz2              , 0    ],
-#                          [0    , 0                , L2[1]            , L2[0]]])
-#          
-#         
-#     def fsolveConnectionSys1(self,x,args):
-#         """
-#         Residual Function with equations to solve for at the Link
-#         Using recalculated areas depending on the new pressure values
-#         
-#         Input:     x = array [P1,Q1,Q2,P2]
-#                    args = args with local variables
-#         Returns array with residuals 
-#         """
-#         P1,Q1,Q2,P2 = x
-#         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
-#                         
-#         A1 = self.A_func[pos1]([P1],pos1)
-#         A2 = self.A_func[pos2]([P2],pos2)
-#         
-#         du1[0] = P1 - P1o 
-#         du1[1] = Q1 - Q1o
-#         du2[0] = P2 - P2o
-#         du2[1] = Q2 - Q2o 
-#         
-#         if self.updateL == True:      
-#             self.systemEquations[0].updateLARL([P1],[Q1],[A1],idArray=[pos1],update='L')
-#             self.systemEquations[1].updateLARL([P2],[Q2],[A2],idArray=[pos2],update='L')
-#         
-#         
-#         #calculate residuals
-#         res1 = vz1*Q1+vz2*Q2
-#         
-#         if self.nonLin == True:
-#             # non linear pressure equation
-#             res2 = vz1*P1+vz1*rho1*0.5*(Q1/A1)**2.+vz2*P2+vz2*rho2*0.5*(Q2/A2)**2.
-#         else:
-#             # linear pressure equation p1 - p2 = 0
-#             res2 = vz1*P1+vz2*P2
-#         
-#         res3 = np.dot(self.systemEquations[0].L[pos1][pos1+1],du1) - domega1
-#         res4 = np.dot(self.systemEquations[1].L[pos2][pos2+1],du2) - domega2
-#         
-#         return [res3,res2,res1,res4]
-#  
-#     def jacobiMatrixSys1(self,x, args):
-#         """
-#         Returns the jabcobi matrix, bifurcation-functions and x; J = dF/dx
-#         Using recalculated areas depending on the new pressure values
-#         """
-#         P1,Q1,Q2,P2 = x
-#         A1,A2,pos1,pos2,vz1,vz2,P1o,Q1o,P2o,Q2o,domega1,domega2,rho1,rho2,L1,L2,du1,du2 = args
-#         
-#         
-#         A1 = self.A_func[pos1]([P1],pos1)
-#         A2 = self.A_func[pos2]([P2],pos2)
-#         
-#         if self.nonLin == True:
-#             # J non linear pressure equ.
-#             J =    np.array([[L1[0], L1[1]            , 0                , 0    ],
-#                              [vz1  , vz1*rho1*Q1/A1**2, vz2*rho2*Q2/A2**2, vz2  ],
-#                              [0    , vz1              , vz2              , 0    ],
-#                              [0    , 0                , L2[1]            , L2[0]]])
-#         else:
-#             # J linear pressure equation
-#             J =    np.array([[L1[0], L1[1]            , 0                , 0    ],
-#                              [vz1  , 0                , 0                , vz2  ],
-#                              [0    , vz1              , vz2              , 0    ],
-#                              [0    , 0                , L2[1]            , L2[0]]])
-#             
-#         return J
-#     
-#     
-#    def fsolveMultibranchingSys0(self,x):
-#        
-#        #self.count = self.count+1
-#        
-#        out = [0 for i in x]
-#        #outt = ['' for i in x]
-#        for i in range(self.number):
-#           
-#            Ai = self.A[i]
-#            out[0]=out[0] + self.vz[i]*x[i*2+1]
-#            if i != 0: out[i]= (x[0]+(self.rho[0]/2.)*(x[1]/self.A[0])**2.) - (x[i*2]+(self.rho[i]/2.)*(x[i*2+1]/Ai)**2.)
-#                                 
-#            du_t = np.array([x[i*2],x[i*2+1]])-np.array([self.P[i],self.Q[i]])  
-#            self.systemEquations[i].updateLARL([x[i*2]],[x[i*2+1]],[Ai],idArray=[self.positions[i]],update='L') 
-#            
-#            out[i+self.number]= np.dot(self.systemEquations[i].L[self.positions[i]][self.positions[i]+1],du_t)/self.domega[i] - 1
-#            
-#            #outt[0] = outt[0]+str('mass eq'+str(i)+'+')
-#            #if i != 0: outt[i]= 'P0 - P'+str(i)
-#            #outt[i+self.number] = 'domega '+str(i)
-#            
-#        #if self.count == 8:print outt
-#        return out
-    
+   
     
 class Bifurcation():
     
@@ -827,7 +578,7 @@ class Bifurcation():
         self.positions.append(0)
         self.names.append(leftDaughter.Id)
         self.A_func.append(leftDaughter.A_nID)
-#        self.vz.append(1)
+        
         #SolutionVariables
         self.P_leftDaughter = leftDaughter.Psol
         self.Q_leftDaughter = leftDaughter.Qsol
@@ -840,27 +591,19 @@ class Bifurcation():
         self.positions.append(0)
         self.names.append(rightDaughter.Id)
         self.A_func.append(rightDaughter.A_nID)
-#        self.vz.append(1)
+        
         #SolutionVariables
         self.P_rightDaughter = rightDaughter.Psol
         self.Q_rightDaughter = rightDaughter.Qsol
         self.A_rightDaughter = rightDaughter.Asol
         
-#         if   rigidAreas == False:
-#             self.fsolveFunction = self.fsolveBifurcationSys0
-#             self.jacobiMatrix = self.jacobiMatrixBifSys0
-#         elif rigidAreas == False:
-#             self.fsolveFunction = self.fsolveBifurcationSys1
-#             self.jacobiMatrix = self.jacobiMatrixBifSys1
-#         else: print("ERROR classConnections: EquSys not properly defined!";exit())
-
         self.rigidAreas = rigidAreas
         solvingScheme = "NonLinear"
         # Define the call function depending on the solving Scheme
         if solvingScheme == "Linear": 
-            self.__call__ = self.callLinear
+            self._callfcn = self.callLinear
         elif solvingScheme == "NonLinear":
-            self.__call__ = self.callNonLinear
+            self._callfcn = self.callNonLinear
         else:
             raise ImportError("Connections wrong solving scheme! {}".format(solvingScheme))
         
@@ -871,6 +614,9 @@ class Bifurcation():
         self.maxPError = 0
         self.sumPErrorCount = 0
         self.sumPErrorNonLinCount = 0
+    
+    def __call__(self):
+        return self._callfcn()
     
     def callLinear(self):
         """
@@ -1016,9 +762,6 @@ class Bifurcation():
         """        
         dt = self.dt
         n = self.currentMemoryIndex[0]
-        #if n == 1:
-            #print "using nonlinear bifurcation model"
-        #print "using nonlinear bifurcation model"
         pos1 = self.positions[0]
         pos2 = self.positions[1]
         pos3 = self.positions[2]
@@ -1598,10 +1341,10 @@ class Anastomosis():
         # Define the call function depending on the solving Scheme
         solvingScheme = "NonLinear"
         if solvingScheme == "Linear": 
-            self.__call__ = self.callLinear
+            self._callfcn = self.callLinear
         elif solvingScheme == "NonLinear":
             print("classconnection 1652: using nonlinear anastomosis model: {0}".format(self.name)) 
-            self.__call__ = self.callNonLinear
+            self._callfcn = self.callNonLinear
         else:
             raise ValueError("Connections; wrong solving scheme! {}".format(solvingScheme))
         
@@ -1612,6 +1355,9 @@ class Anastomosis():
         self.maxPError = 0
         self.sumPErrorCount = 0
         self.sumPErrorNonLinCount = 0
+
+    def __call__(self):
+        return self._callfcn()
     
     def callLinear(self):
         """

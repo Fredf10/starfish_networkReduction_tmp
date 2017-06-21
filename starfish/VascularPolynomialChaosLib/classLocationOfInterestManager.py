@@ -73,7 +73,7 @@ class LocationOfInterestManager(TestBaseClass):
         if self.evaluateSimulationTime == True:
             
             print("estimate simulation time of all simulations")
-            progressBar = cPB.ProgressBar(35, len(evaluationCaseFiles))
+            #progressBar = cPB.ProgressBar(35, len(evaluationCaseFiles))
             
             for batchData in evaluationCaseFiles:
                 networkName              = batchData['networkName']
@@ -98,7 +98,7 @@ class LocationOfInterestManager(TestBaseClass):
                 vascularNetwork.solutionDataFile.close()
                 del vascularNetwork
             
-                progressBar.progress()  
+                #progressBar.progress()  
             
             self.simulationTime = np.linspace(timeS, timeE, nPoints)
             # save the simulationTime
@@ -114,7 +114,7 @@ class LocationOfInterestManager(TestBaseClass):
         
         self.openQuantityOfInterestFile(preprocessedSolutionData)
         print("estimate solution data for quantities of interest")
-        progressBar = cPB.ProgressBar(35, len(evaluationCaseFiles))
+        #progressBar = cPB.ProgressBar(35, len(evaluationCaseFiles))
         
         # pass the data to the locationsOfInterests which will load the information needed
         for batchData in evaluationCaseFiles:
@@ -129,7 +129,7 @@ class LocationOfInterestManager(TestBaseClass):
             for locationOfInterest in self.locationsOfInterest.values():
                 locationOfInterest.preprocessSolutionData(vascularNetwork,self.simulationTime, self.sampleSize, simulationIndex)
         
-            progressBar.progress()    
+            #progressBar.progress()    
             
         # save hdf5 file
         

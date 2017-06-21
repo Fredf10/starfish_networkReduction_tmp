@@ -1,5 +1,6 @@
 from __future__ import print_function, absolute_import
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
+from builtins import range
 from builtins import input as input3
 import sys,os
 # set the path relative to THIS file not the executing file!
@@ -690,7 +691,7 @@ def main():
                         print("        [ {:3} ] - {}".format(index,dirName))
                     print("")
                     indexChoosen = None
-                    while  indexChoosen not in [str(i) for i in xrange(len(dirNamesTemplate))]:
+                    while  indexChoosen not in [str(i) for i in range(len(dirNamesTemplate))]:
                         indexChoosen =input3("     Insert index of network: ")
                                                    
                     templateNetworkName = dirNamesTemplate[int(indexChoosen)]

@@ -143,7 +143,7 @@ class UqsaCase(TestBaseClass):
             sampleSize = self.sampleManager.currentSampleSize
             
             print("Create evaluation case file list")
-            progressBar = cPB.ProgressBar(35, sampleSize)
+            #progressBar = cPB.ProgressBar(35, sampleSize)
             
             for simulationIndex in range(sampleSize):
                                         
@@ -166,7 +166,7 @@ class UqsaCase(TestBaseClass):
                 
                 self.evaluationCaseFiles.append(caseFileDict1)
             
-                progressBar.progress() 
+                #progressBar.progress() 
             
     def getSimulationBatchFileList(self):
         '''

@@ -319,7 +319,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        progressBar = cPB.ProgressBar(35, nTimePoints)
+        #progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in range(nTimePoints):
@@ -369,7 +369,7 @@ class UqsaMethodPolynomialChaosDepDirLR(TestBaseClass):
             V[j]   = cp.Var(poly, dist)
             
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -452,7 +452,7 @@ class UqsaMethodPolynomialChaosDepDirLRorder(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        progressBar = cPB.ProgressBar(35, nTimePoints)
+        #progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in range(nTimePoints):
@@ -509,7 +509,7 @@ class UqsaMethodPolynomialChaosDepDirLRorder(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -591,7 +591,7 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        progressBar = cPB.ProgressBar(35, nTimePoints)
+        #progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in range(nTimePoints):
@@ -651,7 +651,7 @@ class UqsaMethodPolynomialChaosDepDirFLR(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -733,7 +733,7 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        progressBar = cPB.ProgressBar(35, nTimePoints)
+        #progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in range(nTimePoints):
@@ -772,7 +772,7 @@ class UqsaMethodPolynomialChaosDepDirFL(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -854,7 +854,7 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        progressBar = cPB.ProgressBar(35, nTimePoints)
+        #progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in range(nTimePoints):
@@ -896,7 +896,7 @@ class UqsaMethodPolynomialChaosDepDirFR(TestBaseClass):
             V[j]  = cp.Var(poly, dist)
             
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -978,7 +978,7 @@ class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
         top = cp.fit_regression(v, samples, peakTime)
         
         # loading bar
-        progressBar = cPB.ProgressBar(35, nTimePoints)
+        #progressBar = cPB.ProgressBar(35, nTimePoints)
                     
         ## SPLIT WITH LEFT AND RIGHT POLYNOMIALS
         for j in range(nTimePoints):
@@ -1013,7 +1013,7 @@ class UqsaMethodPolynomialChaosDepDirQL(TestBaseClass):
             E[j]  = cp.E(poly, dist)
             V[j]  = cp.Var(poly, dist)
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}
@@ -1130,7 +1130,7 @@ class UqsaMethodPolynomialChaosDepDirQR(TestBaseClass):
             E[j]  = cp.E(poly, dist)
             V[j]  = cp.Var(poly, dist)
             
-            progressBar.progress()
+            #progressBar.progress()
             
         # collect data for return
         statsDict = {}

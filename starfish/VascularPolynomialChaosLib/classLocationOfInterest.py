@@ -448,7 +448,7 @@ class LocationOfInterest(TestBaseClass):
 #                     maxTimeMatched = np.empty((sampleSize,xN))
 #                     
 #                     
-#                     for i in xrange(sampleSize): 
+#                     for i in range(sampleSize): 
 #                         maxTimeMatched[i] = np.interp(xInt, trajectoryData[i],maxTimes[i])
 #                     quantityObject.trajectoryData = xInt
 #                     quantityObject.data = maxTimeMatched
@@ -476,7 +476,7 @@ class LocationOfInterest(TestBaseClass):
 #                     
 #                     spacePointMatched = np.empty((sampleSize,tN))
 #                     
-#                     for i in xrange(sampleSize): 
+#                     for i in range(sampleSize): 
 #                         spacePointMatched[i] = np.interp(tInt, maxTimes[i], trajectoryData[i])
 #                         
 #                     quantityObject.trajectoryData = tInt
@@ -492,7 +492,7 @@ class LocationOfInterest(TestBaseClass):
 #                 
 #             else:
 #                 # find peaks                
-#                 for dataOfSpacePoint in xrange(len(data)):
+#                 for dataOfSpacePoint in range(len(data)):
 #                     self.extremaFinderFunction(dataOfSpacePoint, quantityName, sampleSize, simulationTime, searchPointOfInflection = False)
 #                       
               

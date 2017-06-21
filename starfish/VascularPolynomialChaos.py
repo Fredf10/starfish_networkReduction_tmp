@@ -8,6 +8,7 @@
 
 from __future__ import print_function, absolute_import
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
+from builtins import range
 from builtins import input as input3
 import os
 
@@ -88,7 +89,7 @@ def run_uqsa_case(uqsaCase, vascularNetwork):
     # 5.2 save/create simulation xml files
     if uqsaCase.createEvaluationXmlFiles == True:
         
-        for sampleIndex in xrange(uqsaCase.sampleManager.currentSampleSize):
+        for sampleIndex in range(uqsaCase.sampleManager.currentSampleSize):
             # update network with current evaluation number
             # get sample
             sample = uqsaCase.sampleManager.getSample(sampleIndex)            

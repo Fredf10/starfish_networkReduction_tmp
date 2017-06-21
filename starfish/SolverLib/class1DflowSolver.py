@@ -533,8 +533,9 @@ class FlowSolver(cSBO.StarfishBaseObject):
             self.numericalObjects.append(self.fields[vesselId])
 
             ## try add Connection
+            # TODO: connections belong to the left mother
             try: self.numericalObjects.append(self.connections[vesselId])
-            except Exception: self.warning("old except: pass #2 clause in c1dFlowSolv.initializeNumObjList", oldExceptPass= True)
+            except KeyError: pass
 
             ## try add distal BC
             try:
@@ -648,7 +649,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         logger.info('%-20s %2.1f' % ('Q init (ml s-1)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Flow']*1.e6))
         logger.info('%-20s %2.1f' % ('P init (mmHg)',self.vascularNetwork.initialValues[self.vascularNetwork.root]['Pressure'][0]/133.32))
         try: logger.info('%-20s %2.1f' % ('R_cum (mmHg s ml-1)',self.vascularNetwork.Rcum[self.vascularNetwork.root]/133.32*1.e-6))
-        except Exception: self.warning("old except: pass clause in c1dFlowSolv.initOutput", oldExceptPass= True)
+        except KeyError: pass # TODO: Rcum is not calculated for all initialization methods
         logger.info('%-20s %2.1f' % ('CFL init max',self.vascularNetwork.CFL))
         logger.info('%-20s %2.1f' % ('dz min (mm)',self.output['dz_min']*1.0E3))
         logger.info('%-20s %2.1f' % ('c min (m/s)',self.output['c_min']))
@@ -687,7 +688,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-        progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
+        #progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -698,12 +699,13 @@ class FlowSolver(cSBO.StarfishBaseObject):
                 self.currentTimeStep[0] = n
                 self.currentMemoryIndex[0] = n - self.memoryOffset[0]
                 
-                progressBar.progress()
+                #progressBar.progress()
                 
                 for numericalObject in self.numericalObjects:
                     try:
                         numericalObject()
                     except Exception:
+                        # progressBar.clean_up()
                         # Save the Solution data for debugging
                         logger.critical("Exception caught in  {} by MacCormack_Field attempting to save solution data file...".format(numericalObject))
                         self.vascularNetwork.runtimeMemoryManager.flushSolutionMemory()
@@ -833,7 +835,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         """
         if self.quiet == False:
             logger.info("Solving system ...")
-        progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
+        #progressBar = cPB.ProgressBar(35,self.nTSteps, suppressPrint = self.quiet)
 
         reflectionCoefficientCount = 0
         maxRef = 0
@@ -870,7 +872,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
                         raise # TODO: why does self.exception() not force the program to quit?
                         # self.exception()
                 
-                progressBar.progress()
+                #progressBar.progress()
                 
         ## to be concentrated with original cycle mode !!
         else:

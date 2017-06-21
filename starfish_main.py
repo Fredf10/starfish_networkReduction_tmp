@@ -37,10 +37,10 @@
 from __future__ import print_function, absolute_import
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
-import Simulator as simulator
+import starfish.Simulator as simulator
 import starfish.Visualisation as visualisationToolBox
 import starfish.vnc  as vnc
-import VascularPolynomialChaos as uqsaToolBox
+import starfish.VascularPolynomialChaos as uqsaToolBox
 
 def main():
         

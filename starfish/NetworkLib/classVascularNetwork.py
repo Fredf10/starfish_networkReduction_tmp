@@ -255,13 +255,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             try:
                 self.update(updateDict[dictName])
             except Exception:
-                self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
+                pass #self.warning("old except: pass clause #1 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         for dictName in ['globalFluid', 'communicators', 'externalStimuli']:
             try:
                 self.getVariableValue(dictName).update(updateDict[dictName])
             except Exception:
-                self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
+                pass #self.warning("old except: pass clause #2 in classVascularNetwork.updateNetwork", oldExceptPass= True)
 
         if 'vesselData' in updateDict:
             for vesselId, vesselData in iteritems((updateDict['vesselData'])):
@@ -380,7 +380,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         for Id, bcs in iteritems(self.boundaryConditions):
             for bc in bcs:
                 try: bc.initialize({})
-                except Exception: self.warning("old except: pass clause in VascularNetwork.initialize", oldExceptPass= True)
+                except Exception: pass #self.warning("old except: pass clause in VascularNetwork.initialize", oldExceptPass= True)
 
         windkesselExist = False
         for Id, bcs in iteritems(self.boundaryConditions):

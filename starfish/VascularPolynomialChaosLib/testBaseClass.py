@@ -4,7 +4,7 @@ from builtins import input as input3
 import os,sys
 from starfish.UtilityLib.constants import unitsDictSI as unitsDict
 from starfish.UtilityLib.moduleHelperFunctions import getGitHash
-
+STR_SEP = ":"
 try:
     from lxml import etree
 except:
@@ -554,6 +554,7 @@ class TestBaseClass(object):
                 # check for shape 
                 if np.shape(variableData)== ():
                     loadedData[variableName] = variableData[()]
+
                 else:
                     loadedData[variableName] = variableData[:]
             
@@ -585,7 +586,12 @@ class TestBaseClass(object):
             if variableValue is not None: 
                 if variableName in self.hdf5Group:
                     del self.hdf5Group[variableName]
+                
+                dt=None 
+                if isinstance(variableValue, (str, list, tuple)): #TODO what else to check for?
+                    variableValue = np.string_(variableValue)
                 self.hdf5Group.create_dataset(variableName, data=variableValue)
+                 
             
         # functionality
         for dictName in self.objectDictsHdf5Memory:

@@ -3,6 +3,8 @@ from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, v
 from builtins import input as input3
 import sys,os
 import numpy as np
+import logging
+logger = logging.getLogger('starfish')
 
 class Field():
     
