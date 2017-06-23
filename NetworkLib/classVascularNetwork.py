@@ -1,5 +1,6 @@
 import sys
 import os
+from sympy.series.tests.test_order import test_eval
 # set the path relative to THIS file not the executing file!
 cur = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur + '/../')
@@ -9,6 +10,8 @@ import UtilityLib.classStarfishBaseObject as cSBO
 import classVessel as cVes
 import classBaroreceptor as cBRX
 import classVenousPool as classVenousPool
+
+import classWKinitializers as cWKinit
 
 import UtilityLib.moduleFilePathHandler as mFPH
 
@@ -1621,9 +1624,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.initialValues = initialValuesWithGravity.copy()
         
         from copy import deepcopy
-        self.initialValues['MeanValuesStatic'] = deepcopy(initialValuesWithGravity)
+        #self.initialValues['MeanValuesStatic'] = deepcopy(initialValuesWithGravity)
         #print self.initialValues['MeanValuesStatic'][1]['Pressure'][0]
-        self.initialValues['MeanValues'] = self.adjustForTotalPressure(initialValues_prev_it)
+        self.initialValues['MeanValues'] = deepcopy(initialValuesWithGravity) #self.adjustForTotalPressure(initialValues_prev_it)
         #print "\n", self.initialValues['MeanValuesStatic'][1]['Pressure'][0]
         #print self.name
         
@@ -1634,15 +1637,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
     
     
     def adjustForTotalPressure(self, initialValues):
-        
-        toVisit = []
-        leftDaughter = self.vessels[self.root].leftDaughter
-        rightDaughter = self.vessels[self.root].rightDaughter
-        
-        if leftDaughter != None:
-            toVisit.append(leftDaughter)
-        if rightDaughter != None:
-            toVisit.append(rightDaughter)
         
         idToprint = 1
 #         print initialValues[self.root]['Flow']
@@ -1837,6 +1831,127 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         #pickle.dump(initialValues_new, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/initialValues_new.p", "wb"))
         
         return initialValues_new
+    
+    
+    def calculateInitialValusWK(self, lumpedValues=None, nCycles=4.):
+        initialValues = {}
+        inflowBoundaryCondition = None
+        for bc in self.boundaryConditions[self.root]:
+            if bc.type == 1:
+                inflowBoundaryCondition = bc
+        
+        inflowCurve, time, period = inflowBoundaryCondition.getInflowCurve(N=400, nCycles=nCycles)
+                
+        if lumpedValues==None:
+            c_in, c_out = self.vessels[self.root].calcVesselWavespeed_in_out()
+        else:
+            P = lumpedValues[self.root]['Pressure']
+            c_in, c_out = self.vessels[self.root].calcVesselWavespeed_in_out(P=P)
+        c_avg = 0.5*(c_in + c_out)
+        l = self.vessels[self.root].length
+        dt = l/c_avg
+        lumpedValues[self.root]['PulseArrivalTime'] = [0, dt]
+        toVisit = []
+        leftDaughter = self.vessels[self.root].leftDaughter
+        rightDaughter = self.vessels[self.root].rightDaughter
+        
+            
+        Qm_root = lumpedValues[self.root]['Flow'][0]
+        Pv = 5*133.32
+        P0 = 10665
+        Wk = cWKinit.Wk3(time, Pv, nCycles=nCycles)
+        
+        R1, R_tot, C = lumpedValues[self.root]['R1'][0], lumpedValues[self.root]['R'][0], lumpedValues[self.root]['Cw'][0]
+        R2 = R_tot - R1
+        
+        
+        Wk.updateParameters(inflowCurve, P0, R1, C, R2, vesselId=self.root)
+        t_eval = period*(nCycles) - 0.0001
+        P_init_in, Q_init_in = Wk.solveAll(t_eval=t_eval)
+        
+
+        R1, R_tot, C = lumpedValues[self.root]['R1'][-1], lumpedValues[self.root]['R'][-1], lumpedValues[self.root]['Cw'][-1]
+        R2 = R_tot - R1
+        
+        
+        Wk.updateParameters(inflowCurve, P0, R1, C, R2, vesselId=self.root)
+        t_eval = period*(nCycles) - dt
+        P_init_out, Q_init_out = Wk.solveAll(t_eval=t_eval)
+        initialValues[self.root] = {'Pressure':[P_init_in, P_init_out], 'Flow':[Q_init_in, Q_init_out]}
+        
+        initialValues[self.root]['tWK'] = Wk.time.copy() + dt
+        initialValues[self.root]['PWK'] = Wk.Psol.copy()
+        initialValues[self.root]['QWK'] = Wk.Q_array.copy()
+        initialValues[self.root]['WK_name'] = Wk.name
+        if leftDaughter != None:
+            toVisit.append(leftDaughter)
+            Qm = lumpedValues[leftDaughter]['Flow'][0]
+            Qscale = Qm/Qm_root
+            initialValues[leftDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
+        if rightDaughter != None:
+            toVisit.append(rightDaughter)
+            Qm = lumpedValues[rightDaughter]['Flow'][0]
+            Qscale = Qm/Qm_root
+            initialValues[rightDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
+        
+        
+        # traverese from root to periphery to ajust for total pressure
+        while len(toVisit) > 0:
+            #print "first loop"
+            for vesselId in toVisit:
+                
+                leftMother = self.vessels[vesselId].leftMother
+                
+                pulseArriveInlet = lumpedValues[leftMother]['PulseArrivalTime'][-1]
+                if lumpedValues==None:
+                    c_in, c_out = self.vessels[vesselId].calcVesselWavespeed_in_out()
+                else:
+                    P = lumpedValues[vesselId]['Pressure']
+                    c_in, c_out = self.vessels[vesselId].calcVesselWavespeed_in_out(P=P)
+                c_avg = 0.5*(c_in + c_out)
+                l = self.vessels[vesselId].length
+                dt = l/c_avg
+                lumpedValues[vesselId]['PulseArrivalTime'] = [pulseArriveInlet, pulseArriveInlet + dt]
+                
+                
+                leftDaughter = self.vessels[vesselId].leftDaughter
+                rightDaughter = self.vessels[vesselId].rightDaughter
+                
+                
+                Qm = lumpedValues[vesselId]['Flow'][0]
+                Qscale = Qm/Qm_root
+        
+                R1, R_tot, C = lumpedValues[vesselId]['R1'][-1], lumpedValues[vesselId]['R'][-1], lumpedValues[vesselId]['Cw'][-1]
+                R2 = R_tot - R1
+                
+                
+                Wk.updateParameters(inflowCurve*Qscale, P0, R1, C, R2, vesselId=vesselId)
+                t_eval = period*(nCycles) - pulseArriveInlet - dt
+                P_init_out, Q_init_out = Wk.solveAll(t_eval=t_eval)
+                
+                initialValues[vesselId]['Pressure'][-1] = P_init_out
+                initialValues[vesselId]['Flow'][-1] = Q_init_out
+                
+                initialValues[vesselId]['tWK'] = Wk.time.copy() + pulseArriveInlet + dt
+                initialValues[vesselId]['PWK'] = Wk.Psol.copy()
+                initialValues[vesselId]['QWK'] = Wk.Q_array.copy()
+                initialValues[vesselId]['WK_name'] = Wk.name
+                
+                if leftDaughter != None:
+                    toVisit.append(leftDaughter)
+                    Qmld = lumpedValues[leftDaughter]['Flow'][0]
+                    Qscale = Qmld/Qm
+                    initialValues[leftDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
+                if rightDaughter != None:
+                    toVisit.append(rightDaughter)
+                    Qmrd = lumpedValues[rightDaughter]['Flow'][0]
+                    Qscale = Qmrd/Qm
+                    initialValues[rightDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
+                
+                toVisit.remove(vesselId)
+                
+        self.initialValues = initialValues
+                
     
     def calcReflectionJunction(self, lumpedValues=None):
         
@@ -2208,7 +2323,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 print self.dt
                 #inflowBoundaryCondition.findMeanFlow()
                 meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(quiet=self.quiet)
-                exit()
+                #exit()
                 self.initialisationPhaseExist = True
 
             except Exception:
@@ -2216,6 +2331,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
             self.calculateInitialValuesLinearSystem(meanInflow)
+            from copy import deepcopy
+            self.lumpedValues = deepcopy(self.initialValues)
             
             return
 
@@ -2232,31 +2349,33 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
             
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-            self.calcReflectionJunction()
+            #self.calcReflectionJunction()
             self.calculateInitialValuesLinearSystem(meanInflow)
             from copy import deepcopy
             self.lumpedValues = deepcopy(self.initialValues)
             self.calcComplianceAndInertance(self.lumpedValues, weightOnlyPeripheral=True)
-            self.calcComplianceAndInertance(self.lumpedValues["MeanValuesStatic"], state="MeanValues", weightOnlyPeripheral=True)
+            #self.calcComplianceAndInertance(self.lumpedValues["MeanValuesStatic"], state="MeanValues", weightOnlyPeripheral=True)
             self.calcComplianceAndInertance(self.lumpedValues["MeanValues"], state="MeanValues", weightOnlyPeripheral=True)
 
-            import pickle
-            SystolicDiastolicPressure = pickle.load(open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/systolicDiastolicPressures.p", 'rb'))
-            self.lumpedValues['Systolic'] = SystolicDiastolicPressure['Systolic']
-            self.lumpedValues['Diastolic'] = SystolicDiastolicPressure['Diastolic']
+            #import pickle
+            #SystolicDiastolicPressure = pickle.load(open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/systolicDiastolicPressures.p", 'rb'))
+            #self.lumpedValues['Systolic'] = SystolicDiastolicPressure['Systolic']
+            #self.lumpedValues['Diastolic'] = SystolicDiastolicPressure['Diastolic']
 
-            self.calcComplianceAndInertance(self.lumpedValues['Systolic'], state="MeanValues", weightOnlyPeripheral=True)
-            self.calcComplianceAndInertance(self.lumpedValues['Diastolic'], state="MeanValues", weightOnlyPeripheral=True)
+            #self.calcComplianceAndInertance(self.lumpedValues['Systolic'], state="MeanValues", weightOnlyPeripheral=True)
+            #self.calcComplianceAndInertance(self.lumpedValues['Diastolic'], state="MeanValues", weightOnlyPeripheral=True)
             
             #self.lumpedValues = deepcopy(self.initialValues)
             #print "\n"
             #self.calcReflectionJunction(lumpedValues=self.lumpedValues["MeanValues"])
-            #import pickle
+            import pickle
             #optDict = pickle.load(open('/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55Model/ReducedNetworks/ReductionCases/OptimizationDicts/optAllVesselsWeighted_tot_constant_average.p', 'rb')) 
             #self.calcComplianceAndInertance(self.lumpedValues["MeanValues"], state="MeanValues", useOptR1=True, optDict=optDict)
             
-            #pickle.dump(self.lumpedValues, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/lumpedValues_all_WeightOnlyDistal.p", "wb"))
+            #pickle.dump(self.lumpedValues, open("/home/fredrik/Documents/git/NTNU_KCL/apps/Windkessel/lumpedValues96.p", "wb"))
+            #self.calculateInitialValusWK(lumpedValues=self.lumpedValues["MeanValues"], nCycles=6)
             self.calculateInitialValuesFromSolution()
+            #self.lumpedValues = self.initialValues.copy()
             
             return
 
@@ -2268,7 +2387,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             #self.lumpedValues = self.initialValues
             #self.calcComplianceAndInertance()
+            try:
+                print "skipping this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! line 2391 classVascularNetwork"
+                #self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+                #self.calculateInitialValuesLinearSystem(meanInflowlumped)
+                #from copy import deepcopy
+                #self.lumpedValues = deepcopy(self.initialValues)
 
+            except Exception:
+                self.exception("classVascularNetwork (ConstantPressure init): Unable to estimate lumpedValues")
             constantPressure = self.initMeanPressure
             try:
                 constantPressure = self.initMeanPressure

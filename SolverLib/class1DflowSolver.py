@@ -228,7 +228,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         # Set time variables
         self.dt = min(dt_min)
-        self.dt = 2*2e-4 #5e-5 #2.5e-4#z
+        self.dt = 7.5e-5 #4e-4 #2*2e-4 #5e-5 #2.5e-4#z
         if self.quiet == False:
             print "Warning, line 198 1dFlowsSolver; setting dt: ", self.dt
         # calculate time steps

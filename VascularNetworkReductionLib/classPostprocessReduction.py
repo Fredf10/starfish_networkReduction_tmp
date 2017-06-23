@@ -38,8 +38,9 @@ class PostprocessReduction:
         networkXmlFileLoad       = batchData['networkXmlFileLoad']
         networkXmlFileSave       = batchData['networkXmlFileSave']
         pathSolutionDataFilename = batchData['pathSolutionDataFilename']
+        pathSolutionDataFilenameNew = batchData['pathSolutionDataFilenameNew']
         
-        self.processVascularNetwork(networkName, dataNumber, networkXmlFileSave, pathSolutionDataFilename)
+        self.processVascularNetwork(networkName, dataNumber, networkXmlFileSave, pathSolutionDataFilename, pathSolutionDataFilenameNew)
         
 
     def postprocessMulti(self, batchDataList, numberWorkers = None, quiet = False):
@@ -65,7 +66,7 @@ class PostprocessReduction:
         pool.join()
 
         
-    def processVascularNetwork(self, networkName, dataNumber, networkXmlFile, pathSolutionDataFilename):
+    def processVascularNetwork(self, networkName, dataNumber, networkXmlFile, pathSolutionDataFilename, pathSolutionDataFilenameNew):
         
         vascularNetwork = mXML.loadNetworkFromXML(networkName, dataNumber = dataNumber, 
                                                   networkXmlFile = networkXmlFile, pathSolutionDataFilename = pathSolutionDataFilename)
@@ -77,7 +78,7 @@ class PostprocessReduction:
             pathSolutionDataFilename = mFPHVNR.getFilePath('solutionFile', self.name, self.dataNumber, 'read')
         # TODO, what if this fails? do we know?
         solutionDataFile = h5py.File(pathSolutionDataFilename, "r")
-        pathSolutionDataFilenameNew = pathSolutionDataFilename + "tmp"
+        #pathSolutionDataFilenameNew = pathSolutionDataFilename + "tmp"
         newSolutionDataFile = h5py.File(pathSolutionDataFilenameNew, "w")
 
         for groupName, group in solutionDataFile.iteritems():
@@ -95,8 +96,8 @@ class PostprocessReduction:
         
         solutionDataFile.close()
         newSolutionDataFile.close()
-        os.remove(pathSolutionDataFilename)
-        os.rename(pathSolutionDataFilenameNew, pathSolutionDataFilename)
+        #os.remove(pathSolutionDataFilename)
+        #os.rename(pathSolutionDataFilenameNew, pathSolutionDataFilename)
         
         del vascularNetwork
         

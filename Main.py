@@ -20,6 +20,7 @@ import SolverLib.class1DflowSolver as c1DFlowSolv
 import UtilityLib.moduleXML as mXML
 import UtilityLib.moduleStartUp as mStartUp #import parseOptions
 import UtilityLib.moduleFilePathHandler as mFPH
+import UtilityLib.moduleLogFile as mLOG
 
 import pprint
 import matplotlib.pyplot as plt
@@ -96,7 +97,8 @@ def main():
     
     vascularNetwork.saveSolutionData()
     mXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
-    
+    mLog2 = mLOG.NetworkLogFile(vascularNetwork, dataNumber=dataNumber, dt=flowSolver.dt, CpuTimeInit=[minutesInit, secsInit], CpuTimeSolve=[minutesSolve, secsSolve])
+    mLog2.writeNetworkLogfile(compileLogFile=True, deleteAuxiliary=True)
     
     del flowSolver
     gc.collect()

@@ -68,15 +68,19 @@ def runSingleBatchSimulation(batchData):
     vascularNetworkTemp.saveSolutionData()
     moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFileSave)
     del flowSolver
+    del vascularNetworkTemp
+    t_tmp = time.time()
+    print "###### starting to postprocess"
     cVnRpost = cVNRpostProcess.PostprocessReduction()
     cVnRpost.postprocessSingle(batchData)
+    print "postprocessing time: ", time.time() - t_tmp
     gc.collect()
     timeSolverSolve = time.clock()-timeStart
     minutesSolve = int(timeSolverSolve/60.)
     secsSolve = timeSolverSolve-minutesSolve*60.
     return minutesSolve,secsSolve
 
-def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False, postProcess=True, CPUTimeFile=None):
+def runBatchAsMultiprocessing(batchDataList, numberWorkers=None, quiet = False, postProcess=True, CPUTimeFile=None):
     '''
     Run a set of simulations on one core without multiprocessing
     

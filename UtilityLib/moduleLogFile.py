@@ -48,7 +48,7 @@ class NetworkLogFile:
         self.timeSaveBegin = vascularNetwork.timeSaveBegin
         self.globalFluid = vascularNetwork.globalFluid
         self.dt = dt
-        print self.dt
+        #print self.dt
         self.CpuTimeInit = CpuTimeInit
         self.CpuTimeSolve = CpuTimeSolve
         self.venousPressure = vascularNetwork.venousPool.P[0]
@@ -71,6 +71,10 @@ class NetworkLogFile:
                 
             elif "% Fill total vlues here" in line:
                 self.writeTotalValues(fLogFile)
+            
+            elif "% Fill periodic values here" in line:
+                self.findPeriodicConvergenceValuesFromSolution()
+                self.writePeriodicConvergenceValues(fLogFile)
                 
             elif "% Fill model parameters here" in line:
                 self.writeModelParameters(fLogFile)
@@ -239,7 +243,7 @@ class NetworkLogFile:
         fLogFile.write('\n')
         fLogFile.write("min Nodes: & {0} ({1})".format(minNode, minNodeID))
         fLogFile.write('\n')
-
+    
     
     def writeTotalValues(self, fLogFile):
         root = self.vascularNetwork.root
@@ -289,7 +293,98 @@ class NetworkLogFile:
         fLogFile.write('\n')
         fLogFile.write(r"Total vessel Compliance ($ m^{3} \, s^{-1}$): &  " + str(C_vessels))
         fLogFile.write('\n')
+    
+    def writePeriodicConvergenceValues(self, fLogFile, roundTo=3):
+        
+        convergenceValues = self.convergenceValues
+        N = len(convergenceValues[self.vascularNetwork.root]['deltaP'])
+        
+        fLogFile.write(r'\begin{tabular}{')
+        for n in range(N + 1):
+            fLogFile.write('l')
+        fLogFile.write(r'}')
+        fLogFile.write('\n')
+        
+        fLogFile.write('$\Delta{P}_{sys}^1$')
+        fLogFile.write(r'    &    ')
+        for deltaP in convergenceValues[self.vascularNetwork.root]['deltaP']:
+            
+            deltaPround = round(deltaP/133.32, roundTo)
+            
+            if deltaPround > 1.0:
+                fLogFile.write(r"\textcolor{red}{" + str(deltaPround) + "}")
+            elif deltaPround > 0.1:
+                fLogFile.write(r"\textcolor{orange}{" + str(deltaPround) + "}")
+            else:
+                fLogFile.write(r"\textcolor{green}{" + str(deltaPround) + "}")
+            if deltaP != convergenceValues[1]['deltaP'][-1]:
+                fLogFile.write(r'    &    ')
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
+
+        fLogFile.write('$\Delta{P}_{sys}^{max}$')
+        fLogFile.write(r'    &    ')
+        for n in range(N):
+            deltaP_max = 0
+            for vesselId in self.treeTraverseList_sorted:
+                deltaP = convergenceValues[vesselId]['deltaP'][n]
                 
+                if deltaP > deltaP_max:
+                    deltaP_max = deltaP
+                    
+            deltaPround = round(deltaP_max/133.32, roundTo)
+            if deltaPround > 1.0:
+                fLogFile.write(r"\textcolor{red}{" + str(deltaPround) + "}")
+            elif deltaPround > 0.1:
+                fLogFile.write(r"\textcolor{orange}{" + str(deltaPround) + "}")
+            else:
+                fLogFile.write(r"\textcolor{green}{" + str(deltaPround) + "}")
+            if n != N - 1:
+                fLogFile.write(r'    &    ')
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+
+
+        fLogFile.write('$\epsilon{P}_{avg}^1$')
+        fLogFile.write(r'    &    ')
+        for epsilon in convergenceValues[self.vascularNetwork.root]['epsilonAvgP']:
+            
+            epsilonRound = round(100*epsilon, roundTo)
+            
+            if epsilonRound > 1.0:
+                fLogFile.write(r"\textcolor{red}{" + str(epsilonRound) + "}")
+            elif epsilonRound > 0.1:
+                fLogFile.write(r"\textcolor{orange}{" + str(epsilonRound) + "}")
+            else:
+                fLogFile.write(r"\textcolor{green}{" + str(epsilonRound) + "}")
+            if epsilon != convergenceValues[self.vascularNetwork.root]['epsilonAvgP'][-1]:
+                fLogFile.write(r'    &    ')
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
+
+        fLogFile.write('$\epsilon{P}_{avg}^{max}$')
+        fLogFile.write(r'    &    ')
+        for n in range(N):
+            epsilon_max = 0
+            for vesselId in self.treeTraverseList_sorted:
+                epsilon = convergenceValues[vesselId]['epsilonAvgP'][n]
+                
+                if epsilon > epsilon_max:
+                    epsilon_max =epsilon
+                    
+            epsilonRound = round(100*epsilon_max, roundTo)
+            if epsilonRound > 1.0:
+                fLogFile.write(r"\textcolor{red}{" + str(epsilonRound) + "}")
+            elif epsilonRound > 0.1:
+                fLogFile.write(r"\textcolor{orange}{" + str(epsilonRound) + "}")
+            else:
+                fLogFile.write(r"\textcolor{green}{" + str(epsilonRound) + "}")
+            if n != N - 1:
+                fLogFile.write(r'    &    ')
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
     def writeModelParameters(self, fLogFile):
         
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
@@ -390,17 +485,20 @@ class NetworkLogFile:
         root = self.vascularNetwork.root
         Q_root = lumpedValues[root]['Flow'][0]
         Q_root_avg = averageValues[root]['Qin']
+        meanValueSum = 0
+        varianceSum = 0
+        
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
-            [Pin, Pout] = lumpedValues[vesselId]['Pressure'] 
-            [Qin, Qout] = lumpedValues[vesselId]['Flow']
+            [Pin, Pout] = lumpedValues['MeanValues'][vesselId]['Pressure'] #['MeanValues']
+            [Qin, Qout] = lumpedValues['MeanValues'][vesselId]['Flow'] # ['MeanValues']
             R = Rcum[vesselId]
             
-            Qin_ml_s = round(Qin*1e6, 3)
-            Qin_perc = round(100*Qin/Q_root, 3)
-            Pin, Pout = round(Pin/133.32, 3), round(Pout/133.32, 3)
-            R = round(R*1e-9, 3)
+            Qin_ml_s_lump = round(Qin*1e6, 3)
+            Qin_perc_lump = round(100*Qin/Q_root, 3)
+            Pin_lump, Pout_lump = round(Pin/133.32, 3), round(Pout/133.32, 3)
+            R_lump = round(R*1e-9, 3)
             
-            tableLine = " {0} & {1} & {2} & {3} & {4} & {5} ".format(vesselId, Qin_ml_s, Qin_perc, Pin, Pout, R)
+           
             
             Pin, Pout = averageValues[vesselId]['Pin'], averageValues[vesselId]['Pout']
             Qin = averageValues[vesselId]['Qin']
@@ -411,6 +509,12 @@ class NetworkLogFile:
             Pin, Pout = round(Pin/133.32, 3), round(Pout/133.32, 3)
             R = round(R*1e-9, 3)
             
+            P_rel = 100*round(Pin_lump/Pin, 3)
+            
+            meanValueSum += P_rel
+            varianceSum += (P_rel - 100)**2
+            
+            tableLine = " {0} & {1} & {2} & {3} ({4}) & {5} & {6} ".format(vesselId, Qin_ml_s_lump, Qin_perc_lump, Pin_lump, P_rel, Pout_lump, R_lump)
             tableLine2 = "& {0} & {1} & {2} & {3} & {4} ".format(Qin_ml_s, Qin_perc, Pin, Pout, R)
             
             fLogFile.write(tableLine)
@@ -431,6 +535,14 @@ class NetworkLogFile:
                 spesificLines = [startNewtableLine1, startNewtableLine2, startNewtableLine3, startNewtableLine4, startNewtableLine5, startNewtableLine6]
                 
                 self.endAndStartTable(fLogFile, spesificLines, resizeTable=False)
+                
+            #import pickle
+            #lumpedValues['1DValues'] = averageValues.copy()
+            #a = lumpedValues['Diastolic']
+            #pickle.dump(lumpedValues, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/lumpedValues_all_WithStaticAnd1D_weightedCorrect.p", "wb"))
+        #print "meanValue: ", meanValueSum/len(self.treeTraverseList_sorted)
+        #print "standard deviation: ", np.sqrt(varianceSum/len(self.treeTraverseList_sorted))
+        #exit()
     
                 
     def endAndStartTable(self, fLogFile, spesificLines, resizeTable=False):
@@ -472,18 +584,22 @@ class NetworkLogFile:
             
             
             startQ  = hdf5File['vessels'][vesselName]['Qsol'][N:, 0]
-            #endQ =  hdf5File['vessels'][vesselName]['Qsol'][-N, -1]
+            endQ =  hdf5File['vessels'][vesselName]['Qsol'][N:, -1]
             
             Pin, Pout = self.findMean(time, startP), self.findMean(time, endP)
             Qin = self.findMean(time, startQ)
+            Qout = self.findMean(time, endQ)
             R = (Pin - self.vascularNetwork.venousPool.P[0])/Qin
             tmpValues['Pin'], tmpValues['Pout'] = Pin, Pout
             tmpValues['Qin'] = Qin
             tmpValues['R'] = R
+            tmpValues['Pressure'] = [Pin, Pout]
+            tmpValues['Flow'] = [Qin, Qout]
+            
             averageValues[vesselId] = tmpValues
         
         self.averageValues = averageValues
-        
+    
 
     def findNumericalValuesFromSolution(self):
         
@@ -500,6 +616,7 @@ class NetworkLogFile:
         print "starting to load solutiondata"
         print "averaging between t_start = {0} and t_end = {1}".format(time[0], time[-1])
         numericalValues = {}
+        SystolicDiastolicDict = {'Systolic':{}, 'Diastolic':{}}
         for vesselName in hdf5File['vessels'].keys():
             tmpValues = {}
             vesselId = vesselName.split(' - ')[-1]
@@ -536,18 +653,107 @@ class NetworkLogFile:
             tmpValues['CFLout']= endCFLmax
             
             numericalValues[vesselId] = tmpValues
+            SystolicDiastolicDict['Systolic'][vesselId] = {}
+            SystolicDiastolicDict['Diastolic'][vesselId] = {}
+            SystolicDiastolicDict['Systolic'][vesselId]['Pressure'] = [np.amax(startP), np.amax(endP)]
+            SystolicDiastolicDict['Diastolic'][vesselId]['Pressure'] = [np.amin(startP), np.amin(endP)]
+            
+            createFig = False
+            if createFig:
+                import matplotlib.pylab as plt
+                initialValues = self.vascularNetwork.initialValues
+                Wkname = initialValues[vesselId]['WK_name']
+                t_Wk = initialValues[vesselId]['tWK']
+                P_Wk = initialValues[vesselId]['PWK']
+                Q_Wk = initialValues[vesselId]['QWK']
+                t_num = hdf5File['VascularNetwork']['simulationTime'][:] - hdf5File['VascularNetwork']['simulationTime'][0]
+                P_num =hdf5File['vessels'][vesselName]['Psol'][:, -1]
+                Q_num =hdf5File['vessels'][vesselName]['Qsol'][:, -1]
+                fig, ax1 = plt.subplots()
+                ax1.plot(t_Wk, P_Wk/133.32, 'b')
+                ax1.plot(t_num, P_num/133.32, 'k--')
+                ax1.set_xlabel('time (s)')
+                # Make the y-axis label, ticks and tick labels match the line color.
+                ax1.set_ylabel('P', color='b')
+                
+                ax2 = ax1.twinx()
+                ax2.plot(t_Wk, 1e6*Q_Wk, 'b')
+                ax2.plot(t_num, 1e6*Q_num, 'k--')
+                ax2.set_ylabel('Q', color='r')
+                plt.tight_layout()
+                plt.savefig('/home/fredrik/starfish_working_directory/Full55ModelDev/fig/{0}_{1}.png'.format(Wkname, vesselId))
+                plt.close()
         
+            #import pickle
+            #pickle.dump(SystolicDiastolicDict, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/systolicDiastolicPressures.p", "wb"))
         self.numericalValues = numericalValues
-            
-            
-    def findMean(self, x, f):
+
+    def findPeriodicConvergenceValuesFromSolution(self):
         
+        hdf5File = h5py.File(self.solutionFile, 'r')
+        time = hdf5File['VascularNetwork']['simulationTime'][:] - hdf5File['VascularNetwork']['simulationTime'][0]
+        dt = time[1] - time[0]
+        root = self.vascularNetwork.root
+        freq = self.boundaryConditions[root][0].freq
+        period = 1./freq
+        N = int(round(period/dt))
+        
+        nCycles = int(round((time[-1] - time[0])/period))
+        convergenceValues = {}
+        for vesselName in hdf5File['vessels'].keys():
+            tmpValues = {}
+            vesselId = vesselName.split(' - ')[-1]
+            vesselId = int(vesselId)
+            maxValues = []
+            errorValues = []
+            P_prev = None
+            for n in range(nCycles):
+            
+                if vesselId == 1:
+                    print time[(n + 1)*N]
+                startP  = hdf5File['vessels'][vesselName]['Psol'][n*N:(n + 1)*N, 0]
+
+                maxValues.append(np.max(startP))
+                
+                if n > 0:
+                    e = self.calcEpsilonAvg(P_prev, startP, data_type='P')
+                    errorValues.append(e)
+                P_prev = startP
+
+            deltaP = np.abs(np.array(maxValues[1:]) - np.array(maxValues[:-1]))
+            
+            tmpValues['maxValues'] = maxValues
+            tmpValues['deltaP'] = deltaP
+            tmpValues['epsilonAvgP'] = errorValues
+            convergenceValues[vesselId] = tmpValues
+        
+        self.convergenceValues = convergenceValues
+            
+            
+    def findMean(self, x, f, splineInterpolate=False):
+        
+        if splineInterpolate:
+            from scipy import interpolate
+            N = len(x)*10
+            
+            tck = interpolate.splrep(x, f, s=0)
+            x = np.linspace(x[0], x[-1], N)
+            f = interpolate.splev(x, tck, der=0)
         F = simps(f, x)
         
         f_mean = F/(x[-1] - x[0])
         
         return f_mean
+    
+
+    def calcEpsilonAvg(self, refData, numData, data_type="P"):
         
+        if data_type == "P":
+            RMS = np.sum(np.abs((numData - refData)/refData))/len(refData)
+        elif data_type == "Q":
+            RMS = np.sum(np.abs((numData - refData)/np.amax(refData)))/len(refData)
+            
+        return RMS
         
 
 

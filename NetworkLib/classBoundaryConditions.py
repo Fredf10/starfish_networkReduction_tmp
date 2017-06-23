@@ -415,6 +415,23 @@ class BoundaryConditionType1(BoundaryCondition):
         self.initPhaseTimeSpan = 0
 
         return Q_mean, self.initPhaseTimeSpan
+    
+    def getInflowCurve(self, N=100, nCycles=2):
+
+        period = 1/self.freq
+        
+        time = np.linspace(0, period*nCycles, N + 1)
+        
+        dt = time[1] - time[0]
+
+        Q_array = np.array([0])
+        for n, t in enumerate(time[:-1]):
+            Q = self.calculateOneStep(n, dt)[1]
+            Q_array = np.append(Q_array, Q)
+        
+        
+        return Q_array, time, period
+        
 
     def findMeanFlowAndMeanTime(self, givenMeanFlow = None, quiet = False):
         """
@@ -525,7 +542,11 @@ class RampMean(BoundaryConditionType1):
     """
 
     def function1(self, t, t0, pulsNum):
-        return self.amp * pow(np.sin(np.pi * (t - self.Tpulse) / (1. / self.freq * 2.0)), 2.0)
+        if t - self.Tpulse < 1. / self.freq:
+            u = self.amp * pow(np.sin(np.pi * (t - self.Tpulse) / (1. / self.freq * 2.0)), 2.0)
+        else:
+            u = self.amp
+        return u
 
     def function2(self, t, t0, pulsNum):
         return self.amp

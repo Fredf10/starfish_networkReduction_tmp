@@ -117,6 +117,14 @@ class NetworkReduction(cSBO.StarfishBaseObject):
                 Rtot = self.lumpedValues[vesselId]["R"][-1]
                 Z_0 = self.lumpedValues[vesselId]["R1"][-1]
                 Cnew = self.lumpedValues[vesselId]["C"][-1]
+            elif self.optimizeParams:
+                WkMethod = self.Wkoptimize
+                params = self.params
+                node = -1
+                Z_0 = 10**6*133.32*self.optParamsDict[vesselId][node][WkMethod][params]['R1']
+                R = 10**6*133.32*self.optParamsDict[vesselId][node][WkMethod][params]['R2']
+                Cnew =  10**-6*self.optParamsDict[vesselId][node][WkMethod][params]['C']/133.32
+                Rtot = R + Z_0
             else:
                 Rtot = self.lumpedValues[vesselId]["R_new"][-1]
                 Z_0 = self.lumpedValues[vesselId]["R1"][-1]

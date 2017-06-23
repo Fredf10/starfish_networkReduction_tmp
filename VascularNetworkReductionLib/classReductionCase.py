@@ -187,7 +187,7 @@ class ReductionCase(TestBaseClass):
                 progressBar.progress(simulationIndex) 
                 
         if self.solveNetworks:
-            mBatchSim.runBatchAsMultiprocessing(self.batchDataList, CPUTimeFile=self.CPUTimeFile)
+            mBatchSim.runBatchAsMultiprocessing(self.batchDataList, CPUTimeFile=self.CPUTimeFile, numberWorkers=self.numberOfProcessors)
             
         
     
