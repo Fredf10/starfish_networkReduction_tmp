@@ -1,0 +1,18 @@
+# To create the environment just run the command below
+# conda-env create -f tutorial.yml
+name: starfish36
+dependencies:
+  - python =3.6
+  - psutil
+  - jupyter
+  - numpy
+  - matplotlib
+  - scipy
+  - h5py
+  - lxml >=3.4.2
+  - pip
+  - graphviz
+  - future
+  - pip:
+    - chaospy >=2.2.2
+    - "git+https://github.com/utsekaj42/progressBar.git@master#egg=progressbar-simple"

@@ -1,3 +1,6 @@
+from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
+from builtins import input as input3
 import os,sys,shutil
 
 cur = os.path.dirname( os.path.realpath( __file__ ) )
@@ -6,7 +9,7 @@ cur = os.path.dirname( os.path.realpath( __file__ ) )
 
 for directory in os.listdir(cur):
     try:
-        print directory
+        print(directory)
         for root, dirs, files in os.walk(''.join([directory,'/SolutionData'])):
             for file in files:
                 if '.hdf5' in file:
@@ -16,10 +19,10 @@ for directory in os.listdir(cur):
                     solDataFolderPath = '/'.join([cur,directory,solDataFolderName])
                     
                     if not os.path.isdir(solDataFolderPath):
-                        print " create folder for {} and moved data into it".format(solDataFolderName)
+                        print(" create folder for {} and moved data into it".format(solDataFolderName))
                         os.mkdir(solDataFolderPath)
                         # move data into it
                         shutil.move(''.join([cur,'/',directory,'/SolutionData/',file]),solDataFolderPath)
                         shutil.move(''.join([cur,'/',directory,'/SolutionData/',filename,'.xml']),solDataFolderPath)
-    except: print "{} nothing to do".format(directory)
+    except: print("{} nothing to do".format(directory))
             

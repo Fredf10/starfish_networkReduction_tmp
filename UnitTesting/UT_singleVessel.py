@@ -1,14 +1,15 @@
+from __future__ import print_function, absolute_import
+from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
+from builtins import range
+from builtins import input as input3
 import unittest
 import sys, os, gc
 import numpy as np
 import math
-
 cur = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(cur + '/../')
-
-import UtilityLib.moduleXML as mXML
-import SolverLib.class1DflowSolver as c1dFS
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import starfish.UtilityLib.moduleXML as mXML
+import starfish.SolverLib.class1DflowSolver as c1dFS
 
 class setUp_singleVessel(unittest.TestCase):
 
@@ -60,7 +61,7 @@ class setUp_singleVessel(unittest.TestCase):
             self.RMSEDict[vesselId] = {}
             self.dataDictNew = {}
             self.dataDictRef = {}
-#            print "testing vessel nr. {}".format(vesselId)
+#            print("testing vessel nr. {}".format(vesselId))
             self.vesselDict[vesselId] = []
             for key in self.testDict:
                 self.vesselDict[vesselId].append(key)
@@ -89,29 +90,28 @@ class setUp_singleVessel(unittest.TestCase):
         del self.dataDictRef
         gc.collect()
 
-
 class testSingleVessel(setUp_singleVessel):
 
     def test_errorThreshold(self):
-        for vesselId, keylist in self.vesselDict.iteritems():
+        for vesselId, keylist in iteritems(self.vesselDict):
             for key in keylist:
-#                print "testing key {}".format(key)
+#                print("testing key {}".format(key))
                 testVals = np.array(self.dataDictNew[vesselId][key])
                 refVals = np.array(self.dataDictRef[vesselId][key])
                 if len(testVals) != len(refVals):
-                    print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                    print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
                 if len(testVals[0]) != len(refVals[0]):
-                    print "different number of values for test and reference for vessel {}, key {} !".format(vesselId, key)
+                    print("different number of values for test and reference for vessel {}, key {} !".format(vesselId, key))
                 SEArrayEntrance = np.zeros(len(testVals))
                 SEArrayExit = np.zeros(len(testVals))
-                for i in xrange(len(testVals)):
+                for i in range(len(testVals)):
                     SEArrayEntrance[i] = (testVals[i][0] - refVals[i][0])*(testVals[i][0] - refVals[i][0])
                     SEArrayExit[i] = (testVals[i][1] - refVals[i][1])*(testVals[i][1] - refVals[i][1])
                 self.RMSEDict[vesselId][key] = math.sqrt((np.sum(SEArrayEntrance) + np.sum(SEArrayExit))/(len(testVals)*2))
 
 ##       Uncomment these if you want to  have a printout of all RMSE values
-#        print "Root Mean Square Error for each part of the network is:"
-#        print self.RMSEDict
+#        print("Root Mean Square Error for each part of the network is:")
+#        print(self.RMSEDict)
 
         TooHighError = False
         errorString = ""
@@ -123,8 +123,8 @@ class testSingleVessel(setUp_singleVessel):
 
         self.assertFalse(TooHighError, errorString)
 #        if not TooHighError:
-#            print "\nAll values below error threshold"
-#            print "Test Successful!"
+#            print("\nAll values below error threshold")
+#            print("Test Successful!")
 
 
 if __name__ == "__main__":
