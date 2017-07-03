@@ -46,6 +46,7 @@ import starfish.SolverLib.class1DflowSolver as c1DFlowSolv
 import starfish.UtilityLib.moduleXML as mXML
 import starfish.UtilityLib.moduleStartUp as mStartUp #import parseOptions
 import starfish.UtilityLib.moduleFilePathHandler as mFPH
+import starfish.UtilityLib.moduleLogFile as mLOG
 import matplotlib.pyplot as plt
 import gc
 import subprocess
@@ -102,13 +103,17 @@ def main():
     secsInit = timeSolverInit-minutesInit*60.
     minutesSolve = int(timeSolverSolve/60.)
     secsSolve = timeSolverSolve-minutesSolve*60.
+
+    mLog2 = mLOG.NetworkLogFile(vascularNetwork, dataNumber=dataNumber, dataNumberCompare='100', dt=flowSolver.dt, CpuTimeInit=[minutesInit, secsInit], CpuTimeSolve=[minutesSolve, secsSolve])
+    mLog2.writeNetworkLogfile(compileLogFile=True, deleteAuxiliary=True)
     
     
     logger.info('____________ Solver time _____________')
     logger.info('Initialisation: {} min {} sec'.format(minutesInit,secsInit))
     logger.info('Solving:        {} min {} sec'.format(minutesSolve,secsSolve))
     logger.info('=====================================')
-    
+    print('Initialisation: {} min {} sec'.format(minutesInit,secsInit))
+    print('Solving:        {} min {} sec'.format(minutesSolve,secsSolve))
     vascularNetwork.saveSolutionData()
     mXML.writeNetworkToXML(vascularNetwork, dataNumber = dataNumber) # needs to be moved to vascularNetwork
     del flowSolver

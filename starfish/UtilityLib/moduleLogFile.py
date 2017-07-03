@@ -2,6 +2,7 @@ import os,sys
 import h5py
 import numpy as np
 from scipy.integrate import simps
+from scipy import interpolate
 
 
 
@@ -14,7 +15,9 @@ import moduleFilePathHandler as mFPH
 
 class NetworkLogFile:
     
-    def __init__(self, vascularNetwork, dataNumber = "xxx", networkLogFile = None, dt=None, CpuTimeInit=[None, None], CpuTimeSolve=[None, None]):
+    def __init__(self, vascularNetwork, dataNumber = "xxx", dataNumberCompare=None,
+                 networkLogFile=None, solutionFileDirectory=None, solutionFile = None,
+                 dt=None, CpuTimeInit=[None, None], CpuTimeSolve=[None, None]):
         
         self.networkName = vascularNetwork.getVariableValue('name')
         self.dataNumber = dataNumber
@@ -23,15 +26,26 @@ class NetworkLogFile:
             #print networkLogFile
         else:
             self.networkLogFile = networkLogFile
-        
-        self.solutionFileDirectory = mFPH.getDirectory('solutionFileDirectory', self.networkName, dataNumber, 'r')
-        
+        if solutionFileDirectory == None:
+            self.solutionFileDirectory = mFPH.getDirectory('solutionFileDirectory', self.networkName, dataNumber, 'r')
+        else:
+            self.solutionFileDirectory = solutionFileDirectory
+            
         TemplateLogFileDirectory = mFPH.getDirectory('networkXmlFileTemplateDirectory', 'singleVessel_template', dataNumber, 'read')
         #print TemplateLogFileDirectory
         self.templateFile = ''.join([TemplateLogFileDirectory,'/logFile_template.tex'])
         
-        self.solutionFile = mFPH.getFilePath('solutionFile', self.networkName, dataNumber, 'read')
+        if solutionFile == None:
+            self.solutionFile = mFPH.getFilePath('solutionFile', self.networkName, dataNumber, 'read')
         
+        else:
+            self.solutionFile = solutionFile
+        if dataNumberCompare != None:
+            self.solutionFileCompare = mFPH.getFilePath('solutionFile', self.networkName, dataNumberCompare, 'read')
+            self.compare = True
+        else:
+            self.compare = False
+            
         self.vessels = vascularNetwork.vessels
         self.boundaryConditions = vascularNetwork.boundaryConditions
         
@@ -51,7 +65,7 @@ class NetworkLogFile:
         #print self.dt
         self.CpuTimeInit = CpuTimeInit
         self.CpuTimeSolve = CpuTimeSolve
-        self.venousPressure = vascularNetwork.venousPool.P[0]
+        self.venousPressure = vascularNetwork.centralVenousPressure
 
     
     def writeNetworkLogfile(self, compileLogFile=False, deleteAuxiliary=False):
@@ -75,7 +89,20 @@ class NetworkLogFile:
             elif "% Fill periodic values here" in line:
                 self.findPeriodicConvergenceValuesFromSolution()
                 self.writePeriodicConvergenceValues(fLogFile)
-                
+                fLogFile.write(r'\end{tabular}')
+                fLogFile.write('\n')
+                fLogFile.write(r'\end{table}')
+                fLogFile.write('\n')
+                if self.compare:
+                    self.compareWithOtherSolution()
+                    fLogFile.write(r'\begin{table}[h!]')
+                    self.writeCompareWithOtherSolutionValues(fLogFile)
+                    
+                    fLogFile.write(r'\end{tabular}')
+                    fLogFile.write('\n')
+                    fLogFile.write(r'\end{table}')
+                    fLogFile.write('\n')
+                    
             elif "% Fill model parameters here" in line:
                 self.writeModelParameters(fLogFile)
 
@@ -385,6 +412,43 @@ class NetworkLogFile:
                 fLogFile.write(r'    &    ')
         fLogFile.write(r'\\')
         fLogFile.write('\n')
+
+
+    def writeCompareWithOtherSolutionValues(self, fLogFile, roundTo=3):
+        
+        compareOtherSolutionValues = self.compareOtherSolutionValues
+        
+        fLogFile.write(r'\begin{tabular}{')
+        
+        fLogFile.write('ll')
+        fLogFile.write(r'}')
+        fLogFile.write('\n')
+        
+        fLogFile.write('$\epsilon{P}_{avg}^1$')
+        fLogFile.write(r'    &    ')
+        
+        fLogFile.write(str(round(self.compareOtherSolutionValues[self.vascularNetwork.root]['epsilonAvgP']*100, roundTo)))
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
+
+        fLogFile.write('$\epsilon{P}_{sys}^{max}$')
+        fLogFile.write(r'    &    ')
+        epsilonP_max = 0
+        for vesselId in self.treeTraverseList_sorted:
+            epsilonP = compareOtherSolutionValues[vesselId]['epsilonAvgP']
+            
+            if epsilonP > epsilonP_max:
+                epsilonP_max = epsilonP
+                
+        epsilonPround = round(epsilonP_max*100, roundTo)
+        fLogFile.write(str(epsilonPround))
+            
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+        
+        
     def writeModelParameters(self, fLogFile):
         
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
@@ -489,8 +553,8 @@ class NetworkLogFile:
         varianceSum = 0
         
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
-            [Pin, Pout] = lumpedValues['MeanValues'][vesselId]['Pressure'] #['MeanValues']
-            [Qin, Qout] = lumpedValues['MeanValues'][vesselId]['Flow'] # ['MeanValues']
+            [Pin, Pout] = lumpedValues[vesselId]['Pressure'] #['MeanValues']
+            [Qin, Qout] = lumpedValues[vesselId]['Flow'] # ['MeanValues']
             R = Rcum[vesselId]
             
             Qin_ml_s_lump = round(Qin*1e6, 3)
@@ -567,29 +631,33 @@ class NetworkLogFile:
         root = self.vascularNetwork.root
         freq = self.boundaryConditions[root][0].freq
         period = 1./freq
-        N = int(period/dt)
-        N = len(time) - N - 1
-        time = time[N:]
+        
+        N = int(round(period/dt))
+        
+        nCycles = int(round(time[-1]/period))
+        t_start = period*(nCycles - 1)
+        t_end = period*nCycles
+        time_compare = np.linspace(t_start, t_end, N + 1)
         
         print "starting to load solutiondata"
-        print "averaging between t_start = {0} and t_end = {1}".format(time[0], time[-1])
+        print "averaging between t_start = {0} and t_end = {1}".format(t_start, t_end)
         averageValues = {}
         for vesselName in hdf5File['vessels'].keys():
             tmpValues = {}
             vesselId = vesselName.split(' - ')[-1]
             vesselId = int(vesselId)
             
-            startP  = hdf5File['vessels'][vesselName]['Psol'][N:, 0]
-            endP =  hdf5File['vessels'][vesselName]['Psol'][N:, -1]
+            startP  = self.mySplineInterpolater(time, hdf5File['vessels'][vesselName]['Psol'][:, 0], time_compare)
+            endP =  self.mySplineInterpolater(time, hdf5File['vessels'][vesselName]['Psol'][:, -1], time_compare)
             
             
-            startQ  = hdf5File['vessels'][vesselName]['Qsol'][N:, 0]
-            endQ =  hdf5File['vessels'][vesselName]['Qsol'][N:, -1]
+            startQ  = self.mySplineInterpolater(time, hdf5File['vessels'][vesselName]['Qsol'][:, 0], time_compare)
+            endQ =  self.mySplineInterpolater(time, hdf5File['vessels'][vesselName]['Qsol'][:, -1], time_compare)
             
-            Pin, Pout = self.findMean(time, startP), self.findMean(time, endP)
-            Qin = self.findMean(time, startQ)
-            Qout = self.findMean(time, endQ)
-            R = (Pin - self.vascularNetwork.venousPool.P[0])/Qin
+            Pin, Pout = self.findMean(time_compare, startP), self.findMean(time_compare, endP)
+            Qin = self.findMean(time_compare, startQ)
+            Qout = self.findMean(time_compare, endQ)
+            R = (Pin - self.venousPressure)/Qin
             tmpValues['Pin'], tmpValues['Pout'] = Pin, Pout
             tmpValues['Qin'] = Qin
             tmpValues['R'] = R
@@ -699,6 +767,7 @@ class NetworkLogFile:
         N = int(round(period/dt))
         
         nCycles = int(round((time[-1] - time[0])/period))
+
         convergenceValues = {}
         for vesselName in hdf5File['vessels'].keys():
             tmpValues = {}
@@ -707,11 +776,14 @@ class NetworkLogFile:
             maxValues = []
             errorValues = []
             P_prev = None
+            startP_all  = hdf5File['vessels'][vesselName]['Psol'][:, 0]
+            t_start = time[0]
+            t_end = t_start + period
+            tck = interpolate.splrep(time, startP_all)
             for n in range(nCycles):
             
-                if vesselId == 1:
-                    print time[(n + 1)*N]
-                startP  = hdf5File['vessels'][vesselName]['Psol'][n*N:(n + 1)*N, 0]
+                time_tmp = np.linspace(t_start, t_end, N + 1)
+                startP = interpolate.splev(time_tmp, tck)
 
                 maxValues.append(np.max(startP))
                 
@@ -719,6 +791,9 @@ class NetworkLogFile:
                     e = self.calcEpsilonAvg(P_prev, startP, data_type='P')
                     errorValues.append(e)
                 P_prev = startP
+                t_start += period
+                t_end += period
+                
 
             deltaP = np.abs(np.array(maxValues[1:]) - np.array(maxValues[:-1]))
             
@@ -728,7 +803,61 @@ class NetworkLogFile:
             convergenceValues[vesselId] = tmpValues
         
         self.convergenceValues = convergenceValues
+    
+    def compareWithOtherSolution(self):
+        
+        hdf5File = h5py.File(self.solutionFile, 'r')
+        hdf5File2 = h5py.File(self.solutionFileCompare, 'r')
+        
+        time = hdf5File['VascularNetwork']['simulationTime'][:]
+        time2 = hdf5File2['VascularNetwork']['simulationTime'][:]
+        dt = time[1] - time[0]
+        root = self.vascularNetwork.root
+        freq = self.boundaryConditions[root][0].freq
+        period = 1./freq
+        N = int(round(period/dt))
+        
+        nCycles = int(round(time[-1]/period))
+        nCycles2 = int(round(time2[-1]/period))
+        
+        nCycles = min([nCycles, nCycles2])
+        
+        t_start = period*(nCycles - 1)
+        t_end = period*nCycles
+        
+        time_compare = np.linspace(t_start, t_end, N + 1)
+        compareOtherSolutionValues = {}
+        for vesselName in hdf5File['vessels'].keys():
+            tmpValues = {}
+            vesselId = vesselName.split(' - ')[-1]
+            vesselId = int(vesselId)
+
+            startP_all  = hdf5File['vessels'][vesselName]['Psol'][:, 0]
+            startP2_all  = hdf5File2['vessels'][vesselName]['Psol'][:, 0]
+
+            tck = interpolate.splrep(time, startP_all)
+            tck2 = interpolate.splrep(time2, startP2_all)
+        
             
+            startP = interpolate.splev(time_compare, tck)
+            startP2 = interpolate.splev(time_compare, tck2)
+
+            
+            e = self.calcEpsilonAvg(startP2, startP, data_type='P')
+                
+
+            tmpValues['epsilonAvgP'] = e
+            compareOtherSolutionValues[vesselId] = tmpValues
+        
+        self.compareOtherSolutionValues = compareOtherSolutionValues
+        
+
+    def mySplineInterpolater(self, x, y, x_new):
+        tck = interpolate.splrep(x, y, s=0)
+
+        y_new = interpolate.splev(x_new, tck, der=0)
+        
+        return y_new
             
     def findMean(self, x, f, splineInterpolate=False):
         
@@ -756,10 +885,159 @@ class NetworkLogFile:
         return RMS
         
 
-
-
-
+class ConvergenceLogFile:
     
+    
+    def __init__(self, networkLogFile, networkName, epsilonList, batchDataList, solutionFileDirectory):
+        
 
+        TemplateLogFileDirectory = mFPH.getDirectory('networkXmlFileTemplateDirectory', 'singleVessel_template', '200', 'read')
+        #print TemplateLogFileDirectory
+        self.templateFile = ''.join([TemplateLogFileDirectory,'/convergence_template.tex'])
+        
+        self.networkLogFile = networkLogFile
+        
+        self.networkName = networkName
+        self.epsilonList = epsilonList
+        self.batchDataList = batchDataList
+        self.solutionFileDirectory = solutionFileDirectory
+    
+    def writeConvergenceLogfile(self, compileLogFile=False, deleteAuxiliary=False):
+        
+        fTemplate = open(self.templateFile, 'r')
+        fLogFile = open(self.networkLogFile, 'w')
+        for line in fTemplate:
+            
+            if "% Fill in title here" in line:
+                self.writeTitle(fLogFile)
+            elif "% Fill convergence data here" in line:
+                self.writeConvergenceData(fLogFile)
+            else:
+                fLogFile.write(line)
 
+        
+        fTemplate.close()
+        fLogFile.close()
+        
+        if compileLogFile:
+            self.compilePdf(deleteAuxiliary=deleteAuxiliary)
+
+    def writeTitle(self, fLogFile):
+        #titleLine = ''.join([r'\section{Network : ',self.networkName, ', Datanumber: ', self.dataNumber, '}'])
+        titleLine =''.join([r'\Large Network : ',self.networkName, r'\\'])
+        fLogFile.write(titleLine)
+        fLogFile.write('\n')
+
+    def writeConvergenceData(self, fLogFile):
+        
+        N = len(self.batchDataList)
+        fLogFile.write(r'\begin{table}[h!]')
+        fLogFile.write('\n')
+        fLogFile.write(r'\begin{tabular}{l')
+        for n in range(N):
+            fLogFile.write('l')
+        
+        fLogFile.write(r'}')
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+        fLogFile.write('dataN')
+        fLogFile.write("    &    ")
+        for n in range(N):
+            fLogFile.write(self.batchDataList[n]['dataNumber'])
+            if n != N -1:
+                fLogFile.write("    &    ")
+        
+        fLogFile.write(r'    \\')
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+        fLogFile.write('dt [ms]')
+        fLogFile.write("    &    ")
+        for n in range(N):
+            fLogFile.write(str(round(self.batchDataList[n]['dt']*1000, 3)))
+            if n != N -1:
+                fLogFile.write("    &    ")
+        
+        fLogFile.write(r'    \\')
+
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+
+        fLogFile.write('CFL')
+        fLogFile.write("    &    ")
+        for n in range(N):
+            fLogFile.write(str(self.batchDataList[n]['CFL']))
+            if n != N -1:
+                fLogFile.write("    &    ")
+        
+        fLogFile.write(r'    \\')
+
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+
+        fLogFile.write(r'$\epsilon_P [\%]$')
+        fLogFile.write("    &    ")
+        for n in range(N - 1):
+            fLogFile.write(str(self.epsilonList[n]))
+
+            fLogFile.write("    &    ")
+        fLogFile.write(r'\\')
+        fLogFile.write('\n')
+        fLogFile.write(r'\hline')
+        fLogFile.write('\n')
+
+        fLogFile.write(r'\end{tabular}')
+        fLogFile.write('\n')
+        fLogFile.write(r'\end{table}')
+        
+        imagecount = 0
+        fLogFile.write('\n')
+        self.writeStartFigure(fLogFile)
+        for n in range(N - 1):
+            if imagecount == 2:
+                self.writeEndFigure(fLogFile)
+                self.writeStartFigure(fLogFile)
+                imagecount = 0
+            self.writeFigure(fLogFile, self.batchDataList[n]['figFile'])
+            imagecount += 1
+        self.writeEndFigure(fLogFile)
+        
+        
+    
+    def writeStartFigure(self, fLogFile):
+        fLogFile.write(r'\begin{figure}[h]')
+        fLogFile.write('\n')
+        fLogFile.write(r'\centering')
+        fLogFile.write('\n')
+    
+    def writeEndFigure(self, fLogFile):
+        fLogFile.write(r'\end{figure}')
+        fLogFile.write('\n')
+    
+    def writeFigure(self, fLogFile, figurePath):
+        fLogFile.write(r'\includegraphics[height=0.25\textheight,width=0.48\textwidth]{')
+        fLogFile.write(figurePath)
+        fLogFile.write(r'}')
+        fLogFile.write('\n')
+        
+        
+        
+        
+    def compilePdf(self, deleteAuxiliary=False):
+        
+        filesInDirBefore = os.listdir(self.solutionFileDirectory)
+        print filesInDirBefore
+        compileString = ''.join(['pdflatex -output-directory=',self.solutionFileDirectory, ' ', self.networkLogFile])
+        os.system(compileString)
+        #subprocess.Popen(compileString, shell=True)
+        filesInDirAfter = os.listdir(self.solutionFileDirectory)
+        
+        if deleteAuxiliary:
+            for filex in filesInDirAfter:
+                if filex not in filesInDirBefore and 'pdf' not in filex:
+                    completeFilePath = ''.join([self.solutionFileDirectory, '/', filex])
+                    os.remove(completeFilePath)
 

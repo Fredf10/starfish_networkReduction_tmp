@@ -33,7 +33,7 @@ import gc
 class FlowSolver(cSBO.StarfishBaseObject):
 
 
-    def __init__(self,vascularNetwork, quiet=False):
+    def __init__(self, vascularNetwork, quiet=False):
         """
         Constructor
         """
@@ -108,6 +108,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         #define solve function
         if self.vascularNetwork.solvingSchemeField == 'MacCormack_TwoStep':
+            print('twostep')
             self.twoStep = True
         else:
             self.twoStep = False
@@ -120,8 +121,11 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # initialize system
         self.vascularNetwork.currentMemoryIndex = self.currentMemoryIndex
         self.vascularNetwork.initialize(initializeForSimulation = True)
-
-        self.initializeTimeVariables(quiet)
+        
+        if self.vascularNetwork.dt < 0:
+            self.initializeTimeVariables(quiet)
+        else:
+            self.initializeTimeVariablesSimple(quiet)
 
         self.initializeSolutionMatrices() # init data in vessels
         self.initializeFields()
@@ -145,8 +149,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
         else:
             self.initializeNumericalObjectList()
 
-        if self.quiet==False:
-            self.initOutput() # feedback
+#        if self.quiet==False:
+#            self.initOutput() # feedback
 
 
 
@@ -192,6 +196,34 @@ class FlowSolver(cSBO.StarfishBaseObject):
         return N_new
     
     
+    def initializeTimeVariablesSimple(self, quiet):
+
+        """
+        initialize time variable dt and Tstep
+        """
+        self.totalTime = self.vascularNetwork.totalTime
+
+        self.dt = self.vascularNetwork.dt
+        
+        print(self.dt)
+        self.nTSteps = int(np.ceil(self.totalTime/self.dt))
+        # calculate time steps for initialisation phase
+        nTstepsInitPhase = 0
+        if self.vascularNetwork.initialisationPhaseExist:
+            initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
+            nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
+        # correct time steps
+        self.nTSteps += nTstepsInitPhase
+
+        # update vascular network variables
+        self.vascularNetwork.update({'dt':self.dt,
+                                     'nTSteps': self.nTSteps,
+                                     'nTstepsInitPhase': nTstepsInitPhase})
+
+
+ 
+        
+    
     def initializeTimeVariables(self, quiet):
         """
         initialize time variable dt and Tstep
@@ -222,7 +254,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
             c_high = vessel.c(A0_max, Compliance)
 
             dz_low = min(vessel.dz)
-            dt = self.calcTimeStep(dz_low,c_high,self.vascularNetwork.CFL)
+            dt = self.calcTimeStep(dz_low,c_high, self.vascularNetwork.CFL)
             c_max = np.append(c_max,c_high)
             dt_min = np.append(dt_min,dt)
             dz_min = np.append(dz_min,dz_low)
@@ -232,7 +264,8 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
         # Set time variables
         self.dt = min(dt_min)
-        self.dt = 7.5e-5 #4e-4 #2*2e-4 #5e-5 #2.5e-4#z
+        #self.dt = 5e-4 #2*2e-4 #5e-5 #2.5e-4#z7.5e-5 #
+        print(self.dt)
         if self.quiet == False:
             print("Warning, line 198 1dFlowsSolver; setting dt: ", self.dt)
         # calculate time steps
@@ -306,26 +339,22 @@ class FlowSolver(cSBO.StarfishBaseObject):
             if automaticGridCorrection != {}:
                 gridCorrection = 'ohYesDoItPlease'
                 
-                # TODO: comment grid correction in again !!
-                #if self.automaticGridAdaptation == True: gridCorrection = 'y'
-                #while  gridCorrection not in (' ','','y','Y','n','N'): 
-                #    gridCorrection =input3('Do you whish to adapt grid? (yes [<ENTER>,<y>,<Y>]/no [<n>,<N>])')
+                #TODO: comment grid correction in again !!
+                if self.automaticGridAdaptation == True: gridCorrection = 'y'
+                while  gridCorrection not in (' ','','y','Y','n','N'): 
+                    gridCorrection =input3('Do you whish to adapt grid? (yes [<ENTER>,<y>,<Y>]/no [<n>,<N>])')
 
                 if gridCorrection in (' ','','y','Y'):
                     #if quiet == False: logger.info(' proceed with: grid aptation for vessels {} \n'.format(automaticGridCorrection.keys()))
                     arrayN = 0
 
-                    for vesselId,Nnew in iteritems(automaticGridCorrection):
-
+                    for vesselId, Nnew in automaticGridCorrection.iteritems():
                         self.vessels[vesselId].update({'N':Nnew})
                         self.vessels[vesselId].initialize({})
-#                     for vesselId, Nnew in automaticGridCorrection.iteritems():
-#                         self.vessels[vesselId].update({'N':Nnew})
-#                         self.vessels[vesselId].initialize({})
-# 
-#                         newOutput = self.output['CFLcorrect'][arrayN].split(' no')[0]
-#                         self.output['CFLcorrect'][arrayN] = ' '.join([newOutput,'yes'])
-#                         arrayN = arrayN+1
+ 
+                        newOutput = self.output['CFLcorrect'][arrayN].split(' no')[0]
+                        self.output['CFLcorrect'][arrayN] = ' '.join([newOutput,'yes'])
+                        arrayN = arrayN+1
         gridNodes = 0
         for vessel in itervalues(self.vascularNetwork.vessels):
             gridNodes += vessel.N

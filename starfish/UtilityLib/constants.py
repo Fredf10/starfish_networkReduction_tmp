@@ -135,6 +135,7 @@ unitsDictMed = {'m':1.0E2,
 variableUnitsSI = { # SimulationContext
                     'CFL': '',
                     'totalTime': 's',
+                    'dt': 's',
                     'NumScheme': '',
                     'EqSystem': '',
                     # initialisationControls
@@ -211,6 +212,7 @@ variableUnitsMed  = {
                     # SimulationContext
                     'CFL': '',
                     'totalTime': 's',
+                    'dt': 's',
                     'NumScheme': '',
                     'EqSystem': '',
                     # initialisationControls
@@ -290,6 +292,7 @@ variablesDict = {## class Vascular Network
                  # simulation context
                  'description'              : {'type':'str',   'unitSI': None,  'strCases': ['anything'], 'multiVar': False},
                  'totalTime'                : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
+                 'dt'                : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
                  'timeSaveBegin'            : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
                  'timeSaveEnd'              : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},
                  'minSaveDt'               : {'type':'float', 'unitSI': 's',  'strCases': None, 'multiVar': False},

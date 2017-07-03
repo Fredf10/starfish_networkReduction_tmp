@@ -6,6 +6,7 @@
 simulationContextElements = ['description',
                              'totalTime',
                              'CFL',
+                             'dt',
                              'timeSaveBegin',
                              'minSaveDt',
                              'maxMemory',

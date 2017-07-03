@@ -1658,24 +1658,27 @@ class Anastomosis():
             Niterations = Niterations + 1
             
             if Niterations > 50:
-                print("\n")
-                print("Niterations excedded in anastomosis calculation in vessel, Niterations: ", self.names[0], Niterations)
-
-                print("Xnew: ", Xnew)
-                print("Xold: ", Xold)
-                
-                print("f1: ", f1)
-                print("f2: ", f2)
-                print("f3: ", f3)
-                print("epsilonvalues: ", epsilonvalues)
-                print("Q1discretize, Q1o: ", Q1discretize, Q1o)
-                print("Q2discretize, Q2o: ", Q2discretize, Q2o)
-                print("Q3discretize, Q3o: ", Q3discretize, Q3o)
-                print("P1discretize, P1o: ", P1discretize, P1o)
-                print("P2discretize, P2o: ", P2discretize, P2o)
-                print("P3discretize, P3o: ",P3discretize, P3o)
-                #exit()
-                break
+                if self.quiet:
+                    break
+                else:
+                    print("\n")
+                    print("Niterations excedded in anastomosis calculation in vessel, Niterations: ", self.names[0], Niterations)
+    
+                    print("Xnew: ", Xnew)
+                    print("Xold: ", Xold)
+                    
+                    print("f1: ", f1)
+                    print("f2: ", f2)
+                    print("f3: ", f3)
+                    print("epsilonvalues: ", epsilonvalues)
+                    print("Q1discretize, Q1o: ", Q1discretize, Q1o)
+                    print("Q2discretize, Q2o: ", Q2discretize, Q2o)
+                    print("Q3discretize, Q3o: ", Q3discretize, Q3o)
+                    print("P1discretize, P1o: ", P1discretize, P1o)
+                    print("P2discretize, P2o: ", P2discretize, P2o)
+                    print("P3discretize, P3o: ",P3discretize, P3o)
+                    #exit()
+                    break
             Xold = Xnew
             #exit()
         

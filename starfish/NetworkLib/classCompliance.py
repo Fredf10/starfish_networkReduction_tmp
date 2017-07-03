@@ -214,6 +214,52 @@ class Laplace2(Laplace):
         self.update(complianceDataDict)
         self.betaLaplace = (4./3.)*(np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
         self.C0preCalculated = self.C(self.Ps)
+
+class Laplace3(Laplace):
+    """
+    Laplace Compliance Model actually Hookean Model
+    same model equations as Laplace, but it calculates the marterial parameter from 
+    youngs modulus and wallThickness. WalThickness is calculated from eq. 3 in 
+    "Nynard et al 'One-Dimensional Haemodynamic Modeling and Wave Dynamics in the Entire
+    Adult Circulation'. Parameters K1, K2, K3 can be found in table 2."
+    """
+    def __init__(self, rho, As):
+        Compliance.__init__(self, rho, As)
+        self.wallThickness = None
+        self.youngModulus  = None
+        self.betaLaplace   = None
+        
+    def initialize(self,complianceDataDict):
+        """
+        Initilalize compliance class with type specific variables
+        and calculate set the marterial parameters
+        """
+        
+        self.update(complianceDataDict)
+        Ad = self.As
+        r = np.sqrt(Ad/np.pi)
+        
+        D0 = 2*r
+        D0 = D0*100
+        k1 = 3.*10**6                                  # [g/s^2/cm]
+        k2 = -9.                                      # [cm^-1]
+        k3 = 33.7*10**4                                  # [g/s^2/cm]
+        E = 225.*10**3                                  # [N/m^2]
+        
+        rho = 1.06                                      # [g/cm^3]
+        
+        c_02 = (2/(3*rho))*(k1*np.exp(k2*D0/2.) + k3) # [cm^2/s^2]
+        
+        Eh = D0*c_02*3*rho/4                          # [g/s^2]
+        
+        Eh = Eh*10**-3                                  # [kg/s^2] = [kg * m/s^2 * 1/m^2 * m  ] = [N/m^2 * m]
+        
+        h = Eh/self.youngModulus                      # [m]
+        
+        self.wallThickness = h
+        
+        self.betaLaplace = (4./3.)*(np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
+        self.C0preCalculated = self.C(self.Ps)
         
 class Hayashi(Compliance):
     """

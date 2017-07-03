@@ -82,8 +82,10 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                          'boundaryCSVFile',
                          'networkXmlFileTemplate',
                          'networkXmlFile',
+                         'networkXmlFileConvergence',
                          'networkLogFile',
                          'solutionFile',
+                         'solutionFileConvergence',
                          'configFile',
                          'simulationDescriptionFile',
                          'vncRescentNetworksFile',
@@ -105,7 +107,9 @@ def getFilePath(fileType, networkName, dataNumber, mode, exception = 'Error'):
                  'networkXmlFileTemplate'    : ''.join([networkName,'.xml']),
                  'networkXmlFileXXX'         : ''.join([networkName,'.xml']),
                  'networkXmlFileSim'         : ''.join([networkName,'_SolutionData_',dataNumber,'.xml']),
+                 'networkXmlFileConvergence' : ''.join([networkName,'_SolutionData_',dataNumber,'.xml']),
                  'networkLogFile'            : ''.join([networkName,'_SolutionData_',dataNumber,'.tex']),
+                 'solutionFileConvergence'   : ''.join([networkName,'_SolutionData_',dataNumber,'.hdf5']),
                  'solutionFile'              : ''.join([networkName,'_SolutionData_',dataNumber,'.hdf5']),
                  'simulationDescriptionFile' : ''.join(['simulationCaseDescriptions.txt']),
                  'vncRescentNetworksFile'    : '.recentNetworkNames.pickle',
@@ -166,6 +170,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
         'networkXmlFileTemplateDirectory',
         'networkXmlFileXXXDirectory',
         'networkXmlFileSimDirectory',
+        'networkXmlFileConvergenceDirectory',
         'solutionFileDirectory',
         'initialValueFileDirectory',
         'screenshotDirectory',
@@ -201,7 +206,9 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                               'networkXmlFileTemplateDirectory',
                               'networkXmlFileXXXDirectory',
                               'networkXmlFileSimDirectory',
+                              'networkXmlFileConvergenceDirectory',
                               'solutionFileDirectory',
+                              'solutionFileConvergenceDirectory', 
                               'networkLogFileDirectory',
                               'initialValueFileDirectory',
                               'screenshotDirectory',
@@ -232,6 +239,7 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
            
     networkXmlFileTemplateDirectory = ''.join([starfishHomeDirectory,'/TemplateNetworks/',networkName])
     networkXmlFileDirectory         = ''.join([workingDirectory,'/',networkName])
+    networkXmlFileConvergenceDirectory         = ''.join([networkXmlFileDirectory,'/Convergence'])
     solutionFileDirectory           = ''.join([networkXmlFileDirectory,'/SolutionData_',str(dataNumber)])
     initialValueFileDirectory           = ''.join([networkXmlFileDirectory,'/InitialValues'])
     movieDirectory              = ''.join([solutionFileDirectory,'/Movies'])
@@ -247,6 +255,8 @@ def getDirectory(directoryType, networkName, dataNumber, mode, exception = 'Erro
                    'networkXmlFileTemplateDirectory'    : networkXmlFileTemplateDirectory,
                    'networkXmlFileXXXDirectory'         : networkXmlFileDirectory,
                    'networkXmlFileSimDirectory'         : solutionFileDirectory,
+                   'networkXmlFileConvergenceDirectory' : networkXmlFileConvergenceDirectory,
+                   'solutionFileConvergenceDirectory'   : networkXmlFileConvergenceDirectory,
                    'solutionFileDirectory'              : solutionFileDirectory,
                    'networkLogFileDirectory'            : solutionFileDirectory,
                    'initialValueFileDirectory'          : initialValueFileDirectory,

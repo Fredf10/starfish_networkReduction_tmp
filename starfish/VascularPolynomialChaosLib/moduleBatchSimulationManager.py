@@ -4,6 +4,7 @@ from builtins import input as input3
 import sys,os
 from starfish.SolverLib.class1DflowSolver import FlowSolver
 from starfish.UtilityLib import moduleXML
+import starfish.UtilityLib.moduleLogFile as mLOG
 import progressbarsimple as cPB
 import gc,time
 import multiprocessing
@@ -39,7 +40,7 @@ def runBatchAsSingleProcess(batchDataList, quiet = False):
     print('total runtime:  {} min {} sec'.format(minutesBatch,secsBatch))
     print('=====================================')
   
-def runSingleBatchSimulation(batchData):
+def runSingleBatchSimulation(batchData, writeLogFile=True):
     '''
     Function which runs a single simulation the defined with batchData
     
@@ -63,7 +64,16 @@ def runSingleBatchSimulation(batchData):
         flowSolver.solve()
         vascularNetworkTemp.saveSolutionData()
         moduleXML.writeNetworkToXML(vascularNetworkTemp, dataNumber, networkXmlFileSave)
+        
+        if writeLogFile:
+            networkLogFile = networkXmlFileSave.replace(".xml", '.tex')
+            solutionFileDirectory = batchData['pathSolutionDataDirectory']
+            mLog2 = mLOG.NetworkLogFile(vascularNetworkTemp, dataNumber=dataNumber,
+                                        networkLogFile=networkLogFile, solutionFileDirectory=solutionFileDirectory, solutionFile=pathSolutionDataFilename
+                                        , dt=flowSolver.dt, )
+            mLog2.writeNetworkLogfile(compileLogFile=True, deleteAuxiliary=True)
         del flowSolver
+        del vascularNetworkTemp
         gc.collect()
         timeSolverSolve = time.clock()-timeStart
         minutesSolve = int(timeSolverSolve/60.)
@@ -77,7 +87,7 @@ def runSingleBatchSimulation(batchData):
     
     return minutesSolve,secsSolve
 
-def runBatchAsMultiprocessing(batchDataList, numberWorkers = None, quiet = False):
+def runBatchAsMultiprocessing(batchDataList, numberWorkers=None, quiet=False):
     '''
     Run a set of simulations on one core without multiprocessing
     

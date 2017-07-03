@@ -21,6 +21,7 @@ from starfish.UtilityLib import moduleFilePathHandler as mFPH
 import numpy as np
 import math
 from scipy import interpolate
+from copy import deepcopy
 import pprint
 import h5py
 from starfish.NetworkLib.classBoundaryConditions import *
@@ -60,8 +61,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
 
         # simulation Context
         self.totalTime = 1.0  # simulation time in seconds
+        self.dt = -1.0
         self.CFL = 0.85  # maximal initial CFL number
-        self.dt = None  # time step of the simulation determined by the solver
+        
         self.nTSteps = None  # number of timesteps of the simulation case determined by the solver
         self.simulationTime = np.zeros(0)  # array with simulation Time
         self.currentMemoryIndex = None
@@ -106,6 +108,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         self.vessels = {}  # Dictionary with containing all vessel data,  key = vessel id; value = vessel::Vessel()
 
         self.venousPool = None
+        # Todo: figure out better handling of venous pressure. How to set this in xml?
+        self.centralVenousPressure = 5*133.32
         
         self.heart = None
 
@@ -377,7 +381,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             for Id, bcs in iteritems(self.boundaryConditions):
                 for bc in bcs:
                     bcPositions.append(bc.position)
-                    print(bc.name, bc.position)
             if 1 not in bcPositions and -1 not in bcPositions:
                 error_msg = "VascularNetwork.initialize(): BoundaryConditions are not properly defined Vessel {} at least one boundaryCondition at both ends! system exit".format(self.vessels[0].name)
                 logger.error(error_msg)
@@ -1380,7 +1383,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         self.initialValues = initialValues
         
-    def calculateInitialValuesLinearSystem(self, Qmean):
+    def calculateInitialValuesLinearSystem(self, Qmean, it=1, includeDynamic=False):
         """
         This function convert the system to a lumped model of resistors in series and paralell and calculate average pressure and flow values
         to be used as initial conditions. The system is reduced to a set of linear equations. For every vessel there is an equation for
@@ -1400,7 +1403,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         RHS = np.zeros(Nunknowns) #system right hand side
 
-        itMax = 5
+        itMax = it
         
         initialValues_prev_it = None
         
@@ -1593,6 +1596,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 initialValues[vesselId]['Pressure'] = [p0, p1]
                 initialValues[vesselId]['Flow'] = [qm, qm]
                 initialValues[vesselId]['R'] = [p0/qm, p1/qm]
+
                 if it == 0:
                     radiusProximal = self.vessels[vesselId].radiusProximal
                     radiusDistal = self.vessels[vesselId].radiusDistal
@@ -1614,8 +1618,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             # # adjust pressure with venous pressure and difference between mean and diastolic pressure
             for initialArray in initialValues.itervalues():
-                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.venousPool.P[0]
-                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.venousPool.P[0]
+                initialArray['Pressure'][0] = initialArray['Pressure'][0] + self.centralVenousPressure
+                initialArray['Pressure'][1] = initialArray['Pressure'][1] + self.centralVenousPressure
                 
                     
             # # adjust pressure for gravity pressure
@@ -1623,24 +1627,16 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             initialValues_prev_it = initialValuesWithGravity.copy()
             
-            if it == 0:
-                self.initialValues = initialValuesWithGravity.copy()
-        
-        from copy import deepcopy
-        #self.initialValues['MeanValuesStatic'] = deepcopy(initialValuesWithGravity)
-        #print self.initialValues['MeanValuesStatic'][1]['Pressure'][0]
-        self.initialValues['MeanValues'] = deepcopy(initialValuesWithGravity) #self.adjustForTotalPressure(initialValues_prev_it)
-        #print "\n", self.initialValues['MeanValuesStatic'][1]['Pressure'][0]
-        #print self.name
-        
-        #import pickle
-        #pickle.dump(self.initialValues, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/initialValues.p", "wb"))
-        
-        
+        if includeDynamic:
+            initialValues = self.adjustForTotalPressure(initialValues_prev_it)
+        else:
+            initialValues = initialValues_prev_it
+        return initialValues
     
     
     def adjustForTotalPressure(self, initialValues):
-        
+        """ 1) Traverese from root to periphery and adjust for total pressure. 2) Calculate the flow out that match the pressure at terminal sites.
+        3 ) Scale the flow out so that it matches the flow in to the system, and traverese from periphery towards the root. 4) Do this process itMax times."""
         idToprint = 1
 #         print initialValues[self.root]['Flow']
         #print initialValues[idToprint]['Pressure'][0]
@@ -1676,7 +1672,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     P_prev_it = initialValues_new[vesselId]['Pressure']
                     Qm_prev_it = initialValues_new[vesselId]['Flow'][0]
                     Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
-                    
+                    print(p0, Qm_prev_it, Rv, vesselId)
                     p1 = p0 - Qm_prev_it*Rv
                     
                     initialValues_new[vesselId]['Pressure'] = [p0, p1]
@@ -1704,7 +1700,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             
             
 
-            Pv = self.venousPool.P[0]
+            Pv = self.centralVenousPressure
             
             Qout = 0
             
@@ -1788,10 +1784,59 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                 if leftMother != None and leftMother not in toVisit:
                                     toVisit.append(leftMother)
                                 if rightMother != None and rightMother not in toVisit:
-                                    print("Warning: ajust for total Pressure not implemented for anastomisis line approx 1732 cVN")
+                                    toVisit.append(rightMother)
                                 
                                 toVisit.remove(vesselId)
-                        
+                        # anastomosis
+                        elif self.vessels[leftDaughter].rightMother != None:
+                            
+                                leftMotherAnastomosis = self.vessels[leftDaughter].leftMother
+                                rightMotherAnastomosis = self.vessels[leftDaughter].rightMother
+                                leftDaughterAnastomosis = leftDaughter
+                                
+                                P_daughter = initialValues_new[leftDaughterAnastomosis]['DynamicPressure'][0]
+                                P_dynamic_daughter = initialValues_new[leftDaughterAnastomosis]['DynamicPressure'][0]
+                                Ptot_daughter = P_daughter + P_dynamic_daughter
+                                Q_D = initialValues_new[leftDaughterAnastomosis]['Flow'][0]
+                                
+                                P_LM = initialValues_new[leftMotherAnastomosis]['Pressure'][-1]
+                                P_RM = initialValues_new[rightMotherAnastomosis]['Pressure'][-1]
+                                
+                                A_LM = np.pi*initialValues_new[leftMotherAnastomosis]['radius'][-1]**2
+                                A_RM = np.pi*initialValues_new[rightMotherAnastomosis]['radius'][-1]**2
+                                
+                                Q_RM = np.sqrt(2.*(Ptot_daughter - P_RM)/rho)*A_RM
+                                Q_LM = np.sqrt(2.*(Ptot_daughter - P_LM)/rho)*A_LM
+                                Q_scaleAnastomosis = Q_D/(Q_RM + Q_LM)
+                                
+                                if vesselId == leftMotherAnastomosis:
+                                    qm = Q_LM*Q_scaleAnastomosis
+                                elif vesselId == rightMotherAnastomosis:
+                                    qm = Q_RM*Q_scaleAnastomosis
+                                else:
+                                    print("Error in adjustForTotalPressure. Wrong handling of anastomosis")
+                                    
+                                P_prev_it = initialValues_new[vesselId]['Pressure']
+                                Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
+                                
+                    
+                                P_dynamic = initialValues_new[vesselId]['DynamicPressure'][-1]
+                    
+                                p1 = P_daughter + P_dynamic_daughter - P_dynamic
+                                p0 = p1 + qm*Rv
+                                
+                                initialValues_new[vesselId]['Flow'] = [qm, qm]
+                                initialValues_new[vesselId]['Pressure'] = [p0, p1]
+                                
+                                leftMother, rightMother = self.vessels[vesselId].leftMother, self.vessels[vesselId].rightMother
+
+                                if leftMother != None and leftMother not in toVisit:
+                                    toVisit.append(leftMother)
+                                if rightMother != None and rightMother not in toVisit:
+                                    toVisit.append(rightMother)
+                                
+                                toVisit.remove(vesselId)
+                        # link
                         else:
     
                             q1 = initialValues_new[leftDaughter]['Flow'][0]
@@ -1819,141 +1864,11 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                 if leftMother != None and leftMother not in toVisit:
                                     toVisit.append(leftMother)
                                 if rightMother != None and rightMother not in toVisit:
-                                    print("Warning: ajust for total Pressure not implemented for anastomisis line approx 1732 cVN")
+                                    toVisit.append(rightMother)
                                 
                                 toVisit.remove(vesselId)
             
-            #print initialValues_new[self.root]['Flow']
-            #print initialValues[idToprint]['Pressure'][0]
-        #import pickle
-        
-#         print initialValues[self.root]['Flow']
-#         print initialValues[idToprint]['Pressure'][0]/133.32
-        
-        
-        #pickle.dump(initialValues_new, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/initialValues_new.p", "wb"))
-        
         return initialValues_new
-    
-    
-    def calculateInitialValusWK(self, lumpedValues=None, nCycles=4.):
-        initialValues = {}
-        inflowBoundaryCondition = None
-        for bc in self.boundaryConditions[self.root]:
-            if bc.type == 1:
-                inflowBoundaryCondition = bc
-        
-        inflowCurve, time, period = inflowBoundaryCondition.getInflowCurve(N=400, nCycles=nCycles)
-                
-        if lumpedValues==None:
-            c_in, c_out = self.vessels[self.root].calcVesselWavespeed_in_out()
-        else:
-            P = lumpedValues[self.root]['Pressure']
-            c_in, c_out = self.vessels[self.root].calcVesselWavespeed_in_out(P=P)
-        c_avg = 0.5*(c_in + c_out)
-        l = self.vessels[self.root].length
-        dt = l/c_avg
-        lumpedValues[self.root]['PulseArrivalTime'] = [0, dt]
-        toVisit = []
-        leftDaughter = self.vessels[self.root].leftDaughter
-        rightDaughter = self.vessels[self.root].rightDaughter
-        
-            
-        Qm_root = lumpedValues[self.root]['Flow'][0]
-        Pv = 5*133.32
-        P0 = 10665
-        Wk = cWKinit.Wk3(time, Pv, nCycles=nCycles)
-        
-        R1, R_tot, C = lumpedValues[self.root]['R1'][0], lumpedValues[self.root]['R'][0], lumpedValues[self.root]['Cw'][0]
-        R2 = R_tot - R1
-        
-        
-        Wk.updateParameters(inflowCurve, P0, R1, C, R2, vesselId=self.root)
-        t_eval = period*(nCycles) - 0.0001
-        P_init_in, Q_init_in = Wk.solveAll(t_eval=t_eval)
-        
-
-        R1, R_tot, C = lumpedValues[self.root]['R1'][-1], lumpedValues[self.root]['R'][-1], lumpedValues[self.root]['Cw'][-1]
-        R2 = R_tot - R1
-        
-        
-        Wk.updateParameters(inflowCurve, P0, R1, C, R2, vesselId=self.root)
-        t_eval = period*(nCycles) - dt
-        P_init_out, Q_init_out = Wk.solveAll(t_eval=t_eval)
-        initialValues[self.root] = {'Pressure':[P_init_in, P_init_out], 'Flow':[Q_init_in, Q_init_out]}
-        
-        initialValues[self.root]['tWK'] = Wk.time.copy() + dt
-        initialValues[self.root]['PWK'] = Wk.Psol.copy()
-        initialValues[self.root]['QWK'] = Wk.Q_array.copy()
-        initialValues[self.root]['WK_name'] = Wk.name
-        if leftDaughter != None:
-            toVisit.append(leftDaughter)
-            Qm = lumpedValues[leftDaughter]['Flow'][0]
-            Qscale = Qm/Qm_root
-            initialValues[leftDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
-        if rightDaughter != None:
-            toVisit.append(rightDaughter)
-            Qm = lumpedValues[rightDaughter]['Flow'][0]
-            Qscale = Qm/Qm_root
-            initialValues[rightDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
-        
-        
-        # traverese from root to periphery to ajust for total pressure
-        while len(toVisit) > 0:
-            #print "first loop"
-            for vesselId in toVisit:
-                
-                leftMother = self.vessels[vesselId].leftMother
-                
-                pulseArriveInlet = lumpedValues[leftMother]['PulseArrivalTime'][-1]
-                if lumpedValues==None:
-                    c_in, c_out = self.vessels[vesselId].calcVesselWavespeed_in_out()
-                else:
-                    P = lumpedValues[vesselId]['Pressure']
-                    c_in, c_out = self.vessels[vesselId].calcVesselWavespeed_in_out(P=P)
-                c_avg = 0.5*(c_in + c_out)
-                l = self.vessels[vesselId].length
-                dt = l/c_avg
-                lumpedValues[vesselId]['PulseArrivalTime'] = [pulseArriveInlet, pulseArriveInlet + dt]
-                
-                
-                leftDaughter = self.vessels[vesselId].leftDaughter
-                rightDaughter = self.vessels[vesselId].rightDaughter
-                
-                
-                Qm = lumpedValues[vesselId]['Flow'][0]
-                Qscale = Qm/Qm_root
-        
-                R1, R_tot, C = lumpedValues[vesselId]['R1'][-1], lumpedValues[vesselId]['R'][-1], lumpedValues[vesselId]['Cw'][-1]
-                R2 = R_tot - R1
-                
-                
-                Wk.updateParameters(inflowCurve*Qscale, P0, R1, C, R2, vesselId=vesselId)
-                t_eval = period*(nCycles) - pulseArriveInlet - dt
-                P_init_out, Q_init_out = Wk.solveAll(t_eval=t_eval)
-                
-                initialValues[vesselId]['Pressure'][-1] = P_init_out
-                initialValues[vesselId]['Flow'][-1] = Q_init_out
-                
-                initialValues[vesselId]['tWK'] = Wk.time.copy() + pulseArriveInlet + dt
-                initialValues[vesselId]['PWK'] = Wk.Psol.copy()
-                initialValues[vesselId]['QWK'] = Wk.Q_array.copy()
-                initialValues[vesselId]['WK_name'] = Wk.name
-                
-                if leftDaughter != None:
-                    toVisit.append(leftDaughter)
-                    Qmld = lumpedValues[leftDaughter]['Flow'][0]
-                    Qscale = Qmld/Qm
-                    initialValues[leftDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
-                if rightDaughter != None:
-                    toVisit.append(rightDaughter)
-                    Qmrd = lumpedValues[rightDaughter]['Flow'][0]
-                    Qscale = Qmrd/Qm
-                    initialValues[rightDaughter] = {'Pressure':[P_init_out, None], 'Flow':[Q_init_out*Qscale, None]}
-                
-                toVisit.remove(vesselId)
-                
-        self.initialValues = initialValues
                 
     
     def calcReflectionJunction(self, lumpedValues=None):
@@ -2262,12 +2177,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         toVisit.append(leftMother)
                     toVisit.remove(vesselId)
         
-        #import pickle
-        #pickle.dump(self.lumpedValues, open("lumpedValuesWithWeighted.p", "wb"))
-        #print self.lumpedValues[2]
-#         print self.lumpedValues[55]["L"]
-#         print self.lumpedValues[55]["C"]  
-#         exit()
 
 
     def calculateInitialValues(self):
@@ -2334,8 +2243,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
             
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-            self.calculateInitialValuesLinearSystem(meanInflow)
-            from copy import deepcopy
+            self.initialValues = self.calculateInitialValuesLinearSystem(meanInflow)
+            
             self.lumpedValues = deepcopy(self.initialValues)
             
             return
@@ -2353,50 +2262,21 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
             
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-            #self.calcReflectionJunction()
-            self.calculateInitialValuesLinearSystem(meanInflow)
-            from copy import deepcopy
-            self.lumpedValues = deepcopy(self.initialValues)
-            self.calcComplianceAndInertance(self.lumpedValues, weightOnlyPeripheral=True)
-            #self.calcComplianceAndInertance(self.lumpedValues["MeanValuesStatic"], state="MeanValues", weightOnlyPeripheral=True)
-            self.calcComplianceAndInertance(self.lumpedValues["MeanValues"], state="MeanValues", weightOnlyPeripheral=True)
-
-            #import pickle
-            #SystolicDiastolicPressure = pickle.load(open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/systolicDiastolicPressures.p", 'rb'))
-            #self.lumpedValues['Systolic'] = SystolicDiastolicPressure['Systolic']
-            #self.lumpedValues['Diastolic'] = SystolicDiastolicPressure['Diastolic']
-
-            #self.calcComplianceAndInertance(self.lumpedValues['Systolic'], state="MeanValues", weightOnlyPeripheral=True)
-            #self.calcComplianceAndInertance(self.lumpedValues['Diastolic'], state="MeanValues", weightOnlyPeripheral=True)
             
-            #self.lumpedValues = deepcopy(self.initialValues)
-            #print "\n"
-            #self.calcReflectionJunction(lumpedValues=self.lumpedValues["MeanValues"])
-            import pickle
-            #optDict = pickle.load(open('/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55Model/ReducedNetworks/ReductionCases/OptimizationDicts/optAllVesselsWeighted_tot_constant_average.p', 'rb')) 
-            #self.calcComplianceAndInertance(self.lumpedValues["MeanValues"], state="MeanValues", useOptR1=True, optDict=optDict)
-            
-            #pickle.dump(self.lumpedValues, open("/home/fredrik/Documents/git/NTNU_KCL/apps/Windkessel/lumpedValues96.p", "wb"))
-            #self.calculateInitialValusWK(lumpedValues=self.lumpedValues["MeanValues"], nCycles=6)
+            self.lumpedValues = self.calculateInitialValuesLinearSystem(meanInflow)
+
             self.calculateInitialValuesFromSolution()
-            #self.lumpedValues = self.initialValues.copy()
+
             
             return
 
                 
         elif self.initialsationMethod == 'ConstantPressure':
             meanInflowlumped, self.initPhaseTimeSpanlumped = inflowBoundaryCondition.findMeanFlow()
-            #self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-            #self.calculateInitialValuesLinearSystem(meanInflowlumped)
-            
-            #self.lumpedValues = self.initialValues
-            #self.calcComplianceAndInertance()
+
             try:
-                print("skipping this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! line 2391 classVascularNetwork")
-                #self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-                #self.calculateInitialValuesLinearSystem(meanInflowlumped)
-                #from copy import deepcopy
-                #self.lumpedValues = deepcopy(self.initialValues)
+                self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+                self.lumpedValues = self.calculateInitialValuesLinearSystem(meanInflowlumped)
 
             except Exception:
                 self.exception("classVascularNetwork (ConstantPressure init): Unable to estimate lumpedValues")
@@ -2449,7 +2329,6 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     self.initialValues = initialValues
             else:  # with no gravity
                 self.initialValues = initialValues
-            self.lumpedValues = initialValues
             return
 
 
@@ -2527,6 +2406,33 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, root)
 
         self.initialValues = initialValuesWithGravity
+    
+    def calcLumpedValues(self, it=1, includeDynamic=False):
+
+        inflowBoundaryCondition = None
+        for bc in self.boundaryConditions[self.root]:
+            if bc.type == 1:
+                inflowBoundaryCondition = bc
+        try:
+            meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlow()
+            #meanInflow, self.initPhaseTimeSpan = inflowBoundaryCondition.findMeanFlowAndMeanTime(0.0, quiet=self.quiet)
+            self.initialisationPhaseExist = False
+            if self.initPhaseTimeSpan > 0:
+                self.initialisationPhaseExist
+
+        except Exception:
+            self.exception("classVascularNetwork: Unable to evaluate time shift to 0 at inflow point")
+        
+        self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+        
+        lumpedValues = self.calculateInitialValuesLinearSystem(meanInflow, it=it, includeDynamic=includeDynamic)
+        
+        self.lumpedValues = deepcopy(lumpedValues)
+        
+        return lumpedValues
+
+        
+        
 
     def evaluateNetworkResistanceAndCompliance(self):
 
@@ -2895,7 +2801,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if self.venousPool is not None:
             venousPoolPressure = self.venousPool.P[0]
         else:
-            venousPoolPressure = 0.0
+            venousPoolPressure = 5*133.32
 
         # calculate absolute and relative venous pressure at boundary nodes
         for vesselId in self.boundaryVessels:
@@ -2982,7 +2888,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         if self.venousPool is not None:
             venousPoolPressure = self.venousPool.P[0]
         else:
-            venousPoolPressure = 0.0
+            venousPoolPressure = self.centralVenousPressure
 
 
         # calculate absolute and relative venous pressure at boundary nodes
@@ -3007,101 +2913,101 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     bc.update({'venousPressure':relativeVenousPressure})
 
 
-def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet = None):
-    """
-    This method calculates the reflection coefficients of a vascularNetwork by
-    traversing it as binary tree.
-    Inputparameter:
-        vascularNetwork (instance::classVascularNetwork())
-        solutionDataSet = None (optional)
-        If a solutionDataSet is given, the coefficients are calculated transient taking the 
-        soultion data into account.
-        Else, it the coefficients are calculated with the initial condictions.
-    Retrun:  Rf_transient= {}  == { str(bifurcation) : [Rf_mother, Rf_leftDaughter, Rf_rightDaughter] }
-    """
-    
-    ## firstTraverse the tree and create a list of all Bifurcations
-    bifurcationList = []
-    viz = []
-    #find root
-    root = vascularNetwork.root[0]        
-    # add root to the viz vessels if root has daughters:
-    if vascularNetwork.vessels[root].leftDaugther is not None:
-        viz.append(root)
-    # loop through tree until all daughters are conected
-    while len(viz) != 0:
-        # get the mother vessel (already added) and add its daughters
-        motherVessel = viz.pop(0)
-        # find left daughter
-        leftDaughter  = vascularNetwork.vessels[motherVessel].leftDaugther
-        rightDaughter = vascularNetwork.vessels[motherVessel].rightDaugther
-        #append the mother to the calc list
-        curCalcList = [motherVessel]
-        
-        if leftDaughter is not None:
-            #append the left daughter to the calc list
-            curCalcList.append(leftDaughter)
-           
-            if rightDaughter is not None:
-                #append the left daughter to the calc list
-                curCalcList.append(rightDaughter)
-            else:
-                curCalcList.append(None)
-            # check if leftDaughter has also daughters 
-            if vascularNetwork.vessels[leftDaughter].leftDaugther is not None:
-                viz.append(leftDaughter)
-                
-            if rightDaughter is not None:
-                # check if rightDaughter has also daughters 
-                if vascularNetwork.vessels[rightDaughter].leftDaugther is not None:
-                    viz.append(rightDaughter)
-        bifurcationList.append(curCalcList)
-          
-    # static // initial condition
-    if solutionDataSet == None:
-        Rf_static = {}
-        rho = vascularNetwork.globalFluid['rho'] # local rho!!
-        print('Rf at bifurcations for initial condition')
-        for bifurcation in bifurcationList:
-            mother = bifurcation[0]
-            leftDaughter = bifurcation[1]
-            rightDaughter = bifurcation[2]
-            # bifurcation    
-            Y_m = C*c# = (vascularNetwork.vessels[mother].r[-1]**2*np.pi) / (rho*vascularNetwork.vessels[mother].c[-1])
-            Y_lD # =  (vascularNetwork.vessels[leftDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[leftDaughter].c[0])
-            if rightDaughter is not None:
-                Y_rD # = (vascularNetwork.vessels[rightDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[rightDaughter].c[0])          
-            else :
-                Y_rD = 0.0
-            Rf_static[bifurcation] = (Y_m-Y_lD-Y_rD) / (Y_m+Y_lD+Y_rD)
-             
-        return Rf_static
-    else:
-    # over time // after simulation
-        print('Rf at bifurcations transient')
-        Rf_transient = {}
-        rho = vascularNetwork.globalFluid['rho'] # change to local
-        for bifurcation in bifurcationList:
-            mother = bifurcation[0]
-            leftDaughter = bifurcation[1]
-            rightDaughter = bifurcation[2]
-            
-            motherAsol = solutionDataSet['Area'][mother][:,[-1]]
-            motherCsol = solutionDataSet['WaveSpeed'][mother][:,[-1]]
-            leftDaughterAsol = solutionDataSet['Area'][leftDaughter][:,[0]]
-            leftDaughterCsol = solutionDataSet['WaveSpeed'][leftDaughter][:,[0]]
-            
-            Y_m  = (motherAsol) / (rho*motherCsol)
-            Y_lD  =  (leftDaughterAsol) / (rho*leftDaughterCsol)
-            
-            if rightDaughter is not None:
-                rightDaughterAsol = solutionDataSet['Area'][rightDaughter][:,[0]]
-                rightDaughterCsol = solutionDataSet['WaveSpeed'][rightDaughter][:,[0]]
-        
-                Y_rD  =  (rightDaughterAsol) / (rho*rightDaughterCsol)
-            else :
-                Y_rD = 0.0
-                
-            Rf_transient[str(bifurcation)] = [(Y_m-Y_lD-Y_rD) / (Y_m+Y_lD+Y_rD),(Y_lD-Y_m-Y_rD) / (Y_m+Y_lD+Y_rD),(Y_rD-Y_lD-Y_m) / (Y_m+Y_lD+Y_rD)]
-            
-        return Rf_transient
+# def calculateReflectionCoefficientBifurcations(vascularNetwork, solutionDataSet = None):
+#     """
+#     This method calculates the reflection coefficients of a vascularNetwork by
+#     traversing it as binary tree.
+#     Inputparameter:
+#         vascularNetwork (instance::classVascularNetwork())
+#         solutionDataSet = None (optional)
+#         If a solutionDataSet is given, the coefficients are calculated transient taking the 
+#         soultion data into account.
+#         Else, it the coefficients are calculated with the initial condictions.
+#     Retrun:  Rf_transient= {}  == { str(bifurcation) : [Rf_mother, Rf_leftDaughter, Rf_rightDaughter] }
+#     """
+#     
+#     ## firstTraverse the tree and create a list of all Bifurcations
+#     bifurcationList = []
+#     viz = []
+#     #find root
+#     root = vascularNetwork.root[0]        
+#     # add root to the viz vessels if root has daughters:
+#     if vascularNetwork.vessels[root].leftDaugther is not None:
+#         viz.append(root)
+#     # loop through tree until all daughters are conected
+#     while len(viz) != 0:
+#         # get the mother vessel (already added) and add its daughters
+#         motherVessel = viz.pop(0)
+#         # find left daughter
+#         leftDaughter  = vascularNetwork.vessels[motherVessel].leftDaugther
+#         rightDaughter = vascularNetwork.vessels[motherVessel].rightDaugther
+#         #append the mother to the calc list
+#         curCalcList = [motherVessel]
+#         
+#         if leftDaughter is not None:
+#             #append the left daughter to the calc list
+#             curCalcList.append(leftDaughter)
+#            
+#             if rightDaughter is not None:
+#                 #append the left daughter to the calc list
+#                 curCalcList.append(rightDaughter)
+#             else:
+#                 curCalcList.append(None)
+#             # check if leftDaughter has also daughters 
+#             if vascularNetwork.vessels[leftDaughter].leftDaugther is not None:
+#                 viz.append(leftDaughter)
+#                 
+#             if rightDaughter is not None:
+#                 # check if rightDaughter has also daughters 
+#                 if vascularNetwork.vessels[rightDaughter].leftDaugther is not None:
+#                     viz.append(rightDaughter)
+#         bifurcationList.append(curCalcList)
+#           
+#     # static // initial condition
+#     if solutionDataSet == None:
+#         Rf_static = {}
+#         rho = vascularNetwork.globalFluid['rho'] # local rho!!
+#         print('Rf at bifurcations for initial condition')
+#         for bifurcation in bifurcationList:
+#             mother = bifurcation[0]
+#             leftDaughter = bifurcation[1]
+#             rightDaughter = bifurcation[2]
+#             # bifurcation    
+#             Y_m = C*c# = (vascularNetwork.vessels[mother].r[-1]**2*np.pi) / (rho*vascularNetwork.vessels[mother].c[-1])
+#             Y_lD # =  (vascularNetwork.vessels[leftDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[leftDaughter].c[0])
+#             if rightDaughter is not None:
+#                 Y_rD # = (vascularNetwork.vessels[rightDaughter].r[0]**2*np.pi) / (vascularNetwork.globalFluid[rho]*vascularNetwork.vessels[rightDaughter].c[0])          
+#             else :
+#                 Y_rD = 0.0
+#             Rf_static[bifurcation] = (Y_m-Y_lD-Y_rD) / (Y_m+Y_lD+Y_rD)
+#              
+#         return Rf_static
+#     else:
+#     # over time // after simulation
+#         print('Rf at bifurcations transient')
+#         Rf_transient = {}
+#         rho = vascularNetwork.globalFluid['rho'] # change to local
+#         for bifurcation in bifurcationList:
+#             mother = bifurcation[0]
+#             leftDaughter = bifurcation[1]
+#             rightDaughter = bifurcation[2]
+#             
+#             motherAsol = solutionDataSet['Area'][mother][:,[-1]]
+#             motherCsol = solutionDataSet['WaveSpeed'][mother][:,[-1]]
+#             leftDaughterAsol = solutionDataSet['Area'][leftDaughter][:,[0]]
+#             leftDaughterCsol = solutionDataSet['WaveSpeed'][leftDaughter][:,[0]]
+#             
+#             Y_m  = (motherAsol) / (rho*motherCsol)
+#             Y_lD  =  (leftDaughterAsol) / (rho*leftDaughterCsol)
+#             
+#             if rightDaughter is not None:
+#                 rightDaughterAsol = solutionDataSet['Area'][rightDaughter][:,[0]]
+#                 rightDaughterCsol = solutionDataSet['WaveSpeed'][rightDaughter][:,[0]]
+#         
+#                 Y_rD  =  (rightDaughterAsol) / (rho*rightDaughterCsol)
+#             else :
+#                 Y_rD = 0.0
+#                 
+#             Rf_transient[str(bifurcation)] = [(Y_m-Y_lD-Y_rD) / (Y_m+Y_lD+Y_rD),(Y_lD-Y_m-Y_rD) / (Y_m+Y_lD+Y_rD),(Y_rD-Y_lD-Y_m) / (Y_m+Y_lD+Y_rD)]
+#             
+#         return Rf_transient
