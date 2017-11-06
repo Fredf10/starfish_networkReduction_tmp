@@ -842,7 +842,7 @@ class Bifurcation():
         Niterations = 0
         Xold = np.array([domega1_2_last, domega2_1_last, domega3_1_last])
 
-        while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.001 or epsilonvalues[2]>0.001:
+        while epsilonvalues[0]>1e-10 or epsilonvalues[1]>0.0001 or epsilonvalues[2]>0.0001:
             """iterative Newton Rahpson solver
                 domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
             each iteration. A1, A2, A3 are also changing, but the value from the previous iteration is used. (should actually be for the next timestep, but this should converge to the correct solution)
@@ -1346,7 +1346,6 @@ class Anastomosis():
         if solvingScheme == "Linear": 
             self._callfcn = self.callLinear
         elif solvingScheme == "NonLinear":
-            print("classconnection 1652: using nonlinear anastomosis model: {0}".format(self.name)) 
             self._callfcn = self.callNonLinear
         else:
             raise ValueError("Connections; wrong solving scheme! {}".format(solvingScheme))
@@ -1597,7 +1596,7 @@ class Anastomosis():
 #         print("\n")
 #         print("domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2 : ", domega1_2_last, domega2_1_last, domega3_1_last, domega1_1, domega2_1, domega3_2)
 #         print("\n")
-        while epsilonvalues[0]>1e-14 or epsilonvalues[1]>0.001 or epsilonvalues[2]>0.001:
+        while epsilonvalues[0]>1e-10 or epsilonvalues[1]>0.0001 or epsilonvalues[2]>0.0001:
             """iterative Newton Rahpson solver
                 domega1_2, domega2_1, domega3_1 are the unknowns that are changing from
             each iteration. A1, A2, A3 are also changing, but the value from the previous iteration is used. (should actually be for the next timestep, but this should converge to the correct solution)
@@ -1657,7 +1656,7 @@ class Anastomosis():
             epsilonvalues = np.abs(F)
             Niterations = Niterations + 1
             
-            if Niterations > 50:
+            if Niterations > 30:
                 if self.quiet:
                     break
                 else:

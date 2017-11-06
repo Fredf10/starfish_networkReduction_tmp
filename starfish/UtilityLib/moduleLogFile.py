@@ -358,14 +358,18 @@ class NetworkLogFile:
                 
                 if deltaP > deltaP_max:
                     deltaP_max = deltaP
+                    vesselId_max = vesselId
                     
             deltaPround = round(deltaP_max/133.32, roundTo)
             if deltaPround > 1.0:
                 fLogFile.write(r"\textcolor{red}{" + str(deltaPround) + "}")
+                fLogFile.write(" ({0})".format(vesselId))
             elif deltaPround > 0.1:
                 fLogFile.write(r"\textcolor{orange}{" + str(deltaPround) + "}")
+                fLogFile.write(" ({0})".format(vesselId))
             else:
                 fLogFile.write(r"\textcolor{green}{" + str(deltaPround) + "}")
+                fLogFile.write(" ({0})".format(vesselId))
             if n != N - 1:
                 fLogFile.write(r'    &    ')
         fLogFile.write(r'\\')
@@ -424,22 +428,26 @@ class NetworkLogFile:
         fLogFile.write(r'}')
         fLogFile.write('\n')
         
-        fLogFile.write('$\epsilon{P}_{avg}^1$')
+        vesselToCompare = 1
+        fLogFile.write('$\epsilon{P}_{avg}^{' + str(vesselToCompare) + '}$')
         fLogFile.write(r'    &    ')
         
-        fLogFile.write(str(round(self.compareOtherSolutionValues[self.vascularNetwork.root]['epsilonAvgP']*100, roundTo)))
+        fLogFile.write(str(round(self.compareOtherSolutionValues[vesselToCompare]['epsilonAvgP']*100, roundTo)))
         fLogFile.write(r'\\')
         fLogFile.write('\n')
 
-        fLogFile.write('$\epsilon{P}_{sys}^{max}$')
-        fLogFile.write(r'    &    ')
+
         epsilonP_max = 0
+        vesselMax = -1
         for vesselId in self.treeTraverseList_sorted:
             epsilonP = compareOtherSolutionValues[vesselId]['epsilonAvgP']
             
             if epsilonP > epsilonP_max:
                 epsilonP_max = epsilonP
-                
+                vesselMax = vesselId
+
+        fLogFile.write('$\epsilon{P}_{avg}^{max=' + str(vesselMax) + '}$')
+        fLogFile.write(r'    &    ')
         epsilonPround = round(epsilonP_max*100, roundTo)
         fLogFile.write(str(epsilonPround))
             
@@ -552,28 +560,50 @@ class NetworkLogFile:
         meanValueSum = 0
         varianceSum = 0
         
+        epsilonMax = 0
+        epsilonSum = 0
+
+        epsilonMax_Q = 0
+        epsilonSum_Q = 0
+        
+        round_to = 5
         for n, vesselId in enumerate(self.treeTraverseList_sorted):
             [Pin, Pout] = lumpedValues[vesselId]['Pressure'] #['MeanValues']
             [Qin, Qout] = lumpedValues[vesselId]['Flow'] # ['MeanValues']
             R = Rcum[vesselId]
             
-            Qin_ml_s_lump = round(Qin*1e6, 3)
-            Qin_perc_lump = round(100*Qin/Q_root, 3)
-            Pin_lump, Pout_lump = round(Pin/133.32, 3), round(Pout/133.32, 3)
-            R_lump = round(R*1e-9, 3)
+            Qin_ml_s_lump = round(Qin*1e6, round_to)
+            Qin_perc_lump = round(100*Qin/Q_root, round_to)
+            Pin_lump, Pout_lump = round(Pin/133.32, round_to), round(Pout/133.32, round_to)
+            R_lump = round(R*1e-9, round_to)
             
            
             
             Pin, Pout = averageValues[vesselId]['Pin'], averageValues[vesselId]['Pout']
             Qin = averageValues[vesselId]['Qin']
-            R = averageValues[vesselId]['R']
+            Qin_max = averageValues[vesselId]['Qin_max']
+#             R_in, R_out = averageValues[vesselId]['R']
+#             lumpedValues[vesselId]['R'] = [R_in, R_out]
+#             lumpedValues[vesselId]['R_new'] = [R_in, R_out]
+            Qin_max = round(Qin_max*1e6, round_to)
+            Qin_ml_s = round(Qin*1e6, round_to)
+            Qin_perc = round(100*Qin/Q_root_avg, round_to)
+            Pin, Pout = round(Pin/133.32, round_to), round(Pout/133.32, round_to)
+            #R_in = round(R_in*1e-9, 3)
             
-            Qin_ml_s = round(Qin*1e6, 3)
-            Qin_perc = round(100*Qin/Q_root_avg, 3)
-            Pin, Pout = round(Pin/133.32, 3), round(Pout/133.32, 3)
-            R = round(R*1e-9, 3)
+            P_rel = 100*round(Pin_lump/Pin, round_to)
             
-            P_rel = 100*round(Pin_lump/Pin, 3)
+            epsilon = abs(Pin_lump - Pin)/Pin
+            epsilonSum += ((Pin_lump - Pin)/Pin)**2
+
+            epsilon_Q = abs((Qin_ml_s_lump - Qin_ml_s)/Qin_max)
+            epsilonSum_Q += ((Qin_ml_s_lump - Qin_ml_s)/Qin_max)**2
+            
+            if epsilon > epsilonMax:
+                epsilonMax = epsilon
+
+            if epsilon_Q > epsilonMax_Q:
+                epsilonMax_Q = epsilon_Q
             
             meanValueSum += P_rel
             varianceSum += (P_rel - 100)**2
@@ -599,14 +629,15 @@ class NetworkLogFile:
                 spesificLines = [startNewtableLine1, startNewtableLine2, startNewtableLine3, startNewtableLine4, startNewtableLine5, startNewtableLine6]
                 
                 self.endAndStartTable(fLogFile, spesificLines, resizeTable=False)
-                
-            #import pickle
-            #lumpedValues['1DValues'] = averageValues.copy()
-            #a = lumpedValues['Diastolic']
-            #pickle.dump(lumpedValues, open("/home/fredrik/Documents/Backup_old_desktop/Documents/git/NTNU_KCL/apps/dirAppDev/data/Full55ModelDev/lumpedValues_all_WithStaticAnd1D_weightedCorrect.p", "wb"))
-        #print "meanValue: ", meanValueSum/len(self.treeTraverseList_sorted)
-        #print "standard deviation: ", np.sqrt(varianceSum/len(self.treeTraverseList_sorted))
-        #exit()
+
+#         print 'epsilonMax: ', epsilonMax
+#         print 'ST: ', np.sqrt(epsilonSum/(n + 1))
+# 
+#         print 'epsilonMax_Q: ', epsilonMax_Q
+#         print 'ST_Q: ', np.sqrt(epsilonSum_Q/(n + 1))
+#         
+#         raw_input('press enter to continue')
+
     
                 
     def endAndStartTable(self, fLogFile, spesificLines, resizeTable=False):
@@ -639,7 +670,7 @@ class NetworkLogFile:
         t_end = period*nCycles
         time_compare = np.linspace(t_start, t_end, N + 1)
         
-        print "starting to load solutiondata"
+        print "starting to load solutiondata for calculating averageValues"
         print "averaging between t_start = {0} and t_end = {1}".format(t_start, t_end)
         averageValues = {}
         for vesselName in hdf5File['vessels'].keys():
@@ -657,10 +688,12 @@ class NetworkLogFile:
             Pin, Pout = self.findMean(time_compare, startP), self.findMean(time_compare, endP)
             Qin = self.findMean(time_compare, startQ)
             Qout = self.findMean(time_compare, endQ)
-            R = (Pin - self.venousPressure)/Qin
+            R_in = (Pin - self.venousPressure)/Qin
+            R_out = (Pout - self.venousPressure)/Qout
             tmpValues['Pin'], tmpValues['Pout'] = Pin, Pout
             tmpValues['Qin'] = Qin
-            tmpValues['R'] = R
+            tmpValues['Qin_max'] = np.max(startQ)
+            tmpValues['R'] = [R_in, R_out]
             tmpValues['Pressure'] = [Pin, Pout]
             tmpValues['Flow'] = [Qin, Qout]
             
@@ -775,8 +808,8 @@ class NetworkLogFile:
             vesselId = int(vesselId)
             maxValues = []
             errorValues = []
-            P_prev = None
             startP_all  = hdf5File['vessels'][vesselName]['Psol'][:, 0]
+            startP_list = []
             t_start = time[0]
             t_end = t_start + period
             tck = interpolate.splrep(time, startP_all)
@@ -787,14 +820,14 @@ class NetworkLogFile:
 
                 maxValues.append(np.max(startP))
                 
-                if n > 0:
-                    e = self.calcEpsilonAvg(P_prev, startP, data_type='P')
-                    errorValues.append(e)
-                P_prev = startP
+                startP_list.append(startP)
+                
                 t_start += period
                 t_end += period
-                
-
+            
+            for n in range(nCycles - 1):
+                e = self.calcEpsilonAvg(startP_list[-1], startP_list[n], data_type='P')
+                errorValues.append(e)
             deltaP = np.abs(np.array(maxValues[1:]) - np.array(maxValues[:-1]))
             
             tmpValues['maxValues'] = maxValues
@@ -820,12 +853,16 @@ class NetworkLogFile:
         nCycles = int(round(time[-1]/period))
         nCycles2 = int(round(time2[-1]/period))
         
-        nCycles = min([nCycles, nCycles2])
+        #nCycles = min([nCycles, nCycles2])
         
         t_start = period*(nCycles - 1)
         t_end = period*nCycles
+
+        t_start_2 = period*(nCycles2 - 1)
+        t_end_2 = period*nCycles2
         
         time_compare = np.linspace(t_start, t_end, N + 1)
+        time_compare2 = np.linspace(t_start_2, t_end_2, N + 1)
         compareOtherSolutionValues = {}
         for vesselName in hdf5File['vessels'].keys():
             tmpValues = {}
@@ -840,7 +877,7 @@ class NetworkLogFile:
         
             
             startP = interpolate.splev(time_compare, tck)
-            startP2 = interpolate.splev(time_compare, tck2)
+            startP2 = interpolate.splev(time_compare2, tck2)
 
             
             e = self.calcEpsilonAvg(startP2, startP, data_type='P')

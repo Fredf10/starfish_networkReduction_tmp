@@ -63,9 +63,9 @@ class CreateNetwork(cSBO.StarfishBaseObject):
         self.boundaryVesselsBaseline = vascularNetwork.boundaryVessels
         self.lumpedValues = vascularNetwork.lumpedValues
     
-    def findMindt(self, Nmin=3, CFL=0.9):
+    def findMindt(self, Nmin=5, CFL=0.9):
         
-        minDtDict = {}
+        
         minDt = 1000.
         
         for vesselId in self.treeTraverseList_sorted:
@@ -83,6 +83,7 @@ class CreateNetwork(cSBO.StarfishBaseObject):
                 minDt = dt
         
         return minDt
+    
     
     def assignNodes(self, dt, CFL=0.9):
         

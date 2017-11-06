@@ -123,7 +123,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.vascularNetwork.initialize(initializeForSimulation = True)
         
         if self.vascularNetwork.dt < 0:
-            self.initializeTimeVariables(quiet)
+            self.initializeTimeVariablesNew(quiet)
         else:
             self.initializeTimeVariablesSimple(quiet)
 
@@ -222,8 +222,71 @@ class FlowSolver(cSBO.StarfishBaseObject):
 
 
  
+    def initializeTimeVariablesNew(self, quiet):
         
+        """
+        initialize time variable dt and Tstep
+        """
+        self.totalTime = self.vascularNetwork.totalTime
+        CFL = self.vascularNetwork.CFL
+
+        self.dt = self.findMindt(CFL=CFL)
+        self.assignNodes(self.dt, CFL=CFL)
+        print(self.dt, CFL)
+        self.nTSteps = int(np.ceil(self.totalTime/self.dt))
+        # calculate time steps for initialisation phase
+        nTstepsInitPhase = 0
+        if self.vascularNetwork.initialisationPhaseExist:
+            initPhaseTimeSpan = self.vascularNetwork.initPhaseTimeSpan
+            nTstepsInitPhase = int(np.ceil(initPhaseTimeSpan/self.dt))
+        # correct time steps
+        self.nTSteps += nTstepsInitPhase
+
+        # update vascular network variables
+        self.vascularNetwork.update({'dt':self.dt,
+                                     'nTSteps': self.nTSteps,
+                                     'nTstepsInitPhase': nTstepsInitPhase})
+
+    def findMindt(self, Nmin=5, CFL=0.9):
+        
+        
+        minDt = 1000.
+        
+        for vesselId in self.vascularNetwork.treeTraverseList:
+            l = self.vessels[vesselId].length
+            [U_in, U_out]= self.vascularNetwork.lumpedValues[vesselId]['Velocity']
+            Pm = self.vascularNetwork.lumpedValues[vesselId]['Pressure'] #['Pressure']
+            [c_in, c_out] = self.vessels[vesselId].calcVesselWavespeed_in_out(P=Pm)
+            dx = l/Nmin
+            
+            U_pluss_c = max([abs(U_in) + c_in, abs(U_out) + c_out])
+            
+            dt = CFL*dx/U_pluss_c
+            
+            if dt < minDt:
+                minDt = dt
+        
+        return minDt
     
+    
+    def assignNodes(self, dt, CFL=0.9):
+        
+        for vesselId in self.vascularNetwork.treeTraverseList:
+            l = self.vessels[vesselId].length
+            [U_in, U_out]= self.vascularNetwork.lumpedValues[vesselId]['Velocity']
+            Pm = self.vascularNetwork.lumpedValues[vesselId]['Pressure'] #['Pressure']
+            [c_in, c_out] = self.vessels[vesselId].calcVesselWavespeed_in_out(P=Pm)
+            
+            U_pluss_c = max([abs(U_in) + c_in, abs(U_out) + c_out])
+            
+            N = int(round(CFL*l/(dt*U_pluss_c)))
+            CFL_actual = dt*U_pluss_c*N/l
+            if CFL_actual > CFL + 0.1 or CFL_actual > 1.:
+                print("Warning CFL is to big")
+            
+            self.vessels[vesselId].update({'N':N})
+            self.vessels[vesselId].initialize({})
+            
     def initializeTimeVariables(self, quiet):
         """
         initialize time variable dt and Tstep

@@ -1355,7 +1355,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         
         #initialValuePath = mFPH.getDirectory('initialValueFileDirectory', self.name, self.dataNumber, 'write')
-        initialValuePath = "/home/fredrik/starfish_working_directory/Full55Model/InitialValues"
+        initialValuePath = "/home/fredrik/starfish_working_directory/Full96Model/InitialValues"
         initialValues =  {}
         for vesselId in self.treeTraverseList:
             
@@ -1383,7 +1383,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         self.initialValues = initialValues
         
-    def calculateInitialValuesLinearSystem(self, Qmean, it=1, includeDynamic=False):
+    def calculateInitialValuesLinearSystem(self, Qmean, it=10, includeDynamic=False):
         """
         This function convert the system to a lumped model of resistors in series and paralell and calculate average pressure and flow values
         to be used as initial conditions. The system is reduced to a set of linear equations. For every vessel there is an equation for
@@ -1596,7 +1596,8 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 initialValues[vesselId]['Pressure'] = [p0, p1]
                 initialValues[vesselId]['Flow'] = [qm, qm]
                 initialValues[vesselId]['R'] = [p0/qm, p1/qm]
-
+                
+                
                 if it == 0:
                     radiusProximal = self.vessels[vesselId].radiusProximal
                     radiusDistal = self.vessels[vesselId].radiusDistal
@@ -1626,7 +1627,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             initialValuesWithGravity = self.initializeGravityHydrostaticPressure(initialValues, self.root)
             
             initialValues_prev_it = initialValuesWithGravity.copy()
-            
+        
+
+ 
         if includeDynamic:
             initialValues = self.adjustForTotalPressure(initialValues_prev_it)
         else:
@@ -1644,7 +1647,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         
         Qin = initialValues[self.root]['Flow'][0]
         
-        itMax = 10
+        itMax = 100
         
         for it in range(itMax):
 
@@ -1672,7 +1675,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     P_prev_it = initialValues_new[vesselId]['Pressure']
                     Qm_prev_it = initialValues_new[vesselId]['Flow'][0]
                     Rv = self.vessels[vesselId].calcVesselResistance(P=P_prev_it)
-                    print(p0, Qm_prev_it, Rv, vesselId)
+                    #print(p0, Qm_prev_it, Rv, vesselId)
                     p1 = p0 - Qm_prev_it*Rv
                     
                     initialValues_new[vesselId]['Pressure'] = [p0, p1]
@@ -1686,7 +1689,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     initialValues_new[vesselId]['Velocity'] = [Qm_prev_it/areaProximal, Qm_prev_it/areaDistal]
                     initialValues_new[vesselId]['DynamicPressure'] = [0.5*rho*(Qm_prev_it/areaProximal)**2, 0.5*rho*(Qm_prev_it/areaDistal)**2]
                     initialValues_new[vesselId]['radius'] = [radiusProximal, radiusDistal]
-                    initialValues_new[vesselId]['Flow'] = [None, None]
+                    #initialValues_new[vesselId]['Flow'] = [None, None]
                     
                     leftDaughter = self.vessels[vesselId].leftDaughter
                     rightDaughter = self.vessels[vesselId].rightDaughter
@@ -1716,6 +1719,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                 Qout += (p1 - Pv)/R
                 
             Qscale = Qin/Qout
+            print("Qscale:", Qscale)
             #print "Qscale: ", Qscale
                 
             # traverse backwards to match flow with pressuredifference
@@ -1747,7 +1751,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         if leftMother != None and leftMother not in toVisit:
                             toVisit.append(leftMother)
                         if rightMother != None and rightMother not in toVisit:
-                            print("Warning: ajust for total Pressure not implemented for anastomisis line approx 1754 cVN")
+                            toVisit.append(rightMother)
                         
                         toVisit.remove(vesselId)
                         
@@ -1789,12 +1793,12 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                 toVisit.remove(vesselId)
                         # anastomosis
                         elif self.vessels[leftDaughter].rightMother != None:
-                            
+                                #print('hello')
                                 leftMotherAnastomosis = self.vessels[leftDaughter].leftMother
                                 rightMotherAnastomosis = self.vessels[leftDaughter].rightMother
                                 leftDaughterAnastomosis = leftDaughter
                                 
-                                P_daughter = initialValues_new[leftDaughterAnastomosis]['DynamicPressure'][0]
+                                P_daughter = initialValues_new[leftDaughterAnastomosis]['Pressure'][0]
                                 P_dynamic_daughter = initialValues_new[leftDaughterAnastomosis]['DynamicPressure'][0]
                                 Ptot_daughter = P_daughter + P_dynamic_daughter
                                 Q_D = initialValues_new[leftDaughterAnastomosis]['Flow'][0]
@@ -1805,8 +1809,15 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                                 A_LM = np.pi*initialValues_new[leftMotherAnastomosis]['radius'][-1]**2
                                 A_RM = np.pi*initialValues_new[rightMotherAnastomosis]['radius'][-1]**2
                                 
-                                Q_RM = np.sqrt(2.*(Ptot_daughter - P_RM)/rho)*A_RM
-                                Q_LM = np.sqrt(2.*(Ptot_daughter - P_LM)/rho)*A_LM
+                                if Ptot_daughter - P_RM < 0:
+                                    Q_RM = initialValues_new[rightMotherAnastomosis]['Flow'][-1]
+                                else:
+                                    Q_RM = np.sqrt(2.*(Ptot_daughter - P_RM)/rho)*A_RM
+                                if Ptot_daughter - P_LM < 0:
+                                    Q_LM = initialValues_new[leftMotherAnastomosis]['Flow'][-1]
+                                else:
+                                    Q_LM = np.sqrt(2.*(Ptot_daughter - P_LM)/rho)*A_LM
+                                    
                                 Q_scaleAnastomosis = Q_D/(Q_RM + Q_LM)
                                 
                                 if vesselId == leftMotherAnastomosis:
@@ -2264,7 +2275,9 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
             
             self.lumpedValues = self.calculateInitialValuesLinearSystem(meanInflow)
-
+            self.calcComplianceAndInertance(self.lumpedValues, state='MeanValues', weightOnlyPeripheral=True)
+            import pickle
+            pickle.dump(self.lumpedValues, open('/home/fredrik/Documents/git/mypapers/networkReduction/tex/src/lumpedValues96_weighted_correct.p', 'wb'))
             self.calculateInitialValuesFromSolution()
 
             

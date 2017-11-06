@@ -6,6 +6,7 @@ Created on Jun 28, 2017
 from scipy import interpolate
 import h5py, pickle
 import numpy as np
+import os
 import matplotlib.pylab as plt
 
 from starfish.VascularPolynomialChaosLib.testBaseClass import TestBaseClass
@@ -25,7 +26,8 @@ class ConvergenceCase(TestBaseClass):
                              'multiprocessing'          : TestBaseClass.ExtValue(bool),  
                              'numberOfProcessors'       : TestBaseClass.ExtValue(int),
                              'numberOfRefinements'      : TestBaseClass.ExtValue(int),
-                             'perterbVariable'          : TestBaseClass.ExtValue(str, strCases = ['dt', 'dx', 'CFL', 'all'])
+                             'vesselOfInterest'         : TestBaseClass.ExtValue(int),
+                             'dataType'                 : TestBaseClass.ExtValue(str, strCases = ['P', 'Q'])
                              
                            } 
     
@@ -39,7 +41,8 @@ class ConvergenceCase(TestBaseClass):
                             'multiprocessing',
                             'numberOfProcessors',
                             'numberOfRefinements',
-                            'perterbVariable'
+                            'vesselOfInterest',
+                            'dataType'
                             
                             ]
     
@@ -53,7 +56,8 @@ class ConvergenceCase(TestBaseClass):
         self.multiprocessing = False
         self.numberOfProcessors = 1
         self.numberOfRefinements = 4
-        self.perterbVariable = 'all'
+        self.vesselOfInterest = 1
+        self.dataType = 'P'
     
     def createEvaluationCaseFiles(self, convergencePickleCaseFile=None):
         
@@ -115,6 +119,11 @@ class ConvergenceCase(TestBaseClass):
         solutionFileRef = batchDataList[-1]['pathSolutionDataFilename']
         dataNumberRef = batchDataList[-1]['dataNumber']
         errorList = []
+        
+        if os.path.isdir(self.solutionFileDirectory + "/fig/"):
+            pass
+        else:
+            os.mkdir(self.solutionFileDirectory + "/fig/")
         for batchData in batchDataList[:-1]:
             
             solutionFile = batchData['pathSolutionDataFilename']
@@ -149,14 +158,14 @@ class ConvergenceCase(TestBaseClass):
         
         epsilonMax = 0
         time_compare = np.linspace(t_start, t_end, N + 1)
-        compareOtherSolutionValues = {}
+
         for vesselName in hdf5File['vessels'].keys():
-            tmpValues = {}
+
             vesselId = vesselName.split(' - ')[-1]
             vesselId = int(vesselId)
 
-            startP_all  = hdf5File['vessels'][vesselName]['Psol'][:, 0]
-            startP2_all  = hdf5File2['vessels'][vesselName]['Psol'][:, 0]
+            startP_all  = hdf5File['vessels'][vesselName][self.dataType + 'sol'][:, 0]
+            startP2_all  = hdf5File2['vessels'][vesselName][self.dataType + 'sol'][:, 0]
 
             tck = interpolate.splrep(time, startP_all)
             tck2 = interpolate.splrep(time2, startP2_all)
@@ -166,15 +175,15 @@ class ConvergenceCase(TestBaseClass):
             startP2 = interpolate.splev(time_compare, tck2)
 
             
-            epsilon = self.calcEpsilonAvg(startP2, startP, data_type='P')
-            if epsilon > epsilonMax:
+            epsilon = self.calcEpsilonAvg(startP2, startP, data_type=self.dataType)
+            if vesselId == self.vesselOfInterest:
                 epsilonMax = epsilon
                 
                 plt.figure()
                 plt.plot(time_compare, startP, 'r')
                 plt.plot(time_compare, startP2, 'k--')
                 plt.xlabel('t')
-                plt.ylabel('P')
+                plt.ylabel(self.dataType)
                 plt.legend(['dataN' + dataNumber, 'dataN' + dataNumberRef])
                 plt.title("vesselID: {0}".format(vesselId))
                 figFile = self.solutionFileDirectory + "/fig/" + dataNumber + "_" + dataNumberRef + ".pdf"

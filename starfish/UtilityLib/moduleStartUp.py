@@ -139,7 +139,7 @@ def parseOptions(activeOptions, visualisationOnly = False, vascularPolynomialCha
             
             if optionArgument == 1:
                 vizOutput = "2D+3D"
-            elif optionArgument == 2:
+            elif optionArgument == '2':
                 vizOutput = "2D"
             elif optionArgument == 3:
                 vizOutput = "3D"
