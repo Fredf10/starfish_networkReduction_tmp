@@ -38,7 +38,7 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.vessels = vascularNetwork.vessels
         
         self.totalTime = vascularNetwork.totalTime
-        self.dt = -1
+        self.dt = -2.
         self.description = vascularNetwork.description
         self.CFL = vascularNetwork.CFL
         self.timeSaveBegin = vascularNetwork.timeSaveBegin

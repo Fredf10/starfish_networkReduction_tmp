@@ -121,7 +121,9 @@ class FlowSolver(cSBO.StarfishBaseObject):
         # initialize system
         self.vascularNetwork.currentMemoryIndex = self.currentMemoryIndex
         self.vascularNetwork.initialize(initializeForSimulation = True)
-        
+
+        if self.vascularNetwork.dt == - 2.:
+            self.initializeTimeVariablesNew(quiet)
         if self.vascularNetwork.dt < 0:
             self.initializeTimeVariables(quiet)
         else:
