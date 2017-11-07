@@ -1,0 +1,68 @@
+\documentclass[a4paper, 8pt, twoside]{article}
+\usepackage[top=2.5cm, bottom=2.5cm, left=0.5cm, right=0.5cm]{geometry}
+
+%% load different packages
+%=============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\begin{document}
+
+% Fill in title here
+
+\begin{table}[h!]
+\begin{tabular}{ll}
+% Fill solving data here
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h!]
+\begin{tabular}{ll}
+% Fill numerical data here
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h!]
+\begin{tabular}{ll}
+% Fill total vlues here
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h!]
+% Fill periodic values here
+
+
+% Table with modelparameters
+\begin{table}
+\caption{Model Parameters}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{ll*8{c}}
+\hline
+Id & Name & Length & $R_{in} \rightarrow R_{out} $  & $c_{in} \rightarrow c_{out} $ & $C_v$ & $R_v$ & R1/Z & R2 & C \\
+ & & [$cm$] & [$mm$] & [$m/s$] &  [$m^{3}\, {Pa}^{-1}$] & [$Pa\, s\, m^{-3}$] & [$Pa\, s\, m^{-3}$] & [$Pa\, s\, m^{-3}$] &  [$m^{3}\, {Pa}^{-1}$] \\
+ & &  &  &  & $\cdot 10^{10}$ & $\cdot 10^{-9}$ & $\cdot 10^{-9}$ & $\cdot 10^{-9}$ & $\cdot 10^{10}$  \\
+\hline
+% Fill model parameters here
+\end{tabular}}
+\end{table}
+
+% Table with mean values of P and Q calculated from lumped model. Also Rcum at inlet
+\begin{table}
+\caption{Mean values from lumped model (left), and time averaged transient solution (right)}
+
+\begin{tabular}{l|*5{c}|*5{c}}
+\hline
+Id & $Q$ & $Q$ & $P_{in}$ & $P_{out}$ & $R_{cum}$ & $Q$ & $Q$ & $P_{in}$ & $P_{out}$ & $R_{cum}$ \\
+ & [$ml \, s^{-1}$] & [$\%$] & [$mmHg$] & [$mmHg$] & [$Pa\, s\, m^{-3}$] & [$ml \, s^{-1}$] & [$\%$] & [$mmHg$] & [$mmHg$] & [$Pa\, s\, m^{-3}$]  \\
+ &  &  &  & & $\cdot 10^{-9}$ &  &  &  & & $\cdot 10^{-9}$\\
+\hline
+% Fill lumped values here
+\end{tabular}
+\end{table}
+
+\end{document}
