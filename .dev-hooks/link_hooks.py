@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 # Symlinks the hooks to the local git directory
-ret_val = 0 
+
 from __future__ import print_function, absolute_import
 from future.utils import iteritems, iterkeys, viewkeys, viewitems, itervalues, viewvalues
 from builtins import input as input3
@@ -12,7 +12,7 @@ import sys
 import git
 
 from subprocess import check_output, CalledProcessError
-
+ret_val = 0 
 def root():
     ''' returns the absolute path of the repository root '''
     try:
