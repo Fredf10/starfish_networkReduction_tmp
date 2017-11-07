@@ -123,7 +123,7 @@ class FlowSolver(cSBO.StarfishBaseObject):
         self.vascularNetwork.initialize(initializeForSimulation = True)
         
         if self.vascularNetwork.dt < 0:
-            self.initializeTimeVariablesNew(quiet)
+            self.initializeTimeVariables(quiet)
         else:
             self.initializeTimeVariablesSimple(quiet)
 

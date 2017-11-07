@@ -6,6 +6,7 @@
     <CFL>0.8</CFL>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
     <minSaveDt unit="s">-1</minSaveDt>
+    <dt unit="s">-1</dt>
     <maxMemory unit="MB">0.5</maxMemory>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">0.0</gravityConstant>

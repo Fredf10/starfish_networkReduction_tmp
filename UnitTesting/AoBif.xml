@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<AoBif id="100" version="4.2">
+  <simulationContext>
+    <description>None</description>
+    <totalTime unit="s">2.405</totalTime>
+    <CFL>0.8</CFL>
+    <dt unit="s">-1.0</dt>
+    <timeSaveBegin unit="s">0.0</timeSaveBegin>
+    <minSaveDt unit="s">0.005</minSaveDt>
+    <maxMemory unit="MB">20.0</maxMemory>
+    <gravitationalField>False</gravitationalField>
+    <gravityConstant unit="m s-2">0.0</gravityConstant>
+  </simulationContext>
+  <solverCalibration>
+    <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
+    <rigidAreas>False</rigidAreas>
+    <simplifyEigenvalues>False</simplifyEigenvalues>
+    <riemannInvariantUnitBase>Pressure</riemannInvariantUnitBase>
+    <automaticGridAdaptation>True</automaticGridAdaptation>
+  </solverCalibration>
+  <initialisationControls>
+    <initialsationMethod>FromSolution</initialsationMethod>
+    <initMeanFlow unit="m3 s-1">0.0</initMeanFlow>
+    <initMeanPressure unit="Pa">0.0</initMeanPressure>
+    <estimateWindkesselCompliance>No</estimateWindkesselCompliance>
+    <compPercentageWK3>0.2</compPercentageWK3>
+    <compPercentageTree>0.8</compPercentageTree>
+    <compTotalSys unit="m3 Pa-1">4.895587352e-08</compTotalSys>
+  </initialisationControls>
+  <globalFluid>
+    <my unit="Pa s">0.0035</my>
+    <rho unit="kg m-3">1060.0</rho>
+    <gamma>9.0</gamma>
+  </globalFluid>
+  <externalStimuli/>
+  <baroreceptors/>
+  <communicators/>
+  <boundaryConditions>
+    <boundaryCondition vesselId="1">
+      <Flow-FromFile>
+        <amp unit="m3 s-1">1.0</amp>
+        <ampConst unit="m3 s-1">0.0</ampConst>
+        <Npulse>17.0</Npulse>
+        <Tpulse unit="s">0.0</Tpulse>
+        <freq unit="s-1">1.25</freq>
+        <Tspace unit="s">0.0</Tspace>
+        <runtimeEvaluation>False</runtimeEvaluation>
+        <filePathName>/home/fredrik/Documents/git/NTNU_KCL/workingDir/Full96Model/inflow.csv</filePathName>
+        <prescribe>total</prescribe>
+      </Flow-FromFile>
+    </boundaryCondition>
+    <boundaryCondition vesselId="2">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">136222196.295</Rc>
+        <Rtotal unit="Pa s m-3">144816385.838</Rtotal>
+        <C unit="m3 Pa-1">7.60025761653e-09</C>
+        <Z unit="Pa s m-3">8594189.54367</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+    <boundaryCondition vesselId="3">
+      <Windkessel-3Elements>
+        <Rc unit="Pa s m-3">729340386.767</Rc>
+        <Rtotal unit="Pa s m-3">758891231.362</Rtotal>
+        <C unit="m3 Pa-1">1.73906853025e-09</C>
+        <Z unit="Pa s m-3">29550844.595</Z>
+      </Windkessel-3Elements>
+    </boundaryCondition>
+  </boundaryConditions>
+  <randomInputManager/>
+  <vessels>
+    <vessel Id="1" name="Ascending Aorta">
+      <topology>
+        <leftDaughter>2</leftDaughter>
+        <rightDaughter>3</rightDaughter>
+        <angleYMother unit="rad">1.57079632679</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.06</length>
+        <radiusProximal unit="m">0.01487</radiusProximal>
+        <radiusDistal unit="m">0.0147</radiusDistal>
+        <N>130</N>
+      </geometry>
+      <compliance>
+        <complianceType>Laplace3</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">10665.78944</Ps>
+        <As unit="m2">None</As>
+        <wallThickness unit="m">0.0022272261</wallThickness>
+        <youngModulus unit="m2">225000.0</youngModulus>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">0.0035</my>
+        <rho unit="kg m-3">1060.0</rho>
+        <gamma>9.0</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="2" name="Aortic Arch I">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">1.57079632679</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.02</length>
+        <radiusProximal unit="m">0.0129</radiusProximal>
+        <radiusDistal unit="m">0.0129</radiusDistal>
+        <N>43</N>
+      </geometry>
+      <compliance>
+        <complianceType>Laplace3</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">10665.78944</Ps>
+        <As unit="m2">None</As>
+        <wallThickness unit="m">0.0019322894</wallThickness>
+        <youngModulus unit="m2">225000.0</youngModulus>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">0.0035</my>
+        <rho unit="kg m-3">1060.0</rho>
+        <gamma>9.0</gamma>
+      </fluid>
+    </vessel>
+    <vessel Id="3" name="Brachiocephalic Artery">
+      <topology>
+        <leftDaughter>None</leftDaughter>
+        <rightDaughter>None</rightDaughter>
+        <angleYMother unit="rad">1.57079632679</angleYMother>
+      </topology>
+      <geometry>
+        <geometryType>cone</geometryType>
+        <length unit="m">0.034</length>
+        <radiusProximal unit="m">0.00699</radiusProximal>
+        <radiusDistal unit="m">0.00699</radiusDistal>
+        <N>73</N>
+      </geometry>
+      <compliance>
+        <complianceType>Laplace3</complianceType>
+        <constantCompliance>False</constantCompliance>
+        <externalPressure unit="Pa">0.0</externalPressure>
+        <Ps unit="Pa">10665.78944</Ps>
+        <As unit="m2">None</As>
+        <wallThickness unit="m">0.0010642158</wallThickness>
+        <youngModulus unit="m2">225000.0</youngModulus>
+      </compliance>
+      <fluid>
+        <applyGlobalFluid>True</applyGlobalFluid>
+        <my unit="Pa s">0.0035</my>
+        <rho unit="kg m-3">1060.0</rho>
+        <gamma>9.0</gamma>
+      </fluid>
+    </vessel>
+  </vessels>
+  <venousPool/>
+</AoBif>

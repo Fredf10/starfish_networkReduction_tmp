@@ -3,6 +3,7 @@
   <simulationContext>
     <description>my STARFiSh simulation</description>
     <totalTime unit="s">1.0</totalTime>
+    <dt unit="s">-1</dt>
     <timeSaveBegin unit="s">0.0</timeSaveBegin>
     <minSaveDt unit="s">-1</minSaveDt>
 	<maxMemory unit="MB">0.500</maxMemory>

@@ -1499,15 +1499,20 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                         
                 vesselindex = self.treeTraverseList_sorted.index(vesselId) # find index of vesselID in rangeList
                 Q_index = vesselindex + len(self.connectionNodes) - 1 # -1 due to Q1 is known and python index start at 0
-                
+
                 # TODO: 1) both flow and pressure BC at inlet
                 if vesselId != self.root and boundaryVessel == False:
                     M[n, Pstart_index] = 1
                     M[n, Pend_index] = -1
                     M[n, Q_index] = - 1.e-6*nodeToNodeResistance/133.32
-                elif vesselId == self.root:
+                elif vesselId == self.root and len(self.treeTraverseList_sorted) > 1:
                     M[n, Pstart_index] = 1
                     M[n, Pend_index] = -1
+                    RHS[n] = Qmean*1.e-6*nodeToNodeResistance/133.32
+
+                elif vesselId == self.root:
+                    M[n, Pstart_index] = 1
+                    #M[n, Pend_index] = -1
                     RHS[n] = Qmean*1.e-6*nodeToNodeResistance/133.32
                  
                 elif boundaryVessel:
@@ -1515,7 +1520,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     M[n, Pstart_index] = 1
                     M[n, Q_index] = -1.e-6*nodeToNodeResistance/133.32
                     RHS[n] = 0 # could set to venous pressure
-            
+
             for leftMother, rightMother, leftDaughter, rightDaughter in (self.treeTraverseConnections):
         
                 """iter through the list of junctions and add the equation about conservation of mass:
@@ -1550,7 +1555,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
                     Q_index = vesselindex + len(self.connectionNodes) - 1 #int(vesselId)
                     
                     M[n, Q_index] = - 1
-                    
+
             meanPandQ = np.linalg.solve(M, RHS)
                     
             for n, vesselId in enumerate(self.treeTraverseList_sorted):
@@ -2287,12 +2292,13 @@ class VascularNetwork(cSBO.StarfishBaseObject):
         elif self.initialsationMethod == 'ConstantPressure':
             meanInflowlumped, self.initPhaseTimeSpanlumped = inflowBoundaryCondition.findMeanFlow()
 
-            try:
-                self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
-                self.lumpedValues = self.calculateInitialValuesLinearSystem(meanInflowlumped)
+            #try:
+            self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
+                
+            self.lumpedValues = self.calculateInitialValuesLinearSystem(meanInflowlumped)
 
-            except Exception:
-                self.exception("classVascularNetwork (ConstantPressure init): Unable to estimate lumpedValues")
+            #except Exception:
+            #    self.exception("classVascularNetwork (ConstantPressure init): Unable to estimate lumpedValues, meanInflow: "+ str(meanInflowlumped))
             constantPressure = self.initMeanPressure
             try:
                 constantPressure = self.initMeanPressure
