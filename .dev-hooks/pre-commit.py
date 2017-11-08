@@ -6,7 +6,7 @@ from builtins import input as input3
 import sys
 import subprocess
 
-ret_val = subprocess.call([sys.executable, "UnitTesting/unitTest_singleVessel.py", "UnitTesting/unitTest_networkReduction.py"])
+ret_val = subprocess.call([sys.executable, "UnitTesting/unitTest_singleVessel.py"])
 if ret_val != 0:
     msg = "ERROR: 1 or more tests failed."
     msg += "\n\nUse the '--no-verify' option to by-pass this hook"
