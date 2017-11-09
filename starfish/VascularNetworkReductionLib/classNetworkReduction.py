@@ -67,6 +67,8 @@ class NetworkReduction(cSBO.StarfishBaseObject):
         self.useVesselsImpedance = False
         self.useAverageValues = False
         
+        self.centralVenousPressure = vascularNetwork.centralVenousPressure
+        
         #print self.vessels
         #print self.boundaryConditions
         #self.test()

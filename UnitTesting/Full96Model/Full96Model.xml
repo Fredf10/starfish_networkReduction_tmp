@@ -10,6 +10,7 @@
     <maxMemory unit="MB">20.0</maxMemory>
     <gravitationalField>False</gravitationalField>
     <gravityConstant unit="m s-2">0.0</gravityConstant>
+    <centralVenousPressure unit="Pa">666.6</centralVenousPressure>
   </simulationContext>
   <solverCalibration>
     <solvingSchemeField>MacCormack_Flux</solvingSchemeField>
