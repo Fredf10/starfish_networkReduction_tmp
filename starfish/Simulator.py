@@ -104,7 +104,7 @@ def main():
     minutesSolve = int(timeSolverSolve/60.)
     secsSolve = timeSolverSolve-minutesSolve*60.
 
-    mLog2 = mLOG.NetworkLogFile(vascularNetwork, dataNumber=dataNumber, dataNumberCompare='100', dt=flowSolver.dt, CpuTimeInit=[minutesInit, secsInit], CpuTimeSolve=[minutesSolve, secsSolve])
+    mLog2 = mLOG.NetworkLogFile(vascularNetwork, dataNumber=dataNumber, dataNumberCompare=None, dt=flowSolver.dt, CpuTimeInit=[minutesInit, secsInit], CpuTimeSolve=[minutesSolve, secsSolve])
     mLog2.writeNetworkLogfile(compileLogFile=True, deleteAuxiliary=True)
     
     

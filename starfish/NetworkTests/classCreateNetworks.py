@@ -62,6 +62,13 @@ class CreateNetwork(cSBO.StarfishBaseObject):
         self.boundaryVessels = vascularNetwork.boundaryVessels
         self.boundaryVesselsBaseline = vascularNetwork.boundaryVessels
         self.lumpedValues = vascularNetwork.lumpedValues
+        
+        root = vascularNetwork.root
+        for bcTmp in self.boundaryConditions[root]:
+            if bcTmp.type == 1:
+                
+                freq = bcTmp.freq
+        self.period = 1./freq
     
     def findMindt(self, Nmin=5, CFL=0.9):
         

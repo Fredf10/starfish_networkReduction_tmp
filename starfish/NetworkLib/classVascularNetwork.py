@@ -2296,6 +2296,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             self.findStartAndEndNodes() # allocate start and end nodes to all vessels in the network
                 
             self.lumpedValues = self.calculateInitialValuesLinearSystem(meanInflowlumped)
+            meanInflow = self.initMeanFlow
 
             #except Exception:
             #    self.exception("classVascularNetwork (ConstantPressure init): Unable to estimate lumpedValues, meanInflow: "+ str(meanInflowlumped))
@@ -2316,7 +2317,7 @@ class VascularNetwork(cSBO.StarfishBaseObject):
             #############################Inititalisation Method constant pressure #############
             initialValues[root] = {}
             initialValues[root]['Pressure'] = [constantPressure, constantPressure]
-            initialValues[root]['Flow'] = [0, 0]
+            initialValues[root]['Flow'] = [meanInflow, 0]
 
             # # set initial values of the vessels by traversing the connections
             for leftMother, rightMother, leftDaughter, rightDaughter in self.treeTraverseConnections:

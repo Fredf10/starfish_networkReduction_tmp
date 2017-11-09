@@ -20,6 +20,7 @@ class NetworkLogFile:
                  dt=None, CpuTimeInit=[None, None], CpuTimeSolve=[None, None]):
         
         self.networkName = vascularNetwork.getVariableValue('name')
+        self.root = vascularNetwork.root
         self.dataNumber = dataNumber
         if networkLogFile == None:
             self.networkLogFile =  mFPH.getFilePath('networkLogFile', self.networkName, dataNumber, 'write')
@@ -84,7 +85,10 @@ class NetworkLogFile:
                 self.writeNumericalData(fLogFile)
                 
             elif "% Fill total vlues here" in line:
-                self.writeTotalValues(fLogFile)
+                try:
+                    self.writeTotalValues(fLogFile)
+                except:
+                    pass
             
             elif "% Fill periodic values here" in line:
                 self.findPeriodicConvergenceValuesFromSolution()
@@ -287,7 +291,10 @@ class NetworkLogFile:
             if vesselId in self.boundaryVessels:
                 bc = self.boundaryConditions[vesselId]
                 if len(bc)>1:
-                    bc = bc[1]
+                    for bcTmp in self.boundaryConditions[vesselId]:
+                        if bcTmp.type != 1:
+                            
+                            bc = bcTmp
                 else:
                     bc = bc[0]
                 R = bc.Rc
@@ -344,7 +351,7 @@ class NetworkLogFile:
                 fLogFile.write(r"\textcolor{orange}{" + str(deltaPround) + "}")
             else:
                 fLogFile.write(r"\textcolor{green}{" + str(deltaPround) + "}")
-            if deltaP != convergenceValues[1]['deltaP'][-1]:
+            if deltaP != convergenceValues[self.root]['deltaP'][-1]:
                 fLogFile.write(r'    &    ')
         fLogFile.write(r'\\')
         fLogFile.write('\n')
@@ -464,7 +471,10 @@ class NetworkLogFile:
             if vesselId in self.boundaryVessels:
                 bc = self.boundaryConditions[vesselId]
                 if len(bc)>1:
-                    bc = bc[1]
+                    for bcTmp in self.boundaryConditions[vesselId]:
+                        if bcTmp.type != 1:
+                            
+                            bc = bcTmp
                 else:
                     bc = bc[0]
                 try:
@@ -486,7 +496,7 @@ class NetworkLogFile:
             cd_out =round(self.vessels[vesselId].cd_out, 2)
 
                 
-            name = self.vessels[vesselId].name
+            name = self.vessels[vesselId].name.replace('_', ' ')
             l = round(self.vessels[vesselId].length*100, 2)
             rProx = round(self.vessels[vesselId].radiusProximal*1000, 2)
             rDist = round(self.vessels[vesselId].radiusDistal*1000, 2)
@@ -660,12 +670,15 @@ class NetworkLogFile:
         time = hdf5File['VascularNetwork']['simulationTime'][:] - hdf5File['VascularNetwork']['simulationTime'][0]
         dt = time[1] - time[0]
         root = self.vascularNetwork.root
-        freq = self.boundaryConditions[root][0].freq
+        for bc in self.vascularNetwork.boundaryConditions[root]:
+            if bc.type == 1:
+                freq = bc.freq
+
         period = 1./freq
         
-        N = int(round(period/dt))
+        N = int((period/dt))
         
-        nCycles = int(round(time[-1]/period))
+        nCycles = int((time[-1]/period))
         t_start = period*(nCycles - 1)
         t_end = period*nCycles
         time_compare = np.linspace(t_start, t_end, N + 1)
@@ -708,7 +721,10 @@ class NetworkLogFile:
         time = hdf5File['VascularNetwork']['simulationTime'][:] - hdf5File['VascularNetwork']['simulationTime'][0]
         dt = time[1] - time[0]
         root = self.vascularNetwork.root
-        freq = self.boundaryConditions[root][0].freq
+        for bc in self.vascularNetwork.boundaryConditions[root]:
+            if bc.type == 1:
+                freq = bc.freq
+
         period = 1./freq
         N = int(period/dt)
         N = len(time) - N - 1
@@ -794,12 +810,17 @@ class NetworkLogFile:
         hdf5File = h5py.File(self.solutionFile, 'r')
         time = hdf5File['VascularNetwork']['simulationTime'][:] - hdf5File['VascularNetwork']['simulationTime'][0]
         dt = time[1] - time[0]
+
+
         root = self.vascularNetwork.root
-        freq = self.boundaryConditions[root][0].freq
+        for bcTmp in self.boundaryConditions[root]:
+            if bcTmp.type == 1:
+                
+                freq = bcTmp.freq
         period = 1./freq
-        N = int(round(period/dt))
+        N = int((period/dt))
         
-        nCycles = int(round((time[-1] - time[0])/period))
+        nCycles = int(((time[-1] - time[0])/period))
 
         convergenceValues = {}
         for vesselName in hdf5File['vessels'].keys():
@@ -848,10 +869,10 @@ class NetworkLogFile:
         root = self.vascularNetwork.root
         freq = self.boundaryConditions[root][0].freq
         period = 1./freq
-        N = int(round(period/dt))
+        N = int((period/dt))
         
-        nCycles = int(round(time[-1]/period))
-        nCycles2 = int(round(time2[-1]/period))
+        nCycles = int((time[-1]/period))
+        nCycles2 = int((time2[-1]/period))
         
         #nCycles = min([nCycles, nCycles2])
         

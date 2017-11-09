@@ -64,8 +64,11 @@ class ConvergenceCase(TestBaseClass):
         if self.createNetworks:
             vascularNetwork = mXML.loadNetworkFromXML(self.networkName, dataNumber = "xxx")
             vascularNetwork.quiet = True
+
             
             New_network = cCreateNetwork.CreateNetwork(vascularNetwork, quiet=True)
+            self.period = New_network.period
+
             CFL = 0.8
             dt = New_network.findMindt(CFL=CFL)
             New_network.assignNodes(dt, CFL=CFL)
@@ -89,6 +92,7 @@ class ConvergenceCase(TestBaseClass):
                 batchData['networkXmlFileSave'] = networkXMLFile
                 batchData['pathSolutionDataFilename'] = solutionFilehd5
                 batchData['dataNumber'] = str(dataNumber)
+                batchData['period'] = self.period
                 
                 batchData['dt'] = dt
                 batchData['CFL'] = CFL 
@@ -103,7 +107,7 @@ class ConvergenceCase(TestBaseClass):
             
         else:
             batchDataList = pickle.load(open(convergencePickleCaseFile, 'r'))
-        
+            self.period = batchDataList[0]['period']
         if self.solveNetworks:
             mBatchSim.runBatchAsMultiprocessing(batchDataList)
             pickle.dump(batchDataList, open(convergencePickleCaseFile, 'wb'))
@@ -144,12 +148,12 @@ class ConvergenceCase(TestBaseClass):
         time = hdf5File['VascularNetwork']['simulationTime'][:]
         time2 = hdf5File2['VascularNetwork']['simulationTime'][:]
         dt = time[1] - time[0]
-        freq = 1./0.8
-        period = 1./freq
+        #freq = 1./0.8
+        period = self.period
         N = int(round(period/dt))
         
-        nCycles = int(round(time[-1]/period))
-        nCycles2 = int(round(time2[-1]/period))
+        nCycles = int((time[-1]/period))
+        nCycles2 = int((time2[-1]/period))
         
         nCycles = min([nCycles, nCycles2])
         

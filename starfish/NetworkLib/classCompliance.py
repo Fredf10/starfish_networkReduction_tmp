@@ -212,6 +212,17 @@ class Laplace2(Laplace):
         and calculate set the marterial parameters
         """
         self.update(complianceDataDict)
+        
+        RoWallthickness = (self.As/np.pi)**0.5
+        a= 0.2802
+        b = -5.053
+        c = 0.1324
+        d = -0.1114
+        RoWallthickness = RoWallthickness*100
+        h = RoWallthickness*(a*np.exp(b*RoWallthickness)+c*np.exp(d*RoWallthickness))
+        h = h/100
+        self.wallThickness = h
+        #self.youngModulus = 225000
         self.betaLaplace = (4./3.)*(np.sqrt(np.pi)*self.wallThickness*self.youngModulus)/self.As
         self.C0preCalculated = self.C(self.Ps)
 
